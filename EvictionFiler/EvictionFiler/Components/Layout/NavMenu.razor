@@ -4,12 +4,12 @@
 @using BlazorUI.Services
 @using BlazorUI.Services.Auth
 @using BlazorUI.ViewModels *@
-@* @using Microsoft.AspNetCore.Components.Authorization
-@* @inject SpinnerService SpinnerService *
-@inject AuthenticationStateProvider AuthenticationStateProvider *@
+ @using Microsoft.AspNetCore.Components.Authorization
+@* @inject SpinnerService SpinnerService *@
+@inject AuthenticationStateProvider AuthenticationStateProvider 
 
 
-@* <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet"> *@
+
 <style>
     .flyout-menu {
         border-radius: 7px;
@@ -29,9 +29,10 @@
         <nav class="sidebar d-flex flex-column vh-100 @(isCollapsed ? "collapsed" : "")">
 
             <div class="p-4 d-flex justify-content-center logo-container">
-                <img src="images/PHOTO-2025-06-18-02-45-29.jpg"
+                @* <img src="images/PHOTO-2025-06-18-02-45-29.jpg"
                      alt="Logo"
-                     class="logo-img" />
+                     class="logo-img" /> *@
+                <h6 style="color:#1F365D; font-weight:bold;">EVICTION FILER</h6>
             </div>
             @*   <button class="toggle-btn" @onclick="ToggleSidebar">
                 <i class="fas fa-chevron-left"></i>
@@ -133,9 +134,19 @@
     string activeMenu = "";
     bool isCollapsed = false;
     private string HoveredMenu { get; set; }
-    protected override async void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        //userClaims = await UserContextService.GetUserClaimsAsync(AuthenticationStateProvider);
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            Name = user.Identity.Name ?? "User";
+        }
+        else
+        {
+            Name = "Guest";
+        }
 
         string[] menus = { "Home", "View", "Manage", "HR", "Access", "Reports", "Toolbox", "Self Service", "Payroll", "Xero", "Import", "Organisation", "Contract", "Shifts and Rosters", "Reporting and Exceptions", "Access control", "Clocking terminals", "Flexitime", "HR records", "Employees", "Holiday,Sick and Absence", "Overtime rules" };
         foreach (var menu in menus)

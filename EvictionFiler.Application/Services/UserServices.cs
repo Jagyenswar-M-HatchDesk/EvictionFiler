@@ -1,70 +1,78 @@
-﻿//using EvictionFiler.Application.DTOs;
-//using EvictionFiler.Application.Interfaces.IServices;
-//using EvictionFiler.Domain.Entities;
-//using Microsoft.AspNetCore.Identity;
-//using Microsoft.Extensions.Configuration;
-//using Microsoft.IdentityModel.Tokens;
-//using System;
-//using System.Collections.Generic;
-//using System.IdentityModel.Tokens.Jwt;
-//using System.Linq;
-//using System.Security.Claims;
-//using System.Text;
-//using System.Threading.Tasks;
+﻿using EvictionFiler.Application.DTOs;
+using EvictionFiler.Application.Interfaces.IServices;
+using EvictionFiler.Application.Interfaces.IUserRepository;
+using EvictionFiler.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 
-//namespace EvictionFiler.Application.Services
-//{
-//    public class UserService : IUserservices
-//    {
-//        private readonly IUserRepository _userRepository;
-//        private readonly IConfiguration _config;
+namespace EvictionFiler.Application.Services
+{
+    public class UserService : IUserservices
+    {
+        private readonly IUserRepository _userRepository;
+        private readonly IConfiguration _config;
+        private readonly UserManager<User> _userManager;
+        public UserService(IUserRepository userRepository, IConfiguration config, UserManager<User> userManager)
+        {
+            _userRepository = userRepository;
+            _config = config;
+            _userManager = userManager;
+        }
 
-//        public UserService(IUserRepository userRepository, IConfiguration config)
-//        {
-//            _userRepository = userRepository;
-//            _config = config;
-//        }
+        public async Task<string?> LoginAsync(string email, string password)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
 
-//        public async Task<string?> LoginAsync(string email, string password)
-//        {
-//            var user = await _userRepository.GetByEmailAsync(email);
-//            var passwordmatch = new PasswordHasher<object>().VerifyHashedPassword(null, user.PasswordHash, password);
-//            if (user == null || passwordmatch == PasswordVerificationResult.Failed)
-//                return null;
+            if (user == null || !await _userManager.CheckPasswordAsync(user, password))
+                return null;
 
-//            var claims = new List<Claim>
-//            {
-//            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-//            new Claim(ClaimTypes.Name, user.Name),
-//            new Claim(ClaimTypes.Email, user.Email ?? ""),
-//            new Claim("tenantConn", user.ConnectionString),
-//            new Claim(ClaimTypes.Role, user.Role.Name) // or user.Role.Name if available
-//        };
+            var userRoles = await _userManager.GetRolesAsync(user);
 
-//            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
-//            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-//            var token = new JwtSecurityToken(
-//                _config["Jwt:Issuer"],
-//                _config["Jwt:Issuer"],
-//                claims,
-//                expires: DateTime.UtcNow.AddHours(2),
-//                signingCredentials: creds
-//            );
+            var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.FirstName +" " + user.LastName ?? ""),
+            new Claim(ClaimTypes.Email, user.Email ?? "")
+        };
 
-//            return new JwtSecurityTokenHandler().WriteToken(token);
-//        }
+            foreach (var role in userRoles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
-//        public async Task<bool> RegisterTenantAsync(RegisterDto model)
-//        {
-//            var registerResult = _userRepository.RegisterTenant(model);
-//            if (registerResult == null) return false;
-//            return true;
-//        }
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-//        public async Task<IEnumerable<User>> GetAllUserAsync()
-//        {
-//            var users = await _userRepository.GetAllUser();
-//            return users;
-//        }
-//    }
-//}
+            var token = new JwtSecurityToken(
+                issuer: _config["Jwt:Issuer"],
+                audience: _config["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(2),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public async Task<bool> RegisterTenantAsync(RegisterDto model)
+        {
+            var registerResult = _userRepository.RegisterTenant(model);
+            if (registerResult == null) return false;
+            return true;
+        }
+
+        public async Task<IEnumerable<User>> GetAllUserAsync()
+        {
+            var users = await _userRepository.GetAllUser();
+            return users;
+        }
+    }
+}
