@@ -2,6 +2,7 @@ using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Application.Services;
 using EvictionFiler.Client.Pages;
+using EvictionFiler.Client.Services;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories;
@@ -49,7 +50,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
     provider.GetRequiredService<JwtAuthStateProvider>());
-
+builder.Services.AddScoped<UserServiceClient>();
 builder.Services.AddAuthorizationCore();
 
 
