@@ -1,213 +1,156 @@
 ﻿@page "/createcase"
 @rendermode InteractiveAuto
 <style>
-/* PROGRESS BAR STYLES */
-.progress-bar-wrapper {
- /*    max-width: 800px; */
-    margin: 30px auto 60px auto;
-    position: relative;
-    padding: 0 10px;
-}
+    .stepper-row::-webkit-scrollbar {
+        height: 3px; /* thinner scrollbar */
+    }
 
-.step-track {
+    .stepper-row::-webkit-scrollbar-thumb {
+        background-color: #888;
+        border-radius: 10px;
+    }
+
+    .stepper-row::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    /* For Firefox */
+    .stepper-row {
+        scrollbar-width: thin;
+        scrollbar-color: #888 transparent;
+    }
+
+    .stepper-container {
+      /*   background-color: #F7F6F3; */
+        padding: 10px 20px;
+        border-radius: 6px;
+      /*   box-shadow: 0 1px 3px rgba(0,0,0,0.1); */
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+  .stepper-row {
     display: flex;
-    justify-content: space-between;
-    position: relative;
-}
-
-.step-track::before {
-    content: '';
-    position: absolute;
-    top: 18px;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background-color: #ddd;
-    z-index: 0;
-    border-radius: 4px;
-}
-
-.step-item {
-    position: relative;
-    text-align: center;
-    flex: 1;
-    z-index: 1;
-    color: #ccc;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.step-item .step-circle {
-    width: 36px;
-    height: 36px;
-    line-height: 36px;
-    border-radius: 50%;
-    margin: 0 auto 8px auto;
-    background-color: #ccc;
-    color: white;
-    font-weight: bold;
-    display: flex;
-    justify-content: center;
     align-items: center;
-    transition: all 0.3s ease;
+    gap: 5px;
+    min-width: max-content;
+    overflow-x: auto; /* move it here */
+    white-space: nowrap;
 }
 
-.step-item.active .step-circle {
-    background-color: #D4A844;
-    color: white;
-}
 
-.step-item.done .step-circle {
-    background-color: #D4A844;
-    content: "✓";
-}
+    .stepper-step {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        font-weight: 500;
+        gap: 6px;
+    }
 
-.step-item.active,
-.step-item.done {
-    color: #1F365D;
-}
+        .stepper-step .circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
 
-.step-fill {
-    position: absolute;
-    top: 18px;
-    left: 0;
-    height: 4px;
-    background-color: #D4A844;
-    z-index: 0;
-    border-radius: 4px;
-    transition: width 0.4s ease;
-}
+    .circle.done {
+        background-color: #5cb85c;
+        color: white;
+    }
 
-/* FORM STYLES */
-.form-container {
-    max-width: 800px;
-    margin: auto;
-    background: white;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-}
+    .circle.active {
+        background-color: #1F365D;
+        color: white;
+    }
 
-.form-section {
-    margin-bottom: 2rem;
-    padding: 1rem;
-    border-radius: 8px;
-}
+    .circle.upcoming {
+        background-color: #ccc;
+        color: white;
+    }
 
-.form-label {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    display: block;
-    color: #1F365D;
-}
+    .text.done,
+    .text.active {
+        color: #007bff;
+        font-weight: 600;
+    }
 
-.form-select, .form-control {
-    width: 100%;
-    padding: 0.5rem;
-    border-radius: 6px;
-    border: 1px solid #ced4da;
-    font-size: 1rem;
-}
+    .text.upcoming {
+        color: #aaa;
+    }
 
-/* BUTTON STYLES */
-.button-group {
-    padding-top: 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 2rem;
-}
+    .arrow {
+        color: #ccc;
+        margin: 0 8px;
+    }
 
-.btn {
-    padding: 0.5rem 1.25rem;
-    font-size: 1rem;
-    border-radius: 6px;
-    min-width: 120px;
-    border: none;
-}
+    .nav-buttons {
+        display: flex;
+        gap: 6px;
+    }
 
-.btn-back {
-    background-color: #1F365D;
-    color: white;
-    border: none;
-}
+    .circle.done {
+        background-color: #D4A844;
+        color: white;
+    }
 
-.btn-next {
-    background-color: #D4A844;
-    color: white;
-    border: none;
-}
-
-.btn-warning:hover {
-    background-color: #D4A844;
-    color: white;
-}
-
-.btn-success:hover {
-    background-color: #28a745;
-    color: white;
-}
-
-.btn-back:hover {
-    background-color: #1F365D;
-    color: white;
-}
-
-.btn-next:hover {
-    background-color: #D4A844;
-    color: white;
-}
-
-.btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.btn-outline-secondary {
-    background-color: transparent;
-    color: #1F365D;
-    border: 2px solid #1F365D;
-}
-
-.heading-line {
-    border: none;
-    height: 2px;
-    background-color: #D4A844;
-    margin: 0 auto 1.5rem auto;
-    width: 100%;
-}
+    .text.done,
+    .text.active {
+        color: #1F365D;
+        font-weight: 600;
+    }
 </style>
 
-<!-- Step Tracker -->
-<div class="progress-bar-wrapper">
-    <div class="step-track">
-        <div class="step-fill" style="width: @(currentStep * 100 / lastStep)%"></div>
+<!-- Step Tracker + Navigation Buttons -->
+<div class="stepper-container d-flex justify-content-between align-items-center flex-wrap v-100" style="scrollbar-width: thin;">
+    <!-- Stepper Tracker -->
+<div class="stepper-row d-flex align-items-center">
 
         @for (int i = 0; i < stepTitles.Count; i++)
         {
-            var statusClass = i < currentStep ? "step-item done" : i == currentStep ? "step-item active" : "step-item";
+            var isDone = i < currentStep;
+            var isActive = i == currentStep;
 
-            <div class="@statusClass">
-                <div class="step-circle">
-                    @(i < currentStep ? "✓" : (i + 1).ToString())
+            var circleClass = isDone ? "circle done"
+            : isActive ? "circle active"
+            : "circle upcoming";
+
+            var textClass = isDone ? "text done"
+            : isActive ? "text active"
+            : "text upcoming";
+
+            <div class="stepper-step">
+                <div class="@circleClass">
+                    @(isDone ? "✓" : (i + 1).ToString())
                 </div>
+                <span class="@textClass">@stepTitles[i]</span>
+
+                @if (i < stepTitles.Count - 1)
+                {
+                    <span class="arrow">→</span>
+                }
             </div>
         }
     </div>
-</div>
+
+    </div>
 
 <!-- Form Content -->
-<div class="form-container">
+<div class="container pt-4">
     @if (currentStep == 0)
     {
-        <div>
-            <h5 class="text-center mb-2" style="color:#1F365D">Basic Information</h5>
-            <hr class="heading-line" />
+        <div class="mx-auto p-4 border rounded shadow-sm bg-white" style="max-width: 800px;">
+            <h5 class="text-center text-navy fw-bold">Basic Information</h5>
+            <hr class="border-gold mb-4" />
 
-            <div class="form-section">
-                <!-- Client Role Dropdown -->
-                <div class="form-group mb-3">
-                    <label class="form-label">Client Role</label>
+            <!-- Client Role Dropdown -->
+            <div class="mb-3">
+                <div class="half-width">
+                    <label class="form-label fw-semibold text-navy">Client Role</label>
                     <select class="form-select" @bind="selectedClientRole">
                         <option value="">-- Select Client Role --</option>
                         <option value="Landlord/Owner">Landlord/Owner</option>
@@ -216,16 +159,21 @@
                         <option value="Legal Representative">Legal Representative</option>
                     </select>
                 </div>
-                @if (selectedClientRole == "Legal Representative")
-                {
-                    <div class="form-group">
-                        <label class="form-label">Please specify other case type</label>
-                        <input type="text" class="form-control mb-2" @bind="otherCaseType" placeholder="Enter Representative Name" />
+            </div>
+            @if (selectedClientRole == "Legal Representative")
+            {
+                <div class="mb-3">
+                    <div class="half-width">
+                        <label class="form-label fw-semibold text-navy">Representative Name</label>
+                        <input type="text" class="form-control" @bind="otherCaseType" placeholder="Enter Representative Name" />
                     </div>
-                }
-                <!-- Case Type Dropdown -->
-                <div class="form-group mb-3">
-                    <label class="form-label">Case Type</label>
+                </div>
+            }
+
+            <!-- Case Type Dropdown -->
+            <div class="mb-3">
+                <div class="half-width">
+                    <label class="form-label fw-semibold text-navy">Case Type</label>
                     <select class="form-select" @bind="selectedCaseType">
                         <option value="">-- Select Case Type --</option>
                         <option>Nonpayment</option>
@@ -238,51 +186,155 @@
                         <option>Other</option>
                     </select>
                 </div>
-
-                @if (selectedCaseType == "Other")
-                {
-                    <div class="form-group">
-                        <label class="form-label">Please specify other case type</label>
+            </div>
+            @if (selectedCaseType == "Other")
+            {
+                <div class="mb-3">
+                    <div class="half-width">
+                        <label class="form-label fw-semibold text-navy">Other Case Type</label>
                         <input type="text" class="form-control" @bind="otherCaseType" placeholder="Enter case type" />
                     </div>
-                }
-            </div>
+                </div>
+            }
         </div>
     }
 </div>
 
-    <!-- Button Group -->
-<!-- Button Group -->
-<div class="button-group">
-    <button class="btn btn-back" @onclick="Back">← Back</button>
+@if (currentStep == 1)
+{
+    <div class="mx-auto p-4 border rounded shadow-sm bg-white" style="max-width: 800px;">
+        <h5 class="text-center text-navy fw-bold">Tenant Information</h5>
+        <hr class="border-gold mb-4" />
 
-    <div class="d-flex gap-2">
-        @if (currentStep > 0 && currentStep < lastStep)
-        {
-            <button class="btn btn-warning" @onclick="SaveAsDraft">Save as Draft</button>
-        }
-        @if (currentStep < lastStep)
-        {
-            <button class="btn btn-next" @onclick="Next">Next →</button>
-        }
-        @if (currentStep == lastStep)
-        {
-            <button class="btn btn-success" @onclick="Submit">✅ Submit</button>
-        }
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Full Name</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input type="text" class="form-control" @bind="first_name" placeholder="Enter full name" />
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">SSN</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
+                    <input type="text" class="form-control" @bind="last_name" placeholder="Enter SSN" />
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Phone</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                    <input type="tel" class="form-control" @bind="phone" placeholder="Enter phone number" />
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i>@@</i>
+
+                    </span>
+                    <input type="email" class="form-control" @bind="address" placeholder="Enter email" />
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Language</label>
+                <input type="text" class="form-control" @bind="code" placeholder="Enter language" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Address</label>
+                <input type="text" class="form-control" @bind="code" placeholder="Enter address" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Apt #</label>
+                <input type="text" class="form-control" @bind="code" placeholder="Enter Apt #" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Borough</label>
+                <input type="text" class="form-control" @bind="code" placeholder="Enter borough" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Rent ($)</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i>$</i>
+
+                    </span>
+                <input type="text" class="form-control" @bind="code" placeholder="Enter rent amount" />
+            </div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Lease Status</label>
+                <input type="text" class="form-control" @bind="code" placeholder="Enter lease status" />
+            </div>
+        </div>
     </div>
-</div>
+}
 
+<!-- Button Group -->
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <button class="btn bg-navy text-white" @onclick="Back" disabled="@(currentStep == 0)">← Back</button> 
+
+        <div class="d-flex gap-2">
+            @if (currentStep > 0 && currentStep < lastStep)
+            {
+                <button class="btn btn-outline-warning" @onclick="SaveAsDraft">Save as Draft</button>
+            }
+            @if (currentStep < lastStep)
+            {
+                <button class="btn bg-gold text-white" @onclick="Next">Next →</button>
+            }
+            @if (currentStep == lastStep)
+            {
+                <button class="btn btn-success" @onclick="Submit"> Submit</button>
+            } 
+        </div> 
+    </div>
+</div> 
 
 @code {
     int currentStep = 0;
     int lastStep = 9;
-    List<string> stepTitles = new() {
-        "Case Type and Client Role", "Tenant Information", "Landlord / Owner Information",
-        "Property Manager / Building Manager", "Building / Property Details",
-        "For Good Cause Eviction (Article 6-A)", "Additional NYC Properties (Landlord Only)",
-        "Court & Document Status", "Supporting Documents", "Final Declarations"
-    };
 
+    List<string> stepTitles = new() {
+        "Case & Role", "Tenant Info", "Landlord Info",
+        "Manager Info", "Property Info",
+        "Eviction 6-A", "NYC Properties",
+        "Court Status", "Documents", "Declarations"
+    };
+    string first_name;
+    string last_name;
+    string gender = "male";
+    string address;
+    string phone;
+    string code;
+    string date;
+    string month;
+    string year;
+
+    bool checkbox;
+    bool checkbox_other;
+
+    // Bank Info
+    string bank;
+    string branch;
+    string email;
+    string account_name;
+    string account_number;
+    string date_2;
+    string month_2;
+    string year_2;
     string selectedClientRole;
     string selectedCaseType;
     string otherCaseType;
