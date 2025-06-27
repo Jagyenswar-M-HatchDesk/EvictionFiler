@@ -1,450 +1,273 @@
 ﻿@page "/createcase"
 @rendermode InteractiveAuto
-<head>
-</head>
 <style>
+/* PROGRESS BAR STYLES */
+.progress-bar-wrapper {
+ /*    max-width: 800px; */
+    margin: 30px auto 60px auto;
+    position: relative;
+    padding: 0 10px;
+}
 
-    .form-container {
-        max-width: 700px;
-        margin: 80px auto;
-        /* … */
-        /* If you added max-height or overflow here, remove it: */
-        /* max-height: 100vh;
-            overflow-y: auto; */
-    }
+.step-track {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+}
 
+.step-track::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: #ddd;
+    z-index: 0;
+    border-radius: 4px;
+}
 
-    /*.form-container {
-                overflow-y: auto;
-                max-height: 100vh;
-            } */
+.step-item {
+    position: relative;
+    text-align: center;
+    flex: 1;
+    z-index: 1;
+    color: #ccc;
+    font-size: 14px;
+    font-weight: 500;
+}
 
+.step-item .step-circle {
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    border-radius: 50%;
+    margin: 0 auto 8px auto;
+    background-color: #ccc;
+    color: white;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+}
 
-    .form-container {
-        max-width: 700px;
-        margin: 80px auto;
-        background-color: #f4f4f9;
-        border-radius: 12px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        padding: 2rem;
-        font-family: 'Segoe UI', sans-serif;
-    }
+.step-item.active .step-circle {
+    background-color: #D4A844;
+    color: white;
+}
 
-    .form-section {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
+.step-item.done .step-circle {
+    background-color: #D4A844;
+    content: "✓";
+}
 
-    .form-group {
-        flex: 1 1 48%;
-        display: flex;
-        flex-direction: column;
-    }
+.step-item.active,
+.step-item.done {
+    color: #1F365D;
+}
 
-        .form-group.full {
-            flex: 1 1 100%;
-        }
+.step-fill {
+    position: absolute;
+    top: 18px;
+    left: 0;
+    height: 4px;
+    background-color: #D4A844;
+    z-index: 0;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+}
 
-    label {
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-    }
+/* FORM STYLES */
+.form-container {
+    max-width: 800px;
+    margin: auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
 
-    input, select {
-        padding: 0.75rem;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        font-size: 1rem;
-    }
+.form-section {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    border-radius: 8px;
+}
 
-    .button-group {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 2rem;
-    }
+.form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: #1F365D;
+}
 
-    button {
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 6px;
-        font-size: 1rem;
-        cursor: pointer;
-    }
+.form-select, .form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    font-size: 1rem;
+}
 
-        button.save {
-            background-color: #6c757d;
-            color: white;
-        }
+/* BUTTON STYLES */
+.button-group {
+    padding-top: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+}
 
-        button.next {
-            background-color: #28a745;
-            color: white;
-        }
+.btn {
+    padding: 0.5rem 1.25rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    min-width: 120px;
+    border: none;
+}
 
-        button.back {
-            background-color: #007bff;
-            color: white;
-        }
+.btn-back {
+    background-color: #1F365D;
+    color: white;
+    border: none;
+}
 
-    .step-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-    }
+.btn-next {
+    background-color: #D4A844;
+    color: white;
+    border: none;
+}
 
+.btn-warning:hover {
+    background-color: #D4A844;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-back:hover {
+    background-color: #1F365D;
+    color: white;
+}
+
+.btn-next:hover {
+    background-color: #D4A844;
+    color: white;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-outline-secondary {
+    background-color: transparent;
+    color: #1F365D;
+    border: 2px solid #1F365D;
+}
+
+.heading-line {
+    border: none;
+    height: 2px;
+    background-color: #D4A844;
+    margin: 0 auto 1.5rem auto;
+    width: 100%;
+}
 </style>
 
-<style>
-    .step-tracker {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 2rem;
-    }
+<!-- Step Tracker -->
+<div class="progress-bar-wrapper">
+    <div class="step-track">
+        <div class="step-fill" style="width: @(currentStep * 100 / lastStep)%"></div>
 
-    .step-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-size: 0.9rem;
-        color: #999;
-    }
-
-        .step-item .circle {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #ccc;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-bottom: 0.3rem;
-        }
-
-    .step-line {
-        width: 40px;
-        height: 2px;
-        background: #ccc;
-        margin: 0 0.5rem;
-    }
-
-    .step-item.active .circle {
-        background: #28a745;
-    }
-
-    .step-item.done .circle {
-        background: #28a745;
-    }
-
-    .step-item.active span,
-    .step-item.done span {
-        color: #28a745;
-    }
-
-</style>
-
-<div class="step-tracker">
-    @for (int i = 0; i < stepTitles.Count; i++)
-    {
-        <div class="step-item @(i < currentStep ? "done" : i == currentStep ? "active" : "")">
-            <div class="circle">
-                @(i < currentStep ? "✓" : (i + 1).ToString())
-            </div>
-            @* <span>@stepTitles[i]</span> *@
-        </div>
-
-        @if (i < stepTitles.Count - 1)
+        @for (int i = 0; i < stepTitles.Count; i++)
         {
-            <div class="step-line"></div>
+            var statusClass = i < currentStep ? "step-item done" : i == currentStep ? "step-item active" : "step-item";
+
+            <div class="@statusClass">
+                <div class="step-circle">
+                    @(i < currentStep ? "✓" : (i + 1).ToString())
+                </div>
+            </div>
         }
-    }
+    </div>
 </div>
-<!-- your existing form content goes here -->
 
+<!-- Form Content -->
 <div class="form-container">
-
     @if (currentStep == 0)
     {
         <div>
-            <div class="step-title">Personal Information</div>
+            <h5 class="text-center mb-2" style="color:#1F365D">Basic Information</h5>
+            <hr class="heading-line" />
+
             <div class="form-section">
-                <div class="form-group full">
-                    <label>Client Role</label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> Landlord/Owner </label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> Tenant/Occupant</label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> Property Manager</label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> Legal Representative</label>
+                <!-- Client Role Dropdown -->
+                <div class="form-group mb-3">
+                    <label class="form-label">Client Role</label>
+                    <select class="form-select" @bind="selectedClientRole">
+                        <option value="">-- Select Client Role --</option>
+                        <option value="Landlord/Owner">Landlord/Owner</option>
+                        <option value="Tenant/Occupant">Tenant/Occupant</option>
+                        <option value="Property Manager">Property Manager</option>
+                        <option value="Legal Representative">Legal Representative</option>
+                    </select>
                 </div>
-                <div class="form-group full">
-                    <label>Client Role</label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> Nonpayment </label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> Holdover </label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> Licensee </label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> Lockout </label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> HP Action </label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> For Good Cause (6-A) </label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> Succession </label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox_other" /> Other </label>
-                    @if (checkbox_other)
-                    {
-                        <input type="text" @bind="phone" />
-                    }
+                @if (selectedClientRole == "Legal Representative")
+                {
+                    <div class="form-group">
+                        <label class="form-label">Please specify other case type</label>
+                        <input type="text" class="form-control mb-2" @bind="otherCaseType" placeholder="Enter Representative Name" />
+                    </div>
+                }
+                <!-- Case Type Dropdown -->
+                <div class="form-group mb-3">
+                    <label class="form-label">Case Type</label>
+                    <select class="form-select" @bind="selectedCaseType">
+                        <option value="">-- Select Case Type --</option>
+                        <option>Nonpayment</option>
+                        <option>Holdover</option>
+                        <option>Licensee</option>
+                        <option>Lockout</option>
+                        <option>HP Action</option>
+                        <option>For Good Cause (6-A)</option>
+                        <option>Succession</option>
+                        <option>Other</option>
+                    </select>
                 </div>
 
+                @if (selectedCaseType == "Other")
+                {
+                    <div class="form-group">
+                        <label class="form-label">Please specify other case type</label>
+                        <input type="text" class="form-control" @bind="otherCaseType" placeholder="Enter case type" />
+                    </div>
+                }
             </div>
         </div>
     }
-
-    @if (currentStep == 1)
-    {
-        <div>
-            <div class="step-title">Tenant Information</div>
-            <div class="form-section">
-                <div class="form-group full">
-                    <label>Name</label>
-                    <input type="text" @bind="first_name" />
-                </div>
-                <div class="form-group">
-                    <label>SSN</label>
-                    <input type="text" @bind="last_name" />
-                </div>
-                <div class="form-group ">
-                    <label>Phone</label>
-                    <input type="text" @bind="phone" />
-                    @*  <label><input type="radio" name="gender" value="male"  /> Male</label>
-                    <label><input type="radio" name="gender" value="female"  /> Female</label> *@
-                </div>
-                <div class="form-group full">
-                    <label>Email</label>
-                    <input type="text" @bind="address" />
-                </div>
-                @*   <div class="form-group">
-                    <label>Phone Number</label>
-                    <input type="text" @bind="phone" />
-                </div> *@
-                <div class="form-group">
-                    <label>Language</label>
-                    <input type="text" @bind="code" />
-                </div>
-                <div class="form-group full">
-                    <label>Address</label>
-                    <input type="text" @bind="code" />
-                    @* <div class="form-section"> *@
-                    @*  <select @bind="date"><option>15</option><option>16</option></select>
-                        <select @bind="month"><option>Jan</option><option>Feb</option></select>
-                        <select @bind="year"><option>2018</option><option>2017</option></select> *@
-                    @*  </div> *@
-                </div>
-                <div class="form-group">
-                    <label>Apt #</label>
-                    <input type="text" @bind="code" />
-                </div>
-                <div class="form-group">
-                    <label>Borough</label>
-                    <input type="text" @bind="code" />
-                </div>
-                <div class="form-group">
-                    <label>Rent: $</label>
-                    <input type="text" @bind="code" />
-                </div>
-                <div class="form-group">
-                    <label>Lease Status</label>
-                    <input type="text" @bind="code" />
-                </div>
-            </div>
-        </div>
-    }
-
-    @if (currentStep == 2)
-    {
-        <div>
-            <div class="step-title">LandLord Information</div>
-            <div class="form-section">
-                <div class="form-group full">
-                    <label>Name/Entity</label>
-                    <input type="text" @bind="first_name" />
-                </div>
-                <div class="form-group">
-                    <label>EIN/SSN(last 4)</label>
-                    <input type="text" @bind="last_name" />
-                </div>
-                <div class="form-group ">
-                    <label>Phone</label>
-                    <input type="text" @bind="phone" />
-                    @*  <label><input type="radio" name="gender" value="male"  /> Male</label>
-                    <label><input type="radio" name="gender" value="female"  /> Female</label> *@
-                </div>
-                <div class="form-group full">
-                    <label>Email</label>
-                    <input type="text" @bind="address" />
-                </div>
-                @*   <div class="form-group">
-                    <label>Phone Number</label>
-                    <input type="text" @bind="phone" />
-                </div> *@
-                <div class="form-group">
-                    <label>Mailing Address</label>
-                    <input type="text" @bind="code" />
-                </div>
-                <div class="form-group full">
-                    <label>Attorney(if any)</label>
-                    <input type="text" @bind="code" />
-                    @* <div class="form-section"> *@
-                    @*  <select @bind="date"><option>15</option><option>16</option></select>
-                        <select @bind="month"><option>Jan</option><option>Feb</option></select>
-                        <select @bind="year"><option>2018</option><option>2017</option></select> *@
-                    @*  </div> *@
-                </div>
-                <div class="form-group">
-                    <label>Firm</label>
-                    <input type="text" @bind="code" />
-                </div>
-                <div class="form-group full">
-                    <label>Is Corporate Owner</label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> Yes</label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> No</label>
-
-                </div>
-                <div class="form-group">
-                    <label>Registerd Agent</label>
-                    <input type="text" @bind="code" />
-                </div>
-
-            </div>
-        </div>
-    }
-    @if (currentStep == 3)
-    {
-        <div>
-            <div class="step-title">Property Manager / Building Manager</div>
-            <div class="form-section">
-                <div class="form-group full">
-                    <label>Company</label>
-                    <input type="text" @bind="first_name" />
-                </div>
-                <div class="form-group">
-                    <label>Contact</label>
-                    <input type="text" @bind="last_name" />
-                </div>
-                <div class="form-group ">
-                    <label>Phone/Email</label>
-                    <input type="text" @bind="phone" />
-                    @*  <label><input type="radio" name="gender" value="male"  /> Male</label>
-                    <label><input type="radio" name="gender" value="female"  /> Female</label> *@
-                </div>
-                <div class="form-group ">
-                    <label>MDR #</label>
-                    <input type="text" @bind="address" />
-                </div>
-                @*   <div class="form-group">
-                    <label>Phone Number</label>
-                    <input type="text" @bind="phone" />
-                </div> *@
-                <div class="form-group">
-                    <label>Residental Units</label>
-                    <input type="text" @bind="code" />
-                </div>
-                <div class="form-group ">
-                    <label>Commercial Units</label>
-                    <input type="text" @bind="code" />
-                    @* <div class="form-section"> *@
-                    @*  <select @bind="date"><option>15</option><option>16</option></select>
-                        <select @bind="month"><option>Jan</option><option>Feb</option></select>
-                        <select @bind="year"><option>2018</option><option>2017</option></select> *@
-                    @*  </div> *@
-                </div>
-
-                <div class="form-group full">
-                    <label>All Units registered with DHCR?</label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> Yes</label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> No</label>
-                </div>
-                <div class="form-group full">
-                    <label>HPD violations?</label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> Yes</label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> No</label>
-                </div>
-
-            </div>
-        </div>
-    }
-    @if (currentStep == 4)
-    {
-        <div>
-            <div class="step-title">Building / Property Details</div>
-            <div class="form-section">
-                <div class="form-group full">
-                    <label>Address</label>
-                    <input type="text" @bind="first_name" />
-                </div>
-                <div class="form-group">
-                    <label>Apt #</label>
-                    <input type="text" @bind="last_name" />
-                </div>
-                <div class="form-group ">
-                    <label>Borough</label>
-                    <input type="text" @bind="phone" />
-                    @*  <label><input type="radio" name="gender" value="male"  /> Male</label>
-                    <label><input type="radio" name="gender" value="female"  /> Female</label> *@
-                </div>
-                <div class="form-group ">
-                    <label>ZIP</label>
-                    <input type="text" @bind="address" />
-                </div>
-                @*   <div class="form-group">
-                    <label>Phone Number</label>
-                    <input type="text" @bind="phone" />
-                </div> *@
-                <div class="form-group">
-                    <label>Class</label>
-                    <input type="text" @bind="code" />
-                </div>
-                <div class="form-group ">
-                    <label>Year Built</label>
-                    <input type="text" @bind="code" />
-                    @* <div class="form-section"> *@
-                    @*  <select @bind="date"><option>15</option><option>16</option></select>
-                        <select @bind="month"><option>Jan</option><option>Feb</option></select>
-                        <select @bind="year"><option>2018</option><option>2017</option></select> *@
-                    @*  </div> *@
-                </div>
-
-                <div class="form-group full">
-                    <label>Heat/Hot Water</label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> Yes</label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> No</label>
-                </div>
-                <div class="form-group full">
-                    <label>HPD violations?</label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> Yes</label>
-                    <label><input type="radio" name="corpOwner" @bind="checkbox" /> No</label>
-                </div>
-
-            </div>
-        </div>
-    }
-
-    
 </div>
+
+    <!-- Button Group -->
+<!-- Button Group -->
 <div class="button-group">
-    <button class="back" @onclick="Back">Back</button>
+    <button class="btn btn-back" @onclick="Back">← Back</button>
 
-
-    <div>
+    <div class="d-flex gap-2">
         @if (currentStep > 0 && currentStep < lastStep)
         {
-            <button class="save" @onclick="SaveAsDraft">Save as Draft</button>
+            <button class="btn btn-warning" @onclick="SaveAsDraft">Save as Draft</button>
         }
         @if (currentStep < lastStep)
         {
-            <button class="next" @onclick="Next">Next →</button>
+            <button class="btn btn-next" @onclick="Next">Next →</button>
         }
         @if (currentStep == lastStep)
         {
-            <button class="next" @onclick="Submit">Submit</button>
+            <button class="btn btn-success" @onclick="Submit">✅ Submit</button>
         }
     </div>
 </div>
@@ -453,37 +276,19 @@
 @code {
     int currentStep = 0;
     int lastStep = 9;
-    List<string> stepTitles = new() { "Case Type and Client Role", "Tenant Information", "Landlord / Owner Information", "Property Manager / Building Manager",
-    "Building / Property Details", "For Good Cause Eviction (Article 6-A)", "Additional NYC Properties (Landlord Only)", "Court & Document Status", "Supporting Documents","Final Declarations"};
-    // Personal Info
-    string first_name;
-    string last_name;
-    string gender = "male";
-    string address;
-    string phone;
-    string code;
-    string date;
-    string month;
-    string year;
+    List<string> stepTitles = new() {
+        "Case Type and Client Role", "Tenant Information", "Landlord / Owner Information",
+        "Property Manager / Building Manager", "Building / Property Details",
+        "For Good Cause Eviction (Article 6-A)", "Additional NYC Properties (Landlord Only)",
+        "Court & Document Status", "Supporting Documents", "Final Declarations"
+    };
 
-    bool checkbox;
-    bool checkbox_other;
-
-    // Bank Info
-    string bank;
-    string branch;
-    string email;
-    string account_name;
-    string account_number;
-    string date_2;
-    string month_2;
-    string year_2;
+    string selectedClientRole;
+    string selectedCaseType;
+    string otherCaseType;
 
     void SaveAsDraft() => Console.WriteLine("Saving Draft...");
     void Next() => currentStep++;
     void Back() => currentStep--;
-    void Submit()
-    {
-
-    }
+    void Submit() => Console.WriteLine("Submitting...");
 }
