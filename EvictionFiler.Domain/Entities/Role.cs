@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 
 namespace EvictionFiler.Domain.Entities
 {
-    public class Role : IdentityRole
+    public class Role : IdentityRole<Guid>
     {
-        public bool IsActive { get; set; }
-        public bool IsDeleted { get; set; }
+        public bool? IsActive { get; set; }
+        public bool? IsDeleted { get; set; }
 
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
         public string? CreatedBy { get; set; }
+        public string? UpdatedBy { get; set; }
     }
 }
