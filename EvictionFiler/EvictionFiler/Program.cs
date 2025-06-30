@@ -45,7 +45,7 @@ builder.Services.AddDbContext<MainDbContext>(options =>
 builder.Services.AddScoped<IUserservices, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICasesRepository, CasesRepository>();
-builder.Services.AddScoped<IClientService, ClientServices>();
+//builder.Services.AddScoped<IClientService, ClientServices>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<IApartmentRepository, ApartmentRepository>();
 builder.Services.AddScoped<ILegalCaseService, LegalCaseService>();
