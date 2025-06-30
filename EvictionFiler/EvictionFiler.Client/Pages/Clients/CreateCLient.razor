@@ -1,165 +1,140 @@
-﻿ @using EvictionFiler.Application.DTOs
+﻿@using EvictionFiler.Application.DTOs.ClientDto
 @inject IJSRuntime JS
+
 <style>
+    :root {
+        --bs-primary: #1F365D;
+        --bs-warning: #D4A844;
+        --bs-light: #F7F6F3;
+    }
+
+    body {
+        background-color: var(--bs-light);
+    }
     .offcanvas.show {
         transform: translateX(0%);
     }
 
     .offcanvas {
         transform: translateX(100%);
-        width: 600px !important; 
+        width: 600px !important;
+        transition: transform 0.5s ease-in-out;
     }
 
     .color-text {
-        color: #1F365D;
+        color: var(--bs-primary);
     }
-
 </style>
-<div class="offcanvas offcanvas-end show border-start shadow" tabindex="-1" id="createClient"
-     style="visibility:@(IsVisible ? "visible" : "hidden"); transition: transform 0.9s ease-in-out;"
+
+<div class="offcanvas offcanvas-end show border-start shadow bg-white" tabindex="-1" id="createClient"
+     style="visibility:@(IsVisible ? "visible" : "hidden");"
      aria-labelledby="createUserLabel">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="createUserLabel">Add New User</h5>
-        <button type="button" class="btn-close text-reset" @onclick="Hide"></button>
+
+    <!-- Header -->
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title fw-bold color-text" id="createUserLabel">Add New Client</h5>
+        <button type="button" class="btn-close" @onclick="Hide" aria-label="Close"></button>
     </div>
 
+    <!-- Body -->
     <div class="offcanvas-body">
-        <EditForm Model="@registerDto" OnValidSubmit="SubmitUser" FormName="CreateClient">
+        <EditForm Model="@createClient" OnValidSubmit="SubmitUser">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <div class="row mb-3">
-                <div class="col-md-12">
-                    <label class="form-label color-text">Client Code</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="registerDto.FirstName" placeholder="Enter Client Code" />
-                    </div>
-                </div>
-
-
+            @* Client Code *@
+            <div class="mb-3">
+                <label class="form-label color-text">Client Code</label>
+                <InputText class="form-control" @bind-Value="createClient.ClientCode" placeholder="Enter Client Code" />
             </div>
 
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label color-text">Name</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="registerDto.FirstName" placeholder="Enter Client Name" />
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label color-text">Email</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-regular fa-at color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="registerDto.LastName" placeholder="Enter Emaill" />
-                    </div>
-                </div>
+            @* Name *@
+            <div class="mb-3">
+                <label class="form-label color-text">Name</label>
+                <InputText class="form-control" @bind-Value="createClient.Name" placeholder="Enter Client Name" />
             </div>
 
-            <div class="row mb-3">
-                <div class="col-md-12">
-                    <label class="form-label color-text">Address Line 1</label>
-                    <div class="input-group">
-                        <span class="input-group-text"></span>
-                        <InputText class="form-control" @bind-Value="registerDto.Email" placeholder="Address Line 2" />
-                    </div>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-12">
-                    <label class="form-label color-text">Address Line 2</label>
-                    <div class="input-group">
-                        <span class="input-group-text"></span>
-                        <InputText class="form-control" @bind-Value="registerDto.Email" placeholder="Addresls Line 2" />
-                    </div>
-                </div>
+            @* Email *@
+            <div class="mb-3">
+                <label class="form-label color-text">Email</label>
+                <InputText class="form-control" @bind-Value="createClient.Email" placeholder="Enter Email" />
             </div>
 
+            @* Address 1 & 2 *@
+            <div class="mb-3">
+                <label class="form-label color-text">Address Line 1</label>
+                <InputText class="form-control" @bind-Value="createClient.Address_1" placeholder="Address Line 1" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label color-text">Address Line 2</label>
+                <InputText class="form-control" @bind-Value="createClient.Address_2" placeholder="Address Line 2" />
+            </div>
 
-            <div class="row mb-3">
-                <div class="col-md-6">
+            @* City + State *@
+            <div class="row">
+                <div class="col-md-6 mb-3">
                     <label class="form-label color-text">City</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-solid fa-city color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="registerDto.Email" placeholder="Addresls Line 2" />
-                    </div>
+                    <InputText class="form-control" @bind-Value="createClient.City" placeholder="City" />
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 mb-3">
                     <label class="form-label color-text">State</label>
-                    <select class="form-select" @bind="registerDto.Role">
-                        <option disabled selected value="">-- Select a State --</option>
-                        <option>Law Firm</option>
-                        <option>Property Manager</option>
-                    </select>
+                    <InputNumber class="form-control" @bind-Value="createClient.State" placeholder="State ID" />
                 </div>
-
             </div>
 
-            <div class="row mb-3">
-                <div class="col-md-6">
+            @* Zip + Fax *@
+            <div class="row">
+                <div class="col-md-6 mb-3">
                     <label class="form-label color-text">Zipcode</label>
-                    <div class="input-group">
-                        <span class="input-group-text"></span>
-                        <InputText class="form-control" @bind-Value="registerDto.Email" placeholder="Enter Zipcode" />
-                    </div>
+                    <InputNumber class="form-control" @bind-Value="createClient.ZipCode" placeholder="Zipcode" />
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 mb-3">
                     <label class="form-label color-text">Fax</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-solid fa-fax color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="registerDto.Email" placeholder="Enter Fax No." />
-                    </div>
+                    <InputText class="form-control" @bind-Value="createClient.Fax" placeholder="Fax" />
                 </div>
             </div>
 
-            <div class="row mb-3">
-                <div class="col-md-6">
+            @* Phone + Cell *@
+            <div class="row">
+                <div class="col-md-6 mb-3">
                     <label class="form-label color-text">Phone</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-solid fa-phone color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="registerDto.Email" placeholder="Enter Phone" />
-                    </div>
+                    <InputText class="form-control" @bind-Value="createClient.Phone" placeholder="Phone" />
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 mb-3">
                     <label class="form-label color-text">Cell Phone</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-solid fa-mobile-retro color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="registerDto.Email" placeholder="Enter Cell Phone" />
-                    </div>
+                    <InputText class="form-control" @bind-Value="createClient.CellPhone" placeholder="Cell Phone" />
                 </div>
-                <div class="row mb-3">
-                <div class="col-md-6 pt-4">
-                    <div class="form-check">
-                        <InputCheckbox class="form-check-input" @bind-Value="generateownrd" id="generateOwnRdCheckbox" />
-                        <label class="form-check-label color-text" for="generateOwnRdCheckbox">
-                            Generate Own Rd
-                        </label>
-                    </div>
-                </div>
-                </div>
-
             </div>
 
-            <div class="d-flex justify-content-end">
-                <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+            @* Optional Checkbox Block (Uncomment if needed) *@
+            @* <div class="form-check mb-3">
+                <InputCheckbox class="form-check-input" @bind-Value="createClient.GenarateOwnRd" id="generateOwnRdCheckbox" />
+                <label class="form-check-label color-text" for="generateOwnRdCheckbox">
+                    Generate Own Rd
+                </label>
+            </div> *@
+
+            <!-- Submit -->
+            <div class="d-flex justify-content-end mt-4">
+                <button type="submit" class="btn px-4 fw-semibold"
+                        style="background-color: #1F365D;; color: white; border: none;">
+                    Submit
+                </button>
             </div>
+
         </EditForm>
     </div>
 </div>
 
-
 @code {
-    [Parameter] public RegisterDto registerDto { get; set; } = new RegisterDto();
-    [Parameter] public EventCallback<RegisterDto> Submit { get; set; }
+    [Parameter] public CreateClientDto createClient { get; set; } = new CreateClientDto();
+    [Parameter] public EventCallback<CreateClientDto> Submit { get; set; }
 
     private bool IsVisible { get; set; } = false;
-    private bool generateownrd { get; set; } = false;
 
-    public void Show(RegisterDto model)
+    public void Show(CreateClientDto model)
     {
-        registerDto = model;
+        createClient = model;
         IsVisible = true;
         StateHasChanged();
     }
@@ -172,8 +147,7 @@
 
     public async Task SubmitUser()
     {
-        await Submit.InvokeAsync(registerDto); // calls your database method in parent
+        await Submit.InvokeAsync(createClient);
         Hide();
     }
 }
-
