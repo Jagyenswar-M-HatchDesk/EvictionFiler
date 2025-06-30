@@ -6,6 +6,7 @@ using EvictionFiler.Client.Services;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories;
+using EvictionFiler.Infrastructure.Services;
 using EvictionFiler.Server.Components;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -43,6 +44,11 @@ builder.Services.AddDbContext<MainDbContext>(options =>
 
 builder.Services.AddScoped<IUserservices, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICasesRepository, CasesRepository>();
+builder.Services.AddScoped<IClientService, ClientServices>();
+builder.Services.AddScoped<IClientRepository, ClientRepository>();
+builder.Services.AddScoped<IApartmentRepository, ApartmentRepository>();
+builder.Services.AddScoped<ILegalCaseService, LegalCaseService>();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<JwtAuthStateProvider>();
@@ -51,6 +57,7 @@ builder.Services.AddScoped<JwtAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
     provider.GetRequiredService<JwtAuthStateProvider>());
 builder.Services.AddScoped<UserServiceClient>();
+builder.Services.AddScoped<ClientService>();
 builder.Services.AddAuthorizationCore();
 
 
