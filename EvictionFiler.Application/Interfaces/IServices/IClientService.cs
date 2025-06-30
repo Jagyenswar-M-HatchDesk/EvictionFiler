@@ -9,6 +9,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 {
     public interface IClientService
     {
+        Task<List<CreateClientDto>> GetAllClientsAsync();
         Task<bool> AddClientAsync(CreateClientDto client);
     }
 }

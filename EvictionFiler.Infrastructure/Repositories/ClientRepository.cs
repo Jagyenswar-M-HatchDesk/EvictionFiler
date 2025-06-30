@@ -28,7 +28,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<Client>> GetAllAsync()
         {
-            return await _context.Clients.ToListAsync();
+            var allclients = await _context.Clients.ToListAsync();
+            return allclients;
         }
 
         public async Task<bool> AddAsync(CreateClientDto client)
