@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace EvictionFiler.Infrastructure.Migrations
 {
-    // <inheritdoc />
-    public partial class initialmigration : Migration
+    /// <inheritdoc />
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -211,8 +211,8 @@ namespace EvictionFiler.Infrastructure.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "CreatedAt", "CreatedBy", "IsActive", "IsDeleted", "Name", "NormalizedName", "UpdatedAt", "UpdatedBy" },
                 values: new object[,]
                 {
-                    { new Guid("2bb5c3bf-8dd8-4415-9090-1d428c792533"), null, null, null, null, null, "PropertyManager", null, null, null },
-                    { new Guid("56355bf6-e335-428a-b718-00cb79e5273d"), null, null, null, null, null, "LawFirm", null, null, null },
+                    { new Guid("2bb5c3bf-8dd8-4415-9090-1d428c792533"), null, null, null, null, null, "Property Manager", null, null, null },
+                    { new Guid("56355bf6-e335-428a-b718-00cb79e5273d"), null, null, null, null, null, "Law Firm", null, null, null },
                     { new Guid("f5ab29da-356e-42df-a3ad-d91bbf644550"), null, null, null, null, null, "Admin", null, null, null }
                 });
 

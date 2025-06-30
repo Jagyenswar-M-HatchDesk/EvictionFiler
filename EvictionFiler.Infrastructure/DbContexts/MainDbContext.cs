@@ -18,14 +18,19 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserDatabase> UserDatabases { get; set; }
         //public DbSet<Subscription> Subscriptions { get; set; }
+        public DbSet<Tenant> Tenants { get; set; }
+        public DbSet<Client> Clients { get; set; }
+        public DbSet<LandLord> LandLords { get; set; }
+        public DbSet<Appartment> Appartments { get; set; }
+        public DbSet<LegalCase> LegalCases { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Role>().HasData(
-                new Role { Id = Guid.Parse("f5ab29da-356e-42df-a3ad-d91bbf644550"), Name = "Admin" },
-                new Role { Id = Guid.Parse("56355bf6-e335-428a-b718-00cb79e5273d"), Name = "LawFirm" },
-                new Role { Id = Guid.Parse("2bb5c3bf-8dd8-4415-9090-1d428c792533"), Name = "PropertyManager" }
+                new Role { Id = Guid.Parse("f5ab29da-356e-42df-a3ad-d91bbf644550"), Name = "Admin" , NormalizedName= "ADMIN" },
+                new Role { Id = Guid.Parse("56355bf6-e335-428a-b718-00cb79e5273d"), Name = "Law Firm", NormalizedName = "LAW FIRM" },
+                new Role { Id = Guid.Parse("2bb5c3bf-8dd8-4415-9090-1d428c792533"), Name = "Property Manager", NormalizedName = "PROPERTY MANAGER" }
 
             );
 

@@ -3,7 +3,9 @@ using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -47,7 +49,7 @@ namespace EvictionFiler.Infrastructure.Repositories
         public async Task<bool> RegisterTenant(RegisterDto model)
         {
             var serverPrefix = _config.GetConnectionString("SqlServer");
-            var dbName = $"Tenant_{model.Email.Split('@')[0]}";
+            var dbName = $"{model.Role}_{model.Email.Split('@')[0]}";
             var connectionString = $"{serverPrefix};Database={dbName};MultipleActiveResultSets=True;";
 
             var database = new UserDatabase
@@ -90,7 +92,10 @@ namespace EvictionFiler.Infrastructure.Repositories
                 //EmailConfirmed = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                TenantId = database.Id
+                RoleId = role.Id,
+                TenantId = database.Id,
+                IsActive = true,
+                //CreatedBy
             };
 
             var createResult = await _userManager.CreateAsync(user, model.Password);
