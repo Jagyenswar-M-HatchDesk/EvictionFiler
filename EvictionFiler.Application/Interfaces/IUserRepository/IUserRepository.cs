@@ -17,5 +17,8 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
         Task<bool> RegisterTenant(RegisterDto model);
 
         Task<IEnumerable<User>> GetAllUser();
+        Task<User?> GetByIdAsync(Guid id);
+        Task<bool> UpdateUserAsync(User updatedUser);
+        Task<bool> DeleteUserAsync(Guid id);
     }
 }

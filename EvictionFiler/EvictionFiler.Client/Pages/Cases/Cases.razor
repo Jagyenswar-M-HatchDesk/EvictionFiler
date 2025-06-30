@@ -1,5 +1,12 @@
 ﻿@page "/createcase"
+@using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Application.DTOs.TenantDto
+@using EvictionFiler.Client.Services
+@inject LandLordService _landlordService
+@inject ApartmentService _apartmentService
+@inject TenantService _tenantService
 @rendermode InteractiveAuto
 <style>
     .stepper-row::-webkit-scrollbar {
@@ -211,7 +218,7 @@
                 <label class="form-label">Full Name</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-person"></i></span>
-                    <input type="text" class="form-control" @bind="first_name" placeholder="Enter full name" />
+                    <input type="text" class="form-control" @bind="tenantDto.Name" placeholder="Enter full name" />
                 </div>
             </div>
 
@@ -219,7 +226,7 @@
                 <label class="form-label">SSN</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
-                    <input type="text" class="form-control" @bind="last_name" placeholder="Enter SSN" />
+                    <input type="text" class="form-control" @bind="tenantDto.SSN" placeholder="Enter SSN" />
                 </div>
             </div>
 
@@ -227,7 +234,7 @@
                 <label class="form-label">Phone</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                    <input type="tel" class="form-control" @bind="phone" placeholder="Enter phone number" />
+                    <input type="tel" class="form-control" @bind="tenantDto.Phone" placeholder="Enter phone number" />
                 </div>
             </div>
 
@@ -238,28 +245,28 @@
                         <i>@@</i>
 
                     </span>
-                    <input type="email" class="form-control" @bind="address" placeholder="Enter email" />
+                    <input type="email" class="form-control" @bind="tenantDto.Email" placeholder="Enter email" />
                 </div>
             </div>
 
             <div class="col-md-6">
                 <label class="form-label">Language</label>
-                <input type="text" class="form-control" @bind="code" placeholder="Enter language" />
+                <input type="text" class="form-control" @bind="tenantDto.Language" placeholder="Enter language" />
             </div>
 
             <div class="col-md-6">
                 <label class="form-label">Address</label>
-                <input type="text" class="form-control" @bind="code" placeholder="Enter address" />
+                <input type="text" class="form-control" @bind="tenantDto.Address" placeholder="Enter address" />
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Apt #</label>
-                <input type="text" class="form-control" @bind="code" placeholder="Enter Apt #" />
+                <input type="text" class="form-control" @bind="tenantDto.Apt" placeholder="Enter Apt #" />
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Borough</label>
-                <input type="text" class="form-control" @bind="code" placeholder="Enter borough" />
+                <input type="text" class="form-control" @bind="tenantDto.Borough" placeholder="Enter borough" />
             </div>
 
             <div class="col-md-4">
@@ -269,13 +276,13 @@
                         <i>$</i>
 
                     </span>
-                    <input type="text" class="form-control" @bind="code" placeholder="Enter rent amount" />
+                    <input type="text" class="form-control" @bind="tenantDto.Rent" placeholder="Enter rent amount" />
                 </div>
             </div>
 
             <div class="col-md-6">
                 <label class="form-label">Lease Status</label>
-                <input type="text" class="form-control" @bind="code" placeholder="Enter lease status" />
+                <input type="text" class="form-control" @bind="tenantDto.LeaseStatus" placeholder="Enter lease status" />
             </div>
         </div>
     </div>
@@ -293,7 +300,7 @@
                 <label class="form-label">Name/Entity</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-building"></i></span>
-                    <input type="text" class="form-control" @bind="first_name" placeholder="Enter name/entity" />
+                    <input type="text" class="form-control" @bind="landLordDto.Name" placeholder="Enter name/entity" />
                 </div>
             </div>
 
@@ -302,7 +309,7 @@
                 <label class="form-label">EIN/SSN (last 4)</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
-                    <input type="text" class="form-control" @bind="last_name" placeholder="Enter EIN/SSN" />
+                    <input type="text" class="form-control" @bind="landLordDto.EINorSSN" placeholder="Enter EIN/SSN" />
                 </div>
             </div>
 
@@ -311,7 +318,7 @@
                 <label class="form-label">Phone</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                    <input type="text" class="form-control" @bind="phone" placeholder="Enter phone number" />
+                    <input type="text" class="form-control" @bind="landLordDto.Phone" placeholder="Enter phone number" />
                 </div>
             </div>
 
@@ -320,7 +327,7 @@
                 <label class="form-label">Email</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                    <input type="email" class="form-control" @bind="address" placeholder="Enter email" />
+                    <input type="email" class="form-control" @bind="landLordDto.Email" placeholder="Enter email" />
                 </div>
             </div>
 
@@ -329,7 +336,7 @@
                 <label class="form-label">Mailing Address</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                    <input type="text" class="form-control" @bind="code" placeholder="Enter mailing address" />
+                    <input type="text" class="form-control" @bind="landLordDto.MaillingAddress" placeholder="Enter mailing address" />
                 </div>
             </div>
 
@@ -338,7 +345,7 @@
                 <label class="form-label">Attorney (if any)</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-person-bounding-box"></i></span>
-                    <input type="text" class="form-control" @bind="attorney" placeholder="Enter attorney name" />
+                    <input type="text" class="form-control" @bind="landLordDto.Attorney" placeholder="Enter attorney name" />
                 </div>
             </div>
 
@@ -347,7 +354,7 @@
                 <label class="form-label">Firm</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
-                    <input type="text" class="form-control" @bind="firm" placeholder="Enter firm name" />
+                    <input type="text" class="form-control" @bind="landLordDto.Firm" placeholder="Enter firm name" />
                 </div>
             </div>
 
@@ -369,7 +376,7 @@
                 <label class="form-label">Registered Agent</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
-                    <input type="text" class="form-control" @bind="registeredAgent" placeholder="Enter agent name" />
+                    <input type="text" class="form-control" @bind="landLordDto.RegisteredAgent" placeholder="Enter agent name" />
                 </div>
             </div>
         </div>
@@ -604,11 +611,24 @@
     private string yearBuilt;
     private string heatWater;
 
-    private CreateClientDto clientDto = new CreateClientDto();
+    private CreateTenantDto tenantDto = new CreateTenantDto();
+    private CreateLandLordDto landLordDto = new CreateLandLordDto();
+    private AddApartment appartmentDto = new AddApartment();
 
 
     void SaveAsDraft() => Console.WriteLine("Saving Draft...");
     void Next() => currentStep++;
     void Back() => currentStep--;
-    void Submit() => Console.WriteLine("Submitting...");
+    async Task Submit()
+    {
+        tenantDto.Id = Guid.NewGuid();
+        var tenant = await _tenantService.AddTenantAsync(tenantDto);
+
+        landLordDto.Id = Guid.NewGuid();
+        var landlord = await _landlordService.AddLandLordAsync(landLordDto);
+
+        appartmentDto.Id = Guid.NewGuid();
+        var appartment = await _apartmentService.AddApartmentAsync(appartmentDto);
+
+    }
 }

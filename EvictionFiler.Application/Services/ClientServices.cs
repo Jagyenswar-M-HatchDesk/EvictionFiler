@@ -12,7 +12,7 @@ namespace EvictionFiler.Application.Services
     public class ClientServices : IClientService
     {
         private readonly IClientRepository _clientRepository;
-        public ClientServices(IClientRepository clientRepository) 
+        public ClientServices(IClientRepository clientRepository)
         {
             _clientRepository = clientRepository;
         }

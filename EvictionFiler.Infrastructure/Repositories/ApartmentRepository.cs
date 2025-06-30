@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using EvictionFiler.Application.Interfaces.IUserRepository;
+using EvictionFiler.Application.DTOs.ApartmentDto;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
@@ -26,13 +27,26 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<Appartment>> GetAllAsync()
         {
-            return await _context.Appartments.ToListAsync();
+            return await _context.Appartments.Where(e=>e.IsDeleted != true).ToListAsync();
         }
 
-        public async Task AddAsync(Appartment appartment)
+        public async Task<bool> AddAsync(AddApartment appartment)
         {
-            _context.Appartments.Add(appartment);
-            await _context.SaveChangesAsync();
+            var newapartment = new Appartment
+            {
+                Id = appartment.Id,
+                City = appartment.City,
+                State = appartment.State,
+                ZipCode = appartment.ZipCode,
+                PhoneNumber = appartment.PhoneNumber,
+                Extention = appartment.Extention,
+                CellPhone = appartment.CellPhone,
+            };
+            _context.Appartments.Add(newapartment);
+            var result =await _context.SaveChangesAsync();
+            if(result != null)
+                return true;
+            return false;
         }
 
         public async Task UpdateAsync(Appartment appartment)

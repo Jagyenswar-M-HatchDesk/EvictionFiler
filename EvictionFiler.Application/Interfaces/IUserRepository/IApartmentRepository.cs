@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Domain.Entities;
+﻿using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
     {
         Task<Appartment?> GetByIdAsync(Guid id);
         Task<List<Appartment>> GetAllAsync();
-        Task AddAsync(Appartment appartment);
+        Task<bool> AddAsync(AddApartment appartment)
         Task UpdateAsync(Appartment appartment);
         Task DeleteAsync(Guid id);
     }

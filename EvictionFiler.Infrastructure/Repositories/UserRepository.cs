@@ -120,5 +120,43 @@ namespace EvictionFiler.Infrastructure.Repositories
             var alluser = await _db.Users.Include(e => e.Roles).ToListAsync();
             return alluser;
         }
+
+        public async Task<User?> GetByIdAsync(Guid id)
+        {
+            return await _db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Id == id);
+        }
+
+        public async Task<bool> UpdateUserAsync(User updatedUser)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == updatedUser.Id);
+            if (user == null) return false;
+
+            user.FirstName = updatedUser.FirstName;
+            user.LastName = updatedUser.LastName;
+            user.MiddleName = updatedUser.MiddleName;
+            user.Email = updatedUser.Email;
+            user.UserName = updatedUser.Email;
+            user.UpdatedAt = DateTime.UtcNow;
+            user.IsActive = updatedUser.IsActive;
+
+            _db.Users.Update(user);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteUserAsync(Guid id)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == id);
+            if (user == null) return false;
+
+            user.IsDeleted = true;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            _db.Users.Update(user);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+
     }
 }
