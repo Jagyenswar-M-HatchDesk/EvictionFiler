@@ -16,7 +16,7 @@ namespace EvictionFiler.Application.DTOs.LandLordDto
         public string? MaillingAddress { get; set; } = string.Empty;
         public string? Attorney { get; set; } = string.Empty;
         public string? Firm { get; set; } = string.Empty;
-
+        public string? LandLordCode { get; set; } = string.Empty;
         public bool? isCorporeateOwner { get; set; }
         public string? RegisteredAgent { get; set; } = string.Empty;
     }

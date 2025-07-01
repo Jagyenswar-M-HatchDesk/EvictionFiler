@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Domain.Entities;
+﻿using EvictionFiler.Application.DTOs;
+using EvictionFiler.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
     {
         Task<List<LegalCase>> GetAllCasesAsync();
         Task<LegalCase?> GetCaseByIdAsync(Guid id);
-        Task AddCaseAsync(LegalCase legalCase);
+        Task<bool> AddCaseAsync(CreateEditLegalCaseModel legalCase);
         Task UpdateCaseAsync(LegalCase legalCase);
         Task DeleteCaseAsync(Guid id);
 

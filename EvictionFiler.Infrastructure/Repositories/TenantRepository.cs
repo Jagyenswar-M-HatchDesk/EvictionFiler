@@ -25,6 +25,7 @@ namespace EvictionFiler.Infrastructure.Repositories
             var newtenant = new Tenant
             {
                 Id = dto.Id,
+                TenantCode = dto.TenantCode,
                 Name = dto.Name,
                 DOB = dto.DOB,
                 SSN = dto.SSN,
@@ -36,8 +37,11 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Borough = dto.Borough,
                 Rent = dto.Rent,
                 LeaseStatus = dto.LeaseStatus,
+                CreatedAt = DateTime.Now,
+                IsActive = true,
+
             };
-            _dbContext.Tenants.Add(newtenant);
+            await _dbContext.Tenants.AddAsync(newtenant);
             var result = await _dbContext.SaveChangesAsync();
 
             if(result != null)
@@ -96,5 +100,12 @@ namespace EvictionFiler.Infrastructure.Repositories
             return true;
         }
 
+        public async Task<Tenant> SearchTenantByCode(string code)
+        {
+            var tenant = await _dbContext.Tenants.FirstOrDefaultAsync(e=>e.TenantCode == code);
+            if (tenant == null)
+                return new Tenant();
+            return tenant;
+        }
     }
 }

@@ -24,6 +24,7 @@ namespace EvictionFiler.Infrastructure.Repositories
             var newlandlord = new LandLord
             {
                 Id = dto.Id,
+                LandLordCode = dto.LandLordCode,
                 Name = dto.Name,
                 EINorSSN = dto.EINorSSN,
                 Phone = dto.Phone,
