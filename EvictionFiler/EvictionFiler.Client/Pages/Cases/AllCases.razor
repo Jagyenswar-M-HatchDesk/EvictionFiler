@@ -1,4 +1,8 @@
 ﻿@page "/cases"
+@using EvictionFiler.Client.Services
+@using EvictionFiler.Domain.Entities
+@inject LegalCasesService _service
+@inject NavigationManager nav
 <PageTitle>Cases</PageTitle>
 
 <!-- Bootstrap CSS -->
@@ -43,23 +47,22 @@
     table.table thead th {
         color: #1F365D;
         background: #F2F0EC;
-        margin-bottom:0px !important;
+        margin-bottom: 0px !important;
     }
 
     h5, p, small {
         color: #1F365D;
     }
 
-    .adv-btn{
+    .adv-btn {
         color: #1F365D;
         background: #FFF;
     }
 
-    .adv-btn:hover
-    {
-        color: #FFF;
-        background: #1F365D;
-    }
+        .adv-btn:hover {
+            color: #FFF;
+            background: #1F365D;
+        }
 
         .adv-btn.active-adv-btn {
             background-color: #1F365D !important;
@@ -97,7 +100,7 @@
         padding-left: 1rem;
         /* border-radius: 1.5rem; */
         border: 2px solid #1F365D;
-         background-color: #FFF; /* dark background */
+        background-color: #FFF; /* dark background */
         color: black;
         height: 2.5rem;
     }
@@ -138,7 +141,8 @@
         <!-- Title Row -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="m-0">Manage Legal Cases</h5>
-            <button class="btn btn-primary">Add New</button>
+            <NavLink class="btn btn-primary" href="/createcase">Add New</NavLink>
+
         </div>
 
         <!-- Search Filters -->
@@ -251,7 +255,7 @@
                         <td>L$T HOLDOVER</td>
                         <td>Calender</td>
                         <td>06/20/2025</td>
-                        <td class="sticky"><i class="fa-solid fa-pen-to-square"></i><span class="status-active ms-2">Active</span></td>
+                        <td class="sticky"><i class="fa-solid fa-pen-to-square" @onclick="FocusOnNavigate"></i><span class="status-active ms-2">Active</span></td>
                     </tr>
                     <tr>
                         <td>HO0011758</td>
@@ -262,8 +266,23 @@
                         <td>L$T HOLDOVER</td>
                         <td>Calender</td>
                         <td>06/20/2025</td>
-                        <td class="sticky"><i class="fa-solid fa-pen-to-square"></i><span class="status-active ms-2">Active</span></td>
+                        <td class="sticky"><i class="fa-solid fa-pen-to-square" @onclick="FocusOnNavigate"></i><span class="status-active ms-2">Active</span></td>
                     </tr>
+                    @foreach (var cas in cases)
+                    {
+                        <tr>
+                            <td>@(cas?.Casecode ?? "")</td>
+                            <td>@(cas?.Clients?.Name ?? "")</td>
+                            <td>@(cas?.LandLords?.Name ?? "")</td>
+                            <td>@(cas?.Tenant?.Name ?? "")</td>
+                            <td>@(cas?.AptNo ?? "")</td>
+                            <td>@(cas?.CaseType ?? "")</td>
+                            <td>Calender</td>
+                            <td>@(cas?.CreatedAt.HasValue == true ? cas.CreatedAt.Value.ToString("MM/dd/yyyy") : "")</td>
+                            <td class="sticky"><i class="fa-solid fa-pen-to-square" @onclick="FocusOnNavigate"></i><span class="status-active ms-2">Active</span></td>
+                        </tr>
+
+                    }
                     <!-- repeat more data here -->
                 </tbody>
             </table>
@@ -300,4 +319,23 @@
     });
 </script>
 
-@code { }
+
+@code {
+    private List<LegalCase> cases = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAllCases();
+    }
+
+    private async Task GetAllCases()
+    {
+        cases = await _service.GetAllAsync();
+    }
+
+    void FocusOnNavigate()
+    {
+        nav.NavigateTo("/case");
+    }
+}
+

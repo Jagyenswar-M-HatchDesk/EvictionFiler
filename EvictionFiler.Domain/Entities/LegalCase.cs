@@ -37,6 +37,8 @@ namespace EvictionFiler.Domain.Entities
         public virtual Tenant? Tenant { get; set; }
 
         public string? CaseName { get; set; }
+        public string? ClientRole { get; set; }
+        public string? LegalRepresentative { get; set; }
         public string? Casecode { get; set; }
         public string? CaseType { get; set; }
 
