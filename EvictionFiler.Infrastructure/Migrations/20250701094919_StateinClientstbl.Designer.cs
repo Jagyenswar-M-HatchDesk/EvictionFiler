@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250701094919_StateinClientstbl")]
+    partial class StateinClientstbl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -241,9 +244,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<Guid?>("ClientId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ClientRole")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("CommercialUnits")
                         .HasColumnType("nvarchar(max)");
 
@@ -276,9 +276,6 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Property<Guid?>("LandLordId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("LegalRepresentative")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MDRNo")
                         .HasColumnType("nvarchar(max)");
