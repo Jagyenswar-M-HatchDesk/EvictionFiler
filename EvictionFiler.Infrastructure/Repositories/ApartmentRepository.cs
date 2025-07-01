@@ -35,12 +35,19 @@ namespace EvictionFiler.Infrastructure.Repositories
             var newapartment = new Appartment
             {
                 Id = appartment.Id,
+                ApartmentCode = appartment.ApartmentCode,
                 City = appartment.City,
                 State = appartment.State,
-                ZipCode = appartment.ZipCode,
-                PhoneNumber = appartment.PhoneNumber,
-                Extention = appartment.Extention,
-                CellPhone = appartment.CellPhone,
+                PremiseType= appartment.PremiseType,
+                Address_1 = appartment.Address_1,
+                Address_2 = appartment.Address_2,
+                Zipcode = appartment.Zipcode,
+                Country = appartment.Country,
+                MDR_Number = appartment.MDR_Number,
+                PetitionerInterest = appartment.PetitionerInterest,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+
             };
             _context.Appartments.Add(newapartment);
             var result =await _context.SaveChangesAsync();

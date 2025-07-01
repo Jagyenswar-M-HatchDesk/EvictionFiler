@@ -11,14 +11,17 @@ namespace EvictionFiler.Domain.Entities
     {
         [Key]
         public Guid Id { get; set; }
-        public string? City { get; set; } = string.Empty;
-        public string? State { get; set; } = string.Empty ;
-        public string? ZipCode { get; set; } = string.Empty;
-        public string? PhoneNumber { get; set; } = string.Empty;
-        public string? Extention { get; set; } = string.Empty;
-        public string? CellPhone { get; set; } = string.Empty;
-        //public string CellPhone { get; set; }
-        //public string CellPhone { get; set; }
+       
+        public string? ApartmentCode { get; set; }
+        public string? PremiseType { get; set; }
+        public string? Address_1 { get; set; }
+        public string? Address_2 { get; set; }
+        public string? City { get; set; }
+        public string? State { get; set; }
+        public string? Country { get; set; }
+        public string? Zipcode { get; set; }
+        public string? MDR_Number { get; set; }
+        public string? PetitionerInterest { get; set; }
 
     }
 }

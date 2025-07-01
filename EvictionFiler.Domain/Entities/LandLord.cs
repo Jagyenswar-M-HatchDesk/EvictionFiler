@@ -11,7 +11,9 @@ namespace EvictionFiler.Domain.Entities
     {
         [Key]
         public Guid Id { get; set; }
+
         public string? Name { get; set; } = string.Empty;
+        public string? LandLordCode { get; set; } = string.Empty;
         public string? EINorSSN { get; set; } = string.Empty;
         public string? Phone { get; set; } = string.Empty;
         public string? Email { get; set; } = string.Empty;
