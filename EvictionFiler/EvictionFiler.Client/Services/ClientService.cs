@@ -21,7 +21,8 @@ namespace EvictionFiler.Client.Services
             var clientDtos = clients.Select(client => new CreateClientDto
             {
                 ClientCode = client.ClientCode,
-                Name = client.Name,
+                FirstName = client.FirstName,
+                LastName = client.LastName,
                 Email = client.Email,
                 Address_1 = client.Address_1,
                 Address_2 = client.Address_2,

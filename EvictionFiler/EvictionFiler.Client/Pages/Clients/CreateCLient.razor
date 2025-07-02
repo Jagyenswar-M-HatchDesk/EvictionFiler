@@ -43,11 +43,11 @@
         will-change: transform, opacity;
     }
 
-        .form-wrapper.hidden {
+        /* .form-wrapper.hidden {
             transform: translateX(-100%);
             opacity: 0;
             pointer-events: none;
-        }
+        } */
 
     .overlay-form {
         animation: slideIn 0.5s ease forwards;
@@ -137,6 +137,7 @@
     } */
 
 </style>
+@using System.Collections.Generic
 
 <div class="offcanvas offcanvas-end show border-start shadow bg-white"
      tabindex="-1" id="createClient"
@@ -145,38 +146,29 @@
 
     <div class="offcanvas-header border-bottom">
         <h5 class="offcanvas-title fw-bold color-text" id="createUserLabel">Add New Client</h5>
-        <button type="button" class="btn-close" @onclick="Hide" aria-label="Close"></button>
+        <button type="button" class="btn-close" @onclick="HideAsync" aria-label="Close"></button>
     </div>
 
     <div class="offcanvas-body p-0">
         <div class="d-flex align-items-center position-relative">
+            <!-- CLIENT FORM -->
             <div class="form-wrapper @(activeTab != string.Empty ? "hidden" : "") flex-grow-1 p-3 pe-5">
-                <!-- Existing EditForm here -->
-                <EditForm Model="@createClient" OnValidSubmit="SubmitUser">
-                    <DataAnnotationsValidator />
-                    <ValidationSummary />
-
-                    <!-- Client Code (max 10 digits) -->
+                <EditForm Model="@createClient" OnValidSubmit="SubmitClientAsync">
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text">Client Code</label>
-                            <InputText class="form-control"
-                                       maxlength="10"
-                                       @bind-Value="createClient.ClientCode"
-                                       placeholder="Enter up to 10 digits" />
+                            <InputText class="form-control" maxlength="10" @bind-Value="createClient.ClientCode" placeholder="Enter up to 10 digits" />
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text">First Name</label>
-                            <InputText class="form-control" @bind-Value="createClient.Name" placeholder="Enter FirstName" />
+                            <InputText class="form-control" @bind-Value="createClient.FirstName" placeholder="Enter First Name" />
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text">Last Name</label>
-                            <InputText class="form-control" @bind-Value="createClient.Name" placeholder="Enter LastName" />
+                            <InputText class="form-control" @bind-Value="createClient.LastName" placeholder="Enter Last Name" />
                         </div>
                     </div>
 
-
-                    <!-- Email -->
                     <div class="row">
                         <div class="col-md-8 mb-3">
                             <label class="form-label color-text">Email</label>
@@ -193,403 +185,222 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Address Line 1 & 2 -->
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label color-text">Address Line 1 </label>
-                            <InputText class="form-control" @bind-Value="createClient.Address_1" placeholder="Address Line 1" />
-
+                            <label class="form-label color-text">Address Line 1</label>
+                            <InputText class="form-control" @bind-Value="createClient.Address_1" />
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label color-text">Address Line 2</label>
-                            <InputText class="form-control" @bind-Value="createClient.Address_2" placeholder="Address Line 2" />
+                            <InputText class="form-control" @bind-Value="createClient.Address_2" />
                         </div>
                     </div>
-                    <!-- City & State -->
+
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text">City</label>
-                            <InputText class="form-control" @bind-Value="createClient.City" placeholder="City" />
+                            <InputText class="form-control" @bind-Value="createClient.City" />
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text">State</label>
-                            <div class="input-group">
-                                <InputSelect class="form-select" @bind-Value="createClient.State">
-                                    <option value="">-- Select State --</option>
-                                    <option>Georgia</option>
-                                    <option>California</option>
-                                    <option>Florida</option>
-                                </InputSelect>
-                            </div>
+                            <InputSelect class="form-select" @bind-Value="createClient.State">
+                                <option value="">-- Select State --</option>
+                                <option>Georgia</option>
+                                <option>California</option>
+                                <option>Florida</option>
+                            </InputSelect>
                         </div>
-
-
-                        <!-- Zipcode & Fax (with Input Group) -->
-
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text">Zip Code</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-geo"></i></span>
-                                <InputNumber class="form-control" @bind-Value="createClient.ZipCode" placeholder="Zip" />
+                                <InputNumber class="form-control" @bind-Value="createClient.ZipCode" />
                             </div>
                         </div>
-
                     </div>
 
-                    <!-- Phone & Cell Phone (with Input Group) -->
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label color-text">Phone</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                                <InputText class="form-control" @bind-Value="createClient.Phone" placeholder="Phone" />
+                                <InputText class="form-control" @bind-Value="createClient.Phone" />
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label color-text">Cell Phone</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-phone"></i></span>
-                                <InputText class="form-control" @bind-Value="createClient.CellPhone" placeholder="Mobile" />
+                                <InputText class="form-control" @bind-Value="createClient.CellPhone" />
                             </div>
                         </div>
                     </div>
-
-                    <!-- Submit Button -->
-                  @*   <div class="d-flex justify-content-end mt-4 gap-2">
-                        <button type="button" class="btn btn-outline-secondary px-4 fw-semibold" @onclick="Hide">
-                            Cancel
-                        </button>
-                        <button type="submit" class="btn px-4 fw-semibold"
-                                style="background-color: var(--bs-primary); color: white; border: none;">
-                            Submit
-                        </button>
-                    </div> *@
-
                 </EditForm>
             </div>
 
-            <div class="vertical-buttons d-flex flex-column align-items-center position-absolute end-0 top-50 translate-middle-y">
-                <button class="vertical-tab-button @(activeTab == "landlord" ? "active-vertical" : "")"
-                        @onclick="@(() => SetActiveTab("landlord"))">
-                    LANDLORD
-                </button>
-                <button class="vertical-tab-button @(activeTab == "building" ? "active-vertical" : "")"
-                        @onclick="@(() => SetActiveTab("building"))">
-                    BUILDING
-                </button>
+            <!-- Vertical Overlay Buttons -->
+            <div class="vertical-buttons d-flex flex-column align-items-center position-absolute end-0 top-50 translate-middle-y @(IsVisible ? "" : "d-none")">
+                <button class="vertical-tab-button @(activeTab == "landlord" ? "active-vertical" : "")" @onclick="@(() => SetActiveTab("landlord"))">LANDLORD</button>
+                <button class="vertical-tab-button @(activeTab == "building" ? "active-vertical" : "")" @onclick="@(() => SetActiveTab("building"))">BUILDING</button>
             </div>
+        </div>
 
-
-            </div>
-        <!-- 🚧 Overlay Forms -->
-        @if (activeTab == "landlord" || activeTab == "building")
+        <!-- LANDLORD Overlay -->
+        @if (activeTab == "landlord")
         {
-            <div class="overlay-form @(activeTab == "landlord" ? "overlay-landlord" : "overlay-building")">
+            <div class="overlay-form overlay-landlord">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="color-text fw-bold mb-0">
-                        @(activeTab == "landlord" ? "LANDLORD INFORMATION" : "BUILDING INFORMATION")
-                    </h5>
-                    <div class="d-flex justify-content-center align-items-center ">
-                        <button type="button" class="btn btn-outline-secondary fw-semibold me-2"
-                                @onclick="() => SetActiveTab(string.Empty)">
-                            ← Back
-                        </button>
-                        <!-- Landlord -->
-                        <button class="btn bg-navy text-white" @onclick="ToggleActiveForm">
-                            @GetToggleButtonText()
-                        </button>
-
-
-
-                   </div>
+                    <h5 class="color-text fw-bold mb-0">LANDLORD INFORMATION</h5>
+                    <div>
+                        <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button>
+                        <button class="btn bg-navy text-white" @onclick="ToggleLandlordForm">@GetToggleButtonText()</button>
+                    </div>
                 </div>
 
-                @if (activeTab == "landlord")
+                @if (showLandlordForm)
                 {
-                    <div class="mt-3">
-                        @* 🔹 Form only when flag true *@
-                        @if (showLandlordForm)
-                        {
-                            <EditForm Model="@landlord" OnValidSubmit="HandleLandlordSubmit">
-                                <DataAnnotationsValidator />
-                                <ValidationSummary />
-
-                                <!-- Name (with icon) -->
-                                <div class="mb-3">
-                                    <label class="form-label color-text">Name</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                        <InputText class="form-control" @bind-Value="landlord.Name" placeholder="Enter Name" />
-                                    </div>
-                                </div>
-
-                                <!-- EIN/SSN (with icon) -->
-                                <div class="mb-3">
-                                    <label class="form-label color-text">EIN / SSN</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-id-card"></i></span>
-                                        <InputText class="form-control" @bind-Value="landlord.EINorSSN" placeholder="Enter EIN or SSN" />
-                                    </div>
-                                </div>
-
-                                <!-- Phone (with icon), Email (normal) -->
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label color-text">Phone</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                            <InputText class="form-control" @bind-Value="landlord.Phone" placeholder="Phone" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label color-text">Email</label>
-                                        <InputText class="form-control" @bind-Value="landlord.Email" placeholder="Email" />
-                                    </div>
-                                </div>
-
-                                <!-- Mailing Address (normal) -->
-                                <div class="mb-3">
-                                    <label class="form-label color-text"> Address</label>
-                                    <InputText class="form-control" @bind-Value="landlord.MaillingAddress" placeholder="Mailing Address" />
-                                </div>
-
-                                <!-- Attorney (normal), Firm (normal) -->
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label color-text">Attorney</label>
-                                        <InputText class="form-control" @bind-Value="landlord.Attorney" placeholder="Attorney" />
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label color-text">Firm</label>
-                                        <InputText class="form-control" @bind-Value="landlord.Firm" placeholder="Firm" />
-                                    </div>
-                                </div>
-
-                                <!-- Buttons -->
-                                <div class="d-flex justify-content-end mt-4 gap-2">
-                                   
-                                    <button type="submit" class="btn px-4 fw-semibold" @onclick="SaveChanges"
-                                            style="background-color: var(--bs-primary); color: white; border: none;">
-                                        Save Landlord Info
-                                    </button>
-                                </div>
-                            </EditForm>
-                        }
-
-                        @* 🔹 Grid Always Visible *@
-                        <div class="table-responsive mt-4" style="overflow-x: auto; white-space: nowrap;">
-                            <table class="table table-bordered" style="min-width: 1000px;">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>EIN / SSN</th>
-                                        <th>Phone</th>
-                                        <th>Email</th>
-                                        <th>Address</th>
-                                        <th>Attorney</th>
-                                        <th>Firm</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if (landlordList.Any())
-                                    {
-                                        @foreach (var item in landlordList)
-                                        {
-                                            <tr>
-                                                <td>@item.Name</td>
-                                                <td>@item.EINorSSN</td>
-                                                <td>@item.Phone</td>
-                                                <td>@item.Email</td>
-                                                <td>@item.MaillingAddress</td>
-                                                <td>@item.Attorney</td>
-                                                <td>@item.Firm</td>
-                                            </tr>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <tr>
-                                            <td colspan="7" class="text-muted">No landlords added yet.</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+                    <EditForm Model="@landlord" OnValidSubmit="SubmitLandlordAsync">
+                        <div class="mb-3"><label>Name</label><InputText class="form-control" @bind-Value="landlord.Name" /></div>
+                        <div class="mb-3"><label>EIN/SSN</label><InputText class="form-control" @bind-Value="landlord.EINorSSN" /></div>
+                        <div class="row">
+                            <div class="col"><label>Phone</label><InputText class="form-control" @bind-Value="landlord.Phone" /></div>
+                            <div class="col"><label>Email</label><InputText class="form-control" @bind-Value="landlord.Email" /></div>
                         </div>
-
-                    </div>
-
+                        <div class="mb-3"><label>Address</label><InputText class="form-control" @bind-Value="landlord.MaillingAddress" /></div>
+                        <div class="row">
+                            <div class="col"><label>Attorney</label><InputText class="form-control" @bind-Value="landlord.Attorney" /></div>
+                            <div class="col"><label>Firm</label><InputText class="form-control" @bind-Value="landlord.Firm" /></div>
+                        </div>
+                        <button type="submit" class="btn bg-navy text-white mt-2">Save Landlord Info</button>
+                    </EditForm>
                 }
-                else if (activeTab == "building")
-                {
-                    if (showBuildingForm)
-                    {
-                        <EditForm Model="@building" OnValidSubmit="HandleBuildingSubmit">
-                            <DataAnnotationsValidator />
-                            <ValidationSummary />
 
-                            <!-- Apartment Code (with icon) -->
-                            <div class="mb-3">
-                                <label class="form-label color-text">Apartment Code</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-building"></i></span>
-                                    <InputText class="form-control" @bind-Value="building.ApartmentCode" placeholder="Enter Apartment Code" />
-                                </div>
-                            </div>
-
-                            <!-- Premise Type (normal) -->
-                            <div class="mb-3">
-                                <label class="form-label color-text">Premise Type</label>
-                                <InputText class="form-control" @bind-Value="building.PremiseType" placeholder="Enter Premise Type" />
-                            </div>
-
-                            <!-- Address Line 1 (with icon) -->
-                            <div class="mb-3">
-                                <label class="form-label color-text">Address Line 1</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                                    <InputText class="form-control" @bind-Value="building.Address_1" placeholder="Address Line 1" />
-                                </div>
-                            </div>
-
-                            <!-- Address Line 2 (normal) -->
-                            <div class="mb-3">
-                                <label class="form-label color-text">Address Line 2</label>
-                                <InputText class="form-control" @bind-Value="building.Address_2" placeholder="Address Line 2" />
-                            </div>
-
-                            <!-- City & State -->
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label color-text">City</label>
-                                    <InputText class="form-control" @bind-Value="building.City" placeholder="City" />
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label color-text">State</label>
-                                    <InputText class="form-control" @bind-Value="building.State" placeholder="State" />
-                                </div>
-                            </div>
-
-                            <!-- Country (with icon) & Zipcode -->
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label color-text">Country</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-globe"></i></span>
-                                        <InputText class="form-control" @bind-Value="building.Country" placeholder="Country" />
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label color-text">Zipcode</label>
-                                    <InputText class="form-control" @bind-Value="building.Zipcode" placeholder="Zipcode" />
-                                </div>
-                            </div>
-
-                            <!-- MDR Number (normal) -->
-                            <div class="mb-3">
-                                <label class="form-label color-text">MDR Number</label>
-                                <InputText class="form-control" @bind-Value="building.MDR_Number" placeholder="MDR Number" />
-                            </div>
-
-                            <!-- Petitioner Interest (normal) -->
-                            <div class="mb-3">
-                                <label class="form-label color-text">Petitioner Interest</label>
-                                <InputText class="form-control" @bind-Value="building.PetitionerInterest" placeholder="Petitioner Interest" />
-                            </div>
-
-                            <!-- Buttons -->
-                            <div class="d-flex justify-content-end mt-4 gap-2">
-                                <button type="button" class="btn btn-outline-secondary fw-semibold px-4"
-                                        @onclick="() => SetActiveTab(string.Empty)">
-                                    ← Back
-                                </button>
-                                <button type="submit" class="btn px-4 fw-semibold" @onclick="SaveChanges"
-                                        style="background-color: var(--bs-primary); color: white; border: none;">
-                                    Save Building Info
-                                </button>
-                            </div>
-                        </EditForm>
-                    }
-                    @* 🔹 Grid Always Visible *@
-                    <div class="table-responsive mt-4" style="overflow-x: auto; white-space: nowrap;">
-                        <table class="table table-bordered" style="min-width: 1000px;">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Appartment Code</th>
-                                    <th>Premise Type</th>
-                                    <th>Address Line 1</th>
-                                    <th>Address Line 2</th>
-                                    <th> City</th>
-                                    <th>State</th>
-                                    <th>Country</th>
-                                    <th> Zip Code</th>
-                                    <th>MDR Number</th>
-                                    <th>Petitioner Interest</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                               @*  @if (buildingList.Any())
-                                {
-                                    @foreach (var item in buildingList)
-                                    {
-                                        <tr>
-                                            <td>@item.Appartmentcode</td>
-                                            <td>@item.EINorSSN</td>
-                                            <td>@item.Phone</td>
-                                            <td>@item.Email</td>
-                                            <td>@item.MaillingAddress</td>
-                                            <td>@item.Attorney</td>
-                                            <td>@item.Firm</td> 
-                                        </tr>
-                                    }
-                                }
-                                else
+                <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
+                    <table class="table table-bordered mt-4" style="min-width: 1000px;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>EIN</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>Attorney</th>
+                                <th>Firm</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (landlordList.Any())
+                            {
+                                @foreach (var l in landlordList)
                                 {
                                     <tr>
-                                        <td colspan="7" class="text-muted">No landlords added yet.</td>
+                                        <td>@l.Name</td>
+                                        <td>@l.EINorSSN</td>
+                                        <td>@l.Phone</td>
+                                        <td>@l.Email</td>
+                                        <td>@l.MaillingAddress</td>
+                                        <td>@l.Attorney</td>
+                                        <td>@l.Firm</td>
                                     </tr>
-                                } *@
-                            </tbody>
-                        </table>
-                    </div>
-                   
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="7" class="text-muted">No landlords added yet.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
 
-
-                }
             </div>
         }
-       
-      
-</div>
-    <!-- Sticky Footer Buttons -->
+
+        <!-- BUILDING Overlay -->
+        @if (activeTab == "building")
+        {
+            <div class="overlay-form overlay-building">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="color-text fw-bold mb-0">BUILDING INFORMATION</h5>
+                    <div>
+                        <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button>
+                        <button class="btn bg-navy text-white" @onclick="ToggleBuildingForm">@GetToggleButtonText()</button>
+                    </div>
+                </div>
+
+                @if (showBuildingForm)
+                {
+                    <EditForm Model="@building" OnValidSubmit="SubmitBuildingAsync">
+                        <div class="mb-3"><label>Apartment Code</label><InputText class="form-control" @bind-Value="building.ApartmentCode" /></div>
+                        <div class="mb-3"><label>Premise Type</label><InputText class="form-control" @bind-Value="building.PremiseType" /></div>
+                        <div class="mb-3"><label>Address Line 1</label><InputText class="form-control" @bind-Value="building.Address_1" /></div>
+                        <div class="mb-3"><label>Address Line 2</label><InputText class="form-control" @bind-Value="building.Address_2" /></div>
+                        <div class="row">
+                            <div class="col"><label>City</label><InputText class="form-control" @bind-Value="building.City" /></div>
+                            <div class="col"><label>State</label><InputText class="form-control" @bind-Value="building.State" /></div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label>Country</label><InputText class="form-control" @bind-Value="building.Country" /></div>
+                            <div class="col"><label>Zipcode</label><InputText class="form-control" @bind-Value="building.Zipcode" /></div>
+                        </div>
+                        <div class="mb-3"><label>MDR Number</label><InputText class="form-control" @bind-Value="building.MDR_Number" /></div>
+                        <div class="mb-3"><label>Petitioner Interest</label><InputText class="form-control" @bind-Value="building.PetitionerInterest" /></div>
+                        <button type="submit" class="btn bg-navy text-white mt-2">Save Building Info</button>
+                    </EditForm>
+                }
+
+                <!-- Grid -->
+                <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
+                    <table class="table table-bordered mt-4" style="min-width: 1000px;">
+                    <thead><tr><th>Code</th><th>Premise</th><th>Address1</th><th>Address2</th><th>City</th><th>State</th><th>Country</th><th>Zip</th><th>MDR</th><th>Interest</th></tr></thead>
+                    <tbody>
+                        @if (apartmentList.Any())
+                        {
+                            @foreach (var b in apartmentList)
+                            {
+                                <tr>
+                                    <td>@b.ApartmentCode</td><td>@b.PremiseType</td><td>@b.Address_1</td><td>@b.Address_2</td>
+                                    <td>@b.City</td><td>@b.State</td><td>@b.Country</td><td>@b.Zipcode</td>
+                                    <td>@b.MDR_Number</td><td>@b.PetitionerInterest</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="10" class="text-muted">No buildings added yet.</td></tr>
+                        }
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Footer -->
     <div class="sticky-footer bg-white border-top p-3 d-flex justify-content-end gap-2">
-        <button type="button" class="btn btn-outline-secondary px-4 fw-semibold" @onclick="Hide">
-            Cancel
-        </button>
-        <button type="button" class="btn px-4 fw-semibold"
-                @onclick="SubmitUser"
-                style="background-color: var(--bs-primary); color: white; border: none;">
-            Submit
-        </button>
+        <button class="btn btn-outline-secondary px-4 fw-semibold" @onclick="HideAsync">Cancel</button>
+        <button class="btn bg-navy text-white px-4 fw-semibold" @onclick="SubmitClientAsync">Submit</button>
     </div>
 </div>
 
-
 @code {
-    [Parameter] public CreateClientDto createClient { get; set; } = new CreateClientDto();
+    [Parameter] public CreateClientDto createClient { get; set; } = new();
     [Parameter] public EventCallback<CreateClientDto> Submit { get; set; }
 
-    private bool IsVisible { get; set; } = false;
+    private bool IsVisible { get; set; }
+    private string activeTab = string.Empty;
 
-    // Added flags
     private bool showLandlordForm = false;
     private bool showBuildingForm = false;
 
-    private CreateLandLordDto landlord { get; set; } = new CreateLandLordDto();
-    // private CreateBuildingDto building { get; set; } = new CreateBuildingDto();
-    private AddApartment building { get; set; } = new AddApartment();
-    private string activeTab = string.Empty;
-    private List<CreateLandLordDto> landlordList = new();  // ✅ Add this list
-    // private List<CreateLandLordDto> buildingList = new();
+    private CreateLandLordDto landlord = new();
+    private AddApartment building = new();
+
+    private List<CreateLandLordDto> landlordList = new();
+    private List<AddApartment> apartmentList = new();
+
     public void Show(CreateClientDto model)
     {
         createClient = model;
@@ -597,124 +408,48 @@
         StateHasChanged();
     }
 
-    private async void SaveChanges()
+    public async Task HideAsync()
     {
-        if (showLandlordForm)
-        {
-            landlordList.Add(landlord);
-            landlord = new CreateLandLordDto();
-
-            await SaveToLocalStorage();
-        } else
-        {
-            landlordList.Add(landlord);
-            landlord = new CreateLandLordDto();
-            await SaveToLocalStorage();
-        }
-    }
-
-    private async Task SaveToLocalStorage()
-    {
-            await JS.InvokeVoidAsync("saveLandlordList", "landlordList", landlordList);
-      
-    }
-
-    private async Task LoadFromLocalStorage()
-    {
-            landlordList = await JS.InvokeAsync<List<CreateLandLordDto>>("loadLandlordList", "landlordList");
-    
-
-    }
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadFromLocalStorage();
-    }
-
-    public void Hide()
-    {
+        
         IsVisible = false;
+      
         activeTab = string.Empty;
+        showLandlordForm = false;
+        showBuildingForm = false;
         StateHasChanged();
     }
 
-    private void ToggleActiveForm()
+
+    private void SetActiveTab(string tab) => activeTab = tab;
+
+    private void ToggleLandlordForm() => showLandlordForm = !showLandlordForm;
+
+    private void ToggleBuildingForm() => showBuildingForm = !showBuildingForm;
+
+    private string GetToggleButtonText() => (activeTab == "landlord" && showLandlordForm) || (activeTab == "building" && showBuildingForm)
+        ? "Cancel"
+        : "Add New";
+
+    private Task SubmitLandlordAsync()
     {
-        if (activeTab == "landlord")
-        {
-            showLandlordForm = !showLandlordForm;
-            showBuildingForm = false;
-        }
-        else if (activeTab == "building")
-        {
-            showBuildingForm = !showBuildingForm;
-            showLandlordForm = false;
-        }
-    }
-
-    private string GetToggleButtonText()
-    {
-        if (activeTab == "landlord")
-        {
-            return "Add Landlord";
-        }
-        else if (activeTab == "building")
-        {
-            return "Add Building";
-        }
-
-        return "Add Info";
-    }
-
-
-
-
-    private void SetActiveTab(string tab)
-    {
-        activeTab = tab;
-
-        // Default view: grid only
+        landlordList.Add(landlord);
+        landlord = new();
         showLandlordForm = false;
+        return Task.CompletedTask;
+    }
+
+    private Task SubmitBuildingAsync()
+    {
+        apartmentList.Add(building);
+        building = new();
         showBuildingForm = false;
+        return Task.CompletedTask;
     }
 
-    private void ShowLandlordForm()
+    private Task SubmitClientAsync()
     {
-        showLandlordForm = true;
-    }
-
-    private void HideLandlordForm()
-    {
-        showLandlordForm = false;
-    }
-
-    private void ShowBuildingForm()
-    {
-        showBuildingForm = true;
-    }
-
-    private void HideBuildingForm()
-    {
-        showBuildingForm = false;
-    }
-
-    private async Task HandleLandlordSubmit()
-    {
-        await JS.InvokeVoidAsync("console.log", "Landlord Info Submitted", landlord);
-        // showLandlordForm = false; 
-        // You can also add landlord to list here
-    }
-
-    private async Task HandleBuildingSubmit()
-    {
-        await JS.InvokeVoidAsync("console.log", "Building Info Submitted", building);
-        showBuildingForm = false;
-    }
-
-    public async Task SubmitUser()
-    {
-        await Submit.InvokeAsync(createClient);
-        Hide();
+     
+        return Submit.InvokeAsync(createClient);
     }
 }
+

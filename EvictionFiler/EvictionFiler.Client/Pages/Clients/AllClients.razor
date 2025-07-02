@@ -14,7 +14,7 @@
         </div>
 
         <!-- Add Button + Search -->
-        <div class=" overlay-form g-2 mb-3 d-flex justify-content-between align-items-center">
+        <div class="g-2 mb-3 d-flex justify-content-between align-items-center">
             <button class="btn bg-navy text-white" @onclick="AddClient">
                 <i class="fa fa-plus me-1"></i> Add New
             </button>
@@ -37,7 +37,7 @@
                         <th>Phone</th>
                         <th>City</th>
                         <th>Zip Code</th>
-                        <th class="sticky">Status</th>
+                       @* // <th class="sticky">Status</th> *@
                         <th class="sticky">Action</th>
                     </tr>
                 </thead>
@@ -48,16 +48,16 @@
                         {
                             <tr>
                                 <td>@client.ClientCode</td>
-                                <td>@client.Name</td>
+                                <td>@(client.FirstName + " " + @client.LastName)</td>
                                 <td>@client.Email</td>
                                 <td>@client.Phone</td>
                                 <td>@client.City</td>
                                 <td>@client.ZipCode</td>
 
-                              @*   <td class="sticky">
-                                    <i class="fa-solid fa-pen-to-square text-navy"></i>
-                                    <span class="ms-2 text-gold fw-semibold">Active</span>
-                                </td> *@
+                                <td class="sticky">
+                                    <i class="fa-solid fa-pen-to-square text-navy me-3" title="Edit"></i>
+                                    <i class="fa-solid fa-trash-can text-danger" title="Delete"></i>
+                                </td>
                             </tr>
                         }
                     }
@@ -84,7 +84,7 @@
         string.IsNullOrWhiteSpace(searchTerm)
         ? clients
         : clients.Where(c =>
-            (!string.IsNullOrWhiteSpace(c.Name) && c.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+            (!string.IsNullOrWhiteSpace(c.FirstName) && c.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
             (!string.IsNullOrWhiteSpace(c.Email) && c.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
             (!string.IsNullOrWhiteSpace(c.Phone) && c.Phone.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
 
@@ -104,8 +104,9 @@
         var result = await clientservice.AddClientAsync(client);
         if (result)
         {
-            createClientRef.Hide();
+            await createClientRef.HideAsync();
             clients = await clientservice.GetAllClientsAsync();
+        
         }
     }
 }
