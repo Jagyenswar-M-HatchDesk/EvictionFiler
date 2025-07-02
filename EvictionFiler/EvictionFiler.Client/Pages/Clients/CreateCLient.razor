@@ -292,11 +292,15 @@
                     <div class="d-flex justify-content-center align-items-center ">
                         <button type="button" class="btn btn-outline-secondary fw-semibold me-2"
                                 @onclick="() => SetActiveTab(string.Empty)">
-                            ← 
+                            ← Back
                         </button>
-                        <button class="btn bg-navy text-white" @onclick="ShowLandlordForm">
-                           Add Landlord
+                        <!-- Landlord -->
+                        <button class="btn bg-navy text-white" @onclick="ToggleActiveForm">
+                            @GetToggleButtonText()
                         </button>
+
+
+
                    </div>
                 </div>
 
@@ -345,7 +349,7 @@
 
                                 <!-- Mailing Address (normal) -->
                                 <div class="mb-3">
-                                    <label class="form-label color-text">Mailing Address</label>
+                                    <label class="form-label color-text"> Address</label>
                                     <InputText class="form-control" @bind-Value="landlord.MaillingAddress" placeholder="Mailing Address" />
                                 </div>
 
@@ -373,15 +377,15 @@
                         }
 
                         @* 🔹 Grid Always Visible *@
-                        <div class="table-responsive mt-4">
-                            <table class="table table-bordered">
+                        <div class="table-responsive mt-4" style="overflow-x: auto; white-space: nowrap;">
+                            <table class="table table-bordered" style="min-width: 1000px;">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Name</th>
                                         <th>EIN / SSN</th>
                                         <th>Phone</th>
                                         <th>Email</th>
-                                        <th>Mailing Address</th>
+                                        <th>Address</th>
                                         <th>Attorney</th>
                                         <th>Firm</th>
                                     </tr>
@@ -411,98 +415,143 @@
                                 </tbody>
                             </table>
                         </div>
-                    </div> 
-                
+
+                    </div>
+
                 }
                 else if (activeTab == "building")
                 {
+                    if (showBuildingForm)
+                    {
+                        <EditForm Model="@building" OnValidSubmit="HandleBuildingSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
 
-
-                    <EditForm Model="@building" OnValidSubmit="HandleBuildingSubmit">
-                        <DataAnnotationsValidator />
-                        <ValidationSummary />
-
-                        <!-- Apartment Code (with icon) -->
-                        <div class="mb-3">
-                            <label class="form-label color-text">Apartment Code</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-building"></i></span>
-                                <InputText class="form-control" @bind-Value="building.ApartmentCode" placeholder="Enter Apartment Code" />
-                            </div>
-                        </div>
-
-                        <!-- Premise Type (normal) -->
-                        <div class="mb-3">
-                            <label class="form-label color-text">Premise Type</label>
-                            <InputText class="form-control" @bind-Value="building.PremiseType" placeholder="Enter Premise Type" />
-                        </div>
-
-                        <!-- Address Line 1 (with icon) -->
-                        <div class="mb-3">
-                            <label class="form-label color-text">Address Line 1</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                                <InputText class="form-control" @bind-Value="building.Address_1" placeholder="Address Line 1" />
-                            </div>
-                        </div>
-
-                        <!-- Address Line 2 (normal) -->
-                        <div class="mb-3">
-                            <label class="form-label color-text">Address Line 2</label>
-                            <InputText class="form-control" @bind-Value="building.Address_2" placeholder="Address Line 2" />
-                        </div>
-
-                        <!-- City & State -->
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label color-text">City</label>
-                                <InputText class="form-control" @bind-Value="building.City" placeholder="City" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label color-text">State</label>
-                                <InputText class="form-control" @bind-Value="building.State" placeholder="State" />
-                            </div>
-                        </div>
-
-                        <!-- Country (with icon) & Zipcode -->
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label color-text">Country</label>
+                            <!-- Apartment Code (with icon) -->
+                            <div class="mb-3">
+                                <label class="form-label color-text">Apartment Code</label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-globe"></i></span>
-                                    <InputText class="form-control" @bind-Value="building.Country" placeholder="Country" />
+                                    <span class="input-group-text"><i class="fas fa-building"></i></span>
+                                    <InputText class="form-control" @bind-Value="building.ApartmentCode" placeholder="Enter Apartment Code" />
                                 </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label color-text">Zipcode</label>
-                                <InputText class="form-control" @bind-Value="building.Zipcode" placeholder="Zipcode" />
+
+                            <!-- Premise Type (normal) -->
+                            <div class="mb-3">
+                                <label class="form-label color-text">Premise Type</label>
+                                <InputText class="form-control" @bind-Value="building.PremiseType" placeholder="Enter Premise Type" />
                             </div>
-                        </div>
 
-                        <!-- MDR Number (normal) -->
-                        <div class="mb-3">
-                            <label class="form-label color-text">MDR Number</label>
-                            <InputText class="form-control" @bind-Value="building.MDR_Number" placeholder="MDR Number" />
-                        </div>
+                            <!-- Address Line 1 (with icon) -->
+                            <div class="mb-3">
+                                <label class="form-label color-text">Address Line 1</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                    <InputText class="form-control" @bind-Value="building.Address_1" placeholder="Address Line 1" />
+                                </div>
+                            </div>
 
-                        <!-- Petitioner Interest (normal) -->
-                        <div class="mb-3">
-                            <label class="form-label color-text">Petitioner Interest</label>
-                            <InputText class="form-control" @bind-Value="building.PetitionerInterest" placeholder="Petitioner Interest" />
-                        </div>
+                            <!-- Address Line 2 (normal) -->
+                            <div class="mb-3">
+                                <label class="form-label color-text">Address Line 2</label>
+                                <InputText class="form-control" @bind-Value="building.Address_2" placeholder="Address Line 2" />
+                            </div>
 
-                        <!-- Buttons -->
-                        <div class="d-flex justify-content-end mt-4 gap-2">
-                            <button type="button" class="btn btn-outline-secondary fw-semibold px-4"
-                                    @onclick="() => SetActiveTab(string.Empty)">
-                                ← Back
-                            </button>
-                            <button type="submit" class="btn px-4 fw-semibold"
-                                    style="background-color: var(--bs-primary); color: white; border: none;">
-                                Save Building Info
-                            </button>
-                        </div>
-                    </EditForm>
+                            <!-- City & State -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label color-text">City</label>
+                                    <InputText class="form-control" @bind-Value="building.City" placeholder="City" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label color-text">State</label>
+                                    <InputText class="form-control" @bind-Value="building.State" placeholder="State" />
+                                </div>
+                            </div>
+
+                            <!-- Country (with icon) & Zipcode -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label color-text">Country</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                        <InputText class="form-control" @bind-Value="building.Country" placeholder="Country" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label color-text">Zipcode</label>
+                                    <InputText class="form-control" @bind-Value="building.Zipcode" placeholder="Zipcode" />
+                                </div>
+                            </div>
+
+                            <!-- MDR Number (normal) -->
+                            <div class="mb-3">
+                                <label class="form-label color-text">MDR Number</label>
+                                <InputText class="form-control" @bind-Value="building.MDR_Number" placeholder="MDR Number" />
+                            </div>
+
+                            <!-- Petitioner Interest (normal) -->
+                            <div class="mb-3">
+                                <label class="form-label color-text">Petitioner Interest</label>
+                                <InputText class="form-control" @bind-Value="building.PetitionerInterest" placeholder="Petitioner Interest" />
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="d-flex justify-content-end mt-4 gap-2">
+                                <button type="button" class="btn btn-outline-secondary fw-semibold px-4"
+                                        @onclick="() => SetActiveTab(string.Empty)">
+                                    ← Back
+                                </button>
+                                <button type="submit" class="btn px-4 fw-semibold" @onclick="SaveChanges"
+                                        style="background-color: var(--bs-primary); color: white; border: none;">
+                                    Save Building Info
+                                </button>
+                            </div>
+                        </EditForm>
+                    }
+                    @* 🔹 Grid Always Visible *@
+                    <div class="table-responsive mt-4" style="overflow-x: auto; white-space: nowrap;">
+                        <table class="table table-bordered" style="min-width: 1000px;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Appartment Code</th>
+                                    <th>Premise Type</th>
+                                    <th>Address Line 1</th>
+                                    <th>Address Line 2</th>
+                                    <th> City</th>
+                                    <th>State</th>
+                                    <th>Country</th>
+                                    <th> Zip Code</th>
+                                    <th>MDR Number</th>
+                                    <th>Petitioner Interest</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                               @*  @if (buildingList.Any())
+                                {
+                                    @foreach (var item in buildingList)
+                                    {
+                                        <tr>
+                                            <td>@item.Appartmentcode</td>
+                                            <td>@item.EINorSSN</td>
+                                            <td>@item.Phone</td>
+                                            <td>@item.Email</td>
+                                            <td>@item.MaillingAddress</td>
+                                            <td>@item.Attorney</td>
+                                            <td>@item.Firm</td> 
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="7" class="text-muted">No landlords added yet.</td>
+                                    </tr>
+                                } *@
+                            </tbody>
+                        </table>
+                    </div>
+                   
 
 
                 }
@@ -536,10 +585,11 @@
     private bool showBuildingForm = false;
 
     private CreateLandLordDto landlord { get; set; } = new CreateLandLordDto();
+    // private CreateBuildingDto building { get; set; } = new CreateBuildingDto();
     private AddApartment building { get; set; } = new AddApartment();
     private string activeTab = string.Empty;
     private List<CreateLandLordDto> landlordList = new();  // ✅ Add this list
-
+    // private List<CreateLandLordDto> buildingList = new();
     public void Show(CreateClientDto model)
     {
         createClient = model;
@@ -549,21 +599,31 @@
 
     private async void SaveChanges()
     {
-        landlordList.Add(landlord);
-        landlord = new CreateLandLordDto();
-        showLandlordForm = true;
+        if (showLandlordForm)
+        {
+            landlordList.Add(landlord);
+            landlord = new CreateLandLordDto();
 
-        await SaveToLocalStorage();
+            await SaveToLocalStorage();
+        } else
+        {
+            landlordList.Add(landlord);
+            landlord = new CreateLandLordDto();
+            await SaveToLocalStorage();
+        }
     }
 
     private async Task SaveToLocalStorage()
     {
-        await JS.InvokeVoidAsync("saveLandlordList", "landlordList", landlordList);
+            await JS.InvokeVoidAsync("saveLandlordList", "landlordList", landlordList);
+      
     }
 
     private async Task LoadFromLocalStorage()
     {
-        landlordList = await JS.InvokeAsync<List<CreateLandLordDto>>("loadLandlordList", "landlordList");
+            landlordList = await JS.InvokeAsync<List<CreateLandLordDto>>("loadLandlordList", "landlordList");
+    
+
     }
 
 
@@ -578,6 +638,37 @@
         activeTab = string.Empty;
         StateHasChanged();
     }
+
+    private void ToggleActiveForm()
+    {
+        if (activeTab == "landlord")
+        {
+            showLandlordForm = !showLandlordForm;
+            showBuildingForm = false;
+        }
+        else if (activeTab == "building")
+        {
+            showBuildingForm = !showBuildingForm;
+            showLandlordForm = false;
+        }
+    }
+
+    private string GetToggleButtonText()
+    {
+        if (activeTab == "landlord")
+        {
+            return "Add Landlord";
+        }
+        else if (activeTab == "building")
+        {
+            return "Add Building";
+        }
+
+        return "Add Info";
+    }
+
+
+
 
     private void SetActiveTab(string tab)
     {
@@ -596,6 +687,16 @@
     private void HideLandlordForm()
     {
         showLandlordForm = false;
+    }
+
+    private void ShowBuildingForm()
+    {
+        showBuildingForm = true;
+    }
+
+    private void HideBuildingForm()
+    {
+        showBuildingForm = false;
     }
 
     private async Task HandleLandlordSubmit()
