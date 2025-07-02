@@ -10,7 +10,8 @@ namespace EvictionFiler.Application.DTOs.ClientDto
     {
         public Guid Id { get; set; }
         public string? ClientCode { get; set; } = string.Empty;
-        public string? Name { get; set; } = string.Empty;
+        public string? FirstName { get; set; } = string.Empty;
+        public string? LastName { get; set; } = string.Empty;
         public string? Email { get; set; } = string.Empty;
         public string? Address_1 { get; set; } = string.Empty;
         public string? Address_2 { get; set; } = string.Empty;
