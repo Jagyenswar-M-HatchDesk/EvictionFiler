@@ -20,7 +20,7 @@ namespace EvictionFiler.Client.Services
             return newtenant;
         }
 
-        public async Task<Tenant> SearchTenantbyCode(string code)
+        public async Task<List<CreateTenantDto>> SearchTenantbyCode(string code)
         {
             var newtenant = await _services.SearchTenantByCode(code);
             return newtenant;

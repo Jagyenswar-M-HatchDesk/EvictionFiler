@@ -11,7 +11,7 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
     public interface ITenantRepository
     {
         Task<bool> AddTenant(CreateTenantDto dto);
-        Task<Tenant> SearchTenantByCode(string code);
+        Task<List<CreateTenantDto>> SearchTenantByCode(string code);
         Task<Tenant> GetTenantById(Guid id);
         Task<List<Tenant>> GetAllTenantsAsync();
         Task<bool> DeleteTenantAsync(Guid id);

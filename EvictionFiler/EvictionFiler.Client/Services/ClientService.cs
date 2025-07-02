@@ -1,6 +1,8 @@
 ﻿using EvictionFiler.Application.DTOs.ClientDto;
+using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
+using EvictionFiler.Infrastructure.Repositories;
 
 namespace EvictionFiler.Client.Services
 {
@@ -41,6 +43,12 @@ namespace EvictionFiler.Client.Services
         {
             var result = await _clientRepository.AddAsync(dto);
             return result;
+        }
+
+        public async Task<List<CreateClientDto>> SearchClientByCode(string code)
+        {
+            var newtenant = await _clientRepository.SearchClientByCode(code);
+            return newtenant;
         }
     }
 }

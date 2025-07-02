@@ -1,4 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
@@ -92,6 +93,25 @@ namespace EvictionFiler.Infrastructure.Repositories
             return true;
         }
 
-
+        public async Task<List<CreateLandLordDto>> SearchLandlordByCode(string code)
+        {
+            var landlord = await _mainDbContext.LandLords.Where(e => e.LandLordCode.Contains(code)).Select(e => new CreateLandLordDto
+            {
+                Id = e.Id,
+                LandLordCode = e.LandLordCode,
+                Name = e.Name,
+                EINorSSN = e.EINorSSN,
+                Phone = e.Phone,
+                Email = e.Email,
+                MaillingAddress = e.MaillingAddress,
+                Attorney = e.Attorney,
+                Firm = e.Firm,
+                isCorporeateOwner = e.isCorporeateOwner,
+                RegisteredAgent = e.RegisteredAgent,
+            }).ToListAsync();
+            if (landlord == null)
+                return new List<CreateLandLordDto>();
+            return landlord;
+        }
     }
 }

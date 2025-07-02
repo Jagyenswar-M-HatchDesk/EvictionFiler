@@ -15,5 +15,7 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
         Task<bool> AddAsync(CreateClientDto client);
         Task UpdateAsync(Client client);
         Task DeleteAsync(Guid id);
+
+        Task<List<CreateClientDto>> SearchClientByCode(string code);
     }
 }

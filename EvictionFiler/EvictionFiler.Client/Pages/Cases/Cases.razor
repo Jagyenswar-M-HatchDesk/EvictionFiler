@@ -9,6 +9,7 @@
 @inject ApartmentService _apartmentService
 @inject LegalCasesService _legalCaseService
 @inject TenantService _tenantService
+@inject ClientService _clientService
 @inject NavigationManager nav
 @rendermode InteractiveAuto
 <style>
@@ -184,7 +185,7 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label fw-semibold text-navy">Case Type</label>
-                    <select class="form-select" @bind="legalcaseDto.CaseType">
+                    <select class="form-select" @bind="otherCaseType">
                         <option value="">-- Select Case Type --</option>
                         <option value="Nonpayment">Nonpayment</option>
                         <option value="Holdover">Holdover</option>
@@ -193,11 +194,11 @@
                         <option value="HP Action">HP Action</option>
                         <option value="For Good Cause (6-A)">For Good Cause (6-A)</option>
                         <option value="Succession">Succession</option>
-                        <option>Other</option>
+                        <option value="Other">Other</option>
                     </select>
                 </div>
 
-                @if (legalcaseDto.CaseType == "Other")
+                @if (otherCaseType == "Other")
                 {
                     <div class="col-md-6">
                         <label class="form-label fw-semibold text-navy">Other Case Type</label>
@@ -219,10 +220,25 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Tenant Code</label>
-                <div class="input-group">
-                    <span class="input-group-text"></span>
-                    <input type="text" class="form-control" @bind="tenantDto.TenantCode" placeholder="Enter Tenant Code" />
-                </div>
+                <input type="text" class="form-control"
+                @bind="tenantDto.TenantCode"
+                @oninput="OnTenantCodeChanged"
+                placeholder="Enter Tenant Code" />
+
+                @if (showSuggestions)
+                {
+
+                    <ul class="list-group position-absolute " style="z-index: 1000; max-height: 200px; width:30%; overflow-y: auto;">
+                        @foreach (var tenant in matchedTenants)
+                        {
+                            <li class="list-group-item list-group-item-action"
+                            @onclick="@(() => SelectTenant(tenant))">
+                                @tenant.TenantCode - @tenant.Name
+                            </li>
+                        }
+                    </ul>
+
+                }
             </div>
             @* <div class="col-md-2">
                 <button class="btn btn-outline-warning" @onclick="SearchTenant">LookUp</button>
@@ -310,13 +326,30 @@
         <hr class="border-gold mb-4" />
 
         <div class="row g-3">
+
             <div class="col-md-6">
                 <label class="form-label">LandLord Code</label>
-                <div class="input-group">
-                    <span class="input-group-text"></span>
-                    <input type="text" class="form-control" @bind="landLordDto.LandLordCode" placeholder="Enter Landlord Code" />
-                </div>
+                <input type="text" class="form-control"
+                @bind="landLordDto.LandLordCode"
+                @oninput="OnLandLordCodeChanged"
+                placeholder="Enter Landlord Code" />
+
+                @if (showSuggestions)
+                {
+
+                    <ul class="list-group position-absolute " style="z-index: 1000; max-height: 200px; width:30%; overflow-y: auto;">
+                        @foreach (var landlord in matchedLandLords)
+                        {
+                            <li class="list-group-item list-group-item-action"
+                            @onclick="@(() => SelectLandLord(landlord))">
+                                @landlord.LandLordCode - @landlord.Name
+                            </li>
+                        }
+                    </ul>
+
+                }
             </div>
+
             @* <div class="col-md-2">
                 <button class="btn btn-outline-warning" @onclick="SearchLandLord">LookUp</button>
             </div> *@
@@ -418,18 +451,33 @@
         <h5 class="text-center text-navy fw-bold">Property Manager / Building Manager</h5>
         <hr class="border-gold mb-4" />
 
-        <div class="row g-3">
+        @* <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Client Code</label>
-                <div class="input-group">
-                    <span class="input-group-text"></span>
-                    <input type="text" class="form-control" @bind="BuildingCode" placeholder="Enter Client Code" />
-                </div>
-            </div>
-            @* <div class="col-md-2">
-                <button class="btn btn-outline-warning" @onclick="SearchTenant()">LookUp</button>
+                <input type="text" class="form-control"
+                @bind="clientDto.ClientCode"
+                @oninput="OnClientCodeChanged"
+                placeholder="Enter Landlord Code" />
+
+                @if (showSuggestions)
+                {
+
+                    <ul class="list-group position-absolute " style="z-index: 1000; max-height: 200px; width:30%; overflow-y: auto;">
+                        @foreach (var client in matchedClients)
+                        {
+                            <li class="list-group-item list-group-item-action"
+                            @onclick="@(() => SelectClient(client))">
+                                @client.ClientCode - @client.Name
+                            </li>
+                        }
+                    </ul>
+
+                }
             </div> *@
-        </div>
+        @* <div class="col-md-2">
+                <button class="btn btn-outline-warning" @onclick="SearchTenant()">LookUp</button>
+            </div> 
+        </div>*@
         <div class="row g-3">
             <!-- Company -->
             <div class="col-md-6">
@@ -515,11 +563,26 @@
 
         <div class="row g-3">
             <div class="col-md-6">
-                <label class="form-label">Building Code</label>
-                <div class="input-group">
-                    <span class="input-group-text"></span>
-                    <input type="text" class="form-control" @bind="BuildingCode" placeholder="Enter Building Code" />
-                </div>
+                <label class="form-label">LandLord Code</label>
+                <input type="text" class="form-control"
+                @bind="apartmentDto.ApartmentCode"
+                @oninput="OnBuildingChanged"
+                placeholder="Enter Apartment Code" />
+
+                @if (showSuggestions)
+                {
+
+                    <ul class="list-group position-absolute " style="z-index: 1000; max-height: 200px; width:30%; overflow-y: auto;">
+                        @foreach (var landlord in matchedBuilding)
+                        {
+                            <li class="list-group-item list-group-item-action"
+                            @onclick="@(() => SelectBuilding(landlord))">
+                                @landlord.ApartmentCode
+                            </li>
+                        }
+                    </ul>
+
+                }
             </div>
             @* <div class="col-md-2">
                 <button class="btn btn-outline-warning" @onclick="SearchTenant()">LookUp</button>
@@ -669,34 +732,39 @@
     private CreateLandLordDto landLordDto = new CreateLandLordDto();
     private AddApartment apartmentDto = new AddApartment();
     private CreateEditLegalCaseModel legalcaseDto = new CreateEditLegalCaseModel();
+    private CreateClientDto clientDto = new CreateClientDto();
 
-
+    private List<CreateTenantDto> matchedTenants = new List<CreateTenantDto>();
+    private List<CreateLandLordDto> matchedLandLords = new List<CreateLandLordDto>();
+    private List<CreateClientDto> matchedClients = new List<CreateClientDto>();
+    private List<AddApartment> matchedBuilding = new List<AddApartment>();
+    private bool showSuggestions = false;
 
     void SaveAsDraft() => Console.WriteLine("Saving Draft...");
     void Next() => currentStep++;
     void Back() => currentStep--;
-    void Submit()
+    private async Task Submit()
     {
-        Task<bool> tenant;
+
         if (tenantDto != null)
         {
             if (tenantDto?.Id != null)
                 tenantDto.Id = Guid.NewGuid();
-            tenant = _tenantService.AddTenantAsync(tenantDto);
+            var tenant = await _tenantService.AddTenantAsync(tenantDto);
         }
 
         if (landLordDto != null)
         {
             if (landLordDto?.Id != null)
                 landLordDto.Id = Guid.NewGuid();
-            var landlord = _landlordService.AddLandLordAsync(landLordDto);
+            var landlord = await _landlordService.AddLandLordAsync(landLordDto);
         }
 
         if (apartmentDto != null)
         {
-            if(apartmentDto?.Id !=null)
+            if (apartmentDto?.Id != null)
                 apartmentDto.Id = Guid.NewGuid();
-            var appartment = _apartmentService.AddApartmentAsync(apartmentDto);
+            var appartment = await _apartmentService.AddApartmentAsync(apartmentDto);
         }
 
         if (legalcaseDto != null)
@@ -705,33 +773,123 @@
             legalcaseDto.LandLordId = landLordDto.Id;
             legalcaseDto.ApartmentId = apartmentDto.Id;
             legalcaseDto.TenantId = tenantDto.Id;
-            var legalcase = _legalCaseService.AddLegalCasesAsync(legalcaseDto);
+            if (legalcaseDto.CaseType != null)
+                legalcaseDto.CaseType = otherCaseType; 
+            var legalcase = await _legalCaseService.AddLegalCasesAsync(legalcaseDto);
         }
 
         nav.NavigateTo("/cases");
 
     }
-    async Task SearchTenant()
+    
+
+
+    private CancellationTokenSource _cts;
+    private async Task OnTenantCodeChanged(ChangeEventArgs e)
     {
-        var tenant = await _tenantService.SearchTenantbyCode(tenantDto.TenantCode);
-        if (tenant != null)
+        _cts?.Cancel(); // cancel previous call
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
+        var input = e.Value?.ToString() ?? string.Empty;
+        tenantDto.TenantCode = input;
+
+        if (input.Length >= 3)
         {
-            tenantDto = new CreateTenantDto
-                {
-                    Id = tenant.Id,
-                    Name = tenant.Name,
-                    TenantCode = tenant.TenantCode,
-                    DOB = tenant.DOB,
-                    SSN = tenant.SSN,
-                    Phone = tenant.Phone,
-                    Email = tenant.Email,
-                    Language = tenant.Language,
-                    Address = tenant.Address,
-                    Apt = tenant.Apt,
-                    Borough = tenant.Borough,
-                    Rent = tenant.Rent,
-                    LeaseStatus = tenant.LeaseStatus
-                };
+            await Task.Delay(1000, token); // debounce
+            matchedTenants = await _tenantService.SearchTenantbyCode(input);
+            showSuggestions = matchedTenants.Any();
         }
+        else
+        {
+            showSuggestions = false;
+        }
+    }
+    private void SelectTenant(CreateTenantDto selectedTenant)
+    {
+        tenantDto = selectedTenant;
+        showSuggestions = false;
+    }
+
+    private async Task OnLandLordCodeChanged(ChangeEventArgs e)
+    {
+        _cts?.Cancel(); // cancel previous call
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
+        var input = e.Value?.ToString() ?? string.Empty;
+        landLordDto.LandLordCode = input;
+
+        if (input.Length >= 3)
+        {
+            await Task.Delay(1000, token); // debounce
+            matchedLandLords = await _landlordService.SearchLandlordByCode(input);
+            showSuggestions = matchedLandLords.Any();
+        }
+        else
+        {
+            showSuggestions = false;
+        }
+    }
+    private void SelectLandLord(CreateLandLordDto selectedTenant)
+    {
+        landLordDto = selectedTenant;
+        showSuggestions = false;
+    }
+
+    private async Task OnClientCodeChanged(ChangeEventArgs e)
+    {
+        _cts?.Cancel(); // cancel previous call
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
+        var input = e.Value?.ToString() ?? string.Empty;
+        clientDto.ClientCode = input;
+
+        if (input.Length >= 3)
+        {
+            await Task.Delay(1000, token); // debounce
+            matchedClients = await _clientService.SearchClientByCode(input);
+            showSuggestions = matchedClients.Any();
+        }
+        else
+        {
+            showSuggestions = false;
+        }
+    }
+    private void SelectClient(CreateClientDto selectedClient)
+    {
+        legalcaseDto.Company = selectedClient.Name;
+
+        showSuggestions = false;
+    }
+
+    private async Task OnBuildingChanged(ChangeEventArgs e)
+    {
+        _cts?.Cancel(); // cancel previous call
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
+        var input = e.Value?.ToString() ?? string.Empty;
+        apartmentDto.ApartmentCode = input;
+
+        if (input.Length >= 3)
+        {
+            await Task.Delay(1000, token); // debounce
+            matchedBuilding = await _apartmentService.SearchBuildingByCode(input);
+            showSuggestions = matchedBuilding.Any();
+        }
+        else
+        {
+            showSuggestions = false;
+        }
+    }
+    private void SelectBuilding(AddApartment selectedClient)
+    {
+        legalcaseDto.Address = selectedClient.Address_1 + ", " + selectedClient.Address_2;
+        legalcaseDto.ZIP = selectedClient.Zipcode;
+        legalcaseDto.Class = selectedClient.PremiseType;
+
+        showSuggestions = false;
     }
 }
