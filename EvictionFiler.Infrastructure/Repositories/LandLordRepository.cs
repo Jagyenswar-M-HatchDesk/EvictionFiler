@@ -108,6 +108,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Firm = e.Firm,
                 isCorporeateOwner = e.isCorporeateOwner,
                 RegisteredAgent = e.RegisteredAgent,
+                ClientId = e.ClientId,
             }).ToListAsync();
             if (landlord == null)
                 return new List<CreateLandLordDto>();

@@ -88,6 +88,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Country = e.Country,
                 MDR_Number = e.MDR_Number,
                 PetitionerInterest = e.PetitionerInterest,
+                ClientId = e.ClientId,
             }).ToListAsync();
             if (landlord == null)
                 return new List<AddApartment>();

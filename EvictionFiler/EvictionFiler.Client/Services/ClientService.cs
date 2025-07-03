@@ -35,7 +35,7 @@ namespace EvictionFiler.Client.Services
 		}
 
 
-	}
+	
 
         public async Task<List<CreateClientDto>> SearchClientByCode(string code)
         {

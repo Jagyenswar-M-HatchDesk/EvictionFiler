@@ -19,5 +19,6 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
         public string? Zipcode { get; set; }
         public string? MDR_Number { get; set; }
         public string? PetitionerInterest { get; set; }
+        public Guid? ClientId { get; set; }
     }
 }

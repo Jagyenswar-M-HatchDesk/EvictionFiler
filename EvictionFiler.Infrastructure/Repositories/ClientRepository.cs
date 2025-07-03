@@ -93,6 +93,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				{
 					Id = Guid.NewGuid(),
 					Name = landlordDto.Name,
+					LandLordCode = GenerateCaseCode(),
 					EINorSSN = landlordDto.EINorSSN,
 					Phone = landlordDto.Phone,
 					Email = landlordDto.Email,
@@ -163,7 +164,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 
 
-	}
+	
 
         //public Task AddAsync(Client client)
         //{
@@ -193,6 +194,14 @@ namespace EvictionFiler.Infrastructure.Repositories
             if (client == null)
                 return new List<CreateClientDto>();
             return client;
+        }
+
+        public static string GenerateCaseCode()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, 8)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 
