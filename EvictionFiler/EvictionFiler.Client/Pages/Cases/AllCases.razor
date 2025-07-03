@@ -1,7 +1,9 @@
 ﻿@page "/cases"
+@using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Client.Services
 @using EvictionFiler.Domain.Entities
 @inject LegalCasesService _service
+@inject ClientService _clientservice
 @inject NavigationManager nav
 <PageTitle>Cases</PageTitle>
 
@@ -10,11 +12,11 @@
 
 <style>
     .status-active {
-        background-color: #28a745;
+        background-color: rgba(25,135,84,1);
         color: #fff;
         padding: 2px 7px;
         border-radius: 1rem;
-        font-size: 10px;
+        font-size: 12px;
     }
 
     .container {
@@ -131,17 +133,70 @@
         .search-btn:hover {
             color: #1F365D;
         }
+
+    .status-delete {
+        background-color: rgba(220,53,69,1);
+        color: #fff;
+        padding: 2px 7px;
+        border-radius: 1rem;
+        font-size: 12px;
+    }
+
+    .status-archive {
+        background-color: rgba(255, 193, 7, 1);
+        color: #fff;
+        padding: 2px 7px;
+        border-radius: 1rem;
+        font-size: 12px;
+        
+    }
 </style>
 
 
 <body class="p-4">
+    @* <div class="container p-4 rounded shadow-sm">
 
-    <div class="container p-4 rounded shadow-sm">
+        <!-- Title Row -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="m-0">Select Client</h5>
+            <NavLink class="btn btn-primary" href="/createcase">Add New Case</NavLink>
+        </div>
+
+        <!-- Centered Search Box -->
+        <div class="d-flex justify-content-center mb-3">
+            <div class="position-relative w-50">
+                <input class="form-control border border-primary text-navy"
+                       placeholder="Search.."
+                       @oninput="OnInputChanged"
+                       @bind-value="showClient" />
+                <button class="search-btn position-absolute" type="button">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        @if (ViewSearch)
+        {
+            <ul class="list-group" style="max-height: 250px; overflow-y: auto;">
+                @foreach (var client in FilteredClients)
+                {
+                    <li class="list-group-item list-group-item-action" @onclick="() => SelectClient(client)">
+                        @(client.FirstName + " " + client.LastName) - (@client.ClientCode)
+                    </li>
+                }
+            </ul>
+        }
+
+
+    </div> *@
+
+
+    <div class="container p-4 rounded shadow-sm mt-4">
 
         <!-- Title Row -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="m-0">Manage Legal Cases</h5>
-            <NavLink class="btn btn-primary" href="/createcase">Add New</NavLink>
+            <button class="btn btn-primary" @onclick="SelectClientmodal">Select Client</button>
 
         </div>
 
@@ -149,19 +204,19 @@
         <div class="row g-2 mb-3">
             <!-- Four default search boxes -->
             <div class="col-md-3 position-relative">
-                <input class="form-control search-box" placeholder="Search by Case Code" />
+                <input class="form-control search-box" placeholder="Search by Case Code" @bind="searchTerm" @bind:event="oninput" />
                 <button class="search-btn" type="button">
                     <i class="fa fa-search"></i>
                 </button>
             </div>
             <div class="col-md-3 position-relative">
-                <input class="form-control search-box" placeholder="Search by Client" />
+                <input class="form-control search-box" placeholder="Search by Client" @bind="searchTerm" @bind:event="oninput" />
                 <button class="search-btn" type="button">
                     <i class="fa fa-search"></i>
                 </button>
             </div>
             <div class="col-md-3 position-relative">
-                <input class="form-control search-box" placeholder="Search by Tenant" />
+                <input class="form-control search-box" placeholder="Search by Tenant" @bind="searchTerm" @bind:event="oninput" />
                 <button class="search-btn" type="button">
                     <i class="fa fa-search"></i>
                 </button>
@@ -178,49 +233,49 @@
         <div class="collapse mb-3" id="advancedFilters">
             <div class="row g-2">
                 <div class="col-md-3 position-relative">
-                    <input class="form-control search-box" placeholder="Search by LandLord" />
+                    <input class="form-control search-box" placeholder="Search by LandLord" @bind="searchTerm" @bind:event="oninput" />
                     <button class="search-btn" type="button">
                         <i class="fa fa-search"></i>
                     </button>
                 </div>
                 <div class="col-md-3 position-relative">
-                    <input class="form-control search-box" placeholder="Search by Apt #" />
+                    <input class="form-control search-box" placeholder="Search by Apt #" @bind="searchTerm" @bind:event="oninput" />
                     <button class="search-btn" type="button">
                         <i class="fa fa-search"></i>
                     </button>
                 </div>
                 <div class="col-md-3 position-relative">
-                    <input class="form-control search-box" placeholder="Search by Case Type" />
+                    <input class="form-control search-box" placeholder="Search by Case Type" @bind="searchTerm" @bind:event="oninput" />
                     <button class="search-btn" type="button">
                         <i class="fa fa-search"></i>
                     </button>
                 </div>
                 <div class="col-md-3 position-relative">
-                    <input class="form-control search-box" placeholder="Search by Department" />
+                    <input class="form-control search-box" placeholder="Search by Department" @bind="searchTerm" @bind:event="oninput" />
                     <button class="search-btn" type="button">
                         <i class="fa fa-search"></i>
                     </button>
                 </div>
                 <div class="col-md-3 position-relative">
-                    <input class="form-control search-box" placeholder="Search by Action Date" />
+                    <input class="form-control search-box" placeholder="Search by Action Date" @bind="searchTerm" @bind:event="oninput" />
                     <button class="search-btn" type="button">
                         <i class="fa fa-search"></i>
                     </button>
                 </div>
                 <div class="col-md-3 position-relative">
-                    <input class="form-control search-box" placeholder="Search by Status" />
+                    <input class="form-control search-box" placeholder="Search by Status" @bind="searchTerm" @bind:event="oninput" />
                     <button class="search-btn" type="button">
                         <i class="fa fa-search"></i>
                     </button>
                 </div>
                 <div class="col-md-3 position-relative">
-                    <input class="form-control search-box" placeholder="Extra Filter 7" />
+                    <input class="form-control search-box" placeholder="Extra Filter 7" @bind="searchTerm" @bind:event="oninput" />
                     <button class="search-btn" type="button">
                         <i class="fa fa-search"></i>
                     </button>
                 </div>
                 <div class="col-md-3 position-relative">
-                    <input class="form-control search-box" placeholder="Extra Filter 8" />
+                    <input class="form-control search-box" placeholder="Extra Filter 8" @bind="searchTerm" @bind:event="oninput" />
                     <button class="search-btn" type="button">
                         <i class="fa fa-search"></i>
                     </button>
@@ -242,44 +297,41 @@
                         <th>Case Type</th>
                         <th>Department</th>
                         <th>Last Action Date</th>
+                        <th>Status</th>
+
                         <th class="sticky">Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>HO0011759</td>
-                        <td>PK06 PARKCHESTER PRESERVATION</td>
-                        <td>PPC RESIDENTAL</td>
-                        <td>DARIUS NESMITH</td>
-                        <td>6H 48</td>
-                        <td>L$T HOLDOVER</td>
-                        <td>Calender</td>
-                        <td>06/20/2025</td>
-                        <td class="sticky"><i class="fa-solid fa-pen-to-square" @onclick="FocusOnNavigate"></i><span class="status-active ms-2">Active</span></td>
-                    </tr>
-                    <tr>
-                        <td>HO0011758</td>
-                        <td>PK06 PARKCHESTER PRESERVATION</td>
-                        <td>PPC RESIDENTAL</td>
-                        <td>SOE ROSA</td>
-                        <td>6A 89</td>
-                        <td>L$T HOLDOVER</td>
-                        <td>Calender</td>
-                        <td>06/20/2025</td>
-                        <td class="sticky"><i class="fa-solid fa-pen-to-square" @onclick="FocusOnNavigate"></i><span class="status-active ms-2">Active</span></td>
-                    </tr>
+
                     @foreach (var cas in cases)
                     {
                         <tr>
                             <td>@(cas?.Casecode ?? "")</td>
-                            <td>@(cas?.Clients?.FirstName  + " " + cas?.Clients?.LastName ?? "")</td>
+                            <td>@(cas?.Clients?.FirstName + " " + cas?.Clients?.LastName ?? "")</td>
                             <td>@(cas?.LandLords?.Name ?? "")</td>
                             <td>@(cas?.Tenant?.Name ?? "")</td>
                             <td>@(cas?.AptNo ?? "")</td>
                             <td>@(cas?.CaseType ?? "")</td>
                             <td>Calender</td>
                             <td>@(cas?.CreatedAt.HasValue == true ? cas.CreatedAt.Value.ToString("MM/dd/yyyy") : "")</td>
-                            <td class="sticky"><i class="fa-solid fa-pen-to-square" @onclick="FocusOnNavigate"></i><span class="status-active ms-2">Active</span></td>
+                            @if (cas.IsActive == true && cas.IsDeleted == false)
+                            {
+                                <td><span class="status-active ms-2">Active</span></td>
+                            }
+                            @if (cas.IsDeleted == true && cas.IsActive == false)
+                            {
+                                <td><span class="status-delete ms-2">InActive</span></td>
+                            }
+                            @if (cas.IsDeleted == false && cas.IsActive == false)
+                            {
+                                <td><span class="status-archive  ms-2">Archive</span></td>
+                            }
+                            <td class="sticky">
+                                <i class="fa-solid fa-pen-to-square me-2" @onclick="FocusOnNavigate"></i>
+                                <i class="fa-solid fa-trash-can text-danger" title="Delete"></i>
+                            </td>
+
                         </tr>
 
                     }
@@ -303,6 +355,8 @@
 
     </div>
 
+    <SelectClientModal @ref="clientModal" />
+
     <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
@@ -311,31 +365,86 @@
     var advancedCollapse = document.getElementById('advancedFilters');
 
     advancedCollapse.addEventListener('shown.bs.collapse', function () {
-        advButton.classList.add('active-adv-btn');
+    advButton.classList.add('active-adv-btn');
     });
 
     advancedCollapse.addEventListener('hidden.bs.collapse', function () {
-        advButton.classList.remove('active-adv-btn');
+    advButton.classList.remove('active-adv-btn');
     });
 </script>
 
 
 @code {
-    private List<LegalCase> cases = new();
+    private List<LegalCase> allcases = new List<LegalCase>();
+    private string searchTerm = string.Empty;
+    private string showClient = string.Empty;
+    private bool ViewSearch = false;
+
+    private List<CreateClientDto> AllClients = new();
+    private List<CreateClientDto> FilteredClients = new();
+
+    private SelectClientModal clientModal;
+    private Guid selectedClientId = new Guid();
+    // private List<CreateClientDto> AllClients = new();
 
     protected override async Task OnInitializedAsync()
     {
         await GetAllCases();
+
     }
+
+    // private void HandleClientSelected(Guid clientId)
+    // {
+    //     selectedClientId = clientId;
+
+    //     // You can now use selectedClientId in form logic (e.g., load data, bind to DTO, etc.)
+    //     Console.WriteLine($"Client selected: {clientId}");
+    // }
 
     private async Task GetAllCases()
     {
-        cases = await _service.GetAllAsync();
+        allcases = await _service.GetAllAsync();
+        AllClients = await _clientservice.GetAllClientsAsync();
     }
 
     void FocusOnNavigate()
     {
         nav.NavigateTo("/case");
+    }
+
+    private IEnumerable<LegalCase> cases =>
+      string.IsNullOrWhiteSpace(searchTerm)
+      ? allcases
+      : allcases.Where(c =>
+          (!string.IsNullOrWhiteSpace(c.CaseName) && c.CaseName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+          (!string.IsNullOrWhiteSpace(c.Casecode) && c.Casecode.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+          (!string.IsNullOrWhiteSpace(c.Clients.ClientCode) && c.Clients.ClientCode.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+          // (!string.IsNullOrWhiteSpace(c.Tenant.TenantCode) && c.Tenant?.TenantCode.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+          );
+
+    private void OnInputChanged(ChangeEventArgs e)
+    {
+        var input = e.Value?.ToString()?.ToLower() ?? "";
+        FilteredClients = AllClients
+            .Where(c => c.FirstName?.ToLower().Contains(input) == true ||
+                        c.LastName?.ToLower().Contains(input) == true ||
+                        c.ClientCode?.ToLower().Contains(input) == true)
+            .ToList();
+        ViewSearch = FilteredClients.Any();
+
+    }
+    private async Task SelectClient(CreateClientDto client)
+    {
+
+        // showClient = SelectedClient.FirstName + " " + SelectedClient.LastName + " - (" + SelectedClient.ClientCode + ")";
+        showClient = $"{client.FirstName} {client.LastName} - ({client.ClientCode})";
+        ViewSearch = false;
+        //await OnClientSelected.InvokeAsync(clientId);
+    }
+
+    private async Task SelectClientmodal()
+    {
+        await clientModal.Show(AllClients);
     }
 }
 

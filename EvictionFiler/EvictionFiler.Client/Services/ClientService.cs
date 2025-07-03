@@ -19,25 +19,7 @@ namespace EvictionFiler.Client.Services
         public async Task<List<CreateClientDto>> GetAllClientsAsync()
         {
             var clients = await _clientRepository.GetAllAsync();
-
-            var clientDtos = clients.Select(client => new CreateClientDto
-            {
-                ClientCode = client.ClientCode,
-                FirstName = client.FirstName,
-                LastName = client.LastName,
-                Email = client.Email,
-                Address_1 = client.Address_1,
-                Address_2 = client.Address_2,
-                City = client.City,
-                State = client.State,
-                ZipCode = client.ZipCode,
-                Fax = client.Fax,
-                Phone = client.Phone,
-                CellPhone = client.CellPhone,
-                GenarateOwnRd = client.GenarateOwnRd
-            }).ToList();
-
-            return clientDtos;
+            return clients;
         }
 
         public async Task<bool> AddClientAsync(CreateClientDto dto)

@@ -1,4 +1,4 @@
-﻿@page "/createcase"
+﻿@page "/createcase/{ClientId}"
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.ClientDto
@@ -11,6 +11,7 @@
 @inject TenantService _tenantService
 @inject ClientService _clientService
 @inject NavigationManager nav
+@inject NavigationDataService _dataService
 @rendermode InteractiveAuto
 <style>
     .stepper-row::-webkit-scrollbar {
@@ -563,11 +564,11 @@
 
         <div class="row g-3">
             <div class="col-md-6">
-                <label class="form-label">LandLord Code</label>
+                <label class="form-label">Building Code</label>
                 <input type="text" class="form-control"
                 @bind="apartmentDto.ApartmentCode"
                 @oninput="OnBuildingChanged"
-                placeholder="Enter Apartment Code" />
+                placeholder="Enter Building Code" />
 
                 @if (showSuggestions)
                 {
@@ -658,7 +659,6 @@
 }
 
 
-
 <!-- Button Group -->
 <div class="container my-4">
     <div class="d-flex justify-content-between align-items-center">
@@ -682,6 +682,8 @@
 </div>
 
 @code {
+    [Parameter] public string ClientId { get; set; }
+
     int currentStep = 0;
     int lastStep = 4;
 
@@ -740,48 +742,76 @@
     private List<AddApartment> matchedBuilding = new List<AddApartment>();
     private bool showSuggestions = false;
 
+
+
+
     void SaveAsDraft() => Console.WriteLine("Saving Draft...");
     void Next() => currentStep++;
     void Back() => currentStep--;
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        // AllClients = await _clientService.GetAllClientsAsync() ?? new();
+        // await clientModal.Show(AllClients); // Open the popup on first load
+    }
+
+    // private void HandleClientSelected(Guid clientId)
+    // {
+    //     selectedClientId = clientId;
+
+    //     // You can now use selectedClientId in form logic (e.g., load data, bind to DTO, etc.)
+    //     Console.WriteLine($"Client selected: {clientId}");
+    // }
+
+
     private async Task Submit()
     {
+        var result = false;
 
-        if (tenantDto != null)
+        if (tenantDto == null || tenantDto.Id == Guid.Empty)
         {
-            if (tenantDto?.Id != null)
-                tenantDto.Id = Guid.NewGuid();
-            var tenant = await _tenantService.AddTenantAsync(tenantDto);
+            tenantDto.Id = Guid.NewGuid();
+            await _tenantService.AddTenantAsync(tenantDto);
         }
 
-        if (landLordDto != null)
+        if (landLordDto == null || landLordDto.Id == Guid.Empty)
         {
-            if (landLordDto?.Id != null)
-                landLordDto.Id = Guid.NewGuid();
-            var landlord = await _landlordService.AddLandLordAsync(landLordDto);
+            landLordDto.Id = Guid.NewGuid();
+            await _landlordService.AddLandLordAsync(landLordDto);
         }
 
-        if (apartmentDto != null)
+        if (apartmentDto == null || apartmentDto.Id == Guid.Empty)
         {
-            if (apartmentDto?.Id != null)
-                apartmentDto.Id = Guid.NewGuid();
-            var appartment = await _apartmentService.AddApartmentAsync(apartmentDto);
+            apartmentDto.Id = Guid.NewGuid();
+            await _apartmentService.AddApartmentAsync(apartmentDto);
         }
 
-        if (legalcaseDto != null)
+        if (legalcaseDto == null || legalcaseDto.Id == Guid.Empty)
         {
             legalcaseDto.Id = Guid.NewGuid();
             legalcaseDto.LandLordId = landLordDto.Id;
             legalcaseDto.ApartmentId = apartmentDto.Id;
             legalcaseDto.TenantId = tenantDto.Id;
-            if (legalcaseDto.CaseType != null)
-                legalcaseDto.CaseType = otherCaseType; 
-            var legalcase = await _legalCaseService.AddLegalCasesAsync(legalcaseDto);
+            legalcaseDto.ClientId = Guid.Parse(ClientId);
+            legalcaseDto.CaseName = _dataService.CaseName;
+
+            if (legalcaseDto.CaseType == null)
+                legalcaseDto.CaseType = otherCaseType;
+
+            result = await _legalCaseService.AddLegalCasesAsync(legalcaseDto);
+
+            _dataService.CaseName = null;
         }
 
-        nav.NavigateTo("/cases");
-
+        if (result)
+        {
+            nav.NavigateTo("/cases");
+        }
     }
-    
+
+
 
 
     private CancellationTokenSource _cts;
@@ -859,7 +889,7 @@
     }
     private void SelectClient(CreateClientDto selectedClient)
     {
-        legalcaseDto.Company = selectedClient.Name;
+        // legalcaseDto.Company = selectedClient.Name;
 
         showSuggestions = false;
     }
@@ -877,6 +907,7 @@
         {
             await Task.Delay(1000, token); // debounce
             matchedBuilding = await _apartmentService.SearchBuildingByCode(input);
+
             showSuggestions = matchedBuilding.Any();
         }
         else
@@ -884,12 +915,12 @@
             showSuggestions = false;
         }
     }
-    private void SelectBuilding(AddApartment selectedClient)
+    private void SelectBuilding(AddApartment selectedapartment)
     {
-        legalcaseDto.Address = selectedClient.Address_1 + ", " + selectedClient.Address_2;
-        legalcaseDto.ZIP = selectedClient.Zipcode;
-        legalcaseDto.Class = selectedClient.PremiseType;
-
+        legalcaseDto.Address = selectedapartment.Address_1 + ", " + selectedapartment.Address_2;
+        legalcaseDto.ZIP = selectedapartment.Zipcode;
+        legalcaseDto.Class = selectedapartment.PremiseType;
+        apartmentDto.Id = selectedapartment.Id;
         showSuggestions = false;
     }
 }
