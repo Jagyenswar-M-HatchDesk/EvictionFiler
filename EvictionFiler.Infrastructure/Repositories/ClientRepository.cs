@@ -121,19 +121,19 @@ namespace EvictionFiler.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(Guid id)
-        {
-            var client = await _context.Clients.FindAsync(id);
-            if (client != null)
-            {
-                _context.Clients.Remove(client);
-                await _context.SaveChangesAsync();
-            }
-        }
+		public async Task<bool> DeleteAsync(Guid id)
+		{
+			var client = await _context.Clients.FindAsync(id);
+			if (client != null)
+			{
+				_context.Clients.Remove(client);
+				await _context.SaveChangesAsync();
+				return true;
+			}
+			return false;
+		}
 
-        //public Task AddAsync(Client client)
-        //{
-        //    throw new NotImplementedException();
-        //}
-    }
+
+
+	}
 }

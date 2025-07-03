@@ -43,5 +43,12 @@ namespace EvictionFiler.Client.Services
             var result = await _clientRepository.AddAsync(dto);
             return result;
         }
-    }
+
+		public async Task<bool> DeleteClientAsync(Guid id)
+		{
+			return await _clientRepository.DeleteAsync(id);
+		}
+
+
+	}
 }
