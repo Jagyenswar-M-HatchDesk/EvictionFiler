@@ -11,5 +11,6 @@ namespace EvictionFiler.Application.Interfaces.IServices
     {
         Task<List<CreateClientDto>> GetAllClientsAsync();
         Task<bool> AddClientAsync(CreateClientDto client);
-    }
+		Task<bool> DeleteClientAsync(Guid id);
+	}
 }

@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250703054941_ModifyLandlordTable")]
+    partial class ModifyLandlordTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,9 +42,6 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Property<string>("City")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("ClientId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Country")
                         .HasColumnType("nvarchar(max)");
@@ -80,8 +80,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ClientId");
 
                     b.ToTable("Appartments");
                 });
@@ -749,15 +747,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Appartment", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.Client", "Client")
-                        .WithMany()
-                        .HasForeignKey("ClientId");
-
-                    b.Navigation("Client");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.LandLord", b =>

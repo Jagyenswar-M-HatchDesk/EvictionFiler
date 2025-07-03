@@ -28,10 +28,20 @@ namespace EvictionFiler.Client.Services
             return result;
         }
 
+
+		public async Task<bool> DeleteClientAsync(Guid id)
+		{
+			return await _clientRepository.DeleteAsync(id);
+		}
+
+
+	}
+
         public async Task<List<CreateClientDto>> SearchClientByCode(string code)
         {
             var newtenant = await _clientRepository.SearchClientByCode(code);
             return newtenant;
         }
     }
+
 }

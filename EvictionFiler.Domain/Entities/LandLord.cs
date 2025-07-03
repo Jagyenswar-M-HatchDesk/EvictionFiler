@@ -20,8 +20,9 @@ namespace EvictionFiler.Domain.Entities
         public string? MaillingAddress { get; set; } = string.Empty;
         public string? Attorney { get; set; } = string.Empty;
         public string? Firm { get; set; } = string.Empty;
-
-        public bool? isCorporeateOwner { get; set; }
+		public Guid? ClientId { get; set; }
+		public Client? Client { get; set; }
+		public bool? isCorporeateOwner { get; set; }
         public string? RegisteredAgent { get; set; } = string.Empty;
     }
 }
