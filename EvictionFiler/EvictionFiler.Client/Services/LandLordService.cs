@@ -1,4 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 
 namespace EvictionFiler.Client.Services
@@ -17,6 +18,10 @@ namespace EvictionFiler.Client.Services
             var newlandlord = await _landLordRepository.AddLandLord(dto);
             return newlandlord;
         }
-
+        public async Task<List<CreateLandLordDto>> SearchLandlordByCode(string code)
+        {
+            var newtenant = await _landLordRepository.SearchLandlordByCode(code);
+            return newtenant;
+        }
     }
 }

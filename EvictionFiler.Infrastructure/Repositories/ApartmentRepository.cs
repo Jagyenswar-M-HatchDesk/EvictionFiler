@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.LandLordDto;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
@@ -70,6 +71,27 @@ namespace EvictionFiler.Infrastructure.Repositories
                 _context.Appartments.Remove(appartment);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<List<AddApartment>> SearchBuildingByCode(string code)
+        {
+            var landlord = await _context.Appartments.Where(e => e.ApartmentCode.Contains(code)).Select(e => new AddApartment
+            {
+                Id = e.Id,
+                ApartmentCode = e.ApartmentCode,
+                City = e.City,
+                State = e.State,
+                PremiseType = e.PremiseType,
+                Address_1 = e.Address_1,
+                Address_2 = e.Address_2,
+                Zipcode = e.Zipcode,
+                Country = e.Country,
+                MDR_Number = e.MDR_Number,
+                PetitionerInterest = e.PetitionerInterest,
+            }).ToListAsync();
+            if (landlord == null)
+                return new List<AddApartment>();
+            return landlord;
         }
     }
 }

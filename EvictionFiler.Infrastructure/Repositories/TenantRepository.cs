@@ -100,11 +100,26 @@ namespace EvictionFiler.Infrastructure.Repositories
             return true;
         }
 
-        public async Task<Tenant> SearchTenantByCode(string code)
+        public async Task<List<CreateTenantDto>> SearchTenantByCode(string code)
         {
-            var tenant = await _dbContext.Tenants.FirstOrDefaultAsync(e=>e.TenantCode == code);
+            var tenant = await _dbContext.Tenants.Where(e=>e.TenantCode.Contains(code)).Select( e=> new CreateTenantDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+                TenantCode = e.TenantCode,
+                DOB = e.DOB,
+                SSN = e.SSN,
+                Phone = e.Phone,
+                Email = e.Email,
+                Language = e.Language,
+                Address = e.Address,
+                Apt = e.Apt,
+                Borough = e.Borough,
+                Rent = e.Rent,
+                LeaseStatus = e.LeaseStatus
+            }). ToListAsync();
             if (tenant == null)
-                return new Tenant();
+                return new List<CreateTenantDto>();
             return tenant;
         }
     }

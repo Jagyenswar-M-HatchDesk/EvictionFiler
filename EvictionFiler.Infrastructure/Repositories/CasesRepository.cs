@@ -41,6 +41,7 @@ namespace EvictionFiler.Infrastructure.Repositories
             var newcase = new LegalCase
             {
                 Id = legalCase.Id,
+                Casecode = GenerateCaseCode(),
                 TenantId = legalCase.TenantId,
                 ApartmentId = legalCase.ApartmentId,
                 LandLordId = legalCase.LandLordId,
@@ -48,7 +49,6 @@ namespace EvictionFiler.Infrastructure.Repositories
                 CaseName = legalCase.CaseName,
                 ClientRole = legalCase.ClientRole,
                 LegalRepresentative = legalCase.LegalRepresentative,
-                Casecode = legalCase.Casecode,
                 CaseType = legalCase.CaseType,
                 Company = legalCase.Company,
                 Contact = legalCase.Contact,
@@ -63,6 +63,8 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Class = legalCase.Class,
                 YearBuilt = legalCase.YearBuilt,
                 CreatedAt = DateTime.UtcNow,
+                IsActive =true,
+                IsDeleted = false
             };
 
             await _context.LegalCases.AddAsync(newcase);
@@ -89,6 +91,14 @@ namespace EvictionFiler.Infrastructure.Repositories
                 _context.LegalCases.Remove(legalCase);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public static string GenerateCaseCode()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, 8)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

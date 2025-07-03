@@ -1,3 +1,4 @@
+using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Application.Services;
@@ -40,6 +41,9 @@ builder.Services.AddDbContext<MainDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default"),
         b => b.MigrationsAssembly("EvictionFiler.Infrastructure")));
 
+//builder.Services.AddDbContextFactory<MainDbContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"),
+//        b => b.MigrationsAssembly("EvictionFiler.Infrastructure")));
 
 builder.Services.AddScoped<IUserservices, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -64,6 +68,8 @@ builder.Services.AddScoped<TenantService>();
 builder.Services.AddScoped<ApartmentService>();
 builder.Services.AddScoped<LandLordService>();
 builder.Services.AddScoped<LegalCasesService>();
+builder.Services.AddScoped<NavigationDataService>();
+
 builder.Services.AddAuthorizationCore();
 
 
