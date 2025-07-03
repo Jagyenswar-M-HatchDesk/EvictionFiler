@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.LandLordDto;
 
 namespace EvictionFiler.Application.DTOs.ClientDto
 {
@@ -22,7 +24,11 @@ namespace EvictionFiler.Application.DTOs.ClientDto
         public string? CellPhone { get; set; } = string.Empty;
         public string? Fax { get; set; } = string.Empty;
         public bool? GenarateOwnRd { get; set; }
-        //public string? LandlordName { get; set; }
-        //public string? LandlordEmail { get; set; }
-    }
+		//public string? LandlordName { get; set; }
+		//public string? LandlordEmail { get; set; }
+
+		public CreateLandLordDto? LandLord { get; set; }
+		public AddApartment? Apartment { get; set; }
+
+	}
 }

@@ -161,11 +161,11 @@
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text">First Name</label>
-                            <InputText class="form-control" @bind-Value="createClient.FirstName" placeholder="Enter First Name" />
+                            <InputText class="form-control" @bind-Value="createClient.FirstName"   placeholder="Enter First Name" />
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text">Last Name</label>
-                            <InputText class="form-control" @bind-Value="createClient.LastName" placeholder="Enter Last Name" />
+                            <InputText class="form-control" @bind-Value="createClient.LastName"    placeholder="Enter Last Name" />
                         </div>
                     </div>
 
@@ -174,14 +174,14 @@
                             <label class="form-label color-text">Email</label>
                             <div class="input-group">
                                 <span class="input-group-text">@@</span>
-                                <InputText class="form-control" @bind-Value="createClient.Email" placeholder="Enter Email" />
+                                <InputText class="form-control" @bind-Value="createClient.Email"   placeholder="Enter Email" />
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text">Fax</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-printer"></i></span>
-                                <InputText class="form-control" @bind-Value="createClient.Fax" placeholder="Fax Number" />
+                                <InputText class="form-control" @bind-Value="createClient.Fax"    placeholder="Fax Number" />
                             </div>
                         </div>
                     </div>
@@ -189,7 +189,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label color-text">Address Line 1</label>
-                            <InputText class="form-control" @bind-Value="createClient.Address_1" />
+                            <InputText class="form-control" @bind-Value="createClient.Address_1"   />
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label color-text">Address Line 2</label>
@@ -200,11 +200,11 @@
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text">City</label>
-                            <InputText class="form-control" @bind-Value="createClient.City" />
+                            <InputText class="form-control" @bind-Value="createClient.City"   />
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text">State</label>
-                            <InputSelect class="form-select" @bind-Value="createClient.State">
+                            <InputSelect class="form-select" @bind-Value="createClient.State"  >
                                 <option value="">-- Select State --</option>
                                 <option>Georgia</option>
                                 <option>California</option>
@@ -225,14 +225,14 @@
                             <label class="form-label color-text">Phone</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                                <InputText class="form-control" @bind-Value="createClient.Phone" />
+                                <InputText class="form-control" @bind-Value="createClient.Phone"  />
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label color-text">Cell Phone</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-phone"></i></span>
-                                <InputText class="form-control" @bind-Value="createClient.CellPhone" />
+                                <InputText class="form-control" @bind-Value="createClient.CellPhone"  />
                             </div>
                         </div>
                     </div>
@@ -260,7 +260,7 @@
 
                 @if (showLandlordForm)
                 {
-                    <EditForm Model="@landlord" OnValidSubmit="SubmitLandlordAsync">
+                    <EditForm Model="@landlord" OnValidSubmit="SaveLandlordAsync">
                         <div class="mb-3"><label>Name</label><InputText class="form-control" @bind-Value="landlord.Name" /></div>
                         <div class="mb-3"><label>EIN/SSN</label><InputText class="form-control" @bind-Value="landlord.EINorSSN" /></div>
                         <div class="row">
@@ -381,8 +381,13 @@
     <!-- Footer -->
     <div class="sticky-footer bg-white border-top p-3 d-flex justify-content-end gap-2">
         <button class="btn btn-outline-secondary px-4 fw-semibold" @onclick="HideAsync">Cancel</button>
-        <button class="btn bg-navy text-white px-4 fw-semibold" @onclick="SubmitClientAsync">Submit</button>
+        <button class="btn bg-navy text-white px-4 fw-semibold" disabled="@(!IsClientFormValid())" @onclick="SubmitClientAsync">Submit</button>
     </div>
+    @if (!IsClientFormValid())
+    {
+        <div class="text-danger mt-2">Please fill all required client fields to enable Submit.</div>
+    }
+
 </div>
 
 @code {
@@ -408,11 +413,24 @@
         StateHasChanged();
     }
 
+    private bool IsClientFormValid()
+    {
+        return !string.IsNullOrWhiteSpace(createClient.FirstName)
+            && !string.IsNullOrWhiteSpace(createClient.LastName)
+            && !string.IsNullOrWhiteSpace(createClient.Email)
+            && !string.IsNullOrWhiteSpace(createClient.Phone)
+            && !string.IsNullOrWhiteSpace(createClient.ClientCode)
+            && !string.IsNullOrWhiteSpace(createClient.Address_1)
+            && !string.IsNullOrWhiteSpace(createClient.City)
+            && !string.IsNullOrWhiteSpace(createClient.State);
+    }
+
+
     public async Task HideAsync()
     {
-        
+
         IsVisible = false;
-      
+
         activeTab = string.Empty;
         showLandlordForm = false;
         showBuildingForm = false;
@@ -430,7 +448,7 @@
         ? "Cancel"
         : "Add New";
 
-    private Task SubmitLandlordAsync()
+    private Task SaveLandlordAsync()
     {
         landlordList.Add(landlord);
         landlord = new();
@@ -446,10 +464,19 @@
         return Task.CompletedTask;
     }
 
-    private Task SubmitClientAsync()
+    private async Task SubmitClientAsync()
     {
-     
-        return Submit.InvokeAsync(createClient);
+      
+        if ((landlordList != null && landlordList.Any()) || (apartmentList != null && apartmentList.Any()))
+        {
+            createClient.LandLord = landlordList.FirstOrDefault();
+            createClient.Apartment = apartmentList.FirstOrDefault(); 
+        }
+
+
+        await Submit.InvokeAsync(createClient); 
     }
+
+
 }
 

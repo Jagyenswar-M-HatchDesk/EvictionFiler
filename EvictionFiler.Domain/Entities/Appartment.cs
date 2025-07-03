@@ -22,6 +22,7 @@ namespace EvictionFiler.Domain.Entities
         public string? Zipcode { get; set; }
         public string? MDR_Number { get; set; }
         public string? PetitionerInterest { get; set; }
-
-    }
+		public Guid? ClientId { get; set; }
+		public Client? Client { get; set; }
+	}
 }
