@@ -147,8 +147,8 @@
         <div class="g-2 mb-3 d-flex justify-content-between align-items-center">
             <!-- Four default search boxes -->
             <button class="btn btn-primary" @onclick="AddUser">Add New</button>
-            <div class="position-relative w-50" >
-                <input class="form-control search-box" placeholder="Search.." />
+            <div class="position-relative w-50">
+                <input class="form-control border border-primary text-navy" placeholder="Search.." @bind="searchTerm" @bind:event="oninput" />
                 <button class="search-btn" type="button">
                     <i class="fa fa-search"></i>
                 </button>
@@ -171,13 +171,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
+                    @* <tr>
                         <td>Jagyenswar</td>
                         <td>Meher</td>
                         <td>jm@gmail.com</td>
                         <td>7723099993</td>
                         <td>Property Manager</td>
-                        <td>06/27/2025</td>
+                        <td>06-27-2025</td>
                         <td class="sticky"><i class="fa-solid fa-pen-to-square"></i><span class="status-active ms-2">Active</span></td>
                     </tr>
                     <tr>
@@ -186,22 +186,24 @@
                         <td>sk@gmail.comL</td>
                         <td>7988324752</td>
                         <td>Property Manager</td>
-                        <td>06/27/2025</td>
+                        <td>06-27-2025</td>
                         <td class="sticky"><i class="fa-solid fa-pen-to-square"></i><span class="status-active ms-2">Active</span></td>
-                    </tr>
-                    @* @foreach(var user in cases)
+                    </tr> *@
+                    @foreach (var user in cases)
                     {
-                        <tr>
-                            <td>@(user.FirstName ?? "")</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td class="sticky"><i class="fa-solid fa-pen-to-square"></i><span class="status-active ms-2">Active</span></td>
-                        </tr>
-
-                    } *@
+                        if (user != null)
+                        {
+                            <tr>
+                                <td>@(user.FirstName ?? "")</td>
+                                <td>@(user.LastName ?? "")</td>
+                                <td>@(user.Email ?? "")</td>
+                                <td>@(user.PhoneNumber ?? "")</td>
+                                <td>@(user.Roles?.Name ?? "")</td>
+                                <td>@(user?.CreatedAt.HasValue == true ? user.CreatedAt.Value.ToString("MM/dd/yyyy") : "")</td>
+                                <td class="sticky"><i class="fa-solid fa-pen-to-square"></i><span class="status-active ms-2">Active</span></td>
+                            </tr>
+                        }
+                    }
                     <!-- repeat more data here -->
                 </tbody>
             </table>
@@ -230,6 +232,7 @@
 
 
 @code {
+    private string searchTerm = string.Empty;
 
 
     private CreateUsers createUserRef;
@@ -241,26 +244,61 @@
 
         var alluser = _userService.GetAllUser();
     }
+    private CancellationTokenSource _cts;
 
-    public async Task Handle(RegisterDto user)
+    public async Task Handle()
     {
         // Your existing DB logic here
-        user.Password = "Abcd@1234";
-        var result = await _userService.RegisterTenantAsync(user); // example
-        if(result)
-        {
-            createUserRef.Hide();
-        }
+        _cts?.Cancel(); // cancel previous call
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+        await Task.Delay(1000, token);
+        createUserRef.Hide();
+        await GetAllCases();
+
+        StateHasChanged();
     }
-    private IEnumerable<User> cases;
+    private IEnumerable<User> allUsers = new List<User>();
+
+    private IEnumerable<User> cases =>
+       string.IsNullOrWhiteSpace(searchTerm)
+       ? allUsers
+       : allUsers.Where(c =>
+           (!string.IsNullOrWhiteSpace(c.FirstName) && c.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+           (!string.IsNullOrWhiteSpace(c.LastName) && c.LastName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+           (!string.IsNullOrWhiteSpace(c.Email) && c.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+           (!string.IsNullOrWhiteSpace(c.PhoneNumber) && c.PhoneNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
     protected override async Task OnInitializedAsync()
     {
         await GetAllCases();
     }
 
+
+
     private async Task GetAllCases()
     {
-        cases = await _userService.GetAllUser();
+        allUsers = await _userService.GetAllUser();
+        StateHasChanged();
     }
+
+    // private void FilterUsers()
+    // {
+    //     if (!string.IsNullOrWhiteSpace(searchTerm))
+    //     {
+    //         var term = searchTerm.Trim().ToLower();
+    //         cases = allUsers.Where(user =>
+    //             (user.FirstName?.ToLower().Contains(term) ?? false) ||
+    //             (user.LastName?.ToLower().Contains(term) ?? false) ||
+    //             (user.Email?.ToLower().Contains(term) ?? false) ||
+    //             (user.PhoneNumber?.ToLower().Contains(term) ?? false) ||
+    //             (user.Roles?.Name?.ToLower().Contains(term) ?? false));
+    //     }
+    //     else
+    //     {
+    //         cases = allUsers;
+    //     }
+    // }
+
+
 
 }

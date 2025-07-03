@@ -1,22 +1,25 @@
 ﻿ @using EvictionFiler.Application.DTOs
+@using EvictionFiler.Client.Services
 @inject IJSRuntime JS
+@inject UserServiceClient _userService
+
 <style>
     .offcanvas.show {
-        transform: translateX(0%);
+    transform: translateX(0%);
     }
 
     .offcanvas {
-        transform: translateX(100%);
-        width : 500px !important;
+    transform: translateX(100%);
+    width : 500px !important;
     }
     .color-text{
-        color: #1F365D;
+    color: #1F365D;
     }
 
 </style>
 <div class="offcanvas offcanvas-end show border-start shadow" tabindex="-1" id="createUser"
-     style="visibility:@(IsVisible ? "visible" : "hidden"); transition: transform 0.9s ease-in-out;"
-     aria-labelledby="createUserLabel">
+style="visibility:@(IsVisible ? "visible" : "hidden"); transition: transform 0.9s ease-in-out;"
+aria-labelledby="createUserLabel">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="createUserLabel">Add New User</h5>
         <button type="button" class="btn-close text-reset" @onclick="Hide"></button>
@@ -93,8 +96,13 @@
 
     public async Task SubmitUser()
     {
-        await Submit.InvokeAsync(registerDto); // calls your database method in parent
-        Hide();
+        registerDto.Password = "Abcd@1234";
+        var result = await _userService.RegisterTenantAsync(registerDto); // example
+        if (result)
+        {
+            await Submit.InvokeAsync(); // calls your database method in parent
+            Hide();
+        }
     }
 }
 

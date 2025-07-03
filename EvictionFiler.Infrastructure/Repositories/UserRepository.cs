@@ -48,70 +48,77 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<bool> RegisterTenant(RegisterDto model)
         {
-            var serverPrefix = _config.GetConnectionString("SqlServer");
-            var dbName = $"{model.Role}_{model.Email.Split('@')[0]}";
-            var connectionString = $"{serverPrefix};Database={dbName};MultipleActiveResultSets=True;";
-
-            var database = new UserDatabase
+            try
             {
-                Id = Guid.NewGuid(),
-                DatabaseName = dbName,
-                ConnectionString = connectionString,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-            };
-            await _db.UserDatabases.AddAsync(database);
-            await _db.SaveChangesAsync();
+                var serverPrefix = _config.GetConnectionString("SqlServer");
+                var dbName = $"{model.Role}_{model.Email.Split('@')[0]}";
+                var connectionString = $"{serverPrefix};Database={dbName};MultipleActiveResultSets=True;";
 
-            // Create and migrate tenant database
-            var options = new DbContextOptionsBuilder<TenantDbContext>()
-                .UseSqlServer(connectionString)
-                .EnableSensitiveDataLogging()
-                .LogTo(Console.WriteLine)
-                .Options;
+                var database = new UserDatabase
+                {
+                    Id = Guid.NewGuid(),
+                    DatabaseName = dbName,
+                    ConnectionString = connectionString,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                };
+                await _db.UserDatabases.AddAsync(database);
+                await _db.SaveChangesAsync();
 
-            using var tenantDb = new TenantDbContext(options);
-            await tenantDb.Database.MigrateAsync();
+                // Create and migrate tenant database
+                var options = new DbContextOptionsBuilder<TenantDbContext>()
+                    .UseSqlServer(connectionString)
+                    .EnableSensitiveDataLogging()
+                    .LogTo(Console.WriteLine)
+                    .Options;
 
-            // Ensure role exists in main DB
-            var role = await _roleManager.FindByNameAsync(model.Role);
-            if (role == null)
-            {
-                role = new Role { Name = model.Role };
-                await _roleManager.CreateAsync(role);
+                using var tenantDb = new TenantDbContext(options);
+                await tenantDb.Database.MigrateAsync();
+
+                // Ensure role exists in main DB
+                var role = await _roleManager.FindByNameAsync(model.Role);
+                if (role == null)
+                {
+                    role = new Role { Name = model.Role };
+                    await _roleManager.CreateAsync(role);
+                }
+
+                // Create user (main DB)
+                var user = new User
+                {
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    MiddleName = model.MiddleName,
+                    Email = model.Email,
+                    UserName = model.Email,
+                    //EmailConfirmed = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    RoleId = role.Id,
+                    TenantId = database.Id,
+                    IsActive = true,
+                    //CreatedBy
+                };
+
+                var createResult = await _userManager.CreateAsync(user, model.Password);
+                if (!createResult.Succeeded)
+                {
+                    // optionally log createResult.Errors
+                    return false;
+                }
+
+                await _userManager.AddToRoleAsync(user, model.Role);
+
+                // Optional: create the same user in the tenant DB
+                // If tenant uses Identity, you need to set up UserManager for tenantDb as well
+                // Otherwise, use raw EF to add user profile there
+
+                return true;
             }
-
-            // Create user (main DB)
-            var user = new User
+            catch(Exception ex)
             {
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                MiddleName = model.MiddleName,
-                Email = model.Email,
-                UserName = model.Email,
-                //EmailConfirmed = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                RoleId = role.Id,
-                TenantId = database.Id,
-                IsActive = true,
-                //CreatedBy
-            };
-
-            var createResult = await _userManager.CreateAsync(user, model.Password);
-            if (!createResult.Succeeded)
-            {
-                // optionally log createResult.Errors
                 return false;
             }
-
-            await _userManager.AddToRoleAsync(user, model.Role);
-
-            // Optional: create the same user in the tenant DB
-            // If tenant uses Identity, you need to set up UserManager for tenantDb as well
-            // Otherwise, use raw EF to add user profile there
-
-            return true;
         }
 
 
