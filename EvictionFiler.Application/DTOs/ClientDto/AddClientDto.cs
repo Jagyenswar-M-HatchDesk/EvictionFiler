@@ -39,8 +39,9 @@ namespace EvictionFiler.Application.DTOs.ClientDto
 		//public string? LandlordName { get; set; }
 		//public string? LandlordEmail { get; set; }
 
-		public CreateLandLordDto? LandLord { get; set; }
-		public AddApartment? Apartment { get; set; }
+		public List<CreateLandLordDto>? LandLords { get; set; }
+
+	
 
 	}
 }

@@ -1,6 +1,13 @@
 ﻿@using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Client.Services
+
+@inject ClientService _clientService
+@inject LandLordService _landlordService
+@inject ApartmentService _apartmentService
+@rendermode InteractiveAuto
+
 @inject IJSRuntime JS
 
 <style>
@@ -138,6 +145,7 @@
 
 </style>
 @using System.Collections.Generic
+@using EvictionFiler.Client.Services
 
 <div class="offcanvas offcanvas-end show border-start shadow bg-white"
      tabindex="-1" id="createClient"
@@ -296,7 +304,7 @@
                         <tbody>
                             @if (landlordList.Any())
                             {
-                                @foreach (var l in landlordList)
+                                @foreach (var l in savelandlordList)
                                 {
                                     <tr>
                                         <td>@l.Name</td>
@@ -337,7 +345,19 @@
                 @if (showBuildingForm)
                 {
                     <EditForm Model="@building" OnValidSubmit="SubmitBuildingAsync">
+
+                        <div class="mb-3">
+                            <label>Choose Landlord</label>
+                            <InputSelect class="form-select" @bind-Value="building.LandlordId">
+                                <option value="">-- Select Landlord --</option>
+                                @foreach (var landlord in landlordList)
+                                {
+                                    <option value="@landlord.Id">@landlord.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
                         <div class="mb-3"><label>Apartment Code</label><InputText class="form-control" @bind-Value="building.ApartmentCode" /></div>
+                        <div class="mb-3"><label>Tanent</label><InputText class="form-control" @bind-Value="building.Tanent" /></div>
                         <div class="mb-3"><label>Premise Type</label><InputText class="form-control" @bind-Value="building.PremiseType" /></div>
                         <div class="mb-3"><label>Address Line 1</label><InputText class="form-control" @bind-Value="building.Address_1" /></div>
                         <div class="mb-3"><label>Address Line 2</label><InputText class="form-control" @bind-Value="building.Address_2" /></div>
@@ -408,7 +428,16 @@
     private AddApartment building = new();
 
     private List<CreateLandLordDto> landlordList = new();
+    private List<CreateLandLordDto> savelandlordList = new();
     private List<AddApartment> apartmentList = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(1000);
+        landlordList = await _landlordService.GetAllLandLordsAsync();
+    }
+
+
 
     public void Show(CreateClientDto model)
     {
@@ -454,12 +483,11 @@
 
     private Task SaveLandlordAsync()
     {
-        landlordList.Add(landlord);
+        savelandlordList.Add(landlord);
         landlord = new();
         showLandlordForm = false;
         return Task.CompletedTask;
     }
-
     private Task SubmitBuildingAsync()
     {
         apartmentList.Add(building);
@@ -468,18 +496,56 @@
         return Task.CompletedTask;
     }
 
+
+
     private async Task SubmitClientAsync()
     {
-      
-        if ((landlordList != null && landlordList.Any()) || (apartmentList != null && apartmentList.Any()))
+        // Step 1: Ensure Client ID
+        if (createClient == null)
+            return;
+
+        if (createClient.Id == Guid.Empty)
+            createClient.Id = Guid.NewGuid();
+
+        var isClientSaved = await _clientService.AddClientAsync(createClient);
+        if (!isClientSaved)
+            return;
+
+        // Step 2: Link and Save LandLord
+        if (savelandlordList.Count > 0)
         {
-            createClient.LandLord = landlordList.FirstOrDefault();
-            createClient.Apartment = apartmentList.FirstOrDefault(); 
+            
+
+            foreach (var val in savelandlordList)
+            {
+                if(val.Id == Guid.Empty)
+                    val.Id = Guid.NewGuid();
+                val.ClientId = createClient.Id;
+
+            }
+
+            var isLandlordSaved = await _landlordService.AddLandLordAsync(savelandlordList);
+            if (!isLandlordSaved)
+                return;
         }
 
+        // if (building != null)
+        // {
+        //     if (building.Id == Guid.Empty)
+        //         building.Id = Guid.NewGuid();
 
-        await Submit.InvokeAsync(createClient); 
+        //     building.LandlordId = landlord.Id;
+
+        //     var isapartmentSaved = await _apartmentService.AddApartmentAsync(building);
+        //     if (!isapartmentSaved)
+        //         return;
+        // }
+
+        
     }
+
+
+
 
 
 }

@@ -48,6 +48,8 @@ namespace EvictionFiler.Infrastructure.Repositories
                 PetitionerInterest = appartment.PetitionerInterest,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
+                LandlordId = appartment.LandlordId,
+                Tanent = appartment.Tanent,
 
             };
             _context.Appartments.Add(newapartment);
@@ -88,7 +90,9 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Country = e.Country,
                 MDR_Number = e.MDR_Number,
                 PetitionerInterest = e.PetitionerInterest,
-                ClientId = e.ClientId,
+                LandlordId = e.LandlordId,
+                Tanent = e.Tanent,
+            
             }).ToListAsync();
             if (landlord == null)
                 return new List<AddApartment>();

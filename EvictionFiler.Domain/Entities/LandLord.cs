@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace EvictionFiler.Domain.Entities
 {
@@ -21,6 +23,8 @@ namespace EvictionFiler.Domain.Entities
         public string? Attorney { get; set; } = string.Empty;
         public string? Firm { get; set; } = string.Empty;
 		public Guid? ClientId { get; set; }
+		[ForeignKey("ClientId")]
+		[DeleteBehavior(DeleteBehavior.Restrict)]
 		public Client? Client { get; set; }
 		public bool? isCorporeateOwner { get; set; }
         public string? RegisteredAgent { get; set; } = string.Empty;

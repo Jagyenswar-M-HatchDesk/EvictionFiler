@@ -57,12 +57,49 @@ namespace EvictionFiler.Infrastructure.Repositories
 
             return allclients ?? new List<CreateClientDto>();
         }
+		//public async Task<bool> AddAsync(CreateClientDto client)
+		//{
+		//	//  Client 
+		//	var newclient = new Client
+		//	{
+		//		Id = Guid.NewGuid(),
+		//		ClientCode = client.ClientCode,
+		//		FirstName = client.FirstName,
+		//		LastName = client.LastName,
+		//		Email = client.Email,
+		//		Address_1 = client.Address_1,
+		//		Address_2 = client.Address_2,
+		//		City = client.City,
+		//		State = client.State,
+		//		ZipCode = client.ZipCode,
+		//		Phone = client.Phone,
+		//		CellPhone = client.CellPhone,
+		//		Fax = client.Fax,
+		//		GenarateOwnRd = client.GenarateOwnRd,
+		//		CreatedAt = DateTime.Now,
+		//		IsActive = true
+		//	};
+
+
+		//	_context.Clients.Add(newclient);
+		//	var result = await _context.SaveChangesAsync();
+
+
+
+
+		//	return true;
+		//}
+
+
 		public async Task<bool> AddAsync(CreateClientDto client)
 		{
-			//  Client 
+			// Make sure Id is provided
+			if (client.Id == Guid.Empty)
+				client.Id = Guid.NewGuid();  // fallback safety
+
 			var newclient = new Client
 			{
-				Id = Guid.NewGuid(),
+				Id = client.Id, // ✅ use passed client.Id instead of new GUID
 				ClientCode = client.ClientCode,
 				FirstName = client.FirstName,
 				LastName = client.LastName,
@@ -80,67 +117,11 @@ namespace EvictionFiler.Infrastructure.Repositories
 				IsActive = true
 			};
 
-
 			_context.Clients.Add(newclient);
 			var result = await _context.SaveChangesAsync();
 
-			//  Landlord 
-			if (client.LandLord != null)
-			{
-				var landlordDto = client.LandLord;
-
-				var landlord = new LandLord
-				{
-					Id = Guid.NewGuid(),
-					Name = landlordDto.Name,
-					LandLordCode = GenerateCaseCode(),
-					EINorSSN = landlordDto.EINorSSN,
-					Phone = landlordDto.Phone,
-					Email = landlordDto.Email,
-					MaillingAddress = landlordDto.MaillingAddress,
-					Attorney = landlordDto.Attorney,
-					Firm = landlordDto.Firm,
-					ClientId = newclient.Id,
-					CreatedAt = DateTime.Now,
-					IsActive = true
-				};
-
-
-				_context.LandLords.Add(landlord);
-				await _context.SaveChangesAsync();
-			}
-
-			//  Apartment
-			if (client.Apartment != null)
-			{
-				var apartmentDto = client.Apartment;
-
-				var apartment = new Appartment
-				{
-					Id = Guid.NewGuid(),
-					ApartmentCode = apartmentDto.ApartmentCode,
-					PremiseType = apartmentDto.PremiseType,
-					Address_1 = apartmentDto.Address_1,
-					Address_2 = apartmentDto.Address_2,
-					City = apartmentDto.City,
-					State = apartmentDto.State,
-					Country = apartmentDto.Country,
-					Zipcode = apartmentDto.Zipcode,
-					MDR_Number = apartmentDto.MDR_Number,
-					PetitionerInterest = apartmentDto.PetitionerInterest,
-					ClientId = newclient.Id,
-					CreatedAt = DateTime.Now,
-					IsActive = true
-				};
-
-				_context.Appartments.Add(apartment);
-				await _context.SaveChangesAsync();
-			}
-
-			return true;
+			return result > 0;
 		}
-
-
 
 
 		public async Task UpdateAsync(Client client)

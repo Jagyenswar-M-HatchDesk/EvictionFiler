@@ -20,9 +20,13 @@ namespace EvictionFiler.Infrastructure.Repositories
             _mainDbContext = mainDbContext;
         }
 
-        public async Task<bool> AddLandLord(CreateLandLordDto dto)
+        public async Task<bool> AddLandLord(List<CreateLandLordDto> dtoList)
         {
-            var newlandlord = new LandLord
+
+			// Make sure Id is provided
+			//if (dto.Id == Guid.Empty)
+			//	dto.Id = Guid.NewGuid();
+			var newlandlord = dtoList.Select(dto => new LandLord
             {
                 Id = dto.Id,
                 LandLordCode = dto.LandLordCode,
@@ -35,9 +39,10 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Firm = dto.Firm,
                 isCorporeateOwner = dto.isCorporeateOwner,
                 RegisteredAgent = dto.RegisteredAgent,
-            };
+                ClientId = dto.ClientId,
+            });
 
-            _mainDbContext.LandLords.Add(newlandlord);
+            _mainDbContext.LandLords.AddRange(newlandlord);
             var result = await _mainDbContext.SaveChangesAsync();
 
             if(result != null)
@@ -47,14 +52,33 @@ namespace EvictionFiler.Infrastructure.Repositories
             return false;
         }
 
-        public async Task<List<LandLord>> GetAllLandLordsAsync()
-        {
-            return await _mainDbContext.LandLords
-                .Where(x => x.IsDeleted != true) // Optional: filter soft-deleted
-                .ToListAsync();
-        }
+		public async Task<List<CreateLandLordDto>> GetAllLandLordsAsync()
+		{
+			var landlords = await _mainDbContext.LandLords
+				.Where(x => x.IsDeleted != true)
+				.ToListAsync();
 
-        public async Task<LandLord?> GetLandLordByIdAsync(Guid id)
+			var result = landlords.Select(l => new CreateLandLordDto
+			{
+				Id = l.Id,
+				LandLordCode = l.LandLordCode,
+				Name = l.Name,
+				EINorSSN = l.EINorSSN,
+				Phone = l.Phone,
+				Email = l.Email,
+				MaillingAddress = l.MaillingAddress,
+				Attorney = l.Attorney,
+				Firm = l.Firm,
+				isCorporeateOwner = l.isCorporeateOwner,
+				RegisteredAgent = l.RegisteredAgent,
+				
+			}).ToList();
+
+			return result;
+		}
+
+
+		public async Task<LandLord?> GetLandLordByIdAsync(Guid id)
         {
             return await _mainDbContext.LandLords
                 .FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted != true);
@@ -108,7 +132,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Firm = e.Firm,
                 isCorporeateOwner = e.isCorporeateOwner,
                 RegisteredAgent = e.RegisteredAgent,
-                ClientId = e.ClientId,
+                //ClientId = e.ClientId,
             }).ToListAsync();
             if (landlord == null)
                 return new List<CreateLandLordDto>();

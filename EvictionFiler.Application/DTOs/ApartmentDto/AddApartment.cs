@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EvictionFiler.Application.DTOs.LandLordDto;
 
 namespace EvictionFiler.Application.DTOs.ApartmentDto
 {
@@ -19,6 +20,9 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
         public string? Zipcode { get; set; }
         public string? MDR_Number { get; set; }
         public string? PetitionerInterest { get; set; }
-        public Guid? ClientId { get; set; }
-    }
+        public Guid? LandlordId { get; set; }
+		public string? Tanent { get; set; }
+
+
+	}
 }

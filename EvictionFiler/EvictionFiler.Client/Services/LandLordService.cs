@@ -13,7 +13,7 @@ namespace EvictionFiler.Client.Services
             _landLordRepository = landLordRepository;
         }
 
-        public async Task<bool> AddLandLordAsync(CreateLandLordDto dto)
+        public async Task<bool> AddLandLordAsync(List<CreateLandLordDto> dto)
         {
             var newlandlord = await _landLordRepository.AddLandLord(dto);
             return newlandlord;
@@ -23,5 +23,11 @@ namespace EvictionFiler.Client.Services
             var newtenant = await _landLordRepository.SearchLandlordByCode(code);
             return newtenant;
         }
-    }
+
+		public async Task<List<CreateLandLordDto>> GetAllLandLordsAsync()
+		{
+			var landlords = await _landLordRepository.GetAllLandLordsAsync();
+			return landlords;
+		}
+	}
 }

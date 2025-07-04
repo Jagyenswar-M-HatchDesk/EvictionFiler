@@ -10,23 +10,35 @@ namespace EvictionFiler.Client.Services
     {
 
         private readonly IClientRepository _clientRepository;
+		private readonly ILandLordRepository _landLordRepo;
+		private readonly IApartmentRepository _apartmentRepo;
 
-        public ClientService(IClientRepository clientServices)
-        {
-            _clientRepository = clientServices;
-        }
+		public ClientService(
+	   IClientRepository clientRepo,
+	   ILandLordRepository landLordRepo,
+	   IApartmentRepository apartmentRepo)
+		{
+			_clientRepository = clientRepo;
+			_landLordRepo = landLordRepo;
+			_apartmentRepo = apartmentRepo;
+		}
 
-        public async Task<List<CreateClientDto>> GetAllClientsAsync()
+		public async Task<List<CreateClientDto>> GetAllClientsAsync()
         {
             var clients = await _clientRepository.GetAllAsync();
             return clients;
         }
 
-        public async Task<bool> AddClientAsync(CreateClientDto dto)
-        {
-            var result = await _clientRepository.AddAsync(dto);
-            return result;
-        }
+		public async Task<bool> AddClientAsync(CreateClientDto dto)
+		{
+			
+
+			// 2. Save Client
+			var isClientSaved = await _clientRepository.AddAsync(dto);
+			return true;
+		
+		}
+
 
 
 		public async Task<bool> DeleteClientAsync(Guid id)
