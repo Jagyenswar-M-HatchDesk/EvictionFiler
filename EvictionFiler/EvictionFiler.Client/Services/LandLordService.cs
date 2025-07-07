@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Application.DTOs.LandLordDto;
+﻿using EvictionFiler.Application.DTOs;
+using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +42,9 @@ namespace EvictionFiler.Client.Services
 			return await _landLordRepository.GetLandLordByIdAsync(id);
 		}
 
-
+		public async Task<LandlordWithBuildings?> GetLandlordWithBuildingsAsync(Guid landlordId)
+		{
+		return await  _landLordRepository.GetLandlordWithBuildingsAsync(landlordId);
+		}
 	}
 }

@@ -264,25 +264,49 @@
                 </div>
             </EditForm>
 
-            @if (selectedLandlord != null)
+            @if (landlordDetails != null)
             {
                 <div class="row mt-4">
-                    <!-- Left: Landlord Info -->
                     <div class="col-md-6">
-                        <div class="border rounded p-3 bg-light">
-                            <h6 class="text-navy">Landlord Details</h6>
-                            <p><strong>Code:</strong> @selectedLandlord.LandLordCode</p>
-                            <p><strong>Name:</strong> @selectedLandlord.Name</p>
-                            <p><strong>Email:</strong> @selectedLandlord.Email</p>
-                            <p><strong>Phone:</strong> @selectedLandlord.Phone</p>
-                            <p><strong>EIN/SSN:</strong> @selectedLandlord.EINorSSN</p>
-                            <p><strong>MaillingAddress:</strong> @selectedLandlord.MaillingAddress</p>
-                            <p><strong>Attorney:</strong> @selectedLandlord.Attorney</p>
-                            <p><strong>Firm:</strong> @selectedLandlord.Firm</p>
+                        <div class="border rounded p-3  bg-light">
+                            <h6 class="text-navy fw-bold">Landlord Details</h6>
+                            <p><strong>Name:</strong> @landlordDetails.Landlord.Name</p>
+                            <p><strong>Email:</strong> @landlordDetails.Landlord.Email</p>
+                            <p><strong>Phone:</strong> @landlordDetails.Landlord.Phone</p>
                         </div>
                     </div>
+
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-navy mb-3 fw-bold">Buildings</h6>
+
+                            @if (landlordDetails.Buildings?.Any() == true)
+                            {
+                                @foreach (var b in landlordDetails.Buildings)
+                                {
+                                    <div class="card mb-3 shadow-sm">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-navy"><strong>Apartment Code:</strong> @b.ApartmentCode</h6>
+                                            <p class="card-text mb-1"><strong>Address:</strong> @b.City</p>
+                                            <p class="card-text mb-0"><strong>State:</strong> @b.State</p>
+                                            <p class="card-text mb-1"><strong>Zipcode:</strong> @b.Zipcode</p>
+                                            <p class="card-text mb-0"><strong>City:</strong> @b.PremiseType</p>
+                                            <p class="card-text mb-1"><strong>MDR Number:</strong> @b.MDR_Number</p>
+                                            <p class="card-text mb-0"><strong>Petitioner Interest:</strong> @b.PetitionerInterest</p>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p>No buildings found.</p>
+                            }
+                        </div>
+                    </div>
+
                 </div>
             }
+
         </div>
     }
 
@@ -443,18 +467,21 @@
         }
     }
 
+    private LandlordWithBuildings? landlordDetails;
+
     private async Task SelectLandlord(Guid id)
     {
-        selectedLandlord = await _landlordService.GetLandLordByIdAsync(id);
+        landlordDetails = await _landlordService.GetLandlordWithBuildingsAsync(id);
 
-        if (selectedLandlord != null)
+        if (landlordDetails?.Landlord != null)
         {
-            searchText = selectedLandlord.Name;
-            landlordSearchModel.SelectedLandlord = selectedLandlord.Name;
+            searchText = landlordDetails.Landlord.Name;
+            landlordSearchModel.SelectedLandlord = landlordDetails.Landlord.Name;
         }
 
         filteredList.Clear();
     }
+
 
     private void HandleSubmit()
     {
@@ -514,14 +541,18 @@
 
 
     private bool IsNextDisabled =>
-    currentStep == 0 &&
-    (
-        string.IsNullOrWhiteSpace(legalcaseDto.ClientRole) ||
-        (legalcaseDto.ClientRole == "Legal Representative" && string.IsNullOrWhiteSpace(legalcaseDto.LegalRepresentative)) ||
-        string.IsNullOrWhiteSpace(otherCaseType) ||
-        (otherCaseType == "Holdover" && string.IsNullOrWhiteSpace(holdoverSubType)) ||
-        (otherCaseType == "Other" && string.IsNullOrWhiteSpace(legalcaseDto.CaseType))
-    );
+        (currentStep == 0 &&
+        (
+            string.IsNullOrWhiteSpace(legalcaseDto.ClientRole) ||
+            (legalcaseDto.ClientRole == "Legal Representative" && string.IsNullOrWhiteSpace(legalcaseDto.LegalRepresentative)) ||
+            string.IsNullOrWhiteSpace(otherCaseType) ||
+            (otherCaseType == "Holdover" && string.IsNullOrWhiteSpace(holdoverSubType)) ||
+            (otherCaseType == "Other" && string.IsNullOrWhiteSpace(legalcaseDto.CaseType))
+        ))
+        ||
+        (currentStep == 1 &&
+        string.IsNullOrWhiteSpace(landlordSearchModel.SelectedLandlord));
+
 
     void SaveAsDraft() => Console.WriteLine("Saving Draft...");
     private void Next()

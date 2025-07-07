@@ -1,4 +1,6 @@
-﻿using EvictionFiler.Application.DTOs.LandLordDto;
+﻿using EvictionFiler.Application.DTOs;
+using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
@@ -172,6 +174,57 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			return landlords;
 		}
+
+
+		public async Task<LandlordWithBuildings?> GetLandlordWithBuildingsAsync(Guid landlordId)
+		{
+			var l = await _mainDbContext.LandLords
+				.FirstOrDefaultAsync(x => x.Id == landlordId && x.IsDeleted != true);
+
+			if (l == null) return null;
+
+			var buildings = await _mainDbContext.Appartments
+				.Where(a => a.LandlordId == landlordId && a.IsDeleted != true)
+				.Select(appartment  => new AddApartment
+				{
+					Id = appartment.Id,
+					ApartmentCode = appartment.ApartmentCode,
+					City = appartment.City,
+					State = appartment.State,
+					PremiseType = appartment.PremiseType,
+					Address_1 = appartment.Address_1,
+					Address_2 = appartment.Address_2,
+					Zipcode = appartment.Zipcode,
+					Country = appartment.Country,
+					MDR_Number = appartment.MDR_Number,
+					PetitionerInterest = appartment.PetitionerInterest,
+					//IsActive = true,
+					//CreatedAt = DateTime.UtcNow,
+					LandlordId = appartment.LandlordId,
+					Tanent = appartment.Tanent,
+				}).ToListAsync();
+
+			return new LandlordWithBuildings
+			{
+				Landlord = new CreateLandLordDto
+				{
+					Id = l.Id,
+					LandLordCode = l.LandLordCode,
+					Name = l.Name,
+					EINorSSN = l.EINorSSN,
+					Phone = l.Phone,
+					Email = l.Email,
+					MaillingAddress = l.MaillingAddress,
+					Attorney = l.Attorney,
+					Firm = l.Firm,
+					isCorporeateOwner = l.isCorporeateOwner,
+					RegisteredAgent = l.RegisteredAgent,
+					// baki fields
+				},
+				Buildings = buildings
+			};
+		}
+
 
 
 	}

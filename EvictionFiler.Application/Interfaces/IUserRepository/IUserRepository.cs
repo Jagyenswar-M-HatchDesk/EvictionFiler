@@ -20,5 +20,7 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
         Task<User?> GetByIdAsync(Guid id);
         Task<bool> UpdateUserAsync(User updatedUser);
         Task<bool> DeleteUserAsync(Guid id);
-    }
+     
+
+	}
 }

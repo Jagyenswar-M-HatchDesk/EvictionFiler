@@ -1,10 +1,11 @@
-﻿using EvictionFiler.Application.DTOs.LandLordDto;
-using EvictionFiler.Domain.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EvictionFiler.Application.DTOs;
+using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Domain.Entities;
 
 namespace EvictionFiler.Application.Interfaces.IUserRepository
 {
@@ -18,6 +19,6 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
         Task<List<CreateLandLordDto>> GetAllLandLordsAsync();
         Task<List<CreateLandLordDto>> SearchLandlordByCode(string code);
         Task<List<CreateLandLordDto>> SearchLandlordsAsync(string query);
-
+		Task<LandlordWithBuildings?> GetLandlordWithBuildingsAsync(Guid landlordId);
 	}
 }
