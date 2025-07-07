@@ -15,9 +15,9 @@ namespace EvictionFiler.Client.Services
             _repository = repository;
         }
 
-        public async Task<bool> AddApartmentAsync(AddApartment dto)
+        public async Task<bool> AddApartmentAsync(List<AddApartment> dto)
         {
-            var newapartment = await _repository.AddAsync(dto);
+            var newapartment = await _repository.AddApartmentAsync(dto);
             return newapartment;
         }
 

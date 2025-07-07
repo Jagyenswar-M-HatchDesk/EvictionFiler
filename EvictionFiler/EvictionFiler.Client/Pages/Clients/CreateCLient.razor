@@ -7,6 +7,8 @@
 @inject LandLordService _landlordService
 @inject ApartmentService _apartmentService
 @rendermode InteractiveAuto
+@inject NavigationManager Navigation
+
 
 @inject IJSRuntime JS
 
@@ -350,7 +352,7 @@
                             <label>Choose Landlord</label>
                             <InputSelect class="form-select" @bind-Value="building.LandlordId">
                                 <option value="">-- Select Landlord --</option>
-                                @foreach (var landlord in landlordList)
+                                @foreach (var landlord in savelandlordList)
                                 {
                                     <option value="@landlord.Id">@landlord.Name</option>
                                 }
@@ -483,13 +485,17 @@
 
     private Task SaveLandlordAsync()
     {
+         landlord.Id =  Guid.NewGuid();
         savelandlordList.Add(landlord);
+
         landlord = new();
         showLandlordForm = false;
         return Task.CompletedTask;
     }
     private Task SubmitBuildingAsync()
+
     {
+
         apartmentList.Add(building);
         building = new();
         showBuildingForm = false;
@@ -514,8 +520,6 @@
         // Step 2: Link and Save LandLord
         if (savelandlordList.Count > 0)
         {
-            
-
             foreach (var val in savelandlordList)
             {
                 if(val.Id == Guid.Empty)
@@ -529,24 +533,23 @@
                 return;
         }
 
-        // if (building != null)
-        // {
-        //     if (building.Id == Guid.Empty)
-        //         building.Id = Guid.NewGuid();
+        if (apartmentList.Count > 0)
+        {
+            foreach (var val in apartmentList)
+            {
+                if (val.Id == Guid.Empty)
+                    val.Id = Guid.NewGuid();
+                // val.LandlordId = landlord.Id;
 
-        //     building.LandlordId = landlord.Id;
+            }
 
-        //     var isapartmentSaved = await _apartmentService.AddApartmentAsync(building);
-        //     if (!isapartmentSaved)
-        //         return;
-        // }
+            var isapartmentSaved = await _apartmentService.AddApartmentAsync(apartmentList);
+            if (!isapartmentSaved)
+                return;
+        }
 
-        
+        Navigation.NavigateTo("/clients");  
     }
-
-
-
-
 
 }
 

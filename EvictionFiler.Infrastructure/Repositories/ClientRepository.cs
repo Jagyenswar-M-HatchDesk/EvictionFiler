@@ -57,49 +57,17 @@ namespace EvictionFiler.Infrastructure.Repositories
 
             return allclients ?? new List<CreateClientDto>();
         }
-		//public async Task<bool> AddAsync(CreateClientDto client)
-		//{
-		//	//  Client 
-		//	var newclient = new Client
-		//	{
-		//		Id = Guid.NewGuid(),
-		//		ClientCode = client.ClientCode,
-		//		FirstName = client.FirstName,
-		//		LastName = client.LastName,
-		//		Email = client.Email,
-		//		Address_1 = client.Address_1,
-		//		Address_2 = client.Address_2,
-		//		City = client.City,
-		//		State = client.State,
-		//		ZipCode = client.ZipCode,
-		//		Phone = client.Phone,
-		//		CellPhone = client.CellPhone,
-		//		Fax = client.Fax,
-		//		GenarateOwnRd = client.GenarateOwnRd,
-		//		CreatedAt = DateTime.Now,
-		//		IsActive = true
-		//	};
-
-
-		//	_context.Clients.Add(newclient);
-		//	var result = await _context.SaveChangesAsync();
-
-
-
-
-		//	return true;
-		//}
-
+	
 
 		public async Task<bool> AddAsync(CreateClientDto client)
 		{
 			// Make sure Id is provided
 			if (client.Id == Guid.Empty)
-				client.Id = Guid.NewGuid();  // fallback safety
+				client.Id = Guid.NewGuid(); 
 
 			var newclient = new Client
 			{
-				Id = client.Id, // ✅ use passed client.Id instead of new GUID
+				Id = client.Id, 
 				ClientCode = client.ClientCode,
 				FirstName = client.FirstName,
 				LastName = client.LastName,

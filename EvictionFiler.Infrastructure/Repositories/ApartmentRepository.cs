@@ -31,9 +31,9 @@ namespace EvictionFiler.Infrastructure.Repositories
             return await _context.Appartments.Where(e=>e.IsDeleted != true).ToListAsync();
         }
 
-        public async Task<bool> AddAsync(AddApartment appartment)
-        {
-            var newapartment = new Appartment
+		public async Task<bool> AddApartmentAsync(List<AddApartment> dtolist)
+		{
+            var newapartment = dtolist.Select(appartment=> new Appartment
             {
                 Id = appartment.Id,
                 ApartmentCode = appartment.ApartmentCode,
@@ -51,8 +51,8 @@ namespace EvictionFiler.Infrastructure.Repositories
                 LandlordId = appartment.LandlordId,
                 Tanent = appartment.Tanent,
 
-            };
-            _context.Appartments.Add(newapartment);
+            });
+            _context.Appartments.AddRange(newapartment);
             var result =await _context.SaveChangesAsync();
             if(result != null)
                 return true;
