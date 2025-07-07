@@ -12,6 +12,8 @@
 @inject ClientService _clientService
 @inject NavigationManager nav
 @inject NavigationDataService _dataService
+@using Blazored.Typeahead
+
 @rendermode InteractiveAuto
 <style>
     .stepper-row::-webkit-scrollbar {
@@ -116,6 +118,12 @@
     color: #1F365D;
     font-weight: 600;
     }
+
+    .required-label::after {
+        content: " *";
+        color: red;
+    }
+
 </style>
 
 <!-- Step Tracker + Navigation Buttons -->
@@ -163,7 +171,7 @@
             <!-- Client Role + Representative Name -->
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold text-navy">Client Role</label>
+                    <label class="form-label fw-semibold text-navy required-label">Client Role</label>
                     <select class="form-select" @bind="legalcaseDto.ClientRole">
                         <option value="">-- Select Client Role --</option>
                         <option value="Landlord/Owner">Landlord/Owner</option>
@@ -176,28 +184,39 @@
                 @if (legalcaseDto.ClientRole == "Legal Representative")
                 {
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold text-navy">Representative Name</label>
+                        <label class="form-label fw-semibold text-navy required-label">Representative Name</label>
                         <input type="text" class="form-control" @bind="legalcaseDto.LegalRepresentative" placeholder="Enter Representative Name" />
                     </div>
                 }
             </div>
 
             <!-- Case Type + Other Case Type -->
-            <div class="row mb-3">
+            <div class="row mb-3 d-flex align-items-center">
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold text-navy">Case Type</label>
+                    <label class="form-label fw-semibold text-navy required-label">Case Type</label>
                     <select class="form-select" @bind="otherCaseType">
                         <option value="">-- Select Case Type --</option>
-                        <option value="Nonpayment">Nonpayment</option>
                         <option value="Holdover">Holdover</option>
+                        <option value="Nonpayment">Nonpayment</option>
                         <option value="Licensee">Licensee</option>
-                        <option value="Lockout">Lockout</option>
                         <option value="HP Action">HP Action</option>
-                        <option value="For Good Cause (6-A)">For Good Cause (6-A)</option>
-                        <option value="Succession">Succession</option>
-                        <option value="Other">Other</option>
+                     
                     </select>
                 </div>
+                @if (otherCaseType == "Holdover")
+                {
+                  <div class="col-md-6 mt-1">
+                        <label class="form-label fw-semibold text-navy required-label">Holdover Case Type</label>
+                        <select class="form-select" @bind="holdoverSubType">
+                        <option value="">-- Select Case Type --</option>
+                            <option value="For Good Cause (6-A)">For Good Cause (6-A)</option>
+                            <option value="Succession">Succession</option>
+                            <option value="Other">Other</option>
+                    
+                    </select>
+                  </div>
+                }
+
 
                 @if (otherCaseType == "Other")
                 {
@@ -210,353 +229,65 @@
         </div>
     }
 
-</div>
+    @if (currentStep == 1)
+    {
+        <div class="mx-auto p-4 border rounded shadow-sm bg-white" style="max-width: 900px;">
+            <h5 class="text-center text-navy fw-bold">Landlord Information</h5>
+            <hr class="border-gold mb-4" />
 
-@if (currentStep == 1)
-{
-    <div class="mx-auto p-4 border rounded shadow-sm bg-white" style="max-width: 800px;">
-        <h5 class="text-center text-navy fw-bold">Tenant Information</h5>
-        <hr class="border-gold mb-4" />
+            <EditForm Model="@landlordSearchModel" OnValidSubmit="HandleSubmit">
+                <div class="row mb-3 align-items-center">
+                    <label class="col-sm-2 col-form-label fw-semibold text-navy">Landlord</label>
+                    <div class="col-sm-10 position-relative">
+                        <input type="text"
+                               class="form-control"
+                               value="@searchText"
+                               @oninput="HandleInput"
+                               placeholder="Type landlord name..." />
 
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">Tenant Code</label>
-                <input type="text" class="form-control"
-                @bind="tenantDto.TenantCode"
-                @oninput="OnTenantCodeChanged"
-                placeholder="Enter Tenant Code" />
-
-                @if (showSuggestions)
-                {
-
-                    <ul class="list-group position-absolute " style="z-index: 1000; max-height: 200px; width:30%; overflow-y: auto;">
-                        @foreach (var tenant in matchedTenants)
+                        @if (filteredList?.Any() == true)
                         {
-                            <li class="list-group-item list-group-item-action"
-                            @onclick="@(() => SelectTenant(tenant))">
-                                @tenant.TenantCode - @tenant.Name
-                            </li>
+                            <ul class="list-group position-absolute w-100 shadow-sm z-3 mt-1"
+                                style="max-height: 200px; overflow-y: auto;">
+                                @foreach (var item in filteredList)
+                                {
+                                    <li class="list-group-item list-group-item-action"
+                                        style="cursor: pointer;"
+                                        @onclick="@(() => SelectLandlord(item.Id))">
+                                        @item.Name @(!string.IsNullOrEmpty(item.LandLordCode) ? $"({item.LandLordCode})" : "")
+
+                                    </li>
+                                }
+                            </ul>
                         }
-                    </ul>
+                    </div>
+                </div>
+            </EditForm>
 
-                }
-            </div>
-            @* <div class="col-md-2">
-                <button class="btn btn-outline-warning" @onclick="SearchTenant">LookUp</button>
-            </div> *@
+            @if (selectedLandlord != null)
+            {
+                <div class="row mt-4">
+                    <!-- Left: Landlord Info -->
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-navy">Landlord Details</h6>
+                            <p><strong>Code:</strong> @selectedLandlord.LandLordCode</p>
+                            <p><strong>Name:</strong> @selectedLandlord.Name</p>
+                            <p><strong>Email:</strong> @selectedLandlord.Email</p>
+                            <p><strong>Phone:</strong> @selectedLandlord.Phone</p>
+                            <p><strong>EIN/SSN:</strong> @selectedLandlord.EINorSSN</p>
+                            <p><strong>MaillingAddress:</strong> @selectedLandlord.MaillingAddress</p>
+                            <p><strong>Attorney:</strong> @selectedLandlord.Attorney</p>
+                            <p><strong>Firm:</strong> @selectedLandlord.Firm</p>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">Full Name</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-person"></i></span>
-                    <input type="text" class="form-control" @bind="tenantDto.Name" placeholder="Enter full name" />
-                </div>
-            </div>
+    }
 
-            <div class="col-md-6">
-                <label class="form-label">SSN</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
-                    <input type="text" class="form-control" @bind="tenantDto.SSN" placeholder="Enter SSN" />
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Phone</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                    <input type="tel" class="form-control" @bind="tenantDto.Phone" placeholder="Enter phone number" />
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Email</label>
-                <div class="input-group">
-                    <span class="input-group-text">
-                        <i>@@</i>
-
-                    </span>
-                    <input type="email" class="form-control" @bind="tenantDto.Email" placeholder="Enter email" />
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Language</label>
-                <input type="text" class="form-control" @bind="tenantDto.Language" placeholder="Enter language" />
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Address</label>
-                <input type="text" class="form-control" @bind="tenantDto.Address" placeholder="Enter address" />
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Apt #</label>
-                <input type="text" class="form-control" @bind="tenantDto.Apt" placeholder="Enter Apt #" />
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Borough</label>
-                <input type="text" class="form-control" @bind="tenantDto.Borough" placeholder="Enter borough" />
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Rent ($)</label>
-                <div class="input-group">
-                    <span class="input-group-text">
-                        <i>$</i>
-
-                    </span>
-                    <input type="text" class="form-control" @bind="tenantDto.Rent" placeholder="Enter rent amount" />
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Lease Status</label>
-                <input type="text" class="form-control" @bind="tenantDto.LeaseStatus" placeholder="Enter lease status" />
-            </div>
-        </div>
-    </div>
-}
 
 @if (currentStep == 2)
-{
-    <div class="mx-auto p-4 border rounded shadow-sm bg-white" style="max-width: 800px;">
-        <h5 class="text-center text-navy fw-bold">Landlord Information</h5>
-        <hr class="border-gold mb-4" />
-
-        <div class="row g-3">
-
-            <div class="col-md-6">
-                <label class="form-label">LandLord Code</label>
-                <input type="text" class="form-control"
-                @bind="landLordDto.LandLordCode"
-                @oninput="OnLandLordCodeChanged"
-                placeholder="Enter Landlord Code" />
-
-                @if (showSuggestions)
-                {
-
-                    <ul class="list-group position-absolute " style="z-index: 1000; max-height: 200px; width:30%; overflow-y: auto;">
-                        @foreach (var landlord in matchedLandLords)
-                        {
-                            <li class="list-group-item list-group-item-action"
-                            @onclick="@(() => SelectLandLord(landlord))">
-                                @landlord.LandLordCode - @landlord.Name
-                            </li>
-                        }
-                    </ul>
-
-                }
-            </div>
-
-            @* <div class="col-md-2">
-                <button class="btn btn-outline-warning" @onclick="SearchLandLord">LookUp</button>
-            </div> *@
-        </div>
-        <div class="row g-3">
-            <!-- Name/Entity -->
-            <div class="col-md-6">
-                <label class="form-label">Name/Entity</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-building"></i></span>
-                    <input type="text" class="form-control" @bind="landLordDto.Name" placeholder="Enter name/entity" />
-                </div>
-            </div>
-
-            <!-- EIN/SSN (last 4) -->
-            <div class="col-md-6">
-                <label class="form-label">EIN/SSN (last 4)</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
-                    <input type="text" class="form-control" @bind="landLordDto.EINorSSN" placeholder="Enter EIN/SSN" />
-                </div>
-            </div>
-
-            <!-- Phone -->
-            <div class="col-md-6">
-                <label class="form-label">Phone</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                    <input type="text" class="form-control" @bind="landLordDto.Phone" placeholder="Enter phone number" />
-                </div>
-            </div>
-
-            <!-- Email -->
-            <div class="col-md-6">
-                <label class="form-label">Email</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                    <input type="email" class="form-control" @bind="landLordDto.Email" placeholder="Enter email" />
-                </div>
-            </div>
-
-            <!-- Mailing Address -->
-            <div class="col-md-6">
-                <label class="form-label">Mailing Address</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                    <input type="text" class="form-control" @bind="landLordDto.MaillingAddress" placeholder="Enter mailing address" />
-                </div>
-            </div>
-
-            <!-- Attorney (if any) -->
-            <div class="col-md-6">
-                <label class="form-label">Attorney (if any)</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-person-bounding-box"></i></span>
-                    <input type="text" class="form-control" @bind="landLordDto.Attorney" placeholder="Enter attorney name" />
-                </div>
-            </div>
-
-            <!-- Firm -->
-            <div class="col-md-6">
-                <label class="form-label">Firm</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
-                    <input type="text" class="form-control" @bind="landLordDto.Firm" placeholder="Enter firm name" />
-                </div>
-            </div>
-
-            <!-- Is Corporate Owner -->
-            <div class="col-md-6">
-                <label class="form-label d-block">Is Corporate Owner</label>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="corpOwner" @bind="checkbox">
-                    <label class="form-check-label">Yes</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="corpOwner" @bind="checkbox">
-                    <label class="form-check-label">No</label>
-                </div>
-            </div>
-
-            <!-- Registered Agent -->
-            <div class="col-md-6">
-                <label class="form-label">Registered Agent</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
-                    <input type="text" class="form-control" @bind="landLordDto.RegisteredAgent" placeholder="Enter agent name" />
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
-
-
-@if (currentStep == 3)
-{
-    <div class="mx-auto p-4 border rounded shadow-sm bg-white" style="max-width: 800px;">
-        <h5 class="text-center text-navy fw-bold">Property Manager / Building Manager</h5>
-        <hr class="border-gold mb-4" />
-
-        @* <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">Client Code</label>
-                <input type="text" class="form-control"
-                @bind="clientDto.ClientCode"
-                @oninput="OnClientCodeChanged"
-                placeholder="Enter Landlord Code" />
-
-                @if (showSuggestions)
-                {
-
-                    <ul class="list-group position-absolute " style="z-index: 1000; max-height: 200px; width:30%; overflow-y: auto;">
-                        @foreach (var client in matchedClients)
-                        {
-                            <li class="list-group-item list-group-item-action"
-                            @onclick="@(() => SelectClient(client))">
-                                @client.ClientCode - @client.Name
-                            </li>
-                        }
-                    </ul>
-
-                }
-            </div> *@
-        @* <div class="col-md-2">
-                <button class="btn btn-outline-warning" @onclick="SearchTenant()">LookUp</button>
-            </div> 
-        </div>*@
-        <div class="row g-3">
-            <!-- Company -->
-            <div class="col-md-6">
-                <label class="form-label">Company</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-building"></i></span>
-                    <input type="text" class="form-control" @bind="legalcaseDto.Company" placeholder="Enter company name" />
-                </div>
-            </div>
-
-            <!-- Contact -->
-            <div class="col-md-6">
-                <label class="form-label">Contact</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-person"></i></span>
-                    <input type="text" class="form-control" @bind="legalcaseDto.Contact" placeholder="Enter contact name" />
-                </div>
-            </div>
-
-            <!-- Phone/Email -->
-            <div class="col-md-6">
-                <label class="form-label">Phone / Email</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                    <input type="text" class="form-control" @bind="legalcaseDto.PhoneorEmail" placeholder="Enter phone or email" />
-                </div>
-            </div>
-
-            <!-- MDR # -->
-            <div class="col-md-6">
-                <label class="form-label">MDR #</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-hash"></i></span>
-                    <input type="text" class="form-control" @bind="legalcaseDto.MDRNo" placeholder="Enter MDR number" />
-                </div>
-            </div>
-
-            <!-- Residential Units -->
-            <div class="col-md-6">
-                <label class="form-label">Residential Units</label>
-                <input type="text" class="form-control" @bind="legalcaseDto.ResidentalUnits" placeholder="Enter number" />
-            </div>
-
-            <!-- Commercial Units -->
-            <div class="col-md-6">
-                <label class="form-label">Commercial Units</label>
-                <input type="text" class="form-control" @bind="legalcaseDto.CommercialUnits" placeholder="Enter number" />
-            </div>
-
-            <!-- DHCR Registered -->
-            <div class="col-md-6">
-                <label class="form-label d-block">All Units registered with DHCR?</label>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="dhcr" @bind="dhcrRegistered" />
-                    <label class="form-check-label">Yes</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="dhcr" @bind="dhcrRegistered" />
-                    <label class="form-check-label">No</label>
-                </div>
-            </div>
-
-            <!-- HPD Violations -->
-            <div class="col-md-6">
-                <label class="form-label d-block">HPD Violations?</label>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="hpd" @bind="hpdViolations" />
-                    <label class="form-check-label">Yes</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="hpd" @bind="hpdViolations" />
-                    <label class="form-check-label">No</label>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-@if (currentStep == 4)
 {
     <div class="mx-auto p-4 border rounded shadow-sm bg-white" style="max-width: 800px;">
         <h5 class="text-center text-navy fw-bold">Building / Property Details</h5>
@@ -658,9 +389,9 @@
     </div>
 }
 
-
+</div>
 <!-- Button Group -->
-<div class="container my-4">
+<div class="container my-4" style="position:fixed ; bottom:-17px">
     <div class="d-flex justify-content-between align-items-center">
         <button class="btn bg-navy text-white" @onclick="Back" disabled="@(currentStep == 0)">← Back</button>
 
@@ -671,7 +402,7 @@
             }
             @if (currentStep < lastStep)
             {
-                <button class="btn bg-gold text-white" @onclick="Next">Next →</button>
+                <button class="btn bg-gold text-white" @onclick="Next" disabled="@IsNextDisabled">Next →</button>
             }
             @if (currentStep == lastStep)
             {
@@ -685,14 +416,52 @@
     [Parameter] public string ClientId { get; set; }
 
     int currentStep = 0;
-    int lastStep = 4;
+    int lastStep = 2;
 
     List<string> stepTitles = new() {
-        "Case & Role", "Tenant Info", "Landlord Info",
-        "Manager Info", "Property Info",
+        "Case & Role", "Landlord Info", "Property Info",
         // "Eviction 6-A", "NYC Properties",
         // "Court Status", "Documents", "Declarations"
     };
+
+    private LandlordSearchModel landlordSearchModel = new();
+    private string searchText = "";
+    private List<CreateLandLordDto> filteredList = new();
+    private CreateLandLordDto? selectedLandlord;
+
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        searchText = e?.Value?.ToString() ?? "";
+
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            filteredList = await _landlordService.SearchLandlordsAsync(searchText);
+        }
+        else
+        {
+            filteredList.Clear();
+        }
+    }
+
+    private async Task SelectLandlord(Guid id)
+    {
+        selectedLandlord = await _landlordService.GetLandLordByIdAsync(id);
+
+        if (selectedLandlord != null)
+        {
+            searchText = selectedLandlord.Name;
+            landlordSearchModel.SelectedLandlord = selectedLandlord.Name;
+        }
+
+        filteredList.Clear();
+    }
+
+    private void HandleSubmit()
+    {
+        Console.WriteLine($"Selected: {landlordSearchModel.SelectedLandlord}");
+    }
+
+
     string first_name;
     string last_name;
     string gender = "male";
@@ -718,6 +487,7 @@
     string selectedClientRole;
     string selectedCaseType;
     string otherCaseType;
+    string holdoverSubType;
 
     private string attorney;
     private string firm;
@@ -743,10 +513,27 @@
     private bool showSuggestions = false;
 
 
-
+    private bool IsNextDisabled =>
+    currentStep == 0 &&
+    (
+        string.IsNullOrWhiteSpace(legalcaseDto.ClientRole) ||
+        (legalcaseDto.ClientRole == "Legal Representative" && string.IsNullOrWhiteSpace(legalcaseDto.LegalRepresentative)) ||
+        string.IsNullOrWhiteSpace(otherCaseType) ||
+        (otherCaseType == "Holdover" && string.IsNullOrWhiteSpace(holdoverSubType)) ||
+        (otherCaseType == "Other" && string.IsNullOrWhiteSpace(legalcaseDto.CaseType))
+    );
 
     void SaveAsDraft() => Console.WriteLine("Saving Draft...");
-    void Next() => currentStep++;
+    private void Next()
+    {
+        if (otherCaseType == "Holdover")
+            legalcaseDto.CaseType = holdoverSubType;
+        else if (otherCaseType != "Other")
+            legalcaseDto.CaseType = otherCaseType;
+
+        currentStep++;
+    }
+
     void Back() => currentStep--;
 
 

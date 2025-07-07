@@ -21,10 +21,33 @@ namespace EvictionFiler.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<Appartment?> GetByIdAsync(Guid id)
+        public async Task<AddApartment?> GetByIdAsync(Guid id)
         {
-            return await _context.Appartments.FindAsync(id);
-        }
+            var appartment  =  await _context.Appartments.FindAsync(id);
+
+			if (appartment == null)
+				return null;
+
+			return new AddApartment
+			{
+				Id = appartment.Id,
+				ApartmentCode = appartment.ApartmentCode,
+				City = appartment.City,
+				State = appartment.State,
+				PremiseType = appartment.PremiseType,
+				Address_1 = appartment.Address_1,
+				Address_2 = appartment.Address_2,
+				Zipcode = appartment.Zipcode,
+				Country = appartment.Country,
+				MDR_Number = appartment.MDR_Number,
+				PetitionerInterest = appartment.PetitionerInterest,
+				//IsActive = true,
+				//CreatedAt = DateTime.UtcNow,
+				LandlordId = appartment.LandlordId,
+				Tanent = appartment.Tanent,
+			};
+		}
+
 
         public async Task<List<Appartment>> GetAllAsync()
         {

@@ -78,10 +78,49 @@ namespace EvictionFiler.Infrastructure.Repositories
 		}
 
 
-		public async Task<LandLord?> GetLandLordByIdAsync(Guid id)
+		public async Task<CreateLandLordDto?> GetLandLordByIdAsync(Guid id)
         {
-            return await _mainDbContext.LandLords
-                .FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted != true);
+			var l = await _mainDbContext.LandLords
+		  .FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted != true);
+
+			if (l == null)
+				return null;
+
+			return new CreateLandLordDto
+			{
+				LandLordCode = l.LandLordCode,
+				Name = l.Name,
+				EINorSSN = l.EINorSSN,
+				Phone = l.Phone,
+				Email = l.Email,
+				MaillingAddress = l.MaillingAddress,
+				Attorney = l.Attorney,
+				Firm = l.Firm,
+				isCorporeateOwner = l.isCorporeateOwner,
+				RegisteredAgent = l.RegisteredAgent,
+			};
+
+		}
+        public async Task<List<CreateLandLordDto>> SearchLandlordByCode(string code)
+        {
+            var landlord = await _mainDbContext.LandLords.Where(e => e.LandLordCode.Contains(code)).Select(e => new CreateLandLordDto
+            {
+                Id = e.Id,
+                LandLordCode = e.LandLordCode,
+                Name = e.Name,
+                EINorSSN = e.EINorSSN,
+                Phone = e.Phone,
+                Email = e.Email,
+                MaillingAddress = e.MaillingAddress,
+                Attorney = e.Attorney,
+                Firm = e.Firm,
+                isCorporeateOwner = e.isCorporeateOwner,
+                RegisteredAgent = e.RegisteredAgent,
+                //ClientId = e.ClientId,
+            }).ToListAsync();
+            if (landlord == null)
+                return new List<CreateLandLordDto>();
+            return landlord;
         }
 
         public async Task<bool> UpdateLandLordAsync(CreateLandLordDto dto)
@@ -117,26 +156,23 @@ namespace EvictionFiler.Infrastructure.Repositories
             return true;
         }
 
-        public async Task<List<CreateLandLordDto>> SearchLandlordByCode(string code)
-        {
-            var landlord = await _mainDbContext.LandLords.Where(e => e.LandLordCode.Contains(code)).Select(e => new CreateLandLordDto
-            {
-                Id = e.Id,
-                LandLordCode = e.LandLordCode,
-                Name = e.Name,
-                EINorSSN = e.EINorSSN,
-                Phone = e.Phone,
-                Email = e.Email,
-                MaillingAddress = e.MaillingAddress,
-                Attorney = e.Attorney,
-                Firm = e.Firm,
-                isCorporeateOwner = e.isCorporeateOwner,
-                RegisteredAgent = e.RegisteredAgent,
-                //ClientId = e.ClientId,
-            }).ToListAsync();
-            if (landlord == null)
-                return new List<CreateLandLordDto>();
-            return landlord;
-        }
-    }
+
+		public async Task<List<CreateLandLordDto>> SearchLandlordsAsync(string query)
+		{
+			var landlords = await _mainDbContext.LandLords
+				.Where(l => l.Name.Contains(query) && l.IsDeleted != true)
+				.Select(l => new CreateLandLordDto
+				{
+					Id = l.Id,
+					Name = l.Name,
+					Email = l.Email,
+					Phone = l.Phone,
+					LandLordCode = l.LandLordCode
+				}).ToListAsync();
+
+			return landlords;
+		}
+
+
+	}
 }

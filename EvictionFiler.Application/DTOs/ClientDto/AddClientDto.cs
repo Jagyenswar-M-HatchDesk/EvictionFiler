@@ -14,27 +14,28 @@ namespace EvictionFiler.Application.DTOs.ClientDto
         public Guid Id { get; set; }
 
 
-		[Required]
+		[Required(ErrorMessage ="Client code is Required")]
 		public string? ClientCode { get; set; } = string.Empty;
-		[Required]
+		[Required(ErrorMessage = " FirstName is Required")]
 		public string? FirstName { get; set; } = string.Empty;
-		[Required]
+	
 		public string? LastName { get; set; } = string.Empty;
-		[Required]
+		[Required(ErrorMessage = " Email is Required")]
 		public string? Email { get; set; } = string.Empty;
-		[Required]
+		[Required(ErrorMessage = " Address is Required")]
 		public string? Address_1 { get; set; } = string.Empty;
         public string? Address_2 { get; set; } = string.Empty;
-		[Required]
+		[Required(ErrorMessage = " City is Required")]
 		public string? City { get; set; } = string.Empty;
-		[Required]
+		[Required(ErrorMessage = " State is Required")]
 		public string? State { get; set; }
-		[Required]
+		[Required(ErrorMessage = "Client code is Required")]
 		public int? ZipCode { get; set; }
-		[Required]
+		[Required(ErrorMessage = " Phone is Required")]
 		public string? Phone { get; set; } = string.Empty;
         public string? CellPhone { get; set; } = string.Empty;
-        public string? Fax { get; set; } = string.Empty;
+		[Required(ErrorMessage = " Fax is Required")]
+		public string? Fax { get; set; } = string.Empty;
         public bool? GenarateOwnRd { get; set; }
 		//public string? LandlordName { get; set; }
 		//public string? LandlordEmail { get; set; }

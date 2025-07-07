@@ -1,6 +1,7 @@
 ﻿using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
+using Microsoft.EntityFrameworkCore;
 
 namespace EvictionFiler.Client.Services
 {
@@ -29,5 +30,17 @@ namespace EvictionFiler.Client.Services
 			var landlords = await _landLordRepository.GetAllLandLordsAsync();
 			return landlords;
 		}
+
+		public async Task<List<CreateLandLordDto>> SearchLandlordsAsync(string query)
+		{
+			return await _landLordRepository.SearchLandlordsAsync(query);
+		}
+
+		public async Task<CreateLandLordDto?> GetLandLordByIdAsync(Guid id)
+		{
+			return await _landLordRepository.GetLandLordByIdAsync(id);
+		}
+
+
 	}
 }

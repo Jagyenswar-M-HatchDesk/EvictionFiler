@@ -144,6 +144,10 @@
         border-color: #1F365D;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     } */
+    .required-label::after {
+        content: " *";
+        color: red;
+    }
 
 </style>
 @using System.Collections.Generic
@@ -169,11 +173,11 @@
                     <ValidationSummary />
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label color-text">Client Code</label>
+                            <label class="form-label color-text required-label">Client Code</label>
                             <InputText class="form-control" maxlength="10" @bind-Value="createClient.ClientCode" placeholder="Enter up to 10 digits" />
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label color-text">First Name</label>
+                            <label class="form-label color-text required-label">First Name</label>
                             <InputText class="form-control" @bind-Value="createClient.FirstName"   placeholder="Enter First Name" />
                         </div>
                         <div class="col-md-4 mb-3">
@@ -184,14 +188,14 @@
 
                     <div class="row">
                         <div class="col-md-8 mb-3">
-                            <label class="form-label color-text">Email</label>
+                            <label class="form-label color-text required-label">Email</label>
                             <div class="input-group">
                                 <span class="input-group-text">@@</span>
                                 <InputText class="form-control" @bind-Value="createClient.Email"   placeholder="Enter Email" />
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label color-text">Fax</label>
+                            <label class="form-label color-text required-label">Fax</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-printer"></i></span>
                                 <InputText class="form-control" @bind-Value="createClient.Fax"    placeholder="Fax Number" />
@@ -201,7 +205,7 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label color-text">Address Line 1</label>
+                            <label class="form-label color-text required-label">Address Line 1</label>
                             <InputText class="form-control" @bind-Value="createClient.Address_1"   />
                         </div>
                         <div class="col-md-6 mb-3">
@@ -212,11 +216,11 @@
 
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label color-text">City</label>
+                            <label class="form-label color-text required-label">City</label>
                             <InputText class="form-control" @bind-Value="createClient.City"   />
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label color-text">State</label>
+                            <label class="form-label color-text required-label">State</label>
                             <InputSelect class="form-select" @bind-Value="createClient.State"  >
                                 <option value="">-- Select State --</option>
                                 <option>Georgia</option>
@@ -225,7 +229,7 @@
                             </InputSelect>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label color-text">Zip Code</label>
+                            <label class="form-label color-text required-label">Zip Code</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-geo"></i></span>
                                 <InputNumber class="form-control" @bind-Value="createClient.ZipCode" />
@@ -235,7 +239,7 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label color-text">Phone</label>
+                            <label class="form-label color-text required-label">Phone</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-telephone"></i></span>
                                 <InputText class="form-control" @bind-Value="createClient.Phone"  />
@@ -404,15 +408,19 @@
         }
     </div>
 
-    <!-- Footer -->
-    <div class="sticky-footer bg-white border-top p-3 d-flex justify-content-end gap-2">
-        <button class="btn btn-outline-secondary px-4 fw-semibold" @onclick="HideAsync">Cancel</button>
-        <button class="btn bg-navy text-white px-4 fw-semibold" disabled="@(!IsClientFormValid())" @onclick="SubmitClientAsync">Submit</button>
+
+    <div class="sticky-footer bg-white border-top p-3 d-flex justify-content-between gap-2">
+        @if (!IsClientFormValid())
+        {
+            <div class="text-danger mt-2">Please fill all required client fields to enable Submit.</div>
+        }
+        <div class="d-flex gap-2 ">
+            <button class="btn btn-outline-secondary px-4 fw-semibold" @onclick="HideAsync">Cancel</button>
+            <button class="btn bg-navy text-white px-4 fw-semibold" disabled="@(!IsClientFormValid())" @onclick="SubmitClientAsync">Submit</button>
+        </div>
+        
     </div>
-    @if (!IsClientFormValid())
-    {
-        <div class="text-danger mt-2">Please fill all required client fields to enable Submit.</div>
-    }
+ 
 
 </div>
 
@@ -450,14 +458,17 @@
 
     private bool IsClientFormValid()
     {
-        return !string.IsNullOrWhiteSpace(createClient.FirstName)
-            && !string.IsNullOrWhiteSpace(createClient.LastName)
+        return 
+         !string.IsNullOrWhiteSpace(createClient.ClientCode)
+             &&!string.IsNullOrWhiteSpace(createClient.FirstName)
+                       && !string.IsNullOrWhiteSpace(createClient.Fax)
             && !string.IsNullOrWhiteSpace(createClient.Email)
             && !string.IsNullOrWhiteSpace(createClient.Phone)
             && !string.IsNullOrWhiteSpace(createClient.ClientCode)
             && !string.IsNullOrWhiteSpace(createClient.Address_1)
             && !string.IsNullOrWhiteSpace(createClient.City)
-            && !string.IsNullOrWhiteSpace(createClient.State);
+            && !string.IsNullOrWhiteSpace(createClient.State)
+              && createClient.ZipCode.HasValue;
     }
 
 
