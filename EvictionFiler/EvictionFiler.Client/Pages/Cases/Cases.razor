@@ -235,7 +235,7 @@
             <h5 class="text-center text-navy fw-bold">Landlord Information</h5>
             <hr class="border-gold mb-4" />
 
-            <EditForm Model="@landlordSearchModel" OnValidSubmit="HandleSubmit">
+            <EditForm Model="@landlordSearchModel">
                 <div class="row mb-3 align-items-center">
                     <label class="col-sm-2 col-form-label fw-semibold text-navy">Landlord</label>
                     <div class="col-sm-10 position-relative">
@@ -313,104 +313,64 @@
 
 @if (currentStep == 2)
 {
-    <div class="mx-auto p-4 border rounded shadow-sm bg-white" style="max-width: 800px;">
-        <h5 class="text-center text-navy fw-bold">Building / Property Details</h5>
-        <hr class="border-gold mb-4" />
 
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">Building Code</label>
-                <input type="text" class="form-control"
-                @bind="apartmentDto.ApartmentCode"
-                @oninput="OnBuildingChanged"
-                placeholder="Enter Building Code" />
+        <div class="mx-auto p-4 border rounded shadow-sm bg-white" style="max-width: 900px;">
+            <h5 class="text-center text-navy fw-bold"> Building/Property Details</h5>
+            <hr class="border-gold mb-4" />
 
-                @if (showSuggestions)
-                {
+            <EditForm Model="@buildingSearchModel">
+                <div class="row mb-3 align-items-center">
+                    <label class="col-sm-2 col-form-label fw-semibold text-navy">Building/Property</label>
+                    <div class="col-sm-10 position-relative">
+                        <input type="text"
+                               class="form-control"
+                               value="@searchBuildingText"
+                               @oninput="HandleBuildingInput"
+                               placeholder="Search by Apartment Code..." />
 
-                    <ul class="list-group position-absolute " style="z-index: 1000; max-height: 200px; width:30%; overflow-y: auto;">
-                        @foreach (var landlord in matchedBuilding)
+                        @if (filteredBuildingList?.Any() == true)
                         {
-                            <li class="list-group-item list-group-item-action"
-                            @onclick="@(() => SelectBuilding(landlord))">
-                                @landlord.ApartmentCode
-                            </li>
+                            <ul class="list-group position-absolute w-100 shadow-sm z-3 mt-1"
+                                style="max-height: 200px; overflow-y: auto;">
+                                @foreach (var item in filteredBuildingList)
+                                {
+                                    <li class="list-group-item list-group-item-action"
+                                        style="cursor: pointer;"
+                                        @onclick="@(() => SelectBuilding(item.Id))">
+                                        @item.ApartmentCode
+
+                                    </li>
+                                }
+                            </ul>
                         }
-                    </ul>
+                    </div>
+                </div>
+            </EditForm>
 
-                }
-            </div>
-            @* <div class="col-md-2">
-                <button class="btn btn-outline-warning" @onclick="SearchTenant()">LookUp</button>
-            </div> *@
+            @if (buildingDetails != null)
+            {
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-navy mb-3 fw-bold">Building Details</h6>
+
+                            <div class="card mb-3 shadow-sm">
+                                <div class="card-body">
+                                    <h6 class="card-title text-navy"><strong>Apartment Code:</strong> @buildingDetails.ApartmentCode</h6>
+                                    <p class="card-text mb-1"><strong>City:</strong> @buildingDetails.City</p>
+                                    <p class="card-text mb-1"><strong>State:</strong> @buildingDetails.State</p>
+                                    <p class="card-text mb-1"><strong>Zipcode:</strong> @buildingDetails.Zipcode</p>
+                                    <p class="card-text mb-1"><strong>Premise Type:</strong> @buildingDetails.PremiseType</p>
+                                    <p class="card-text mb-1"><strong>MDR Number:</strong> @buildingDetails.MDR_Number</p>
+                                    <p class="card-text mb-1"><strong>Petitioner Interest:</strong> @buildingDetails.PetitionerInterest</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
         </div>
-        <div class="row g-3">
-            <!-- Address -->
-            <div class="col-md-6">
-                <label class="form-label">Address</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                    <input type="text" class="form-control" @bind="legalcaseDto.Address" placeholder="Enter property address" />
-                </div>
-            </div>
-
-            <!-- Apt # -->
-            <div class="col-md-6">
-                <label class="form-label">Apt #</label>
-                <input type="text" class="form-control" @bind="legalcaseDto.AptNo" placeholder="Enter Apt #" />
-            </div>
-
-            <!-- Borough -->
-            <div class="col-md-6">
-                <label class="form-label">Borough</label>
-                <input type="text" class="form-control" @bind="legalcaseDto.Borough" placeholder="Enter borough" />
-            </div>
-
-            <!-- ZIP -->
-            <div class="col-md-6">
-                <label class="form-label">ZIP</label>
-                <input type="text" class="form-control" @bind="legalcaseDto.ZIP" placeholder="Enter ZIP code" />
-            </div>
-
-            <!-- Class -->
-            <div class="col-md-6">
-                <label class="form-label">Class</label>
-                <input type="text" class="form-control" @bind="legalcaseDto.Class" placeholder="Enter class" />
-            </div>
-
-            <!-- Year Built -->
-            <div class="col-md-6">
-                <label class="form-label">Year Built</label>
-                <input type="text" class="form-control" @bind="legalcaseDto.YearBuilt" placeholder="Enter year" />
-            </div>
-
-            <!-- Heat/Hot Water -->
-            <div class="col-md-6">
-                <label class="form-label d-block">Heat / Hot Water</label>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="heatWater" @bind="heatWater" />
-                    <label class="form-check-label">Yes</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="heatWater" @bind="heatWater" />
-                    <label class="form-check-label">No</label>
-                </div>
-            </div>
-
-            <!-- HPD Violations -->
-            <div class="col-md-6">
-                <label class="form-label d-block">HPD Violations?</label>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="hpd" @bind="hpdViolations" />
-                    <label class="form-check-label">Yes</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="hpd" @bind="hpdViolations" />
-                    <label class="form-check-label">No</label>
-                </div>
-            </div>
-        </div>
-    </div>
 }
 
 </div>
@@ -449,9 +409,13 @@
     };
 
     private LandlordSearchModel landlordSearchModel = new();
+    private BuildingSearchModel buildingSearchModel = new();
     private string searchText = "";
+    private string searchBuildingText = "";
     private List<CreateLandLordDto> filteredList = new();
+    private List<AddApartment> filteredBuildingList = new();
     private CreateLandLordDto? selectedLandlord;
+    private AddApartment? SelectApartment;
 
     private async Task HandleInput(ChangeEventArgs e)
     {
@@ -467,7 +431,25 @@
         }
     }
 
+
+
+    private async Task HandleBuildingInput(ChangeEventArgs e)
+    {
+        searchBuildingText = e?.Value?.ToString() ?? "";
+
+        if (!string.IsNullOrWhiteSpace(searchBuildingText))
+        {
+            filteredBuildingList = await _apartmentService.SearchBuildingByCode(searchBuildingText);
+        }
+        else
+        {
+            filteredBuildingList.Clear();
+        }
+    }
+
     private LandlordWithBuildings? landlordDetails;
+    private AddApartment buildingDetails;
+   
 
     private async Task SelectLandlord(Guid id)
     {
@@ -482,10 +464,17 @@
         filteredList.Clear();
     }
 
-
-    private void HandleSubmit()
+    private async Task SelectBuilding(Guid id)
     {
-        Console.WriteLine($"Selected: {landlordSearchModel.SelectedLandlord}");
+        buildingDetails = await _apartmentService.GetByIdAsync(id);
+
+        if (buildingDetails != null)
+        {
+            searchBuildingText = buildingDetails.ApartmentCode;
+            
+        }
+
+        filteredBuildingList.Clear();
     }
 
 
@@ -734,12 +723,12 @@
             showSuggestions = false;
         }
     }
-    private void SelectBuilding(AddApartment selectedapartment)
-    {
-        legalcaseDto.Address = selectedapartment.Address_1 + ", " + selectedapartment.Address_2;
-        legalcaseDto.ZIP = selectedapartment.Zipcode;
-        legalcaseDto.Class = selectedapartment.PremiseType;
-        apartmentDto.Id = selectedapartment.Id;
-        showSuggestions = false;
-    }
+    // private void SelectBuilding(AddApartment selectedapartment)
+    // {
+    //     legalcaseDto.Address = selectedapartment.Address_1 + ", " + selectedapartment.Address_2;
+    //     legalcaseDto.ZIP = selectedapartment.Zipcode;
+    //     legalcaseDto.Class = selectedapartment.PremiseType;
+    //     apartmentDto.Id = selectedapartment.Id;
+    //     showSuggestions = false;
+    // }
 }

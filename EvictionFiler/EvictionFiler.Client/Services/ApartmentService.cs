@@ -32,5 +32,7 @@ namespace EvictionFiler.Client.Services
             var newtenant = await _repository.SearchBuildingByCode(code);
             return newtenant;
         }
+
+
     }
 }
