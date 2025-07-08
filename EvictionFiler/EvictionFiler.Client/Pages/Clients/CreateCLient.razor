@@ -1,6 +1,7 @@
 ﻿@using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Application.DTOs.TenantDto
 @using EvictionFiler.Client.Services
 
 @inject ClientService _clientService
@@ -350,6 +351,7 @@
 
                 @if (showBuildingForm)
                 {
+                   
                     <EditForm Model="@building" OnValidSubmit="SubmitBuildingAsync">
 
                         <div class="mb-3">
@@ -375,12 +377,18 @@
                             <div class="col"><label>Country</label><InputText class="form-control" @bind-Value="building.Country" /></div>
                             <div class="col"><label>Zipcode</label><InputText class="form-control" @bind-Value="building.Zipcode" /></div>
                         </div>
+                  
                         <div class="mb-3"><label>MDR Number</label><InputText class="form-control" @bind-Value="building.MDR_Number" /></div>
                         <div class="mb-3"><label>Petitioner Interest</label><InputText class="form-control" @bind-Value="building.PetitionerInterest" /></div>
                         <button type="submit" class="btn bg-navy text-white mt-2">Save Building Info</button>
+         
                     </EditForm>
-                }
+                    <div class="vertical-buttons d-flex flex-column align-items-center position-absolute end-0 top-0 translate-middle-y @(IsVisible ? "" : "d-none")">
+                        <button class="vertical-tab-button @(activeTab == "tanent" ? "active-vertical" : "")" @onclick="@(() => SetActiveTab("tanent"))">Tanent</button>
 
+                    </div>
+
+                }
                 <!-- Grid -->
                 <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
                     <table class="table table-bordered mt-4" style="min-width: 1000px;">
@@ -404,9 +412,147 @@
                     </tbody>
                 </table>
                 </div>
+
+                      </div>
+        }
+
+
+        @if (activeTab == "tanent")
+        {
+            <div class="overlay-form overlay-landlord">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="color-text fw-bold mb-0">TENANT INFORMATION</h5>
+                    <div>
+                        <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button>
+                        <button class="btn bg-navy text-white" @onclick="ToggleTanentForm">@GetToggleButtonText()</button>
+                    </div>
+                </div>
+
+                @if (showTanentForm)
+                {
+                    <EditForm Model="@tenant" OnValidSubmit="SaveTenantAsync">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Name</label>
+                                <InputText class="form-control" @bind-Value="tenant.Name" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Date of Birth</label>
+                                <InputDate class="form-control" @bind-Value="tenant.DOB" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>SSN</label>
+                                <InputText class="form-control" @bind-Value="tenant.SSN" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Phone</label>
+                                <InputText class="form-control" @bind-Value="tenant.Phone" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Email</label>
+                                <InputText class="form-control" @bind-Value="tenant.Email" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Language</label>
+                                <InputText class="form-control" @bind-Value="tenant.Language" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Address</label>
+                            <InputText class="form-control" @bind-Value="tenant.Address" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Apt</label>
+                                <InputText class="form-control" @bind-Value="tenant.Apt" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Borough</label>
+                                <InputText class="form-control" @bind-Value="tenant.Borough" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Rent</label>
+                                <InputNumber class="form-control" @bind-Value="tenant.Rent" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Lease Status</label>
+                                <InputText class="form-control" @bind-Value="tenant.LeaseStatus" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Tenant Code</label>
+                            <InputText class="form-control" @bind-Value="tenant.TenantCode" />
+                        </div>
+
+                        <button type="submit" class="btn bg-navy text-white mt-2">Save Tenant Info</button>
+                    </EditForm>
+                }
+
+                <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
+                    <table class="table table-bordered mt-4" style="min-width: 1200px;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>DOB</th>
+                                <th>SSN</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Language</th>
+                                <th>Address</th>
+                                <th>Apt</th>
+                                <th>Borough</th>
+                                <th>Rent</th>
+                                <th>Lease Status</th>
+                                <th>Tenant Code</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (saveTanentList.Any())
+                            {
+                                @foreach (var t in saveTanentList)
+                                {
+                                    <tr>
+                                        <td>@t.Name</td>
+                                        <td>@t.DOB.ToString("yyyy-MM-dd")</td>
+                                        <td>@t.SSN</td>
+                                        <td>@t.Phone</td>
+                                        <td>@t.Email</td>
+                                        <td>@t.Language</td>
+                                        <td>@t.Address</td>
+                                        <td>@t.Apt</td>
+                                        <td>@t.Borough</td>
+                                        <td>@t.Rent</td>
+                                        <td>@t.LeaseStatus</td>
+                                        <td>@t.TenantCode</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="12" class="text-muted">No tenants added yet.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
         }
-    </div>
+
+
+</div>
 
 
     <div class="sticky-footer bg-white border-top p-3 d-flex justify-content-between gap-2">
@@ -433,12 +579,16 @@
 
     private bool showLandlordForm = false;
     private bool showBuildingForm = false;
+    private bool showTanentForm = false;
 
     private CreateLandLordDto landlord = new();
     private AddApartment building = new();
 
+    private CreateTenantDto tenant = new();
+
     private List<CreateLandLordDto> landlordList = new();
     private List<CreateLandLordDto> savelandlordList = new();
+    private List<CreateTenantDto> saveTanentList = new();
     private List<AddApartment> apartmentList = new();
 
     protected override async Task OnInitializedAsync()
@@ -480,6 +630,7 @@
         activeTab = string.Empty;
         showLandlordForm = false;
         showBuildingForm = false;
+        showTanentForm = false;
         StateHasChanged();
     }
 
@@ -489,8 +640,9 @@
     private void ToggleLandlordForm() => showLandlordForm = !showLandlordForm;
 
     private void ToggleBuildingForm() => showBuildingForm = !showBuildingForm;
+    private void ToggleTanentForm() => showTanentForm = !showTanentForm;
 
-    private string GetToggleButtonText() => (activeTab == "landlord" && showLandlordForm) || (activeTab == "building" && showBuildingForm)
+    private string GetToggleButtonText() => (activeTab == "landlord" && showLandlordForm) || (activeTab == "building" && showBuildingForm) || (activeTab == "tanent" && showTanentForm)
         ? "Cancel"
         : "Add New";
 
@@ -501,6 +653,16 @@
 
         landlord = new();
         showLandlordForm = false;
+        return Task.CompletedTask;
+    }
+
+    private Task SaveTenantAsync()
+    {
+      
+        saveTanentList.Add(tenant);
+
+        tenant = new();
+        showTanentForm = false;
         return Task.CompletedTask;
     }
     private Task SubmitBuildingAsync()
