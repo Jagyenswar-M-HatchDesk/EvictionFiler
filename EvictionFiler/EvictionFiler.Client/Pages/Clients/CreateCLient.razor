@@ -7,6 +7,7 @@
 @inject ClientService _clientService
 @inject LandLordService _landlordService
 @inject ApartmentService _apartmentService
+@inject TenantService _tenantService
 @rendermode InteractiveAuto
 @inject NavigationManager Navigation
 
@@ -365,7 +366,7 @@
                             </InputSelect>
                         </div>
                         <div class="mb-3"><label>Apartment Code</label><InputText class="form-control" @bind-Value="building.ApartmentCode" /></div>
-                        <div class="mb-3"><label>Tanent</label><InputText class="form-control" @bind-Value="building.Tanent" /></div>
+                       
                         <div class="mb-3"><label>Premise Type</label><InputText class="form-control" @bind-Value="building.PremiseType" /></div>
                         <div class="mb-3"><label>Address Line 1</label><InputText class="form-control" @bind-Value="building.Address_1" /></div>
                         <div class="mb-3"><label>Address Line 2</label><InputText class="form-control" @bind-Value="building.Address_2" /></div>
@@ -432,11 +433,25 @@
                 {
                     <EditForm Model="@tenant" OnValidSubmit="SaveTenantAsync">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="mb-3">
+                                <label>Choose Apartment</label>
+                                <InputSelect class="form-select" @bind-Value="tenant.ApartmentId">
+                                    <option value="">-- Select Apartment --</option>
+                                    @foreach (var apartment in apartmentList)
+                                    {
+                                        <option value="@apartment.Id">@apartment.ApartmentCode</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class=" col-md-4  mb-3">
+                                <label>Tenant Code</label>
+                                <InputText class="form-control" @bind-Value="tenant.TenantCode" />
+                            </div>
+                            <div class="col-md-4 mb-3">
                                 <label>Name</label>
                                 <InputText class="form-control" @bind-Value="tenant.Name" />
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label>Date of Birth</label>
                                 <InputDate class="form-control" @bind-Value="tenant.DOB" />
                             </div>
@@ -451,6 +466,7 @@
                                 <label>Phone</label>
                                 <InputText class="form-control" @bind-Value="tenant.Phone" />
                             </div>
+                           
                         </div>
 
                         <div class="row">
@@ -491,10 +507,7 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label>Tenant Code</label>
-                            <InputText class="form-control" @bind-Value="tenant.TenantCode" />
-                        </div>
+
 
                         <button type="submit" class="btn bg-navy text-white mt-2">Save Tenant Info</button>
                     </EditForm>
@@ -668,7 +681,7 @@
     private Task SubmitBuildingAsync()
 
     {
-
+        building.Id = Guid.NewGuid();
         apartmentList.Add(building);
         building = new();
         showBuildingForm = false;
@@ -718,6 +731,21 @@
 
             var isapartmentSaved = await _apartmentService.AddApartmentAsync(apartmentList);
             if (!isapartmentSaved)
+                return;
+        }
+
+        if (saveTanentList.Count > 0)
+        {
+            foreach (var val in saveTanentList)
+            {
+                if (val.Id == Guid.Empty)
+                    val.Id = Guid.NewGuid();
+                // val.LandlordId = landlord.Id;
+
+            }
+
+            var istanentSaved = await _tenantService.AddTenantAsync(saveTanentList);
+            if (!istanentSaved)
                 return;
         }
 

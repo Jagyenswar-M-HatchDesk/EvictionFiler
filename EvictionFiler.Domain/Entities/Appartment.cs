@@ -28,6 +28,7 @@ namespace EvictionFiler.Domain.Entities
 		public Guid? LandlordId { get; set; }
 		[ForeignKey("LandlordId")]
 		[DeleteBehavior(DeleteBehavior.Restrict)]
+		
 		public LandLord? Landlord { get; set; }
 	}
 }

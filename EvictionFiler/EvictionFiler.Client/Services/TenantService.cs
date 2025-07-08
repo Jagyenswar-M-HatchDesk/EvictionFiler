@@ -7,22 +7,22 @@ namespace EvictionFiler.Client.Services
 {
     public class TenantService
     {
-        private readonly ITenantRepository _services;
+        private readonly ITenantRepository _repo;
 
         public TenantService(ITenantRepository services)
         {
-            _services = services;
+			_repo = services;
         }
 
-        public async Task<bool> AddTenantAsync(CreateTenantDto dto)
+        public async Task<bool> AddTenantAsync(List<CreateTenantDto> dto)
         {
-            var newtenant =  await _services.AddTenant(dto);
+            var newtenant =  await _repo.AddTenant(dto);
             return newtenant;
         }
 
         public async Task<List<CreateTenantDto>> SearchTenantbyCode(string code)
         {
-            var newtenant = await _services.SearchTenantByCode(code);
+            var newtenant = await _repo.SearchTenantByCode(code);
             return newtenant;
         }
     }

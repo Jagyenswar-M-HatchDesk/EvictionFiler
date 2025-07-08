@@ -20,10 +20,10 @@ namespace EvictionFiler.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<bool> AddTenant(CreateTenantDto dto)
+        public async Task<bool> AddTenant(List<CreateTenantDto> dtolist)
         {
-            var newtenant = new Tenant
-            {
+            var newtenant = dtolist.Select(dto => new Tenant
+			{
                 Id = dto.Id,
                 TenantCode = dto.TenantCode,
                 Name = dto.Name,
@@ -39,9 +39,10 @@ namespace EvictionFiler.Infrastructure.Repositories
                 LeaseStatus = dto.LeaseStatus,
                 CreatedAt = DateTime.Now,
                 IsActive = true,
+                ApartmentId = dto.ApartmentId
 
-            };
-            await _dbContext.Tenants.AddAsync(newtenant);
+            });
+             _dbContext.Tenants.AddRange(newtenant);
             var result = await _dbContext.SaveChangesAsync();
 
             if(result != null)

@@ -1,14 +1,16 @@
-﻿using EvictionFiler.Domain.Entities;
-using EvictionFiler.Infrastructure.DbContexts;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using EvictionFiler.Application.Interfaces.IUserRepository;
+using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.DTOs.TenantDto;
+using EvictionFiler.Application.Interfaces.IUserRepository;
+using EvictionFiler.Domain.Entities;
+using EvictionFiler.Infrastructure.DbContexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
@@ -81,8 +83,59 @@ namespace EvictionFiler.Infrastructure.Repositories
                 return true;
             return false;
         }
+		public async Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id)
+		{
+			var appartment = await _context.Appartments
+				.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted != true);
 
-        public async Task UpdateAsync(Appartment appartment)
+			if (appartment == null) return null;
+
+			var tenant = await _context.Tenants
+				.Where(a => a.ApartmentId == id && a.IsDeleted != true)
+				.Select(dto => new CreateTenantDto
+				{
+					Id = dto.Id,
+					TenantCode = dto.TenantCode,
+					Name = dto.Name,
+					DOB = dto.DOB,
+					SSN = dto.SSN,
+					Phone = dto.Phone,
+					Email = dto.Email,
+					Language = dto.Language,
+					Address = dto.Address,
+					Apt = dto.Apt,
+					Borough = dto.Borough,
+					Rent = dto.Rent,
+					LeaseStatus = dto.LeaseStatus,
+				
+					ApartmentId = dto.ApartmentId
+				}).ToListAsync();
+
+            return new BuildingWithTenant
+            {
+              
+                Building = new AddApartment
+                {
+                    Id = appartment.Id,
+                    ApartmentCode = appartment.ApartmentCode,
+                    City = appartment.City,
+                    State = appartment.State,
+                    PremiseType = appartment.PremiseType,
+                    Address_1 = appartment.Address_1,
+                    Address_2 = appartment.Address_2,
+                    Zipcode = appartment.Zipcode,
+                    Country = appartment.Country,
+                    MDR_Number = appartment.MDR_Number,
+                    PetitionerInterest = appartment.PetitionerInterest,
+                    LandlordId = appartment.LandlordId,
+                    Tanent = appartment.Tanent,
+                },
+				Tenants = tenant
+			};
+		}
+
+
+		public async Task UpdateAsync(Appartment appartment)
         {
             _context.Appartments.Update(appartment);
             await _context.SaveChangesAsync();

@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Application.DTOs.ApartmentDto;
+﻿using EvictionFiler.Application.DTOs;
+using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
@@ -33,6 +34,9 @@ namespace EvictionFiler.Client.Services
             return newtenant;
         }
 
-
-    }
+		public async Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id)
+		{
+			return await _repository.GetBuildingsWithTenantAsync(id);
+		}
+	}
 }

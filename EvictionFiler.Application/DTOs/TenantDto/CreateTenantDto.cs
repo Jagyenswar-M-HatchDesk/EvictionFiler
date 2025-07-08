@@ -21,5 +21,6 @@ namespace EvictionFiler.Application.DTOs.TenantDto
         public string? Borough { get; set; } = string.Empty;
         public double Rent { get; set; }
         public string? LeaseStatus { get; set; } = string.Empty;
-    }
+		public Guid? ApartmentId { get; set; }
+	}
 }
