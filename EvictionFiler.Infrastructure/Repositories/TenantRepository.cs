@@ -1,14 +1,16 @@
-﻿using EvictionFiler.Application.DTOs.TenantDto;
-using EvictionFiler.Application.Interfaces.IUserRepository;
-using EvictionFiler.Domain.Entities;
-using EvictionFiler.Infrastructure.DbContexts;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
+using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.DTOs.TenantDto;
+using EvictionFiler.Application.Interfaces.IUserRepository;
+using EvictionFiler.Domain.Entities;
+using EvictionFiler.Infrastructure.DbContexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace EvictionFiler.Infrastructure.Repositories
 { 
@@ -123,5 +125,49 @@ namespace EvictionFiler.Infrastructure.Repositories
                 return new List<CreateTenantDto>();
             return tenant;
         }
-    }
+
+		public async Task<List<CreateTenantDto>> SearchTenantAsync(string query)
+		{
+			var tenants = await _dbContext.Tenants
+				.Where(l => l.Name.Contains(query) && l.IsDeleted != true)
+				.Select(l => new CreateTenantDto
+				{
+					Id = l.Id,
+					Name = l.Name,
+					Email = l.Email,
+					Phone = l.Phone,
+					
+				}).ToListAsync();
+
+			return tenants;
+		}
+
+		public async Task<CreateTenantDto?> GetByIdAsync(Guid id)
+		{
+			var dto = await _dbContext.Tenants.FindAsync(id);
+
+			if (dto == null)
+				return null;
+
+			return new CreateTenantDto
+			{
+				Id = dto.Id,
+				TenantCode = dto.TenantCode,
+				Name = dto.Name,
+				DOB = dto.DOB,
+				SSN = dto.SSN,
+				Phone = dto.Phone,
+				Email = dto.Email,
+				Language = dto.Language,
+				Address = dto.Address,
+				Apt = dto.Apt,
+				Borough = dto.Borough,
+				Rent = dto.Rent,
+				LeaseStatus = dto.LeaseStatus,
+			
+				ApartmentId = dto.ApartmentId
+			};
+		}
+
+	}
 }

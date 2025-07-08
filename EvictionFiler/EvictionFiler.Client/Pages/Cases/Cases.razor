@@ -408,6 +408,73 @@
         </div>
 }
 
+    @if (currentStep == 3)
+    {
+
+        <div class="mx-auto p-4 border rounded shadow-sm bg-white" style="max-width: 900px;">
+            <h5 class="text-center text-navy fw-bold"> Building/Property Details</h5>
+            <hr class="border-gold mb-4" />
+
+            <EditForm Model="@tenantSearchModel">
+                <div class="row mb-3 align-items-center">
+                    <label class="col-sm-2 col-form-label fw-semibold text-navy">Tenant</label>
+                    <div class="col-sm-10 position-relative">
+                        <input type="text"
+                               class="form-control"
+                               value="@searchtenantText"
+                               @oninput="HandleTenantInput"
+                               placeholder="Search by Tenant Name..." />
+
+                        @if (filteredTenantList?.Any() == true)
+                        {
+                            <ul class="list-group position-absolute w-100 shadow-sm z-3 mt-1"
+                                style="max-height: 200px; overflow-y: auto;">
+                                @foreach (var item in filteredTenantList)
+                                {
+                                    <li class="list-group-item list-group-item-action"
+                                        style="cursor: pointer;"
+                                        @onclick="@(() => SelectTenant(item.Id))">
+                                        @item.Name
+
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                </div>
+            </EditForm>
+
+            @if (TenantDetails != null)
+            {
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-navy mb-3 fw-bold">Tenants Details</h6>
+
+                            <div class="card mb-3 shadow-sm">
+                                <div class="card-body">
+                                    <p class="card-text mb-1"><strong>Tenant Code:</strong> @TenantDetails.TenantCode</p>
+                                    <p class="card-text mb-1"><strong>DOB:</strong> @TenantDetails.DOB.ToString("dd/MM/yyyy")</p>
+                                    <p class="card-text mb-1"><strong>Phone:</strong> @TenantDetails.Phone</p>
+                                    <p class="card-text mb-1"><strong>Email:</strong> @TenantDetails.Email</p>
+                                    <p class="card-text mb-1"><strong>Language:</strong> @TenantDetails.Language</p>
+                                    <p class="card-text mb-1"><strong>Address:</strong> @TenantDetails.Address</p>
+                                    <p class="card-text mb-1"><strong>Apt:</strong> @TenantDetails.Apt</p>
+                                    <p class="card-text mb-1"><strong>Borough:</strong> @TenantDetails.Borough</p>
+                                    <p class="card-text mb-1"><strong>Rent:</strong> $@TenantDetails.Rent</p>
+                                    <p class="card-text mb-1"><strong>Lease Status:</strong> @TenantDetails.LeaseStatus</p>
+                                    <p class="card-text mb-1"><strong>Tenant Code:</strong> @TenantDetails.TenantCode</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            }
+
+        </div>
+    }
+
 </div>
 <!-- Button Group -->
 <div class="container my-4" style="position:fixed ; bottom:-17px;">
@@ -437,22 +504,26 @@
     [Parameter] public string ClientId { get; set; }
 
     int currentStep = 0;
-    int lastStep = 2;
+    int lastStep = 3;
 
     List<string> stepTitles = new() {
-        "Case & Role", "Landlord Info", "Property Info",
-     
+        "Case & Role", "Landlord Info", "Property Info", " Tenant Info",
+
     };
 
     private LandlordSearchModel landlordSearchModel = new();
     private BuildingSearchModel buildingSearchModel = new();
+    private TenantSearchModel tenantSearchModel = new();
     private string searchText = "";
     private string searchBuildingText = "";
+    private string searchtenantText = "";
     private List<CreateLandLordDto> filteredList = new();
     private List<AddApartment> filteredBuildingList = new();
+    private List<CreateTenantDto> filteredTenantList = new();
     private CreateLandLordDto? selectedLandlord;
     private AddApartment? selectedBuilding;
-    private AddApartment? SelectApartment;
+    private CreateTenantDto? selectedTenant;
+
 
     private async Task HandleInput(ChangeEventArgs e)
     {
@@ -468,6 +539,19 @@
         }
     }
 
+    private async Task HandleTenantInput(ChangeEventArgs e)
+    {
+        searchtenantText = e?.Value?.ToString() ?? "";
+
+        if (!string.IsNullOrWhiteSpace(searchtenantText))
+        {
+            filteredTenantList = await _tenantService.SearchTenantsAsync(searchtenantText);
+        }
+        else
+        {
+            filteredTenantList.Clear();
+        }
+    }
 
 
     private async Task HandleBuildingInput(ChangeEventArgs e)
@@ -486,7 +570,10 @@
 
     private LandlordWithBuildings? landlordDetails;
     private BuildingWithTenant ?buildingDetails;
-   
+    private CreateTenantDto? TenantDetails;
+
+
+
 
     private async Task SelectLandlord(Guid id)
     {
@@ -514,6 +601,18 @@
         filteredBuildingList.Clear();
     }
 
+    private async Task SelectTenant(Guid id)
+    {
+        TenantDetails = await _tenantService.GetByIdAsync(id);
+
+        if (TenantDetails != null)
+        {
+            searchtenantText = TenantDetails.Name;
+            tenantSearchModel.SelectedTenant = TenantDetails.Name;
+        }
+
+        filteredTenantList.Clear();
+    }
 
     string first_name;
     string last_name;
@@ -567,17 +666,22 @@
 
 
     private bool IsNextDisabled =>
-        (currentStep == 0 &&
-        (
-            string.IsNullOrWhiteSpace(legalcaseDto.ClientRole) ||
-            (legalcaseDto.ClientRole == "Legal Representative" && string.IsNullOrWhiteSpace(legalcaseDto.LegalRepresentative)) ||
-            string.IsNullOrWhiteSpace(otherCaseType) ||
-            (otherCaseType == "Holdover" && string.IsNullOrWhiteSpace(holdoverSubType)) ||
-            (otherCaseType == "Other" && string.IsNullOrWhiteSpace(legalcaseDto.CaseType))
-        ))
-        ||
-        (currentStep == 1 &&
-        string.IsNullOrWhiteSpace(landlordSearchModel.SelectedLandlord));
+      (currentStep == 0 &&
+      (
+          string.IsNullOrWhiteSpace(legalcaseDto.ClientRole) ||
+          (legalcaseDto.ClientRole == "Legal Representative" && string.IsNullOrWhiteSpace(legalcaseDto.LegalRepresentative)) ||
+          string.IsNullOrWhiteSpace(otherCaseType) ||
+          (otherCaseType == "Holdover" && string.IsNullOrWhiteSpace(holdoverSubType)) ||
+          (otherCaseType == "Other" && string.IsNullOrWhiteSpace(legalcaseDto.CaseType))
+      ))
+      ||
+      (currentStep == 1 &&
+       string.IsNullOrWhiteSpace(landlordSearchModel.SelectedLandlord))
+      ||
+      (currentStep == 2 &&
+       (buildingDetails == null || buildingDetails.Building == null || string.IsNullOrWhiteSpace(buildingDetails.Building.ApartmentCode)));
+
+
 
 
     void SaveAsDraft() => Console.WriteLine("Saving Draft...");
