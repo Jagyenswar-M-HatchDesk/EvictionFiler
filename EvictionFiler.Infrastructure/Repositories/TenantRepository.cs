@@ -129,18 +129,19 @@ namespace EvictionFiler.Infrastructure.Repositories
 		public async Task<List<CreateTenantDto>> SearchTenantAsync(string query)
 		{
 			var tenants = await _dbContext.Tenants
-				.Where(l => l.Name.Contains(query) && l.IsDeleted != true)
-				.Select(l => new CreateTenantDto
+				.Where(t => t.Name.ToLower().StartsWith(query.ToLower()) && t.IsDeleted != true)
+				.Select(t => new CreateTenantDto
 				{
-					Id = l.Id,
-					Name = l.Name,
-					Email = l.Email,
-					Phone = l.Phone,
-					
-				}).ToListAsync();
+					Id = t.Id,
+					Name = t.Name,
+					Email = t.Email,
+					Phone = t.Phone
+				})
+				.ToListAsync();
 
 			return tenants;
 		}
+
 
 		public async Task<CreateTenantDto?> GetByIdAsync(Guid id)
 		{

@@ -161,8 +161,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 		public async Task<List<CreateLandLordDto>> SearchLandlordsAsync(string query)
 		{
+			query = query?.Trim().ToLower() ?? "";
+
 			var landlords = await _mainDbContext.LandLords
-				.Where(l => l.Name.Contains(query) && l.IsDeleted != true)
+				.Where(l => l.Name.ToLower().Contains(query) && l.IsDeleted != true)
 				.Select(l => new CreateLandLordDto
 				{
 					Id = l.Id,
@@ -174,6 +176,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			return landlords;
 		}
+
 
 
 		public async Task<LandlordWithBuildings?> GetLandlordWithBuildingsAsync(Guid landlordId)
