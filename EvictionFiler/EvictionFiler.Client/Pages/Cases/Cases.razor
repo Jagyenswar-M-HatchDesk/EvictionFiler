@@ -161,7 +161,7 @@
 </div>
 
 <!-- Form Content -->
-<div class="container pt-4">
+<div class="container pt-4" style="position:relative; top:12%;">
 @if (currentStep == 0)
     {
         <div class="mx-auto p-4 border rounded shadow-sm bg-white" >
@@ -237,10 +237,10 @@
 
             <EditForm Model="@landlordSearchModel">
                 <div class="row mb-3 align-items-center">
-                    <label class="col-sm-2 col-form-label fw-semibold text-navy">Landlord</label>
+                    <label class="col-sm-1 col-form-label fw-semibold text-navy">Landlord</label>
                     <div class="col-sm-10 position-relative">
                         <input type="text"
-                               class="form-control w-75"
+                               class="form-control w-50"
                                value="@searchText"
                                @oninput="HandleInput"
                                placeholder="Search by  landlord name..." />
@@ -284,7 +284,7 @@
 
                     <div class="col-md-6">
                         <div class="border rounded p-3 bg-light">
-                            <h6 class="text-navy mb-3 fw-bold">Buildings</h6>
+                            <h6 class="text-navy mb-3 fw-bold">Building Details</h6>
 
                             @if (landlordDetails.Buildings?.Any() == true)
                             {
@@ -319,7 +319,7 @@
 @if (currentStep == 2)
 {
 
-        <div class="mx-auto p-4 border rounded shadow-sm bg-white" style="max-width: 900px;">
+        <div class="mx-auto p-4 border rounded shadow-sm bg-white">
             <h5 class="text-center text-navy fw-bold"> Building/Property Details</h5>
             <hr class="border-gold mb-4" />
 
@@ -374,7 +374,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="border rounded p-3 bg-light">
-                            <h6 class="text-navy mb-3 fw-bold">Tenant </h6>
+                            <h6 class="text-navy mb-3 fw-bold">Tenant Details </h6>
 
                             @if (buildingDetails.Tenants?.Any() == true)
                             {
@@ -408,16 +408,16 @@
         </div>
 }
 
-    @if (currentStep == 3)
+@if (currentStep == 3)
     {
 
-        <div class="mx-auto p-4 border rounded shadow-sm bg-white" style="max-width: 900px;">
-            <h5 class="text-center text-navy fw-bold"> Building/Property Details</h5>
+        <div class="mx-auto p-4 border rounded shadow-sm bg-white" >
+            <h5 class="text-center text-navy fw-bold">Tenants Details</h5>
             <hr class="border-gold mb-4" />
 
             <EditForm Model="@tenantSearchModel">
                 <div class="row mb-3 align-items-center">
-                    <label class="col-sm-2 col-form-label fw-semibold text-navy">Tenant</label>
+                    <label class="col-sm-1 col-form-label fw-semibold text-navy">Tenant</label>
                     <div class="col-sm-10 position-relative">
                         <input type="text"
                                class="form-control"
@@ -583,6 +583,8 @@
         {
             searchText = landlordDetails.Landlord.Name;
             landlordSearchModel.SelectedLandlord = landlordDetails.Landlord.Name;
+
+            landLordDto = landlordDetails.Landlord;
         }
 
         filteredList.Clear();
@@ -596,11 +598,11 @@
         {
             searchBuildingText = buildingDetails.Building.ApartmentCode;
             buildingSearchModel.SelectedBuilding = buildingDetails.Building.ApartmentCode;
+            apartmentDto = buildingDetails.Building;
         }
 
         filteredBuildingList.Clear();
     }
-
     private async Task SelectTenant(Guid id)
     {
         TenantDetails = await _tenantService.GetByIdAsync(id);
@@ -609,10 +611,30 @@
         {
             searchtenantText = TenantDetails.Name;
             tenantSearchModel.SelectedTenant = TenantDetails.Name;
+
+            // ✅ Create and assign tenantDto properly
+            tenantDto = new CreateTenantDto
+            {
+                Id = TenantDetails.Id,
+                Name = TenantDetails.Name,
+                DOB = TenantDetails.DOB,
+                SSN = TenantDetails.SSN,
+                Phone = TenantDetails.Phone,
+                Email = TenantDetails.Email,
+                Language = TenantDetails.Language,
+                Address = TenantDetails.Address,
+                Apt = TenantDetails.Apt,
+                Borough = TenantDetails.Borough,
+                Rent = TenantDetails.Rent,
+                LeaseStatus = TenantDetails.LeaseStatus,
+                TenantCode = TenantDetails.TenantCode
+               
+            };
         }
 
         filteredTenantList.Clear();
     }
+
 
     string first_name;
     string last_name;
@@ -714,31 +736,15 @@
     // }
 
 
+
     private async Task Submit()
     {
         var result = false;
 
-        if (tenantDto == null || tenantDto.Id == Guid.Empty)
-        {
-            tenantDto.Id = Guid.NewGuid();
-            // await _tenantService.AddTenantAsync(tenantDto);
-        }
-
-        if (landLordDto == null || landLordDto.Id == Guid.Empty)
-        {
-            landLordDto.Id = Guid.NewGuid();
-            //await _landlordService.AddLandLordAsync(landLordDto);
-        }
-
-        if (apartmentDto == null || apartmentDto.Id == Guid.Empty)
-        {
-            apartmentDto.Id = Guid.NewGuid();
-            // await _apartmentService.AddApartmentAsync(apartmentDto);
-        }
-
+        // ✅ No need to generate new IDs here
         if (legalcaseDto == null || legalcaseDto.Id == Guid.Empty)
         {
-            legalcaseDto.Id = Guid.NewGuid();
+            legalcaseDto.Id = Guid.NewGuid(); // Submit ke liye legalcase ka naya ID toh chahiye
             legalcaseDto.LandLordId = landLordDto.Id;
             legalcaseDto.ApartmentId = apartmentDto.Id;
             legalcaseDto.TenantId = tenantDto.Id;
@@ -749,7 +755,6 @@
                 legalcaseDto.CaseType = otherCaseType;
 
             result = await _legalCaseService.AddLegalCasesAsync(legalcaseDto);
-
             _dataService.CaseName = null;
         }
 
@@ -758,7 +763,6 @@
             nav.NavigateTo("/cases");
         }
     }
-
 
 
 

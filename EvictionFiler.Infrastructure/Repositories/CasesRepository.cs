@@ -41,7 +41,7 @@ namespace EvictionFiler.Infrastructure.Repositories
             var newcase = new LegalCase
             {
                 Id = legalCase.Id,
-                Casecode = GenerateCaseCode(),
+                Casecode = await GenerateCaseCodeAsync(),
                 TenantId = legalCase.TenantId,
                 ApartmentId = legalCase.ApartmentId,
                 LandLordId = legalCase.LandLordId,
@@ -93,12 +93,29 @@ namespace EvictionFiler.Infrastructure.Repositories
             }
         }
 
-        public static string GenerateCaseCode()
-        {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            var random = new Random();
-            return new string(Enumerable.Repeat(chars, 8)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
-        }
-    }
+		public async Task<string> GenerateCaseCodeAsync()
+		{
+			// Get the latest case from DB
+			var lastCase = await _context.LegalCases
+				.OrderByDescending(c => c.Casecode)
+				.Select(c => c.Casecode)
+				.FirstOrDefaultAsync();
+
+			int nextNumber = 1;
+
+			if (!string.IsNullOrEmpty(lastCase) && lastCase.StartsWith("CC"))
+			{
+				string numberPart = lastCase.Substring(2); // Remove 'EF'
+				if (int.TryParse(numberPart, out int parsedNumber))
+				{
+					nextNumber = parsedNumber + 1;
+				}
+			}
+
+			// Generate new CaseCode
+			string newCode = "CC" + nextNumber.ToString("D10"); // D10 = 10 digits
+			return newCode;
+		}
+
+	}
 }
