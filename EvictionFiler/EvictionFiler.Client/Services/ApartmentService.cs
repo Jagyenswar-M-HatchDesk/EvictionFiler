@@ -28,11 +28,11 @@ namespace EvictionFiler.Client.Services
 			return newapartment;
 		}
 
-		public async Task<List<AddApartment>> SearchBuildingByCode(string code)
-        {
-            var newtenant = await _repository.SearchBuildingByCode(code);
-            return newtenant;
-        }
+		public async Task<List<AddApartment>> SearchBuildingByCode(string code, Guid landlordId)
+		{
+			return await _repository.SearchBuildingByCode(code, landlordId);
+		}
+
 
 		public async Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id)
 		{

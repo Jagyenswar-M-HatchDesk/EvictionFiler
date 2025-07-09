@@ -17,8 +17,9 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
         Task<List<Tenant>> GetAllTenantsAsync();
         Task<bool> DeleteTenantAsync(Guid id);
         Task<bool> UpdateTenantAsync(CreateTenantDto dto);
-        Task<List<CreateTenantDto>> SearchTenantAsync(string query);
-        Task<CreateTenantDto?> GetByIdAsync(Guid id);
+        Task<List<CreateTenantDto>> SearchTenantAsync(string query, Guid BuildingId);
+
+		Task<CreateTenantDto?> GetByIdAsync(Guid id);
 
 	}
 }

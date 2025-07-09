@@ -32,9 +32,9 @@ namespace EvictionFiler.Client.Services
 			return landlords;
 		}
 
-		public async Task<List<CreateLandLordDto>> SearchLandlordsAsync(string query)
+		public async Task<List<CreateLandLordDto>> SearchLandlordsAsync(string query ,Guid clientId)
 		{
-			return await _landLordRepository.SearchLandlordsAsync(query);
+			return await _landLordRepository.SearchLandlordsAsync(query , clientId);
 		}
 
 		public async Task<CreateLandLordDto?> GetLandLordByIdAsync(Guid id)

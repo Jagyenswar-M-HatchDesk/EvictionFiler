@@ -159,12 +159,19 @@ namespace EvictionFiler.Infrastructure.Repositories
         }
 
 
-		public async Task<List<CreateLandLordDto>> SearchLandlordsAsync(string query)
+		public async Task<List<CreateLandLordDto>> SearchLandlordsAsync(string query, Guid clientId)
 		{
 			query = query?.Trim().ToLower() ?? "";
 
 			var landlords = await _mainDbContext.LandLords
-				.Where(l => l.Name.ToLower().Contains(query) && l.IsDeleted != true)
+				.Where(l =>
+					l.ClientId == clientId &&                
+					l.IsDeleted != true &&
+					(
+						l.Name.ToLower().StartsWith(query) ||
+						l.LandLordCode.ToLower().StartsWith(query)
+					)
+				)
 				.Select(l => new CreateLandLordDto
 				{
 					Id = l.Id,
@@ -172,10 +179,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 					Email = l.Email,
 					Phone = l.Phone,
 					LandLordCode = l.LandLordCode
-				}).ToListAsync();
+				})
+				.ToListAsync();
 
 			return landlords;
 		}
+
+
 
 
 

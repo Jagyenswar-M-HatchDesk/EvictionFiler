@@ -126,21 +126,32 @@ namespace EvictionFiler.Infrastructure.Repositories
             return tenant;
         }
 
-		public async Task<List<CreateTenantDto>> SearchTenantAsync(string query)
+		public async Task<List<CreateTenantDto>> SearchTenantAsync(string query , Guid BuildingId)
 		{
+			query = query?.Trim().ToLower() ?? "";
+
 			var tenants = await _dbContext.Tenants
-				.Where(t => t.Name.ToLower().StartsWith(query.ToLower()) && t.IsDeleted != true)
+				.Where(l =>
+					l.ApartmentId == BuildingId &&
+					l.IsDeleted != true &&
+					(
+						l.Name.ToLower().StartsWith(query) ||
+						l.TenantCode.ToLower().StartsWith(query)
+					)
+				)
 				.Select(t => new CreateTenantDto
 				{
 					Id = t.Id,
 					Name = t.Name,
 					Email = t.Email,
-					Phone = t.Phone
+					Phone = t.Phone,
+					TenantCode = t.TenantCode // make sure this property exists in CreateTenantDto
 				})
 				.ToListAsync();
 
 			return tenants;
 		}
+
 
 
 		public async Task<CreateTenantDto?> GetByIdAsync(Guid id)

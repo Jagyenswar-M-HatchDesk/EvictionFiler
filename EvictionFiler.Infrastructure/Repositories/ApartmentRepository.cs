@@ -151,10 +151,13 @@ namespace EvictionFiler.Infrastructure.Repositories
             }
         }
 
-		public async Task<List<AddApartment>> SearchBuildingByCode(string code)
+		public async Task<List<AddApartment>> SearchBuildingByCode(string code, Guid landlordId)
 		{
-			var buildings = await _context.Appartments
-				.Where(e => e.ApartmentCode.StartsWith(code)) // 👈 better filtering
+			return await _context.Appartments
+				.Where(e =>
+					e.LandlordId == landlordId && // ✅ only selected landlord's buildings
+					e.ApartmentCode.StartsWith(code)
+				)
 				.Select(e => new AddApartment
 				{
 					Id = e.Id,
@@ -172,9 +175,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 					Tanent = e.Tanent
 				})
 				.ToListAsync();
-
-			return buildings; // 👈 no need for null check
 		}
+
 
 	}
 }

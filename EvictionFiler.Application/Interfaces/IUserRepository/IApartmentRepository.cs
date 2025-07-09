@@ -17,8 +17,9 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
 
 		Task UpdateAsync(Appartment appartment);
         Task DeleteAsync(Guid id);
-        Task<List<AddApartment>> SearchBuildingByCode(string code);
-        Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id);
+        Task<List<AddApartment>> SearchBuildingByCode(string code, Guid landlordId);
+
+		Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id);
 
 
 	}
