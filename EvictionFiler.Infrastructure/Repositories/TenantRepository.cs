@@ -181,5 +181,46 @@ namespace EvictionFiler.Infrastructure.Repositories
 			};
 		}
 
+		public async Task<List<EditTenantDto>> GetTenantsByClientIdAsync(Guid clientId)
+		{
+			// Step 1: Get all landlord IDs for the client
+			var landlordIds = await _dbContext.LandLords
+				.Where(x => x.ClientId == clientId && x.IsDeleted != true)
+				.Select(x => x.Id)
+				.ToListAsync();
+
+			// Step 2: Get all apartment IDs linked to these landlords
+			var apartmentIds = await _dbContext.Appartments
+		.Where(a => a.LandlordId.HasValue && landlordIds.Contains(a.LandlordId.Value) && a.IsDeleted != true)
+		.Select(a => a.Id)
+		.ToListAsync();
+
+
+			// Step 3: Get all tenants linked to these apartments
+			var tenants = await _dbContext.Tenants
+		.Where(t => t.ApartmentId.HasValue && apartmentIds.Contains(t.ApartmentId.Value) && t.IsDeleted != true)
+		.Select(dto => new EditTenantDto
+		{
+			Id = dto.Id,
+			TenantCode = dto.TenantCode,
+			Name = dto.Name,
+			DOB = dto.DOB,
+			SSN = dto.SSN,
+			Phone = dto.Phone,
+			Email = dto.Email,
+			Language = dto.Language,
+			Address = dto.Address,
+			Apt = dto.Apt,
+			Borough = dto.Borough,
+			Rent = dto.Rent,
+			LeaseStatus = dto.LeaseStatus,
+			ApartmentId = dto.ApartmentId ?? Guid.Empty // fallback if null
+		}).ToListAsync();
+
+
+			return tenants;
+		}
+
+
 	}
 }

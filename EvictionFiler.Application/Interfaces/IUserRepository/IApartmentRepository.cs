@@ -20,7 +20,7 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
         Task<List<AddApartment>> SearchBuildingByCode(string code, Guid landlordId);
 
 		Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id);
-
+        Task<List<EditApartmentDto>> GetBuildingsByLandlordIdAsync(Guid landlordId);
 
 	}
 }

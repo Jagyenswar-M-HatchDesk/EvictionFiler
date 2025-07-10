@@ -31,12 +31,35 @@ namespace EvictionFiler.Client.Services
 
 		public async Task<bool> AddClientAsync(CreateClientDto dto)
 		{
-			
-
 			// 2. Save Client
 			var isClientSaved = await _clientRepository.AddAsync(dto);
 			return true;
 		
+		}
+
+		public async Task<CreateClientDto?> GetClientByIdAsync(Guid id)
+		{
+			var client = await _clientRepository.GetByIdAsync(id);
+
+			if (client == null) return null;
+
+			// Map Entity to DTO
+			return new CreateClientDto
+			{
+				Id = client.Id,
+				FirstName = client.FirstName,
+				LastName = client.LastName,
+				Email = client.Email,
+				Fax = client.Fax,
+				Phone = client.Phone,
+				CellPhone = client.CellPhone,
+				ClientCode = client.ClientCode,
+				Address_1 = client.Address_1,
+				Address_2 = client.Address_2,
+				City = client.City,
+				State = client.State,
+				ZipCode = client.ZipCode
+			};
 		}
 
 

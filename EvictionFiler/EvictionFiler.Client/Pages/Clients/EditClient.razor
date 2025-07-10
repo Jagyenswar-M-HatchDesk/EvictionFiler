@@ -1,0 +1,703 @@
+﻿@using EvictionFiler.Application.DTOs.ApartmentDto
+@using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Application.DTOs.TenantDto
+@using EvictionFiler.Client.Services
+
+@inject ClientService _clientService
+@inject LandLordService _landlordService
+@inject ApartmentService _apartmentService
+@inject TenantService _tenantService
+@rendermode InteractiveAuto
+@inject NavigationManager Navigation
+
+
+@inject IJSRuntime JS
+
+<style>
+    :root {
+        --bs-primary: #1F365D;
+        --bs-warning: #D4A844;
+        --bs-light: #F7F6F3;
+    }
+
+    body {
+        background-color: var(--bs-light);
+    }
+
+    .offcanvas.show {
+        transform: translateX(0%);
+    }
+
+    .offcanvas {
+        transform: translateX(100%);
+        width: 900px !important;
+        transition: transform 0.5s ease-in-out;
+    }
+
+    .color-text {
+        color: var(--bs-primary);
+    }
+
+    .form-control::placeholder {
+        font-size: 0.9rem;
+    }
+
+    .input-group-text {
+        background-color: var(--bs-light);
+        color: var(--bs-primary);
+        font-weight: 500;
+    }
+
+    .form-wrapper {
+        transition: transform 0.5s ease, opacity 0.5s ease;
+        will-change: transform, opacity;
+    }
+
+    /* .form-wrapper.hidden {
+                transform: translateX(-100%);
+                opacity: 0;
+                pointer-events: none;
+            } */
+
+    .overlay-form {
+        animation: slideIn 0.5s ease forwards;
+        background-color: white;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0%);
+        }
+    }
+
+    .form-wrapper.hidden {
+        display: none !important;
+    }
+
+    .vertical-buttons button {
+        /*  min-width: 100px; */
+        text-align: center;
+    }
+
+    .vertical-tab-button {
+        writing-mode: vertical-rl; /* vertical top-to-bottom */
+        text-orientation: upright;
+        background-color: #f0f2f5;
+        color: #1F365D;
+        font-weight: 700;
+        font-size: 14px;
+        border: none;
+        padding: 12px 8px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+        .vertical-tab-button:hover {
+            background-color: #1F365D;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    .active-vertical {
+        background: linear-gradient(135deg, #1F365D, #2F4F7F);
+        color: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+
+    /*   .tab-button {
+            background: transparent;
+            color: #1F365D;
+            border: 2px solid transparent;
+            padding: 0.6rem 1rem;
+            min-width: 120px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 8px;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+            .tab-button:hover {
+                background: #1F365D;
+                color: white;
+                border-color: #1F365D;
+                transform: translateY(-2px);
+            }
+
+        .active-tab {
+            background: linear-gradient(135deg, #1F365D, #2F4F7F);
+            color: white !important;
+            border-color: #1F365D;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        } */
+    .required-label::after {
+        content: " *";
+        color: red;
+    }
+
+</style>
+@using System.Collections.Generic
+@using EvictionFiler.Client.Services
+
+<div class="offcanvas offcanvas-end show border-start shadow bg-white"
+     tabindex="-1" id="editClient"
+     style="visibility:@(IsVisible ? "visible" : "hidden");"
+     aria-labelledby="createUserLabel">
+
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title fw-bold color-text" id="createUserLabel">Edit New Client</h5>
+        <button type="button" class="btn-close" @onclick="HideAsync" aria-label="Close"></button>
+    </div>
+
+    <div class="offcanvas-body p-0">
+        <div class="d-flex align-items-center position-relative">
+            <!-- CLIENT FORM -->
+            <div class="form-wrapper @(activeTab != string.Empty ? "hidden" : "") flex-grow-1 p-3 pe-5">
+
+                <EditForm Model="@editClient">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label color-text required-label">Client Code</label>
+                            <InputText class="form-control" maxlength="10" @bind-Value="editClient.ClientCode" placeholder="Enter up to 10 digits" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label color-text required-label">First Name</label>
+                            <InputText class="form-control" @bind-Value="editClient.FirstName" placeholder="Enter First Name" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label color-text">Last Name</label>
+                            <InputText class="form-control" @bind-Value="editClient.LastName" placeholder="Enter Last Name" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label color-text required-label">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text">@@</span>
+                                <InputText class="form-control" @bind-Value="editClient.Email" placeholder="Enter Email" />
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label color-text required-label">Fax</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-printer"></i></span>
+                                <InputText class="form-control" @bind-Value="editClient.Fax" placeholder="Fax Number" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label color-text required-label">Address Line 1</label>
+                            <InputText class="form-control" @bind-Value="editClient.Address_1" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label color-text">Address Line 2</label>
+                            <InputText class="form-control" @bind-Value="editClient.Address_2" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label color-text required-label">City</label>
+                            <InputText class="form-control" @bind-Value="editClient.City" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label color-text required-label">State</label>
+                            <InputSelect class="form-select" @bind-Value="editClient.State">
+                                <option value="">-- Select State --</option>
+                                <option>Georgia</option>
+                                <option>California</option>
+                                <option>Florida</option>
+                            </InputSelect>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label color-text required-label">Zip Code</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-geo"></i></span>
+                                <InputNumber class="form-control" @bind-Value="editClient.ZipCode" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label color-text required-label">Phone</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <InputText class="form-control" @bind-Value="editClient.Phone" />
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label color-text">Cell Phone</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                                <InputText class="form-control" @bind-Value="editClient.CellPhone" />
+                            </div>
+                        </div>
+                    </div>
+                </EditForm>
+
+            </div>
+
+            <!-- Vertical Overlay Buttons -->
+            <div class="vertical-buttons d-flex flex-column align-items-center position-absolute end-0 top-50 translate-middle-y @(IsVisible ? "" : "d-none")">
+                <button class="vertical-tab-button @(activeTab == "landlord" ? "active-vertical" : "")" @onclick="@(() => SetActiveTab("landlord"))">LANDLORD</button>
+                <button class="vertical-tab-button @(activeTab == "building" ? "active-vertical" : "")"
+                        @onclick="@(() => SetActiveTab("building"))">
+                    BUILDING
+                </button>
+
+            </div>
+        </div>
+
+        @if (activeTab == "landlord")
+        {
+            <div class="overlay-form overlay-landlord">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="color-text fw-bold mb-0">LANDLORD INFORMATION</h5>
+                    <div>
+                        <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button>
+                        
+                    </div>
+                </div>
+
+                @if (showLandlordForm)
+                {
+                    <EditForm Model="@landlord" >
+                        <div class="mb-3"><label>LandLord Code</label><InputText class="form-control" @bind-Value="landlord.LandLordCode" /></div>
+                        <div class="mb-3"><label>Name</label><InputText class="form-control" @bind-Value="landlord.Name" /></div>
+                        <div class="mb-3"><label>EIN/SSN</label><InputText class="form-control" @bind-Value="landlord.EINorSSN" /></div>
+                        <div class="row">
+                            <div class="col"><label>Phone</label><InputText class="form-control" @bind-Value="landlord.Phone" /></div>
+                            <div class="col"><label>Email</label><InputText class="form-control" @bind-Value="landlord.Email" /></div>
+                        </div>
+                        <div class="mb-3"><label>Address</label><InputText class="form-control" @bind-Value="landlord.MaillingAddress" /></div>
+                        <div class="row">
+                            <div class="col"><label>Attorney</label><InputText class="form-control" @bind-Value="landlord.Attorney" /></div>
+                            <div class="col"><label>Firm</label><InputText class="form-control" @bind-Value="landlord.Firm" /></div>
+                        </div>
+                        <button type="submit" class="btn bg-navy text-white mt-2">Save Landlord Info</button>
+                    </EditForm>
+                }
+
+                <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
+                    <table class="table table-bordered mt-4" style="min-width: 1000px;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>EIN</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>Attorney</th>
+                                <th>Firm</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Landlords.Any())
+                            {
+                                @foreach (var l in Landlords)
+                                {
+                                    <tr>
+                                        <td>@l.Name</td>
+                                        <td>@l.EINorSSN</td>
+                                        <td>@l.Phone</td>
+                                        <td>@l.Email</td>
+                                        <td>@l.MaillingAddress</td>
+                                        <td>@l.Attorney</td>
+                                        <td>@l.Firm</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => EditLandlord(l.Id)">Edit</button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="7" class="text-muted">No landlords added yet.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        }
+
+
+        @if (activeTab == "building")
+        {
+            <div class="overlay-form overlay-building">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="color-text fw-bold mb-0">BUILDING INFORMATION</h5>
+                    <div>
+                        <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button>
+
+                    </div>
+                </div>
+
+                @if (showBuildingForm)
+                {
+
+                    <EditForm Model="@building">
+
+                        <div class="mb-3">
+                            <label>Choose Landlord</label>
+                            <InputSelect class="form-select" @bind-Value="building.LandlordId">
+                                <option value="">-- Select Landlord --</option>
+                                @foreach (var landlord in savelandlordList)
+                                {
+                                    <option value="@landlord.Id">@landlord.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3"><label>Apartment Code</label><InputText class="form-control" @bind-Value="building.ApartmentCode" /></div>
+
+                        <div class="mb-3"><label>Premise Type</label><InputText class="form-control" @bind-Value="building.PremiseType" /></div>
+                        <div class="mb-3"><label>Address Line 1</label><InputText class="form-control" @bind-Value="building.Address_1" /></div>
+                        <div class="mb-3"><label>Address Line 2</label><InputText class="form-control" @bind-Value="building.Address_2" /></div>
+                        <div class="row">
+                            <div class="col"><label>City</label><InputText class="form-control" @bind-Value="building.City" /></div>
+                            <div class="col"><label>State</label><InputText class="form-control" @bind-Value="building.State" /></div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label>Country</label><InputText class="form-control" @bind-Value="building.Country" /></div>
+                            <div class="col"><label>Zipcode</label><InputText class="form-control" @bind-Value="building.Zipcode" /></div>
+                        </div>
+
+                        <div class="mb-3"><label>MDR Number</label><InputText class="form-control" @bind-Value="building.MDR_Number" /></div>
+                        <div class="mb-3"><label>Petitioner Interest</label><InputText class="form-control" @bind-Value="building.PetitionerInterest" /></div>
+                        <button type="submit" class="btn bg-navy text-white mt-2">Save Building Info</button>
+
+                    </EditForm>
+                    <div class="vertical-buttons d-flex flex-column align-items-center position-absolute end-0 top-0 translate-middle-y @(IsVisible ? "" : "d-none")">
+                        <button class="vertical-tab-button @(activeTab == "tanent" ? "active-vertical" : "")" @onclick="@(() => SetActiveTab("tanent"))">Tanent</button>
+
+                    </div>
+
+                }
+               
+                <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
+                    <table class="table table-bordered mt-4" style="min-width: 1000px;">
+                        <thead><tr><th>Code</th><th>Premise</th><th>Address1</th><th>Address2</th><th>City</th><th>State</th><th>Country</th><th>Zip</th><th>MDR</th><th>Interest</th> <th>Action</th></tr></thead>
+                        <tbody>
+                            @if (Buildings.Any())
+                            {
+                                @foreach (var b in Buildings)
+                                {
+                                    <tr>
+                                        <td>@b.ApartmentCode</td>
+                                        <td>@b.PremiseType</td>
+                                        <td>@b.Address_1</td>
+                                        <td>@b.Address_2</td>
+                                        <td>@b.City</td>
+                                        <td>@b.State</td>
+                                        <td>@b.Country</td>
+                                        <td>@b.Zipcode</td>
+                                        <td>@b.MDR_Number</td>
+                                        <td>@b.PetitionerInterest</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => EditBuilding(b)">Edit</button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="10" class="text-muted">No buildings added yet.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        }
+
+        @if (activeTab == "tanent")
+        {
+            <div class="overlay-form overlay-landlord">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="color-text fw-bold mb-0">TENANT INFORMATION</h5>
+                    <div>
+                        <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button>
+                       
+                    </div>
+                </div>
+
+                @if (showTanentForm)
+                {
+                    <EditForm Model="@tenant">
+                        <div class="row">
+                            <div class="mb-3">
+                                <label>Choose Apartment</label>
+                                <InputSelect class="form-select" @bind-Value="tenant.ApartmentId">
+                                    <option value="">-- Select Apartment --</option>
+                                    @foreach (var apartment in apartmentList)
+                                    {
+                                        <option value="@apartment.Id">@apartment.ApartmentCode</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class=" col-md-4  mb-3">
+                                <label>Tenant Code</label>
+                                <InputText class="form-control" @bind-Value="tenant.TenantCode" />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Name</label>
+                                <InputText class="form-control" @bind-Value="tenant.Name" />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Date of Birth</label>
+                                <InputDate class="form-control" @bind-Value="tenant.DOB" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>SSN</label>
+                                <InputText class="form-control" @bind-Value="tenant.SSN" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Phone</label>
+                                <InputText class="form-control" @bind-Value="tenant.Phone" />
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Email</label>
+                                <InputText class="form-control" @bind-Value="tenant.Email" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Language</label>
+                                <InputText class="form-control" @bind-Value="tenant.Language" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Address</label>
+                            <InputText class="form-control" @bind-Value="tenant.Address" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Apt</label>
+                                <InputText class="form-control" @bind-Value="tenant.Apt" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Borough</label>
+                                <InputText class="form-control" @bind-Value="tenant.Borough" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Rent</label>
+                                <InputNumber class="form-control" @bind-Value="tenant.Rent" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Lease Status</label>
+                                <InputText class="form-control" @bind-Value="tenant.LeaseStatus" />
+                            </div>
+                        </div>
+
+
+
+                        <button type="submit" class="btn bg-navy text-white mt-2">Save Tenant Info</button>
+                    </EditForm>
+                }
+
+                <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
+                    <table class="table table-bordered mt-4" style="min-width: 1200px;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>DOB</th>
+                                <th>SSN</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Language</th>
+                                <th>Address</th>
+                                <th>Apt</th>
+                                <th>Borough</th>
+                                <th>Rent</th>
+                                <th>Lease Status</th>
+                                <th>Tenant Code</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (saveTanentList.Any())
+                            {
+                                @foreach (var t in saveTanentList)
+                                {
+                                    <tr>
+                                        <td>@t.Name</td>
+                                        <td>@t.DOB.ToString("yyyy-MM-dd")</td>
+                                        <td>@t.SSN</td>
+                                        <td>@t.Phone</td>
+                                        <td>@t.Email</td>
+                                        <td>@t.Language</td>
+                                        <td>@t.Address</td>
+                                        <td>@t.Apt</td>
+                                        <td>@t.Borough</td>
+                                        <td>@t.Rent</td>
+                                        <td>@t.LeaseStatus</td>
+                                        <td>@t.TenantCode</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="12" class="text-muted">No tenants added yet.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+
+    </div>
+
+
+    <div class="sticky-footer bg-white border-top p-3 d-flex justify-content-between gap-2">
+        @if (!IsClientFormValid())
+        {
+            <div class="text-danger mt-2">Please fill all required client fields to enable Submit.</div>
+        }
+        <div class="d-flex gap-2 ">
+            <button class="btn btn-outline-secondary px-4 fw-semibold" @onclick="HideAsync">Cancel</button>
+            <button class="btn bg-navy text-white px-4 fw-semibold" disabled="@(!IsClientFormValid())" >Submit</button>
+        </div>
+
+    </div>
+
+
+</div>
+
+@code {
+    [Parameter] public EditClientDto editClient { get; set; } = new();
+    [Parameter] public EventCallback<EditClientDto> Submit { get; set; }
+    [Parameter]
+    public List<EditLandlordDto> Landlords { get; set; } = new();
+    private EditLandlordDto landlord = new();
+    [Parameter]
+    public List<EditApartmentDto> Buildings { get; set; } = new();
+    private EditApartmentDto building = new();
+    [Parameter]
+    public List<EditTenantDto> Tenants { get; set; } = new();
+
+
+    private bool IsVisible { get; set; }
+    private string activeTab = string.Empty;
+    private bool showLandlordForm = false;
+    private bool showBuildingForm = false;
+    private bool showTanentForm = false;
+  
+    private CreateTenantDto tenant = new();
+    private List<CreateLandLordDto> savelandlordList = new();
+  
+    private List<AddApartment> apartmentList = new();
+    private List<CreateTenantDto> saveTanentList = new();
+    private List<EditLandlordDto> saveEditlandlordList = new();
+
+    private Guid selectedLandlordId = Guid.Empty;
+
+    public void Show(EditClientDto model)
+    {
+        editClient = model;
+        IsVisible = true;
+        StateHasChanged();
+    }
+     private void EditBuilding(EditApartmentDto selected)
+    {
+        building = new EditApartmentDto
+        {
+            Id = selected.Id,
+            LandlordId = selected.LandlordId,
+            ApartmentCode = selected.ApartmentCode,
+            PremiseType = selected.PremiseType,
+            Address_1 = selected.Address_1,
+            Address_2 = selected.Address_2,
+            City = selected.City,
+            State = selected.State,
+            Country = selected.Country,
+            Zipcode = selected.Zipcode,
+            MDR_Number = selected.MDR_Number,
+            PetitionerInterest = selected.PetitionerInterest
+        };
+
+        // showBuildingForm = true; // ✅ Show form
+        StateHasChanged();       // ✅ Refresh UI
+    }
+
+    private async Task EditLandlord(Guid landlordId)
+    {
+        selectedLandlordId = landlordId;
+        showLandlordForm = true;
+        activeTab = "landlord"; // 👈 set tab
+
+        // Get selected landlord from list
+        landlord = saveEditlandlordList.FirstOrDefault(l => l.Id == landlordId) ?? new();
+
+        // Show vertical buttons
+        IsVisible = true;
+
+        StateHasChanged();
+    }
+
+
+    private bool IsClientFormValid()
+    {
+        return
+         !string.IsNullOrWhiteSpace(editClient.ClientCode)
+         && !string.IsNullOrWhiteSpace(editClient.FirstName)
+                   && !string.IsNullOrWhiteSpace(editClient.Fax)
+        && !string.IsNullOrWhiteSpace(editClient.Email)
+        && !string.IsNullOrWhiteSpace(editClient.Phone)
+        && !string.IsNullOrWhiteSpace(editClient.ClientCode)
+        && !string.IsNullOrWhiteSpace(editClient.Address_1)
+        && !string.IsNullOrWhiteSpace(editClient.City)
+        && !string.IsNullOrWhiteSpace(editClient.State)
+          && editClient.ZipCode.HasValue;
+    }
+    private void ToggleBuildingForm() => showBuildingForm = !showBuildingForm;
+    private void ToggleLandlordForm() => showLandlordForm = !showLandlordForm;
+    private void ToggleTanentForm() => showTanentForm = !showTanentForm;
+  
+    public async Task HideAsync()
+    {
+        IsVisible = false;
+        activeTab = string.Empty;
+        StateHasChanged();
+    }
+
+
+    private void SetActiveTab(string tab) => activeTab = tab;
+
+
+}
+

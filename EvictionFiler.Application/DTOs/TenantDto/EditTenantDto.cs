@@ -1,0 +1,26 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EvictionFiler.Application.DTOs.TenantDto
+{
+	public class EditTenantDto
+	{
+		public Guid Id { get; set; }
+		public string? Name { get; set; } = string.Empty;
+		public string? TenantCode { get; set; } = string.Empty;
+		public DateTime DOB { get; set; }
+		public string? SSN { get; set; } = string.Empty;
+		public string? Phone { get; set; } = string.Empty;
+		public string? Email { get; set; } = string.Empty;
+		public string? Language { get; set; } = string.Empty;
+		public string? Address { get; set; } = string.Empty;
+		public string? Apt { get; set; } = string.Empty;
+		public string? Borough { get; set; } = string.Empty;
+		public double Rent { get; set; }
+		public string? LeaseStatus { get; set; } = string.Empty;
+		public Guid? ApartmentId { get; set; }
+	}
+}

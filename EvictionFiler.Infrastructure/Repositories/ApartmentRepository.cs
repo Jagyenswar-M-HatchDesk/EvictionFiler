@@ -177,6 +177,31 @@ namespace EvictionFiler.Infrastructure.Repositories
 				.ToListAsync();
 		}
 
+		public async Task<List<EditApartmentDto>> GetBuildingsByLandlordIdAsync(Guid landlordId)
+		{
+			var building  = await _context.Appartments
+				.Where(x => x.LandlordId == landlordId && x.IsDeleted != true)
+				.ToListAsync();
+
+			return building.Select(e => new EditApartmentDto
+			{
+				Id = e.Id,
+				ApartmentCode = e.ApartmentCode,
+				City = e.City,
+				State = e.State,
+				PremiseType = e.PremiseType,
+				Address_1 = e.Address_1,
+				Address_2 = e.Address_2,
+				Zipcode = e.Zipcode,
+				Country = e.Country,
+				MDR_Number = e.MDR_Number,
+				PetitionerInterest = e.PetitionerInterest,
+				LandlordId = e.LandlordId,
+				Tanent = e.Tanent
+			}).ToList();
+		}
+
+
 
 	}
 }

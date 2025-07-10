@@ -1,7 +1,13 @@
 ﻿@page "/clients"
+@using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Application.DTOs.TenantDto
 @using EvictionFiler.Client.Services
 @inject ClientService clientservice
+@inject LandLordService landLordService
+@inject ApartmentService apartmentService
+@inject TenantService tenantService
 @rendermode InteractiveAuto
 <PageTitle>Clients</PageTitle>
 
@@ -55,7 +61,7 @@
                                 <td>@client.ZipCode</td>
 
                                 <td class="sticky">
-                                    <i class="fa-solid fa-pen-to-square text-navy me-3" title="Edit"></i>
+                                    <i class="fa-solid fa-pen-to-square text-navy me-3" @onclick= "()=>EditClient(client.Id)" title="Edit"></i>
                                     <i class="fa-solid fa-trash-can text-danger" @onclick=" ()=>DeleteClient(client.Id)" title="Delete"></i>
                                 </td>
                             </tr>
@@ -72,15 +78,33 @@
         </div>
     </div>
 
-    <CreateCLient @ref="createClientRef" Submit="HandleCreate" />
+    <CreateCLient @ref="createClientRef"  />
+
+    <EditClient @ref="editClientRef"
+                Landlords="saveEditlandlordList"
+                Buildings="saveEditBuildingList"
+                Tenants="saveEditTenantList" />
+
+
 </body>
 
 @code {
+    private Guid clientIdForEdit;
+
     private CreateCLient createClientRef;
+    private EditClient editClientRef;
+    private List<EditLandlordDto> saveEditlandlordList = new();
+    private List<EditApartmentDto> saveEditBuildingList = new();
+    private List<EditTenantDto> saveEditTenantList = new();
+   
+
+
     private List<CreateClientDto> clients = new();
     private string searchTerm = string.Empty;
     [Parameter]
     public Guid Id { get; set; }
+
+    private string activeTab = string.Empty;
 
     private IEnumerable<CreateClientDto> filteredClients =>
         string.IsNullOrWhiteSpace(searchTerm)
@@ -101,16 +125,103 @@
         createClientRef.Show(newClient);
     }
 
-    private async Task HandleCreate(CreateClientDto client)
-    {
-        var result = await clientservice.AddClientAsync(client);
-        if (result)
-        {
-            await createClientRef.HideAsync();
-            clients = await clientservice.GetAllClientsAsync();
 
+
+    private async Task LoadBuildings(Guid clientId)
+    {
+        var landlords = await landLordService.GetLandlordsByClientIdAsync(clientId);
+        saveEditBuildingList.Clear();
+
+        foreach (var landlord in landlords)
+        {
+            var buildings = await apartmentService.GetBuildingsByLandlordIdAsync(landlord.Id);
+            if (buildings?.Any() == true)
+            {
+                saveEditBuildingList.AddRange(buildings);
+            }
         }
     }
+
+  
+
+
+    private async Task EditClient(Guid clientId)
+    {
+        clientIdForEdit = clientId;
+
+        var client = await clientservice.GetClientByIdAsync(clientId);
+        var landlords = await landLordService.GetLandlordsByClientIdAsync(clientId);
+
+        if (client != null)
+        {
+            var editClient = new EditClientDto
+            {
+                Id = client.Id,
+                FirstName = client.FirstName,
+                LastName = client.LastName,
+                Email = client.Email,
+                Fax = client.Fax,
+                Phone = client.Phone,
+                CellPhone = client.CellPhone,
+                ClientCode = client.ClientCode,
+                Address_1 = client.Address_1,
+                Address_2 = client.Address_2,
+                City = client.City,
+                State = client.State,
+                ZipCode = client.ZipCode,
+                LandLords = landlords
+            };
+
+            await LoadBuildings(clientId);
+            saveEditlandlordList = landlords;
+            editClientRef.Show(editClient);
+        }
+    }
+
+
+    private async Task SetActiveTab(string tab)
+    {
+        activeTab = tab;
+
+        if (clientIdForEdit != Guid.Empty)
+        {
+            if (tab == "building")
+            {
+                saveEditBuildingList.Clear();
+
+                var landlords = await landLordService.GetLandlordsByClientIdAsync(clientIdForEdit);
+                foreach (var landlord in landlords)
+                {
+                    var buildings = await apartmentService.GetBuildingsByLandlordIdAsync(landlord.Id);
+                    saveEditBuildingList.AddRange(buildings);
+                }
+            }
+            else if (tab == "tenant")
+            {
+                saveEditTenantList.Clear();
+
+                var tenants = await tenantService.GetTenantsByClientIdAsync(clientIdForEdit);
+                saveEditTenantList.AddRange(tenants);
+            }
+
+            StateHasChanged();
+        }
+    }
+
+
+
+
+
+    // private async Task HandleCreate(CreateClientDto client)
+    // {
+    //     var result = await clientservice.AddClientAsync(client);
+    //     if (result)
+    //     {
+    //         await createClientRef.HideAsync();
+    //         clients = await clientservice.GetAllClientsAsync();
+
+    //     }
+    // }
 
     public async Task DeleteClient(Guid id)
     {

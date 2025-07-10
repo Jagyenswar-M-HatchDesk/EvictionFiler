@@ -184,11 +184,6 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			return landlords;
 		}
-
-
-
-
-
 		public async Task<LandlordWithBuildings?> GetLandlordWithBuildingsAsync(Guid landlordId)
 		{
 			var l = await _mainDbContext.LandLords
@@ -236,6 +231,27 @@ namespace EvictionFiler.Infrastructure.Repositories
 				},
 				Buildings = buildings
 			};
+		}
+		public async Task<List<EditLandlordDto>> GetByClientIdAsync(Guid clientId)
+		{
+			var landlords = await _mainDbContext.LandLords
+				.Where(x => x.ClientId == clientId && x.IsDeleted != true)
+				.ToListAsync();
+
+			return landlords.Select(l => new EditLandlordDto
+			{
+				Id = l.Id,
+				LandLordCode = l.LandLordCode,
+				Name = l.Name,
+				EINorSSN = l.EINorSSN,
+				Phone = l.Phone,
+				Email = l.Email,
+				MaillingAddress = l.MaillingAddress,
+				Attorney = l.Attorney,
+				Firm = l.Firm,
+				isCorporeateOwner = l.isCorporeateOwner,
+				RegisteredAgent = l.RegisteredAgent,
+			}).ToList();
 		}
 
 
