@@ -43,10 +43,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Country = appartment.Country,
 				MDR_Number = appartment.MDR_Number,
 				PetitionerInterest = appartment.PetitionerInterest,
-				//IsActive = true,
-				//CreatedAt = DateTime.UtcNow,
+				TypeOfRentRegulation = appartment.TypeOfRentRegulation,
+				BuildingUnits = appartment.BuildingUnits,
+				HasPriorCase = appartment.HasPriorCase,
+				OtherProperties = appartment.OtherProperties,
+				
 				LandlordId = appartment.LandlordId,
-				Tanent = appartment.Tanent,
+		
 			};
 		}
 
@@ -61,20 +64,24 @@ namespace EvictionFiler.Infrastructure.Repositories
             var newapartment = dtolist.Select(appartment=> new Appartment
             {
                 Id = appartment.Id,
-                ApartmentCode = appartment.ApartmentCode,
-                City = appartment.City,
-                State = appartment.State,
-                PremiseType= appartment.PremiseType,
-                Address_1 = appartment.Address_1,
-                Address_2 = appartment.Address_2,
-                Zipcode = appartment.Zipcode,
-                Country = appartment.Country,
-                MDR_Number = appartment.MDR_Number,
-                PetitionerInterest = appartment.PetitionerInterest,
-                IsActive = true,
+				ApartmentCode = appartment.ApartmentCode,
+				City = appartment.City,
+				State = appartment.State,
+				PremiseType = appartment.PremiseType,
+				Address_1 = appartment.Address_1,
+				Address_2 = appartment.Address_2,
+				Zipcode = appartment.Zipcode,
+				Country = appartment.Country,
+				MDR_Number = appartment.MDR_Number,
+				PetitionerInterest = appartment.PetitionerInterest,
+				TypeOfRentRegulation = appartment.TypeOfRentRegulation,
+				BuildingUnits = appartment.BuildingUnits,
+				HasPriorCase = appartment.HasPriorCase,
+				OtherProperties = appartment.OtherProperties,
+				IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 LandlordId = appartment.LandlordId,
-                Tanent = appartment.Tanent,
+           
 
             });
             _context.Appartments.AddRange(newapartment);
@@ -107,8 +114,17 @@ namespace EvictionFiler.Infrastructure.Repositories
 					Borough = dto.Borough,
 					Rent = dto.Rent,
 					LeaseStatus = dto.LeaseStatus,
-				
+					HasPossession = dto.HasPossession,
+					HasRegulatedTenancy = dto.HasRegulatedTenancy,
+					Name_Relation = dto.Name_Relation,
+					OtherOccupants = dto.OtherOccupants,
+					Registration_No = dto.Registration_No,
+					TenantRecord = dto.TenantRecord,
+					
 					ApartmentId = dto.ApartmentId
+
+
+					
 				}).ToListAsync();
 
             return new BuildingWithTenant
@@ -117,18 +133,22 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Building = new AddApartment
                 {
                     Id = appartment.Id,
-                    ApartmentCode = appartment.ApartmentCode,
-                    City = appartment.City,
-                    State = appartment.State,
-                    PremiseType = appartment.PremiseType,
-                    Address_1 = appartment.Address_1,
-                    Address_2 = appartment.Address_2,
-                    Zipcode = appartment.Zipcode,
-                    Country = appartment.Country,
-                    MDR_Number = appartment.MDR_Number,
-                    PetitionerInterest = appartment.PetitionerInterest,
-                    LandlordId = appartment.LandlordId,
-                    Tanent = appartment.Tanent,
+					ApartmentCode = appartment.ApartmentCode,
+					City = appartment.City,
+					State = appartment.State,
+					PremiseType = appartment.PremiseType,
+					Address_1 = appartment.Address_1,
+					Address_2 = appartment.Address_2,
+					Zipcode = appartment.Zipcode,
+					Country = appartment.Country,
+					MDR_Number = appartment.MDR_Number,
+					PetitionerInterest = appartment.PetitionerInterest,
+					TypeOfRentRegulation = appartment.TypeOfRentRegulation,
+					BuildingUnits = appartment.BuildingUnits,
+					HasPriorCase = appartment.HasPriorCase,
+					OtherProperties = appartment.OtherProperties,
+					LandlordId = appartment.LandlordId,
+               
                 },
 				Tenants = tenant
 			};
@@ -154,25 +174,29 @@ namespace EvictionFiler.Infrastructure.Repositories
 		public async Task<List<AddApartment>> SearchBuildingByCode(string code, Guid landlordId)
 		{
 			return await _context.Appartments
-				.Where(e =>
-					e.LandlordId == landlordId && // ✅ only selected landlord's buildings
-					e.ApartmentCode.StartsWith(code)
+				.Where(appartment =>
+					appartment.LandlordId == landlordId && // ✅ only selected landlord's buildings
+					appartment.ApartmentCode.StartsWith(code)
 				)
-				.Select(e => new AddApartment
+				.Select(appartment=> new AddApartment
 				{
-					Id = e.Id,
-					ApartmentCode = e.ApartmentCode,
-					City = e.City,
-					State = e.State,
-					PremiseType = e.PremiseType,
-					Address_1 = e.Address_1,
-					Address_2 = e.Address_2,
-					Zipcode = e.Zipcode,
-					Country = e.Country,
-					MDR_Number = e.MDR_Number,
-					PetitionerInterest = e.PetitionerInterest,
-					LandlordId = e.LandlordId,
-					Tanent = e.Tanent
+					Id = appartment.Id,
+					ApartmentCode = appartment.ApartmentCode,
+					City = appartment.City,
+					State = appartment.State,
+					PremiseType = appartment.PremiseType,
+					Address_1 = appartment.Address_1,
+					Address_2 = appartment.Address_2,
+					Zipcode = appartment.Zipcode,
+					Country = appartment.Country,
+					MDR_Number = appartment.MDR_Number,
+					PetitionerInterest = appartment.PetitionerInterest,
+					TypeOfRentRegulation = appartment.TypeOfRentRegulation,
+					BuildingUnits = appartment.BuildingUnits,
+					HasPriorCase = appartment.HasPriorCase,
+					OtherProperties = appartment.OtherProperties,
+					LandlordId = appartment.LandlordId,
+					
 				})
 				.ToListAsync();
 		}
@@ -183,21 +207,25 @@ namespace EvictionFiler.Infrastructure.Repositories
 				.Where(x => x.LandlordId == landlordId && x.IsDeleted != true)
 				.ToListAsync();
 
-			return building.Select(e => new EditApartmentDto
+			return building.Select(appartment  => new EditApartmentDto
 			{
-				Id = e.Id,
-				ApartmentCode = e.ApartmentCode,
-				City = e.City,
-				State = e.State,
-				PremiseType = e.PremiseType,
-				Address_1 = e.Address_1,
-				Address_2 = e.Address_2,
-				Zipcode = e.Zipcode,
-				Country = e.Country,
-				MDR_Number = e.MDR_Number,
-				PetitionerInterest = e.PetitionerInterest,
-				LandlordId = e.LandlordId,
-				Tanent = e.Tanent
+				Id = appartment.Id,
+				ApartmentCode = appartment.ApartmentCode,
+				City = appartment.City,
+				State = appartment.State,
+				PremiseType = appartment.PremiseType,
+				Address_1 = appartment.Address_1,
+				Address_2 = appartment.Address_2,
+				Zipcode = appartment.Zipcode,
+				Country = appartment.Country,
+				MDR_Number = appartment.MDR_Number,
+				PetitionerInterest = appartment.PetitionerInterest,
+				TypeOfRentRegulation = appartment.TypeOfRentRegulation,
+				BuildingUnits = appartment.BuildingUnits,
+				HasPriorCase = appartment.HasPriorCase,
+				OtherProperties = appartment.OtherProperties,
+				LandlordId = appartment.LandlordId,
+
 			}).ToList();
 		}
 

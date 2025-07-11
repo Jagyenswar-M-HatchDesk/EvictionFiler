@@ -3,6 +3,8 @@
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.TenantDto
 @using EvictionFiler.Client.Services
+@using EvictionFiler.Domain.Enums
+@using Microsoft.AspNetCore.Components.Forms
 
 @inject ClientService _clientService
 @inject LandLordService _landlordService
@@ -313,7 +315,7 @@
                             </div>
                             <div class="col">
                                 <label>Type of Owner</label>
-                                <select class="form-select">
+                                <select class="form-select" @bind="landlord.TypeOfOwner">
                                     <option selected disabled>Select Type</option>
                                     <option value="Corporation">Corporation</option>
                                     <option value="LLC">LLC</option>
@@ -362,7 +364,7 @@
                             </div>
                             <div class="col">
                                 <label>Attorney Contact Info</label>
-                                <input type="text" class="form-control" />
+                                <InputText class="form-control" @bind-Value="landlord.AttorneyContactInfo"  />
                             </div>
                           
                            
@@ -380,7 +382,7 @@
                         </div>
                             <div class="col">
                                 <label>Contact Person Name</label>
-                                <input type="text" class="form-control" />
+                                <InputText class="form-control" @bind-Value="landlord.ContactPersonName" />
                             </div>
                         </div>
                         <div class=" row mb-3">
@@ -399,41 +401,33 @@
                              
                             </div>
                             <div class="col-lg-3">
-                                <input type="date" class="form-control" />
+                                <InputDate class="form-control" @bind-Value="landlord.DateOfRefreeDeed" />
                             </div>
                         </div>
 
-                       
 
-                        <div class="row align-items-center mb-3">
+
+                        <InputRadioGroup @bind-Value="landlord.LandlordType" class="row align-items-center mb-3">
                             <div class="col-auto">
                                 <label class="form-label mb-0">Are You the:</label>
                             </div>
-                            <div class="col-auto">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="ownerOfRecord" />
-                                    <label class="form-check-label" for="ownerOfRecord">Owner of Record</label>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="agent" />
-                                    <label class="form-check-label" for="agent">Agent</label>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="refereeOwner" />
-                                    <label class="form-check-label" for="refereeOwner">Referee Owner</label>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="other" />
-                                    <label class="form-check-label" for="other">Other</label>
-                                </div>
-                            </div>
+
+                            @foreach (LandLordRole role in Enum.GetValues(typeof(LandLordRole)))
+                            {
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        <InputRadio class="form-check-input" Value="@role" />
+                                        <label class="form-check-label">
+                                            @(role.ToString()
+                                                                            .Replace("OwnerOfRecord", "Owner of Record")
+                                                                            .Replace("RefereeOwner", "Referee Owner"))
+                            </label>
                         </div>
+                    </div>
+                                        }
+                        </InputRadioGroup>
+
+
 
                         <button type="submit" class="btn bg-navy text-white mt-2">Save Landlord Info</button>
                     </EditForm>
@@ -517,8 +511,8 @@
                             </div>
                             <div class="col">
                                 <label for="RentStatus">Rent Regulation Status</label>
-                                <select class="form-select" id="RentStatus">
-                                    <option selected disabled>Select Type</option>
+                                <select class="form-select" id="RentStatus" @bind="building.TypeOfRentRegulation">
+                                    <option disabled value="">Select Type</option>
                                     <option value="Rent_Stabilised">Rent Stabilised</option>
                                     <option value="Controlled">Controlled</option>
                                     <option value="Market">Market</option>
@@ -527,6 +521,7 @@
                                     <option value="Other">Other</option>
                                 </select>
                             </div>
+
                         </div>
 
                       
@@ -584,7 +579,7 @@
                             </div>
                             <div class="col">
                                 <label for="BuildingUnit">No. of Units in the Building</label>
-                                <input type="number" class="form-control" id="BuildingUnit" />
+                                <InputText class="form-control" id="BuildingUnit" @bind-Value="building.BuildingUnits" />
                             </div>
                         </div>
 
@@ -613,28 +608,33 @@
                             </div>
                             <div class="col">
                                 <label>List Other Properties</label>
-                                <input type="text" class="form-control" id="Properties" />
+                                <InputText type="text" class="form-control" @bind-Value="building.OtherProperties" />
                             </div>
                         </div>
 
-                        <!-- Any prior housing court case (checkboxes) -->
-                        <div class="row align-items-center mb-3">
-                            <div class="col-auto">
-                                <label class="form-label mb-0">Any prior housing Court Case:</label>
-                            </div>
-                            <div class="col-auto">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="Yes" />
-                                    <label class="form-check-label" for="Yes">Yes</label>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="No" />
-                                    <label class="form-check-label" for="No">No</label>
-                                </div>
-                            </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <InputRadioGroup @bind-Value="building.HasPriorCase">
+                                    <div class="d-flex align-items-center">
+                                        <label class="form-label mb-0 me-2">Any prior housing Court Case:</label>
+
+                                        <div class="form-check me-2">
+                                            <InputRadio class="form-check-input" Value="true" />
+                                            <label class="form-check-label">Yes</label>
+                                        </div>
+
+                                        <div class="form-check">
+                                            <InputRadio class="form-check-input" Value="false" />
+                                            <label class="form-check-label">No</label>
+                                        </div>
+                                    </div>
+                                </InputRadioGroup>
+                               
+                           </div>
                         </div>
+
+
+
 
                         <!-- Submit Button -->
                         <button type="submit" class="btn bg-navy text-white mt-2">Save Building Info</button>
@@ -705,7 +705,7 @@
                             </div>
                             <div class="col-md-3">
                                 <label>Registration No.</label>
-                                <Input type="text" class="form-control"  />
+                                <InputText class="form-control" @bind-Value="tenant.Registration_No" />
                             </div>
                             <div class="col-md-4">
                                 <label>Choose Apartment</label>
@@ -757,7 +757,7 @@
                             </div>
                             <div class="col-md-3">
                                 <label>Name & Relations</label>
-                                <Input type="text" class="form-control" />
+                                <InputText class="form-control"  @bind-Value="tenant.Name_Relation" />
                             </div>
                             <div class="col-md-3">
                                 <label>Date of Birth</label>
@@ -781,69 +781,84 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <!-- Group 1: Tenant of Record -->
+                            <!-- Tenant of Record -->
                             <div class="col-md-6">
-                                <div class="d-flex align-items-center">
-                                    <label class="form-label mb-0 me-2">Tenant of Record:</label>
-                                    <div class="form-check me-2">
-                                        <input type="checkbox" class="form-check-input" id="TenantYes" />
-                                        <label class="form-check-label" for="TenantYes">Yes</label>
+                                <InputRadioGroup @bind-Value="tenant.TenantRecord">
+                                    <div class="d-flex align-items-center">
+                                        <label class="form-label mb-0 me-2">Tenant of Record:</label>
+
+                                        <div class="form-check me-2">
+                                            <InputRadio class="form-check-input" Value="true" />
+                                            <label class="form-check-label">Yes</label>
+                                        </div>
+
+                                        <div class="form-check">
+                                            <InputRadio class="form-check-input" Value="false" />
+                                            <label class="form-check-label">No</label>
+                                        </div>
                                     </div>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="TenantNo" />
-                                        <label class="form-check-label" for="TenantNo">No</label>
-                                    </div>
-                                </div>
+                                </InputRadioGroup>
                             </div>
 
-                            <!-- Group 2: Still in Possession -->
+                            <!-- Still in Possession -->
                             <div class="col-md-6">
-                                <div class="d-flex align-items-center">
-                                    <label class="form-label mb-0 me-2">Still in Possession:</label>
-                                    <div class="form-check me-2">
-                                        <input type="checkbox" class="form-check-input" id="PossessionYes" />
-                                        <label class="form-check-label" for="PossessionYes">Yes</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="PossessionNo" />
-                                        <label class="form-check-label" for="PossessionNo">No</label>
-                                    </div>
-                                </div>
-                            </div>
+                                <InputRadioGroup @bind-Value="tenant.HasPossession">
+                                    <div class="d-flex align-items-center">
+                                        <label class="form-label mb-0 me-2">Still in Possession:</label>
 
-                         
-                           
+                                        <div class="form-check me-2">
+                                            <InputRadio class="form-check-input" Value="true" />
+                                            <label class="form-check-label">Yes</label>
+                                        </div>
+
+                                        <div class="form-check">
+                                            <InputRadio class="form-check-input" Value="false" />
+                                            <label class="form-check-label">No</label>
+                                        </div>
+                                    </div>
+                                </InputRadioGroup>
+                            </div>
                         </div>
+
                         <div class="row align-items-center mb-3">
-                          
+
                             <div class="col-md-6">
+
+                            <InputRadioGroup @bind-Value="tenant.HasRegulatedTenancy">
                                 <div class="d-flex align-items-center">
-                                    <label class="form-label mb-0 me-2">Is this a rent regulated tenancy::</label>
+                                    <label class="form-label mb-0 me-2">Is this a rent regulated tenancy:</label>
+
                                     <div class="form-check me-2">
-                                        <input type="checkbox" class="form-check-input" id="OtherYes" />
-                                        <label class="form-check-label" for="OtherYes">Yes</label>
+                                        <InputRadio class="form-check-input" Value="true" />
+                                        <label class="form-check-label">Yes</label>
                                     </div>
+
                                     <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="OtherNo" />
-                                        <label class="form-check-label" for="OtherNo">No</label>
+                                        <InputRadio class="form-check-input" Value="false" />
+                                        <label class="form-check-label">No</label>
                                     </div>
                                 </div>
+                            </InputRadioGroup>
                             </div>
-
-
                             <div class="col-md-6">
+                            <InputRadioGroup @bind-Value="tenant.OtherOccupants" >
                                 <div class="d-flex align-items-center">
                                     <label class="form-label mb-0 me-2">Other Occupants:</label>
+
                                     <div class="form-check me-2">
-                                        <input type="checkbox" class="form-check-input" id="OtherYes" />
-                                        <label class="form-check-label" for="OtherYes">Yes</label>
+                                        <InputRadio class="form-check-input" Value="true" />
+                                        <label class="form-check-label">Yes</label>
                                     </div>
+
                                     <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="OtherNo" />
-                                        <label class="form-check-label" for="OtherNo">No</label>
+                                        <InputRadio class="form-check-input" Value="false" />
+                                        <label class="form-check-label">No</label>
                                     </div>
                                 </div>
+                            </InputRadioGroup>
+
                             </div>
+                           
                         </div>
 
                         <!-- Row 5: Address -->
@@ -1103,7 +1118,7 @@
                 return;
         }
 
-        Navigation.NavigateTo("/clients");  
+        Navigation.NavigateTo("/clients" , true);  
     }
 
 }
