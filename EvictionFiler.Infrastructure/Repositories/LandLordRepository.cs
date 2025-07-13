@@ -32,8 +32,9 @@ namespace EvictionFiler.Infrastructure.Repositories
             {
                 Id = dto.Id,
                 LandLordCode = dto.LandLordCode,
-                Name = dto.Name,
-                EINorSSN = dto.EINorSSN,
+				Name = string.Concat(dto.FirstName, " ", dto.LastName),
+
+				EINorSSN = dto.EINorSSN,
                 Phone = dto.Phone,
                 Email = dto.Email,
                 MaillingAddress = dto.MaillingAddress,
@@ -41,8 +42,9 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Firm = dto.Firm,
               AttorneyContactInfo = dto.AttorneyContactInfo,
 			  ContactPersonName = dto.ContactPersonName,
-			  DateOfRefreeDeed  = dto.DateOfRefreeDeed,
-			  LandlordType  = dto.LandlordType,
+				DateOfRefreeDeed = dto.DateOfRefreeDeed ?? DateOnly.FromDateTime(DateTime.Today),
+
+				LandlordType = dto.LandlordType,
 			  TypeOfOwner =dto.TypeOfOwner,
 
                 ClientId = dto.ClientId,
@@ -104,6 +106,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Id = dto.Id,
 				LandLordCode = dto.LandLordCode,
 				Name = dto.Name,
+
 				EINorSSN = dto.EINorSSN,
 				Phone = dto.Phone,
 				Email = dto.Email,
@@ -158,7 +161,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 			existing.Firm = dto.Firm;
 			existing.AttorneyContactInfo = dto.AttorneyContactInfo;
 			existing.ContactPersonName = dto.ContactPersonName;
-			existing.DateOfRefreeDeed = dto.DateOfRefreeDeed;
+			existing.DateOfRefreeDeed = dto.DateOfRefreeDeed ?? DateOnly.FromDateTime(DateTime.Today);
+
 			existing.LandlordType = dto.LandlordType;
 			existing.TypeOfOwner = dto.TypeOfOwner;
 

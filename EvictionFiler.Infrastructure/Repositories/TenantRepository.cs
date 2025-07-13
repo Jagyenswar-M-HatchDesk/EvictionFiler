@@ -33,7 +33,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 TenantCode = dto.TenantCode,
                 Name = dto.Name,
                 DOB = dto.DOB,
-                SSN = dto.SSN,
+				SSN = dto.SSN,
                 Phone = dto.Phone,
                 Email = dto.Email,
                 Language = dto.Language,
