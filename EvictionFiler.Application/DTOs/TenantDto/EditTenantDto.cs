@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 	{
 		public Guid Id { get; set; }
 		public string? TenantCode { get; set; } = string.Empty;
+		[Required(ErrorMessage = "First Name is required")]
 		public string? FirstName { get; set; } = string.Empty;
 		public string? LastName { get; set; } = string.Empty;
 		public string? Registration_No { get; set; } = string.Empty;
@@ -38,6 +40,7 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public bool? OtherOccupants { get; set; }
 
 		public bool? HasPriorCase { get; set; }
+		[Required(ErrorMessage = "Apartment is required")]
 		public Guid? ApartmentId { get; set; }
 	}
 }

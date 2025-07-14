@@ -28,7 +28,7 @@ namespace EvictionFiler.Application.DTOs.LandLordDto
 		public string? City { get; set; }
 		public string? State { get; set; }
 		public string? Zipcode { get; set; }
-		public Guid ClientId { get; set; }  
+		public Guid? ClientId { get; set; }  
 		public List<AddApartment>? Apartments { get; set; }
 
 		public string? OtherLandlordTypeDescription { get; set; }

@@ -52,7 +52,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Fax = client.Fax ?? "",
                 Phone = client.Phone ?? "",
                 CellPhone = client.CellPhone ?? "",
-                GenarateOwnRd = client.GenarateOwnRd ?? false
+                //GenarateOwnRd = client.GenarateOwnRd ?? false
             }).ToListAsync();
 
             return allclients ?? new List<CreateClientDto>();
@@ -80,7 +80,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Phone = client.Phone,
 				CellPhone = client.CellPhone,
 				Fax = client.Fax,
-				GenarateOwnRd = client.GenarateOwnRd,
+				//GenarateOwnRd = client.GenarateOwnRd,
 				CreatedAt = DateTime.Now,
 				IsActive = true
 			};
@@ -137,7 +137,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Phone = e.Phone,
                 CellPhone = e.CellPhone,
                 Fax = e.Fax,
-                GenarateOwnRd = e.GenarateOwnRd,
+                //GenarateOwnRd = e.GenarateOwnRd,
 
             }).ToListAsync();
             if (client == null)

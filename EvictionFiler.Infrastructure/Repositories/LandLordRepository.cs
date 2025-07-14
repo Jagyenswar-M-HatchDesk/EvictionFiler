@@ -291,6 +291,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Zipcode = l.Zipcode,
 				ContactPersonName = l.ContactPersonName,
 				TypeOfOwner = l.TypeOfOwner,
+				ClientId = l.ClientId
+
 			}).ToList();
 		}
 
