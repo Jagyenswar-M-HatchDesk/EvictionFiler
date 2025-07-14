@@ -68,7 +68,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 			var newclient = new Client
 			{
 				Id = client.Id, 
-				ClientCode = client.ClientCode,
+				ClientCode = await GenerateClientCodeAsync(),
 				FirstName = client.FirstName,
 				LastName = client.LastName,
 				Email = client.Email,
@@ -145,13 +145,29 @@ namespace EvictionFiler.Infrastructure.Repositories
             return client;
         }
 
-        public static string GenerateCaseCode()
-        {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            var random = new Random();
-            return new string(Enumerable.Repeat(chars, 8)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
-        }
-    }
+		public async Task<string> GenerateClientCodeAsync()
+		{
+			// Get the latest case from DB
+			var lastCase = await _context.Clients
+				.OrderByDescending(c => c.ClientCode)
+				.Select(c => c.ClientCode)
+				.FirstOrDefaultAsync();
+
+			int nextNumber = 1;
+
+			if (!string.IsNullOrEmpty(lastCase) && lastCase.StartsWith("CC"))
+			{
+				string numberPart = lastCase.Substring(2); // Remove 'EF'
+				if (int.TryParse(numberPart, out int parsedNumber))
+				{
+					nextNumber = parsedNumber + 1;
+				}
+			}
+
+			// Generate new CaseCode
+			string newCode = "CC" + nextNumber.ToString("D10"); // D10 = 10 digits
+			return newCode;
+		}
+	}
 
 }

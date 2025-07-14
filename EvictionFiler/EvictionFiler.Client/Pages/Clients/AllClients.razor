@@ -8,6 +8,7 @@
 @inject LandLordService landLordService
 @inject ApartmentService apartmentService
 @inject TenantService tenantService
+@inject NavigationManager navManager
 @rendermode InteractiveAuto
 <PageTitle>Clients</PageTitle>
 
@@ -43,7 +44,7 @@
                         <th>Phone</th>
                         <th>City</th>
                         <th>Zip Code</th>
-                       @* // <th class="sticky">Status</th> *@
+                       <th class="sticky">Status</th>
                         <th class="sticky">Action</th>
                     </tr>
                 </thead>
@@ -59,9 +60,9 @@
                                 <td>@client.Phone</td>
                                 <td>@client.City</td>
                                 <td>@client.ZipCode</td>
-
+                                <td>Active</td>
                                 <td class="sticky">
-                                    <i class="fa-solid fa-pen-to-square text-navy me-3" @onclick= "()=>EditClient(client.Id)" title="Edit"></i>
+                                    @* <i class="fa-solid fa-pen-to-square text-navy me-3" @onclick= "()=>EditClient(client.Id)" title="Edit"></i> *@
                                     <i class="fa-solid fa-trash-can text-danger" @onclick=" ()=>DeleteClient(client.Id)" title="Delete"></i>
                                 </td>
                             </tr>
@@ -78,12 +79,27 @@
         </div>
     </div>
 
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+            <div class="toast show text-white bg-success">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        @successMessage
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                            @onclick="() => successMessage = string.Empty"></button>
+                </div>
+            </div>
+        </div>
+    }
+
     <CreateCLient @ref="createClientRef"  />
 
-    <EditClient @ref="editClientRef"
+   @*  <EditClient @ref="editClientRef"
                 Landlords="saveEditlandlordList"
                 Buildings="saveEditBuildingList"
-                Tenants="saveEditTenantList" />
+                Tenants="saveEditTenantList" /> *@
 
 
 </body>
@@ -96,7 +112,7 @@
     private List<EditLandlordDto> saveEditlandlordList = new();
     private List<EditApartmentDto> saveEditBuildingList = new();
     private List<EditTenantDto> saveEditTenantList = new();
-   
+    private string successMessage;
 
 
     private List<CreateClientDto> clients = new();
@@ -106,6 +122,9 @@
 
     private string activeTab = string.Empty;
 
+    
+
+
     private IEnumerable<CreateClientDto> filteredClients =>
         string.IsNullOrWhiteSpace(searchTerm)
         ? clients
@@ -114,10 +133,35 @@
             (!string.IsNullOrWhiteSpace(c.Email) && c.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
             (!string.IsNullOrWhiteSpace(c.Phone) && c.Phone.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
 
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     clients = await clientservice.GetAllClientsAsync();
+    // }
+
+    
+
+
     protected override async Task OnInitializedAsync()
     {
-        clients = await clientservice.GetAllClientsAsync();
+        var uri = new Uri(navManager.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.TryGetValue("success", out var isSuccess) && isSuccess == "true")
+        {
+            successMessage = "Client submitted successfully!";
+            StateHasChanged();
+
+            await Task.Delay(2000); 
+
+            successMessage = string.Empty;
+            StateHasChanged();
+
+            navManager.NavigateTo("/clients", forceLoad: false); // ✅ FIX: No full reload
+        }
+
+        clients = await clientservice.GetAllClientsAsync(); // ✅ Grid data still loads
     }
+
 
     private async Task AddClient()
     {
@@ -145,38 +189,38 @@
   
 
 
-    private async Task EditClient(Guid clientId)
-    {
-        clientIdForEdit = clientId;
+    // private async Task EditClient(Guid clientId)
+    // {
+    //     clientIdForEdit = clientId;
 
-        var client = await clientservice.GetClientByIdAsync(clientId);
-        var landlords = await landLordService.GetLandlordsByClientIdAsync(clientId);
+    //     var client = await clientservice.GetClientByIdAsync(clientId);
+    //     var landlords = await landLordService.GetLandlordsByClientIdAsync(clientId);
 
-        if (client != null)
-        {
-            var editClient = new EditClientDto
-            {
-                Id = client.Id,
-                FirstName = client.FirstName,
-                LastName = client.LastName,
-                Email = client.Email,
-                Fax = client.Fax,
-                Phone = client.Phone,
-                CellPhone = client.CellPhone,
-                ClientCode = client.ClientCode,
-                Address_1 = client.Address_1,
-                Address_2 = client.Address_2,
-                City = client.City,
-                State = client.State,
-                ZipCode = client.ZipCode,
-                LandLords = landlords
-            };
+    //     if (client != null)
+    //     {
+    //         var editClient = new EditClientDto
+    //         {
+    //             Id = client.Id,
+    //             FirstName = client.FirstName,
+    //             LastName = client.LastName,
+    //             Email = client.Email,
+    //             Fax = client.Fax,
+    //             Phone = client.Phone,
+    //             CellPhone = client.CellPhone,
+    //             ClientCode = client.ClientCode,
+    //             Address_1 = client.Address_1,
+    //             Address_2 = client.Address_2,
+    //             City = client.City,
+    //             State = client.State,
+    //             ZipCode = client.ZipCode,
+    //             LandLords = landlords
+    //         };
 
-            await LoadBuildings(clientId);
-            saveEditlandlordList = landlords;
-            editClientRef.Show(editClient);
-        }
-    }
+    //         await LoadBuildings(clientId);
+    //         saveEditlandlordList = landlords;
+    //         editClientRef.Show(editClient);
+    //     }
+    // }
 
 
     private async Task SetActiveTab(string tab)

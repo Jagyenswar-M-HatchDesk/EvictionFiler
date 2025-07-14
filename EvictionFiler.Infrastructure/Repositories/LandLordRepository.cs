@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using EvictionFiler.Application.DTOs;
@@ -24,42 +25,42 @@ namespace EvictionFiler.Infrastructure.Repositories
             _mainDbContext = mainDbContext;
         }
 
-        public async Task<bool> AddLandLord(List<CreateLandLordDto> dtoList)
-        {
+		public async Task<bool> AddLandLord(List<CreateLandLordDto> dtoList)
+		{
+			var newLandlords = new List<LandLord>();
 
-			
-			var newlandlord = dtoList.Select(dto => new LandLord
-            {
-                Id = dto.Id,
-                LandLordCode = dto.LandLordCode,
-				Name = string.Concat(dto.FirstName, " ", dto.LastName),
+			foreach (var dto in dtoList)
+			{
+				var landlord = new LandLord
+				{
+					Id = dto.Id,
+					LandLordCode = await GenerateLandlordCodeAsync(),
+					FirstName = dto.FirstName,
+					LastName = dto.LastName,
+					EINorSSN = dto.EINorSSN,
+					Phone = dto.Phone,
+					Email = dto.Email,
+					OtherProperties = dto.OtherProperties,
+					Address1 = dto.Address1,
+					Address2 = dto.Address2,
+					State = dto.State,
+					City = dto.City,
+					Zipcode = dto.Zipcode,
+					ContactPersonName = dto.ContactPersonName,
+					TypeOfOwner = dto.TypeOfOwner,
+					ClientId = dto.ClientId
+				};
 
-				EINorSSN = dto.EINorSSN,
-                Phone = dto.Phone,
-                Email = dto.Email,
-                MaillingAddress = dto.MaillingAddress,
-                Attorney = dto.Attorney,
-                Firm = dto.Firm,
-              AttorneyContactInfo = dto.AttorneyContactInfo,
-			  ContactPersonName = dto.ContactPersonName,
-				DateOfRefreeDeed = dto.DateOfRefreeDeed ?? DateOnly.FromDateTime(DateTime.Today),
+				newLandlords.Add(landlord);
+			}
 
-				LandlordType = dto.LandlordType,
-			  TypeOfOwner =dto.TypeOfOwner,
+			_mainDbContext.LandLords.AddRange(newLandlords);
+			var result = await _mainDbContext.SaveChangesAsync();
 
-                ClientId = dto.ClientId,
-				
-            });
+			return result > 0;
+		}
 
-            _mainDbContext.LandLords.AddRange(newlandlord);
-            var result = await _mainDbContext.SaveChangesAsync();
 
-            if(result != null)
-            {
-                return true;
-            }
-            return false;
-        }
 
 
 		public async Task<List<CreateLandLordDto>> GetAllLandLordsAsync()
@@ -70,22 +71,25 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			var result = landlords.Select(dto => new CreateLandLordDto
 			{
+				
 				Id = dto.Id,
 				LandLordCode = dto.LandLordCode,
-				Name = dto.Name,
+				FirstName = dto.FirstName,
+				LastName = dto.LastName,
 				EINorSSN = dto.EINorSSN,
 				Phone = dto.Phone,
 				Email = dto.Email,
-				MaillingAddress = dto.MaillingAddress,
-				Attorney = dto.Attorney,
-				Firm = dto.Firm,
-				AttorneyContactInfo = dto.AttorneyContactInfo,
+				OtherProperties = dto.OtherProperties,
+				Address1 = dto.Address1,
+				Address2 = dto.Address2,
+				State = dto.State,
+				City = dto.City,
+				Zipcode = dto.Zipcode,
 				ContactPersonName = dto.ContactPersonName,
-				DateOfRefreeDeed = dto.DateOfRefreeDeed,
-				LandlordType = dto.LandlordType,
 				TypeOfOwner = dto.TypeOfOwner,
+			
 
-	
+
 
 			}).ToList();
 
@@ -105,19 +109,20 @@ namespace EvictionFiler.Infrastructure.Repositories
 			{
 				Id = dto.Id,
 				LandLordCode = dto.LandLordCode,
-				Name = dto.Name,
-
+				FirstName = dto.FirstName,
+				LastName = dto.LastName,
 				EINorSSN = dto.EINorSSN,
 				Phone = dto.Phone,
 				Email = dto.Email,
-				MaillingAddress = dto.MaillingAddress,
-				Attorney = dto.Attorney,
-				Firm = dto.Firm,
-				AttorneyContactInfo = dto.AttorneyContactInfo,
+				OtherProperties = dto.OtherProperties,
+				Address1 = dto.Address1,
+				Address2 = dto.Address2,
+				State = dto.State,
+				City = dto.City,
+				Zipcode = dto.Zipcode,
 				ContactPersonName = dto.ContactPersonName,
-				DateOfRefreeDeed = dto.DateOfRefreeDeed,
-				LandlordType = dto.LandlordType,
 				TypeOfOwner = dto.TypeOfOwner,
+				
 			};
 
 		}
@@ -127,17 +132,14 @@ namespace EvictionFiler.Infrastructure.Repositories
             {
 				Id = e.Id,
 				LandLordCode = e.LandLordCode,
-				Name = e.Name,
+				//Name = e.Name,
 				EINorSSN = e.EINorSSN,
 				Phone = e.Phone,
 				Email = e.Email,
-				MaillingAddress = e.MaillingAddress,
-				Attorney = e.Attorney,
-				Firm = e.Firm,
-				AttorneyContactInfo = e.AttorneyContactInfo,
+		
+				
 				ContactPersonName = e.ContactPersonName,
-				DateOfRefreeDeed = e.DateOfRefreeDeed,
-				LandlordType = e.LandlordType,
+				
 				TypeOfOwner = e.TypeOfOwner,
 			}).ToListAsync();
             if (landlord == null)
@@ -152,21 +154,23 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 
 			existing.LandLordCode = dto.LandLordCode;
-			existing.Name = dto.Name;
+			existing.FirstName = dto.FirstName;
+			existing.LastName = dto.LastName;
 			existing.EINorSSN = dto.EINorSSN;
 			existing.Phone = dto.Phone;
 			existing.Email = dto.Email;
-			existing.MaillingAddress = dto.MaillingAddress;
-			existing.Attorney = dto.Attorney;
-			existing.Firm = dto.Firm;
-			existing.AttorneyContactInfo = dto.AttorneyContactInfo;
+			existing.OtherProperties = dto.OtherProperties;
+			existing.Address1 = dto.Address1;
+			existing.Address2 = dto.Address2;
+			existing.State = dto.State;
+			existing.City = dto.City;
+			existing.Zipcode = dto.Zipcode;
 			existing.ContactPersonName = dto.ContactPersonName;
-			existing.DateOfRefreeDeed = dto.DateOfRefreeDeed ?? DateOnly.FromDateTime(DateTime.Today);
-
-			existing.LandlordType = dto.LandlordType;
 			existing.TypeOfOwner = dto.TypeOfOwner;
+					
 
-            _mainDbContext.LandLords.Update(existing);
+
+			_mainDbContext.LandLords.Update(existing);
             await _mainDbContext.SaveChangesAsync();
 
             return true;
@@ -194,14 +198,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 					l.ClientId == clientId &&                
 					l.IsDeleted != true &&
 					(
-						l.Name.ToLower().StartsWith(query) ||
+						l.FirstName.ToLower().StartsWith(query) ||
 						l.LandLordCode.ToLower().StartsWith(query)
 					)
 				)
 				.Select(l => new CreateLandLordDto
 				{
 					Id = l.Id,
-					Name = l.Name,
+					FirstName = l.FirstName,
 					Email = l.Email,
 					Phone = l.Phone,
 					LandLordCode = l.LandLordCode
@@ -221,6 +225,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				.Where(a => a.LandlordId == landlordId && a.IsDeleted != true)
 				.Select(appartment  => new AddApartment
 				{
+					Id = appartment.Id,
 					ApartmentCode = appartment.ApartmentCode,
 					City = appartment.City,
 					State = appartment.State,
@@ -228,16 +233,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 					Address_1 = appartment.Address_1,
 					Address_2 = appartment.Address_2,
 					Zipcode = appartment.Zipcode,
-					Country = appartment.Country,
 					MDR_Number = appartment.MDR_Number,
 					PetitionerInterest = appartment.PetitionerInterest,
 					TypeOfRentRegulation = appartment.TypeOfRentRegulation,
 					BuildingUnits = appartment.BuildingUnits,
-					HasPriorCase = appartment.HasPriorCase,
-					OtherProperties = appartment.OtherProperties,
-
+					DateOfRefreeDeed = appartment.DateOfRefreeDeed,
+					LandlordType = appartment.LandlordType,
 					LandlordId = appartment.LandlordId,
-					
+
 				}).ToListAsync();
 
 			return new LandlordWithBuildings
@@ -246,17 +249,18 @@ namespace EvictionFiler.Infrastructure.Repositories
 				{
 					Id = l.Id,
 					LandLordCode = l.LandLordCode,
-					Name = l.Name,
+					FirstName = l.FirstName,
+					LastName = l.LastName,
 					EINorSSN = l.EINorSSN,
 					Phone = l.Phone,
 					Email = l.Email,
-					MaillingAddress = l.MaillingAddress,
-					Attorney = l.Attorney,
-					Firm = l.Firm,
-					AttorneyContactInfo = l.AttorneyContactInfo,
+					OtherProperties = l.OtherProperties,
+					Address1 = l.Address1,
+					Address2 = l.Address2,
+					State = l.State,
+					City = l.City,
+					Zipcode = l.Zipcode,
 					ContactPersonName = l.ContactPersonName,
-					DateOfRefreeDeed = l.DateOfRefreeDeed,
-					LandlordType = l.LandlordType,
 					TypeOfOwner = l.TypeOfOwner,
 
 
@@ -274,22 +278,45 @@ namespace EvictionFiler.Infrastructure.Repositories
 			{
 				Id = l.Id,
 				LandLordCode = l.LandLordCode,
-				Name = l.Name,
+				FirstName = l.FirstName,
+				LastName = l.LastName,
 				EINorSSN = l.EINorSSN,
 				Phone = l.Phone,
 				Email = l.Email,
-				MaillingAddress = l.MaillingAddress,
-				Attorney = l.Attorney,
-				Firm = l.Firm,
-				AttorneyContactInfo = l.AttorneyContactInfo,
+				OtherProperties = l.OtherProperties,
+				Address1 = l.Address1,
+				Address2 = l.Address2,
+				State = l.State,
+				City = l.City,
+				Zipcode = l.Zipcode,
 				ContactPersonName = l.ContactPersonName,
-				DateOfRefreeDeed = l.DateOfRefreeDeed,
-				LandlordType = l.LandlordType,
 				TypeOfOwner = l.TypeOfOwner,
 			}).ToList();
 		}
 
+		public async Task<string> GenerateLandlordCodeAsync()
+		{
+			// Get the latest case from DB
+			var lastCase = await _mainDbContext.LandLords
+				.OrderByDescending(c => c.LandLordCode)
+				.Select(c => c.LandLordCode)
+				.FirstOrDefaultAsync();
 
+			int nextNumber = 1;
+
+			if (!string.IsNullOrEmpty(lastCase) && lastCase.StartsWith("LL"))
+			{
+				string numberPart = lastCase.Substring(2); // Remove 'EF'
+				if (int.TryParse(numberPart, out int parsedNumber))
+				{
+					nextNumber = parsedNumber + 1;
+				}
+			}
+
+			// Generate new CaseCode
+			string newCode = "LL" + nextNumber.ToString("D10"); // D10 = 10 digits
+			return newCode;
+		}
 
 	}
 }

@@ -39,15 +39,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 				PremiseType = appartment.PremiseType,
 				Address_1 = appartment.Address_1,
 				Address_2 = appartment.Address_2,
-				Zipcode = appartment.Zipcode,
-				Country = appartment.Country,
+				Zipcode = appartment.Zipcode,	
 				MDR_Number = appartment.MDR_Number,
 				PetitionerInterest = appartment.PetitionerInterest,
 				TypeOfRentRegulation = appartment.TypeOfRentRegulation,
 				BuildingUnits = appartment.BuildingUnits,
-				HasPriorCase = appartment.HasPriorCase,
-				OtherProperties = appartment.OtherProperties,
-				
+				DateOfRefreeDeed =appartment.DateOfRefreeDeed,
+				LandlordType = appartment.LandlordType,
 				LandlordId = appartment.LandlordId,
 		
 			};
@@ -63,7 +61,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 		{
             var newapartment = dtolist.Select(appartment=> new Appartment
             {
-                Id = appartment.Id,
+				Id = appartment.Id,
 				ApartmentCode = appartment.ApartmentCode,
 				City = appartment.City,
 				State = appartment.State,
@@ -71,19 +69,16 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Address_1 = appartment.Address_1,
 				Address_2 = appartment.Address_2,
 				Zipcode = appartment.Zipcode,
-				Country = appartment.Country,
 				MDR_Number = appartment.MDR_Number,
 				PetitionerInterest = appartment.PetitionerInterest,
 				TypeOfRentRegulation = appartment.TypeOfRentRegulation,
 				BuildingUnits = appartment.BuildingUnits,
-				HasPriorCase = appartment.HasPriorCase,
-				OtherProperties = appartment.OtherProperties,
-				IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                LandlordId = appartment.LandlordId,
-           
+				DateOfRefreeDeed = appartment.DateOfRefreeDeed,
+				LandlordType = appartment.LandlordType,
+				LandlordId = appartment.LandlordId,
 
-            });
+
+			});
             _context.Appartments.AddRange(newapartment);
             var result =await _context.SaveChangesAsync();
             if(result != null)
@@ -103,13 +98,18 @@ namespace EvictionFiler.Infrastructure.Repositories
 				{
 					Id = dto.Id,
 					TenantCode = dto.TenantCode,
-					Name = dto.Name,
+					FirstName = dto.FirstName,
+					LastName = dto.LastName,
 					DOB = dto.DOB,
 					SSN = dto.SSN,
 					Phone = dto.Phone,
 					Email = dto.Email,
 					Language = dto.Language,
-					Address = dto.Address,
+					Address_1 = dto.Address_1,
+					Address_2 = dto.Address_2,
+					State = dto.State,
+					City = dto.City,
+					Zipcode = dto.Zipcode,
 					Apt = dto.Apt,
 					Borough = dto.Borough,
 					Rent = dto.Rent,
@@ -120,11 +120,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 					OtherOccupants = dto.OtherOccupants,
 					Registration_No = dto.Registration_No,
 					TenantRecord = dto.TenantRecord,
-					
+					HasPriorCase = dto.HasPriorCase,
+
+
 					ApartmentId = dto.ApartmentId
 
 
-					
+
 				}).ToListAsync();
 
             return new BuildingWithTenant
@@ -132,7 +134,7 @@ namespace EvictionFiler.Infrastructure.Repositories
               
                 Building = new AddApartment
                 {
-                    Id = appartment.Id,
+					Id = appartment.Id,
 					ApartmentCode = appartment.ApartmentCode,
 					City = appartment.City,
 					State = appartment.State,
@@ -140,16 +142,15 @@ namespace EvictionFiler.Infrastructure.Repositories
 					Address_1 = appartment.Address_1,
 					Address_2 = appartment.Address_2,
 					Zipcode = appartment.Zipcode,
-					Country = appartment.Country,
 					MDR_Number = appartment.MDR_Number,
 					PetitionerInterest = appartment.PetitionerInterest,
 					TypeOfRentRegulation = appartment.TypeOfRentRegulation,
 					BuildingUnits = appartment.BuildingUnits,
-					HasPriorCase = appartment.HasPriorCase,
-					OtherProperties = appartment.OtherProperties,
+					DateOfRefreeDeed = appartment.DateOfRefreeDeed,
+					LandlordType = appartment.LandlordType,
 					LandlordId = appartment.LandlordId,
-               
-                },
+
+				},
 				Tenants = tenant
 			};
 		}
@@ -188,15 +189,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 					Address_1 = appartment.Address_1,
 					Address_2 = appartment.Address_2,
 					Zipcode = appartment.Zipcode,
-					Country = appartment.Country,
 					MDR_Number = appartment.MDR_Number,
 					PetitionerInterest = appartment.PetitionerInterest,
 					TypeOfRentRegulation = appartment.TypeOfRentRegulation,
 					BuildingUnits = appartment.BuildingUnits,
-					HasPriorCase = appartment.HasPriorCase,
-					OtherProperties = appartment.OtherProperties,
+					DateOfRefreeDeed = appartment.DateOfRefreeDeed,
+					LandlordType = appartment.LandlordType,
 					LandlordId = appartment.LandlordId,
-					
+
 				})
 				.ToListAsync();
 		}
@@ -217,13 +217,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Address_1 = appartment.Address_1,
 				Address_2 = appartment.Address_2,
 				Zipcode = appartment.Zipcode,
-				Country = appartment.Country,
 				MDR_Number = appartment.MDR_Number,
 				PetitionerInterest = appartment.PetitionerInterest,
 				TypeOfRentRegulation = appartment.TypeOfRentRegulation,
 				BuildingUnits = appartment.BuildingUnits,
-				HasPriorCase = appartment.HasPriorCase,
-				OtherProperties = appartment.OtherProperties,
+				DateOfRefreeDeed = appartment.DateOfRefreeDeed,
+				LandlordType = appartment.LandlordType,
 				LandlordId = appartment.LandlordId,
 
 			}).ToList();
