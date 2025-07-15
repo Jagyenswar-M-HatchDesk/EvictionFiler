@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace Multi_Talent_Architect.Services
+namespace EvictionFiler.Server.Services
 {
     //public class JwtAuthStateProvider : AuthenticationStateProvider
     //{

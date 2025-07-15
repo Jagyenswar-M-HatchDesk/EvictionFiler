@@ -4,9 +4,13 @@
 @using BlazorUI.Services
 @using BlazorUI.Services.Auth
 @using BlazorUI.ViewModels *@
+@using EvictionFiler.Server
+@using EvictionFiler.Server.Services
  @using Microsoft.AspNetCore.Components.Authorization
 @* @inject SpinnerService SpinnerService *@
 @inject AuthenticationStateProvider AuthenticationStateProvider 
+@inject AuthService _authService
+@inject NavigationManager Navigation
 
 
 
@@ -99,7 +103,7 @@
 
                 <!-- Profile Link -->
 
-                <a href="NotImplemented" class="sidebar-link text-decoration-none p-2">
+                <a  class="sidebar-link text-decoration-none p-2" @onclick="ToggleProfileOptions">
                     <i class="fa-regular fa-user menu-icon"></i>
 
                     @if (Name != null)
@@ -107,6 +111,15 @@
                         <span class="hide-on-collapse menu-label">@Name</span>
                     }
                 </a>
+                @if (showProfileOptions)
+                {
+                    <div class="bg-white border rounded shadow p-2 position-absolute" style="bottom: 60px; left: 10px; z-index: 1000;">
+                        <a href="javascript:void(0);" class="dropdown-item text-dark" @onclick="LogoutUser">
+                            <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
+                        </a>
+                    </div>
+                }
+
 
                 <a href="NotImplemented" class="sidebar-link text-decoration-none p-2">
                     <i class="fa-solid fa-circle-question menu-icon"></i>
@@ -115,12 +128,6 @@
                 </a>
                 <!-- Settings Link -->
 
-
-                @* 
-                <a  class="sidebar-link text-decoration-none p-2" @onclick="ToggleSettingsMode">
-                    <i class="fas fa-cog me-2"></i>
-                    <span class="hide-on-collapse menu-label">Settings</span>
-                </a> *@
                 <div class="sidebar-bottom  d-flex flex-column  position-relative">
                     <a class="sidebar-link text-decoration-none p-2 " @onclick="ToggleSettingsMode">
                         <i class="fa-solid fa-gears"></i>
@@ -139,7 +146,7 @@
 
 
 @code {
-
+    private bool showProfileOptions = false;
     Dictionary<string, bool> expandedMenus = new();
     // private UserClaimsModel userClaims;
     // private List<UserClaimsModel> userClaimsModels = new List<UserClaimsModel>();
@@ -181,6 +188,17 @@
             expandedMenus["Home"] = false;
         }
 
+    }
+
+    private async Task LogoutUser()
+    {
+        await _authService.LogoutAsync();
+        Navigation.NavigateTo("/", forceLoad: true); 
+    }
+
+    private void ToggleProfileOptions()
+    {
+        showProfileOptions = !showProfileOptions;
     }
     void ToggleSidebar()
     {

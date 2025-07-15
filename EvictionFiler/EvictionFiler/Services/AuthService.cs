@@ -3,7 +3,7 @@ using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Domain.Entities;
 
-namespace Multi_Talent_Architect.Services
+namespace EvictionFiler.Server.Services
 {
     public class AuthService
     {

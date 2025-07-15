@@ -8,12 +8,13 @@ using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories;
 using EvictionFiler.Server.Components;
+using EvictionFiler.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Multi_Talent_Architect.Services;
+
 using Syncfusion.Blazor;
 using System.Text;
 
