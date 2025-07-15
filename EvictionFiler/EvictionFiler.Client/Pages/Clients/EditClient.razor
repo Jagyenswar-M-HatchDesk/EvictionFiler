@@ -176,10 +176,17 @@
                     <DataAnnotationsValidator />
 
                     <div class="row">
-                         <div class="col-md-3 mb-3">
-                            <label class="form-label color-text required-label">Client Code</label>
-                            <InputText class="form-control" maxlength="10" @bind-Value="editClient.ClientCode" placeholder="Enter up to 10 digits" />
-                        </div> 
+                      
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label color-text required-label">Client Code</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-code-slash"></i>
+                                    </span>
+                                    <InputText class="form-control" maxlength="10" @bind-Value="editClient.ClientCode" placeholder="Enter up to 10 digits" readonly />
+                                </div>
+                            </div>
+                          
                         <div class="col-md-3 mb-3">
                             <label class="form-label color-text required-label">First Name</label>
                             <div class="input-group mb-3">
@@ -307,12 +314,24 @@
 
                 @if (showLandlordForm)
                 {
-                    <EditForm Model="@landlord" >
+                    <EditForm Model="@landlord" OnValidSubmit="SaveLandlordAsync">
 
                         <DataAnnotationsValidator />
 
                         <div class="row mb-3">
 
+                          
+                            <div class="col-md-4">
+                                <label class="required-label">Code</label>
+
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text"><i class="bi bi-code-slash"></i></span>
+                                    <InputText class="form-control" @bind-Value="landlord.LandLordCode" placeholder="Enter up to 10 digits" readonly />
+                                </div>
+                                <ValidationMessage For="@(() => landlord.LandLordCode)" />
+
+                            </div>
+                          
                             <div class="col-md-4">
                                 <label class="required-label">First Name</label>
 
@@ -332,19 +351,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="required-label">Type of Owner</label>
-                                <select class="form-select" @bind="landlord.TypeOfOwner">
-                                    <option selected disabled>Select Type</option>
-                                    <option value="Corporation">Corporation</option>
-                                    <option value="LLC">LLC</option>
-                                    <option value="Individual">Individual</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
-
                         </div>
-
 
                         <div class="row mb-3">
                             <div class="col-md-4">
@@ -379,7 +386,17 @@
 
                         </div>
                         <div class="row mb-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <label class="required-label">Type of Owner</label>
+                                <select class="form-select" @bind="landlord.TypeOfOwner">
+                                    <option selected disabled>Select Type</option>
+                                    <option value="Corporation">Corporation</option>
+                                    <option value="LLC">LLC</option>
+                                    <option value="Individual">Individual</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
                                 <label>EIN/SSN</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text">
@@ -387,10 +404,8 @@
                                     </span>
                                     <InputText class="form-control" @bind-Value="landlord.EINorSSN" placeholder="Enter EIN " />
                                 </div>
-
-
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label>List Other Properties</label>
                                 <InputText type="text" class="form-control" @bind-Value="landlord.OtherProperties" placeholder="Enter Other Properties" />
                             </div>
@@ -449,7 +464,11 @@
 
                         <button type="submit" class="btn bg-navy text-white mt-3">Save </button>
                     </EditForm>
+                    <div class="vertical-buttons d-flex flex-column align-items-center position-absolute end-0 top-50 translate-middle-y @(IsVisible ? "" : "d-none")">
+                        <button class="vertical-tab-button @(activeTab == "building" ? "active-vertical" : "")" @onclick="@(() => SetActiveTab("building"))">BUILDING</button>
 
+
+                    </div>
                 }
 
                 <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
@@ -466,9 +485,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (saveEditlandlordList != null && saveEditlandlordList.Any())
+                            @if (Landlords != null && Landlords.Any())
                     {
-                        @foreach (var l in saveEditlandlordList)
+                        @foreach (var l in Landlords)
                         {
                             <tr>
                                 <td>@(l.FirstName + " " + l.LastName)</td>
@@ -477,12 +496,11 @@
                                 <td>@l.Email</td>
                                 <td>@l.Address1</td>
                                 <td>@l.Address2</td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary"
-                                            @onclick="@(() => EditLandlord(l.Id))">
-                                        Edit
-                                    </button>
-                                </td>
+                                        <td class="sticky">
+                                            <i class="fa-solid fa-pen-to-square text-navy me-3" @onclick="@(() => EditLandlord(l.Id))" title="Edit"></i>
+                                            @* <i class="fa-solid fa-trash-can text-danger" @onclick=" ()=>DeleteClient(client.Id)" title="Delete"></i> *@
+                                        </td>
+                              
                             </tr>
                         }
                     }
@@ -515,7 +533,7 @@
                 @if (showBuildingForm)
                 {
 
-                    <EditForm Model="@building" >
+                    <EditForm Model="@building" OnValidSubmit="SaveBuildingAsync">
                         <DataAnnotationsValidator />
 
                         <div class="row mb-3">
@@ -700,14 +718,14 @@
                     </div>
 
                 }
-                <!-- Grid -->
+                
                 <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
                     <table class="table table-bordered mt-4" style="min-width: 1000px;">
-                        <thead><tr><th>Code</th><th>Premise</th><th>Address1</th><th>Address2</th><th>City</th><th>State</th><th>Zip</th><th>MDR</th><th>Interest</th></tr></thead>
+                        <thead><tr><th>Code</th><th>Premise</th><th>Address1</th><th>Address2</th><th>City</th><th>State</th><th>Zip</th><th>MDR</th><th>Interest</th><th>Action</th></tr></thead>
                         <tbody>
-                            @if (apartmentList.Any())
+                            @if (Buildings != null && Buildings.Any())
                             {
-                                @foreach (var b in apartmentList)
+                                @foreach (var b in Buildings)
                                 {
                                     <tr>
                                         <td>@b.ApartmentCode</td>
@@ -719,6 +737,11 @@
                                         <td>@b.Zipcode</td>
                                         <td>@b.MDR_Number</td>
                                         <td>@b.PetitionerInterest</td>
+                                        <td class="sticky">
+                                            <i class="fa-solid fa-pen-to-square text-navy me-3" @onclick="@(() => EditBuilding(b.Id))" title="Edit"></i>
+                                            @* <i class="fa-solid fa-trash-can text-danger" @onclick=" ()=>DeleteClient(client.Id)" title="Delete"></i> *@
+                                        </td>
+                                     
                                     </tr>
                                 }
                             }
@@ -745,12 +768,22 @@
                 </div>
                 @if (showTanentForm)
                 {
-                    <EditForm Model="@tenant">
+                    <EditForm Model="@tenant" OnValidSubmit="SavetenantAsync">
                         <DataAnnotationsValidator />
                         <!-- Row 1: Apartment Selection -->
                         <div class="row mb-3">
-
+                           
                             <div class="col-md-3">
+                                <label class="required-label">Code</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">   <i class="bi bi-code-slash"></i></span>
+                                    <InputText class="form-control" @bind-Value="tenant.TenantCode" placeholder="Enter up to 10 digits" readonly />
+                                </div>
+                                <ValidationMessage For="@(() => tenant.TenantCode)" />
+                            </div>
+
+
+                            <div class="col-md-2">
                                 <label class="required-label">Apartment</label>
                                 <InputSelect class="form-select" @bind-Value="tenant.ApartmentId">
                                     <option value="">-- Select Apartment --</option>
@@ -761,7 +794,7 @@
                                 </InputSelect>
                                 <ValidationMessage For="@(() => tenant.ApartmentId)" />
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label class="required-label">First Name</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-person"></i></span>
@@ -777,10 +810,7 @@
                                 </div>
 
                             </div>
-                            <div class="col-md-3">
-                                <label>Registration No.</label>
-                                <InputText class="form-control" @bind-Value="tenant.Registration_No" placeholder="Enter Registration No." />
-                            </div>
+                        
 
 
                         </div>
@@ -844,6 +874,10 @@
                                     <InputText class="form-control" @bind-Value="tenant.Address_2" placeholder="Enter Second Address " />
                                 </div>
 
+                            </div>
+                            <div class="col">
+                                <label>Registration No.</label>
+                                <InputText class="form-control" @bind-Value="tenant.Registration_No" placeholder="Enter Registration No." />
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -1047,9 +1081,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if (saveTanentList.Any())
+                            @if (Tenants.Any())
                             {
-                                @foreach (var t in saveTanentList)
+                                @foreach (var t in Tenants)
                                 {
                                     <tr>
                                         <td>@t.FirstName</td>
@@ -1064,6 +1098,11 @@
                                         <td>@t.Rent</td>
                                         <td>@t.LeaseStatus</td>
                                         <td>@t.TenantCode</td>
+                                        <td class="sticky">
+                                            <i class="fa-solid fa-pen-to-square text-navy me-3" @onclick="@(() => EditTenant(t.Id))" title="Edit"></i>
+                                            @* <i class="fa-solid fa-trash-can text-danger" @onclick=" ()=>DeleteClient(client.Id)" title="Delete"></i> *@
+                                        </td>
+
                                     </tr>
                                 }
                             }
@@ -1090,12 +1129,9 @@
         }
         <div class="d-flex gap-2 ">
             <button class="btn btn-outline-secondary px-4 fw-semibold" @onclick="HideAsync">Cancel</button>
-            <button class="btn bg-navy text-white px-4 fw-semibold" disabled="@(!IsClientFormValid())" >Submit</button>
+            <button class="btn bg-navy text-white px-4 fw-semibold" disabled="@(!IsClientFormValid())" @onclick="SubmitUpdateClientAsync">Submit</button>
         </div>
-
     </div>
-
-
 </div>
 
 @code {
@@ -1109,77 +1145,205 @@
     private EditApartmentDto building = new();
     [Parameter]
     public List<EditTenantDto> Tenants { get; set; } = new();
-    [Parameter] public EventCallback<string> OnTabChange { get; set; }
+    private EditTenantDto tenant = new();
+
 
     private bool IsVisible { get; set; }
     private string activeTab = string.Empty;
     private bool showLandlordForm = false;
     private bool showBuildingForm = false;
     private bool showTanentForm = false;
-  
-    private CreateTenantDto tenant = new();
+
+
     private List<CreateLandLordDto> savelandlordList = new();
-  
+
     private List<AddApartment> apartmentList = new();
     private List<CreateTenantDto> saveTanentList = new();
     private List<EditLandlordDto> saveEditlandlordList = new();
 
     private Guid selectedLandlordId = Guid.Empty;
 
+    private Guid selectedBuildingId = Guid.Empty;
+    private Guid selectedTenantId = Guid.Empty;
 
-    private async Task SetActiveTab(string tabName)
-    {
-        Console.WriteLine($"[EditClient] Button Clicked: {tabName}");
-        await OnTabChange.InvokeAsync(tabName);
-    }
     public void Show(EditClientDto model)
     {
         editClient = model;
         IsVisible = true;
         StateHasChanged();
     }
-     private void EditBuilding(EditApartmentDto selected)
-    {
-        building = new EditApartmentDto
-        {
-            Id = selected.Id,
-            LandlordId = selected.LandlordId,
-            ApartmentCode = selected.ApartmentCode,
-            PremiseType = selected.PremiseType,
-            Address_1 = selected.Address_1,
-            Address_2 = selected.Address_2,
-            City = selected.City,
-            State = selected.State,
-            Zipcode = selected.Zipcode,
-            MDR_Number = selected.MDR_Number,
-            BuildingUnits = selected.BuildingUnits,
-            TypeOfRentRegulation = selected.TypeOfRentRegulation,
-            DateOfRefreeDeed= selected.DateOfRefreeDeed,
-            LandlordType = selected.LandlordType,
-            PetitionerInterest = selected.PetitionerInterest
-        };
 
-        showBuildingForm = true; // ✅ Show form
-        StateHasChanged();       // ✅ Refresh UI
-    }
-    private void LoadLandlordsForClient()
+    private Task SaveLandlordAsync()
     {
-        activeTab = "landlord";
-
-        if (editClient != null && editClient.Id != Guid.Empty)
+        if (landlord.Id == Guid.Empty || !Landlords.Any(x => x.Id == landlord.Id))
         {
-            // Filter only landlords for this client
-            saveEditlandlordList = Landlords
-                .Where(x => x.ClientId == editClient.Id)
-                .ToList();
+
+            landlord.Id = Guid.NewGuid();
+            Landlords.Add(landlord);
+        }
+        else
+        {
+
+            var existing = Landlords.FirstOrDefault(x => x.Id == landlord.Id);
+            if (existing != null)
+            {
+                existing.FirstName = landlord.FirstName;
+                existing.LastName = landlord.LastName;
+                existing.Phone = landlord.Phone;
+                existing.Email = landlord.Email;
+                existing.EINorSSN = landlord.EINorSSN;
+                existing.Address1 = landlord.Address1;
+                existing.Address2 = landlord.Address2;
+
+                existing.ContactPersonName = landlord.ContactPersonName;
+                existing.TypeOfOwner = landlord.TypeOfOwner;
+                existing.City = landlord.City;
+                existing.State = landlord.State;
+                existing.Zipcode = landlord.Zipcode;
+                existing.OtherProperties = landlord.OtherProperties;
+            }
         }
 
+        // 🔄 Reset the form
+        landlord = new();
         showLandlordForm = false;
-        StateHasChanged();
+        StateHasChanged(); 
+
+        return Task.CompletedTask;
     }
 
+    private Task SaveBuildingAsync()
+    {
+        if (building.Id == Guid.Empty || !Buildings.Any(x => x.Id == building.Id))
+        {
+
+            building.Id = Guid.NewGuid();
+            Buildings.Add(building);
+        }
+        else
+        {
+
+            var existing = Buildings.FirstOrDefault(x => x.Id == building.Id);
+            if (existing != null)
+            {
+
+                existing.ApartmentCode = building.ApartmentCode;
+                existing.City = building.City;
+                existing.State = building.State;
+                existing.PremiseType = building.PremiseType;
+                existing.Address_1 = building.Address_1;
+                existing.Address_2 = building.Address_2;
+                existing.Zipcode = building.Zipcode;
+                existing.MDR_Number = building.MDR_Number;
+                existing.PetitionerInterest = building.PetitionerInterest;
+                existing.TypeOfRentRegulation = building.TypeOfRentRegulation;
+                existing.BuildingUnits = building.BuildingUnits;
+                existing.DateOfRefreeDeed = building.DateOfRefreeDeed;
+                existing.LandlordType = building.LandlordType;
+                existing.LandlordId = building.LandlordId;
+            }
+        }
+
+    
+        building = new();
+        showBuildingForm = false;
+        StateHasChanged();
+
+        return Task.CompletedTask;
+    }
+
+    private Task SavetenantAsync()
+    {
+        if (tenant.Id == Guid.Empty || !Tenants.Any(x => x.Id == tenant.Id))
+        {
+
+            tenant.Id = Guid.NewGuid();
+            Tenants.Add(tenant);
+        }
+        else
+        {
+
+            var existing = Tenants.FirstOrDefault(x => x.Id == tenant.Id);
+            if (existing != null)
+            {
+                existing.FirstName = tenant.FirstName;
+                existing.LastName = tenant.LastName;
+                existing.DOB = tenant.DOB;
+                existing.SSN = tenant.SSN;
+                existing.Phone = tenant.Phone;
+                existing.Email = tenant.Email;
+                existing.Language = tenant.Language;
+                existing.Address_1 = tenant.Address_1;
+                existing.Address_2 = tenant.Address_2;
+                existing.State = tenant.State;
+                existing.City = tenant.City;
+                existing.Zipcode = tenant.Zipcode;
+                existing.Apt = tenant.Apt;
+                existing.Borough = tenant.Borough;
+                existing.Rent = tenant.Rent;
+                existing.LeaseStatus = tenant.LeaseStatus;
+                existing.HasPossession = tenant.HasPossession;
+                existing.HasRegulatedTenancy = tenant.HasRegulatedTenancy;
+                existing.Name_Relation = tenant.Name_Relation;
+                existing.OtherOccupants = tenant.OtherOccupants;
+                existing.Registration_No = tenant.Registration_No;
+                existing.TenantRecord = tenant.TenantRecord;
+                existing.HasPriorCase = tenant.HasPriorCase;
+            }
+        }
+
+        // 🔄 Reset the form
+        tenant = new();
+        showTanentForm = false;
+        StateHasChanged();
+
+        return Task.CompletedTask;
+    }
+
+    private async Task EditTenant(Guid TenantId)
+    {
+        selectedTenantId = TenantId;
+        showTanentForm = true;
+        activeTab = "tanent"; 
+
+        if (apartmentList == null || !apartmentList.Any())
+        {
+            apartmentList = await _apartmentService.GetAll();
+        }
+        // Get selected landlord from list
+        tenant = Tenants.FirstOrDefault(l => l.Id == TenantId) ?? new();
+
+        // Show vertical buttons
+        IsVisible = true;
+
+        StateHasChanged();
 
 
+        StateHasChanged();       // ✅ Refresh UI
+    }
+
+    private async Task EditBuilding(Guid  BuildingId)
+    {
+        selectedBuildingId = BuildingId;
+        showBuildingForm = true;
+        activeTab = "building"; // 👈 set tab
+
+        if (savelandlordList == null || !savelandlordList.Any())
+        {
+            savelandlordList = await _landlordService.GetAllLandLordsAsync();
+        }
+        // Get selected landlord from list
+        building = Buildings.FirstOrDefault(l => l.Id == BuildingId) ?? new();
+
+        // Show vertical buttons
+        IsVisible = true;
+
+        StateHasChanged();
+
+ 
+        StateHasChanged();       // ✅ Refresh UI
+    }
+ 
     private async Task EditLandlord(Guid landlordId)
     {
         selectedLandlordId = landlordId;
@@ -1187,14 +1351,13 @@
         activeTab = "landlord"; // 👈 set tab
 
         // Get selected landlord from list
-        landlord = saveEditlandlordList.FirstOrDefault(l => l.Id == landlordId) ?? new();
+        landlord = Landlords.FirstOrDefault(l => l.Id == landlordId) ?? new();
 
         // Show vertical buttons
         IsVisible = true;
 
         StateHasChanged();
     }
-
 
     private bool IsClientFormValid()
     {
@@ -1221,8 +1384,68 @@
         StateHasChanged();
     }
 
+    private async Task SubmitUpdateClientAsync()
+    {
+        if (editClient == null || editClient.Id == Guid.Empty)
+            return;
 
-    // private void SetActiveTab(string tab) => activeTab = tab;
+        // Step 1: Update Client
+        var isClientUpdated = await _clientService.UpdateClientAsync(editClient);
+        if (!isClientUpdated)
+            return;
+
+        // Step 2: Update/Add Landlords
+        if (Landlords.Count > 0)
+        {
+            foreach (var val in Landlords)
+            {
+                val.ClientId = editClient.Id;
+                if (val.Id == Guid.Empty)
+                    val.Id = Guid.NewGuid();
+            }
+
+            var isLandlordSaved = await _landlordService.UpdateLandLordsAsync(Landlords);
+            if (!isLandlordSaved)
+                return;
+        }
+
+        // // Step 3: Update/Add Apartments
+        if (Buildings.Count > 0)
+        {
+            foreach (var val in Buildings)
+            {
+                if (val.Id == Guid.Empty)
+                    val.Id = Guid.NewGuid();
+
+                // you may link landlordid if needed
+            }
+
+            var isapartmentsaved = await _apartmentService.UpdateBuildingAsync(Buildings);
+            if (!isapartmentsaved)
+                return;
+        }
+
+        // Step 4: Update/Add Tenants
+        if (Tenants.Count > 0)
+        {
+            foreach (var val in Tenants)
+            {
+                if (val.Id == Guid.Empty)
+                    val.Id = Guid.NewGuid();
+
+                // Link ApartmentId if needed
+            }
+
+            var isTenantSaved = await _tenantService.UpdateTenantAsync(Tenants);
+            if (!isTenantSaved)
+                return;
+        }
+
+        Navigation.NavigateTo("/clients?edit=true", true);
+    }
+
+
+    private void SetActiveTab(string tab) => activeTab = tab;
 
 
 }

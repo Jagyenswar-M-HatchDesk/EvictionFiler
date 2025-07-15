@@ -100,7 +100,7 @@
                 Landlords="saveEditlandlordList"
                 Buildings="saveEditBuildingList"
                 Tenants="saveEditTenantList"
-                OnTabChange="SetActiveTab" /> 
+            /> 
 
 
 </body>
@@ -123,7 +123,7 @@
 
     private string activeTab = string.Empty;
 
-    
+
 
 
     private IEnumerable<CreateClientDto> filteredClients =>
@@ -134,7 +134,7 @@
             (!string.IsNullOrWhiteSpace(c.Email) && c.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
             (!string.IsNullOrWhiteSpace(c.Phone) && c.Phone.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
 
-    
+
 
 
     protected override async Task OnInitializedAsync()
@@ -147,16 +147,29 @@
             successMessage = "Client submitted successfully!";
             StateHasChanged();
 
-            await Task.Delay(2000); 
-
+            await Task.Delay(2000);
             successMessage = string.Empty;
             StateHasChanged();
 
-            navManager.NavigateTo("/clients", forceLoad: false); // ✅ FIX: No full reload
+            navManager.NavigateTo("/clients", forceLoad: false);
         }
 
-        clients = await clientservice.GetAllClientsAsync(); // ✅ Grid data still loads
+        // ✅ Edit success message
+        else if (query.TryGetValue("edit", out var isEdit) && isEdit == "true")
+        {
+            successMessage = "Client updated successfully!";
+            StateHasChanged();
+
+            await Task.Delay(2000);
+            successMessage = string.Empty;
+            StateHasChanged();
+
+            navManager.NavigateTo("/clients", forceLoad: false);
+        }
+
+        clients = await clientservice.GetAllClientsAsync();
     }
+
 
 
     private async Task AddClient()
@@ -182,7 +195,30 @@
         }
     }
 
-  
+    private async Task LoadTenants(Guid clientId)
+    {
+        saveEditTenantList.Clear(); // Clear old data
+
+        var landlords = await landLordService.GetLandlordsByClientIdAsync(clientId);
+
+        foreach (var landlord in landlords)
+        {
+            var buildings = await apartmentService.GetBuildingsByLandlordIdAsync(landlord.Id);
+
+            foreach (var building in buildings)
+            {
+                // 🟢 IMPORTANT: Ye method tenantService ka hona chahiye:
+                var tenants = await tenantService.GetTenantsByClientIdAsync(building.Id); // BuildingId dena h yaha
+
+                if (tenants != null && tenants.Any())
+                {
+                    saveEditTenantList.AddRange(tenants); // ✅ Add all tenants in flat list
+                }
+            }
+        }
+    }
+
+
 
 
     private async Task EditClient(Guid clientId)
@@ -213,6 +249,7 @@
             };
 
             await LoadBuildings(clientId);
+            await LoadTenants(clientId);
             saveEditlandlordList = landlords;
             editClientRef.Show(editClient);
         }
@@ -225,21 +262,7 @@
 
         if (clientIdForEdit != Guid.Empty)
         {
-            if (tab == "landlord")
-            {
-                saveEditlandlordList.Clear();
-
-                var landlords = await landLordService.GetLandlordsByClientIdAsync(clientIdForEdit);
-
-                // 🔁 Important: set ClientId if missing
-                foreach (var l in landlords)
-                {
-                    l.ClientId = clientIdForEdit;
-                }
-
-                saveEditlandlordList.AddRange(landlords);
-            }
-            else if (tab == "building")
+            if (tab == "building")
             {
                 saveEditBuildingList.Clear();
 
@@ -261,6 +284,7 @@
             StateHasChanged();
         }
     }
+
 
 
 

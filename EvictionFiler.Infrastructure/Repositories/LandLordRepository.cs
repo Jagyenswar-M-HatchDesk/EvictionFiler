@@ -147,36 +147,37 @@ namespace EvictionFiler.Infrastructure.Repositories
             return landlord;
         }
 
-        public async Task<bool> UpdateLandLordAsync(CreateLandLordDto dto)
-        {
-            var existing = await _mainDbContext.LandLords.FirstOrDefaultAsync(x => x.Id == dto.Id);
-            if (existing == null) return false;
+		public async Task<bool> UpdateLandLordsAsync(List<EditLandlordDto> landlords)
+		{
+			foreach (var l in landlords)
+			{
+				var entity = await _mainDbContext.LandLords.FindAsync(l.Id);
+				if (entity != null)
+				{
+					// Manually map updated values
+					entity.FirstName = l.FirstName;
+					entity.LastName = l.LastName;
+					entity.Phone = l.Phone;
+					entity.Email = l.Email;
+					entity.Address1 = l.Address1;
+					entity.Address2 = l.Address2;
+					entity.TypeOfOwner = l.TypeOfOwner;
+					entity.State = l.State;
+					entity.City = l.City;
+					entity.Zipcode = l.Zipcode;
+					entity.EINorSSN = l.EINorSSN;
+					entity.ContactPersonName = l.ContactPersonName;
+					entity.OtherProperties = l.OtherProperties;
+				
+				}
+			}
+
+			await _mainDbContext.SaveChangesAsync();
+			return true;
+		}
 
 
-			existing.LandLordCode = dto.LandLordCode;
-			existing.FirstName = dto.FirstName;
-			existing.LastName = dto.LastName;
-			existing.EINorSSN = dto.EINorSSN;
-			existing.Phone = dto.Phone;
-			existing.Email = dto.Email;
-			existing.OtherProperties = dto.OtherProperties;
-			existing.Address1 = dto.Address1;
-			existing.Address2 = dto.Address2;
-			existing.State = dto.State;
-			existing.City = dto.City;
-			existing.Zipcode = dto.Zipcode;
-			existing.ContactPersonName = dto.ContactPersonName;
-			existing.TypeOfOwner = dto.TypeOfOwner;
-					
-
-
-			_mainDbContext.LandLords.Update(existing);
-            await _mainDbContext.SaveChangesAsync();
-
-            return true;
-        }
-
-        public async Task<bool> DeleteLandLordAsync(Guid id)
+		public async Task<bool> DeleteLandLordAsync(Guid id)
         {
             var landLord = await _mainDbContext.LandLords.FirstOrDefaultAsync(x => x.Id == id);
             if (landLord == null) return false;

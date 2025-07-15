@@ -37,6 +37,14 @@ namespace EvictionFiler.Client.Services
 		
 		}
 
+		public async Task<bool> UpdateClientAsync(EditClientDto dto)
+		{
+			// 2. Save Client
+			var isClientSaved = await _clientRepository.UpdateClientAsync(dto);
+			return true;
+
+		}
+
 		public async Task<CreateClientDto?> GetClientByIdAsync(Guid id)
 		{
 			var client = await _clientRepository.GetByIdAsync(id);

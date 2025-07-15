@@ -55,6 +55,15 @@ namespace EvictionFiler.Client.Services
 		
 		}
 
+		public async Task<bool> UpdateLandLordsAsync(List<EditLandlordDto> landlords)
+
+		{
+			var landlord = await _landLordRepository.UpdateLandLordsAsync(landlords);
+			return landlord;
+
+
+		}
+
 
 	}
 }

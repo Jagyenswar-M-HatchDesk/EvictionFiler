@@ -1,21 +1,22 @@
 
-﻿using EvictionFiler.Application.DTOs.ClientDto;
-using EvictionFiler.Application.DTOs.LandLordDto;
-using EvictionFiler.Application.Interfaces.IUserRepository;
-using EvictionFiler.Domain.Entities;
-using EvictionFiler.Infrastructure.DbContexts;
-using Microsoft.EntityFrameworkCore;
 using System;
-
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Numerics;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+﻿using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.ClientDto;
+using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
+using EvictionFiler.Infrastructure.DbContexts;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -80,7 +81,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Phone = client.Phone,
 				CellPhone = client.CellPhone,
 				Fax = client.Fax,
-				//GenarateOwnRd = client.GenarateOwnRd,
+				
 				CreatedAt = DateTime.Now,
 				IsActive = true
 			};
@@ -91,7 +92,32 @@ namespace EvictionFiler.Infrastructure.Repositories
 			return result > 0;
 		}
 
+		public async Task<bool> UpdateClientAsync(EditClientDto client)
+		{
+			var existing = await _context.Clients.FirstOrDefaultAsync(x => x.Id == client.Id);
+			if (existing == null) return false;
 
+
+			existing.FirstName = client.FirstName;
+			existing.LastName = client.LastName;
+			existing.Email = client.Email;
+			existing.Address_1 = client.Address_1;
+			existing.Address_2 = client.Address_2;
+			existing.City = client.City;
+			existing.State = client.State;
+			existing.ZipCode = client.ZipCode;
+			existing.Phone = client.Phone;
+			existing.CellPhone = client.CellPhone;
+			existing.Fax = client.Fax;
+				
+
+
+
+			_context.Clients.Update(existing);
+			await _context.SaveChangesAsync();
+
+			return true;
+		}
 		public async Task UpdateAsync(Client client)
         {
             _context.Clients.Update(client);

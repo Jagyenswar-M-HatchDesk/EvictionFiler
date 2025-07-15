@@ -202,6 +202,45 @@ namespace EvictionFiler.Infrastructure.Repositories
 			return tenants;
 		}
 
+		public async Task<bool> UpdateTenantAsync(List<EditTenantDto> dtoList)
+		{
+			foreach (var dto in dtoList)
+			{
+				var entity = await _dbContext.Tenants.FindAsync(dto.Id); // ✅ Consistent DbContext
+				if (entity != null)
+				{
+					entity.TenantCode = dto.TenantCode;
+					entity.FirstName = dto.FirstName;
+					entity.LastName = dto.LastName;
+					entity.DOB = dto.DOB;
+					entity.SSN = dto.SSN;
+					entity.Phone = dto.Phone;
+					entity.Email = dto.Email;
+					entity.Language = dto.Language;
+					entity.Address_1 = dto.Address_1;
+					entity.Address_2 = dto.Address_2;
+					entity.State = dto.State;
+					entity.City = dto.City;
+					entity.Zipcode = dto.Zipcode;
+					entity.Apt = dto.Apt;
+					entity.Borough = dto.Borough;
+					entity.Rent = dto.Rent;
+					entity.LeaseStatus = dto.LeaseStatus;
+					entity.HasPossession = dto.HasPossession;
+					entity.HasRegulatedTenancy = dto.HasRegulatedTenancy;
+					entity.Name_Relation = dto.Name_Relation;
+					entity.OtherOccupants = dto.OtherOccupants;
+					entity.Registration_No = dto.Registration_No;
+					entity.TenantRecord = dto.TenantRecord;
+					entity.HasPriorCase = dto.HasPriorCase;
+					entity.ApartmentId = dto.ApartmentId;
+				}
+			}
+
+			await _dbContext.SaveChangesAsync();
+			return true;
+		}
+
 
 
 		public async Task<CreateTenantDto?> GetByIdAsync(Guid id)
@@ -244,19 +283,15 @@ namespace EvictionFiler.Infrastructure.Repositories
 			};
 		}
 
-		public async Task<List<EditTenantDto>> GetTenantsByClientIdAsync(Guid clientId)
+		public async Task<List<EditTenantDto>> GetTenantsByClientIdAsync(Guid buildingId)
 		{
-			// Step 1: Get all landlord IDs for the client
-			var landlordIds = await _dbContext.LandLords
-				.Where(x => x.ClientId == clientId && x.IsDeleted != true)
-				.Select(x => x.Id)
-				.ToListAsync();
 
-			// Step 2: Get all apartment IDs linked to these landlords
+
+
 			var apartmentIds = await _dbContext.Appartments
-		.Where(a => a.LandlordId.HasValue && landlordIds.Contains(a.LandlordId.Value) && a.IsDeleted != true)
-		.Select(a => a.Id)
-		.ToListAsync();
+			.Where(a => a.Id == buildingId && (a.IsDeleted == false || a.IsDeleted == null))
+			.Select(a => a.Id)
+			.ToListAsync();
 
 
 			// Step 3: Get all tenants linked to these apartments
@@ -297,6 +332,11 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			return tenants;
 		}
+
+
+
+
+
 
 		public async Task<string> GenerateTenantCodeAsync()
 		{

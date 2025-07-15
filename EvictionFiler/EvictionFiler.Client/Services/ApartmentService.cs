@@ -16,7 +16,14 @@ namespace EvictionFiler.Client.Services
             _repository = repository;
         }
 
-        public async Task<bool> AddApartmentAsync(List<AddApartment> dto)
+
+		public async Task<List<AddApartment>> GetAll()
+		{
+			var newapartment = await _repository.GetAllAsync();
+			return newapartment;
+		}
+
+		public async Task<bool> AddApartmentAsync(List<AddApartment> dto)
         {
             var newapartment = await _repository.AddApartmentAsync(dto);
             return newapartment;
@@ -42,6 +49,15 @@ namespace EvictionFiler.Client.Services
 		{
 			var landlords = await _repository.GetBuildingsByLandlordIdAsync(clientId);
 			return landlords;
+
+
+		}
+
+		public async Task<bool> UpdateBuildingAsync(List<EditApartmentDto> buildings)
+
+		{
+			var building = await _repository.UpdateBuildingAsync(buildings);
+			return building;
 
 
 		}

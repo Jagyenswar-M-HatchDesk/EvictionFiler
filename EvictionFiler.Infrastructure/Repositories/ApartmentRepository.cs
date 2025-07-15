@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using EvictionFiler.Application.DTOs;
@@ -52,9 +53,30 @@ namespace EvictionFiler.Infrastructure.Repositories
 		}
 
 
-        public async Task<List<Appartment>> GetAllAsync()
+        public async Task<List<AddApartment>> GetAllAsync()
         {
-            return await _context.Appartments.Where(e=>e.IsDeleted != true).ToListAsync();
+
+			return await _context.Appartments
+	   .Where(a => a.IsDeleted == false || a.IsDeleted == null)
+	   .Select(appartment => new AddApartment
+	   {
+		   Id = appartment.Id,
+		   ApartmentCode = appartment.ApartmentCode,
+		   City = appartment.City,
+		   State = appartment.State,
+		   PremiseType = appartment.PremiseType,
+		   Address_1 = appartment.Address_1,
+		   Address_2 = appartment.Address_2,
+		   Zipcode = appartment.Zipcode,
+		   MDR_Number = appartment.MDR_Number,
+		   PetitionerInterest = appartment.PetitionerInterest,
+		   TypeOfRentRegulation = appartment.TypeOfRentRegulation,
+		   BuildingUnits = appartment.BuildingUnits,
+		   DateOfRefreeDeed = appartment.DateOfRefreeDeed,
+		   LandlordType = appartment.LandlordType,
+		   LandlordId = appartment.LandlordId,
+	   }).ToListAsync();
+			
         }
 
 		public async Task<bool> AddApartmentAsync(List<AddApartment> dtolist)
@@ -162,7 +184,37 @@ namespace EvictionFiler.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(Guid id)
+		public async Task<bool> UpdateBuildingAsync(List<EditApartmentDto> buildings)
+		{
+			foreach (var appartment in buildings)
+			{
+				var entity = await _context.Appartments.FindAsync(appartment.Id);
+				if (entity != null)
+				{
+					// Manually map updated values
+					entity.ApartmentCode = appartment.ApartmentCode;
+					entity.City = appartment.City;
+					entity.State = appartment.State;
+					entity.PremiseType = appartment.PremiseType;
+					entity.Address_1 = appartment.Address_1;
+					entity.Address_2 = appartment.Address_2;
+					entity.Zipcode = appartment.Zipcode;
+					entity.MDR_Number = appartment.MDR_Number;
+					entity.PetitionerInterest = appartment.PetitionerInterest;
+					entity.TypeOfRentRegulation = appartment.TypeOfRentRegulation;
+					entity.BuildingUnits = appartment.BuildingUnits;
+					entity.DateOfRefreeDeed = appartment.DateOfRefreeDeed;
+					entity.LandlordType = appartment.LandlordType;
+					entity.LandlordId = appartment.LandlordId;
+
+				}
+			}
+
+			await _context.SaveChangesAsync();
+			return true;
+		}
+
+		public async Task DeleteAsync(Guid id)
         {
             var appartment = await _context.Appartments.FindAsync(id);
             if (appartment != null)

@@ -14,8 +14,9 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
         Task<bool> AddLandLord(List<CreateLandLordDto> dtoList);
 
 		Task<bool> DeleteLandLordAsync(Guid id);
-        Task<bool> UpdateLandLordAsync(CreateLandLordDto dto);
-        Task<CreateLandLordDto?> GetLandLordByIdAsync(Guid id);
+        Task<bool> UpdateLandLordsAsync(List<EditLandlordDto> landlords);
+
+		Task<CreateLandLordDto?> GetLandLordByIdAsync(Guid id);
         Task<List<CreateLandLordDto>> GetAllLandLordsAsync();
         Task<List<CreateLandLordDto>> SearchLandlordByCode(string code);
         Task<List<CreateLandLordDto>> SearchLandlordsAsync(string query, Guid clientId);

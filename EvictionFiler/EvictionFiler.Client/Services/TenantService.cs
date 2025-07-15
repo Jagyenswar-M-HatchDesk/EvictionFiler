@@ -47,5 +47,14 @@ namespace EvictionFiler.Client.Services
 
 
 		}
+		public async Task<bool> UpdateTenantAsync(List<EditTenantDto> dto)
+
+		{
+			var tenant = await _repo.UpdateTenantAsync(dto);
+			return tenant;
+
+
+		}
+
 	}
 }
