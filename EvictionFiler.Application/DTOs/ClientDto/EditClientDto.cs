@@ -32,7 +32,7 @@ namespace EvictionFiler.Application.DTOs.ClientDto
 		public string? CellPhone { get; set; } = string.Empty;
 
 		public string? Fax { get; set; } = string.Empty;
-
+		public bool? IsActive { get; set; }
 		public List<EditLandlordDto>? LandLords { get; set; }
 	}
 }

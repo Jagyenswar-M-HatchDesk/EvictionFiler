@@ -249,7 +249,7 @@
      aria-labelledby="createUserLabel">
 
     <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title fw-bold color-text" id="createUserLabel">Edit New Client</h5>
+        <h5 class="offcanvas-title fw-bold color-text" id="createUserLabel">Edit Client - @editClient.ClientCode </h5>
         <button type="button" class="btn-close" @onclick="HideAsync" aria-label="Close"></button>
     </div>
 
@@ -263,7 +263,7 @@
 
                     <div class="row">
                       
-                            <div class="col-md-3 mb-3">
+                          @*   <div class="col-md-3 mb-3">
                                 <label class="form-label color-text required-label">Client Code</label>
                                 <div class="input-group">
                                     <span class="input-group-text">
@@ -271,9 +271,9 @@
                                     </span>
                                     <InputText class="form-control" maxlength="10" @bind-Value="editClient.ClientCode" placeholder="Enter up to 10 digits" readonly />
                                 </div>
-                            </div>
+                            </div> *@
                           
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label color-text required-label">First Name</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
@@ -281,7 +281,7 @@
                             </div>
 
                         </div>
-                        <div class="col-md-2 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label color-text">Last Name</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
@@ -382,8 +382,6 @@
             <!-- Vertical Overlay Buttons -->
             <div class="vertical-buttons d-flex flex-column align-items-center position-absolute end-0 top-50 translate-middle-y @(IsVisible ? "" : "d-none")">
                 <button class="vertical-tab-button @(activeTab == "landlord" ? "active-vertical" : "")" @onclick="@(() => SetActiveTab("landlord"))">LANDLORD</button>
-             
-
             </div>
         </div>
 
@@ -391,11 +389,20 @@
         {
             <div class="overlay-form overlay-landlord">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="color-text fw-bold mb-0">LANDLORD INFORMATION</h5>
-                    <div>
-                        <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button>
-                        
-                    </div>
+                    <h5 class="color-text fw-bold mb-0">
+                        @(
+                           showLandlordForm && landlord != null && landlord.Id != Guid.Empty
+                           ? $"LandLord - {landlord.FirstName} {landlord.LastName} / {landlord.LandLordCode}"
+                           : "LANDLORD"
+                           )
+                </h5>
+
+
+                    <button class="btn btn-outline-secondary fw-semibold me-2"
+                            @onclick="@BackToLandlordList">
+                        ←
+                    </button>
+
                 </div>
 
                 @if (showLandlordForm)
@@ -405,19 +412,6 @@
                         <DataAnnotationsValidator />
 
                         <div class="row mb-3">
-
-                          
-                            <div class="col-md-4">
-                                <label class="required-label">Code</label>
-
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="bi bi-code-slash"></i></span>
-                                    <InputText class="form-control" @bind-Value="landlord.LandLordCode" placeholder="Enter up to 10 digits" readonly />
-                                </div>
-                                <ValidationMessage For="@(() => landlord.LandLordCode)" />
-
-                            </div>
-                          
                             <div class="col-md-4">
                                 <label class="required-label">First Name</label>
 
@@ -436,18 +430,6 @@
                                     <InputText class="form-control" @bind-Value="landlord.LastName" placeholder="Enter Last Name" />
                                 </div>
                             </div>
-
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label>Phone</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-phone"></i></span>
-                                    <InputText class="form-control" @bind-Value="landlord.Phone" placeholder="Enter Phone " />
-                                </div>
-
-                            </div>
                             <div class="col-md-4">
                                 <label class="required-label">Email</label>
 
@@ -460,7 +442,20 @@
 
                             </div>
 
-                            <div class="col-md-4">
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label>Phone</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                                    <InputText class="form-control" @bind-Value="landlord.Phone" placeholder="Enter Phone " />
+                                </div>
+
+                            </div>
+                           
+
+                            <div class="col-md-3">
                                 <label>Contact Person Name</label>
 
                                 <div class="input-group mb-3">
@@ -469,33 +464,38 @@
                                 </div>
 
                             </div>
+                                <div class="col-md-3">
+                                    <label>EIN/SSN</label>
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-person-vcard"></i> <!-- You can replace with bi-shield-lock too -->
+                                        </span>
+                                        <InputText class="form-control" @bind-Value="landlord.EINorSSN" placeholder="Enter EIN " />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="required-label">Type of Owner</label>
+                                    <select class="form-select" @bind="landlord.TypeOfOwner">
+                                        <option selected disabled>Select Type</option>
+                                        <option value="Corporation">Corporation</option>
+                                        <option value="LLC">LLC</option>
+                                        <option value="Individual">Individual</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+
 
                         </div>
                         <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label class="required-label">Type of Owner</label>
-                                <select class="form-select" @bind="landlord.TypeOfOwner">
-                                    <option selected disabled>Select Type</option>
-                                    <option value="Corporation">Corporation</option>
-                                    <option value="LLC">LLC</option>
-                                    <option value="Individual">Individual</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label>EIN/SSN</label>
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text">
-                                        <i class="bi bi-person-vcard"></i> <!-- You can replace with bi-shield-lock too -->
-                                    </span>
-                                    <InputText class="form-control" @bind-Value="landlord.EINorSSN" placeholder="Enter EIN " />
-                                </div>
-                            </div>
-                            <div class="col-md-4">
+                            <div class="col-md-12">
                                 <label>List Other Properties</label>
-                                <InputText type="text" class="form-control" @bind-Value="landlord.OtherProperties" placeholder="Enter Other Properties" />
+                                <InputTextArea class="form-control"
+                                               @bind-Value="landlord.OtherProperties"
+                                               placeholder="Enter Other Properties"
+                                               rows="4" />
                             </div>
                         </div>
+
 
                         <div class="row mb-3">
                             <div class="col">
@@ -517,7 +517,7 @@
                         </div>
                         <div class="row mb-3">
                             <div class="col">
-                                <label class="form-label color-text ">State</label>
+                                <label >State</label>
                                 <InputSelect class="form-select" @bind-Value="landlord.State">
                                     <option value="">-- Select State --</option>
                                     <option>Georgia</option>
@@ -557,6 +557,8 @@
                     </div>
                 }
 
+                @if (!showLandlordForm)
+                {
                 <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
                     <table class="table table-hover align-middle text-center" style="min-width: 1000px;">
                        <thead>
@@ -568,11 +570,8 @@
                         <th>Contact Person Name</th>
                                 <th>Type of Owner</th>
                                 <th>Other Properties</th>
-                        <th>Address1</th>
-                        <th>Address2</th>
-                         <th>State</th>
-                          <th>City</th>
-                                <th>Zip Code</th>
+                        <th>Address</th>
+                                <th>Status</th>
                         <th class="sticky">Actions</th>
                     </tr>
                 </thead>
@@ -581,25 +580,31 @@
                     {
                         @foreach (var l in Landlords)
                         {
-                            <tr>
-                                <td>@(l.FirstName + " " + l.LastName)</td>
-                                        <td>@l.Email</td>
-                                <td>@l.EINorSSN</td>
-                                <td>@l.Phone</td>
-                                <td>@l.ContactPersonName</td>
-                                        <td>@l.TypeOfOwner</td>
-                                         <td>@l.OtherProperties</td>
-                                <td>@l.Address1</td>
-                                <td>@l.Address2</td>
-                                  <td>@l.State</td>
-                                    <td>@l.City</td>
-                                      <td>@l.Zipcode</td>
+                                    <tr>
+                                        <td>@(string.IsNullOrWhiteSpace(l.FirstName + l.LastName) ? "-" : l.FirstName + " " + l.LastName)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(l.Email) ? "-" : l.Email)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(l.Phone) ? "-" : l.Phone)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(l.EINorSSN) ? "-" : l.EINorSSN)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(l.ContactPersonName) ? "-" : l.ContactPersonName)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(l.TypeOfOwner) ? "-" : l.TypeOfOwner)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(l.OtherProperties) ? "-" : l.OtherProperties)</td>
+
+                                     
+                                        <td>
+                                            @(
+                                               string.IsNullOrWhiteSpace($"{l.Address1}{l.Address2}{l.City}{l.State}{l.Zipcode}")
+                                                ? "-" : $"{l.Address1}, {l.Address2}, {l.City}, {l.State} - {l.Zipcode}")
+                                    </td>
+
+                                        <td>Active</td>
+
                                         <td class="sticky">
-                                            <i class="fa-solid fa-pen-to-square text-navy me-3" @onclick="@(() => EditLandlord(l.Id))" title="Edit"></i>
-                                            @* <i class="fa-solid fa-trash-can text-danger" @onclick=" ()=>DeleteClient(client.Id)" title="Delete"></i> *@
+                                            <i class="fa-solid fa-pen-to-square text-navy me-3" style="cursor:pointer"
+                                               @onclick="@(() => EditLandlord(l.Id))"
+                                               title="Edit"></i>
                                         </td>
-                              
-                            </tr>
+                                    </tr>
+
                         }
                     }
                     else
@@ -612,6 +617,7 @@
            
                     </table>
                 </div>
+                }
 
             </div>
         }
@@ -621,11 +627,14 @@
         {
             <div class="overlay-form overlay-building">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="color-text fw-bold mb-0">BUILDING INFORMATION</h5>
-                    <div>
-                        <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button>
+                    <h5 class="color-text fw-bold mb-0">
+                        @($"Building - {landlord.FirstName} {landlord.LastName} / {landlord.LandLordCode}")
+                    </h5>
 
-                    </div>
+                <button class="btn btn-outline-secondary fw-semibold me-2"
+                        @onclick="@BackToBuildingList">
+                    ←
+                </button>
                 </div>
 
                 @if (showBuildingForm)
@@ -635,7 +644,7 @@
                         <DataAnnotationsValidator />
 
                         <div class="row mb-3">
-                            <div class="col-md-3">
+                           @*  <div class="col-md-3">
                                 <label class="required-label">Landlord</label>
                                 <InputSelect class="form-select" @bind-Value="building.LandlordId">
                                     <option value="">-- Select Landlord --</option>
@@ -645,14 +654,14 @@
                                     }
                                 </InputSelect>
                                 <ValidationMessage For="@(() => building.LandlordId)" />
-                            </div>
+                            </div> *@
                             <div class="col-md-2">
                                 <label class="required-label">Apt Code</label>
                                 <InputText class="form-control" @bind-Value="building.ApartmentCode" placeholder="Enter Code" />
                                 <ValidationMessage For="@(() => building.ApartmentCode)" />
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label>MDR Number</label>
                                 <InputText class="form-control" @bind-Value="building.MDR_Number" Placeholder="Enter Number" />
                             </div>
@@ -660,17 +669,16 @@
                                 <label for="BuildingUnit"> Building Units(No.)</label>
                                 <InputNumber class="form-control" id="BuildingUnit" @bind-Value="building.BuildingUnits" placeholder="Enter Building Units" />
                             </div>
+                            <div class="col-md-4">
+                                <label>Petitioner Interest</label>
+                                <InputText class="form-control" @bind-Value="building.PetitionerInterest" placeholder="Enter Intrest" />
+                            </div>
 
 
                         </div>
-
-
-
-
-                        <!-- Premise Type & MDR Number -->
                         <div class="row mb-3">
 
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label for="BuildingUnit" class="required-label">Premise Type</label>
                                 <InputSelect class="form-select" @bind-Value="building.PremiseType">
                                     <option value="">-- Select Type --</option>
@@ -685,7 +693,7 @@
                                 </InputSelect>
                                 <ValidationMessage For="@(() => building.PremiseType)" />
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="required-label" for="RentStatus required-label">Rent Regulation Status</label>
                                 <select class="form-select" id="RentStatus" @bind="building.TypeOfRentRegulation">
                                     <option disabled value="">Select Type</option>
@@ -699,11 +707,7 @@
                                 <ValidationMessage For="@(() => building.TypeOfRentRegulation)" />
                             </div>
 
-                            <div class="col-md-4">
-                                <label>Petitioner Interest</label>
-                                <InputText class="form-control" @bind-Value="building.PetitionerInterest" placeholder="Enter Intrest" />
-                            </div>
-
+                        
                         </div>
 
 
@@ -816,41 +820,67 @@
                     </div>
 
                 }
-                
-                <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
-                    <table class="table table-bordered mt-4" style="min-width: 1000px;">
-                        <thead><tr><th>Code</th><th>Premise</th><th>Address1</th><th>Address2</th><th>City</th><th>State</th><th>Zip</th><th>MDR</th><th>Interest</th><th>Action</th></tr></thead>
-                        <tbody>
-                            @if (Buildings != null && Buildings.Any())
-                            {
-                                @foreach (var b in Buildings)
+
+                @if (!showBuildingForm)
+                {
+                    <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
+                        <table class="table table-bordered mt-4" style="min-width: 1000px;">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Premise</th>
+                                    <th>Address</th>
+                                    <th>MDR</th>
+                                    <th>Interest</th>
+                                    <th>Rent Regulation</th>
+                                    <th>Building Units</th>
+                                    <th>Date Of Refree</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Buildings != null && Buildings.Any())
+                                {
+                                    @foreach (var b in Buildings)
+                                    {
+                                        <tr>
+                                            <td>@(string.IsNullOrWhiteSpace(b.ApartmentCode) ? "-" : b.ApartmentCode)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(b.PremiseType) ? "-" : b.PremiseType)</td>
+                                            <td>
+                                                @(
+                                                                                string.IsNullOrWhiteSpace($"{b.Address_1}{b.Address_2}{b.City}{b.State}{b.Zipcode}")
+                                                                                ? "-"
+                                                                                : $"{b.Address_1}, {b.Address_2}, {b.City}, {b.State} - {b.Zipcode}"
+                                                                                )
+                                        </td>
+                                        <td>@(string.IsNullOrWhiteSpace(b.MDR_Number) ? "-" : b.MDR_Number)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(b.PetitionerInterest) ? "-" : b.PetitionerInterest)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(b.TypeOfRentRegulation) ? "-" : b.TypeOfRentRegulation)</td>
+                                        <td>@(b.BuildingUnits.HasValue? b.BuildingUnits.ToString() : "-")</td>
+                                        <td>@(b.DateOfRefreeDeed == DateOnly.MinValue ? "-" : b.DateOfRefreeDeed.ToString("MM/dd/yyyy"))</td>
+
+                                        <td>Active</td>
+                                        <td class="sticky">
+                                            <i class="fa-solid fa-pen-to-square text-navy me-3"
+                                               style="cursor:pointer"
+                                               @onclick="@(() => EditBuilding(b.Id))"
+                                               title="Edit"></i>
+                                        </td>
+                                    </tr>
+                                                }
+                                }
+                                else
                                 {
                                     <tr>
-                                        <td>@b.ApartmentCode</td>
-                                        <td>@b.PremiseType</td>
-                                        <td>@b.Address_1</td>
-                                        <td>@b.Address_2</td>
-                                        <td>@b.City</td>
-                                        <td>@b.State</td>
-                                        <td>@b.Zipcode</td>
-                                        <td>@b.MDR_Number</td>
-                                        <td>@b.PetitionerInterest</td>
-                                        <td class="sticky">
-                                            <i class="fa-solid fa-pen-to-square text-navy me-3" @onclick="@(() => EditBuilding(b.Id))" title="Edit"></i>
-                                            @* <i class="fa-solid fa-trash-can text-danger" @onclick=" ()=>DeleteClient(client.Id)" title="Delete"></i> *@
-                                        </td>
-                                     
+                                        <td colspan="10" class="text-muted">No buildings added yet.</td>
                                     </tr>
                                 }
-                            }
-                            else
-                            {
-                                <tr><td colspan="10" class="text-muted">No buildings added yet.</td></tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                            </tbody>
+                        </table>
+                    </div>
 
+                }
             </div>
         }
 
@@ -858,11 +888,17 @@
         {
             <div class="overlay-form overlay-landlord">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="color-text fw-bold mb-0">TENANT INFORMATION</h5>
-                    <div>
-                        <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button>
-                       
-                    </div>
+                    <h5 class="color-text fw-bold mb-0">
+                        @(
+                                            showTanentForm && tenant != null && tenant.Id != Guid.Empty
+                                            ? $"Tenant - {tenant.FirstName} {tenant.LastName} / {tenant.TenantCode}"
+                                            : "Tenant"
+                                            )
+                </h5>
+                    <button class="btn btn-outline-secondary fw-semibold me-2"
+                            @onclick="@BackToTenantList">
+                        ←
+                    </button>
                 </div>
                 @if (showTanentForm)
                 {
@@ -870,17 +906,7 @@
                         <DataAnnotationsValidator />
                         <!-- Row 1: Apartment Selection -->
                         <div class="row mb-3">
-                           
-                            <div class="col-md-3">
-                                <label class="required-label">Code</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">   <i class="bi bi-code-slash"></i></span>
-                                    <InputText class="form-control" @bind-Value="tenant.TenantCode" placeholder="Enter up to 10 digits" readonly />
-                                </div>
-                                <ValidationMessage For="@(() => tenant.TenantCode)" />
-                            </div>
-
-
+     
                             <div class="col-md-2">
                                 <label class="required-label">Apartment</label>
                                 <InputSelect class="form-select" @bind-Value="tenant.ApartmentId">
@@ -908,7 +934,16 @@
                                 </div>
 
                             </div>
-                        
+                            <div class="col-md-3">
+                                <label>EIN/SSN</label>
+
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-person-vcard"></i> <!-- You can replace with bi-shield-lock too -->
+                                    </span>
+                                    <InputText class="form-control" @bind-Value="tenant.SSN" placeholder="Enter EIN " />
+                                </div>
+                            </div>
 
 
                         </div>
@@ -934,11 +969,11 @@
                                 </div>
 
                             </div>
+                          
                             <div class="col-md-3">
-                                <label>Name & Relations</label>
-                                <InputText class="form-control" @bind-Value="tenant.Name_Relation" placeholder="Enter Name" />
+                                <label>Registration No.</label>
+                                <InputText class="form-control" @bind-Value="tenant.Registration_No" placeholder="Enter Registration No." />
                             </div>
-
 
                             <div class="col-md-2">
                                 <label class="required-label">Language</label>
@@ -953,6 +988,36 @@
                                     <option value="Other">Other</option>
                                 </InputSelect>
                             </div>
+
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-2">
+                                <label>Rent</label>
+                                <InputNumber class="form-control" @bind-Value="tenant.Rent" />
+                            </div>
+                            <div class="col-md-2">
+                                <label>Lease Status</label>
+                                <InputText class="form-control" @bind-Value="tenant.LeaseStatus" placeholder="Enter Status" />
+                            </div>
+
+                            <div class="col-md-2">
+                                <label>Apt</label>
+                                <InputText class="form-control" @bind-Value="tenant.Apt" placeholder="Enter Apt" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>Borough</label>
+                                <InputText class="form-control" @bind-Value="tenant.Borough" placeholder="Enter Borough" />
+                            </div>
+                            <div class="col-md-3">
+                                <label>Name & Relations</label>
+                                <InputTextArea class="form-control"
+                                               @bind-Value="tenant.Name_Relation"
+                                               placeholder="Enter Name & Relation"
+                                               rows="3" />
+                            </div>
+
 
                         </div>
 
@@ -973,10 +1038,7 @@
                                 </div>
 
                             </div>
-                            <div class="col">
-                                <label>Registration No.</label>
-                                <InputText class="form-control" @bind-Value="tenant.Registration_No" placeholder="Enter Registration No." />
-                            </div>
+                           
                         </div>
                         <div class="row mb-3">
                             <div class="col">
@@ -1014,41 +1076,7 @@
                                 <InputDate class="form-control" @bind-Value="tenant.DOB" />
                             </div>
                         </div>
-
-
-
-                        <!-- Row 7: Rent, Lease Status -->
-                        <div class="row mb-3">
-                            <div class="col-md-2">
-                                <label>Rent</label>
-                                <InputNumber class="form-control" @bind-Value="tenant.Rent" />
-                            </div>
-                            <div class="col-md-2">
-                                <label>Lease Status</label>
-                                <InputText class="form-control" @bind-Value="tenant.LeaseStatus" placeholder="Enter Status" />
-                            </div>
-                            <div class="col-md-3">
-                                <label>EIN/SSN</label>
-
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text">
-                                        <i class="bi bi-person-vcard"></i> <!-- You can replace with bi-shield-lock too -->
-                                    </span>
-                                    <InputText class="form-control" @bind-Value="tenant.SSN" placeholder="Enter EIN " />
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <label>Apt</label>
-                                <InputText class="form-control" @bind-Value="tenant.Apt" placeholder="Enter Apt" />
-                            </div>
-
-                            <div class="col-md-3">
-                                <label>Borough</label>
-                                <InputText class="form-control" @bind-Value="tenant.Borough" placeholder="Enter Borough" />
-                            </div>
-
-                        </div>
-
+                    
                         <div class="row mb-3">
                             <!-- Tenant of Record -->
                             <div class="col-md-6">
@@ -1159,11 +1187,12 @@
                     </EditForm>
                 }
 
-
+                @if (!showTanentForm){
                 <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
                     <table class="table table-bordered mt-4" style="min-width: 1200px;">
                         <thead class="table-light">
                             <tr>
+                                    <th>Tenant Code</th>
                                 <th>Name</th>
                                 <th>DOB</th>
                                 <th>SSN</th>
@@ -1175,7 +1204,8 @@
                                 <th>Borough</th>
                                 <th>Rent</th>
                                 <th>Lease Status</th>
-                                <th>Tenant Code</th>
+                               
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1184,20 +1214,27 @@
                                 @foreach (var t in Tenants)
                                 {
                                     <tr>
+                                        <td>@t.TenantCode</td>
                                         <td>@t.FirstName</td>
                                         <td>@t.DOB.ToString("yyyy-MM-dd")</td>
                                         <td>@t.SSN</td>
                                         <td>@t.Phone</td>
                                         <td>@t.Email</td>
                                         <td>@t.Language</td>
-                                        <td>@t.Address_1</td>
+                                            <td>
+                                                @(
+                                                                                string.IsNullOrWhiteSpace($"{t.Address_1}{t.Address_2}{t.City}{t.State}{t.Zipcode}")
+                                                                                ? "-"
+                                                                                : $"{t.Address_1}, {t.Address_2}, {t.City}, {t.State} - {t.Zipcode}"
+                                                                                )
+                                        </td>
                                         <td>@t.Apt</td>
                                         <td>@t.Borough</td>
                                         <td>@t.Rent</td>
                                         <td>@t.LeaseStatus</td>
-                                        <td>@t.TenantCode</td>
+                                        
                                         <td class="sticky">
-                                            <i class="fa-solid fa-pen-to-square text-navy me-3" @onclick="@(() => EditTenant(t.Id))" title="Edit"></i>
+                                            <i class="fa-solid fa-pen-to-square text-navy me-3" @onclick="@(() => EditTenant(t.Id))" style="cursor:pointer" title="Edit"></i>
                                             @* <i class="fa-solid fa-trash-can text-danger" @onclick=" ()=>DeleteClient(client.Id)" title="Delete"></i> *@
                                         </td>
 
@@ -1213,6 +1250,7 @@
                         </tbody>
                     </table>
                 </div>
+                }
             </div>
         }
 
@@ -1269,6 +1307,23 @@
         editClient = model;
         IsVisible = true;
         StateHasChanged();
+    }
+
+    private void BackToLandlordList()
+    {
+        showLandlordForm = false;
+        landlord = new(); // optional: reset form
+    }
+
+    private void BackToBuildingList()
+    {
+        showBuildingForm = false;
+        building = new(); // optional: reset form
+    }
+    private void BackToTenantList()
+    {
+        showTanentForm = false;
+        tenant = new(); // optional: reset form
     }
 
     private Task SaveLandlordAsync()

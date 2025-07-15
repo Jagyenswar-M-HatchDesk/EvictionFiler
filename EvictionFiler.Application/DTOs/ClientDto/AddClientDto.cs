@@ -27,7 +27,7 @@ namespace EvictionFiler.Application.DTOs.ClientDto
         public string? Address_2 { get; set; } = string.Empty;
 
 		public string? City { get; set; } = string.Empty;
-
+		public bool? IsActive { get; set; }
 		public string? State { get; set; }
 	
 		public int? ZipCode { get; set; }
