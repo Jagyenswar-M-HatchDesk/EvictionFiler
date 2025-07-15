@@ -1155,9 +1155,9 @@
     private bool showTanentForm = false;
 
 
-    private List<CreateLandLordDto> savelandlordList = new();
+    private List<EditLandlordDto> savelandlordList = new();
 
-    private List<AddApartment> apartmentList = new();
+    private List<EditApartmentDto> apartmentList = new();
     private List<CreateTenantDto> saveTanentList = new();
     private List<EditLandlordDto> saveEditlandlordList = new();
 
@@ -1304,23 +1304,27 @@
     {
         selectedTenantId = TenantId;
         showTanentForm = true;
-        activeTab = "tanent"; 
+        activeTab = "tanent";
 
         if (apartmentList == null || !apartmentList.Any())
         {
-            apartmentList = await _apartmentService.GetAll();
+            // ✅ Load apartments of client landlords
+            var landlords = await _landlordService.GetLandlordsByClientIdAsync(editClient.Id);
+            apartmentList = new();
+
+            foreach (var l in landlords)
+            {
+                var buildings = await _apartmentService.GetBuildingsByLandlordIdAsync(l.Id);
+                apartmentList.AddRange(buildings);
+            }
         }
-        // Get selected landlord from list
+
         tenant = Tenants.FirstOrDefault(l => l.Id == TenantId) ?? new();
 
-        // Show vertical buttons
         IsVisible = true;
-
         StateHasChanged();
-
-
-        StateHasChanged();       // ✅ Refresh UI
     }
+
 
     private async Task EditBuilding(Guid  BuildingId)
     {
@@ -1330,7 +1334,7 @@
 
         if (savelandlordList == null || !savelandlordList.Any())
         {
-            savelandlordList = await _landlordService.GetAllLandLordsAsync();
+            savelandlordList = await _landlordService.GetLandlordsByClientIdAsync(editClient.Id);
         }
         // Get selected landlord from list
         building = Buildings.FirstOrDefault(l => l.Id == BuildingId) ?? new();

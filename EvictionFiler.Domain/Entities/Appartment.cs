@@ -28,7 +28,7 @@ namespace EvictionFiler.Domain.Entities
 		public string? City { get; set; }
 		public string? State { get; set; }
 		public string? Zipcode { get; set; }
-		public DateOnly DateOfRefreeDeed { get; set; }
+		public DateOnly DateOfRefreeDeed { get; set; } 
 		public LandLordRole? LandlordType { get; set; }
 		
 		public Guid? LandlordId { get; set; }

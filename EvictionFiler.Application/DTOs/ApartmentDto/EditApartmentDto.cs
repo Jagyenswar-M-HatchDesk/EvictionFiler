@@ -27,7 +27,7 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 		public string? City { get; set; }
 		public string? State { get; set; }
 		public string? Zipcode { get; set; }
-		public DateOnly DateOfRefreeDeed { get; set; }
+		public DateOnly DateOfRefreeDeed { get; set; } = DateOnly.FromDateTime(DateTime.Now);
 		public LandLordRole? LandlordType { get; set; }
 		[Required(ErrorMessage = "Landlord is required")]
 		public Guid? LandlordId { get; set; }

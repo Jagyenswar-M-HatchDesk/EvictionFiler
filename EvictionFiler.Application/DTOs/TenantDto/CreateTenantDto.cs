@@ -27,7 +27,7 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public string? City { get; set; }
 		public string? State { get; set; }
 		public string? Zipcode { get; set; }
-		public DateOnly DOB { get; set; }
+		public DateOnly DOB { get; set; } = DateOnly.FromDateTime(DateTime.Now);
 		public double Rent { get; set; }
 		public string? LeaseStatus { get; set; } = string.Empty;
 		public string? SSN { get; set; } = string.Empty;
