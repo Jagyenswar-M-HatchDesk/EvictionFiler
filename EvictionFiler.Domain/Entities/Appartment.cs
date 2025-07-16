@@ -14,8 +14,8 @@ namespace EvictionFiler.Domain.Entities
     {
         [Key]
         public Guid Id { get; set; }
-       
-        public string? ApartmentCode { get; set; }
+		public string? BuildingCode { get; set; } = string.Empty;
+		public string? ApartmentCode { get; set; }
 		public string? MDR_Number { get; set; }
 		public int? BuildingUnits { get; set; }
      

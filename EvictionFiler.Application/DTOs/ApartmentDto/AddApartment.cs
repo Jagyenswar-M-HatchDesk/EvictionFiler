@@ -15,7 +15,9 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 	public class AddApartment
 	{
 		public Guid Id { get; set; }
-		[Required(ErrorMessage = "Apt code is required")]
+
+		public string? BuildingCode { get; set; } = string.Empty;
+		
 		public string? ApartmentCode { get; set; }
 		public string? MDR_Number { get; set; }
 		public int? BuildingUnits { get; set; }

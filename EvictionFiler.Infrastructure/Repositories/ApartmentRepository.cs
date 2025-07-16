@@ -34,6 +34,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 			return new AddApartment
 			{
 				Id = appartment.Id,
+				BuildingCode = appartment.BuildingCode,
 				ApartmentCode = appartment.ApartmentCode,
 				City = appartment.City,
 				State = appartment.State,
@@ -61,6 +62,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 	   .Select(appartment => new AddApartment
 	   {
 		   Id = appartment.Id,
+		   BuildingCode = appartment.BuildingCode,
 		   ApartmentCode = appartment.ApartmentCode,
 		   City = appartment.City,
 		   State = appartment.State,
@@ -79,34 +81,43 @@ namespace EvictionFiler.Infrastructure.Repositories
 			
         }
 
-		public async Task<bool> AddApartmentAsync(List<AddApartment> dtolist)
+	
+
+		public async Task<bool> AddApartmentAsync(List<AddApartment> dtoList)
 		{
-            var newapartment = dtolist.Select(appartment=> new Appartment
-            {
-				Id = appartment.Id,
-				ApartmentCode = appartment.ApartmentCode,
-				City = appartment.City,
-				State = appartment.State,
-				PremiseType = appartment.PremiseType,
-				Address_1 = appartment.Address_1,
-				Address_2 = appartment.Address_2,
-				Zipcode = appartment.Zipcode,
-				MDR_Number = appartment.MDR_Number,
-				PetitionerInterest = appartment.PetitionerInterest,
-				TypeOfRentRegulation = appartment.TypeOfRentRegulation,
-				BuildingUnits = appartment.BuildingUnits,
-				DateOfRefreeDeed = appartment.DateOfRefreeDeed,
-				LandlordType = appartment.LandlordType,
-				LandlordId = appartment.LandlordId,
+			var newapartment = new List<Appartment>();
 
+			foreach (var appartment in dtoList)
+			{
+				var apartment = new Appartment
+				{
+					Id = appartment.Id,
+					BuildingCode = await GenerateBuildingCodeAsync(),
+					ApartmentCode = appartment.ApartmentCode,
+					City = appartment.City,
+					State = appartment.State,
+					PremiseType = appartment.PremiseType,
+					Address_1 = appartment.Address_1,
+					Address_2 = appartment.Address_2,
+					Zipcode = appartment.Zipcode,
+					MDR_Number = appartment.MDR_Number,
+					PetitionerInterest = appartment.PetitionerInterest,
+					TypeOfRentRegulation = appartment.TypeOfRentRegulation,
+					BuildingUnits = appartment.BuildingUnits,
+					DateOfRefreeDeed = appartment.DateOfRefreeDeed,
+					LandlordType = appartment.LandlordType,
+					LandlordId = appartment.LandlordId,
 
-			});
-            _context.Appartments.AddRange(newapartment);
-            var result =await _context.SaveChangesAsync();
-            if(result != null)
-                return true;
-            return false;
-        }
+				};
+
+				newapartment.Add(apartment);
+			}
+
+			_context.Appartments.AddRange(newapartment);
+			var result = await _context.SaveChangesAsync();
+
+			return result > 0;
+		}
 		public async Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id)
 		{
 			var appartment = await _context.Appartments
@@ -143,12 +154,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 					Registration_No = dto.Registration_No,
 					TenantRecord = dto.TenantRecord,
 					HasPriorCase = dto.HasPriorCase,
-
-
 					ApartmentId = dto.ApartmentId
-
-
-
 				}).ToListAsync();
 
             return new BuildingWithTenant
@@ -157,6 +163,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Building = new AddApartment
                 {
 					Id = appartment.Id,
+					BuildingCode = appartment.BuildingCode,
 					ApartmentCode = appartment.ApartmentCode,
 					City = appartment.City,
 					State = appartment.State,
@@ -178,11 +185,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 		}
 
 
-		public async Task UpdateAsync(Appartment appartment)
-        {
-            _context.Appartments.Update(appartment);
-            await _context.SaveChangesAsync();
-        }
+	
 
 		public async Task<bool> UpdateBuildingAsync(List<EditApartmentDto> buildings)
 		{
@@ -193,6 +196,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				{
 					// Manually map updated values
 					entity.ApartmentCode = appartment.ApartmentCode;
+					entity.BuildingCode = appartment.BuildingCode;
 					entity.City = appartment.City;
 					entity.State = appartment.State;
 					entity.PremiseType = appartment.PremiseType;
@@ -234,6 +238,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				.Select(appartment=> new AddApartment
 				{
 					Id = appartment.Id,
+					BuildingCode = appartment.BuildingCode,
 					ApartmentCode = appartment.ApartmentCode,
 					City = appartment.City,
 					State = appartment.State,
@@ -262,6 +267,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 			return building.Select(appartment  => new EditApartmentDto
 			{
 				Id = appartment.Id,
+				BuildingCode = appartment.BuildingCode,
 				ApartmentCode = appartment.ApartmentCode,
 				City = appartment.City,
 				State = appartment.State,
@@ -280,6 +286,30 @@ namespace EvictionFiler.Infrastructure.Repositories
 			}).ToList();
 		}
 
+
+		public async Task<string> GenerateBuildingCodeAsync()
+		{
+			// Get the latest case from DB
+			var lastCase = await _context.Appartments
+				.OrderByDescending(c => c.BuildingCode)
+				.Select(c => c.BuildingCode)
+				.FirstOrDefaultAsync();
+
+			int nextNumber = 1;
+
+			if (!string.IsNullOrEmpty(lastCase) && lastCase.StartsWith("BB"))
+			{
+				string numberPart = lastCase.Substring(2); // Remove 'EF'
+				if (int.TryParse(numberPart, out int parsedNumber))
+				{
+					nextNumber = parsedNumber + 1;
+				}
+			}
+
+			// Generate new CaseCode
+			string newCode = "BB" + nextNumber.ToString("D10"); // D10 = 10 digits
+			return newCode;
+		}
 
 
 	}

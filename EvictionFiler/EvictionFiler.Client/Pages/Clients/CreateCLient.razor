@@ -311,7 +311,7 @@
                         
                         <div class="row mb-3">
                        
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="required-label">First Name</label>
 
                                 <div class="input-group mb-3">
@@ -321,7 +321,7 @@
                                 <ValidationMessage For="@(() => landlord.FirstName)" />
                              
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                             <label>Last Name</label>
 
                             <div class="input-group mb-3">
@@ -329,8 +329,19 @@
                                 <InputText class="form-control" @bind-Value="landlord.LastName" placeholder="Enter Last Name" />
                             </div>
                             </div>
+                             <div class="col-md-3">
+                                <label>EIN/SSN</label>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-person-vcard"></i> <!-- You can replace with bi-shield-lock too -->
+                                    </span>
+                                    <InputText class="form-control" @bind-Value="landlord.EINorSSN" placeholder="Enter EIN " />
+                                </div>
+
+
+                            </div>
                         
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label class="required-label">Type of Owner</label>
                                     <select class="form-select" @bind="landlord.TypeOfOwner">
                                         <option selected disabled>Select Type</option>
@@ -377,26 +388,22 @@
                            
                         </div>
                             <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label>EIN/SSN</label>
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text">
-                                        <i class="bi bi-person-vcard"></i> <!-- You can replace with bi-shield-lock too -->
-                                    </span>
-                                    <InputText class="form-control" @bind-Value="landlord.EINorSSN" placeholder="Enter EIN " />
+                           
+                          
+                                <div class="col-md-12">
+                                    <label>List Other Properties</label>
+                                    <InputTextArea class="form-control"
+                                                   @bind-Value="landlord.OtherProperties"
+                                                   placeholder="Enter Other Properties"
+                                                   rows="4" />
                                 </div>
+                          
 
-
-                            </div>
-                        <div class="col-md-6">
-                            <label>List Other Properties</label>
-                            <InputText type="text" class="form-control" @bind-Value="landlord.OtherProperties" placeholder="Enter Other Properties" />
-                        </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col">
-                                <label class="required-label">Address Line 1</label>
+                                <label >Address Line 1</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                     <InputText class="form-control" @bind-Value="landlord.Address1"  placeholder ="Enter First Address "/>
@@ -414,7 +421,7 @@
                         </div>
                         <div class="row mb-3">
                             <div class="col">
-                                <label class="form-label color-text ">State</label>
+                                <label  >State</label>
                                 <InputSelect class="form-select" @bind-Value="landlord.State">
                                     <option value="">-- Select State --</option>
                                     <option>Georgia</option>
@@ -450,17 +457,21 @@
 
                 }
 
+                @if (!showLandlordForm){
                 <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
                     <table class="table table-bordered mt-4" style="min-width: 1000px;">
                         <thead class="table-light">
                             <tr>
                                 <th>Name</th>
-                                <th>EIN</th>
-                                <th>Phone</th>
                                 <th>Email</th>
-                                <th>Address1</th>
-                                <th>Address2</th>
-                            
+                                <th>Phone</th>
+                                <th>EIN</th>
+                                <th>Contact Person Name</th>
+                                <th>Type of Owner</th>
+                                <th>Other Properties</th>
+                                <th>Address</th>
+                                <th>Status</th>
+                                <th class="sticky">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -469,13 +480,24 @@
                                 @foreach (var l in savelandlordList)
                                 {
                                     <tr>
-                                        <td>@l.FirstName </td>
-                                        <td>@l.EINorSSN</td>
-                                        <td>@l.Phone</td>
-                                        <td>@l.Email</td>
-                                        <td>@l.Address1</td>
-                                        <td>@l.Address2</td>
-                                        
+                                        <td>@(string.IsNullOrWhiteSpace(l.FirstName + l.LastName) ? "-" : l.FirstName + " " + l.LastName)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(l.Email) ? "-" : l.Email)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(l.Phone) ? "-" : l.Phone)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(l.EINorSSN) ? "-" : l.EINorSSN)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(l.ContactPersonName) ? "-" : l.ContactPersonName)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(l.TypeOfOwner) ? "-" : l.TypeOfOwner)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(l.OtherProperties) ? "-" : l.OtherProperties)</td>
+
+
+                                        <td>
+                                            @(
+                                                                            string.IsNullOrWhiteSpace($"{l.Address1}{l.Address2}{l.City}{l.State}{l.Zipcode}")
+                                                                            ? "-" : $"{l.Address1}, {l.Address2}, {l.City}, {l.State} - {l.Zipcode}")
+                            </td>
+
+                                        <td>Active</td>
+
+                                       
                                     </tr>
                                 }
                             }
@@ -488,7 +510,7 @@
                         </tbody>
                     </table>
                 </div>
-
+                }
             </div>
         }
 
@@ -507,7 +529,7 @@
                 @if (showBuildingForm)
                 {
 
-                    <EditForm Model="@building" OnValidSubmit="SubmitBuildingAsync">
+                    <EditForm Model="@building" OnValidSubmit="SaveBuildingAsync">
                         <DataAnnotationsValidator />
                      
                         <div class="row mb-3">
@@ -692,20 +714,48 @@
                     </div>
 
                 }
-                <!-- Grid -->
+
+                @if (!showBuildingForm){
                 <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
                     <table class="table table-bordered mt-4" style="min-width: 1000px;">
-                    <thead><tr><th>Code</th><th>Premise</th><th>Address1</th><th>Address2</th><th>City</th><th>State</th><th>Zip</th><th>MDR</th><th>Interest</th></tr></thead>
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Premise</th>
+                                    <th>Address</th>
+                                    <th>MDR</th>
+                                    <th>Interest</th>
+                                    <th>Rent Regulation</th>
+                                    <th>Building Units</th>
+                                    <th>Date Of Refree</th>
+                                    <th>Status</th>
+                                 
+                                </tr>
+                            </thead>
                     <tbody>
                         @if (apartmentList.Any())
                         {
                             @foreach (var b in apartmentList)
                             {
-                                <tr>
-                                    <td>@b.ApartmentCode</td><td>@b.PremiseType</td><td>@b.Address_1</td><td>@b.Address_2</td>
-                                    <td>@b.City</td><td>@b.State</td><td>@b.Zipcode</td>
-                                    <td>@b.MDR_Number</td><td>@b.PetitionerInterest</td>
-                                </tr>
+                                        <tr>
+                                            <td>@(string.IsNullOrWhiteSpace(b.ApartmentCode) ? "-" : b.ApartmentCode)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(b.PremiseType) ? "-" : b.PremiseType)</td>
+                                            <td>
+                                                @(
+                                                                                string.IsNullOrWhiteSpace($"{b.Address_1}{b.Address_2}{b.City}{b.State}{b.Zipcode}")
+                                                                                ? "-"
+                                                                                : $"{b.Address_1}, {b.Address_2}, {b.City}, {b.State} - {b.Zipcode}"
+                                                                                )
+                                        </td>
+                                        <td>@(string.IsNullOrWhiteSpace(b.MDR_Number) ? "-" : b.MDR_Number)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(b.PetitionerInterest) ? "-" : b.PetitionerInterest)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(b.TypeOfRentRegulation) ? "-" : b.TypeOfRentRegulation)</td>
+                                        <td>@(b.BuildingUnits.HasValue? b.BuildingUnits.ToString() : "-")</td>
+                                        <td>@(b.DateOfRefreeDeed == DateOnly.MinValue ? "-" : b.DateOfRefreeDeed.ToString("MM/dd/yyyy"))</td>
+
+                                            <td>Active</td>
+                                         
+                                        </tr>
                             }
                         }
                         else
@@ -715,8 +765,8 @@
                     </tbody>
                 </table>
                 </div>
-
-                      </div>
+                }
+             </div>
         }
 
 
@@ -741,7 +791,7 @@
                             <div class="col-md-3">
                                 <label class="required-label">Apartment</label>
                                 <InputSelect class="form-select" @bind-Value="tenant.ApartmentId">
-                                    <option value="">-- Select Apartment --</option>
+                                    <option value="">-- Select Building --</option>
                                     @foreach (var apartment in apartmentList)
                                     {
                                         <option value="@apartment.Id">@apartment.ApartmentCode</option>
@@ -794,11 +844,17 @@
                                     </div>
 
                                 </div>
+                          
                             <div class="col-md-3">
-                                <label>Name & Relations</label>
-                                <InputText class="form-control" @bind-Value="tenant.Name_Relation" placeholder="Enter Name" />
-                            </div>
+                                <label>EIN/SSN</label>
 
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-person-vcard"></i> <!-- You can replace with bi-shield-lock too -->
+                                    </span>
+                                    <InputText class="form-control" @bind-Value="tenant.SSN" placeholder="Enter EIN " />
+                                </div>
+                            </div>
 
                             <div class="col-md-2">
                                 <label class="required-label">Language</label>
@@ -812,6 +868,33 @@
                                     <option value="Arabic">Arabic</option>
                                     <option value="Other">Other</option>
                                 </InputSelect>
+                            </div>
+
+                        </div>
+
+                    
+                        <div class="row mb-3">
+                            <div class="col-md-2">
+                                <label>Rent</label>
+                                <InputNumber class="form-control" @bind-Value="tenant.Rent" />
+                            </div>
+                            <div class="col-md-2">
+                                <label>Lease Status</label>
+                                <InputText class="form-control" @bind-Value="tenant.LeaseStatus" placeholder="Enter Status" />
+                            </div>
+
+                            <div class="col-md-2">
+                                <label>Apt</label>
+                                <InputText class="form-control" @bind-Value="tenant.Apt" placeholder="Enter Apt" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>Borough</label>
+                                <InputText class="form-control" @bind-Value="tenant.Borough" placeholder="Enter Borough" />
+                            </div>
+                            <div class="col-md-3">
+                                <label>Date of Birth</label>
+                                <InputDate class="form-control" @bind-Value="tenant.DOB" />
                             </div>
 
                         </div>
@@ -854,8 +937,8 @@
                                 </div>
 
 
-                            </div>
 
+                            </div>
                             <div class="col">
                                 <label>Zip Code</label>
                                 <div class="input-group">
@@ -864,46 +947,24 @@
                                 </div>
 
                             </div>
+                           
 
-                            <div class="col">
-                                <label>Date of Birth</label>
-                                <InputDate class="form-control" @bind-Value="tenant.DOB" />
-                            </div>
+                        
                         </div>
-                    
-
-
-                        <!-- Row 7: Rent, Lease Status -->
                         <div class="row mb-3">
-                            <div class="col-md-2">
-                                <label>Rent</label>
-                                <InputNumber class="form-control" @bind-Value="tenant.Rent" />
+                            <div class="col-md-6">
+                                <label>Name & Relations</label>
+                                <InputTextArea class="form-control"
+                                               @bind-Value="tenant.Name_Relation"
+                                               placeholder="Enter Name & Relation"
+                                               rows="3" />
                             </div>
-                            <div class="col-md-2">
-                                <label>Lease Status</label>
-                                <InputText class="form-control" @bind-Value="tenant.LeaseStatus" placeholder="Enter Status" />
-                            </div>
-                            <div class="col-md-3">
-                                <label>EIN/SSN</label>
-                               
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text">
-                                        <i class="bi bi-person-vcard"></i> <!-- You can replace with bi-shield-lock too -->
-                                    </span>
-                                    <InputText class="form-control" @bind-Value="tenant.SSN" placeholder="Enter EIN " />
-                                </div>
-                                </div>
-                                <div class="col-md-2">
-                                <label>Apt</label>
-                                <InputText class="form-control" @bind-Value="tenant.Apt" placeholder="Enter Apt" />
-                            </div>
-
-                                <div class="col-md-3">
-                                    <label>Borough</label>
-                                <InputText class="form-control" @bind-Value="tenant.Borough" placeholder="Enter Borough" />
-                                </div>
+                            
 
                         </div>
+
+                      
+                    
                        
                         <div class="row mb-3">
                             <!-- Tenant of Record -->
@@ -985,8 +1046,9 @@
                             </div>
                            
                         </div>
+                      
                         <div class="row mb-3">
-                            <div class="col">
+                            <div class="col-md-6">
                                 <InputRadioGroup @bind-Value="tenant.HasPriorCase">
                                     <div class="d-flex align-items-center">
                                         <label class="form-label mb-0 me-2">Any prior housing Court Case:</label>
@@ -1004,7 +1066,7 @@
                                 </InputRadioGroup>
 
                             </div>
-                        </div>
+</div>
                         
                         <!-- Submit Button -->
                         <div class="row">
@@ -1015,11 +1077,12 @@
                     </EditForm>
                 }
 
-
+                @if (!showTanentForm){
                 <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
                     <table class="table table-bordered mt-4" style="min-width: 1200px;">
                         <thead class="table-light">
                             <tr>
+                              
                                 <th>Name</th>
                                 <th>DOB</th>
                                 <th>SSN</th>
@@ -1031,7 +1094,6 @@
                                 <th>Borough</th>
                                 <th>Rent</th>
                                 <th>Lease Status</th>
-                                <th>Tenant Code</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1040,18 +1102,24 @@
                                 @foreach (var t in saveTanentList)
                                 {
                                     <tr>
+                                      
                                         <td>@t.FirstName</td>
                                         <td>@t.DOB.ToString("yyyy-MM-dd")</td>
                                         <td>@t.SSN</td>
                                         <td>@t.Phone</td>
                                         <td>@t.Email</td>
                                         <td>@t.Language</td>
-                                        <td>@t.Address_1</td>
-                                        <td>@t.Apt</td>
-                                        <td>@t.Borough</td>
-                                        <td>@t.Rent</td>
-                                        <td>@t.LeaseStatus</td>
-                                        <td>@t.TenantCode</td>
+                                        <td>
+                                            @(
+                                                                            string.IsNullOrWhiteSpace($"{t.Address_1}{t.Address_2}{t.City}{t.State}{t.Zipcode}")
+                                                                            ? "-"
+                                                                            : $"{t.Address_1}, {t.Address_2}, {t.City}, {t.State} - {t.Zipcode}"
+                                                                            )
+                                    </td>
+                                    <td>@t.Apt</td>
+                                    <td>@t.Borough</td>
+                                    <td>@t.Rent</td>
+                                    <td>@t.LeaseStatus</td>
                                     </tr>
                                 }
                             }
@@ -1064,6 +1132,7 @@
                         </tbody>
                     </table>
                 </div>
+                }
             </div>
         }
 
@@ -1174,9 +1243,10 @@
         showTanentForm = false;
         return Task.CompletedTask;
     }
-    private Task SubmitBuildingAsync()
+    private Task SaveBuildingAsync()
 
     {
+        Console.WriteLine("SaveBuildingAsync CALLED ✅");
         building.Id = Guid.NewGuid();
         apartmentList.Add(building);
         building = new();
