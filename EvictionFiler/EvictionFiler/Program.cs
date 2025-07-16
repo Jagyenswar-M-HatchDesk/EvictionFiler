@@ -51,8 +51,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICasesRepository, CasesRepository>();
 //builder.Services.AddScoped<IClientService, ClientServices>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
-builder.Services.AddScoped<IApartmentRepository, ApartmentRepository>();
 builder.Services.AddScoped<ILandLordRepository, LandLordRepository>();
+builder.Services.AddScoped<IApartmentRepository, ApartmentRepository>();
 
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
 //builder.Services.AddScoped<ILegalCaseService, LegalCaseService>();
@@ -65,9 +65,9 @@ builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
     provider.GetRequiredService<JwtAuthStateProvider>());
 builder.Services.AddScoped<UserServiceClient>();
 builder.Services.AddScoped<ClientService>();
-builder.Services.AddScoped<TenantService>();
-builder.Services.AddScoped<ApartmentService>();
 builder.Services.AddScoped<LandLordService>();
+builder.Services.AddScoped<ApartmentService>();
+builder.Services.AddScoped<TenantService>();
 builder.Services.AddScoped<LegalCasesService>();
 builder.Services.AddScoped<NavigationDataService>();
 
