@@ -70,5 +70,8 @@ namespace EvictionFiler.Domain.Entities
         public int? Monthsunpaid { get; set; }
         public string? OthersGrounds { get; set; }
 
+       public string ? Attrney { get; set; }
+        public string? AttrneyContactInfo { get; set; }
+        public string? Firm { get; set; }
     }
 }

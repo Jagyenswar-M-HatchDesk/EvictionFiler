@@ -61,7 +61,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 					Registration_No = dto.Registration_No,
 					TenantRecord = dto.TenantRecord,
 					HasPriorCase = dto.HasPriorCase,
-
+					IsActive = dto.IsActive,
+					IsDeleted = dto.IsDeleted,
+					CreatedBy = dto.CreatedBy,
+					CreatedAt = dto.CreatedAt,
+					UpdatedAt = dto.UpdatedAt,
+					UpdatedBy = dto.UpdatedBy,
 
 					ApartmentId = dto.ApartmentId
 				};
@@ -87,45 +92,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 .Where(t => t.IsDeleted != true)
                 .ToListAsync();
         }
-		public async Task<bool> UpdateTenantAsync(CreateTenantDto dto)
-		{
-			var tenant = await _dbContext.Tenants.FirstOrDefaultAsync(x => x.Id == dto.Id);
-			if (tenant == null) return false;
-
-
-			tenant.TenantCode = dto.TenantCode;
-			tenant.FirstName = dto.FirstName;
-			tenant.LastName = dto.LastName;
-			tenant.DOB = dto.DOB;
-			tenant.SSN = dto.SSN;
-			tenant.Phone = dto.Phone;
-			tenant.Email = dto.Email;
-			tenant.Language = dto.Language;
-			tenant.Address_1 = dto.Address_1;
-			tenant.Address_2 = dto.Address_2;
-			tenant.State = dto.State;
-			tenant.City = dto.City;
-			tenant.Zipcode = dto.Zipcode;
-			tenant.Apt = dto.Apt;
-			tenant.Borough = dto.Borough;
-			tenant.Rent = dto.Rent;
-			tenant.LeaseStatus = dto.LeaseStatus;
-			tenant.HasPossession = dto.HasPossession;
-			tenant.HasRegulatedTenancy = dto.HasRegulatedTenancy;
-			tenant.Name_Relation = dto.Name_Relation;
-			tenant.OtherOccupants = dto.OtherOccupants;
-			tenant.Registration_No = dto.Registration_No;
-			tenant.TenantRecord = dto.TenantRecord;
-			tenant.HasPriorCase = dto.HasPriorCase;
-              
-         
-
-
-			_dbContext.Tenants.Update(tenant);
-			await _dbContext.SaveChangesAsync();
-
-			return true;
-		}
+		
 		public async Task<bool> DeleteTenantAsync(Guid id)
         {
             var tenant = await _dbContext.Tenants.FirstOrDefaultAsync(x => x.Id == id);
@@ -234,6 +201,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 					entity.TenantRecord = dto.TenantRecord;
 					entity.HasPriorCase = dto.HasPriorCase;
 					entity.ApartmentId = dto.ApartmentId;
+					entity.IsActive = dto.IsActive;
+					entity.IsDeleted = dto.IsDeleted;
+					entity.CreatedBy = dto.CreatedBy;
+					entity.CreatedAt = dto.CreatedAt;
+					entity.UpdatedAt = dto.UpdatedAt;
+					entity.UpdatedBy = dto.UpdatedBy;
+					entity.HasPriorCase = dto.HasPriorCase;
 				}
 			}
 

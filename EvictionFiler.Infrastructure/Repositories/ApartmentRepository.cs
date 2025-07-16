@@ -49,7 +49,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 				DateOfRefreeDeed =appartment.DateOfRefreeDeed,
 				LandlordType = appartment.LandlordType,
 				LandlordId = appartment.LandlordId,
-		
+				IsActive = appartment.IsActive,
+				IsDeleted = appartment.IsDeleted,
+				CreatedBy = appartment.CreatedBy,
+				CreatedAt = appartment.CreatedAt,
+				UpdatedAt = appartment.UpdatedAt,
+				UpdatedBy = appartment.UpdatedBy,
+
 			};
 		}
 
@@ -77,6 +83,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 		   DateOfRefreeDeed = appartment.DateOfRefreeDeed,
 		   LandlordType = appartment.LandlordType,
 		   LandlordId = appartment.LandlordId,
+		   IsActive = appartment.IsActive,
+		   IsDeleted = appartment.IsDeleted,
+		   CreatedBy = appartment.CreatedBy,
+		   CreatedAt = appartment.CreatedAt,
+		   UpdatedAt = appartment.UpdatedAt,
+		   UpdatedBy = appartment.UpdatedBy,
 	   }).ToListAsync();
 			
         }
@@ -107,6 +119,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 					DateOfRefreeDeed = appartment.DateOfRefreeDeed,
 					LandlordType = appartment.LandlordType,
 					LandlordId = appartment.LandlordId,
+					IsActive = appartment.IsActive,
+					IsDeleted = appartment.IsDeleted,
+					CreatedBy = appartment.CreatedBy,
+					CreatedAt = appartment.CreatedAt,
+					UpdatedAt = appartment.UpdatedAt,
+					UpdatedBy = appartment.UpdatedBy,
 
 				};
 
@@ -154,7 +172,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 					Registration_No = dto.Registration_No,
 					TenantRecord = dto.TenantRecord,
 					HasPriorCase = dto.HasPriorCase,
-					ApartmentId = dto.ApartmentId
+					ApartmentId = dto.ApartmentId,
+					IsActive = dto.IsActive,
+					IsDeleted = dto.IsDeleted,
+					CreatedBy = dto.CreatedBy,
+					CreatedAt = dto.CreatedAt,
+					UpdatedAt = dto.UpdatedAt,
+					UpdatedBy = dto.UpdatedBy,
 				}).ToListAsync();
 
             return new BuildingWithTenant
@@ -178,6 +202,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 					DateOfRefreeDeed = appartment.DateOfRefreeDeed,
 					LandlordType = appartment.LandlordType,
 					LandlordId = appartment.LandlordId,
+					IsActive = appartment.IsActive,
+					IsDeleted = appartment.IsDeleted,
+					CreatedBy = appartment.CreatedBy,
+					CreatedAt = appartment.CreatedAt,
+					UpdatedAt = appartment.UpdatedAt,
+					UpdatedBy = appartment.UpdatedBy,
 
 				},
 				Tenants = tenant
@@ -210,7 +240,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 					entity.DateOfRefreeDeed = appartment.DateOfRefreeDeed;
 					entity.LandlordType = appartment.LandlordType;
 					entity.LandlordId = appartment.LandlordId;
-
+					entity.IsActive = appartment.IsActive;
+					entity.IsDeleted = appartment.IsDeleted;
+					entity.CreatedBy = appartment.CreatedBy;
+					entity.CreatedAt = appartment.CreatedAt;
+					entity.UpdatedAt = appartment.UpdatedAt;
+					entity.UpdatedBy = appartment.UpdatedBy;
 				}
 			}
 
@@ -233,7 +268,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 			return await _context.Appartments
 				.Where(appartment =>
 					appartment.LandlordId == landlordId && // ✅ only selected landlord's buildings
-					appartment.ApartmentCode.StartsWith(code)
+					appartment.BuildingCode.StartsWith(code)
 				)
 				.Select(appartment=> new AddApartment
 				{
@@ -282,6 +317,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 				DateOfRefreeDeed = appartment.DateOfRefreeDeed,
 				LandlordType = appartment.LandlordType,
 				LandlordId = appartment.LandlordId,
+				IsActive = appartment.IsActive,
+				IsDeleted = appartment.IsDeleted,
+				CreatedBy = appartment.CreatedBy,
+				CreatedAt = appartment.CreatedAt,
+				UpdatedAt = appartment.UpdatedAt,
+				UpdatedBy = appartment.UpdatedBy,
 
 			}).ToList();
 		}

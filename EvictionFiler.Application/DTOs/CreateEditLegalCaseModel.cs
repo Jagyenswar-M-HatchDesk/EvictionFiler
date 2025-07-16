@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,5 +47,14 @@ namespace EvictionFiler.Application.DTOs
         public bool? RentIncreases { get; set; }
         public int? Monthsunpaid { get; set; }
         public string? OthersGrounds { get; set; }
-    }
+
+		[Required(ErrorMessage = "Attorney is required")]
+		public string Attrney { get; set; }
+
+		[Required(ErrorMessage = "Contact Info is required")]
+		public string AttrneyContactInfo { get; set; }
+
+		[Required(ErrorMessage = "Firm is required")]
+		public string Firm { get; set; }
+	}
 }

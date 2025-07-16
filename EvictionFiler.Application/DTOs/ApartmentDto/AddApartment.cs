@@ -37,9 +37,15 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 		public LandLordRole? LandlordType { get; set; }
 		[Required(ErrorMessage = "Landlord is required")]
 		public Guid? LandlordId { get; set; }
+		public bool? IsActive { get; set; }
+		public bool? IsDeleted { get; set; }
+
+		public DateTime? CreatedAt { get; set; }
+		public DateTime? UpdatedAt { get; set; }
+		public string? CreatedBy { get; set; }
+		public string? UpdatedBy { get; set; }
 
 
-		
 
 
 	}

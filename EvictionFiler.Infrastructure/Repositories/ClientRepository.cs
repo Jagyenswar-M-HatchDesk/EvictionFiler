@@ -1,22 +1,7 @@
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Numerics;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-﻿using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.ClientDto;
-using EvictionFiler.Application.DTOs.LandLordDto;
-using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
-using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
-using EvictionFiler.Infrastructure.DbContexts;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -53,7 +38,12 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Fax = client.Fax ?? "",
                 Phone = client.Phone ?? "",
                 CellPhone = client.CellPhone ?? "",
-                //GenarateOwnRd = client.GenarateOwnRd ?? false
+                IsActive = client.IsActive ?? false,
+				IsDeleted = client.IsDeleted ?? false,
+				CreatedAt = client.CreatedAt ?? DateTime.UtcNow,
+				CreatedBy = client.CreatedBy ?? "Admin",
+				UpdatedAt = client.UpdatedAt ?? DateTime.UtcNow,
+				UpdatedBy = client.UpdatedBy ?? "Admin"
             }).ToListAsync();
 
             return allclients ?? new List<CreateClientDto>();
@@ -83,7 +73,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Fax = client.Fax,
 				
 				CreatedAt = DateTime.Now,
-				IsActive = true
+				IsActive = true,
+				IsDeleted = false,
+				CreatedBy = null,
+				UpdatedBy = null,
+				UpdatedAt = DateTime.Now,
+			
 			};
 
 			_context.Clients.Add(newclient);
@@ -109,6 +104,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 			existing.Phone = client.Phone;
 			existing.CellPhone = client.CellPhone;
 			existing.Fax = client.Fax;
+			existing.CreatedAt = DateTime.Now;
+			existing.IsActive = client.IsActive;
+			existing.IsDeleted = client.IsDeleted;
+			existing.CreatedBy = client.CreatedBy;
+			existing.UpdatedBy = client.UpdatedBy;
+			existing.UpdatedAt = DateTime.Now;
 				
 
 
@@ -141,11 +142,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 	
 
-        //public Task AddAsync(Client client)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
+       
         public async Task<List<CreateClientDto>> SearchClientByCode(string code)
         {
             var client = await _context.Clients.Where(e => e.ClientCode.Contains(code)).Select(e => new CreateClientDto

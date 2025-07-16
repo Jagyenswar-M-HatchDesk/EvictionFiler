@@ -9,7 +9,7 @@ using EvictionFiler.Application.DTOs.LandLordDto;
 
 namespace EvictionFiler.Application.DTOs.ClientDto
 {
-    public class CreateClientDto
+    public class CreateClientDto 
     {
         public Guid Id { get; set; }
 
@@ -27,7 +27,7 @@ namespace EvictionFiler.Application.DTOs.ClientDto
         public string? Address_2 { get; set; } = string.Empty;
 
 		public string? City { get; set; } = string.Empty;
-		public bool? IsActive { get; set; }
+	
 		public string? State { get; set; }
 	
 		public int? ZipCode { get; set; }
@@ -38,8 +38,14 @@ namespace EvictionFiler.Application.DTOs.ClientDto
 		public string? Fax { get; set; } = string.Empty;
   
 		public List<CreateLandLordDto>? LandLords { get; set; }
+		public bool? IsActive { get; set; }
+		public bool? IsDeleted { get; set; }
 
-	
+		public DateTime? CreatedAt { get; set; }
+		public DateTime? UpdatedAt { get; set; }
+		public string? CreatedBy { get; set; }
+		public string? UpdatedBy { get; set; }
+
 
 	}
 }

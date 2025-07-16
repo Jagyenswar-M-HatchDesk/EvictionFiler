@@ -48,7 +48,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 					Zipcode = dto.Zipcode,
 					ContactPersonName = dto.ContactPersonName,
 					TypeOfOwner = dto.TypeOfOwner,
-					ClientId = dto.ClientId
+					ClientId = dto.ClientId,
+					CreatedAt = DateTime.Now,
+					IsActive = true,
+					IsDeleted = false,
+					CreatedBy = null,
+					UpdatedBy = null,
+					UpdatedAt = DateTime.Now,
 				};
 
 				newLandlords.Add(landlord);
@@ -87,7 +93,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Zipcode = dto.Zipcode,
 				ContactPersonName = dto.ContactPersonName,
 				TypeOfOwner = dto.TypeOfOwner,
-			
+				IsActive = dto.IsActive ?? false,
+				IsDeleted = dto.IsDeleted ?? false,
+				CreatedAt = dto.CreatedAt ?? DateTime.UtcNow,
+				CreatedBy = dto.CreatedBy ?? "Admin",
+				UpdatedAt = dto.UpdatedAt ?? DateTime.UtcNow,
+				UpdatedBy = dto.UpdatedBy ?? "Admin"
+
 
 
 
@@ -122,6 +134,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Zipcode = dto.Zipcode,
 				ContactPersonName = dto.ContactPersonName,
 				TypeOfOwner = dto.TypeOfOwner,
+				IsDeleted = dto.IsDeleted,
+				IsActive  = dto.IsActive,
+				CreatedAt = dto.CreatedAt,
+				CreatedBy = dto.CreatedBy,
+				UpdatedAt = dto.UpdatedAt,
+				UpdatedBy = dto.UpdatedBy,
 				
 			};
 
@@ -168,6 +186,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 					entity.EINorSSN = l.EINorSSN;
 					entity.ContactPersonName = l.ContactPersonName;
 					entity.OtherProperties = l.OtherProperties;
+					entity.IsActive = l.IsActive;
+					entity.IsDeleted = l.IsDeleted;
+					entity.CreatedBy  = l.CreatedBy;
+					entity.CreatedAt = l.CreatedAt;
+					entity.UpdatedAt = l.UpdatedAt;
+					entity.UpdatedBy = l.UpdatedBy;
 				
 				}
 			}
@@ -227,6 +251,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				.Select(appartment  => new AddApartment
 				{
 					Id = appartment.Id,
+					BuildingCode = appartment.BuildingCode,
 					ApartmentCode = appartment.ApartmentCode,
 					City = appartment.City,
 					State = appartment.State,
@@ -241,6 +266,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 					DateOfRefreeDeed = appartment.DateOfRefreeDeed,
 					LandlordType = appartment.LandlordType,
 					LandlordId = appartment.LandlordId,
+					IsDeleted = appartment.IsDeleted,
+					IsActive = appartment.IsActive,
+					CreatedAt	= appartment.CreatedAt,
+					CreatedBy = appartment.CreatedBy,
+					UpdatedBy = appartment.UpdatedBy,
+					UpdatedAt	= appartment.UpdatedAt,
 
 				}).ToListAsync();
 
@@ -263,6 +294,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 					Zipcode = l.Zipcode,
 					ContactPersonName = l.ContactPersonName,
 					TypeOfOwner = l.TypeOfOwner,
+					IsActive= l.IsActive,
+					IsDeleted = l.IsDeleted,
+					CreatedBy	=	l.CreatedBy,
+					CreatedAt = l.CreatedAt,
+					UpdatedAt = l.UpdatedAt,
+					UpdatedBy= l.UpdatedBy,
 
 
 				},
@@ -292,7 +329,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Zipcode = l.Zipcode,
 				ContactPersonName = l.ContactPersonName,
 				TypeOfOwner = l.TypeOfOwner,
-				ClientId = l.ClientId
+				ClientId = l.ClientId,
+				IsActive = l.IsActive,
+				IsDeleted = l.IsDeleted,
+				CreatedBy = l.CreatedBy,
+				CreatedAt = l.CreatedAt,
+				UpdatedAt = l.UpdatedAt,
+				UpdatedBy = l.UpdatedBy,
 
 			}).ToList();
 		}

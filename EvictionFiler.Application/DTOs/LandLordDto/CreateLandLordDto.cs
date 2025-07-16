@@ -30,7 +30,13 @@ namespace EvictionFiler.Application.DTOs.LandLordDto
 		public string? Zipcode { get; set; }
 		public Guid? ClientId { get; set; }  
 		public List<AddApartment>? Apartments { get; set; }
+		public bool? IsActive { get; set; }
+		public bool? IsDeleted { get; set; }
 
+		public DateTime? CreatedAt { get; set; }
+		public DateTime? UpdatedAt { get; set; }
+		public string? CreatedBy { get; set; }
+		public string? UpdatedBy { get; set; }
 		public string? OtherLandlordTypeDescription { get; set; }
 	}
 }
