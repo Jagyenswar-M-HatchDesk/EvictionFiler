@@ -34,7 +34,7 @@ namespace EvictionFiler.Client.Services
 			return await _repo.SearchTenantAsync(query , buildingId);
 		}
 
-		public async Task<CreateTenantDto> GetByIdAsync(Guid id)
+		public async Task<EditTenantDto> GetByIdAsync(Guid id)
 		{
 			var newtenant = await _repo.GetByIdAsync(id);
 			return newtenant;

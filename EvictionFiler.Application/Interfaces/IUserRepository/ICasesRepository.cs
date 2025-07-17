@@ -11,10 +11,12 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
     public interface ICasesRepository
     {
         Task<List<LegalCase>> GetAllCasesAsync();
-        Task<LegalCase?> GetCaseByIdAsync(Guid id);
-        Task<bool> AddCaseAsync(CreateEditLegalCaseModel legalCase);
-        Task UpdateCaseAsync(LegalCase legalCase);
-        Task DeleteCaseAsync(Guid id);
+        Task<CreateEditLegalCaseModel?> GetCaseByIdAsync(Guid id);
+
+		Task<bool> AddCaseAsync(CreateEditLegalCaseModel legalCase);
+        Task<bool> UpdateCasesAsync(CreateEditLegalCaseModel legalCase);
+
+		Task DeleteCaseAsync(Guid id);
         Task<List<CaseType>> GetAllCaseTypeAsync();
         Task<List<CaseSubType>> GetSubTypesByCaseTypeIdAsync(Guid caseTypeId);
 

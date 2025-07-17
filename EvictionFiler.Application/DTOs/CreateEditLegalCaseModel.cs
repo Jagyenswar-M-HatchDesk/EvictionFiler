@@ -18,7 +18,7 @@ namespace EvictionFiler.Application.DTOs
         public string? ClientRole { get; set; }
         public string? LegalRepresentative { get; set; }
         public string? Casecode { get; set; }
-        public string? CaseType { get; set; }
+
 
         //section4
         public string? Company { get; set; }

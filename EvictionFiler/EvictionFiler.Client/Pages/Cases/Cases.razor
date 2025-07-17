@@ -225,7 +225,7 @@
                                 <option value="">-- Select Case Type --</option>
                                 @foreach (var caseType in caseTypes)
                                 {
-                                    <option value="@caseType.Id" selected="@(caseType.Id == legalcaseDto.CaseTypeId)">
+                                    <option value="@caseType.Id" >
                                         @caseType.Name
                                     </option>
                                 }
@@ -794,16 +794,19 @@
 
 @code {
     [Parameter] public string ClientId { get; set; }
-    private CreateEditLegalCaseModel legalCase = new();
+    private CreateEditLegalCaseModel legalcaseDto = new CreateEditLegalCaseModel();
     int currentStep = 0;
     int lastStep = 3;
     private List<CaseType> caseTypes = new();
     private List<CaseSubType> caseSubTypes = new();
     private EditContext editContext;
+    private EditContext caseContext;
+    private EditContext landlordContext;
     // Used for conditional rendering
     private string selectedCaseTypeName;
     protected override async Task OnInitializedAsync()
     {
+        legalcaseDto = new CreateEditLegalCaseModel();
         editContext = new EditContext(legalcaseDto);
         caseTypes = await _caseService.GetAllCaseType();
     }
@@ -828,7 +831,7 @@
             legalcaseDto.CaseSubTypeId = null;
         }
 
-        legalcaseDto.CaseType = selectedCaseTypeName;
+            legalcaseDto.CaseTypeId = selectedGuid;
     }
 }
 
@@ -851,6 +854,7 @@
         }
     }
 
+ 
 
 
 
@@ -945,7 +949,7 @@
 
     private LandlordWithBuildings? landlordDetails;
     private BuildingWithTenant ?buildingDetails;
-    private CreateTenantDto? TenantDetails;
+    private EditTenantDto? TenantDetails;
 
 
 
@@ -986,6 +990,7 @@
         isBuildingSelected = true;
         hasSearched = false;
     }
+
     private async Task SelectTenant(Guid id)
     {
         TenantDetails = await _tenantService.GetByIdAsync(id);
@@ -1093,7 +1098,7 @@
     private CreateTenantDto tenantDto = new CreateTenantDto();
     private CreateLandLordDto landLordDto = new CreateLandLordDto();
     private AddApartment apartmentDto = new AddApartment();
-    private CreateEditLegalCaseModel legalcaseDto = new CreateEditLegalCaseModel();
+  
     private CreateClientDto clientDto = new CreateClientDto();
 
     private List<CreateTenantDto> matchedTenants = new List<CreateTenantDto>();
@@ -1108,59 +1113,43 @@
 
     void SaveAsDraft() => Console.WriteLine("Saving Draft...");
 
-
-
-
-  
-
-
     void Back() => currentStep--;
-
 
     private async Task Submit()
     {
-        var result = false;
+        if (legalcaseDto == null)
+            return;
 
-        if (legalcaseDto == null || legalcaseDto.Id == Guid.Empty)
+        // Ensure required fields are present before update
+        if (legalcaseDto.CaseTypeId == Guid.Empty)
         {
-            legalcaseDto.Id = Guid.NewGuid();
-            legalcaseDto.LandLordId = landLordDto.Id;
-            legalcaseDto.ApartmentId = apartmentDto.Id;
-            legalcaseDto.TenantId = tenantDto.Id;
-            legalcaseDto.ClientId = Guid.Parse(ClientId);
-            legalcaseDto.CaseName = _dataService.CaseName;
-            legalcaseDto.Attrney = legalCase.Attrney;
-            legalcaseDto.AttrneyContactInfo = legalCase.AttrneyContactInfo;
-            legalcaseDto.Firm = legalCase.Firm;
-
-            // Set CaseType string
-            if (selectedCaseTypeName == "Holdover")
-            {
-                if (legalcaseDto.CaseSubTypeId != null)
-                {
-                    var subType = caseSubTypes.FirstOrDefault(s => s.Id == legalcaseDto.CaseSubTypeId);
-                    legalcaseDto.CaseType = subType?.Name;
-                }
-            }
-            else
-            {
-                legalcaseDto.CaseType = selectedCaseTypeName;
-            }
-
-            // Ensure CaseTypeId is correctly preserved
-            if (legalcaseDto.CaseTypeId == Guid.Empty)
-            {
-                Console.WriteLine("CaseTypeId is required");
-                return;
-            }
-
-            result = await _legalCaseService.AddLegalCasesAsync(legalcaseDto);
-            _dataService.CaseName = null;
+            Console.WriteLine("❌ CaseTypeId is required.");
+            return;
         }
+
+        if (legalcaseDto.LandLordId == Guid.Empty || legalcaseDto.ApartmentId == Guid.Empty || legalcaseDto.TenantId == Guid.Empty)
+        {
+            Console.WriteLine("❌ Landlord, Apartment, or Tenant is missing.");
+            return;
+        }
+
+        // Optional: Set subtype name if CaseType is Holdover
+        if (selectedCaseTypeName == "Holdover" && legalcaseDto.CaseSubTypeId != null)
+        {
+            var subType = caseSubTypes.FirstOrDefault(s => s.Id == legalcaseDto.CaseSubTypeId);
+            // legalcaseDto.CaseSubTypeName = subType?.Name; // Uncomment if your DTO has CaseSubTypeName
+        }
+
+        // 🔁 Call update service
+        var result = await _legalCaseService.UpdateAsync(legalcaseDto);
 
         if (result)
         {
             nav.NavigateTo("/cases?success=true");
+        }
+        else
+        {
+            Console.WriteLine("❌ Failed to update the case.");
         }
     }
 

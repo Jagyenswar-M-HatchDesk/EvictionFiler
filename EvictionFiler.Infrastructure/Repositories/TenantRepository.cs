@@ -217,14 +217,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 
 
-		public async Task<CreateTenantDto?> GetByIdAsync(Guid id)
+		public async Task<EditTenantDto?> GetByIdAsync(Guid id)
 		{
 			var dto = await _dbContext.Tenants.FindAsync(id);
 
 			if (dto == null)
 				return null;
 
-			return new CreateTenantDto
+			return new EditTenantDto
 			{
 				Id = dto.Id,
 				TenantCode = dto.TenantCode,
