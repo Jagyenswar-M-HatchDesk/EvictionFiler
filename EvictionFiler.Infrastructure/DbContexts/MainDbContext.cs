@@ -21,7 +21,10 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<Tenant> Tenants { get; set; }
         public DbSet<Client> Clients { get; set; }
         public DbSet<LandLord> LandLords { get; set; }
-        public DbSet<Appartment> Appartments { get; set; }
+
+		public DbSet<CaseType> CaseTypes { get; set; }
+		public DbSet<CaseSubType> CaseSubTypes { get; set; }
+		public DbSet<Appartment> Appartments { get; set; }
         public DbSet<LegalCase> LegalCases { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

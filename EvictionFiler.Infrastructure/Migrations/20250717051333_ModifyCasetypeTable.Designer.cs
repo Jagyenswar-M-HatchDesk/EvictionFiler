@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250717051333_ModifyCasetypeTable")]
+    partial class ModifyCasetypeTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -104,9 +107,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("CaseTypeId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -129,8 +129,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CaseTypeId");
 
                     b.ToTable("CaseSubTypes");
                 });
@@ -141,6 +139,9 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("CaseSubTypeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -163,6 +164,8 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CaseSubTypeId");
 
                     b.ToTable("CaseTypes");
                 });
@@ -341,9 +344,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<string>("CaseName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("CaseSubTypeId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("CaseTypeId")
                         .HasColumnType("uniqueidentifier");
 
@@ -440,8 +440,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ApartmentId");
-
-                    b.HasIndex("CaseSubTypeId");
 
                     b.HasIndex("CaseTypeId");
 
@@ -911,13 +909,13 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Navigation("Landlord");
                 });
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseSubType", b =>
+            modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseType", b =>
                 {
-                    b.HasOne("EvictionFiler.Domain.Entities.CaseType", "CaseTypes")
+                    b.HasOne("EvictionFiler.Domain.Entities.CaseSubType", "CaseSubTypes")
                         .WithMany()
-                        .HasForeignKey("CaseTypeId");
+                        .HasForeignKey("CaseSubTypeId");
 
-                    b.Navigation("CaseTypes");
+                    b.Navigation("CaseSubTypes");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.LandLord", b =>
@@ -936,10 +934,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("ApartmentId")
                         .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("EvictionFiler.Domain.Entities.CaseSubType", "CaseSubTypes")
-                        .WithMany()
-                        .HasForeignKey("CaseSubTypeId");
 
                     b.HasOne("EvictionFiler.Domain.Entities.CaseType", "CaseTypes")
                         .WithMany()
@@ -961,8 +955,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Apartments");
-
-                    b.Navigation("CaseSubTypes");
 
                     b.Navigation("CaseTypes");
 

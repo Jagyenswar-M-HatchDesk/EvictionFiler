@@ -40,10 +40,16 @@ namespace EvictionFiler.Domain.Entities
         public string? ClientRole { get; set; }
         public string? LegalRepresentative { get; set; }
         public string? Casecode { get; set; }
-        public string? CaseType { get; set; }
+		public Guid ?CaseTypeId { get; set; }
+		[ForeignKey("CaseTypeId")]
+		public CaseType? CaseTypes { get; set; }
 
-        //section4
-        public string? Company {  get; set; } 
+		public Guid? CaseSubTypeId { get; set; }
+		[ForeignKey("CaseSubTypeId")]
+		public CaseSubType? CaseSubTypes { get; set; }
+
+		//section4
+		public string? Company {  get; set; } 
         public string? Contact {  get; set; } 
         public string? PhoneorEmail {  get; set; } 
         public string? MDRNo {  get; set; } 
@@ -70,7 +76,7 @@ namespace EvictionFiler.Domain.Entities
         public int? Monthsunpaid { get; set; }
         public string? OthersGrounds { get; set; }
 
-       public string ? Attrney { get; set; }
+         public string ? Attrney { get; set; }
         public string? AttrneyContactInfo { get; set; }
         public string? Firm { get; set; }
     }

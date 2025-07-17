@@ -68,6 +68,7 @@ builder.Services.AddScoped<ClientService>();
 builder.Services.AddScoped<LandLordService>();
 builder.Services.AddScoped<ApartmentService>();
 builder.Services.AddScoped<TenantService>();
+builder.Services.AddScoped<CaseService>();
 builder.Services.AddScoped<LegalCasesService>();
 builder.Services.AddScoped<NavigationDataService>();
 

@@ -15,7 +15,9 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
         Task<bool> AddCaseAsync(CreateEditLegalCaseModel legalCase);
         Task UpdateCaseAsync(LegalCase legalCase);
         Task DeleteCaseAsync(Guid id);
+        Task<List<CaseType>> GetAllCaseTypeAsync();
+        Task<List<CaseSubType>> GetSubTypesByCaseTypeIdAsync(Guid caseTypeId);
 
-    }
+	}
 
 }

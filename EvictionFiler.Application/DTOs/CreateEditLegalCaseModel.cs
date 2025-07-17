@@ -47,6 +47,10 @@ namespace EvictionFiler.Application.DTOs
         public bool? RentIncreases { get; set; }
         public int? Monthsunpaid { get; set; }
         public string? OthersGrounds { get; set; }
+		[Required(ErrorMessage = "CaseType  is required")]
+		public Guid? CaseTypeId { get; set; }
+		[Required(ErrorMessage = "CasesUBType  is required")]
+		public Guid? CaseSubTypeId { get; set; }
 
 		[Required(ErrorMessage = "Attorney is required")]
 		public string Attrney { get; set; }

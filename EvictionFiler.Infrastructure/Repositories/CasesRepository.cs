@@ -18,7 +18,21 @@ namespace EvictionFiler.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<List<LegalCase>> GetAllCasesAsync()
+		public async Task<List<CaseType>> GetAllCaseTypeAsync()
+		{
+			return await _context.CaseTypes.ToListAsync();
+		}
+
+		public async Task<List<CaseSubType>> GetSubTypesByCaseTypeIdAsync(Guid caseTypeId)
+		{
+			return await _context.CaseSubTypes
+				.Where(x => x.CaseTypeId == caseTypeId && x.IsActive == true && x.IsDeleted != true)
+				.ToListAsync();
+		}
+
+
+
+		public async Task<List<LegalCase>> GetAllCasesAsync()
         {
             return await _context.LegalCases
                 .Include(c => c.Clients)
@@ -49,7 +63,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 CaseName = legalCase.CaseName,
                 ClientRole = legalCase.ClientRole,
                 LegalRepresentative = legalCase.LegalRepresentative,
-                CaseType = legalCase.CaseType,
+                //CaseType = legalCase.CaseType,
                 Company = legalCase.Company,
                 Contact = legalCase.Contact,
                 PhoneorEmail = legalCase.PhoneorEmail,
@@ -119,6 +133,9 @@ namespace EvictionFiler.Infrastructure.Repositories
 			string newCode = "CC" + nextNumber.ToString("D10"); // D10 = 10 digits
 			return newCode;
 		}
+
+
+
 
 	}
 }

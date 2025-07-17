@@ -8,11 +8,13 @@
 @inject LandLordService _landlordService
 @inject ApartmentService _apartmentService
 @inject LegalCasesService _legalCaseService
+@inject CaseService _caseService
 @inject TenantService _tenantService
 @inject ClientService _clientService
 @inject NavigationManager nav
 @inject NavigationDataService _dataService
 @using Blazored.Typeahead
+@using EvictionFiler.Domain.Entities
 
 @rendermode InteractiveAuto
 <style>
@@ -211,43 +213,46 @@
                     </div>
                 }
             </div>
-
+            <EditForm EditContext="editContext" >
+  
+    <ValidationSummary />
             <!-- Case Type + Other Case Type -->
-            <div class="row mb-3 d-flex align-items-center">
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold text-navy required-label">Case Type</label>
-                    <select class="form-select" @bind="otherCaseType">
-                        <option value="">-- Select Case Type --</option>
-                        <option value="Holdover">Holdover</option>
-                        <option value="Nonpayment">Nonpayment</option>
-                        <option value="Licensee">Licensee</option>
-                        <option value="HP Action">HP Action</option>
-                     
-                    </select>
-                </div>
-                @if (otherCaseType == "Holdover")
-                {
-                  <div class="col-md-6 mt-1">
-                        <label class="form-label fw-semibold text-navy required-label">Holdover Case Type</label>
-                        <select class="form-select" @bind="holdoverSubType">
-                        <option value="">-- Select Case Type --</option>
-                            <option value="For Good Cause (6-A)">For Good Cause (6-A)</option>
-                            <option value="Succession">Succession</option>
-                            <option value="Other">Other</option>
-                    
-                    </select>
-                  </div>
-                }
+           <div class="row mb-3 d-flex align-items-center">
+    <!-- Case Type Dropdown (Populated from DB) -->
+    <div class="col-md-6">
+        <label class="form-label fw-semibold text-navy required-label">Case Type</label>
+                            <select class="form-select" @onchange="OnCaseTypeChanged">
+                                <option value="">-- Select Case Type --</option>
+                                @foreach (var caseType in caseTypes)
+                                {
+                                    <option value="@caseType.Id" selected="@(caseType.Id == legalcaseDto.CaseTypeId)">
+                                        @caseType.Name
+                                    </option>
+                                }
+                            </select>
+                        <ValidationMessage For="@(() => legalcaseDto.CaseTypeId)" />
+    </div>
 
+    <!-- Holdover Subtypes Dropdown (if Holdover selected) -->
+                        @if (selectedCaseTypeName == "Holdover" && caseSubTypes?.Any() == true)
+                        {
+                            <div class="col-md-6 mt-3">
+                                <label class="form-label fw-semibold text-navy required-label">Holdover Case Type</label>
+                                <select class="form-select"
+                                        @bind-value="legalcaseDto.CaseSubTypeId"
+                                        @bind-value:event="onchange">
+                                    <option value="">-- Select Holdover Subtype --</option>
+                                    @foreach (var subtype in caseSubTypes)
+                                    {
+                                        <option value="@subtype.Id">@subtype.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        }
 
-                @if (otherCaseType == "Other")
-                {
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold text-navy">Other Case Type</label>
-                        <input type="text" class="form-control" @bind="legalcaseDto.CaseType" placeholder="Enter case type" />
-                    </div>
-                }
-            </div>
+  
+</div>
+</EditForm>
         </div>
     }
 
@@ -310,18 +315,18 @@
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold required-label">Attorney</label>
-                                <InputText class="form-control" @bind-Value="legalCase.Attrney" placeholder="Enter Attorney" />
-                                <ValidationMessage For="@(() => legalCase.Attrney)" />
+                                <InputText class="form-control" @bind-Value="legalcaseDto.Attrney" placeholder="Enter Attorney" />
+                                <ValidationMessage For="@(() => legalcaseDto.Attrney)" />
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold required-label">Attorney Contact Info</label>
-                                <InputText class="form-control" @bind-Value="legalCase.AttrneyContactInfo" placeholder="Enter Attorney Contact Info" />
-                                <ValidationMessage For="@(() => legalCase.AttrneyContactInfo)" />
+                                <InputText class="form-control" @bind-Value="legalcaseDto.AttrneyContactInfo" placeholder="Enter Attorney Contact Info" />
+                                <ValidationMessage For="@(() => legalcaseDto.AttrneyContactInfo)" />
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold required-label">Firm</label>
-                                <InputText class="form-control" @bind-Value="legalCase.Firm" placeholder="Enter Firm" />
-                                <ValidationMessage For="@(() => legalCase.Firm)" />
+                                <InputText class="form-control" @bind-Value="legalcaseDto.Firm" placeholder="Enter Firm" />
+                                <ValidationMessage For="@(() => legalcaseDto.Firm)" />
                             </div>
                         </div>
                     </EditForm>
@@ -792,6 +797,84 @@
     private CreateEditLegalCaseModel legalCase = new();
     int currentStep = 0;
     int lastStep = 3;
+    private List<CaseType> caseTypes = new();
+    private List<CaseSubType> caseSubTypes = new();
+    private EditContext editContext;
+    // Used for conditional rendering
+    private string selectedCaseTypeName;
+    protected override async Task OnInitializedAsync()
+    {
+        editContext = new EditContext(legalcaseDto);
+        caseTypes = await _caseService.GetAllCaseType();
+    }
+
+
+    private async Task OnCaseTypeChanged(ChangeEventArgs e)
+{
+    if (Guid.TryParse(e.Value?.ToString(), out var selectedGuid))
+    {
+        legalcaseDto.CaseTypeId = selectedGuid;
+        var selectedType = caseTypes.FirstOrDefault(ct => ct.Id == selectedGuid);
+        selectedCaseTypeName = selectedType?.Name;
+
+        // Clear Subtype if changing away from Holdover
+        if (selectedCaseTypeName == "Holdover")
+        {
+            caseSubTypes = await _caseService.GetAllCaseSubTypes(selectedGuid);
+        }
+        else
+        {
+            caseSubTypes = new();
+            legalcaseDto.CaseSubTypeId = null;
+        }
+
+        legalcaseDto.CaseType = selectedCaseTypeName;
+    }
+}
+
+
+    private void Next()
+    {
+        var isValid = editContext.Validate();
+
+        if (isValid)
+        {
+            // Optional: map name from ID if needed elsewhere
+            var selectedType = caseTypes.FirstOrDefault(x => x.Id == legalcaseDto.CaseTypeId);
+            selectedCaseTypeName = selectedType?.Name;
+
+            currentStep++;
+        }
+        else
+        {
+            Console.WriteLine("Form is not valid.");
+        }
+    }
+
+
+
+
+    private bool IsNextDisabled =>
+       (currentStep == 0 && (
+      string.IsNullOrWhiteSpace(legalcaseDto.ClientRole) ||
+      (legalcaseDto.ClientRole == "Legal Representative" && string.IsNullOrWhiteSpace(legalcaseDto.LegalRepresentative)) ||
+      legalcaseDto.CaseTypeId == null ||
+      (selectedCaseTypeName == "Holdover" && legalcaseDto.CaseSubTypeId == null)
+  ))
+       ||
+      (currentStep == 1 && string.IsNullOrWhiteSpace(landlordSearchModel.SelectedLandlord))
+      ||
+      (currentStep == 2 && (
+          buildingDetails == null ||
+          buildingDetails.Building == null ||
+          string.IsNullOrWhiteSpace(buildingDetails.Building.ApartmentCode)
+      ))
+      ||
+      (currentStep == 3 && (
+          TenantDetails == null ||
+          string.IsNullOrWhiteSpace(TenantDetails.FirstName)
+      ));
+
 
     List<string> stepTitles = new() {
         "Case & Role", "Landlord Info", "Property Info", " Tenant Info",
@@ -813,7 +896,7 @@
     private bool isLandlordSelected = false;
     private bool isBuildingSelected = false;
     private bool  isTenantSelected = false;
-    private EditContext editContext;
+  
     private async Task HandleInput(ChangeEventArgs e)
     {
         searchText = e?.Value?.ToString() ?? "";
@@ -936,27 +1019,7 @@
         filteredTenantList.Clear();
         hasSearched = false;
     }
-    private bool IsNextDisabled =>
-    (currentStep == 0 && (
-        string.IsNullOrWhiteSpace(legalcaseDto.ClientRole) ||
-        (legalcaseDto.ClientRole == "Legal Representative" && string.IsNullOrWhiteSpace(legalcaseDto.LegalRepresentative)) ||
-        string.IsNullOrWhiteSpace(otherCaseType) ||
-        (otherCaseType == "Holdover" && string.IsNullOrWhiteSpace(holdoverSubType)) ||
-        (otherCaseType == "Other" && string.IsNullOrWhiteSpace(legalcaseDto.CaseType))
-    ))
-    ||
-    (currentStep == 1 && string.IsNullOrWhiteSpace(landlordSearchModel.SelectedLandlord))
-    ||
-    (currentStep == 2 && (
-        buildingDetails == null ||
-        buildingDetails.Building == null ||
-        string.IsNullOrWhiteSpace(buildingDetails.Building.ApartmentCode)
-    ))
-    ||
-    (currentStep == 3 && (
-        TenantDetails == null ||
-        string.IsNullOrWhiteSpace(TenantDetails.FirstName)
-    ));
+
 
     private void ResetStep()
     {
@@ -1048,30 +1111,7 @@
 
 
 
-    protected override void OnInitialized()
-    {
-        editContext = new EditContext(legalCase); // 'legalCase' is your model
-    }
-
-    private void Next()
-    {
-        var isValid = editContext.Validate();
-
-        if (isValid)
-        {
-            if (otherCaseType == "Holdover")
-                legalcaseDto.CaseType = holdoverSubType;
-            else if (otherCaseType != "Other")
-                legalcaseDto.CaseType = otherCaseType;
-
-            currentStep++;
-        }
-        else
-        {
-            // Optional: show toast or console log
-            Console.WriteLine("Form is not valid.");
-        }
-    }
+  
 
 
     void Back() => currentStep--;
@@ -1093,8 +1133,26 @@
             legalcaseDto.AttrneyContactInfo = legalCase.AttrneyContactInfo;
             legalcaseDto.Firm = legalCase.Firm;
 
-            if (legalcaseDto.CaseType == null)
-                legalcaseDto.CaseType = otherCaseType;
+            // Set CaseType string
+            if (selectedCaseTypeName == "Holdover")
+            {
+                if (legalcaseDto.CaseSubTypeId != null)
+                {
+                    var subType = caseSubTypes.FirstOrDefault(s => s.Id == legalcaseDto.CaseSubTypeId);
+                    legalcaseDto.CaseType = subType?.Name;
+                }
+            }
+            else
+            {
+                legalcaseDto.CaseType = selectedCaseTypeName;
+            }
+
+            // Ensure CaseTypeId is correctly preserved
+            if (legalcaseDto.CaseTypeId == Guid.Empty)
+            {
+                Console.WriteLine("CaseTypeId is required");
+                return;
+            }
 
             result = await _legalCaseService.AddLegalCasesAsync(legalcaseDto);
             _dataService.CaseName = null;
@@ -1104,8 +1162,8 @@
         {
             nav.NavigateTo("/cases?success=true");
         }
-
     }
+
 
 
 
