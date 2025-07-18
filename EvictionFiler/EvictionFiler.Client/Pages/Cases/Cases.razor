@@ -1116,41 +1116,52 @@
 
     void Back() => currentStep--;
 
+
     private async Task Submit()
     {
-        if (legalcaseDto == null)
-            return;
+        var result = false;
 
-        // Ensure required fields are present before update
-        if (legalcaseDto.CaseTypeId == Guid.Empty)
+        if (legalcaseDto == null || legalcaseDto.Id == Guid.Empty)
         {
-            Console.WriteLine("❌ CaseTypeId is required.");
-            return;
+            legalcaseDto.Id = Guid.NewGuid();
+            legalcaseDto.LandLordId = landLordDto.Id;
+            legalcaseDto.ApartmentId = apartmentDto.Id;
+            legalcaseDto.TenantId = tenantDto.Id;
+            legalcaseDto.ClientId = Guid.Parse(ClientId);
+            legalcaseDto.CaseName = _dataService.CaseName;
+            legalcaseDto.Attrney = legalcaseDto.Attrney;
+            legalcaseDto.AttrneyContactInfo = legalcaseDto.AttrneyContactInfo;
+            legalcaseDto.Firm = legalcaseDto.Firm;
+
+            // Set CaseType string for display or other usage, but DO NOT overwrite CaseTypeId here!
+            if (selectedCaseTypeName == "Holdover")
+            {
+                if (legalcaseDto.CaseSubTypeId != null)
+                {
+                    var subType = caseSubTypes.FirstOrDefault(s => s.Id == legalcaseDto.CaseSubTypeId);
+                    legalcaseDto.CaseName = subType?.Name;  // This is just string, no impact on CaseTypeId
+                }
+            }
+            else
+            {
+                legalcaseDto.CaseName = selectedCaseTypeName;
+            }
+
+            // Check CaseTypeId presence:
+            if (legalcaseDto.CaseTypeId == null || legalcaseDto.CaseTypeId == Guid.Empty)
+            {
+                Console.WriteLine("CaseTypeId is required");
+                return;
+            }
+
+            result = await _legalCaseService.AddLegalCasesAsync(legalcaseDto);
+            _dataService.CaseName = null;
         }
 
-        if (legalcaseDto.LandLordId == Guid.Empty || legalcaseDto.ApartmentId == Guid.Empty || legalcaseDto.TenantId == Guid.Empty)
-        {
-            Console.WriteLine("❌ Landlord, Apartment, or Tenant is missing.");
-            return;
-        }
-
-        // Optional: Set subtype name if CaseType is Holdover
-        if (selectedCaseTypeName == "Holdover" && legalcaseDto.CaseSubTypeId != null)
-        {
-            var subType = caseSubTypes.FirstOrDefault(s => s.Id == legalcaseDto.CaseSubTypeId);
-            // legalcaseDto.CaseSubTypeName = subType?.Name; // Uncomment if your DTO has CaseSubTypeName
-        }
-
-        // 🔁 Call update service
-        var result = await _legalCaseService.UpdateAsync(legalcaseDto);
 
         if (result)
         {
             nav.NavigateTo("/cases?success=true");
-        }
-        else
-        {
-            Console.WriteLine("❌ Failed to update the case.");
         }
     }
 

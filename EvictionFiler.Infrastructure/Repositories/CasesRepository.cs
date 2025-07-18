@@ -137,6 +137,8 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Firm = legalCase.Firm,  
                 ZIP = legalCase.ZIP,
                 Class = legalCase.Class,
+				CaseTypeId = legalCase.CaseTypeId,
+				CaseSubTypeId = legalCase.CaseSubTypeId,
                 YearBuilt = legalCase.YearBuilt,
                 CreatedAt = DateTime.UtcNow,
                 IsActive =true,
