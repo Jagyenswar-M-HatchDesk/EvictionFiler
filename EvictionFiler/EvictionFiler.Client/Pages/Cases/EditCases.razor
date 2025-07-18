@@ -227,7 +227,7 @@
                                 <option value="">-- Select Case Type --</option>
                                 @foreach (var caseType in caseTypes)
                                 {
-                                    <option value="@caseType.Id" >
+                                    <option value="@caseType.Id" selected="@(legalcaseDto.CaseTypeId == caseType.Id)">
                                         @caseType.Name
                                     </option>
                                 }
@@ -817,7 +817,18 @@
     {
         editContext = new EditContext(legalcaseDto);
         caseTypes = await _caseService.GetAllCaseType();
-        legalcaseDto = await _legalCaseService.GetByIdAsync(caseId); // caseId from route or param
+        legalcaseDto = await _legalCaseService.GetByIdAsync(caseId); 
+
+        if (legalcaseDto?.CaseTypeId != null)
+        {
+            var selectedType = caseTypes.FirstOrDefault(ct => ct.Id == legalcaseDto.CaseTypeId);
+            selectedCaseTypeName = selectedType?.Name;
+
+            if (selectedCaseTypeName == "Holdover")
+            {
+                caseSubTypes = await _caseService.GetAllCaseSubTypes(legalcaseDto.CaseTypeId.Value);
+            }
+        }
 
         if (legalcaseDto?.LandLordId != null)
         {
@@ -881,10 +892,10 @@
         if (Guid.TryParse(e.Value?.ToString(), out var selectedGuid))
         {
             legalcaseDto.CaseTypeId = selectedGuid;
+
             var selectedType = caseTypes.FirstOrDefault(ct => ct.Id == selectedGuid);
             selectedCaseTypeName = selectedType?.Name;
 
-            // Clear Subtype if changing away from Holdover
             if (selectedCaseTypeName == "Holdover")
             {
                 caseSubTypes = await _caseService.GetAllCaseSubTypes(selectedGuid);
@@ -895,7 +906,8 @@
                 legalcaseDto.CaseSubTypeId = null;
             }
 
-            legalcaseDto.CaseTypeId = selectedGuid;
+            // Force UI refresh
+            StateHasChanged();
         }
     }
 
