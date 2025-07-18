@@ -225,7 +225,7 @@
                                 <option value="">-- Select Case Type --</option>
                                 @foreach (var caseType in caseTypes)
                                 {
-                                    <option value="@caseType.Id" >
+                                    <option value="@caseType.Id" selected="@(legalcaseDto.CaseTypeId == caseType.Id)">
                                         @caseType.Name
                                     </option>
                                 }
@@ -813,46 +813,47 @@
 
 
     private async Task OnCaseTypeChanged(ChangeEventArgs e)
-{
-    if (Guid.TryParse(e.Value?.ToString(), out var selectedGuid))
     {
-        legalcaseDto.CaseTypeId = selectedGuid;
-        var selectedType = caseTypes.FirstOrDefault(ct => ct.Id == selectedGuid);
-        selectedCaseTypeName = selectedType?.Name;
-
-        // Clear Subtype if changing away from Holdover
-        if (selectedCaseTypeName == "Holdover")
+        if (Guid.TryParse(e.Value?.ToString(), out var selectedGuid))
         {
-            caseSubTypes = await _caseService.GetAllCaseSubTypes(selectedGuid);
-        }
-        else
-        {
-            caseSubTypes = new();
-            legalcaseDto.CaseSubTypeId = null;
-        }
-
             legalcaseDto.CaseTypeId = selectedGuid;
+
+            var selectedType = caseTypes.FirstOrDefault(ct => ct.Id == selectedGuid);
+            selectedCaseTypeName = selectedType?.Name;
+
+            if (selectedCaseTypeName == "Holdover")
+            {
+                caseSubTypes = await _caseService.GetAllCaseSubTypes(selectedGuid);
+            }
+            else
+            {
+                caseSubTypes = new();
+                legalcaseDto.CaseSubTypeId = null;
+            }
+
+            // Force UI refresh
+            StateHasChanged();
+        }
     }
-}
 
 
     private void Next()
     {
+        // ⚠️ Assign selected case type name to DTO before validating
+        legalcaseDto.SelectedCaseTypeName = selectedCaseTypeName;
+
         var isValid = editContext.Validate();
 
         if (isValid)
         {
-            // Optional: map name from ID if needed elsewhere
-            var selectedType = caseTypes.FirstOrDefault(x => x.Id == legalcaseDto.CaseTypeId);
-            selectedCaseTypeName = selectedType?.Name;
-
-            currentStep++;
+            currentStep++; // move to next step
         }
         else
         {
             Console.WriteLine("Form is not valid.");
         }
     }
+
 
  
 
