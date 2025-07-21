@@ -4,7 +4,8 @@
 @using EvictionFiler.Domain.Entities
 @inject LegalCasesService _service
 @inject ClientService _clientservice
-@inject NavigationManager nav
+
+@inject NavigationManager navManager
 <PageTitle>Cases</PageTitle>
 
 <!-- Bootstrap CSS -->
@@ -154,44 +155,6 @@
 
 
 <body class="p-4">
-    @* <div class="container p-4 rounded shadow-sm">
-
-        <!-- Title Row -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="m-0">Select Client</h5>
-            <NavLink class="btn btn-primary" href="/createcase">Add New Case</NavLink>
-        </div>
-
-        <!-- Centered Search Box -->
-        <div class="d-flex justify-content-center mb-3">
-            <div class="position-relative w-50">
-                <input class="form-control border border-primary text-navy"
-                       placeholder="Search.."
-                       @oninput="OnInputChanged"
-                       @bind-value="showClient" />
-                <button class="search-btn position-absolute" type="button">
-                    <i class="fa fa-search"></i>
-                </button>
-            </div>
-        </div>
-
-        @if (ViewSearch)
-        {
-            <ul class="list-group" style="max-height: 250px; overflow-y: auto;">
-                @foreach (var client in FilteredClients)
-                {
-                    <li class="list-group-item list-group-item-action" @onclick="() => SelectClient(client)">
-                        @(client.FirstName + " " + client.LastName) - (@client.ClientCode)
-                    </li>
-                }
-            </ul>
-        }
-
-
-    </div> *@
-    @inject NavigationManager navManager
-
-    
 
     <div class="container p-4 rounded shadow-sm mt-4">
 
@@ -295,9 +258,9 @@
                         <th>Client Code/Name </th>
                         <th>LandLord Code/Name</th>
                         <th>Tenant Code/Name</th>
-                        <th>Apt #</th>
+                        @* <th>Case Role</th> *@
                         <th>Case Type</th>
-                        <th>Department</th>
+                        @* <th>Department</th> *@
                         <th>Last Action Date</th>
                         <th>Status</th>
 
@@ -322,9 +285,9 @@
                                 <td>
                                     @($"{cas?.Tenant?.TenantCode ?? ""} / {cas?.Tenant?.FirstName ?? ""} {cas?.Tenant?.LastName ?? ""}")
                                 </td>
-                                <td>@(cas?.AptNo ?? "")</td>
-                                @* <td>@(cas?.CaseType ?? "")</td> *@
-                                <td>Calender</td>
+                                 <td>@(cas?.CaseTypes.Name ?? "")</td> 
+                            
+                                @* <td>Calender</td> *@
                                 <td>@(cas?.CreatedAt.HasValue == true ? cas.CreatedAt.Value.ToString("MM/dd/yyyy") : "")</td>
                                 @if (cas.IsActive == true && cas.IsDeleted == false)
                                 {
@@ -437,7 +400,7 @@
 
     private void EditCase(Guid caseId)
     {
-        nav.NavigateTo($"/EditCase/{caseId}");
+        navManager.NavigateTo($"/EditCase/{caseId}");
     }
 
 
@@ -448,7 +411,7 @@
 
         if (query.TryGetValue("success", out var isSuccess) && isSuccess == "true")
         {
-            successMessage = "Case submitted successfully!";
+            successMessage = "Case Updated successfully!";
             await Task.Delay(1000);
             successMessage = string.Empty;
 
@@ -458,13 +421,6 @@
         await GetAllCases(); // Call your data loading logic here
     }
 
-    // private void HandleClientSelected(Guid clientId)
-    // {
-    //     selectedClientId = clientId;
-
-    //     // You can now use selectedClientId in form logic (e.g., load data, bind to DTO, etc.)
-    //     Console.WriteLine($"Client selected: {clientId}");
-    // }
 
     private async Task GetAllCases()
     {
@@ -474,7 +430,7 @@
 
     void FocusOnNavigate()
     {
-        nav.NavigateTo("/case");
+        navManager.NavigateTo("/case");
     }
 
     private IEnumerable<LegalCase> cases =>

@@ -45,9 +45,12 @@ namespace EvictionFiler.Application.DTOs
 
 		[Required(ErrorMessage = "Case Type is required")]
 		public Guid? CaseTypeId { get; set; }
+		public string? CaseTypeName { get; set; }
 
 		// Removed Required from here
 		public Guid? CaseSubTypeId { get; set; }
+
+		public string? CaseSubTypeName { get; set; }
 
 		[Required(ErrorMessage = "Attorney is required")]
 		public string Attrney { get; set; }

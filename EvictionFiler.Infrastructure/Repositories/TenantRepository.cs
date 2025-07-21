@@ -26,18 +26,36 @@ namespace EvictionFiler.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-
-
 		public async Task<bool> AddTenant(List<CreateTenantDto> dtoList)
 		{
-			var newtenants = new List<Tenant>();
+			var newtenant = new List<Tenant>();
+
+			// ✅ Fetch last landlord code only once
+			var lastCode = await _dbContext.Tenants
+				.OrderByDescending(l => l.CreatedAt)
+				.Select(l => l.TenantCode)
+				.FirstOrDefaultAsync();
+
+			int nextNumber = 1;
+
+			if (!string.IsNullOrEmpty(lastCode) && lastCode.Length > 2)
+			{
+				var numericPart = lastCode.Substring(2);
+				if (int.TryParse(numericPart, out int lastNumber))
+				{
+					nextNumber = lastNumber + 1;
+				}
+			}
 
 			foreach (var dto in dtoList)
 			{
+				var code = $"TT{nextNumber.ToString().PadLeft(10, '0')}";
+				nextNumber++; // ✅ increment locally
+
 				var tenant = new Tenant
 				{
 					Id = dto.Id,
-					TenantCode = await GenerateTenantCodeAsync(),
+					TenantCode = code,
 					FirstName = dto.FirstName,
 					LastName = dto.LastName,
 					DOB = dto.DOB,
@@ -71,14 +89,67 @@ namespace EvictionFiler.Infrastructure.Repositories
 					ApartmentId = dto.ApartmentId
 				};
 
-				newtenants.Add(tenant);
+				newtenant.Add(tenant);
 			}
 
-			_dbContext.Tenants.AddRange(newtenants);
+			_dbContext.Tenants.AddRange(newtenant);
 			var result = await _dbContext.SaveChangesAsync();
 
 			return result > 0;
 		}
+
+
+		//public async Task<bool> AddTenant(List<CreateTenantDto> dtoList)
+		//{
+		//	var newtenants = new List<Tenant>();
+
+		//	foreach (var dto in dtoList)
+		//	{
+		//		var tenant = new Tenant
+		//		{
+		//			Id = dto.Id,
+		//			TenantCode = await GenerateTenantCodeAsync(),
+		//			FirstName = dto.FirstName,
+		//			LastName = dto.LastName,
+		//			DOB = dto.DOB,
+		//			SSN = dto.SSN,
+		//			Phone = dto.Phone,
+		//			Email = dto.Email,
+		//			Language = dto.Language,
+		//			Address_1 = dto.Address_1,
+		//			Address_2 = dto.Address_2,
+		//			State = dto.State,
+		//			City = dto.City,
+		//			Zipcode = dto.Zipcode,
+		//			Apt = dto.Apt,
+		//			Borough = dto.Borough,
+		//			Rent = dto.Rent,
+		//			LeaseStatus = dto.LeaseStatus,
+		//			HasPossession = dto.HasPossession,
+		//			HasRegulatedTenancy = dto.HasRegulatedTenancy,
+		//			Name_Relation = dto.Name_Relation,
+		//			OtherOccupants = dto.OtherOccupants,
+		//			Registration_No = dto.Registration_No,
+		//			TenantRecord = dto.TenantRecord,
+		//			HasPriorCase = dto.HasPriorCase,
+		//			IsActive = dto.IsActive,
+		//			IsDeleted = dto.IsDeleted,
+		//			CreatedBy = dto.CreatedBy,
+		//			CreatedAt = dto.CreatedAt,
+		//			UpdatedAt = dto.UpdatedAt,
+		//			UpdatedBy = dto.UpdatedBy,
+
+		//			ApartmentId = dto.ApartmentId
+		//		};
+
+		//		newtenants.Add(tenant);
+		//	}
+
+		//	_dbContext.Tenants.AddRange(newtenants);
+		//	var result = await _dbContext.SaveChangesAsync();
+
+		//	return result > 0;
+		//}
 		public async Task<Tenant> GetTenantById(Guid id)
         {
             var tenant = await _dbContext.Tenants.FindAsync(id);

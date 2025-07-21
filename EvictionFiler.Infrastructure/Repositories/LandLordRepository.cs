@@ -25,16 +25,81 @@ namespace EvictionFiler.Infrastructure.Repositories
             _mainDbContext = mainDbContext;
         }
 
+
+
+		//public async Task<bool> AddLandLord(List<CreateLandLordDto> dtoList)
+		//{
+		//	var newLandlords = new List<LandLord>();
+
+		//	foreach (var dto in dtoList)
+		//	{
+		//		var landlord = new LandLord
+		//		{
+		//			Id = dto.Id,
+
+		//			LandLordCode = await GenerateLandlordCodeAsync(),
+		//			FirstName = dto.FirstName,
+		//			LastName = dto.LastName,
+		//			EINorSSN = dto.EINorSSN,
+		//			Phone = dto.Phone,
+		//			Email = dto.Email,
+		//			OtherProperties = dto.OtherProperties,
+		//			Address1 = dto.Address1,
+		//			Address2 = dto.Address2,
+		//			State = dto.State,
+		//			City = dto.City,
+		//			Zipcode = dto.Zipcode,
+		//			ContactPersonName = dto.ContactPersonName,
+		//			TypeOfOwner = dto.TypeOfOwner,
+		//			ClientId = dto.ClientId,
+		//			CreatedAt = DateTime.Now,
+		//			IsActive = true,
+		//			IsDeleted = false,
+		//			CreatedBy = null,
+		//			UpdatedBy = null,
+		//			UpdatedAt = DateTime.Now,
+		//		};
+
+		//		newLandlords.Add(landlord);
+		//	}
+
+		//	_mainDbContext.LandLords.AddRange(newLandlords);
+		//	var result = await _mainDbContext.SaveChangesAsync();
+
+		//	return result > 0;
+		//}
+
+
 		public async Task<bool> AddLandLord(List<CreateLandLordDto> dtoList)
 		{
 			var newLandlords = new List<LandLord>();
 
+			// ✅ Fetch last landlord code only once
+			var lastCode = await _mainDbContext.LandLords
+				.OrderByDescending(l => l.CreatedAt)
+				.Select(l => l.LandLordCode)
+				.FirstOrDefaultAsync();
+
+			int nextNumber = 1;
+
+			if (!string.IsNullOrEmpty(lastCode) && lastCode.Length > 2)
+			{
+				var numericPart = lastCode.Substring(2);
+				if (int.TryParse(numericPart, out int lastNumber))
+				{
+					nextNumber = lastNumber + 1;
+				}
+			}
+
 			foreach (var dto in dtoList)
 			{
+				var code = $"LL{nextNumber.ToString().PadLeft(10, '0')}";
+				nextNumber++; // ✅ increment locally
+
 				var landlord = new LandLord
 				{
 					Id = dto.Id,
-					LandLordCode = await GenerateLandlordCodeAsync(),
+					LandLordCode = code,
 					FirstName = dto.FirstName,
 					LastName = dto.LastName,
 					EINorSSN = dto.EINorSSN,
@@ -65,8 +130,6 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			return result > 0;
 		}
-
-
 
 
 		public async Task<List<CreateLandLordDto>> GetAllLandLordsAsync()
@@ -340,29 +403,31 @@ namespace EvictionFiler.Infrastructure.Repositories
 			}).ToList();
 		}
 
-		public async Task<string> GenerateLandlordCodeAsync()
-		{
-			// Get the latest case from DB
-			var lastCase = await _mainDbContext.LandLords
-				.OrderByDescending(c => c.LandLordCode)
-				.Select(c => c.LandLordCode)
-				.FirstOrDefaultAsync();
+		private static Dictionary<Guid, int> _clientLandlordCounters = new();
 
-			int nextNumber = 1;
 
-			if (!string.IsNullOrEmpty(lastCase) && lastCase.StartsWith("LL"))
-			{
-				string numberPart = lastCase.Substring(2); // Remove 'EF'
-				if (int.TryParse(numberPart, out int parsedNumber))
-				{
-					nextNumber = parsedNumber + 1;
-				}
-			}
+		//public async Task<string> GenerateLandlordCodeAsync()
+		//{
+		//	var lastCode = await _mainDbContext.LandLords
+		//		.OrderByDescending(l => l.CreatedAt)
+		//		.Select(l => l.LandLordCode)
+		//		.FirstOrDefaultAsync();
 
-			// Generate new CaseCode
-			string newCode = "LL" + nextNumber.ToString("D10"); // D10 = 10 digits
-			return newCode;
-		}
+		//	int nextNumber = 1;
+
+		//	if (!string.IsNullOrEmpty(lastCode) && lastCode.Length > 2)
+		//	{
+		//		var numericPart = lastCode.Substring(2); // Remove "LL"
+		//		if (int.TryParse(numericPart, out int lastNumber))
+		//		{
+		//			nextNumber = lastNumber + 1;
+		//		}
+		//	}
+
+		//	return $"LL{nextNumber.ToString().PadLeft(10, '0')}";
+		//}
+
+
 
 	}
 }

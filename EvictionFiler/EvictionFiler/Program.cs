@@ -6,6 +6,7 @@ using EvictionFiler.Client.Pages;
 using EvictionFiler.Client.Services;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
+using EvictionFiler.Infrastructure.Extensions;
 using EvictionFiler.Infrastructure.Repositories;
 using EvictionFiler.Server.Components;
 using EvictionFiler.Server.Services;
@@ -108,6 +109,7 @@ else
     app.UseHsts();
 }
 
+await app.ConfigureDataContext();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

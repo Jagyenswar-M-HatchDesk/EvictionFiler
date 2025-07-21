@@ -29,18 +29,22 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 		public async Task<List<CaseSubType>> GetSubTypesByCaseTypeIdAsync(Guid caseTypeId)
 		{
-			return await _context.CaseSubTypes
-				.Where(x => x.CaseTypeId == caseTypeId && x.IsActive == true && x.IsDeleted != true)
+			var result = await _context.CaseSubTypes
+				.Where(x => x.CaseTypeId == caseTypeId
+					&& (x.IsActive == true || x.IsActive == null)
+					&& (x.IsDeleted == false || x.IsDeleted == null))
 				.ToListAsync();
+
+			return result;
 		}
-
-
 
 		public async Task<List<LegalCase>> GetAllCasesAsync()
         {
             return await _context.LegalCases
                 .Include(c => c.Clients)
                 .Include(c => c.Apartments)
+				.Include(c=>c.CaseTypes)
+				.Include(c=>c.CaseSubTypes)
                 .Include(c => c.LandLords).Include(c=>c.Tenant)
                 .ToListAsync();
         }
