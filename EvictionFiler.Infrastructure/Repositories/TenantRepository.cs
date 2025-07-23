@@ -13,6 +13,7 @@ using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -62,16 +63,16 @@ namespace EvictionFiler.Infrastructure.Repositories
 					SSN = dto.SSN,
 					Phone = dto.Phone,
 					Email = dto.Email,
-					Language = dto.Language,
+					LanguageId = dto.LanguageId,
+					StateId = dto.StateId,
 					Address_1 = dto.Address_1,
 					Address_2 = dto.Address_2,
-					State = dto.State,
 					City = dto.City,
 					Zipcode = dto.Zipcode,
 					Apt = dto.Apt,
 					Borough = dto.Borough,
 					Rent = dto.Rent,
-					LeaseStatus = dto.LeaseStatus,
+				
 					HasPossession = dto.HasPossession,
 					HasRegulatedTenancy = dto.HasRegulatedTenancy,
 					Name_Relation = dto.Name_Relation,
@@ -99,57 +100,6 @@ namespace EvictionFiler.Infrastructure.Repositories
 		}
 
 
-		//public async Task<bool> AddTenant(List<CreateTenantDto> dtoList)
-		//{
-		//	var newtenants = new List<Tenant>();
-
-		//	foreach (var dto in dtoList)
-		//	{
-		//		var tenant = new Tenant
-		//		{
-		//			Id = dto.Id,
-		//			TenantCode = await GenerateTenantCodeAsync(),
-		//			FirstName = dto.FirstName,
-		//			LastName = dto.LastName,
-		//			DOB = dto.DOB,
-		//			SSN = dto.SSN,
-		//			Phone = dto.Phone,
-		//			Email = dto.Email,
-		//			Language = dto.Language,
-		//			Address_1 = dto.Address_1,
-		//			Address_2 = dto.Address_2,
-		//			State = dto.State,
-		//			City = dto.City,
-		//			Zipcode = dto.Zipcode,
-		//			Apt = dto.Apt,
-		//			Borough = dto.Borough,
-		//			Rent = dto.Rent,
-		//			LeaseStatus = dto.LeaseStatus,
-		//			HasPossession = dto.HasPossession,
-		//			HasRegulatedTenancy = dto.HasRegulatedTenancy,
-		//			Name_Relation = dto.Name_Relation,
-		//			OtherOccupants = dto.OtherOccupants,
-		//			Registration_No = dto.Registration_No,
-		//			TenantRecord = dto.TenantRecord,
-		//			HasPriorCase = dto.HasPriorCase,
-		//			IsActive = dto.IsActive,
-		//			IsDeleted = dto.IsDeleted,
-		//			CreatedBy = dto.CreatedBy,
-		//			CreatedAt = dto.CreatedAt,
-		//			UpdatedAt = dto.UpdatedAt,
-		//			UpdatedBy = dto.UpdatedBy,
-
-		//			ApartmentId = dto.ApartmentId
-		//		};
-
-		//		newtenants.Add(tenant);
-		//	}
-
-		//	_dbContext.Tenants.AddRange(newtenants);
-		//	var result = await _dbContext.SaveChangesAsync();
-
-		//	return result > 0;
-		//}
 		public async Task<Tenant> GetTenantById(Guid id)
         {
             var tenant = await _dbContext.Tenants.FindAsync(id);
@@ -188,16 +138,15 @@ namespace EvictionFiler.Infrastructure.Repositories
 				SSN = dto.SSN,
 				Phone = dto.Phone,
 				Email = dto.Email,
-				Language = dto.Language,
+				LanguageId = dto.LanguageId,
+				StateId = dto.StateId,
 				Address_1 = dto.Address_1,
 				Address_2 = dto.Address_2,
-				State = dto.State,
 				City = dto.City,
 				Zipcode = dto.Zipcode,
 				Apt = dto.Apt,
 				Borough = dto.Borough,
 				Rent = dto.Rent,
-				LeaseStatus = dto.LeaseStatus,
 				HasPossession = dto.HasPossession,
 				HasRegulatedTenancy = dto.HasRegulatedTenancy,
 				Name_Relation = dto.Name_Relation,
@@ -254,16 +203,15 @@ namespace EvictionFiler.Infrastructure.Repositories
 					entity.SSN = dto.SSN;
 					entity.Phone = dto.Phone;
 					entity.Email = dto.Email;
-					entity.Language = dto.Language;
+					entity.LanguageId = dto.LanguageId;
+					entity.StateId = dto.StateId;
 					entity.Address_1 = dto.Address_1;
 					entity.Address_2 = dto.Address_2;
-					entity.State = dto.State;
 					entity.City = dto.City;
 					entity.Zipcode = dto.Zipcode;
 					entity.Apt = dto.Apt;
 					entity.Borough = dto.Borough;
 					entity.Rent = dto.Rent;
-					entity.LeaseStatus = dto.LeaseStatus;
 					entity.HasPossession = dto.HasPossession;
 					entity.HasRegulatedTenancy = dto.HasRegulatedTenancy;
 					entity.Name_Relation = dto.Name_Relation;
@@ -305,16 +253,16 @@ namespace EvictionFiler.Infrastructure.Repositories
 				SSN = dto.SSN,
 				Phone = dto.Phone,
 				Email = dto.Email,
-				Language = dto.Language,
+				LanguageId = dto.LanguageId,
+				StateId = dto.StateId,
 				Address_1 = dto.Address_1,
 				Address_2 = dto.Address_2,
-				State = dto.State,
 				City = dto.City,
 				Zipcode = dto.Zipcode,
 				Apt = dto.Apt,
 				Borough = dto.Borough,
 				Rent = dto.Rent,
-				LeaseStatus = dto.LeaseStatus,
+		
 				HasPossession = dto.HasPossession,
 				HasRegulatedTenancy = dto.HasRegulatedTenancy,
 				Name_Relation = dto.Name_Relation,
@@ -341,6 +289,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			// Step 3: Get all tenants linked to these apartments
 			var tenants = await _dbContext.Tenants
+		.Include(a => a.States)
+		.Include(a => a.Languages)
 		.Where(t => t.ApartmentId.HasValue && apartmentIds.Contains(t.ApartmentId.Value) && t.IsDeleted != true)
 		.Select(dto => new EditTenantDto
 		{
@@ -352,16 +302,18 @@ namespace EvictionFiler.Infrastructure.Repositories
 			SSN = dto.SSN,
 			Phone = dto.Phone,
 			Email = dto.Email,
-			Language = dto.Language,
+			LanguageId = dto.LanguageId,
+			StateId = dto.StateId,
+			StateName = dto.States.Name,
+			LanguageName = dto.Languages.Name,
 			Address_1 = dto.Address_1,
 			Address_2 = dto.Address_2,
-			State = dto.State,
 			City = dto.City,
 			Zipcode = dto.Zipcode,
 			Apt = dto.Apt,
 			Borough = dto.Borough,
 			Rent = dto.Rent,
-			LeaseStatus = dto.LeaseStatus,
+			
 			HasPossession = dto.HasPossession,
 			HasRegulatedTenancy = dto.HasRegulatedTenancy,
 			Name_Relation = dto.Name_Relation,
@@ -379,33 +331,36 @@ namespace EvictionFiler.Infrastructure.Repositories
 		}
 
 
-
-
-
-
-		public async Task<string> GenerateTenantCodeAsync()
+		public async Task<List<Language>> GetAllLanguage()
 		{
-			// Get the latest case from DB
-			var lastCase = await _dbContext.Tenants
-				.OrderByDescending(c => c.TenantCode)
-				.Select(c => c.TenantCode)
-				.FirstOrDefaultAsync();
-
-			int nextNumber = 1;
-
-			if (!string.IsNullOrEmpty(lastCase) && lastCase.StartsWith("TT"))
-			{
-				string numberPart = lastCase.Substring(2); // Remove 'EF'
-				if (int.TryParse(numberPart, out int parsedNumber))
-				{
-					nextNumber = parsedNumber + 1;
-				}
-			}
-
-			// Generate new CaseCode
-			string newCode = "TT" + nextNumber.ToString("D10"); // D10 = 10 digits
-			return newCode;
+			return await _dbContext.mst_Languages.ToListAsync();
 		}
+
+
+
+		//public async Task<string> GenerateTenantCodeAsync()
+		//{
+		//	// Get the latest case from DB
+		//	var lastCase = await _dbContext.Tenants
+		//		.OrderByDescending(c => c.TenantCode)
+		//		.Select(c => c.TenantCode)
+		//		.FirstOrDefaultAsync();
+
+		//	int nextNumber = 1;
+
+		//	if (!string.IsNullOrEmpty(lastCase) && lastCase.StartsWith("TT"))
+		//	{
+		//		string numberPart = lastCase.Substring(2); // Remove 'EF'
+		//		if (int.TryParse(numberPart, out int parsedNumber))
+		//		{
+		//			nextNumber = parsedNumber + 1;
+		//		}
+		//	}
+
+		//	// Generate new CaseCode
+		//	string newCode = "TT" + nextNumber.ToString("D10"); // D10 = 10 digits
+		//	return newCode;
+		//}
 
 	}
 }

@@ -7,7 +7,7 @@ using EvictionFiler.Infrastructure.Repositories;
 
 namespace EvictionFiler.Client.Services
 {
-    public class LegalCasesService
+    public class LegalCasesService 
     {
         private readonly ICasesRepository _repository;
         public LegalCasesService(ICasesRepository repository)

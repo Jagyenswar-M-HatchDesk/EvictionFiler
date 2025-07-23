@@ -12,7 +12,9 @@ namespace EvictionFiler.Application.DTOs
 		public Guid? LandLordId { get; set; }
 		public Guid? TenantId { get; set; }
 		public string? CaseName { get; set; }
-		public string? ClientRole { get; set; }
+		[Required(ErrorMessage = "Case role is required")]
+		public Guid? ClientRoleId { get; set; }
+		public string? ClientRoleName { get; set; }
 		public string? LegalRepresentative { get; set; }
 		public string? Casecode { get; set; }
 

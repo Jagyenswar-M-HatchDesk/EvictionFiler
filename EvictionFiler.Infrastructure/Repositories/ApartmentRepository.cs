@@ -10,6 +10,7 @@ using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,14 +38,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 				BuildingCode = appartment.BuildingCode,
 				ApartmentCode = appartment.ApartmentCode,
 				City = appartment.City,
-				State = appartment.State,
-				PremiseType = appartment.PremiseType,
+				StateId = appartment.StateId,
+				RentRegulationId = appartment.RentRegulationId,
+				PremiseTypeId = appartment.PremiseTypeId,
 				Address_1 = appartment.Address_1,
 				Address_2 = appartment.Address_2,
 				Zipcode = appartment.Zipcode,	
 				MDR_Number = appartment.MDR_Number,
 				PetitionerInterest = appartment.PetitionerInterest,
-				TypeOfRentRegulation = appartment.TypeOfRentRegulation,
 				BuildingUnits = appartment.BuildingUnits,
 				DateOfRefreeDeed =appartment.DateOfRefreeDeed,
 				LandlordType = appartment.LandlordType,
@@ -71,14 +72,15 @@ namespace EvictionFiler.Infrastructure.Repositories
 		   BuildingCode = appartment.BuildingCode,
 		   ApartmentCode = appartment.ApartmentCode,
 		   City = appartment.City,
-		   State = appartment.State,
-		   PremiseType = appartment.PremiseType,
+		   StateId = appartment.StateId,
+		   RentRegulationId = appartment.RentRegulationId,
+		   PremiseTypeId = appartment.PremiseTypeId,
 		   Address_1 = appartment.Address_1,
 		   Address_2 = appartment.Address_2,
 		   Zipcode = appartment.Zipcode,
 		   MDR_Number = appartment.MDR_Number,
 		   PetitionerInterest = appartment.PetitionerInterest,
-		   TypeOfRentRegulation = appartment.TypeOfRentRegulation,
+		  
 		   BuildingUnits = appartment.BuildingUnits,
 		   DateOfRefreeDeed = appartment.DateOfRefreeDeed,
 		   LandlordType = appartment.LandlordType,
@@ -126,14 +128,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 					BuildingCode =code,
 					ApartmentCode = appartment.ApartmentCode,
 					City = appartment.City,
-					State = appartment.State,
-					PremiseType = appartment.PremiseType,
+					StateId = appartment.StateId,
+					PremiseTypeId = appartment.PremiseTypeId,
 					Address_1 = appartment.Address_1,
 					Address_2 = appartment.Address_2,
 					Zipcode = appartment.Zipcode,
 					MDR_Number = appartment.MDR_Number,
 					PetitionerInterest = appartment.PetitionerInterest,
-					TypeOfRentRegulation = appartment.TypeOfRentRegulation,
+					RentRegulationId = appartment.RentRegulationId,
 					BuildingUnits = appartment.BuildingUnits,
 					DateOfRefreeDeed = appartment.DateOfRefreeDeed,
 					LandlordType = appartment.LandlordType,
@@ -215,16 +217,16 @@ namespace EvictionFiler.Infrastructure.Repositories
 					SSN = dto.SSN,
 					Phone = dto.Phone,
 					Email = dto.Email,
-					Language = dto.Language,
+					LanguageId = dto.LanguageId,
+					
+					StateId = dto.StateId,
 					Address_1 = dto.Address_1,
 					Address_2 = dto.Address_2,
-					State = dto.State,
 					City = dto.City,
 					Zipcode = dto.Zipcode,
 					Apt = dto.Apt,
 					Borough = dto.Borough,
 					Rent = dto.Rent,
-					LeaseStatus = dto.LeaseStatus,
 					HasPossession = dto.HasPossession,
 					HasRegulatedTenancy = dto.HasRegulatedTenancy,
 					Name_Relation = dto.Name_Relation,
@@ -250,14 +252,16 @@ namespace EvictionFiler.Infrastructure.Repositories
 					BuildingCode = appartment.BuildingCode,
 					ApartmentCode = appartment.ApartmentCode,
 					City = appartment.City,
-					State = appartment.State,
-					PremiseType = appartment.PremiseType,
+				
+					StateId = appartment.StateId,
+				
+					PremiseTypeId = appartment.PremiseTypeId,
 					Address_1 = appartment.Address_1,
 					Address_2 = appartment.Address_2,
 					Zipcode = appartment.Zipcode,
 					MDR_Number = appartment.MDR_Number,
 					PetitionerInterest = appartment.PetitionerInterest,
-					TypeOfRentRegulation = appartment.TypeOfRentRegulation,
+					RentRegulationId = appartment.RentRegulationId,
 					BuildingUnits = appartment.BuildingUnits,
 					DateOfRefreeDeed = appartment.DateOfRefreeDeed,
 					LandlordType = appartment.LandlordType,
@@ -288,14 +292,15 @@ namespace EvictionFiler.Infrastructure.Repositories
 					entity.ApartmentCode = appartment.ApartmentCode;
 					entity.BuildingCode = appartment.BuildingCode;
 					entity.City = appartment.City;
-					entity.State = appartment.State;
-					entity.PremiseType = appartment.PremiseType;
+					entity.StateId = appartment.StateId;
+
+					entity.PremiseTypeId = appartment.PremiseTypeId;
 					entity.Address_1 = appartment.Address_1;
 					entity.Address_2 = appartment.Address_2;
 					entity.Zipcode = appartment.Zipcode;
 					entity.MDR_Number = appartment.MDR_Number;
 					entity.PetitionerInterest = appartment.PetitionerInterest;
-					entity.TypeOfRentRegulation = appartment.TypeOfRentRegulation;
+					entity.RentRegulationId = appartment.RentRegulationId;
 					entity.BuildingUnits = appartment.BuildingUnits;
 					entity.DateOfRefreeDeed = appartment.DateOfRefreeDeed;
 					entity.LandlordType = appartment.LandlordType;
@@ -336,14 +341,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 					BuildingCode = appartment.BuildingCode,
 					ApartmentCode = appartment.ApartmentCode,
 					City = appartment.City,
-					State = appartment.State,
-					PremiseType = appartment.PremiseType,
+					StateId = appartment.StateId,
+					PremiseTypeId = appartment.PremiseTypeId,
 					Address_1 = appartment.Address_1,
 					Address_2 = appartment.Address_2,
 					Zipcode = appartment.Zipcode,
 					MDR_Number = appartment.MDR_Number,
 					PetitionerInterest = appartment.PetitionerInterest,
-					TypeOfRentRegulation = appartment.TypeOfRentRegulation,
+					RentRegulationId = appartment.RentRegulationId,
 					BuildingUnits = appartment.BuildingUnits,
 					DateOfRefreeDeed = appartment.DateOfRefreeDeed,
 					LandlordType = appartment.LandlordType,
@@ -355,9 +360,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 		public async Task<List<EditApartmentDto>> GetBuildingsByLandlordIdAsync(Guid landlordId)
 		{
-			var building  = await _context.Appartments
-				.Where(x => x.LandlordId == landlordId && x.IsDeleted != true)
-				.ToListAsync();
+			var building = await _context.Appartments
+		.Include(a => a.States)
+		.Include(a => a.premiseTypes)
+		.Include(a => a.regulationStatus)
+		.Where(x => x.LandlordId == landlordId && x.IsDeleted != true)
+		.ToListAsync();
 
 			return building.Select(appartment  => new EditApartmentDto
 			{
@@ -365,14 +373,17 @@ namespace EvictionFiler.Infrastructure.Repositories
 				BuildingCode = appartment.BuildingCode,
 				ApartmentCode = appartment.ApartmentCode,
 				City = appartment.City,
-				State = appartment.State,
-				PremiseType = appartment.PremiseType,
+				StateId = appartment.StateId,
+				StateName = appartment.States?.Name,
+				PremiseTypeId = appartment.PremiseTypeId,
+				PremiseName = appartment.premiseTypes?.Name,
+				RentRegulationId = appartment.RentRegulationId,
+				RentRegulationName = appartment.regulationStatus?.Name,
 				Address_1 = appartment.Address_1,
 				Address_2 = appartment.Address_2,
 				Zipcode = appartment.Zipcode,
 				MDR_Number = appartment.MDR_Number,
 				PetitionerInterest = appartment.PetitionerInterest,
-				TypeOfRentRegulation = appartment.TypeOfRentRegulation,
 				BuildingUnits = appartment.BuildingUnits,
 				DateOfRefreeDeed = appartment.DateOfRefreeDeed,
 				LandlordType = appartment.LandlordType,
@@ -385,6 +396,18 @@ namespace EvictionFiler.Infrastructure.Repositories
 				UpdatedBy = appartment.UpdatedBy,
 
 			}).ToList();
+		}
+
+
+		public async Task<List<PremiseType>> GetAllPremiseType()
+		{
+			return await _context.mst_PremiseTypes.ToListAsync();
+		}
+
+
+		public async Task<List<RegulationStatus>> GetAllRentRegulation()
+		{
+			return await _context.mst_regulationStatus.ToListAsync();
 		}
 
 

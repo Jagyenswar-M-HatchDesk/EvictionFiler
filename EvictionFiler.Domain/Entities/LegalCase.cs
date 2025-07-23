@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EvictionFiler.Domain.Entities.Master;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -37,8 +38,10 @@ namespace EvictionFiler.Domain.Entities
         public virtual Tenant? Tenant { get; set; }
 
         public string? CaseName { get; set; }
-        public string? ClientRole { get; set; }
-        public string? LegalRepresentative { get; set; }
+        public Guid? ClientRoleId { get; set; }
+		[ForeignKey("ClientRoleId")]
+		public ClientRole? ClientRoles { get; set; }
+		public string? LegalRepresentative { get; set; }
         public string? Casecode { get; set; }
 		public Guid ?CaseTypeId { get; set; }
 		[ForeignKey("CaseTypeId")]

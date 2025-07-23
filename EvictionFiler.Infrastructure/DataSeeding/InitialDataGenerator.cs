@@ -4,12 +4,99 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities.Master;
 
 namespace EvictionFiler.Infrastructure.DataSeeding
 {
 	public class InitialDataGenerator
 	{
+		public static IEnumerable<ClientRole> GetClientRole()
+		{
+
+			return new List<ClientRole>
+			{
+				new ClientRole() { Name = "LandLord/Owner"},
+				new ClientRole() { Name = "Tenant/Occupants"},
+				new ClientRole() { Name = "Property Manager"},
+				new ClientRole() { Name = "Legal Representative"},
+
+
+
+
+			};
+		}
+
+
+		public static IEnumerable<Language> GetLangauge()
+		{
+
+			return new List<Language>
+			{
+				new Language() { Name = "English"},
+				new Language() { Name = "Spanish"},
+				new Language() { Name = "Hindi"},
+				new Language() { Name = "French"},
+				new Language() { Name = "Chienese"},
+
+			};
+		}
+
+
+		public static IEnumerable<PremiseType> GetPremiseType()
+		{
+
+			return new List<PremiseType>
+			{
+				new PremiseType() { Name = "Residential"},
+					new PremiseType() { Name = "Commercial"},
+					new PremiseType() { Name = "Industrial"},
+					new PremiseType() { Name = "Mixed Use"},
+					new PremiseType() { Name = "Retail"},
+					new PremiseType() { Name = "Office"},
+					new PremiseType() { Name = "Warehouse"},
+
+			};
+		}
+
+		public static IEnumerable<RegulationStatus> GetRegulationStatus()
+		{
+
+			return new List<RegulationStatus>
+			{
+				new RegulationStatus() { Name = "Rent Stablised"},
+				new RegulationStatus() { Name = "Controlled"},
+				new RegulationStatus() { Name = "Market"},
+				new RegulationStatus() { Name = "Section 8"},
+				new RegulationStatus() { Name = "FHEPS"},
+				new RegulationStatus() { Name = "Other"},
+
+			};
+		}
+
+		public static IEnumerable<State> GetState()
+		{
+
+			return new List<State>
+			{
+				new State() { Name = "Georgia"},
+				new State() { Name = "Calofornia"},
+				new State() { Name = "Florida"},
+			};
+		}
+
+		public static IEnumerable<TypeOfOwner> GetTypeOfOwner()
+		{
+
+			return new List<TypeOfOwner>
+			{
+				new TypeOfOwner() { Name = "Corportaion"},
+					new TypeOfOwner() { Name = "LLC"},
+						new TypeOfOwner() { Name = "Individual"},
+							new TypeOfOwner() { Name = "Other"},
+
+			};
+		}
+
 		public static IEnumerable<CaseType> GetCaseTypes()
 		{
 

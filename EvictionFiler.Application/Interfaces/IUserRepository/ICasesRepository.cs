@@ -1,5 +1,6 @@
 ﻿using EvictionFiler.Application.DTOs;
 using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities.Master;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
 		Task DeleteCaseAsync(Guid id);
         Task<List<CaseType>> GetAllCaseTypeAsync();
         Task<List<CaseSubType>> GetSubTypesByCaseTypeIdAsync(Guid caseTypeId);
-
+        Task<List<ClientRole>> GetAllClientRole();
 	}
 
 }

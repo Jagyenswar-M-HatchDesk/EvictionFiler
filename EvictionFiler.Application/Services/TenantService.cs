@@ -1,26 +1,63 @@
-﻿//using EvictionFiler.Application.DTOs.TenantDto;
-//using EvictionFiler.Application.Interfaces.IServices;
-//using EvictionFiler.Application.Interfaces.IUserRepository;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
+﻿using EvictionFiler.Application.DTOs.TenantDto;
+using EvictionFiler.Application.Interfaces.IServices;
+using EvictionFiler.Application.Interfaces.IUserRepository;
+using EvictionFiler.Domain.Entities.Master;
 
-//namespace EvictionFiler.Application.Services
-//{
-//    public class TenantService : ITenantService
-//    {   
-//        private readonly ITenantRepository _tenantRepository;
-//        public TenantService(ITenantRepository tenantRepository)
-//        { 
-//            _tenantRepository = tenantRepository;
-//        }
+namespace EvictionFiler.Application.Services
+{
+    public class TenantService : ITenantService
+    {
+		private readonly ITenantRepository _repo;
 
-//        public async Task<bool> AddTenantAsync(CreateTenantDto dto)
-//        {
-//            var newtenant = await _tenantRepository.AddTenant(dto);
-//            return newtenant;
-//        }
-//    }
-//}
+		public TenantService(ITenantRepository services)
+		{
+			_repo = services;
+		}
+
+		public async Task<bool> AddTenantAsync(List<CreateTenantDto> dto)
+		{
+			var newtenant = await _repo.AddTenant(dto);
+			return newtenant;
+		}
+
+		public async Task<List<CreateTenantDto>> SearchTenantbyCode(string code)
+		{
+			var newtenant = await _repo.SearchTenantByCode(code);
+			return newtenant;
+		}
+
+		public async Task<List<CreateTenantDto>> SearchTenantsAsync(string query, Guid buildingId)
+		{
+			return await _repo.SearchTenantAsync(query, buildingId);
+		}
+
+		public async Task<EditTenantDto> GetByIdAsync(Guid id)
+		{
+			var newtenant = await _repo.GetByIdAsync(id);
+			return newtenant;
+		}
+
+		public async Task<List<EditTenantDto>> GetTenantsByClientIdAsync(Guid clientId)
+		{
+			var tenants = await _repo.GetTenantsByClientIdAsync(clientId);
+			return tenants;
+
+
+		}
+		public async Task<bool> UpdateTenantAsync(List<EditTenantDto> dto)
+
+		{
+			var tenant = await _repo.UpdateTenantAsync(dto);
+			return tenant;
+
+
+		}
+		public async Task<List<Language>> GetAllLanguage()
+		{
+			await Task.Delay(4000);
+			var lang = await _repo.GetAllLanguage();
+			return lang;
+		}
+
+	}
+}

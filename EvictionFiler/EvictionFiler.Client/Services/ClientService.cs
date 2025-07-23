@@ -2,6 +2,7 @@
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
+using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.Repositories;
 
 namespace EvictionFiler.Client.Services
@@ -65,11 +66,18 @@ namespace EvictionFiler.Client.Services
 				Address_1 = client.Address_1,
 				Address_2 = client.Address_2,
 				City = client.City,
-				State = client.State,
+				StateId = client.StateId,
+				StateName = client.States?.Name,
 				ZipCode = client.ZipCode
 			};
 		}
 
+		public async Task<List<State>> GetAllState()
+		{
+			
+			var states = await _clientRepository.GetAllStateAsync();
+			return states;
+		}
 
 
 		public async Task<bool> DeleteClientAsync(Guid id)

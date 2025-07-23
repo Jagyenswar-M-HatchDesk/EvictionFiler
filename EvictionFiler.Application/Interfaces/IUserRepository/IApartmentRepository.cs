@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities.Master;
 
 namespace EvictionFiler.Application.Interfaces.IUserRepository
 {
@@ -22,6 +23,8 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
 
 		Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id);
         Task<List<EditApartmentDto>> GetBuildingsByLandlordIdAsync(Guid landlordId);
+        Task<List<RegulationStatus>> GetAllRentRegulation();
+        Task<List<PremiseType>> GetAllPremiseType();
 
 	}
 }

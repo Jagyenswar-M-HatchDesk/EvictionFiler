@@ -2,8 +2,8 @@ using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Application.Services;
-using EvictionFiler.Client.Pages;
-using EvictionFiler.Client.Services;
+
+
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Extensions;
@@ -14,10 +14,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
 
 using Syncfusion.Blazor;
 using System.Text;
+using ApartmentService = EvictionFiler.Application.Services.ApartmentService;
+using CaseService = EvictionFiler.Application.Services.CaseService;
+using TenantService = EvictionFiler.Application.Services.TenantService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,24 +43,26 @@ builder.Services.AddIdentity<User, Role>(options =>
 .AddDefaultTokenProviders();
 
 builder.Services.AddSyncfusionBlazor();
-builder.Services.AddDbContext<MainDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"),
-        b => b.MigrationsAssembly("EvictionFiler.Infrastructure")));
+builder.Services.AddDbContext<MainDbContext>(
+	options => options.UseSqlServer(
+		builder.Configuration.GetConnectionString("Default"),
+		sqlOptions => sqlOptions.MigrationsAssembly("EvictionFiler.Infrastructure")
+	)
 
-//builder.Services.AddDbContextFactory<MainDbContext>(options =>
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"),
-//        b => b.MigrationsAssembly("EvictionFiler.Infrastructure")));
+);
+
+
 
 builder.Services.AddScoped<IUserservices, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICasesRepository, CasesRepository>();
-//builder.Services.AddScoped<IClientService, ClientServices>();
+
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<ILandLordRepository, LandLordRepository>();
 builder.Services.AddScoped<IApartmentRepository, ApartmentRepository>();
 
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
-//builder.Services.AddScoped<ILegalCaseService, LegalCaseService>();
+
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<JwtAuthStateProvider>();
@@ -64,13 +70,14 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
     provider.GetRequiredService<JwtAuthStateProvider>());
-builder.Services.AddScoped<UserServiceClient>();
-builder.Services.AddScoped<ClientService>();
-builder.Services.AddScoped<LandLordService>();
-builder.Services.AddScoped<ApartmentService>();
-builder.Services.AddScoped<TenantService>();
-builder.Services.AddScoped<CaseService>();
-builder.Services.AddScoped<LegalCasesService>();
+builder.Services.AddScoped<IUserservices , UserService>();
+builder.Services.AddScoped<IClientService , ClientServices>();
+//builder.Services.AddScoped<LandLordService>();
+builder.Services.AddScoped<ILandlordSevice  , LandlordService>();
+builder.Services.AddScoped<IApartmentService , ApartmentService>();
+builder.Services.AddScoped<ITenantService, TenantService>();
+builder.Services.AddScoped<ICaseService , CaseService>();
+builder.Services.AddScoped<ILegalCaseService  , LegalCaseService>();
 builder.Services.AddScoped<NavigationDataService>();
 
 builder.Services.AddAuthorizationCore();

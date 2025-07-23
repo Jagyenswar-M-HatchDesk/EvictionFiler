@@ -4,6 +4,7 @@ using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.Repositories;
 
 namespace EvictionFiler.Client.Services
@@ -54,6 +55,12 @@ namespace EvictionFiler.Client.Services
 			return tenant;
 
 
+		}
+		public async Task<List<Language>> GetAllLanguage()
+		{
+			await Task.Delay(4000);
+			var lang = await _repo.GetAllLanguage();
+			return lang;
 		}
 
 	}

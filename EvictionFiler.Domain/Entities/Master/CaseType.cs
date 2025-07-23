@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EvictionFiler.Domain.Entities
+namespace EvictionFiler.Domain.Entities.Master
 {
 	public class CaseType : Base
 	{

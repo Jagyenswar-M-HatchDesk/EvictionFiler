@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250721100847_AddedTable")]
+    partial class AddedTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -296,8 +299,8 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<Guid?>("ClientId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ClientRoleId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("ClientRole")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CommercialUnits")
                         .HasColumnType("nvarchar(max)");
@@ -386,8 +389,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasIndex("CaseTypeId");
 
                     b.HasIndex("ClientId");
-
-                    b.HasIndex("ClientRoleId");
 
                     b.HasIndex("LandLordId");
 
@@ -1184,10 +1185,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.ClientRole", "ClientRoles")
-                        .WithMany()
-                        .HasForeignKey("ClientRoleId");
-
                     b.HasOne("EvictionFiler.Domain.Entities.LandLord", "LandLords")
                         .WithMany()
                         .HasForeignKey("LandLordId")
@@ -1203,8 +1200,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Navigation("CaseSubTypes");
 
                     b.Navigation("CaseTypes");
-
-                    b.Navigation("ClientRoles");
 
                     b.Navigation("Clients");
 

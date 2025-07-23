@@ -1,21 +1,24 @@
-﻿using EvictionFiler.Application.DTOs;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.ApartmentDto;
-using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
-using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
-using EvictionFiler.Infrastructure.Repositories;
 
-namespace EvictionFiler.Client.Services
+namespace EvictionFiler.Application.Services
 {
-    public class ApartmentService
-    {
-        private readonly IApartmentRepository _repository;
+	public class ApartmentService : IApartmentService
+	{
+		private readonly IApartmentRepository _repository;
 
-        public ApartmentService(IApartmentRepository repository)
-        {
-            _repository = repository;
-        }
+		public ApartmentService(IApartmentRepository repository)
+		{
+			_repository = repository;
+		}
 
 
 		public async Task<List<AddApartment>> GetAll()
@@ -25,10 +28,10 @@ namespace EvictionFiler.Client.Services
 		}
 
 		public async Task<bool> AddApartmentAsync(List<AddApartment> dto)
-        {
-            var newapartment = await _repository.AddApartmentAsync(dto);
-            return newapartment;
-        }
+		{
+			var newapartment = await _repository.AddApartmentAsync(dto);
+			return newapartment;
+		}
 
 		public async Task<AddApartment> GetByIdAsync(Guid id)
 		{
@@ -71,7 +74,7 @@ namespace EvictionFiler.Client.Services
 
 		public async Task<List<PremiseType>> GetAllPremiseTypes()
 		{
-			
+
 			var PremiseTypes = await _repository.GetAllPremiseType();
 			return PremiseTypes;
 		}

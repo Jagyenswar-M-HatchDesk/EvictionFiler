@@ -1,10 +1,11 @@
 ﻿@using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Client.Services
-@inject ClientService _clientService
+@inject IClientService _clientService
 @inject NavigationManager nav
 @inject NavigationDataService _dataservice
-
+@inject IJSRuntime JS
 
 <div class="offcanvas offcanvas-end show border-start shadow bg-white"
 tabindex="-1" id="createClient"
@@ -132,10 +133,17 @@ aria-labelledby="createUserLabel">
         StateHasChanged();
     }
 
-    private void SubmitClientAsync()
+    private async Task SubmitClientAsync()
     {
-        nav.NavigateTo($"/createcase/{SelectedClient.Id}");
-
+        if (SelectedClient.Id != Guid.Empty)
+        {
+            nav.NavigateTo($"/createcase/{SelectedClient.Id}");
+        }
+        else
+        {
+            // error message show karo ya logging
+            await JS.InvokeVoidAsync("alert", "Please select a valid client.");
+        }
     }
 
     private void ChangeClients()

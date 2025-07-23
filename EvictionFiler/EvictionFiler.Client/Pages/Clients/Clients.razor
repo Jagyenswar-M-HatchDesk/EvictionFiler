@@ -3,11 +3,13 @@
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.TenantDto
+@using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Client.Services
-@inject ClientService clientservice
-@inject LandLordService landLordService
-@inject ApartmentService apartmentService
-@inject TenantService tenantService
+ @inject IClientService clientservice 
+ @inject LandLordService landLordService 
+@inject ILandlordSevice landLordService
+@inject IApartmentService apartmentService
+@inject ITenantService tenantService
 @inject NavigationManager navManager
 @rendermode InteractiveAuto
 <PageTitle>Clients</PageTitle>
@@ -106,7 +108,7 @@
 
         <!-- Add Button + Search -->
         <div class="g-2 mb-3 d-flex justify-content-between align-items-center">
-            <button class="btn bg-navy text-white" @onclick="AddClient">
+            <button class="btn bg-navy text-white" @onclick="ShowCreateClient">
                 <i class="fa fa-plus me-1"></i> Add New
             </button>
             <div class="position-relative">
@@ -145,7 +147,7 @@
                                 <td>@client.Fax</td>
                              
                                 <td >
-                                    @($"{client.Address_1}, {client.Address_2}, {client.City}, {client.State} - {client.ZipCode}")
+                                    @($"{client.Address_1}, {client.Address_2}, {client.City}, {client.StateName} - {client.ZipCode}")
                                 </td>
                                 <td>
                                     Active
@@ -187,27 +189,41 @@
         </div>
     }
 
-    <CreateCLient @ref="createClientRef"  />
 
-     <EditClient @ref="editClientRef"
-                Landlords="saveEditlandlordList"
-                Buildings="saveEditBuildingList"
-                Tenants="saveEditTenantList"
-            /> 
+    @if (_showCreateClient)
+    {
+        <CreateCLient createClient="_clientModel" OnClose="HandleCloseCreateClient" />
+    }
+
+
+
+
+    @if (_showEditClient)
+    {
+        <EditClient editClient="_editClientModel"
+                    Landlords="saveEditlandlordList"
+                    Buildings="saveEditBuildingList"
+                    Tenants="saveEditTenantList"
+                    OnClose="HandleCloseEditClient" />
+    }
+
 
 
 </body>
 
 @code {
+    private bool _showCreateClient = false;
+    private bool _showEditClient = false;
     private Guid clientIdForEdit;
 
-    private CreateCLient createClientRef;
+    // private CreateCLient createClientRef;
     private EditClient editClientRef;
     private List<EditLandlordDto> saveEditlandlordList = new();
     private List<EditApartmentDto> saveEditBuildingList = new();
     private List<EditTenantDto> saveEditTenantList = new();
     private string successMessage;
-
+    private CreateClientDto _clientModel;
+    private EditClientDto _editClientModel = new();
 
     private List<CreateClientDto> clients = new();
     private string searchTerm = string.Empty;
@@ -215,20 +231,6 @@
     public Guid Id { get; set; }
 
     private string activeTab = string.Empty;
-
-
-
-
-    private IEnumerable<CreateClientDto> filteredClients =>
-        string.IsNullOrWhiteSpace(searchTerm)
-        ? clients
-        : clients.Where(c =>
-            (!string.IsNullOrWhiteSpace(c.FirstName) && c.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
-            (!string.IsNullOrWhiteSpace(c.Email) && c.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
-            (!string.IsNullOrWhiteSpace(c.Phone) && c.Phone.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
-
-
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -263,19 +265,28 @@
         clients = await clientservice.GetAllClientsAsync();
     }
 
-
-
-    private async Task AddClient()
+    private void ShowCreateClient()
     {
-        var newClient = new CreateClientDto(); 
-        createClientRef.Show(newClient);
+        _clientModel = new CreateClientDto();
+        _showCreateClient = true;
     }
 
+    private void HandleCloseCreateClient()
+    {
+        _showCreateClient = false;
+    }
 
+    private IEnumerable<CreateClientDto> filteredClients =>
+        string.IsNullOrWhiteSpace(searchTerm)
+        ? clients
+        : clients.Where(c =>
+            (!string.IsNullOrWhiteSpace(c.FirstName) && c.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+            (!string.IsNullOrWhiteSpace(c.Email) && c.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+            (!string.IsNullOrWhiteSpace(c.Phone) && c.Phone.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
 
     private async Task LoadBuildings(Guid clientId)
     {
-        var landlords = await landLordService.GetLandlordsByClientIdAsync(clientId);
+         var landlords = await landLordService.GetLandlordsByClientIdAsync(clientId);
         saveEditBuildingList.Clear();
 
         foreach (var landlord in landlords)
@@ -311,9 +322,6 @@
         }
     }
 
-
-
-
     private async Task EditClient(Guid clientId)
     {
         clientIdForEdit = clientId;
@@ -323,7 +331,7 @@
         saveEditlandlordList = landlords;
         if (client != null)
         {
-            var editClient = new EditClientDto
+             _editClientModel = new EditClientDto
             {
                 Id = client.Id,
                 FirstName = client.FirstName,
@@ -336,7 +344,8 @@
                 Address_1 = client.Address_1,
                 Address_2 = client.Address_2,
                 City = client.City,
-                State = client.State,
+                StateId = client.StateId,
+                StateName = client.StateName,
                 ZipCode = client.ZipCode,
                 LandLords = landlords
             };
@@ -344,10 +353,14 @@
             await LoadBuildings(clientId);
             await LoadTenants(clientId);
            
-            editClientRef.Show(editClient);
+            _showEditClient = true;
         }
     }
 
+    private void HandleCloseEditClient()
+    {
+        _showEditClient = false;
+    }
 
     private async Task SetActiveTab(string tab)
     {
@@ -378,22 +391,6 @@
         }
     }
 
-
-
-
-
-
-
-    // private async Task HandleCreate(CreateClientDto client)
-    // {
-    //     var result = await clientservice.AddClientAsync(client);
-    //     if (result)
-    //     {
-    //         await createClientRef.HideAsync();
-    //         clients = await clientservice.GetAllClientsAsync();
-
-    //     }
-    // }
 
     public async Task DeleteClient(Guid id)
     {

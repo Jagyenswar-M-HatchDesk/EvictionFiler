@@ -10,10 +10,11 @@ namespace EvictionFiler.Application.Interfaces.IServices
 {
     public interface ILegalCaseService
     {
+        Task<bool> AddLegalCasesAsync(CreateEditLegalCaseModel dto);
         Task<List<LegalCase>> GetAllAsync();
-        Task<LegalCase?> GetByIdAsync(Guid id);
-        Task CreateAsync(CreateEditLegalCaseModel model);
-        Task UpdateAsync(CreateEditLegalCaseModel model);
+        Task<CreateEditLegalCaseModel?> GetByIdAsync(Guid id);
+        Task<bool> UpdateAsync(CreateEditLegalCaseModel dto);
         Task DeleteAsync(Guid id);
-    }
+
+	}
 }

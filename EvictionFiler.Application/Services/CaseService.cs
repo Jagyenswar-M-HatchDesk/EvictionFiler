@@ -1,10 +1,15 @@
-﻿using EvictionFiler.Application.DTOs.ApartmentDto;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities.Master;
 
-namespace EvictionFiler.Client.Services
+namespace EvictionFiler.Application.Services
 {
-	public class CaseService
+	public class CaseService : ICaseService
 	{
 		private readonly ICasesRepository _repository;
 

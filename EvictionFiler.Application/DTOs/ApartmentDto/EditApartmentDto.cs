@@ -11,23 +11,28 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 	public class EditApartmentDto
 	{
 		public Guid Id { get; set; }
-		[Required(ErrorMessage = "Buildig code is required")]
+
 		public string? BuildingCode { get; set; } = string.Empty;
-		[Required(ErrorMessage = "Apt code is required")]
+
 		public string? ApartmentCode { get; set; }
 		public string? MDR_Number { get; set; }
 		public int? BuildingUnits { get; set; }
 		[Required(ErrorMessage = "Premise Type is required")]
-		public string? PremiseType { get; set; }
+		public Guid? PremiseTypeId { get; set; }
+		public string? PremiseName { get; set; }
 
 		[Required(ErrorMessage = "Rent Regulation is required")]
-		public string? TypeOfRentRegulation { get; set; }
+		public Guid? RentRegulationId { get; set; }
+
+		public string? RentRegulationName { get; set; }
 		public string? PetitionerInterest { get; set; }
 
 		public string? Address_1 { get; set; }
 		public string? Address_2 { get; set; }
 		public string? City { get; set; }
-		public string? State { get; set; }
+		public Guid? StateId { get; set; }
+
+		public string? StateName { get; set; }
 		public string? Zipcode { get; set; }
 		public DateOnly DateOfRefreeDeed { get; set; } = DateOnly.FromDateTime(DateTime.Now);
 		public LandLordRole? LandlordType { get; set; }
@@ -40,5 +45,6 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 		public DateTime? UpdatedAt { get; set; }
 		public string? CreatedBy { get; set; }
 		public string? UpdatedBy { get; set; }
+
 	}
 }

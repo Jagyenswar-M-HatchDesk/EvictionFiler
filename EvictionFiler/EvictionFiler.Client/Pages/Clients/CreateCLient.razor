@@ -2,14 +2,17 @@
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.TenantDto
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Application.Services
 @using EvictionFiler.Client.Services
+@using EvictionFiler.Domain.Entities.Master
 @using EvictionFiler.Domain.Enums
 @using Microsoft.AspNetCore.Components.Forms
 
-@inject ClientService _clientService
-@inject LandLordService _landlordService
-@inject ApartmentService _apartmentService
-@inject TenantService _tenantService
+@inject IClientService _clientService
+@inject ILandlordSevice _landlordService
+@inject IApartmentService _apartmentService
+@inject ITenantService _tenantService
 @rendermode InteractiveAuto
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
@@ -157,7 +160,7 @@
 
 <div class="offcanvas offcanvas-end show border-start shadow bg-white"
      tabindex="-1" id="createClient"
-     style="visibility:@(IsVisible ? "visible" : "hidden");"
+  
      aria-labelledby="createUserLabel">
 
     <div class="offcanvas-header border-bottom">
@@ -251,11 +254,12 @@
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text ">State</label>
-                            <InputSelect class="form-select" @bind-Value="createClient.State">
+                            <InputSelect class="form-select" @bind-Value="createClient.StateId">
                                 <option value="">-- Select State --</option>
-                                <option>Georgia</option>
-                                <option>California</option>
-                                <option>Florida</option>
+                                @foreach (var state in StatesList)
+                                {
+                                    <option value="@state.Id">@state.Name</option>
+                                }
                             </InputSelect>
                         </div>
                         <div class="col-md-4 mb-3">
@@ -285,9 +289,9 @@
             </div>
 
             <!-- Vertical Overlay Buttons -->
-            <div class="vertical-buttons d-flex flex-column align-items-center position-absolute end-0 top-50 translate-middle-y @(IsVisible ? "" : "d-none")">
+            <div class="vertical-buttons d-flex flex-column align-items-center position-absolute end-0 top-50 translate-middle-y ">
                 <button class="vertical-tab-button @(activeTab == "landlord" ? "active-vertical" : "")" @onclick="@(() => SetActiveTab("landlord"))">LANDLORD</button>
-                <button class="vertical-tab-button @(activeTab == "building" ? "active-vertical" : "")" @onclick="@(() => SetActiveTab("building"))">BUILDING</button>
+                
             </div>
         </div>
 
@@ -298,14 +302,22 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="color-text fw-bold mb-0">LANDLORD INFORMATION</h5>
                     <div>
-                        <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button>
+                        <button class="btn btn-outline-secondary fw-semibold me-2"
+                                @onclick="@BackToLandlordList">
+                            ←
+                        </button>
+                       @*  <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button> *@
                         <button class="btn bg-navy text-white" @onclick="ToggleLandlordForm">@GetToggleButtonText()</button>
+                        @if (showLandlordForm)
+                        {
+                            <button type="submit" form="landlordForm" class="btn bg-navy text-white me-2" style="margin-left:10px">Save</button>
+                        }
                     </div>
                 </div>
 
                 @if (showLandlordForm)
                 {
-                    <EditForm Model="@landlord" OnValidSubmit="SaveLandlordAsync">
+                    <EditForm Id="landlordForm" Model="@landlord" OnValidSubmit="SaveLandlordAsync">
 
                         <DataAnnotationsValidator />
                         
@@ -343,13 +355,13 @@
                         
                                 <div class="col-md-3">
                                     <label class="required-label">Type of Owner</label>
-                                    <select class="form-select" @bind="landlord.TypeOfOwner">
-                                        <option selected disabled>Select Type</option>
-                                        <option value="Corporation">Corporation</option>
-                                        <option value="LLC">LLC</option>
-                                        <option value="Individual">Individual</option>
-                                        <option value="Other">Other</option>
-                                    </select>
+                                <InputSelect class="form-select" @bind-Value="landlord.TypeOfOwnerId">
+                                    <option value="">-- Select Type --</option>
+                                    @foreach (var Own in TypeOwnerList)
+                                    {
+                                        <option value="@Own.Id">@Own.Name</option>
+                                    }
+                                </InputSelect>
                                 </div>
 
                         </div>
@@ -387,19 +399,7 @@
                             </div>
                            
                         </div>
-                            <div class="row mb-3">
-                           
-                          
-                                <div class="col-md-12">
-                                    <label>List Other Properties</label>
-                                    <InputTextArea class="form-control"
-                                                   @bind-Value="landlord.OtherProperties"
-                                                   placeholder="Enter Other Properties"
-                                                   rows="4" />
-                                </div>
-                          
-
-                        </div>
+                        
 
                         <div class="row mb-3">
                             <div class="col">
@@ -422,11 +422,12 @@
                         <div class="row mb-3">
                             <div class="col">
                                 <label  >State</label>
-                                <InputSelect class="form-select" @bind-Value="landlord.State">
+                                <InputSelect class="form-select" @bind-Value="landlord.StateId">
                                     <option value="">-- Select State --</option>
-                                    <option>Georgia</option>
-                                    <option>California</option>
-                                    <option>Florida</option>
+                                    @foreach (var s in StatesList)
+                                    {
+                                        <option value="@s.Id">@s.Name</option>
+                                    }
                                 </InputSelect>
                             </div>
                           
@@ -452,9 +453,9 @@
                         </div>
  
        
-                        <button type="submit" class="btn bg-navy text-white mt-3">Save </button>
+                        @* <button type="submit" class="btn bg-navy text-white mt-3">Save </button> *@
                     </EditForm>
-
+                   
                 }
 
                 @if (!showLandlordForm){
@@ -468,7 +469,7 @@
                                 <th>EIN</th>
                                 <th>Contact Person Name</th>
                                 <th>Type of Owner</th>
-                                <th>Other Properties</th>
+                              
                                 <th>Address</th>
                                 <th>Status</th>
                                 <th class="sticky">Actions</th>
@@ -485,14 +486,14 @@
                                         <td>@(string.IsNullOrWhiteSpace(l.Phone) ? "-" : l.Phone)</td>
                                         <td>@(string.IsNullOrWhiteSpace(l.EINorSSN) ? "-" : l.EINorSSN)</td>
                                         <td>@(string.IsNullOrWhiteSpace(l.ContactPersonName) ? "-" : l.ContactPersonName)</td>
-                                        <td>@(string.IsNullOrWhiteSpace(l.TypeOfOwner) ? "-" : l.TypeOfOwner)</td>
-                                        <td>@(string.IsNullOrWhiteSpace(l.OtherProperties) ? "-" : l.OtherProperties)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(l.TypeOfOwnerName) ? "-" : l.TypeOfOwnerName)</td>
 
 
-                                        <td>
+
+                                            <td>
                                             @(
-                                                                            string.IsNullOrWhiteSpace($"{l.Address1}{l.Address2}{l.City}{l.State}{l.Zipcode}")
-                                                                            ? "-" : $"{l.Address1}, {l.Address2}, {l.City}, {l.State} - {l.Zipcode}")
+                                                                            string.IsNullOrWhiteSpace($"{l.Address1}{l.Address2}{l.City}{l.StateName}{l.Zipcode}")
+                                                                            ? "-" : $"{l.Address1}, {l.Address2}, {l.City}, {l.StateName} - {l.Zipcode}")
                             </td>
 
                                         <td>Active</td>
@@ -510,6 +511,9 @@
                         </tbody>
                     </table>
                 </div>
+                    <div class="vertical-buttons d-flex flex-column align-items-center position-absolute end-0 top-0 translate-middle-y ">
+                        <button class="vertical-tab-button @(activeTab == "building" ? "active-vertical" : "")" @onclick="@(() => SetActiveTab("building"))" style="position:relative ; top:15rem">BUILDING</button>
+                    </div>
                 }
             </div>
         }
@@ -521,15 +525,23 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="color-text fw-bold mb-0">BUILDING INFORMATION</h5>
                     <div>
-                        <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button>
+                        @* <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button> *@
+                        <button class="btn btn-outline-secondary fw-semibold me-2"
+                                @onclick="@BackToBuildingList">
+                            ←
+                        </button>
                         <button class="btn bg-navy text-white" @onclick="ToggleBuildingForm">@GetToggleButtonText()</button>
+                        @if (showBuildingForm)
+                        {
+                            <button type="submit" form="buildingForm" class="btn bg-navy text-white me-2" style="margin-left:10px">Save</button>
+                        }
                     </div>
                 </div>
 
                 @if (showBuildingForm)
                 {
 
-                    <EditForm Model="@building" OnValidSubmit="SaveBuildingAsync">
+                    <EditForm  id="buildingForm" Model="@building" OnValidSubmit="SaveBuildingAsync">
                         <DataAnnotationsValidator />
                      
                         <div class="row mb-3">
@@ -570,31 +582,25 @@
 
                             <div class="col-md-4">
                                 <label for="BuildingUnit" class="required-label">Premise Type</label>
-                            <InputSelect class="form-select" @bind-Value="building.PremiseType">
-                                <option value="">-- Select Type --</option>
-                                <option value="Residential">Residential</option>
-                                <option value="Commercial">Commercial</option>
-                                <option value="Industrial">Industrial</option>
-                                <option value="MixedUse">Mixed Use</option>
-                                <option value="Retail">Retail</option>
-                                <option value="Office">Office</option>
-                                <option value="Warehouse">Warehouse</option>
-                                <option value="VacantLand">Vacant Land</option>
-                            </InputSelect>
-                                <ValidationMessage For="@(() => building.PremiseType)" />
+                                <InputSelect class="form-select" @bind-Value="building.PremiseTypeId">
+                                    <option value="">-- Select Type --</option>
+                                    @foreach (var p in premiseTypesList)
+                                    {
+                                        <option value="@p.Id">@p.Name</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => building.PremiseTypeId)" />
                             </div>
                             <div class="col-md-4">
                                 <label class="required-label" for="RentStatus required-label">Rent Regulation Status</label>
-                                <select class="form-select" id="RentStatus" @bind="building.TypeOfRentRegulation">
-                                    <option disabled value="">Select Type</option>
-                                    <option value="Rent_Stabilised">Rent Stabilised</option>
-                                    <option value="Controlled">Controlled</option>
-                                    <option value="Market">Market</option>
-                                    <option value="Section_8">Section 8</option>
-                                    <option value="FHEPS">FHEPS</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                                <ValidationMessage For="@(() => building.TypeOfRentRegulation)" />
+                                <InputSelect class="form-select" @bind-Value="building.RentRegulationId">
+                                    <option value="">-- Select Regulation --</option>
+                                    @foreach (var r in RegulationList)
+                                    {
+                                        <option value="@r.Id">@r.Name</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => building.RentRegulationId)" />
                             </div>
                           
                             <div class="col-md-4">
@@ -628,11 +634,12 @@
                         <div class="row mb-3">
                             <div class="col">
                                 <label >State</label>
-                                <InputSelect class="form-select" @bind-Value="building.State">
+                                <InputSelect class="form-select" @bind-Value="building.StateId">
                                     <option value="">-- Select State --</option>
-                                    <option>Georgia</option>
-                                    <option>California</option>
-                                    <option>Florida</option>
+                                    @foreach (var s in StatesList)
+                                    {
+                                        <option value="@s.Id">@s.Name</option>
+                                    }
                                 </InputSelect>
                             </div>
                             <div class="col">
@@ -705,13 +712,10 @@
 
   
                         <!-- Submit Button -->
-                        <button type="submit" class="btn bg-navy text-white mt-2">Save</button>
+                        @* <button type="submit" class="btn bg-navy text-white mt-2">Save</button> *@
                     </EditForm>
 
-                    <div class="vertical-buttons d-flex flex-column align-items-center position-absolute end-0 top-0 translate-middle-y @(IsVisible ? "" : "d-none")">
-                        <button class="vertical-tab-button @(activeTab == "tanent" ? "active-vertical" : "")" @onclick="@(() => SetActiveTab("tanent"))" style="position:relative ; top:15rem">Tanent</button>
-
-                    </div>
+                   
 
                 }
 
@@ -739,17 +743,17 @@
                             {
                                         <tr>
                                             <td>@(string.IsNullOrWhiteSpace(b.ApartmentCode) ? "-" : b.ApartmentCode)</td>
-                                            <td>@(string.IsNullOrWhiteSpace(b.PremiseType) ? "-" : b.PremiseType)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(b.PremiseName) ? "-" : b.PremiseName)</td> 
                                             <td>
                                                 @(
-                                                                                string.IsNullOrWhiteSpace($"{b.Address_1}{b.Address_2}{b.City}{b.State}{b.Zipcode}")
+                                                                                string.IsNullOrWhiteSpace($"{b.Address_1}{b.Address_2}{b.City}{b.StateName}{b.StateName}")
                                                                                 ? "-"
-                                                                                : $"{b.Address_1}, {b.Address_2}, {b.City}, {b.State} - {b.Zipcode}"
+                                                                                : $"{b.Address_1}, {b.Address_2}, {b.City}, {b.StateName} - {b.Zipcode}"
                                                                                 )
                                         </td>
                                         <td>@(string.IsNullOrWhiteSpace(b.MDR_Number) ? "-" : b.MDR_Number)</td>
                                         <td>@(string.IsNullOrWhiteSpace(b.PetitionerInterest) ? "-" : b.PetitionerInterest)</td>
-                                        <td>@(string.IsNullOrWhiteSpace(b.TypeOfRentRegulation) ? "-" : b.TypeOfRentRegulation)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(b.RentRegulationName) ? "-" : b.RentRegulationName)</td>
                                         <td>@(b.BuildingUnits.HasValue? b.BuildingUnits.ToString() : "-")</td>
                                         <td>@(b.DateOfRefreeDeed == DateOnly.MinValue ? "-" : b.DateOfRefreeDeed.ToString("MM/dd/yyyy"))</td>
 
@@ -765,6 +769,10 @@
                     </tbody>
                 </table>
                 </div>
+                    <div class="vertical-buttons d-flex flex-column align-items-center position-absolute end-0 top-0 translate-middle-y ">
+                        <button class="vertical-tab-button @(activeTab == "tanent" ? "active-vertical" : "")" @onclick="@(() => SetActiveTab("tanent"))" style="position:relative ; top:15rem">Tanent</button>
+
+                    </div>
                 }
              </div>
         }
@@ -776,14 +784,22 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="color-text fw-bold mb-0">TENANT INFORMATION</h5>
                     <div>
-                        <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button>
+                        <button class="btn btn-outline-secondary fw-semibold me-2"
+                                @onclick="@BackToTenantList">
+                            ←
+                        </button>
+                        @* <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button> *@
                         <button class="btn bg-navy text-white" @onclick="ToggleTanentForm">@GetToggleButtonText()</button>
+                        @if (showTanentForm)
+                        {
+                            <button type="submit" form="tenantForm" class="btn bg-navy text-white me-2" style="margin-left:10px">Save</button>
+                        }
                     </div>
                 </div>
 
                 @if (showTanentForm)
                 {
-                    <EditForm Model="@tenant" OnValidSubmit="SaveTenantAsync">
+                    <EditForm id="tenantForm" Model="@tenant" OnValidSubmit="SaveTenantAsync">
                         <DataAnnotationsValidator />
                         <!-- Row 1: Apartment Selection -->
                         <div class="row mb-3">
@@ -858,15 +874,12 @@
 
                             <div class="col-md-2">
                                 <label class="required-label">Language</label>
-                                <InputSelect class="form-select" @bind-Value="tenant.Language">
-                                    <option value="">-- Select --</option>
-                                    <option value="English">English</option>
-                                    <option value="Spanish">Spanish</option>
-                                    <option value="Hindi">Hindi</option>
-                                    <option value="Chinese">Chinese</option>
-                                    <option value="French">French</option>
-                                    <option value="Arabic">Arabic</option>
-                                    <option value="Other">Other</option>
+                                <InputSelect class="form-select" @bind-Value="tenant.LanguageId">
+                                    <option value="">-- Select Language --</option>
+                                    @foreach (var l in LangList)
+                                    {
+                                        <option value="@l.Id">@l.Name</option>
+                                    }
                                 </InputSelect>
                             </div>
 
@@ -878,10 +891,7 @@
                                 <label>Rent</label>
                                 <InputNumber class="form-control" @bind-Value="tenant.Rent" />
                             </div>
-                            <div class="col-md-2">
-                                <label>Lease Status</label>
-                                <InputText class="form-control" @bind-Value="tenant.LeaseStatus" placeholder="Enter Status" />
-                            </div>
+                        
 
                             <div class="col-md-2">
                                 <label>Apt</label>
@@ -920,11 +930,12 @@
                         <div class="row mb-3">
                             <div class="col">
                                 <label >State</label>
-                                <InputSelect class="form-select" @bind-Value="tenant.State">
+                                <InputSelect class="form-select" @bind-Value="tenant.StateId">
                                     <option value="">-- Select State --</option>
-                                    <option>Georgia</option>
-                                    <option>California</option>
-                                    <option>Florida</option>
+                                    @foreach (var s in StatesList)
+                                    {
+                                        <option value="@s.Id">@s.Name</option>
+                                    }
                                 </InputSelect>
                             </div>
 
@@ -952,7 +963,7 @@
                         
                         </div>
                         <div class="row mb-3">
-                            <div class="col-md-6">
+                         <div class="col-md-6">
                                 <label>Name & Relations</label>
                                 <InputTextArea class="form-control"
                                                @bind-Value="tenant.Name_Relation"
@@ -1068,12 +1079,12 @@
                             </div>
 </div>
                         
-                        <!-- Submit Button -->
+                      @*   <!-- Submit Button -->
                         <div class="row">
                             <div class="col">
-                                <button type="submit" class="btn bg-navy text-white mt-2">Save </button>
-                            </div>
-                        </div>
+                                @* <button type="submit" class="btn bg-navy text-white mt-2">Save </button> *@
+                            @* </div> *@
+                        @* </div>  *@
                     </EditForm>
                 }
 
@@ -1108,18 +1119,18 @@
                                         <td>@t.SSN</td>
                                         <td>@t.Phone</td>
                                         <td>@t.Email</td>
-                                        <td>@t.Language</td>
+                                        <td>@t.LanguageName</td>
                                         <td>
                                             @(
-                                                                            string.IsNullOrWhiteSpace($"{t.Address_1}{t.Address_2}{t.City}{t.State}{t.Zipcode}")
+                                                                                string.IsNullOrWhiteSpace($"{t.Address_1}{t.Address_2}{t.City}{t.StateName}{t.Zipcode}")
                                                                             ? "-"
-                                                                            : $"{t.Address_1}, {t.Address_2}, {t.City}, {t.State} - {t.Zipcode}"
+                                                                            : $"{t.Address_1}, {t.Address_2}, {t.City}, {t.StateName} - {t.Zipcode}"
                                                                             )
                                     </td>
                                     <td>@t.Apt</td>
                                     <td>@t.Borough</td>
                                     <td>@t.Rent</td>
-                                    <td>@t.LeaseStatus</td>
+                                
                                     </tr>
                                 }
                             }
@@ -1157,9 +1168,10 @@
 
 @code {
     [Parameter] public CreateClientDto createClient { get; set; } = new();
+    [Parameter]
+    public EventCallback OnClose { get; set; }
     [Parameter] public EventCallback<CreateClientDto> Submit { get; set; }
 
-    private bool IsVisible { get; set; }
     private string activeTab = string.Empty;
 
     private bool showLandlordForm = false;
@@ -1168,27 +1180,51 @@
 
     private CreateLandLordDto landlord = new();
     private AddApartment building = new();
-
     private CreateTenantDto tenant = new();
 
-    private List<CreateLandLordDto> landlordList = new();
     private List<CreateLandLordDto> savelandlordList = new();
     private List<CreateTenantDto> saveTanentList = new();
     private List<AddApartment> apartmentList = new();
 
+    private List<State> StatesList = new();
+    private List<TypeOfOwner> TypeOwnerList = new();
+    private List<RegulationStatus> RegulationList = new();
+    private List<PremiseType> premiseTypesList = new();
+    private List<Language> LangList = new();
+
     protected override async Task OnInitializedAsync()
     {
-        await Task.Delay(1000);
-        landlordList = await _landlordService.GetAllLandLordsAsync();
+        if (createClient != null)
+        {
+            // Load data from service
+            StatesList = await _clientService.GetAllState();
+            TypeOwnerList = await _landlordService.GetAllOwner();
+
+            RegulationList = await _apartmentService.GetAllRentRegulation();
+
+            premiseTypesList = await _apartmentService.GetAllPremiseTypes();
+
+            LangList = await _tenantService.GetAllLanguage();
+        }
+
+  
     }
 
-
-
-    public void Show(CreateClientDto model)
+    private void BackToLandlordList()
     {
-        createClient = model;
-        IsVisible = true;
-        StateHasChanged();
+        showLandlordForm = false;
+        landlord = new(); // optional: reset form
+    }
+
+    private void BackToBuildingList()
+    {
+        showBuildingForm = false;
+        building = new(); // optional: reset form
+    }
+    private void BackToTenantList()
+    {
+        showTanentForm = false;
+        tenant = new(); // optional: reset form
     }
 
     private bool IsClientFormValid()
@@ -1198,22 +1234,52 @@
             !string.IsNullOrWhiteSpace(createClient.Email);
     }
 
-
-
     public async Task HideAsync()
     {
-
-        IsVisible = false;
-
         activeTab = string.Empty;
         showLandlordForm = false;
         showBuildingForm = false;
         showTanentForm = false;
+        await OnClose.InvokeAsync();
         StateHasChanged();
     }
 
+  
+    private async Task SetActiveTab(string tab)
+    {
+        // Step 1: Client tab complete hona chahiye for Landlord
+        if (tab == "landlord")
+        {
+            if (createClient == null || string.IsNullOrWhiteSpace(createClient.FirstName) || string.IsNullOrWhiteSpace(createClient.Email))
+            {
+                await JS.InvokeVoidAsync("alert", "Please complete the Client form before moving to Landlord.");
+                return;
+            }
+        }
 
-    private void SetActiveTab(string tab) => activeTab = tab;
+        // Step 2: Landlord list me at least 1 item hona chahiye for Building
+        if (tab == "building")
+        {
+            if (savelandlordList == null || !savelandlordList.Any())
+            {
+                await JS.InvokeVoidAsync("alert", "Please add and save at least one Landlord before moving to Building.");
+                return;
+            }
+        }
+
+        // Step 3: Building form filled hona chahiye before Tenant
+        if (tab == "tanent")
+        {
+            if (apartmentList == null ||  !apartmentList.Any())
+            {
+                await JS.InvokeVoidAsync("alert", "Please complete and save Building details before moving to Tenant.");
+                return;
+            }
+        }
+
+        // All checks passed: change tab
+        activeTab = tab;
+    }
 
     private void ToggleLandlordForm() => showLandlordForm = !showLandlordForm;
 
@@ -1226,7 +1292,12 @@
 
     private Task SaveLandlordAsync()
     {
-         landlord.Id =  Guid.NewGuid();
+        landlord.Id =  Guid.NewGuid();
+        landlord.TypeOfOwnerName = TypeOwnerList
+   .FirstOrDefault(x => x.Id == landlord.TypeOfOwnerId)?.Name ?? "";
+
+        landlord.StateName = StatesList
+            .FirstOrDefault(x => x.Id == landlord.StateId)?.Name ?? "";
         savelandlordList.Add(landlord);
 
         landlord = new();
@@ -1236,7 +1307,12 @@
 
     private Task SaveTenantAsync()
     {
-      
+
+        tenant.LanguageName = LangList
+            .FirstOrDefault(x => x.Id == tenant.LanguageId)?.Name ?? "";
+
+        tenant.StateName = StatesList
+            .FirstOrDefault(x => x.Id == landlord.StateId)?.Name ?? "";
         saveTanentList.Add(tenant);
 
         tenant = new();
@@ -1246,15 +1322,23 @@
     private Task SaveBuildingAsync()
 
     {
-        Console.WriteLine("SaveBuildingAsync CALLED ✅");
+
         building.Id = Guid.NewGuid();
+
+        building.PremiseName = premiseTypesList
+           .FirstOrDefault(x => x.Id == building.PremiseTypeId)?.Name ?? "";
+
+        building.StateName = StatesList
+            .FirstOrDefault(x => x.Id == building.StateId)?.Name ?? "";
+
+        building.RentRegulationName = RegulationList
+       .FirstOrDefault(x => x.Id == building.RentRegulationId)?.Name ?? "";
+
         apartmentList.Add(building);
         building = new();
         showBuildingForm = false;
         return Task.CompletedTask;
     }
-
-
 
     private async Task SubmitClientAsync()
     {
@@ -1280,7 +1364,7 @@
 
             }
 
-            var isLandlordSaved = await _landlordService.AddLandLordAsync(savelandlordList);
+            var isLandlordSaved = true;/*   await _landlordService.AddLandLordAsync(savelandlordList); */
             if (!isLandlordSaved)
                 return;
         }
@@ -1295,7 +1379,7 @@
 
             }
 
-            var isapartmentSaved = await _apartmentService.AddApartmentAsync(apartmentList);
+            var isapartmentSaved = true;/*  await _apartmentService.AddApartmentAsync(apartmentList); */
             if (!isapartmentSaved)
                 return;
         }
@@ -1310,7 +1394,7 @@
 
             }
 
-            var istanentSaved = await _tenantService.AddTenantAsync(saveTanentList);
+            var istanentSaved = true;/* await _tenantService.AddTenantAsync(saveTanentList); */
             if (!istanentSaved)
                 return;
         }

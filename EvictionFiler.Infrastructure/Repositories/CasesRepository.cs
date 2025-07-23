@@ -7,6 +7,7 @@ using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
@@ -22,14 +23,19 @@ namespace EvictionFiler.Infrastructure.Repositories
             _context = context;
         }
 
+		public async Task<List<ClientRole>> GetAllClientRole()
+		{
+			return await _context.mst_ClienrRoles.ToListAsync();
+		}
+
 		public async Task<List<CaseType>> GetAllCaseTypeAsync()
 		{
-			return await _context.CaseTypes.ToListAsync();
+			return await _context.mst_CaseTypes.ToListAsync();
 		}
 
 		public async Task<List<CaseSubType>> GetSubTypesByCaseTypeIdAsync(Guid caseTypeId)
 		{
-			var result = await _context.CaseSubTypes
+			var result = await _context.mst_CaseSubTypes
 				.Where(x => x.CaseTypeId == caseTypeId
 					&& (x.IsActive == true || x.IsActive == null)
 					&& (x.IsDeleted == false || x.IsDeleted == null))
@@ -42,7 +48,8 @@ namespace EvictionFiler.Infrastructure.Repositories
         {
             return await _context.LegalCases
                 .Include(c => c.Clients)
-                .Include(c => c.Apartments)
+				 .Include(c => c.ClientRoles)
+				.Include(c => c.Apartments)
 				.Include(c=>c.CaseTypes)
 				.Include(c=>c.CaseSubTypes)
                 .Include(c => c.LandLords).Include(c=>c.Tenant)
@@ -70,7 +77,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				LandLordId = legalCaseEntity.LandLordId,
 				TenantId = legalCaseEntity.Tenant?.Id,
 				CaseName = legalCaseEntity.CaseName,
-				ClientRole = legalCaseEntity.ClientRole,
+				ClientRoleId = legalCaseEntity.ClientRoleId,
 				LegalRepresentative = legalCaseEntity.LegalRepresentative,
 				CaseTypeId = legalCaseEntity.CaseTypeId,
 				CaseSubTypeId = legalCaseEntity.CaseSubTypeId,
@@ -124,7 +131,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 LandLordId = legalCase.LandLordId,
                 ClientId = legalCase.ClientId,
                 CaseName = legalCase.CaseName,
-                ClientRole = legalCase.ClientRole,
+                ClientRoleId = legalCase.ClientRoleId,
                 LegalRepresentative = legalCase.LegalRepresentative,
                 //CaseType = legalCase.CaseType,
                 Company = legalCase.Company,
@@ -170,7 +177,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 			existing.LandLordId = legalCase.LandLordId;
 			existing.ClientId = legalCase.ClientId;
 			existing.CaseName = legalCase.CaseName;
-			existing.ClientRole = legalCase.ClientRole;
+			existing.ClientRoleId = legalCase.ClientRoleId;
+		
 			existing.LegalRepresentative = legalCase.LegalRepresentative;
 
 			existing.Company = legalCase.Company;
@@ -222,7 +230,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			int nextNumber = 1;
 
-			if (!string.IsNullOrEmpty(lastCase) && lastCase.StartsWith("CC"))
+			if (!string.IsNullOrEmpty(lastCase) && lastCase.StartsWith("EF"))
 			{
 				string numberPart = lastCase.Substring(2); // Remove 'EF'
 				if (int.TryParse(numberPart, out int parsedNumber))
@@ -232,7 +240,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 			}
 
 			// Generate new CaseCode
-			string newCode = "CC" + nextNumber.ToString("D10"); // D10 = 10 digits
+			string newCode = "EF" + nextNumber.ToString("D10"); // D10 = 10 digits
 			return newCode;
 		}
 

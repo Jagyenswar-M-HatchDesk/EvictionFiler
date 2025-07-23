@@ -5,14 +5,17 @@
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.TenantDto
+@using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Client.Services
-@inject LandLordService _landlordService
-@inject ApartmentService _apartmentService
-@inject LegalCasesService _legalCaseService
-@inject CaseService _caseService
-@inject LegalCasesService _legalCaseService
-@inject TenantService _tenantService
-@inject ClientService _clientService
+@using EvictionFiler.Domain.Entities.Master
+@using EvictionFiler.Domain.Entities.Master
+@inject ILandlordSevice _landlordService
+@inject IApartmentService _apartmentService
+@inject ILegalCaseService _legalCaseService
+@inject ICaseService _caseService
+
+@inject ITenantService _tenantService
+@inject IClientService _clientService
 @inject NavigationManager nav
 @inject NavigationDataService _dataService
 @using Blazored.Typeahead
@@ -198,16 +201,16 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label fw-semibold text-navy required-label">Client Role</label>
-                        <select class="form-select" @bind="legalcaseDto.ClientRole">
-                            <option value="">-- Select Client Role --</option>
-                            <option value="Landlord/Owner">Landlord/Owner</option>
-                            <option value="Tenant/Occupant">Tenant/Occupant</option>
-                            <option value="Property Manager">Property Manager</option>
-                            <option value="Legal Representative">Legal Representative</option>
-                        </select>
+                        <InputSelect class="form-select" @bind-Value="legalcaseDto.ClientRoleId">
+                            <option value="">-- Select Type --</option>
+                            @foreach (var c in ClientRoleList)
+                            {
+                                <option value="@c.Id">@c.Name</option>
+                            }
+                        </InputSelect>
                     </div>
 
-                    @if (legalcaseDto.ClientRole == "Legal Representative")
+                    @if (selectedClientRoleName == "Legal Representative")
                     {
                         <div class="col-md-6">
                             <label class="form-label fw-semibold text-navy required-label">Representative Name</label>
@@ -354,7 +357,7 @@
 
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy" style="white-space: nowrap;">Owner:</div>
-                                                    <div class="col-8">@landlordDetails.Landlord.TypeOfOwner</div>
+                                                    <div class="col-8">@landlordDetails.Landlord.TypeOfOwnerName</div>
                                                 </div>
 
                                                 <div class="row mb-2">
@@ -365,7 +368,7 @@
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy" style="white-space: nowrap;">Address:</div>
                                                     <div class="col-8">
-                                                        @($"{landlordDetails.Landlord.Address1}, {landlordDetails.Landlord.Address2}, {landlordDetails.Landlord.City}, {landlordDetails.Landlord.State} {landlordDetails.Landlord.Zipcode}")
+                                                        @($"{landlordDetails.Landlord.Address1}, {landlordDetails.Landlord.Address2}, {landlordDetails.Landlord.City}, {landlordDetails.Landlord.StateId} {landlordDetails.Landlord.Zipcode}")
                                                     </div>
                                                 </div>
                                             </div>
@@ -382,10 +385,7 @@
                                                     <div class="col-8">@landlordDetails.Landlord.EINorSSN</div>
                                                 </div>
 
-                                                <div class="row mb-2">
-                                                    <div class="col-5 fw-semibold text-navy" style="white-space: nowrap;">Properties:</div>
-                                                    <div class="col-7">@landlordDetails.Landlord.OtherProperties</div>
-                                                </div>
+                                          
 
                                                 <div class="row mb-2">
                                                     <div class="col-6 fw-semibold text-navy" style="white-space: nowrap;">Contact Person:</div>
@@ -437,12 +437,12 @@
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-5 fw-semibold text-navy">Rent Regulation:</div>
-                                                    <div class="col-7">@b.TypeOfRentRegulation</div>
+                                                    <div class="col-7">@b.RentRegulationName</div> 
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy" style="white-space: nowrap;">Address:</div>
                                                     <div class="col-8">
-                                                        @($"{b.Address_1}, {b.Address_2}, {b.City}, {b.State} {b.Zipcode}")
+                                                        @($"{b.Address_1}, {b.Address_2}, {b.City}, {b.StateId} {b.Zipcode}")
                                                     </div>
                                                 </div>
 
@@ -540,7 +540,7 @@
                                                 <div class="row mb-2">
                                                     <div class="col-5 fw-semibold text-navy" style="white-space: nowrap;">Address:</div>
                                                     <div class="col-7">
-                                                        @($"{buildingDetails.Building.Address_1}, {buildingDetails.Building.Address_2}, {buildingDetails.Building.City}, {buildingDetails.Building.State} {buildingDetails.Building.Zipcode}")
+                                                        @($"{buildingDetails.Building.Address_1}, {buildingDetails.Building.Address_2}, {buildingDetails.Building.City}, {buildingDetails.Building.StateId} {buildingDetails.Building.Zipcode}")
                                                     </div>
                                                 </div>
 
@@ -556,15 +556,15 @@
 
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy text-nowrap">Type:</div>
-                                                    <div class="col-8">@buildingDetails.Building.PremiseType</div>
+                                                    <div class="col-8">@buildingDetails.Building.PremiseName</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy text-nowrap">Interest:</div>
-                                                    <div class="col-8">@buildingDetails.Building.PetitionerInterest</div>
+                                                    <div class="col-8">@buildingDetails.Building.PetitionerInterest </div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-5 fw-semibold text-navy text-nowrap">Rent Regulation:</div>
-                                                    <div class="col-7">@buildingDetails.Building.TypeOfRentRegulation</div>
+                                                    <div class="col-7">@buildingDetails.Building.RentRegulationName</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -616,20 +616,17 @@
                                                             <div class="col-8">@b.FirstName</div>
                                                         </div>
                                                         <div class="row mb-2">
-                                                            <div class="col-4 fw-semibold text-navy">Phone:</div>
-                                                            <div class="col-8">@b.Phone</div>
+                                                            <div class="col-5 fw-semibold text-navy">Phone:</div>
+                                                            <div class="col-7">@b.Phone</div>
                                                         </div>
                                                         <div class="row mb-2">
                                                             <div class="col-4 fw-semibold text-navy">Lang:</div>
-                                                            <div class="col-8">@b.Language</div>
+                                                            <div class="col-8">@b.LanguageName</div>
                                                         </div>
-                                                        <div class="row mb-2">
-                                                            <div class="col-4 fw-semibold text-navy">Status:</div>
-                                                            <div class="col-8">@b.LeaseStatus</div>
-                                                        </div>
+                                                    
                                                         <div class="row mb-2">
                                                             <div class="col-5 fw-semibold text-navy">Address:</div>
-                                                            @($"{b.Address_1}, {b.Address_2}, {b.City}, {b.State} {b.Zipcode}")
+                                                            @($"{b.Address_1}, {b.Address_2}, {b.City}, {b.StateId} {b.Zipcode}")
                                                         </div>
                                                     </div>
                                                 </div>
@@ -734,14 +731,14 @@
                                             <div class="col-2 fw-semibold text-navy">Email:</div>
                                             <div class="col-5">@TenantDetails.Email</div>
                                             <div class="col-2 fw-semibold text-navy">Lang:</div>
-                                            <div class="col-3">@TenantDetails.Language</div>
+                                            <div class="col-3">@TenantDetails.LanguageId</div>
                                         </div>
 
                                         <div class="row mb-2">
                                             <div class="col-2 fw-semibold text-navy">Rent:</div>
                                             <div class="col-2">@TenantDetails.Rent</div>
                                             <div class="col-2 fw-semibold text-navy">Status:</div>
-                                            <div class="col-2">@TenantDetails.LeaseStatus</div>
+                                            @* <div class="col-2">@TenantDetails.LeaseStatus</div> *@
                                             <div class="col-2 fw-semibold text-navy">Borough:</div>
                                             <div class="col-2">@TenantDetails.Borough</div>
                                         </div>
@@ -795,6 +792,7 @@
 </div>
 
 @code {
+
     [Parameter]
     public Guid caseId { get; set; }
     // [Parameter] public string ClientId { get; set; }
@@ -812,11 +810,14 @@
     public Guid? SelectedLandlord { get; set; }
     public Guid? SelectedBuilding { get; set; }
     public Guid? SelectedTenant{ get; set; }
+    private List<ClientRole> ClientRoleList = new();
 
+    private string selectedClientRoleName => ClientRoleList.FirstOrDefault(x => x.Id == legalcaseDto.ClientRoleId)?.Name;
     protected override async Task OnInitializedAsync()
     {
         editContext = new EditContext(legalcaseDto);
         caseTypes = await _caseService.GetAllCaseType();
+        ClientRoleList = await _caseService.GetAllClientRole();
         legalcaseDto = await _legalCaseService.GetByIdAsync(caseId); 
 
         if (legalcaseDto?.CaseTypeId != null)
@@ -937,12 +938,12 @@
 
 
     private bool IsNextDisabled =>
-       (currentStep == 0 && (
-      string.IsNullOrWhiteSpace(legalcaseDto.ClientRole) ||
-      (legalcaseDto.ClientRole == "Legal Representative" && string.IsNullOrWhiteSpace(legalcaseDto.LegalRepresentative)) ||
+       (currentStep == 0 && 
+      
+      (selectedClientRole == "Legal Representative" && string.IsNullOrWhiteSpace(legalcaseDto.LegalRepresentative)) ||
       legalcaseDto.CaseTypeId == null ||
       (selectedCaseTypeName == "Holdover" && legalcaseDto.CaseSubTypeId == null)
-  ))
+  )
        ||
       (currentStep == 1 && landlordSearchModel.SelectedLandlord == null)
       ||
@@ -1091,12 +1092,14 @@
                 SSN = TenantDetails.SSN,
                 Phone = TenantDetails.Phone,
                 Email = TenantDetails.Email,
-                Language = TenantDetails.Language,
+                LanguageId = TenantDetails.LanguageId,
                 Address_1 = TenantDetails.Address_1,
                 Apt = TenantDetails.Apt,
                 Borough = TenantDetails.Borough,
                 Rent = TenantDetails.Rent,
-                LeaseStatus = TenantDetails.LeaseStatus,
+                StateName = TenantDetails.StateName,
+                LanguageName = TenantDetails.LanguageName,   
+                // LeaseStatus = TenantDetails.LeaseStatus,
                 TenantCode = TenantDetails.TenantCode
 
             };

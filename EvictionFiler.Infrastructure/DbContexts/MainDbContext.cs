@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EvictionFiler.Domain.Entities.Master;
 
 namespace EvictionFiler.Infrastructure.DbContexts
 {
@@ -17,17 +18,25 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserDatabase> UserDatabases { get; set; }
-        //public DbSet<Subscription> Subscriptions { get; set; }
+   
         public DbSet<Tenant> Tenants { get; set; }
         public DbSet<Client> Clients { get; set; }
         public DbSet<LandLord> LandLords { get; set; }
 
-		public DbSet<CaseType> CaseTypes { get; set; }
-		public DbSet<CaseSubType> CaseSubTypes { get; set; }
+		public DbSet<CaseType> mst_CaseTypes { get; set; }
+		public DbSet<CaseSubType> mst_CaseSubTypes { get; set; }
 		public DbSet<Appartment> Appartments { get; set; }
         public DbSet<LegalCase> LegalCases { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+		public DbSet<TypeOfOwner> mst_TypeOfOwners { get; set; }
+		public DbSet<ClientRole> mst_ClienrRoles { get; set; }
+		public DbSet<Language> mst_Languages { get; set; }
+		public DbSet<PremiseType> mst_PremiseTypes { get; set; }
+		public DbSet<RegulationStatus> mst_regulationStatus { get; set; }
+		public DbSet<State> mst_State { get; set; }
+
+
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Role>().HasData(

@@ -22,16 +22,21 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 		public string? MDR_Number { get; set; }
 		public int? BuildingUnits { get; set; }
 		[Required(ErrorMessage = "Premise Type is required")]
-		public string? PremiseType { get; set; }
+		public Guid? PremiseTypeId { get; set; }
+		public string? PremiseName { get; set; }
 
 		[Required(ErrorMessage = "Rent Regulation is required")]
-		public string? TypeOfRentRegulation { get; set; }
+		public Guid? RentRegulationId { get; set; }
+
+		public string? RentRegulationName { get; set; }
 		public string? PetitionerInterest { get; set; }
 
 		public string? Address_1 { get; set; }
 		public string? Address_2 { get; set; }
 		public string? City { get; set; }
-		public string? State { get; set; }
+		public Guid? StateId { get; set; }
+
+		public string? StateName { get; set; }
 		public string? Zipcode { get; set; }
 		public DateOnly DateOfRefreeDeed { get; set; } = DateOnly.FromDateTime(DateTime.Now);
 		public LandLordRole? LandlordType { get; set; }
