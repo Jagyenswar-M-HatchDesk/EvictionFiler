@@ -5,20 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 
 namespace EvictionFiler.Application.Interfaces.IUserRepository
 {
-    public interface ILandLordRepository
-    {
-        Task<bool> AddLandLord(List<CreateLandLordDto> dtoList);
+    public interface ILandLordRepository : IRepository<LandLord>
+	{
+		Task<string?> GetLastLandLordCodeAsync();
+		Task AddRangeAsync(List<LandLord> landlords);
 
-		Task<bool> DeleteLandLordAsync(Guid id);
-        Task<bool> UpdateLandLordsAsync(List<EditLandlordDto> landlords);
 
-		Task<CreateLandLordDto?> GetLandLordByIdAsync(Guid id);
-        Task<List<CreateLandLordDto>> GetAllLandLordsAsync();
         Task<List<CreateLandLordDto>> SearchLandlordByCode(string code);
         Task<List<CreateLandLordDto>> SearchLandlordsAsync(string query, Guid clientId);
 		Task<LandlordWithBuildings?> GetLandlordWithBuildingsAsync(Guid landlordId);

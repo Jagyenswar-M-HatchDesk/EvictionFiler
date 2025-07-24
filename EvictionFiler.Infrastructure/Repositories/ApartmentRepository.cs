@@ -25,7 +25,19 @@ namespace EvictionFiler.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<AddApartment?> GetByIdAsync(Guid id)
+		public async Task<string?> GetLastBuildingCodeAsync()
+		{
+			return await _context.Appartments
+				.OrderByDescending(l => l.CreatedAt)
+				.Select(l => l.BuildingCode)
+				.FirstOrDefaultAsync();
+		}
+
+		public async Task AddRangeAsync(List<Appartment> buildings)
+		{
+			await _context.Appartments.AddRangeAsync(buildings);
+		}
+		public async Task<AddApartment?> GetByIdAsync(Guid id)
         {
             var appartment  =  await _context.Appartments.FindAsync(id);
 
@@ -156,48 +168,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			return result > 0;
 		}
-//public async Task<bool> AddApartmentAsync(List<AddApartment> dtoList)
-//		{
-//			var newapartment = new List<Appartment>();
 
-//			foreach (var appartment in dtoList)
-//			{
-//				var apartment = new Appartment
-//				{
-//					Id = appartment.Id,
-//					BuildingCode = await GenerateBuildingCodeAsync(),
-//					ApartmentCode = appartment.ApartmentCode,
-//					City = appartment.City,
-//					State = appartment.State,
-//					PremiseType = appartment.PremiseType,
-//					Address_1 = appartment.Address_1,
-//					Address_2 = appartment.Address_2,
-//					Zipcode = appartment.Zipcode,
-//					MDR_Number = appartment.MDR_Number,
-//					PetitionerInterest = appartment.PetitionerInterest,
-//					TypeOfRentRegulation = appartment.TypeOfRentRegulation,
-//					BuildingUnits = appartment.BuildingUnits,
-//					DateOfRefreeDeed = appartment.DateOfRefreeDeed,
-//					LandlordType = appartment.LandlordType,
-//					LandlordId = appartment.LandlordId,
-//					IsActive = appartment.IsActive,
-//					IsDeleted = appartment.IsDeleted,
-//					CreatedBy = appartment.CreatedBy,
-//					CreatedAt = appartment.CreatedAt,
-//					UpdatedAt = appartment.UpdatedAt,
-//					UpdatedBy = appartment.UpdatedBy,
-
-//				};
-
-//				newapartment.Add(apartment);
-//			}
-
-//			_context.Appartments.AddRange(newapartment);
-//			var result = await _context.SaveChangesAsync();
-
-//			return result > 0;
-//		}
-		
 		public async Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id)
 		{
 			var appartment = await _context.Appartments
@@ -277,10 +248,6 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Tenants = tenant
 			};
 		}
-
-
-	
-
 		public async Task<bool> UpdateBuildingAsync(List<EditApartmentDto> buildings)
 		{
 			foreach (var appartment in buildings)
@@ -409,30 +376,6 @@ namespace EvictionFiler.Infrastructure.Repositories
 		{
 			return await _context.mst_regulationStatus.ToListAsync();
 		}
-
-
-		//public async Task<string> GenerateBuildingCodeAsync()
-		//{
-		//	// Get the latest case from DB
-		//	var lastCase = await _context.Appartments
-		//		.OrderByDescending(c => c.BuildingCode)
-		//		.Select(c => c.BuildingCode)
-		//		.FirstOrDefaultAsync();
-
-		//	int nextNumber = 1;
-
-		//	if (!string.IsNullOrEmpty(lastCase) && lastCase.StartsWith("BB"))
-		//	{
-		//		string numberPart = lastCase.Substring(2); // Remove 'EF'
-		//		if (int.TryParse(numberPart, out int parsedNumber))
-		//		{
-		//			nextNumber = parsedNumber + 1;
-		//		}
-		//	}
-
-		//	// Generate new CaseCode
-		//	string newCode = "BB" + nextNumber.ToString("D10"); // D10 = 10 digits
-		//	return newCode;
 
 
 	}

@@ -6,15 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.DTOs.TenantDto;
 
 namespace EvictionFiler.Application.DTOs.ClientDto
 {
     public class CreateClientDto 
     {
         public Guid Id { get; set; }
-
-
-	
 		public string? ClientCode { get; set; } = string.Empty;
 		[Required(ErrorMessage = " FirstName is Required")]
 		public string? FirstName { get; set; } = string.Empty;
@@ -39,6 +37,8 @@ namespace EvictionFiler.Application.DTOs.ClientDto
 		public string? Fax { get; set; } = string.Empty;
   
 		public List<CreateLandLordDto>? LandLords { get; set; }
+		public List<AddApartment>? Buildings { get; set; }
+		public List<CreateTenantDto>? tenants { get; set; }
 		public bool? IsActive { get; set; }
 		public bool? IsDeleted { get; set; }
 

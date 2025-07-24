@@ -12,7 +12,10 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
 {
     public interface IApartmentRepository
     {
-        Task<AddApartment?> GetByIdAsync(Guid id);
+		Task<string?> GetLastBuildingCodeAsync();
+		Task AddRangeAsync(List<Appartment> buildings);
+
+		Task<AddApartment?> GetByIdAsync(Guid id);
         Task<List<AddApartment>> GetAllAsync();
         Task<bool> AddApartmentAsync(List<AddApartment> dtolist);
 

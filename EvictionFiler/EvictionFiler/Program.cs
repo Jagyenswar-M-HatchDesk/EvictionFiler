@@ -1,10 +1,11 @@
+using System.Text;
+using EvictionFiler.Application;
 using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Application.Services;
-
-
 using EvictionFiler.Domain.Entities;
+using EvictionFiler.Infrastructure;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Extensions;
 using EvictionFiler.Infrastructure.Repositories;
@@ -16,9 +17,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
-
 using Syncfusion.Blazor;
-using System.Text;
 using ApartmentService = EvictionFiler.Application.Services.ApartmentService;
 using CaseService = EvictionFiler.Application.Services.CaseService;
 using TenantService = EvictionFiler.Application.Services.TenantService;
@@ -79,7 +78,7 @@ builder.Services.AddScoped<ITenantService, TenantService>();
 builder.Services.AddScoped<ICaseService , CaseService>();
 builder.Services.AddScoped<ILegalCaseService  , LegalCaseService>();
 builder.Services.AddScoped<NavigationDataService>();
-
+builder.Services.AddScoped<IUnitOfWork , UnitOfWork>();
 builder.Services.AddAuthorizationCore();
 
 
