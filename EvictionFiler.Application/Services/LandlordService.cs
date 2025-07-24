@@ -154,7 +154,7 @@ namespace EvictionFiler.Application.Services
 				CreatedBy = dto.CreatedBy,
 				UpdatedAt = dto.UpdatedAt,
 				UpdatedBy = dto.UpdatedBy,
-			}
+			};
 			}
 
 		public async Task<LandlordWithBuildings?> GetLandlordWithBuildingsAsync(Guid landlordId)

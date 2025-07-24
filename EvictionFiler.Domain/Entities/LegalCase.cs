@@ -1,19 +1,19 @@
-﻿using EvictionFiler.Domain.Entities.Master;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EvictionFiler.Domain.Entities.Base.Base;
+using EvictionFiler.Domain.Entities.Master;
+using Microsoft.EntityFrameworkCore;
 
 namespace EvictionFiler.Domain.Entities
 {
-    public class LegalCase : Base
-    {
-        [Key]
-        public Guid Id { get; set; }
+    public class LegalCase : AuditableBaseEntity
+	{
+     
 
         public Guid? ClientId { get; set; }
         public Guid? ApartmentId { get; set; }

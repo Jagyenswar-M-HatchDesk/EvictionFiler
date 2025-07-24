@@ -33,11 +33,6 @@ namespace EvictionFiler.Application.Services
 		{
 			return await _repository.GetCaseByIdAsync(id);
 		}
-
-
-
-
-
 		public async Task<bool> UpdateAsync(CreateEditLegalCaseModel dto)
 		{
 			// 2. Save Client

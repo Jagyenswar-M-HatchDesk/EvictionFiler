@@ -4,12 +4,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EvictionFiler.Domain.Entities.Base.Base;
 
 namespace EvictionFiler.Domain.Entities.Master
 {
-	public class CaseType : Base
+	public class CaseType : AuditableBaseEntity
 	{
-		public Guid Id { get; set; }
+		
 		public string  ? Name { get; set; }
 	
 	}

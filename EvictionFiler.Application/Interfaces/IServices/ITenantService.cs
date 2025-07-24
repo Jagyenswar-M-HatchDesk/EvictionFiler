@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Domain.Entities.Master;
 
@@ -17,6 +18,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 		Task<List<EditTenantDto>> GetTenantsByClientIdAsync(Guid clientId);
 		Task<bool> UpdateTenantAsync(List<EditTenantDto> dto);
 		Task<List<Language>> GetAllLanguage();
+		Task<List<CreateTenantDto>> GetAll();
 
 	}
 }

@@ -27,10 +27,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 				.FirstOrDefaultAsync();
 		}
 
-		public async Task AddRangeAsync(List<LandLord> landlords)
-		{
-			await _mainDbContext.LandLords.AddRangeAsync(landlords);
-		}
+		//public async Task AddRangeAsync(List<LandLord> landlords)
+		//{
+		//	await _mainDbContext.LandLords.AddRangeAsync(landlords);
+		//}
 
         public async Task<List<CreateLandLordDto>> SearchLandlordByCode(string code)
         {

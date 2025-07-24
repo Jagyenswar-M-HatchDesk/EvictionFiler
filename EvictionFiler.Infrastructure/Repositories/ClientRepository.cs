@@ -23,6 +23,17 @@ namespace EvictionFiler.Infrastructure.Repositories
 			return await _context.mst_State.ToListAsync();
 		}
 
+		public async Task<Client?> GetClientWithAllDetailsAsync(Guid clientId)
+		{
+			return await _context.Clients
+				.Where(c => c.Id == clientId && c.IsDeleted != true)
+				.Include(c => c.LandLords)
+				.Include(c => c.Tenants)
+				.Include(c => c.Appartments)
+				.FirstOrDefaultAsync();
+		}
+
+
 		public async Task<List<CreateClientDto>> SearchClientByCode(string code)
         {
             var client = await _context.Clients.Where(e => e.ClientCode.Contains(code)).Select(e => new CreateClientDto

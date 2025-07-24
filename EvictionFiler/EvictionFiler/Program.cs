@@ -1,6 +1,7 @@
 using System.Text;
 using EvictionFiler.Application;
 using EvictionFiler.Application.DTOs;
+using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Application.Services;
@@ -59,7 +60,7 @@ builder.Services.AddScoped<ICasesRepository, CasesRepository>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<ILandLordRepository, LandLordRepository>();
 builder.Services.AddScoped<IApartmentRepository, ApartmentRepository>();
-
+builder.Services.AddScoped<ICodeGenratorRepository, CodeGenratorRepository>();
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
 
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
@@ -78,6 +79,7 @@ builder.Services.AddScoped<ITenantService, TenantService>();
 builder.Services.AddScoped<ICaseService , CaseService>();
 builder.Services.AddScoped<ILegalCaseService  , LegalCaseService>();
 builder.Services.AddScoped<NavigationDataService>();
+
 builder.Services.AddScoped<IUnitOfWork , UnitOfWork>();
 builder.Services.AddAuthorizationCore();
 

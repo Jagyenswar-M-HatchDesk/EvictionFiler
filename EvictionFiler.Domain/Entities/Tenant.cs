@@ -5,15 +5,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EvictionFiler.Domain.Entities.Base.Base;
 using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
 
 namespace EvictionFiler.Domain.Entities
 {
-	public class Tenant : Base
+	public class Tenant : AuditableBaseEntity
 	{
-		[Key]
-		public Guid Id { get; set; }
+	
 		public string? TenantCode { get; set; } = string.Empty;
 		public string? FirstName { get; set; } = string.Empty;
 		public string? LastName { get; set; } = string.Empty;

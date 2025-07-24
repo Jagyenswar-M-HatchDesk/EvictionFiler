@@ -14,7 +14,7 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
     public interface ILandLordRepository : IRepository<LandLord>
 	{
 		Task<string?> GetLastLandLordCodeAsync();
-		Task AddRangeAsync(List<LandLord> landlords);
+		//Task AddRangeAsync(List<LandLord> landlords);
 
 
         Task<List<CreateLandLordDto>> SearchLandlordByCode(string code);

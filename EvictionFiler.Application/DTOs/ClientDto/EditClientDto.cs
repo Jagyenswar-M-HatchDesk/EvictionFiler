@@ -4,7 +4,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.DTOs.TenantDto;
 
 namespace EvictionFiler.Application.DTOs.ClientDto
 {
@@ -39,5 +41,7 @@ namespace EvictionFiler.Application.DTOs.ClientDto
 		public string? CreatedBy { get; set; }
 		public string? UpdatedBy { get; set; }
 		public List<EditLandlordDto>? LandLords { get; set; }
+		public List<EditApartmentDto> Apartments { get; set; } = new();
+		public List<EditTenantDto> Tenants { get; set; } = new();
 	}
 }

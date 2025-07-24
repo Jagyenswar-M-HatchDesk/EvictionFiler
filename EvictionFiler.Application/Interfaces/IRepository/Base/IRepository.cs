@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 
 namespace EvictionFiler.Application.Interfaces.IRepository.Base
 {
@@ -11,6 +6,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository.Base
 	{
 		Task<T> AddAsync(T entity);
 		Task AddRangeAsync(IEnumerable<T> entities);
+		Task RemoveRange(IEnumerable<T> entities);
 		T UpdateAsync(T entity);
 		Task<bool> DeleteAsync(Guid id);
 		Task<T?> GetAsync(object id);

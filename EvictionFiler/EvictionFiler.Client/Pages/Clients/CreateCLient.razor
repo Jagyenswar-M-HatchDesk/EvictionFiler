@@ -1340,67 +1340,85 @@
         return Task.CompletedTask;
     }
 
+    // private async Task SubmitClientAsync()
+    // {
+    //     // Step 1: Ensure Client ID
+    //     if (createClient == null)
+    //         return;
+
+    //     if (createClient.Id == Guid.Empty)
+    //         createClient.Id = Guid.NewGuid();
+
+    //     // var isClientSaved = await _clientService.AddClientAsync(createClient);
+    //     var isClientSaved = await _clientService.Create(createClient);
+    //     if (!isClientSaved)
+    //         return;
+
+    //     // Step 2: Link and Save LandLord
+    //     if (savelandlordList.Count > 0)
+    //     {
+    //         foreach (var val in savelandlordList)
+    //         {
+    //             if(val.Id == Guid.Empty)
+    //                 val.Id = Guid.NewGuid();
+    //             val.ClientId = createClient.Id;
+
+    //         }
+
+    //         var isLandlordSaved =    await _landlordService.AddLandLordAsync(savelandlordList); 
+    //         if (!isLandlordSaved)
+    //             return;
+    //     }
+
+    //     if (apartmentList.Count > 0)
+    //     {
+    //         foreach (var val in apartmentList)
+    //         {
+    //             if (val.Id == Guid.Empty)
+    //                 val.Id = Guid.NewGuid();
+    //             // val.LandlordId = landlord.Id;
+
+    //         }
+
+    //         var isapartmentSaved =  await _apartmentService.AddApartmentAsync(apartmentList); 
+    //         if (!isapartmentSaved)
+    //             return;
+    //     }
+
+    //     if (saveTanentList.Count > 0)
+    //     {
+    //         foreach (var val in saveTanentList)
+    //         {
+    //             if (val.Id == Guid.Empty)
+    //                 val.Id = Guid.NewGuid();
+    //             // val.LandlordId = landlord.Id;
+
+    //         }
+
+    //         var istanentSaved =  await _tenantService.AddTenantAsync(saveTanentList);
+    //         if (!istanentSaved)
+    //             return;
+    //     }
+
+    //     Navigation.NavigateTo("/clients?success=true", true);
+    // }
     private async Task SubmitClientAsync()
     {
-        // Step 1: Ensure Client ID
         if (createClient == null)
             return;
 
         if (createClient.Id == Guid.Empty)
             createClient.Id = Guid.NewGuid();
 
-        // var isClientSaved = await _clientService.AddClientAsync(createClient);
-        var isClientSaved = await _clientService.Create(createClient);
-        if (!isClientSaved)
-            return;
+        createClient.LandLords = savelandlordList;
+        createClient.Apartments = apartmentList;
+        createClient.Tenants = saveTanentList;
 
-        // Step 2: Link and Save LandLord
-        if (savelandlordList.Count > 0)
+        var isSaved = await _clientService.Create(createClient);
+        if (isSaved)
         {
-            foreach (var val in savelandlordList)
-            {
-                if(val.Id == Guid.Empty)
-                    val.Id = Guid.NewGuid();
-                val.ClientId = createClient.Id;
-
-            }
-
-            var isLandlordSaved =    await _landlordService.AddLandLordAsync(savelandlordList); 
-            if (!isLandlordSaved)
-                return;
+            Navigation.NavigateTo("/clients?success=true", true);
         }
-
-        if (apartmentList.Count > 0)
-        {
-            foreach (var val in apartmentList)
-            {
-                if (val.Id == Guid.Empty)
-                    val.Id = Guid.NewGuid();
-                // val.LandlordId = landlord.Id;
-
-            }
-
-            var isapartmentSaved =  await _apartmentService.AddApartmentAsync(apartmentList); 
-            if (!isapartmentSaved)
-                return;
-        }
-
-        if (saveTanentList.Count > 0)
-        {
-            foreach (var val in saveTanentList)
-            {
-                if (val.Id == Guid.Empty)
-                    val.Id = Guid.NewGuid();
-                // val.LandlordId = landlord.Id;
-
-            }
-
-            var istanentSaved =  await _tenantService.AddTenantAsync(saveTanentList);
-            if (!istanentSaved)
-                return;
-        }
-
-        Navigation.NavigateTo("/clients?success=true", true);
     }
 
 }

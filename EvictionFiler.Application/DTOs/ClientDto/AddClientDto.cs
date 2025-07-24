@@ -36,9 +36,7 @@ namespace EvictionFiler.Application.DTOs.ClientDto
 		
 		public string? Fax { get; set; } = string.Empty;
   
-		public List<CreateLandLordDto>? LandLords { get; set; }
-		public List<AddApartment>? Buildings { get; set; }
-		public List<CreateTenantDto>? tenants { get; set; }
+
 		public bool? IsActive { get; set; }
 		public bool? IsDeleted { get; set; }
 
@@ -46,7 +44,9 @@ namespace EvictionFiler.Application.DTOs.ClientDto
 		public DateTime? UpdatedAt { get; set; }
 		public string? CreatedBy { get; set; }
 		public string? UpdatedBy { get; set; }
-
+		public List<CreateLandLordDto> LandLords { get; set; } = new();
+		public List<AddApartment> Apartments { get; set; } = new();
+		public List<CreateTenantDto> Tenants { get; set; } = new();
 
 	}
 }

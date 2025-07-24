@@ -28,12 +28,35 @@ namespace EvictionFiler.Application.Services
 
 		public async Task<List<AddApartment>> GetAll()
 		{
-			var newapartment = await _repository.GetAllAsync();
-			return newapartment;
+			var query = await _repository.GetAllAsync();
+			return query.Select(appartment => new AddApartment
+			{
+				Id = appartment.Id,
+				BuildingCode = appartment.BuildingCode,
+				ApartmentCode = appartment.ApartmentCode,
+				City = appartment.City,
+				StateId = appartment.StateId,
+				RentRegulationId = appartment.RentRegulationId,
+				PremiseTypeId = appartment.PremiseTypeId,
+				Address_1 = appartment.Address_1,
+				Address_2 = appartment.Address_2,
+				Zipcode = appartment.Zipcode,
+				MDR_Number = appartment.MDR_Number,
+				PetitionerInterest = appartment.PetitionerInterest,
+				BuildingUnits = appartment.BuildingUnits,
+				DateOfRefreeDeed = appartment.DateOfRefreeDeed,
+				LandlordType = appartment.LandlordType,
+				LandlordId = appartment.LandlordId,
+				IsActive = appartment.IsActive,
+				IsDeleted = appartment.IsDeleted,
+				CreatedBy = appartment.CreatedBy,
+				CreatedAt = appartment.CreatedAt,
+				UpdatedAt = appartment.UpdatedAt,
+				UpdatedBy = appartment.UpdatedBy,
+			}).ToList();
+
 		}
-
-
-		public async Task<bool> AddLandLordAsync(List<AddApartment> dtoList)
+		public async Task<bool> AddApartmentAsync(List<AddApartment> dtoList)
 		{
 			var newapartment = new List<Appartment>();
 
@@ -88,18 +111,46 @@ namespace EvictionFiler.Application.Services
 
 			return result > 0;
 		}
-		
+
 		public async Task<AddApartment> GetByIdAsync(Guid id)
 		{
-			var newapartment = await _repository.GetByIdAsync(id);
-			return newapartment;
-		}
+			var appartment = await _repository.GetAsync(id);
+
+			if (appartment == null)
+				return null;
+
+			return new AddApartment
+			{
+				Id = appartment.Id,
+				BuildingCode = appartment.BuildingCode,
+				ApartmentCode = appartment.ApartmentCode,
+				City = appartment.City,
+				StateId = appartment.StateId,
+				RentRegulationId = appartment.RentRegulationId,
+				PremiseTypeId = appartment.PremiseTypeId,
+				Address_1 = appartment.Address_1,
+				Address_2 = appartment.Address_2,
+				Zipcode = appartment.Zipcode,
+				MDR_Number = appartment.MDR_Number,
+				PetitionerInterest = appartment.PetitionerInterest,
+				BuildingUnits = appartment.BuildingUnits,
+				DateOfRefreeDeed = appartment.DateOfRefreeDeed,
+				LandlordType = appartment.LandlordType,
+				LandlordId = appartment.LandlordId,
+				IsActive = appartment.IsActive,
+				IsDeleted = appartment.IsDeleted,
+				CreatedBy = appartment.CreatedBy,
+				CreatedAt = appartment.CreatedAt,
+				UpdatedAt = appartment.UpdatedAt,
+				UpdatedBy = appartment.UpdatedBy,
+
+			};
+	}
 
 		public async Task<List<AddApartment>> SearchBuildingByCode(string code, Guid landlordId)
 		{
 			return await _repository.SearchBuildingByCode(code, landlordId);
 		}
-
 
 		public async Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id)
 		{
@@ -116,9 +167,41 @@ namespace EvictionFiler.Application.Services
 		public async Task<bool> UpdateBuildingAsync(List<EditApartmentDto> buildings)
 
 		{
-			var building = await _repository.UpdateBuildingAsync(buildings);
-			return building;
+			foreach (var appartment in buildings)
+			{
+				var entity = await _repository.GetAsync(appartment.Id);
+				if (entity != null)
+				{
+					// Manually map updated values
+					entity.ApartmentCode = appartment.ApartmentCode;
+					entity.BuildingCode = appartment.BuildingCode;
+					entity.City = appartment.City;
+					entity.StateId = appartment.StateId;
 
+					entity.PremiseTypeId = appartment.PremiseTypeId;
+					entity.Address_1 = appartment.Address_1;
+					entity.Address_2 = appartment.Address_2;
+					entity.Zipcode = appartment.Zipcode;
+					entity.MDR_Number = appartment.MDR_Number;
+					entity.PetitionerInterest = appartment.PetitionerInterest;
+					entity.RentRegulationId = appartment.RentRegulationId;
+					entity.BuildingUnits = appartment.BuildingUnits;
+					entity.DateOfRefreeDeed = appartment.DateOfRefreeDeed;
+					entity.LandlordType = appartment.LandlordType;
+					entity.LandlordId = appartment.LandlordId;
+					entity.IsActive = appartment.IsActive;
+					entity.IsDeleted = appartment.IsDeleted;
+					entity.CreatedBy = appartment.CreatedBy;
+					entity.CreatedAt = appartment.CreatedAt;
+					entity.UpdatedAt = appartment.UpdatedAt;
+					entity.UpdatedBy = appartment.UpdatedBy;
+				}
+
+
+				_repository.UpdateAsync(entity);
+				await _unitOfWork.SaveChangesAsync();
+			}
+				return true;
 
 		}
 

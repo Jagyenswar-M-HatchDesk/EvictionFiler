@@ -33,6 +33,8 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 			await _dbSet.AddRangeAsync(entities);
 		}
 
+		
+
 
 		public async Task<bool> AnyAsync(Expression<Func<T, bool>>? predicate = null)
 		{
@@ -110,6 +112,11 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 				throw new ArgumentNullException(nameof(entity));
 			_dbSet.Attach(entity);
 			return entity;
+		}
+
+		public  void RemoveRange(IEnumerable<T> entities)
+		{
+			return _dbSet.RemoveRange(entities);
 		}
 	}
 }
