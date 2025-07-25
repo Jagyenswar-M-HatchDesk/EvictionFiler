@@ -16,8 +16,9 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 {
 	public class CreateToBuildingDto
 	{
-		[Required(ErrorMessage = "Building Code is Required")]
+		
 		public string BuildingCode { get; set; } = string.Empty;
+		[Required(ErrorMessage = "Code is Required")]
 		public string? ApartmentCode { get; set; }
 		public string? MDRNumber { get; set; }
 		public string? BuildingUnits { get; set; }
@@ -29,6 +30,7 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 		public Guid? RegulationStatusId { get; set; }
 		public string? RegulationStatusName { get; set; }
 		public string? PetitionerInterest { get; set; }
+		[Required(ErrorMessage = "Address 1 is Required")]
 		public string Address1 { get; set; } = string.Empty;
 		public string? Address2 { get; set; }
 		public string? City { get; set; } = string.Empty;
@@ -36,6 +38,7 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 		public string? StateName { get; set; }
 		public string ?Zipcode { get; set; } = string.Empty;
 		public DateOnly DateOfRefreeDeed { get; set; }
+		
 		public Guid? LandlordTypeId { get; set; }
 		public string? LandlordTypeName { get; set; }
 		public Guid? LandlordId { get; set; }

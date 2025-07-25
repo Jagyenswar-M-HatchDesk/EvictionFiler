@@ -12,10 +12,10 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		[Required(ErrorMessage = "Email is Required")]
 		public string Email { get; set; } = string.Empty;
 		public string? Phone { get; set; } = string.Empty;
-		public string? Name_Relation { get; set; }
+		public string? Name_Relation { get; set; }	
 		public Guid?LanguageId { get; set; }
 		public string? LanguageName { get; set; }
-		[Required(ErrorMessage = "Address is Required")]
+		[Required(ErrorMessage = "Address1 is Required")]
 		public string Address1 { get; set; } = string.Empty;
 		public string? Address2 { get; set; }
 		public string ?City { get; set; } = string.Empty;

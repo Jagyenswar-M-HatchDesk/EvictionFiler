@@ -13,7 +13,6 @@ namespace EvictionFiler.Application.Interfaces.IServices
 		Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id);
 		Task<List<EditToBuildingDto>> GetBuildingsByLandlordIdAsync(Guid clientId);
 		Task<bool> UpdateBuildingAsync(List<EditToBuildingDto> buildings);
-		Task<List<RegulationStatus>> GetAllRentRegulation();
-		Task<List<PremiseType>> GetAllPremiseTypes();
+		
 	}
 }

@@ -162,15 +162,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 		}
 
 
-		public async Task<List<PremiseType>> GetAllPremiseType()
-		{
-			return await _context.MstPremiseTypes.ToListAsync();
-		}
-
-		public async Task<List<RegulationStatus>> GetAllRentRegulation()
-		{
-			return await _context.MstRegulationStatus.ToListAsync();
-		}
+	
 
 
 	}

@@ -173,17 +173,6 @@ namespace EvictionFiler.Application.Services
 
 		}
 
-		public async Task<List<RegulationStatus>> GetAllRentRegulation()
-		{
-			var regulations = await _repository.GetAllRentRegulation();
-			return regulations;
-		}
-
-		public async Task<List<PremiseType>> GetAllPremiseTypes()
-		{
-
-			var PremiseTypes = await _repository.GetAllPremiseType();
-			return PremiseTypes;
-		}
+		
 	}
 }

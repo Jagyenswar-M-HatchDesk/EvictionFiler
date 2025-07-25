@@ -12,8 +12,7 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
         Task<List<EditToBuildingDto>> SearchBuildingByCode(string code, Guid landlordId);
 		Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id);
         Task<List<EditToBuildingDto>> GetBuildingsByLandlordIdAsync(Guid landlordId);
-        Task<List<RegulationStatus>> GetAllRentRegulation();
-        Task<List<PremiseType>> GetAllPremiseType();
+     
 
 	}
 }

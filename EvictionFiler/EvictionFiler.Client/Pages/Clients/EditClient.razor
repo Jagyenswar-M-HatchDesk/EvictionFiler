@@ -151,7 +151,7 @@
             color: white !important;
             border-color: #1F365D;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        } */
+        } 
     .required-label::after {
         content: " *";
         color: red;
@@ -319,7 +319,7 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label color-text ">Address Line 1</label>
+                            <label class="required-label">Address Line 1</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                 <InputText class="form-control" @bind-Value="editClient.Address1" placeholder="Enter First Address" />
@@ -1296,7 +1296,7 @@
             premiseTypesList = await PremiseTypeRepository.GetAllPremiseType();
             LangList = await LanguageRepository.GetAllLanguage();
         }
-        
+
     }
 
 
@@ -1511,13 +1511,9 @@
         return
          !string.IsNullOrWhiteSpace(editClient.ClientCode)
          && !string.IsNullOrWhiteSpace(editClient.FirstName)
-                   && !string.IsNullOrWhiteSpace(editClient.Fax)
         && !string.IsNullOrWhiteSpace(editClient.Email)
-        && !string.IsNullOrWhiteSpace(editClient.Phone)
-        && !string.IsNullOrWhiteSpace(editClient.ClientCode)
-        && !string.IsNullOrWhiteSpace(editClient.Address1)
-        && !string.IsNullOrWhiteSpace(editClient.City)
-         && !string.IsNullOrWhiteSpace(editClient.ZipCode);
+        && !string.IsNullOrWhiteSpace(editClient.Address1);
+
     }
     private void ToggleBuildingForm() => showBuildingForm = !showBuildingForm;
     private void ToggleLandlordForm() => showLandlordForm = !showLandlordForm;
@@ -1535,60 +1531,26 @@
         if (editClient == null || editClient.Id == Guid.Empty)
             return;
 
-        // Step 1: Update Client
+        // 👇 Attach landlords, buildings, and tenants to client DTO
+        editClient.editLandLords = Landlords;
+        foreach (var landlord in editClient.editLandLords)
+        {
+            landlord.editBuildings = Buildings.Where(b => b.LandlordId == landlord.Id).ToList();
+
+            foreach (var building in landlord.editBuildings)
+            {
+                building.editTenants = Tenants.Where(t => t.BuildingId == building.Id).ToList();
+            }
+        }
+
+        // 🔥 Call only one method
         var isClientUpdated = await _clientService.UpdateClientAsync(editClient);
         if (!isClientUpdated)
             return;
 
-        // Step 2: Update/Add Landlords
-        if (Landlords.Count > 0)
-        {
-            foreach (var val in Landlords)
-            {
-                val.ClientId = editClient.Id;
-                if (val.Id == Guid.Empty)
-                    val.Id = Guid.NewGuid();
-            }
-
-            var isLandlordSaved = await _landlordService.UpdateLandLordsAsync(Landlords);
-            if (!isLandlordSaved)
-                return;
-        }
-
-        // // Step 3: Update/Add Apartments
-        if (Buildings.Count > 0)
-        {
-            foreach (var val in Buildings)
-            {
-                if (val.Id == Guid.Empty)
-                    val.Id = Guid.NewGuid();
-
-                
-            }
-
-            var isapartmentsaved = await _apartmentService.UpdateBuildingAsync(Buildings);
-            if (!isapartmentsaved)
-                return;
-        }
-
-        // Step 4: Update/Add Tenants
-        if (Tenants.Count > 0)
-        {
-            foreach (var val in Tenants)
-            {
-                if (val.Id == Guid.Empty)
-                    val.Id = Guid.NewGuid();
-
-                // Link ApartmentId if needed
-            }
-
-            var isTenantSaved = await _tenantService.UpdateTenantAsync(Tenants);
-            if (!isTenantSaved)
-                return;
-        }
-
         Navigation.NavigateTo("/clients?edit=true", true);
     }
+
 
 
     private void SetActiveTab(string tab) => activeTab = tab;

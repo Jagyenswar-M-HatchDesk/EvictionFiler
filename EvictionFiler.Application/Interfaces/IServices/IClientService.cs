@@ -5,7 +5,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 {
     public interface IClientService
     {
-		Task<bool> Create(CreateToClientDto dto);
+		Task<bool> Create(EditToClientDto dto);
 		Task<List<EditToClientDto>> GetAllClientsAsync();
 		Task<bool> UpdateClientAsync(EditToClientDto dto);
 		Task<List<State>> GetAllState();

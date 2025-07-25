@@ -18,6 +18,7 @@
 @inject ITypeOwnerRepository TypeOwnerRepository
 @inject IRegulationStatusRepository RegulationStatusRepository
 @inject ILanguageRepository LanguageRepository
+@inject ILandlordTypeRepository LandlordTypeRepository
 @rendermode InteractiveAuto
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
@@ -364,6 +365,7 @@
                                         <option value="@Own.Id">@Own.Name</option>
                                     }
                                 </InputSelect>
+                                <ValidationMessage For="@(() => landlord.TypeOwnerId)" />
                                 </div>
 
                         </div>
@@ -410,6 +412,7 @@
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                     <InputText class="form-control" @bind-Value="landlord.Address1"  placeholder ="Enter First Address "/>
                                 </div>
+                                <ValidationMessage For="@(() => landlord.Address1)" />
 
                             </div>
                             <div class="col">
@@ -599,11 +602,12 @@
 
                         <div class="row mb-3">
                             <div class="col">
-                                <label>Address Line 1</label>
+                                <label class="required-label">Address Line 1</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                     <InputText class="form-control" @bind-Value="building.Address1" placeholder="Enter First Address" />
                                 </div>
+                                    <ValidationMessage For="@(() => building.Address1)" />
                               
                             </div>
                             <div class="col">
@@ -659,27 +663,24 @@
                                            placeholder="Select date" />
                             </div>
                         </div>
-                        @* <InputRadioGroup @bind-Value="building.LandlordType" class="mb-3 required-label">
+                        <InputRadioGroup @bind-Value="building.LandlordTypeId" class="mb-3 required-label">
                             <div class="row align-items-center">
                                 <div class="col-auto">
                                     <label class="form-label mb-0" style="margin-top:5px">Are You the:</label>
                                 </div>
-
                                 <div class="col">
                                     <div class="d-flex flex-wrap align-items-center gap-4">
-                                        @foreach (LandLordRole role in Enum.GetValues(typeof(LandLordRole)))
+                                        @foreach (var role in LandLordTypeList)
                                         {
                                             <div class="d-flex align-items-center gap-2">
                                                 <div class="form-check d-flex align-items-center m-0">
-                                                    <InputRadio Value="@role" class="form-check-input me-1" />
+                                                    <InputRadio Value="@role.Id" class="form-check-input me-1" />
                                                     <label class="form-check-label ms-1" style="margin-top:5px">
-                                                        @(role.ToString()
-                                                                                                    .Replace("OwnerOfRecord", "Owner of Record")
-                                                                                                    .Replace("RefereeOwner", "Referee Owner"))
-                                        </label>
-                                    </div>
+                                                        @role.Name
+                                                    </label>
+                                                </div>
 
-                                    @if (role == LandLordRole.Other && building.LandlordType == LandLordRole.Other)
+                                                @if (role.Name == "Other" && building.LandlordTypeId == role.Id)
                                                 {
                                                     <InputText class="form-control"
                                                                placeholder="Please specify"
@@ -691,7 +692,8 @@
                                     </div>
                                 </div>
                             </div>
-                        </InputRadioGroup> *@
+                        </InputRadioGroup>
+
 
   
                         <!-- Submit Button -->
@@ -782,7 +784,7 @@
                         <!-- Row 1: Apartment Selection -->
                         <div class="row mb-3">
                         
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label class="required-label">Building</label>
                                 <InputSelect class="form-select" @bind-Value="tenant.BuildingId">
                                     <option value="">-- Select Building --</option>
@@ -793,7 +795,7 @@
                                 </InputSelect>
                                 <ValidationMessage For="@(() => tenant.BuildingId)" />
                                 </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label class="required-label">First Name</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-person"></i></span>
@@ -825,7 +827,7 @@
                                 <div class="input-group">
                                     <span class="input-group-text">@@</span>
                                     <InputText class="form-control" @bind-Value="tenant.Email" placeholder="Enter Email"/>
-
+                                    <ValidationMessage For="@(() => tenant.Email)" />
                                 </div>
                                
                             </div>
@@ -865,13 +867,13 @@
 
                     
                         <div class="row mb-3">
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                 <label>Rent</label>
-                                <InputNumber class="form-control" @bind-Value="tenant.Rent" />
+                                <InputNumber class="form-control" @bind-Value="tenant.Rent" placeholder="Enter Rent" />
                             </div>
                         
 
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                 <label>Apt</label>
                                 <InputText class="form-control" @bind-Value="tenant.Apt" placeholder="Enter Apt" />
                             </div>
@@ -894,6 +896,7 @@
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                     <InputText class="form-control" @bind-Value="tenant.Address1" placeholder="Enter First Address " />
                                 </div>
+                                    <ValidationMessage For="@(() => tenant.Address1)" />
 
                             </div>
                             <div class="col">
@@ -1169,19 +1172,21 @@
     private List<RegulationStatus> RegulationList = new();
     private List<PremiseType> premiseTypesList = new();
     private List<Language> LangList = new();
+    private List<LandlordType> LandLordTypeList = new();
 
     protected override async Task OnInitializedAsync()
     {
         if (createClient != null)
         {
-          
+
             StatesList = await StateRepository.GetAllState();
             TypeOwnerList = await TypeOwnerRepository.GetAllOwner();
             RegulationList = await RegulationStatusRepository.GetAllRegulationStatus();
             premiseTypesList = await PremiseTypeRepository.GetAllPremiseType();
             LangList = await LanguageRepository.GetAllLanguage();
+            LandLordTypeList = await LandlordTypeRepository.GetAllLandLordType();
         }
-    }
+    }  
 
     private void BackToLandlordList()
     {
@@ -1266,8 +1271,13 @@
     private Task SaveLandlordAsync()
     {
         // landlord.Id =  Guid.NewGuid();
+
+        if (landlord.Id == Guid.Empty)
+        {
+            landlord.Id = Guid.NewGuid();
+        }
         landlord.TypeOwnerName = TypeOwnerList
-   .FirstOrDefault(x => x.Id == landlord.TypeOwnerId)?.Name ?? "";
+       .FirstOrDefault(x => x.Id == landlord.TypeOwnerId)?.Name ?? "";
 
         landlord.StateName = StatesList
             .FirstOrDefault(x => x.Id == landlord.StateId)?.Name ?? "";
@@ -1280,6 +1290,10 @@
 
     private Task SaveTenantAsync()
     {
+        if (tenant.Id == Guid.Empty)
+        {
+            tenant.Id = Guid.NewGuid();
+        }
 
         tenant.LanguageName = LangList
             .FirstOrDefault(x => x.Id == tenant.LanguageId)?.Name ?? "";
@@ -1295,8 +1309,10 @@
     private Task SaveBuildingAsync()
 
     {
-
-        // building.Id = Guid.NewGuid();
+        if (building.Id == Guid.Empty)
+        {
+            building.Id = Guid.NewGuid();
+        }
 
         building.PremiseTypeName = premiseTypesList
            .FirstOrDefault(x => x.Id == building.PremiseTypeId)?.Name ?? "";

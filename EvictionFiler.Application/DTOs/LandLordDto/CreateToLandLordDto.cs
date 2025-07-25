@@ -13,9 +13,11 @@ namespace EvictionFiler.Application.DTOs.LandLordDto
 		public Guid? TypeOwnerId { get; set; }
 		public string? TypeOwnerName { get; set; }
 		public string? Phone { get; set; } = string.Empty;
+		[Required(ErrorMessage = "	Email is Required")]
 		public string Email { get; set; } = string.Empty;
 		public string? EINorSSN { get; set; } = string.Empty;
 		public string? ContactPersonName { get; set; } = string.Empty;
+		[Required(ErrorMessage = "	Address1 is Required")]
 		public string Address1 { get; set; } = string.Empty;
 		public string? Address2 { get; set; }
 		public string? City { get; set; } = string.Empty;

@@ -29,6 +29,38 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 		{
 			await _dbSet.AddRangeAsync(entities);
 		}
+
+		// Update method ke neeche ya kahin bhi jod sakte ho
+
+		public void UpdateRange(IEnumerable<T> entities)
+		{
+			if (entities == null)
+				throw new ArgumentNullException(nameof(entities));
+
+			var idProperty = typeof(T).GetProperty("Id");
+
+			if (idProperty == null)
+				throw new InvalidOperationException($"Type {typeof(T).Name} does not contain a property named 'Id'.");
+
+			foreach (var entity in entities)
+			{
+				var entityId = idProperty.GetValue(entity);
+
+				var localEntity = _dbSet.Local.FirstOrDefault(e =>
+					idProperty.GetValue(e)?.Equals(entityId) == true);
+
+				if (localEntity != null)
+				{
+					_context.Entry(localEntity).State = EntityState.Detached;
+				}
+
+				_context.Entry(entity).State = EntityState.Modified;
+			}
+		}
+
+
+
+
 		public async Task<bool> AnyAsync(Expression<Func<T, bool>>? predicate = null)
 		{
 			return await _dbSet.AnyAsync(predicate!);
@@ -104,9 +136,7 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 			return entity;
 		}
 
-		//public  void RemoveRange(IEnumerable<T> entities)
-		//{
-		//	return _dbSet.RemoveRange(entities);
-		//}
+
+		
 	}
 }

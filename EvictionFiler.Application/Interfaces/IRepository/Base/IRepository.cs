@@ -7,6 +7,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository.Base
 		Task<T> AddAsync(T entity);
 		Task AddRangeAsync(IEnumerable<T> entities);
 		//Task RemoveRange(IEnumerable<T> entities);
+		void UpdateRange(IEnumerable<T> entities);
 		T UpdateAsync(T entity);
 		Task<bool> DeleteAsync(Guid id);
 		Task<T?> GetAsync(object id);
