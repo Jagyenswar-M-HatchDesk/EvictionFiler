@@ -11,14 +11,14 @@ namespace EvictionFiler.Application.Interfaces.IServices
 {
     public interface ITenantService
     {
-		Task<bool> AddTenantAsync(List<CreateTenantDto> dto);
-		Task<List<CreateTenantDto>> SearchTenantbyCode(string code);
-		Task<List<CreateTenantDto>> SearchTenantsAsync(string query, Guid buildingId);
-		Task<EditTenantDto> GetByIdAsync(Guid id);
-		Task<List<EditTenantDto>> GetTenantsByClientIdAsync(Guid clientId);
-		Task<bool> UpdateTenantAsync(List<EditTenantDto> dto);
+		Task<bool> AddTenantAsync(List<CreateToTenantDto> dto);
+		Task<List<CreateToTenantDto>> SearchTenantbyCode(string code);
+		Task<List<EditToTenantDto>> SearchTenantsAsync(string query, Guid buildingId);
+		Task<EditToTenantDto> GetByIdAsync(Guid id);
+		Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid clientId);
+		Task<bool> UpdateTenantAsync(List<EditToTenantDto> dto);
 		Task<List<Language>> GetAllLanguage();
-		Task<List<CreateTenantDto>> GetAll();
+		Task<List<CreateToTenantDto>> GetAll();
 
 	}
 }

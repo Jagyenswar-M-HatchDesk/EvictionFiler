@@ -1,20 +1,23 @@
 ﻿@page "/EditCase/{caseId:guid}"
-
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ApartmentDto
+@using EvictionFiler.Application.DTOs.BuildingDto
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Application.DTOs.LegalCaseDto
 @using EvictionFiler.Application.DTOs.TenantDto
+@using EvictionFiler.Application.Interfaces.IRepository
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Domain.Entities.Master
 @using EvictionFiler.Domain.Entities.Master
 @inject ILandlordSevice _landlordService
-@inject IApartmentService _apartmentService
+@inject IBuildingService _apartmentService
 @inject ILegalCaseService _legalCaseService
-@inject ICaseService _caseService
-
 @inject ITenantService _tenantService
 @inject IClientService _clientService
+@inject IClientRoleRepository ClientRoleRepository
+@inject ICaseTypeRepository CaseTypeRepository
+@inject ICaseSubTypeRepository CaseSubTypeRepository
 @inject NavigationManager nav
 @inject NavigationDataService _dataService
 @using Blazored.Typeahead
@@ -180,13 +183,9 @@
                 }
             </div>
         }
-
     </div>
-
 </div>
 
-
-<!-- Form Content -->
 <div class="container-fluid px-4" style="margin-top: 100px; margin-bottom: 100px;">
 
     <div style="height: calc(100vh - 200px); overflow-y: auto;" class="custom-scroll">
@@ -356,7 +355,7 @@
 
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy" style="white-space: nowrap;">Owner:</div>
-                                                    <div class="col-8">@landlordDetails.Landlord.TypeOfOwnerName</div>
+                                                    <div class="col-8">@landlordDetails.Landlord.TypeOwnerName</div>
                                                 </div>
 
                                                 <div class="row mb-2">
@@ -424,11 +423,11 @@
 
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy">MDR_No.:</div>
-                                                    <div class="col-8">@b.MDR_Number</div>
+                                                    <div class="col-8">@b.MDRNumber</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy">LandRole:</div>
-                                                    <div class="col-8">@b.LandlordType</div>
+                                                    <div class="col-8">@b.LandlordTypeName</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-5 fw-semibold text-navy">Date of Refree:</div>
@@ -436,12 +435,12 @@
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-5 fw-semibold text-navy">Rent Regulation:</div>
-                                                    <div class="col-7">@b.RentRegulationName</div> 
+                                                    <div class="col-7">@b.RegulationStatusName</div> 
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy" style="white-space: nowrap;">Address:</div>
                                                     <div class="col-8">
-                                                        @($"{b.Address_1}, {b.Address_2}, {b.City}, {b.StateId} {b.Zipcode}")
+                                                        @($"{b.Address1}, {b.Address2}, {b.City}, {b.StateName} {b.Zipcode}")
                                                     </div>
                                                 </div>
 
@@ -539,7 +538,7 @@
                                                 <div class="row mb-2">
                                                     <div class="col-5 fw-semibold text-navy" style="white-space: nowrap;">Address:</div>
                                                     <div class="col-7">
-                                                        @($"{buildingDetails.Building.Address_1}, {buildingDetails.Building.Address_2}, {buildingDetails.Building.City}, {buildingDetails.Building.StateId} {buildingDetails.Building.Zipcode}")
+                                                        @($"{buildingDetails.Building.Address1}, {buildingDetails.Building.Address2}, {buildingDetails.Building.City}, {buildingDetails.Building.StateId} {buildingDetails.Building.Zipcode}")
                                                     </div>
                                                 </div>
 
@@ -550,12 +549,12 @@
                                             <div class="col-6">
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy text-nowrap">M_NO.:</div>
-                                                    <div class="col-8">@buildingDetails.Building.MDR_Number</div>
+                                                    <div class="col-8">@buildingDetails.Building.MDRNumber</div>
                                                 </div>
 
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy text-nowrap">Type:</div>
-                                                    <div class="col-8">@buildingDetails.Building.PremiseName</div>
+                                                    <div class="col-8">@buildingDetails.Building.PremiseTypeName</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy text-nowrap">Interest:</div>
@@ -563,7 +562,7 @@
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-5 fw-semibold text-navy text-nowrap">Rent Regulation:</div>
-                                                    <div class="col-7">@buildingDetails.Building.RentRegulationName</div>
+                                                    <div class="col-7">@buildingDetails.Building.RegulationStatusName</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -625,7 +624,7 @@
                                                     
                                                         <div class="row mb-2">
                                                             <div class="col-5 fw-semibold text-navy">Address:</div>
-                                                            @($"{b.Address_1}, {b.Address_2}, {b.City}, {b.StateId} {b.Zipcode}")
+                                                            @($"{b.Address1}, {b.Address2}, {b.City}, {b.StateId} {b.Zipcode}")
                                                         </div>
                                                     </div>
                                                 </div>
@@ -742,9 +741,8 @@
                                             <div class="col-2">@TenantDetails.Borough</div>
                                         </div>
                                         <div class="row mb-2">
-                                            <div class="col-2 fw-semibold text-navy">Address:</div>
-                                            <div class="col-10">@TenantDetails.Address_1</div>
-
+                                            <div class="col-5 fw-semibold text-navy">Address:</div>
+                                            @($"{TenantDetails.Address1}, {TenantDetails.Address2}, {TenantDetails.City}, {TenantDetails.StateName} {TenantDetails.Zipcode}")
                                         </div>
                                     </div>
 
@@ -795,7 +793,7 @@
     [Parameter]
     public Guid caseId { get; set; }
     // [Parameter] public string ClientId { get; set; }
-    private CreateEditLegalCaseModel legalCase = new();
+    private CreateToEditLegalCaseModel legalCase = new();
     int currentStep = 0;
     int lastStep = 3;
     private List<CaseType> caseTypes = new();
@@ -805,7 +803,7 @@
     private string selectedCaseTypeName;
     private LandlordWithBuildings? landlordDetails;
     private BuildingWithTenant? buildingDetails;
-    private EditTenantDto? TenantDetails;
+    private EditToTenantDto? TenantDetails;
     public Guid? SelectedLandlord { get; set; }
     public Guid? SelectedBuilding { get; set; }
     public Guid? SelectedTenant{ get; set; }
@@ -815,8 +813,8 @@
     protected override async Task OnInitializedAsync()
     {
         editContext = new EditContext(legalcaseDto);
-        caseTypes = await _caseService.GetAllCaseType();
-        ClientRoleList = await _caseService.GetAllClientRole();
+        caseTypes = await CaseTypeRepository.GetAllCaseType();
+        ClientRoleList = await ClientRoleRepository.GetAllClientRole();
         legalcaseDto = await _legalCaseService.GetByIdAsync(caseId); 
 
         if (legalcaseDto?.CaseTypeId != null)
@@ -826,7 +824,7 @@
 
             if (selectedCaseTypeName == "Holdover")
             {
-                caseSubTypes = await _caseService.GetAllCaseSubTypes(legalcaseDto.CaseTypeId.Value);
+                // caseSubTypes = await CaseSubTypeRepository.GetAllCaseSubTypes(legalcaseDto.CaseTypeId.Value);
             }
         }
 
@@ -898,7 +896,7 @@
 
             if (selectedCaseTypeName == "Holdover")
             {
-                caseSubTypes = await _caseService.GetAllCaseSubTypes(selectedGuid);
+                // caseSubTypes = await CaseSubTypeRepository.GetAllCaseSubTypes(selectedGuid);
             }
             else
             {
@@ -969,12 +967,12 @@
     private string searchText = "";
     private string searchBuildingText = "";
     private string searchtenantText = "";
-    private List<CreateLandLordDto> filteredList = new();
-    private List<AddApartment> filteredBuildingList = new();
-    private List<CreateTenantDto> filteredTenantList = new();
-    private CreateLandLordDto? selectedLandlord;
-    private AddApartment? selectedBuilding;
-    private CreateTenantDto? selectedTenant;
+    private List<EditToLandlordDto> filteredList = new();
+    private List<EditToBuildingDto> filteredBuildingList = new();
+    private List<EditToTenantDto> filteredTenantList = new();
+    private EditToLandlordDto? selectedLandlord;
+    private EditToBuildingDto? selectedBuilding;
+    private EditToTenantDto? selectedTenant;
     private bool isLandlordSelected = false;
     private bool isBuildingSelected = false;
     private bool isTenantSelected = false;
@@ -1083,7 +1081,7 @@
             tenantSearchModel.SelectedTenant = fullName;
 
             // ✅ Create and assign tenantDto properly
-            tenantDto = new CreateTenantDto
+            tenantDto = new EditToTenantDto
             {
                 Id = TenantDetails.Id,
                 FirstName = TenantDetails.FirstName,
@@ -1092,7 +1090,7 @@
                 Phone = TenantDetails.Phone,
                 Email = TenantDetails.Email,
                 LanguageId = TenantDetails.LanguageId,
-                Address_1 = TenantDetails.Address_1,
+                Address1 = TenantDetails.Address1,
                 Apt = TenantDetails.Apt,
                 Borough = TenantDetails.Borough,
                 Rent = TenantDetails.Rent,
@@ -1178,16 +1176,16 @@
     private string heatWater;
     private string BuildingCode;
 
-    private CreateTenantDto tenantDto = new CreateTenantDto();
-    private CreateLandLordDto landLordDto = new CreateLandLordDto();
-    private AddApartment apartmentDto = new AddApartment();
-    private CreateEditLegalCaseModel legalcaseDto = new CreateEditLegalCaseModel();
-    private CreateClientDto clientDto = new CreateClientDto();
+    private EditToTenantDto tenantDto = new EditToTenantDto();
+    private EditToLandlordDto landLordDto = new EditToLandlordDto();
+    private EditToBuildingDto apartmentDto = new EditToBuildingDto();
+    private CreateToEditLegalCaseModel legalcaseDto = new CreateToEditLegalCaseModel();
+    private CreateToClientDto clientDto = new CreateToClientDto();
 
-    private List<CreateTenantDto> matchedTenants = new List<CreateTenantDto>();
-    private List<CreateLandLordDto> matchedLandLords = new List<CreateLandLordDto>();
-    private List<CreateClientDto> matchedClients = new List<CreateClientDto>();
-    private List<AddApartment> matchedBuilding = new List<AddApartment>();
+    private List<CreateToTenantDto> matchedTenants = new List<CreateToTenantDto>();
+    private List<CreateToLandLordDto> matchedLandLords = new List<CreateToLandLordDto>();
+    private List<CreateToClientDto> matchedClients = new List<CreateToClientDto>();
+    private List<CreateToBuildingDto> matchedBuilding = new List<CreateToBuildingDto>();
     private bool showSuggestions = false;
 
 
@@ -1261,34 +1259,35 @@
             showSuggestions = false;
         }
     }
-    private void SelectTenant(CreateTenantDto selectedTenant)
+    private void SelectTenant(EditToTenantDto selectedTenant)
     {
         tenantDto = selectedTenant;
         showSuggestions = false;
     }
 
-    private async Task OnLandLordCodeChanged(ChangeEventArgs e)
-    {
-        _cts?.Cancel(); // cancel previous call
-        _cts = new CancellationTokenSource();
-        var token = _cts.Token;
+    // private async Task OnLandLordCodeChanged(ChangeEventArgs e)
+    // {
+    //     _cts?.Cancel(); // cancel previous call
+    //     _cts = new CancellationTokenSource();
+    //     var token = _cts.Token;
 
-        var input = e.Value?.ToString() ?? string.Empty;
-        landLordDto.LandLordCode = input;
+    //     var input = e.Value?.ToString() ?? string.Empty;
+    //     landLordDto.LandLordCode = input;
 
-        if (input.Length >= 3)
-        {
-            await Task.Delay(1000, token); // debounce
-            var landlord = await _landlordService.SearchLandlordByCode(input);
-            // matchedLandLords = landlord.Where(e => e.Id == Guid.Parse(ClientId)).ToList();
-            showSuggestions = matchedLandLords.Any();
-        }
-        else
-        {
-            showSuggestions = false;
-        }
-    }
-    private void SelectLandLord(CreateLandLordDto selectedTenant)
+    //     if (input.Length >= 3)
+    //     {
+    //         await Task.Delay(1000, token); // debounce
+    //         var landlord = await _landlordService.SearchLandlordByCode(input);
+    //         // matchedLandLords = landlord.Where(e => e.Id == Guid.Parse(ClientId)).ToList();
+    //         showSuggestions = matchedLandLords.Any();
+    //     }
+    //     else
+    //     {
+    //         showSuggestions = false;
+    //     }
+    // }
+
+    private void SelectLandLord(EditToLandlordDto selectedTenant)
     {
         landLordDto = selectedTenant;
         showSuggestions = false;
@@ -1314,7 +1313,7 @@
             showSuggestions = false;
         }
     }
-    private void SelectClient(CreateClientDto selectedClient)
+    private void SelectClient(CreateToClientDto selectedClient)
     {
         // legalcaseDto.Company = selectedClient.Name;
 

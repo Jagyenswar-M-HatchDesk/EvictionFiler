@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EvictionFiler.Application;
+﻿using EvictionFiler.Application;
 using EvictionFiler.Infrastructure.DbContexts;
 
 namespace EvictionFiler.Infrastructure
@@ -16,7 +11,6 @@ namespace EvictionFiler.Infrastructure
 		{
 			this._context = context;
 		}
-
 		public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
 		{
 			return await _context.SaveChangesAsync(cancellationToken);

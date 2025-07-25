@@ -1,10 +1,9 @@
 ﻿
-
-
 @using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.TenantDto
+@using EvictionFiler.Application.Interfaces.IRepository
 @using EvictionFiler.Application.Interfaces.IServices
 
 @using EvictionFiler.Domain.Entities.Master
@@ -12,12 +11,15 @@
 @using Microsoft.AspNetCore.Components.Forms
 @inject IClientService _clientService
 @inject ILandlordSevice _landlordService
-@inject IApartmentService _apartmentService
+@inject IBuildingService _apartmentService
 @inject ITenantService _tenantService
+@inject IStateRepository StateRepository
+@inject IPremiseTypeRepository PremiseTypeRepository
+@inject ITypeOwnerRepository TypeOwnerRepository
+@inject IRegulationStatusRepository RegulationStatusRepository
+@inject ILanguageRepository LanguageRepository
 @rendermode InteractiveAuto
 @inject NavigationManager Navigation
-
-
 @inject IJSRuntime JS
 
 <style>
@@ -264,18 +266,7 @@
                     <DataAnnotationsValidator />
 
                     <div class="row">
-                      
-                          @*   <div class="col-md-3 mb-3">
-                                <label class="form-label color-text required-label">Client Code</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="bi bi-code-slash"></i>
-                                    </span>
-                                    <InputText class="form-control" maxlength="10" @bind-Value="editClient.ClientCode" placeholder="Enter up to 10 digits" readonly />
-                                </div>
-                            </div> *@
-                          
-                        <div class="col-md-4 mb-3">
+                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text required-label">First Name</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
@@ -331,7 +322,7 @@
                             <label class="form-label color-text ">Address Line 1</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                                <InputText class="form-control" @bind-Value="editClient.Address_1" placeholder="Enter First Address" />
+                                <InputText class="form-control" @bind-Value="editClient.Address1" placeholder="Enter First Address" />
                             </div>
 
                         </div>
@@ -339,7 +330,7 @@
                             <label class="form-label color-text">Address Line 2</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                                <InputText class="form-control" @bind-Value="editClient.Address_2" placeholder="Enter Second Address" />
+                                <InputText class="form-control" @bind-Value="editClient.Address2" placeholder="Enter Second Address" />
                             </div>
 
                         </div>
@@ -371,7 +362,7 @@
                             <label class="form-label color-text ">Zip Code</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-geo"></i></span>
-                                <InputNumber class="form-control" @bind-Value="editClient.ZipCode" />
+                                <InputText class="form-control" @bind-Value="editClient.ZipCode" />
                             </div>
                         </div>
 
@@ -478,7 +469,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="required-label">Type of Owner</label>
-                                <InputSelect class="form-select" @bind-Value="landlord.TypeOfOwnerId">
+                                <InputSelect class="form-select" @bind-Value="landlord.TypeOwnerId">
                                     <option value="">-- Select Type --</option>
                                     @foreach (var Own in TypeOwnerList)
                                     {
@@ -563,7 +554,7 @@
                         <th>Phone</th>
                         <th>EIN</th>
                         <th>Contact Person Name</th>
-                                <th>Type of Owner</th>
+                         <th>Type of Owner</th>
                              
                         <th>Address</th>
                                 <th>Status</th>
@@ -581,12 +572,12 @@
                                         <td>@(string.IsNullOrWhiteSpace(l.Phone) ? "-" : l.Phone)</td>
                                         <td>@(string.IsNullOrWhiteSpace(l.EINorSSN) ? "-" : l.EINorSSN)</td>
                                         <td>@(string.IsNullOrWhiteSpace(l.ContactPersonName) ? "-" : l.ContactPersonName)</td>
-                                         <td>@(string.IsNullOrWhiteSpace(l.TypeOfOwnerName) ? "-" : l.TypeOfOwnerName)</td> 
-                                       
-                                     
-                                        <td>
+                                            <td>@(string.IsNullOrWhiteSpace(l.TypeOwnerName) ? "-" : l.TypeOwnerName)</td>
+
+
+                                            <td>
                                             @(
-                                                                                string.IsNullOrWhiteSpace($"{l.Address1}{l.Address2}{l.City}{l.StateName}{l.Zipcode}")
+                                              string.IsNullOrWhiteSpace($"{l.Address1}{l.Address2}{l.City}{l.StateName}{l.Zipcode}")
                                                 ? "-" : $"{l.Address1}, {l.Address2}, {l.City}, {l.StateName} - {l.Zipcode}")
                                     </td>
 
@@ -623,10 +614,10 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="color-text fw-bold mb-0">
                         @(
-                                            showBuildingForm && building != null && building.Id != Guid.Empty
-                                            ? $"Building - {building.BuildingCode}"
-                                            : "Building"
-                                            )
+                             showBuildingForm && building != null && building.Id != Guid.Empty
+                             ? $"Building - {building.BuildingCode}"
+                             : "Building"
+                             )
                 </h5>
 
                 <button class="btn btn-outline-secondary fw-semibold me-2"
@@ -661,11 +652,11 @@
 
                             <div class="col-md-3">
                                 <label>MDR Number</label>
-                                <InputText class="form-control" @bind-Value="building.MDR_Number" Placeholder="Enter Number" />
+                                <InputText class="form-control" @bind-Value="building.MDRNumber" Placeholder="Enter Number" />
                             </div>
                             <div class="col-md-3">
                                 <label for="BuildingUnit"> Building Units(No.)</label>
-                                <InputNumber class="form-control" id="BuildingUnit" @bind-Value="building.BuildingUnits" placeholder="Enter Building Units" />
+                                <InputText class="form-control" id="BuildingUnit" @bind-Value="building.BuildingUnits" placeholder="Enter Building Units" />
                             </div>
                           
 
@@ -686,14 +677,14 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="required-label" for="RentStatus required-label">Rent Regulation Status</label>
-                                <InputSelect class="form-select" @bind-Value="building.RentRegulationId">
+                                <InputSelect class="form-select" @bind-Value="building.RegulationStatusId">
                                     <option value="">-- Select Regulation --</option>
                                     @foreach (var r in RegulationList)
                                     {
                                         <option value="@r.Id">@r.Name</option>
                                     }
                                 </InputSelect>
-                                <ValidationMessage For="@(() => building.RentRegulationId)" />
+                                <ValidationMessage For="@(() => building.RegulationStatusId)" />
                             </div>
 
                             <div class="col-md-4">
@@ -709,7 +700,7 @@
                                 <label>Address Line 1</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                                    <InputText class="form-control" @bind-Value="building.Address_1" placeholder="Enter First Address" />
+                                    <InputText class="form-control" @bind-Value="building.Address1" placeholder="Enter First Address" />
                                 </div>
 
                             </div>
@@ -717,7 +708,7 @@
                                 <label>Address Line 2</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                                    <InputText class="form-control" @bind-Value="building.Address_2" placeholder="Enter Second Address" />
+                                    <InputText class="form-control" @bind-Value="building.Address2" placeholder="Enter Second Address" />
                                 </div>
 
                             </div>
@@ -768,7 +759,7 @@
                                            placeholder="Select date" />
                             </div>
                         </div>
-                        <InputRadioGroup @bind-Value="building.LandlordType" class="mb-3 required-label">
+                        @* <InputRadioGroup @bind-Value="building.LandlordTypeId" class="mb-3 required-label">
                             <div class="row align-items-center">
                                 <div class="col-auto">
                                     <label class="form-label mb-0" style="margin-top:5px">Are You the:</label>
@@ -783,12 +774,12 @@
                                                     <InputRadio Value="@role" class="form-check-input me-1" />
                                                     <label class="form-check-label ms-1" style="margin-top:5px">
                                                         @(role.ToString()
-                                                                                                    .Replace("OwnerOfRecord", "Owner of Record")
-                                                                                                    .Replace("RefereeOwner", "Referee Owner"))
+                                                          .Replace("OwnerOfRecord", "Owner of Record")
+                                                           .Replace("RefereeOwner", "Referee Owner"))
                                         </label>
                                     </div>
 
-                                    @if (role == LandLordRole.Other && building.LandlordType == LandLordRole.Other)
+                                    @if (role == LandLordRole.Other && building.LandlordTypeId == LandLordRole.Other)
                                                 {
                                                     <InputText class="form-control"
                                                                placeholder="Please specify"
@@ -800,7 +791,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </InputRadioGroup>
+                        </InputRadioGroup> *@
 
 
                         <!-- Submit Button -->
@@ -840,18 +831,17 @@
                                         <tr>
                                             <td>@(string.IsNullOrWhiteSpace(b.ApartmentCode) ? "-" : b.ApartmentCode)</td>
 
-                                            <td>@(string.IsNullOrWhiteSpace(b.PremiseName) ? "-" : b.PremiseName)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(b.PremiseTypeName) ? "-" : b.PremiseTypeName)</td>
 
                                             <td>   @(
-                                                                                string.IsNullOrWhiteSpace($"{b.Address_1}{b.Address_2}{b.City}{b.StateName}{b.Zipcode}")
-                                                                                ? "-"
-                                                                        : $"{b.Address_1}, {b.Address_2}, {b.City}, {b.StateName} - {b.Zipcode}"
+                                                       string.IsNullOrWhiteSpace($"{b.Address1}{b.Address2}{b.City}{b.StateName}{b.Zipcode}")
+                                                     ? "-" : $"{b.Address1}, {b.Address2}, {b.City}, {b.StateName} - {b.Zipcode}"
                                                                                 )
                                         </td>
-                                        <td>@(string.IsNullOrWhiteSpace(b.MDR_Number) ? "-" : b.MDR_Number)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(b.MDRNumber) ? "-" : b.MDRNumber)</td>
                                         <td>@(string.IsNullOrWhiteSpace(b.PetitionerInterest) ? "-" : b.PetitionerInterest)</td>
-                                        <td>@(string.IsNullOrWhiteSpace(b.RentRegulationName) ? "-" : b.RentRegulationName)</td>
-                                        <td>@(b.BuildingUnits.HasValue? b.BuildingUnits.ToString() : "-")</td>
+                                        <td>@(string.IsNullOrWhiteSpace(b.RegulationStatusName) ? "-" : b.RegulationStatusName)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(b.BuildingUnits) ? "-" : b.BuildingUnits)</td>
                                         <td>@(b.DateOfRefreeDeed == DateOnly.MinValue ? "-" : b.DateOfRefreeDeed.ToString("MM/dd/yyyy"))</td>
 
                                         <td>Active</td>
@@ -862,7 +852,7 @@
                                                title="Edit"></i>
                                         </td>
                                     </tr>
-                                                }
+                                  }
                                 }
                                 else
                                 {
@@ -884,10 +874,10 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="color-text fw-bold mb-0">
                         @(
-                                            showTanentForm && tenant != null && tenant.Id != Guid.Empty
-                                            ? $"Tenant - {tenant.FirstName} {tenant.LastName} / {tenant.TenantCode}"
-                                            : "Tenant"
-                                            )
+                           showTanentForm && tenant != null && tenant.Id != Guid.Empty
+                           ? $"Tenant - {tenant.FirstName} {tenant.LastName} / {tenant.TenantCode}"
+                           : "Tenant"
+                           )
                 </h5>
                     <button class="btn btn-outline-secondary fw-semibold me-2"
                             @onclick="@BackToTenantList">
@@ -902,15 +892,15 @@
                         <div class="row mb-3">
      
                             <div class="col-md-2">
-                                <label class="required-label">Apartment</label>
-                                <InputSelect class="form-select" @bind-Value="tenant.ApartmentId">
+                                <label class="required-label">Building</label>
+                                <InputSelect class="form-select" @bind-Value="tenant.BuildingId">
                                     <option value="">-- Select Apartment --</option>
                                     @foreach (var apartment in apartmentList)
                                     {
                                         <option value="@apartment.Id">@apartment.ApartmentCode</option>
                                     }
                                 </InputSelect>
-                                <ValidationMessage For="@(() => tenant.ApartmentId)" />
+                                <ValidationMessage For="@(() => tenant.BuildingId)" />
                             </div>
                             <div class="col-md-4">
                                 <label class="required-label">First Name</label>
@@ -1014,7 +1004,7 @@
                                 <label>Address Line 1</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                                    <InputText class="form-control" @bind-Value="tenant.Address_1" placeholder="Enter First Address " />
+                                    <InputText class="form-control" @bind-Value="tenant.Address1" placeholder="Enter First Address " />
                                 </div>
 
                             </div>
@@ -1022,7 +1012,7 @@
                                 <label>Address Line 2</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                                    <InputText class="form-control" @bind-Value="tenant.Address_2" placeholder="Enter Second Address " />
+                                    <InputText class="form-control" @bind-Value="tenant.Address2" placeholder="Enter Second Address " />
                                 </div>
 
                             </div>
@@ -1205,17 +1195,17 @@
                                     <tr>
                                         <td>@t.TenantCode</td>
                                         <td>@t.FirstName</td>
-                                        <td>@t.DOB.ToString("yyyy-MM-dd")</td>
+                                        <td>@t.DOB</td>
                                         <td>@t.SSN</td>
                                         <td>@t.Phone</td>
                                         <td>@t.Email</td>
                                         <td>@t.LanguageName</td>
                                             <td>
                                                 @(
-                                                                                string.IsNullOrWhiteSpace($"{t.Address_1}{t.Address_2}{t.City}{t.StateId}{t.StateName}")
-                                                                                ? "-"
-                                                                                : $"{t.Address_1}, {t.Address_2}, {t.City}, {t.StateName} - {t.Zipcode}"
-                                                                                )
+                                                    string.IsNullOrWhiteSpace($"{t.Address1}{t.Address2}{t.City}{t.StateId}{t.StateName}")
+                                                    ? "-"
+                                                    : $"{t.Address1}, {t.Address2}, {t.City}, {t.StateName} - {t.Zipcode}"
+                                                    )
                                         </td>
                                         <td>@t.Apt</td>
                                         <td>@t.Borough</td>
@@ -1260,18 +1250,18 @@
 </div>
 
 @code {
-    [Parameter] public EditClientDto editClient { get; set; }
-    [Parameter] public EventCallback<EditClientDto> Submit { get; set; }
+    [Parameter] public EditToClientDto editClient { get; set; }
+    [Parameter] public EventCallback<EditToClientDto> Submit { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter]
-    public List<EditLandlordDto> Landlords { get; set; } = new();
-    private EditLandlordDto landlord = new();
+    public List<EditToLandlordDto> Landlords { get; set; } = new();
+    private EditToLandlordDto landlord = new();
     [Parameter]
-    public List<EditApartmentDto> Buildings { get; set; } = new();
-    private EditApartmentDto building = new();
+    public List<EditToBuildingDto> Buildings { get; set; } = new();
+    private EditToBuildingDto building = new();
     [Parameter]
-    public List<EditTenantDto> Tenants { get; set; } = new();
-    private EditTenantDto tenant = new();
+    public List<EditToTenantDto> Tenants { get; set; } = new();
+    private EditToTenantDto tenant = new();
 
     private string activeTab = string.Empty;
     private bool showLandlordForm = false;
@@ -1279,11 +1269,11 @@
     private bool showTanentForm = false;
 
 
-    private List<EditLandlordDto> savelandlordList = new();
+    private List<EditToLandlordDto> savelandlordList = new();
 
-    private List<EditApartmentDto> apartmentList = new();
-    private List<CreateTenantDto> saveTanentList = new();
-    private List<EditLandlordDto> saveEditlandlordList = new();
+    private List<EditToBuildingDto> apartmentList = new();
+    private List<CreateToTenantDto> saveTanentList = new();
+    private List<EditToLandlordDto> saveEditlandlordList = new();
 
     private Guid selectedLandlordId = Guid.Empty;
 
@@ -1300,34 +1290,31 @@
     {
         @if (editClient != null)
         {
-            StatesList = await _clientService.GetAllState();
-
-            TypeOwnerList = await _landlordService.GetAllOwner();
-
-            RegulationList = await _apartmentService.GetAllRentRegulation();
-
-            premiseTypesList = await _apartmentService.GetAllPremiseTypes();
-
-            LangList = await _tenantService.GetAllLanguage();
+            StatesList = await StateRepository.GetAllState();
+            TypeOwnerList = await TypeOwnerRepository.GetAllOwner();
+            RegulationList = await RegulationStatusRepository.GetAllRegulationStatus();
+            premiseTypesList = await PremiseTypeRepository.GetAllPremiseType();
+            LangList = await LanguageRepository.GetAllLanguage();
         }
+        
     }
 
 
     private void BackToLandlordList()
     {
         showLandlordForm = false;
-        landlord = new(); // optional: reset form
+        landlord = new(); 
     }
 
     private void BackToBuildingList()
     {
         showBuildingForm = false;
-        building = new(); // optional: reset form
+        building = new(); 
     }
     private void BackToTenantList()
     {
         showTanentForm = false;
-        tenant = new(); // optional: reset form
+        tenant = new();
     }
 
     private Task SaveLandlordAsync()
@@ -1352,13 +1339,10 @@
                 existing.Address1 = landlord.Address1;
                 existing.Address2 = landlord.Address2;
                 existing.ContactPersonName = landlord.ContactPersonName;
-
-                existing.TypeOfOwnerId = landlord.TypeOfOwnerId;
-                existing.TypeOfOwnerName = TypeOwnerList.FirstOrDefault(x => x.Id == landlord.TypeOfOwnerId)?.Name ?? "";
-
+                existing.TypeOwnerId = landlord.TypeOwnerId;
+                existing.TypeOwnerName = TypeOwnerList.FirstOrDefault(x => x.Id == landlord.TypeOwnerId)?.Name ?? "";
                 existing.StateId = landlord.StateId;
                 existing.StateName = StatesList.FirstOrDefault(x => x.Id == landlord.StateId)?.Name ?? "";
-
                 existing.City = landlord.City;
                 existing.Zipcode = landlord.Zipcode;
             }
@@ -1393,18 +1377,18 @@
                 existing.StateId = building.StateId;
                 existing.StateName = StatesList.FirstOrDefault(x => x.Id == building.StateId)?.Name ?? "";
                 existing.PremiseTypeId = building.PremiseTypeId;
-                existing.PremiseName = premiseTypesList.FirstOrDefault(x => x.Id == building.PremiseTypeId)?.Name ?? "";
-                existing.Address_1 = building.Address_1;
-                existing.Address_2 = building.Address_2;
+                existing.PremiseTypeName = premiseTypesList.FirstOrDefault(x => x.Id == building.PremiseTypeId)?.Name ?? "";
+                existing.Address1 = building.Address1;
+                existing.Address2 = building.Address2;
                 existing.Zipcode = building.Zipcode;
-                existing.MDR_Number = building.MDR_Number;
+                existing.MDRNumber = building.MDRNumber;
                 existing.PetitionerInterest = building.PetitionerInterest;
-                existing.RentRegulationId = building.RentRegulationId;
-                existing.RentRegulationName = RegulationList.FirstOrDefault(x => x.Id == building.RentRegulationId)?.Name ?? "";
-
+                existing.RegulationStatusId = building.RegulationStatusId;
+                existing.RegulationStatusName = RegulationList.FirstOrDefault(x => x.Id == building.RegulationStatusId)?.Name ?? "";
                 existing.BuildingUnits = building.BuildingUnits;
                 existing.DateOfRefreeDeed = building.DateOfRefreeDeed;
-                existing.LandlordType = building.LandlordType;
+                existing.LandlordTypeId = building.LandlordTypeId;
+                existing.LandlordTypeName = building.LandlordTypeName;
                 existing.LandlordId = building.LandlordId;
             }
         }
@@ -1439,8 +1423,8 @@
                 existing.Email = tenant.Email;
                 existing.LanguageId = tenant.LanguageId;
                 existing.LanguageName = RegulationList.FirstOrDefault(x => x.Id == tenant.LanguageId)?.Name ?? "";
-                existing.Address_1 = tenant.Address_1;
-                existing.Address_2 = tenant.Address_2;
+                existing.Address1 = tenant.Address1;
+                existing.Address2 = tenant.Address2;
                 existing.StateId = tenant.StateId;
                 existing.StateName = RegulationList.FirstOrDefault(x => x.Id == tenant.StateId)?.Name ?? "";
                 existing.City = tenant.City;
@@ -1448,7 +1432,6 @@
                 existing.Apt = tenant.Apt;
                 existing.Borough = tenant.Borough;
                 existing.Rent = tenant.Rent;
-                // existing.LeaseStatus = tenant.LeaseStatus;
                 existing.HasPossession = tenant.HasPossession;
                 existing.HasRegulatedTenancy = tenant.HasRegulatedTenancy;
                 existing.Name_Relation = tenant.Name_Relation;
@@ -1505,7 +1488,7 @@
         // Get selected landlord from list
         building = Buildings.FirstOrDefault(l => l.Id == BuildingId) ?? new();
 
-      
+
 
         StateHasChanged();
 
@@ -1518,12 +1501,8 @@
         selectedLandlordId = landlordId;
         showLandlordForm = true;
         activeTab = "landlord"; // 👈 set tab
-
         // Get selected landlord from list
         landlord = Landlords.FirstOrDefault(l => l.Id == landlordId) ?? new();
-
-        
-
         StateHasChanged();
     }
 
@@ -1536,10 +1515,9 @@
         && !string.IsNullOrWhiteSpace(editClient.Email)
         && !string.IsNullOrWhiteSpace(editClient.Phone)
         && !string.IsNullOrWhiteSpace(editClient.ClientCode)
-        && !string.IsNullOrWhiteSpace(editClient.Address_1)
+        && !string.IsNullOrWhiteSpace(editClient.Address1)
         && !string.IsNullOrWhiteSpace(editClient.City)
-          // && !string.IsNullOrWhiteSpace(editClient.StateId)
-          && editClient.ZipCode.HasValue;
+         && !string.IsNullOrWhiteSpace(editClient.ZipCode);
     }
     private void ToggleBuildingForm() => showBuildingForm = !showBuildingForm;
     private void ToggleLandlordForm() => showLandlordForm = !showLandlordForm;
@@ -1585,7 +1563,7 @@
                 if (val.Id == Guid.Empty)
                     val.Id = Guid.NewGuid();
 
-                // you may link landlordid if needed
+                
             }
 
             var isapartmentsaved = await _apartmentService.UpdateBuildingAsync(Buildings);

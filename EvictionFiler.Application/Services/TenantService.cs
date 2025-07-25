@@ -19,10 +19,7 @@ namespace EvictionFiler.Application.Services
 			_repo = services;
 			_unitOfWork = unitOfWork;
 		}
-
-		
-
-	public async Task<bool> AddTenantAsync(List<CreateTenantDto> dtoList)
+	public async Task<bool> AddTenantAsync(List<CreateToTenantDto> dtoList)
 		{
 			var newtenant = new List<Tenant>();
 
@@ -45,7 +42,7 @@ namespace EvictionFiler.Application.Services
 
 				var tenant = new Tenant
 				{
-					Id = dto.Id,
+					
 					TenantCode = code,
 					FirstName = dto.FirstName,
 					LastName = dto.LastName,
@@ -55,14 +52,13 @@ namespace EvictionFiler.Application.Services
 					Email = dto.Email,
 					LanguageId = dto.LanguageId,
 					StateId = dto.StateId,
-					Address_1 = dto.Address_1,
-					Address_2 = dto.Address_2,
+					Address1 = dto.Address1,
+					Address2 = dto.Address2,
 					City = dto.City,
 					Zipcode = dto.Zipcode,
 					Apt = dto.Apt,
 					Borough = dto.Borough,
 					Rent = dto.Rent,
-
 					HasPossession = dto.HasPossession,
 					HasRegulatedTenancy = dto.HasRegulatedTenancy,
 					Name_Relation = dto.Name_Relation,
@@ -70,14 +66,11 @@ namespace EvictionFiler.Application.Services
 					Registration_No = dto.Registration_No,
 					TenantRecord = dto.TenantRecord,
 					HasPriorCase = dto.HasPriorCase,
-					IsActive = dto.IsActive,
-					IsDeleted = dto.IsDeleted,
-					CreatedBy = dto.CreatedBy,
-					CreatedAt = dto.CreatedAt,
-					UpdatedAt = dto.UpdatedAt,
-					UpdatedBy = dto.UpdatedBy,
-
-					ApartmentId = dto.ApartmentId
+					IsActive = true,
+					IsDeleted = false,
+					CreatedOn = DateTime.UtcNow,
+					UpdatedOn = DateTime.UtcNow	,
+					BuildinId = dto.BuildingId
 				};
 
 				newtenant.Add(tenant);
@@ -89,25 +82,25 @@ namespace EvictionFiler.Application.Services
 			return result > 0;
 		}
 
-		public async Task<List<CreateTenantDto>> SearchTenantbyCode(string code)
+		public async Task<List<CreateToTenantDto>> SearchTenantbyCode(string code)
 		{
 			var newtenant = await _repo.SearchTenantByCode(code);
 			return newtenant;
 		}
 
-		public async Task<List<CreateTenantDto>> SearchTenantsAsync(string query, Guid buildingId)
+		public async Task<List<EditToTenantDto>> SearchTenantsAsync(string query, Guid buildingId)
 		{
 			return await _repo.SearchTenantAsync(query, buildingId);
 		}
 
-		public async Task<EditTenantDto> GetByIdAsync(Guid id)
+		public async Task<EditToTenantDto> GetByIdAsync(Guid id)
 		{
 			var tenant = await _repo.GetAsync(id);
 
 			if (tenant == null)
 				return null;
 
-			return new EditTenantDto
+			return new EditToTenantDto
 			{
 				Id = tenant.Id,
 				TenantCode = tenant.TenantCode,
@@ -119,8 +112,8 @@ namespace EvictionFiler.Application.Services
 				Email = tenant.Email,
 				LanguageId = tenant.LanguageId,
 				StateId = tenant.StateId,
-				Address_1 = tenant.Address_1,
-				Address_2 = tenant.Address_2,
+				Address1 = tenant.Address1,
+				Address2 = tenant.Address2,
 				City = tenant.City,
 				Zipcode = tenant.Zipcode,
 				Apt = tenant.Apt,
@@ -133,25 +126,18 @@ namespace EvictionFiler.Application.Services
 				Registration_No = tenant.Registration_No,
 				TenantRecord = tenant.TenantRecord,
 				HasPriorCase = tenant.HasPriorCase,
-				IsActive = tenant.IsActive,
-				IsDeleted = tenant.IsDeleted,
-				CreatedBy = tenant.CreatedBy,
-				CreatedAt = tenant.CreatedAt,
-				UpdatedAt = tenant.UpdatedAt,
-				UpdatedBy = tenant.UpdatedBy,
-
-				ApartmentId = tenant.ApartmentId
+				BuildingId = tenant.BuildinId,
 			};
 	}
 
-		public async Task<List<EditTenantDto>> GetTenantsByClientIdAsync(Guid clientId)
+		public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid clientId)
 		{
 			var tenants = await _repo.GetTenantsByClientIdAsync(clientId);
 			return tenants;
 
 
 		}
-		public async Task<bool> UpdateTenantAsync(List<EditTenantDto> dtoList)
+		public async Task<bool> UpdateTenantAsync(List<EditToTenantDto> dtoList)
 
 		{
 			foreach (var dto in dtoList)
@@ -168,8 +154,8 @@ namespace EvictionFiler.Application.Services
 					entity.Email = dto.Email;
 					entity.LanguageId = dto.LanguageId;
 					entity.StateId = dto.StateId;
-					entity.Address_1 = dto.Address_1;
-					entity.Address_2 = dto.Address_2;
+					entity.Address1 = dto.Address1;
+					entity.Address2 = dto.Address2;
 					entity.City = dto.City;
 					entity.Zipcode = dto.Zipcode;
 					entity.Apt = dto.Apt;
@@ -182,13 +168,8 @@ namespace EvictionFiler.Application.Services
 					entity.Registration_No = dto.Registration_No;
 					entity.TenantRecord = dto.TenantRecord;
 					entity.HasPriorCase = dto.HasPriorCase;
-					entity.ApartmentId = dto.ApartmentId;
-					entity.IsActive = dto.IsActive;
-					entity.IsDeleted = dto.IsDeleted;
-					entity.CreatedBy = dto.CreatedBy;
-					entity.CreatedAt = dto.CreatedAt;
-					entity.UpdatedAt = dto.UpdatedAt;
-					entity.UpdatedBy = dto.UpdatedBy;
+					entity.BuildinId = dto.BuildingId;
+
 					entity.HasPriorCase = dto.HasPriorCase;
 				}
 
@@ -204,13 +185,11 @@ namespace EvictionFiler.Application.Services
 			return lang;
 		}
 
-		public async Task<List<CreateTenantDto>> GetAll()
+		public async Task<List<CreateToTenantDto>> GetAll()
 		{
 			var query = await _repo.GetAllAsync();
-			return query.Select(dto => new CreateTenantDto
+			return query.Select(dto => new CreateToTenantDto
 			{
-
-				Id = dto.Id,
 				TenantCode = dto.TenantCode,
 				FirstName = dto.FirstName,
 				LastName = dto.LastName,
@@ -220,8 +199,8 @@ namespace EvictionFiler.Application.Services
 				Email = dto.Email,
 				LanguageId = dto.LanguageId,
 				StateId = dto.StateId,
-				Address_1 = dto.Address_1,
-				Address_2 = dto.Address_2,
+				Address1 = dto.Address1,
+				Address2 = dto.Address2,
 				City = dto.City,
 				Zipcode = dto.Zipcode,
 				Apt = dto.Apt,
@@ -234,14 +213,7 @@ namespace EvictionFiler.Application.Services
 				Registration_No = dto.Registration_No,
 				TenantRecord = dto.TenantRecord,
 				HasPriorCase = dto.HasPriorCase,
-				IsActive = dto.IsActive,
-				IsDeleted = dto.IsDeleted,
-				CreatedBy = dto.CreatedBy,
-				CreatedAt = dto.CreatedAt,
-				UpdatedAt = dto.UpdatedAt,
-				UpdatedBy = dto.UpdatedBy,
-
-				ApartmentId = dto.ApartmentId
+				BuildingId = dto.BuildinId,
 			}).ToList();
 		}
 	}

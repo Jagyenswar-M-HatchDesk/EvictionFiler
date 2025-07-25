@@ -1,16 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Numerics;
-using System.Reflection.Emit;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.Intrinsics.X86;
-using System.Text;
-using System.Threading.Tasks;
-using EvictionFiler.Application.DTOs.ApartmentDto;
-using EvictionFiler.Application.DTOs.LandLordDto;
-using EvictionFiler.Application.DTOs.TenantDto;
+﻿using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
@@ -31,16 +19,16 @@ namespace EvictionFiler.Infrastructure.Repositories
 		public async Task<string?> GetLasttenantCodeAsync()
 		{
 			return await _dbContext.Tenants
-				.OrderByDescending(l => l.CreatedAt)
+				.OrderByDescending(l => l.CreatedOn)
 				.Select(l => l.TenantCode)
 				.FirstOrDefaultAsync();
 		}
 
-        public async Task<List<CreateTenantDto>> SearchTenantByCode(string code)
+        public async Task<List<CreateToTenantDto>> SearchTenantByCode(string code)
         {
-            var tenant = await _dbContext.Tenants.Where(e=>e.TenantCode.Contains(code)).Select( dto=> new CreateTenantDto
+            var tenant = await _dbContext.Tenants.Where(e=>e.TenantCode.Contains(code)).Select( dto=> new CreateToTenantDto
             {
-				Id = dto.Id,
+				
 				TenantCode = dto.TenantCode,
 				FirstName = dto.FirstName,
 				LastName = dto.LastName,
@@ -50,8 +38,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Email = dto.Email,
 				LanguageId = dto.LanguageId,
 				StateId = dto.StateId,
-				Address_1 = dto.Address_1,
-				Address_2 = dto.Address_2,
+				Address1 = dto.Address1,
+				Address2 = dto.Address2,
 				City = dto.City,
 				Zipcode = dto.Zipcode,
 				Apt = dto.Apt,
@@ -64,35 +52,34 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Registration_No = dto.Registration_No,
 				TenantRecord = dto.TenantRecord,
 				HasPriorCase = dto.HasPriorCase,
-				ApartmentId = dto.ApartmentId
+				BuildingId = dto.BuildinId
 
 			}). ToListAsync();
             if (tenant == null)
-                return new List<CreateTenantDto>();
+                return new List<CreateToTenantDto>();
             return tenant;
         }
 
-		public async Task<List<CreateTenantDto>> SearchTenantAsync(string query , Guid BuildingId)
+		public async Task<List<EditToTenantDto>> SearchTenantAsync(string query , Guid BuildingId)
 		{
 			query = query?.Trim().ToLower() ?? "";
 
 			var tenants = await _dbContext.Tenants
 				.Where(l =>
-					l.ApartmentId == BuildingId &&
+					l.BuildinId == BuildingId &&
 					l.IsDeleted != true &&
 					(
 						l.FirstName.ToLower().StartsWith(query) ||
 						l.TenantCode.ToLower().StartsWith(query)
 					)
 				)
-				.Select(t => new CreateTenantDto
+				.Select(t => new EditToTenantDto
 				{
-					Id = t.Id,
 					FirstName = t.FirstName,
 					LastName = t.LastName,
 					Email = t.Email,
 					Phone = t.Phone,
-					TenantCode = t.TenantCode // make sure this property exists in CreateTenantDto
+					TenantCode = t.TenantCode 
 				})
 				.ToListAsync();
 
@@ -100,12 +87,9 @@ namespace EvictionFiler.Infrastructure.Repositories
 		}
 
 	
-		public async Task<List<EditTenantDto>> GetTenantsByClientIdAsync(Guid buildingId)
+		public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid buildingId)
 		{
-
-
-
-			var apartmentIds = await _dbContext.Appartments
+			var apartmentIds = await _dbContext.Buildings
 			.Where(a => a.Id == buildingId && (a.IsDeleted == false || a.IsDeleted == null))
 			.Select(a => a.Id)
 			.ToListAsync();
@@ -113,10 +97,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			// Step 3: Get all tenants linked to these apartments
 			var tenants = await _dbContext.Tenants
-		.Include(a => a.States)
-		.Include(a => a.Languages)
-		.Where(t => t.ApartmentId.HasValue && apartmentIds.Contains(t.ApartmentId.Value) && t.IsDeleted != true)
-		.Select(dto => new EditTenantDto
+		.Include(a => a.State)
+		.Include(a => a.Language)
+		.Where(t => t.BuildinId.HasValue && apartmentIds.Contains(t.BuildinId.Value) && t.IsDeleted != true)
+		.Select(dto => new EditToTenantDto
 		{
 			Id = dto.Id,
 			TenantCode = dto.TenantCode,
@@ -128,16 +112,15 @@ namespace EvictionFiler.Infrastructure.Repositories
 			Email = dto.Email,
 			LanguageId = dto.LanguageId,
 			StateId = dto.StateId,
-			StateName = dto.States.Name,
-			LanguageName = dto.Languages.Name,
-			Address_1 = dto.Address_1,
-			Address_2 = dto.Address_2,
+			StateName = dto.State.Name,
+			LanguageName = dto.Language.Name,
+			Address1 = dto.Address1,
+			Address2 = dto.Address2,
 			City = dto.City,
 			Zipcode = dto.Zipcode,
 			Apt = dto.Apt,
 			Borough = dto.Borough,
 			Rent = dto.Rent,
-			
 			HasPossession = dto.HasPossession,
 			HasRegulatedTenancy = dto.HasRegulatedTenancy,
 			Name_Relation = dto.Name_Relation,
@@ -145,9 +128,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 			Registration_No = dto.Registration_No,
 			TenantRecord = dto.TenantRecord,
 			HasPriorCase = dto.HasPriorCase,
-
-
-			ApartmentId = dto.ApartmentId
+			BuildingId = dto.BuildinId
 		}).ToListAsync();
 
 
@@ -157,7 +138,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 		public async Task<List<Language>> GetAllLanguage()
 		{
-			return await _dbContext.mst_Languages.ToListAsync();
+			return await _dbContext.MstLanguages.ToListAsync();
 		}
 
 	}

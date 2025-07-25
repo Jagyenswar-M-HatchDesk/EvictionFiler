@@ -1,5 +1,4 @@
-﻿using EvictionFiler.Application.DTOs;
-using EvictionFiler.Application.DTOs.LandLordDto;
+﻿using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
@@ -19,7 +18,7 @@ namespace EvictionFiler.Application.Services
 			_unitOfWork = unitOfWork;
 		}
 
-		public async Task<bool> AddLandLordAsync(List<CreateLandLordDto> dtoList)
+		public async Task<bool> AddLandLordAsync(List<CreateToLandLordDto> dtoList)
 		{
 			var newLandlords = new List<LandLord>();
 
@@ -55,14 +54,13 @@ namespace EvictionFiler.Application.Services
 					City = dto.City,
 					Zipcode = dto.Zipcode,
 					ContactPersonName = dto.ContactPersonName,
-					TypeOfOwnerId = dto.TypeOfOwnerId,
+					TypeOfOwnerId = dto.TypeOwnerId,
 					ClientId = dto.ClientId,
-					CreatedAt = DateTime.Now,
+					CreatedOn = DateTime.Now,
 					IsActive = true,
 					IsDeleted = false,
-					CreatedBy = null,
 					UpdatedBy = null,
-					UpdatedAt = DateTime.Now,
+					UpdatedOn= DateTime.Now,
 				};
 
 				newLandlords.Add(landlord);
@@ -75,21 +73,15 @@ namespace EvictionFiler.Application.Services
 		}
 
 
-		public async Task<List<CreateLandLordDto>> SearchLandlordByCode(string code)
-		{
-			var newtenant = await _landLordRepository.SearchLandlordByCode(code);
-			return newtenant;
-		}
-
-		public async Task<List<CreateLandLordDto>> GetAllLandLordsAsync()
+		public async Task<List<CreateToLandLordDto>> GetAllLandLordsAsync()
 		{
 			var landlords = await _landLordRepository
-				.GetAllQuerable(x => x.IsDeleted != true, x => x.States, x => x.TypeOfOwners)
+				.GetAllQuerable(x => x.IsDeleted != true, x => x.State, x => x.TypeOfOwner)
 				.ToListAsync();
 
-			var result = landlords.Select(dto => new CreateLandLordDto
+			var result = landlords.Select(dto => new CreateToLandLordDto
 			{
-				Id = dto.Id,
+			
 				LandLordCode = dto.LandLordCode,
 				FirstName = dto.FirstName,
 				LastName = dto.LastName,
@@ -99,18 +91,13 @@ namespace EvictionFiler.Application.Services
 				Address1 = dto.Address1,
 				Address2 = dto.Address2,
 				StateId = dto.StateId,
-				StateName = dto.States?.Name ?? "Unknown",
-				TypeOfOwnerId = dto.TypeOfOwnerId,
-				TypeOfOwnerName = dto.TypeOfOwners?.Name ?? "Unknown",
+				StateName = dto.State?.Name ?? "Unknown",
+				TypeOwnerId = dto.TypeOfOwnerId,
+				TypeOwnerName = dto.TypeOfOwner?.Name ?? "Unknown",
 				City = dto.City,
 				Zipcode = dto.Zipcode,
 				ContactPersonName = dto.ContactPersonName,
-				IsActive = dto.IsActive ?? false,
-				IsDeleted = dto.IsDeleted ?? false,
-				CreatedAt = dto.CreatedAt ?? DateTime.UtcNow,
-				CreatedBy = dto.CreatedBy ?? "Admin",
-				UpdatedAt = dto.UpdatedAt ?? DateTime.UtcNow,
-				UpdatedBy = dto.UpdatedBy ?? "Admin"
+			
 			}).ToList();
 
 			return result;
@@ -118,12 +105,12 @@ namespace EvictionFiler.Application.Services
 
 
 
-		public async Task<List<CreateLandLordDto>> SearchLandlordsAsync(string query, Guid clientId)
+		public async Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query, Guid clientId)
 		{
 			return await _landLordRepository.SearchLandlordsAsync(query, clientId);
 		}
 
-		public async Task<CreateLandLordDto?> GetLandLordByIdAsync(Guid id)
+		public async Task<CreateToLandLordDto?> GetLandLordByIdAsync(Guid id)
 		{
 			var dto = await _landLordRepository.GetAsync(id);
 
@@ -131,29 +118,23 @@ namespace EvictionFiler.Application.Services
 			if (dto == null)
 				return null;
 
-			return new CreateLandLordDto
+			return new CreateToLandLordDto
 			{
-				Id = dto.Id,
+			
 				LandLordCode = dto.LandLordCode,
 				FirstName = dto.FirstName,
 				LastName = dto.LastName,
 				EINorSSN = dto.EINorSSN,
 				Phone = dto.Phone,
 				Email = dto.Email,
-
 				Address1 = dto.Address1,
 				Address2 = dto.Address2,
 				StateId = dto.StateId,
 				City = dto.City,
 				Zipcode = dto.Zipcode,
 				ContactPersonName = dto.ContactPersonName,
-				TypeOfOwnerId = dto.TypeOfOwnerId,
-				IsDeleted = dto.IsDeleted,
-				IsActive = dto.IsActive,
-				CreatedAt = dto.CreatedAt,
-				CreatedBy = dto.CreatedBy,
-				UpdatedAt = dto.UpdatedAt,
-				UpdatedBy = dto.UpdatedBy,
+				TypeOwnerId = dto.TypeOfOwnerId,
+			    TypeOwnerName = dto.TypeOfOwner?.Name,
 			};
 			}
 
@@ -162,7 +143,7 @@ namespace EvictionFiler.Application.Services
 			return await _landLordRepository.GetLandlordWithBuildingsAsync(landlordId);
 		}
 
-		public async Task<List<EditLandlordDto>> GetLandlordsByClientIdAsync(Guid clientId)
+		public async Task<List<EditToLandlordDto>> GetLandlordsByClientIdAsync(Guid clientId)
 		{
 			var landlords = await _landLordRepository.GetByClientIdAsync(clientId);
 			return landlords;
@@ -170,7 +151,7 @@ namespace EvictionFiler.Application.Services
 
 		}
 
-		public async Task<bool> UpdateLandLordsAsync(List<EditLandlordDto> landlords)
+		public async Task<bool> UpdateLandLordsAsync(List<EditToLandlordDto> landlords)
 
 		{
 			foreach (var l in landlords)
@@ -185,20 +166,12 @@ namespace EvictionFiler.Application.Services
 					entity.Email = l.Email;
 					entity.Address1 = l.Address1;
 					entity.Address2 = l.Address2;
-					entity.TypeOfOwnerId = l.TypeOfOwnerId;
+					entity.TypeOfOwnerId = l.TypeOwnerId;
 					entity.StateId = l.StateId;
 					entity.City = l.City;
 					entity.Zipcode = l.Zipcode;
 					entity.EINorSSN = l.EINorSSN;
 					entity.ContactPersonName = l.ContactPersonName;
-
-					entity.IsActive = l.IsActive;
-					entity.IsDeleted = l.IsDeleted;
-					entity.CreatedBy = l.CreatedBy;
-					entity.CreatedAt = l.CreatedAt;
-					entity.UpdatedAt = l.UpdatedAt;
-					entity.UpdatedBy = l.UpdatedBy;
-
 				}
 			}
 
@@ -215,5 +188,7 @@ namespace EvictionFiler.Application.Services
 			var states = await _landLordRepository.GetAllOwner();
 			return states;
 		}
+
+	
 	}
 }

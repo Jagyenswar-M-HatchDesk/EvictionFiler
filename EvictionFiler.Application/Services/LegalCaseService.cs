@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EvictionFiler.Application.DTOs;
+﻿using EvictionFiler.Application.DTOs.LegalCaseDto;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
@@ -18,7 +13,7 @@ namespace EvictionFiler.Application.Services
 			_repository = repository;
 		}
 
-		public async Task<bool> AddLegalCasesAsync(CreateEditLegalCaseModel dto)
+		public async Task<bool> AddLegalCasesAsync(CreateToEditLegalCaseModel dto)
 		{
 			var newcase = await _repository.AddCaseAsync(dto);
 			return newcase;
@@ -29,11 +24,11 @@ namespace EvictionFiler.Application.Services
 			return await _repository.GetAllCasesAsync();
 		}
 
-		public async Task<CreateEditLegalCaseModel?> GetByIdAsync(Guid id)
+		public async Task<CreateToEditLegalCaseModel?> GetByIdAsync(Guid id)
 		{
 			return await _repository.GetCaseByIdAsync(id);
 		}
-		public async Task<bool> UpdateAsync(CreateEditLegalCaseModel dto)
+		public async Task<bool> UpdateAsync(CreateToEditLegalCaseModel dto)
 		{
 			// 2. Save Client
 			var iscaseSaved = await _repository.UpdateCasesAsync(dto);

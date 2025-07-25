@@ -20,7 +20,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 		public async Task<List<State>> GetAllStateAsync()
 		{
-			return await _context.mst_State.ToListAsync();
+			return await _context.MstStates.ToListAsync();
 		}
 
 		public async Task<Client?> GetClientWithAllDetailsAsync(Guid clientId)
@@ -28,23 +28,21 @@ namespace EvictionFiler.Infrastructure.Repositories
 			return await _context.Clients
 				.Where(c => c.Id == clientId && c.IsDeleted != true)
 				.Include(c => c.LandLords)
-				.Include(c => c.Tenants)
-				.Include(c => c.Appartments)
+					.ThenInclude(l => l.Buildings)
+						.ThenInclude(b => b.Tenants)
 				.FirstOrDefaultAsync();
 		}
 
-
-		public async Task<List<CreateClientDto>> SearchClientByCode(string code)
+		public async Task<List<CreateToClientDto>> SearchClientByCode(string code)
         {
-            var client = await _context.Clients.Where(e => e.ClientCode.Contains(code)).Select(e => new CreateClientDto
+            var client = await _context.Clients.Where(e => e.ClientCode.Contains(code)).Select(e => new CreateToClientDto
             {
-
-                Id = e.Id,
+              
                 ClientCode = e.ClientCode,
                 FirstName = e.FirstName,
                 Email = e.Email,
-                Address_1 = e.Address_1,
-                Address_2 = e.Address_2,
+                Address1 = e.Address1,
+                Address2= e.Address2,
                 City = e.City,
 				StateId = e.StateId,
 				ZipCode = e.ZipCode,
@@ -54,13 +52,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 
             }).ToListAsync();
             if (client == null)
-                return new List<CreateClientDto>();
+                return new List<CreateToClientDto>();
             return client;
         }
 
 		public async Task<string> GenerateClientCodeAsync()
 		{
-			// Get the latest case from DB
 			var lastCase = await _context.Clients
 				.OrderByDescending(c => c.ClientCode)
 				.Select(c => c.ClientCode)
@@ -70,14 +67,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			if (!string.IsNullOrEmpty(lastCase) && lastCase.StartsWith("CC"))
 			{
-				string numberPart = lastCase.Substring(2); // Remove 'EF'
+				string numberPart = lastCase.Substring(2);
 				if (int.TryParse(numberPart, out int parsedNumber))
 				{
 					nextNumber = parsedNumber + 1;
 				}
 			}
 
-			// Generate new CaseCode
 			string newCode = "CC" + nextNumber.ToString("D10"); // D10 = 10 digits
 			return newCode;
 		}

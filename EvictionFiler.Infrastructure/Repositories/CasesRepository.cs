@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using EvictionFiler.Application.DTOs;
-using EvictionFiler.Application.DTOs.ClientDto;
+﻿using EvictionFiler.Application.DTOs.LegalCaseDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
@@ -25,93 +18,46 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 		public async Task<List<ClientRole>> GetAllClientRole()
 		{
-			return await _context.mst_ClienrRoles.ToListAsync();
-		}
-
-		public async Task<List<CaseType>> GetAllCaseTypeAsync()
-		{
-			return await _context.mst_CaseTypes.ToListAsync();
-		}
-
-		public async Task<List<CaseSubType>> GetSubTypesByCaseTypeIdAsync(Guid caseTypeId)
-		{
-			var result = await _context.mst_CaseSubTypes
-				.Where(x => x.CaseTypeId == caseTypeId
-					&& (x.IsActive == true || x.IsActive == null)
-					&& (x.IsDeleted == false || x.IsDeleted == null))
-				.ToListAsync();
-
-			return result;
+			return await _context.MstClientRoles.ToListAsync();
 		}
 
 		public async Task<List<LegalCase>> GetAllCasesAsync()
         {
             return await _context.LegalCases
                 .Include(c => c.Clients)
-				 .Include(c => c.ClientRoles)
-				.Include(c => c.Apartments)
-				.Include(c=>c.CaseTypes)
-				.Include(c=>c.CaseSubTypes)
-                .Include(c => c.LandLords).Include(c=>c.Tenant)
+				 .Include(c => c.ClientRole)
+				.Include(c => c.Buildings)
+				.Include(c=>c.CaseType)
+				.Include(c=>c.CaseSubType)
+                .Include(c => c.LandLords).Include(c=>c.Tenants)
                 .ToListAsync();
         }
 
-		public async Task<CreateEditLegalCaseModel?> GetCaseByIdAsync(Guid id)
+		public async Task<CreateToEditLegalCaseModel?> GetCaseByIdAsync(Guid id)
 		{
 			var legalCaseEntity = await _context.LegalCases
 				.Include(c => c.Clients)
-				.Include(c => c.Apartments)
+				.Include(c => c.Buildings)
 				.Include(c => c.LandLords)
-				.Include(c => c.Tenant)
+				.Include(c => c.Tenants)
 				.FirstOrDefaultAsync(c => c.Id == id);
 
 			if (legalCaseEntity == null)
 				return null;
 
-			// Map entity to DTO
-			var dto = new CreateEditLegalCaseModel
+			var dto = new CreateToEditLegalCaseModel
 			{
 				Id = legalCaseEntity.Id,
-				ClientId = legalCaseEntity.Clients.Id, // or appropriate logic
-				ApartmentId = legalCaseEntity.Apartments.Id,
+				ClientId = legalCaseEntity.Clients?.Id, 
+				ApartmentId = legalCaseEntity.Buildings?.Id,
 				LandLordId = legalCaseEntity.LandLordId,
-				TenantId = legalCaseEntity.Tenant?.Id,
+				TenantId = legalCaseEntity.Tenants?.Id,
 				CaseName = legalCaseEntity.CaseName,
 				ClientRoleId = legalCaseEntity.ClientRoleId,
 				LegalRepresentative = legalCaseEntity.LegalRepresentative,
 				CaseTypeId = legalCaseEntity.CaseTypeId,
 				CaseSubTypeId = legalCaseEntity.CaseSubTypeId,
 				Casecode = legalCaseEntity.Casecode,
-
-				// section4
-				Company = legalCaseEntity.Company,
-				Contact = legalCaseEntity.Contact,
-				PhoneorEmail = legalCaseEntity.PhoneorEmail,
-				MDRNo = legalCaseEntity.MDRNo,
-				ResidentalUnits = legalCaseEntity.ResidentalUnits,
-				CommercialUnits = legalCaseEntity.CommercialUnits,
-				AllUnitsRehistered = legalCaseEntity.AllUnitsRehistered,
-				HPDViolation = legalCaseEntity.HPDViolation,
-
-				// section5
-				Address = legalCaseEntity.Address,
-				AptNo = legalCaseEntity.AptNo,
-				Borough = legalCaseEntity.Borough,
-				ZIP = legalCaseEntity.ZIP,
-				Class = legalCaseEntity.Class,
-				YearBuilt = legalCaseEntity.YearBuilt,
-				HeatorHotWater = legalCaseEntity.HeatorHotWater,
-				RentStablized = legalCaseEntity.RentStablized,
-
-				// section6
-				SeekinEviction = legalCaseEntity.SeekinEviction,
-				ExemptUnit = legalCaseEntity.ExemptUnit,
-				RentIncreases = legalCaseEntity.RentIncreases,
-				Monthsunpaid = legalCaseEntity.Monthsunpaid,
-				OthersGrounds = legalCaseEntity.OthersGrounds,
-
-			
-
 				Attrney = legalCaseEntity.Attrney,
 				AttrneyContactInfo = legalCaseEntity.AttrneyContactInfo,
 				Firm = legalCaseEntity.Firm
@@ -120,7 +66,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 			return dto;
 		}
 
-		public async Task<bool> AddCaseAsync(CreateEditLegalCaseModel legalCase)
+		public async Task<bool> AddCaseAsync(CreateToEditLegalCaseModel legalCase)
         {
             var newcase = new LegalCase
             {
@@ -133,27 +79,10 @@ namespace EvictionFiler.Infrastructure.Repositories
                 CaseName = legalCase.CaseName,
                 ClientRoleId = legalCase.ClientRoleId,
                 LegalRepresentative = legalCase.LegalRepresentative,
-                //CaseType = legalCase.CaseType,
-                Company = legalCase.Company,
-                Contact = legalCase.Contact,
-                PhoneorEmail = legalCase.PhoneorEmail,
-                MDRNo = legalCase.MDRNo,
-                ResidentalUnits = legalCase.ResidentalUnits,
-                CommercialUnits = legalCase.CommercialUnits,
-                Address = legalCase.Address,
-                AptNo = legalCase.AptNo,
-                Borough = legalCase.Borough,
                 Attrney = legalCase.Attrney,
                 AttrneyContactInfo = legalCase.AttrneyContactInfo,
                 Firm = legalCase.Firm,  
-                ZIP = legalCase.ZIP,
-                Class = legalCase.Class,
-				CaseTypeId = legalCase.CaseTypeId,
-				CaseSubTypeId = legalCase.CaseSubTypeId,
-                YearBuilt = legalCase.YearBuilt,
-                CreatedAt = DateTime.UtcNow,
-                IsActive =true,
-                IsDeleted = false
+               
             };
 
             await _context.LegalCases.AddAsync(newcase);
@@ -166,11 +95,10 @@ namespace EvictionFiler.Infrastructure.Repositories
             return false;
         }
 
-		public async Task<bool> UpdateCasesAsync(CreateEditLegalCaseModel legalCase)
+		public async Task<bool> UpdateCasesAsync(CreateToEditLegalCaseModel legalCase)
 		{
 			var existing = await _context.LegalCases.FirstOrDefaultAsync(x => x.Id == legalCase.Id);
 			if (existing == null) return false;
-
 
 			existing.TenantId = legalCase.TenantId;
 			existing.ApartmentId = legalCase.ApartmentId;
@@ -178,31 +106,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 			existing.ClientId = legalCase.ClientId;
 			existing.CaseName = legalCase.CaseName;
 			existing.ClientRoleId = legalCase.ClientRoleId;
-		
 			existing.LegalRepresentative = legalCase.LegalRepresentative;
-
-			existing.Company = legalCase.Company;
-			existing.Contact = legalCase.Contact;
-			existing.PhoneorEmail = legalCase.PhoneorEmail;
-			existing.MDRNo = legalCase.MDRNo;
-                existing.ResidentalUnits = legalCase.ResidentalUnits;
-			existing.CommercialUnits = legalCase.CommercialUnits;
-			existing.Address = legalCase.Address;
-			existing.AptNo = legalCase.AptNo;
-			existing.Borough = legalCase.Borough;
 			existing.Attrney = legalCase.Attrney;
 			existing.AttrneyContactInfo = legalCase.AttrneyContactInfo;
 			existing.Firm = legalCase.Firm;
-			existing.ZIP = legalCase.ZIP;
-			existing.Class = legalCase.Class;
-			existing.YearBuilt = legalCase.YearBuilt;
-			existing.CreatedAt = DateTime.UtcNow;
-			existing.IsActive = true;
-			existing.IsDeleted = false;
 			existing.CaseSubTypeId = legalCase.CaseSubTypeId;
 			existing.CaseTypeId = legalCase.CaseTypeId;
-
-
 
 			_context.LegalCases.Update(existing);
 			await _context.SaveChangesAsync();
@@ -222,7 +131,6 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 		public async Task<string> GenerateCaseCodeAsync()
 		{
-			// Get the latest case from DB
 			var lastCase = await _context.LegalCases
 				.OrderByDescending(c => c.Casecode)
 				.Select(c => c.Casecode)
@@ -232,20 +140,16 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			if (!string.IsNullOrEmpty(lastCase) && lastCase.StartsWith("EF"))
 			{
-				string numberPart = lastCase.Substring(2); // Remove 'EF'
+				string numberPart = lastCase.Substring(2);
 				if (int.TryParse(numberPart, out int parsedNumber))
 				{
 					nextNumber = parsedNumber + 1;
 				}
 			}
 
-			// Generate new CaseCode
-			string newCode = "EF" + nextNumber.ToString("D10"); // D10 = 10 digits
+			string newCode = "EF" + nextNumber.ToString("D10");
 			return newCode;
 		}
-
-
-
 
 	}
 }

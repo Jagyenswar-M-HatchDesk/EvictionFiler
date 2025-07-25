@@ -7,15 +7,10 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
 {
     public interface IClientRepository : IRepository<Client>
 	{
-
         Task<List<State>> GetAllStateAsync();
-
 		Task<Client?> GetClientWithAllDetailsAsync(Guid clientId);
-
-
-		Task<List<CreateClientDto>> SearchClientByCode(string code);
+		Task<List<CreateToClientDto>> SearchClientByCode(string code);
         Task<string> GenerateClientCodeAsync();
-    
 
 	}
 }

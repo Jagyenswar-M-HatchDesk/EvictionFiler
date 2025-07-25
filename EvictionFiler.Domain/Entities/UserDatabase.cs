@@ -10,8 +10,6 @@ namespace EvictionFiler.Domain.Entities
 {
     public class UserDatabase : AuditableBaseEntity
 	{
-
-
         public string DatabaseName { get; set; } = string.Empty;
         public string ConnectionString { get; set; } = string.Empty ;
     }

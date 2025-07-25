@@ -22,40 +22,52 @@ namespace EvictionFiler.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Appartment", b =>
+            modelBuilder.Entity("EvictionFiler.Domain.Entities.Building", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Address_1")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Address1")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("Address_2")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Address2")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("ApartmentCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("BuildingCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("BuildingUnits")
-                        .HasColumnType("int");
+                    b.Property<string>("BuildingUnits")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("City")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateOnly>("DateOfRefreeDeed")
                         .HasColumnType("date");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("DateTime");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
@@ -64,44 +76,49 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<Guid?>("LandlordId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("LandlordType")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("LandlordTypeId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("MDR_Number")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("MDRNumber")
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
 
                     b.Property<string>("PetitionerInterest")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<Guid?>("PremiseTypeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("RentRegulationId")
+                    b.Property<Guid?>("RegulationStatusId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("StateId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Zipcode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("LandlordId");
 
+                    b.HasIndex("LandlordTypeId");
+
                     b.HasIndex("PremiseTypeId");
 
-                    b.HasIndex("RentRegulationId");
+                    b.HasIndex("RegulationStatusId");
 
                     b.HasIndex("StateId");
 
-                    b.ToTable("Appartments");
+                    b.ToTable("Buildings");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Client", b =>
@@ -110,62 +127,79 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Address_1")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Address1")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("Address_2")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Address2")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("CellPhone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("ClientCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("DateTime");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("Fax")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<bool?>("GenarateOwnRd")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsActive")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("StateId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ZipCode")
-                        .HasColumnType("int");
+                    b.Property<string>("ZipCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -181,49 +215,68 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Address1")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Address2")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid?>("ClientId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ContactPersonName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("DateTime");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("EINorSSN")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("LandLordCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("StateId")
                         .HasColumnType("uniqueidentifier");
@@ -231,14 +284,16 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<Guid?>("TypeOfOwnerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Zipcode")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -257,29 +312,25 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool?>("AllUnitsRehistered")
-                        .HasColumnType("bit");
-
                     b.Property<Guid?>("ApartmentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AptNo")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Attrney")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("AttrneyContactInfo")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Borough")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("BuildingId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CaseName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid?>("CaseSubTypeId")
                         .HasColumnType("uniqueidentifier");
@@ -288,9 +339,7 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Casecode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Class")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("ClientId")
@@ -299,34 +348,24 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<Guid?>("ClientRoleId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CommercialUnits")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Company")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Contact")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("DateTime");
 
-                    b.Property<bool?>("ExemptUnit")
-                        .HasColumnType("bit");
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Firm")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<bool?>("HPDViolation")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("HeatorHotWater")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsActive")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
@@ -336,50 +375,21 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("LegalRepresentative")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MDRNo")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("Monthsunpaid")
-                        .HasColumnType("int");
-
-                    b.Property<string>("OthersGrounds")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneorEmail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool?>("RentIncreases")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("RentStablized")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ResidentalUnits")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool?>("SeekinEviction")
-                        .HasColumnType("bit");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("YearBuilt")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ZIP")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApartmentId");
+                    b.HasIndex("BuildingId");
 
                     b.HasIndex("CaseSubTypeId");
 
@@ -405,32 +415,44 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<Guid?>("CaseTypeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("DateTime");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CaseTypeId");
 
-                    b.ToTable("mst_CaseSubTypes");
+                    b.ToTable("MstCaseSubTypes");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CaseType", b =>
@@ -439,30 +461,42 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("DateTime");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("mst_CaseTypes");
+                    b.ToTable("MstCaseTypes");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.ClientRole", b =>
@@ -471,30 +505,86 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("DateTime");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("mst_ClienrRoles");
+                    b.ToTable("MstClientRoles");
+                });
+
+            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.LandlordType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("DateTime");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MstLandlordTypes");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.Language", b =>
@@ -503,30 +593,42 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("DateTime");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("mst_Languages");
+                    b.ToTable("MstLanguages");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.PremiseType", b =>
@@ -535,30 +637,42 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("DateTime");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("mst_PremiseTypes");
+                    b.ToTable("MstPremiseTypes");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.RegulationStatus", b =>
@@ -567,30 +681,42 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("DateTime");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("mst_regulationStatus");
+                    b.ToTable("MstRegulationStatus");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.State", b =>
@@ -599,30 +725,42 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("DateTime");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("mst_State");
+                    b.ToTable("MstStates");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.TypeOfOwner", b =>
@@ -631,30 +769,42 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("DateTime");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("mst_TypeOfOwners");
+                    b.ToTable("MstTypeOfOwners");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Role", b =>
@@ -667,13 +817,13 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool?>("IsActive")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
@@ -687,11 +837,11 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -706,18 +856,24 @@ namespace EvictionFiler.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("f5ab29da-356e-42df-a3ad-d91bbf644550"),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
                             Id = new Guid("56355bf6-e335-428a-b718-00cb79e5273d"),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
                             Name = "Law Firm",
                             NormalizedName = "LAW FIRM"
                         },
                         new
                         {
                             Id = new Guid("2bb5c3bf-8dd8-4415-9090-1d428c792533"),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
                             Name = "Property Manager",
                             NormalizedName = "PROPERTY MANAGER"
                         });
@@ -729,38 +885,54 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Address_1")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Address1")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("Address_2")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("ApartmentId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Address2")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Apt")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Borough")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid?>("BuildinId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateOnly>("DOB")
+                    b.Property<DateOnly?>("DOB")
                         .HasColumnType("date");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("DateTime");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool?>("HasPossession")
                         .HasColumnType("bit");
@@ -771,7 +943,7 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<bool?>("HasRegulatedTenancy")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
@@ -781,47 +953,55 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Name_Relation")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool?>("OtherOccupants")
                         .HasColumnType("bit");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Registration_No")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<double>("Rent")
+                    b.Property<double?>("Rent")
+                        .HasMaxLength(100)
                         .HasColumnType("float");
 
                     b.Property<string>("SSN")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("StateId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("TenantCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool?>("TenantRecord")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Zipcode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApartmentId");
+                    b.HasIndex("BuildinId");
 
                     b.HasIndex("LanguageId");
 
@@ -843,11 +1023,11 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("CreatedOn")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -857,16 +1037,19 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -906,11 +1089,11 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
@@ -938,7 +1121,8 @@ namespace EvictionFiler.Infrastructure.Migrations
                             Id = new Guid("84722e9d-806c-4f49-94d7-a55de8d2d76e"),
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "12456e31-62c3-4db3-a8fc-987654321def",
-                            CreatedAt = new DateTime(2024, 6, 19, 12, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            CreatedOn = new DateTime(2024, 6, 19, 12, 0, 0, 0, DateTimeKind.Utc),
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
                             FirstName = "Admin",
@@ -968,27 +1152,24 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("DatabaseName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -1105,112 +1286,112 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Appartment", b =>
+            modelBuilder.Entity("EvictionFiler.Domain.Entities.Building", b =>
                 {
                     b.HasOne("EvictionFiler.Domain.Entities.LandLord", "Landlord")
-                        .WithMany()
-                        .HasForeignKey("LandlordId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .WithMany("Buildings")
+                        .HasForeignKey("LandlordId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.PremiseType", "premiseTypes")
+                    b.HasOne("EvictionFiler.Domain.Entities.Master.LandlordType", "LandlordType")
+                        .WithMany()
+                        .HasForeignKey("LandlordTypeId");
+
+                    b.HasOne("EvictionFiler.Domain.Entities.Master.PremiseType", "PremiseType")
                         .WithMany()
                         .HasForeignKey("PremiseTypeId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.RegulationStatus", "regulationStatus")
+                    b.HasOne("EvictionFiler.Domain.Entities.Master.RegulationStatus", "RegulationStatus")
                         .WithMany()
-                        .HasForeignKey("RentRegulationId");
+                        .HasForeignKey("RegulationStatusId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.State", "States")
+                    b.HasOne("EvictionFiler.Domain.Entities.Master.State", "State")
                         .WithMany()
                         .HasForeignKey("StateId");
 
                     b.Navigation("Landlord");
 
-                    b.Navigation("States");
+                    b.Navigation("LandlordType");
 
-                    b.Navigation("premiseTypes");
+                    b.Navigation("PremiseType");
 
-                    b.Navigation("regulationStatus");
+                    b.Navigation("RegulationStatus");
+
+                    b.Navigation("State");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Client", b =>
                 {
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.State", "States")
+                    b.HasOne("EvictionFiler.Domain.Entities.Master.State", "State")
                         .WithMany()
                         .HasForeignKey("StateId");
 
-                    b.Navigation("States");
+                    b.Navigation("State");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.LandLord", b =>
                 {
                     b.HasOne("EvictionFiler.Domain.Entities.Client", "Client")
-                        .WithMany()
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .WithMany("LandLords")
+                        .HasForeignKey("ClientId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.State", "States")
+                    b.HasOne("EvictionFiler.Domain.Entities.Master.State", "State")
                         .WithMany()
                         .HasForeignKey("StateId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.TypeOfOwner", "TypeOfOwners")
+                    b.HasOne("EvictionFiler.Domain.Entities.Master.TypeOfOwner", "TypeOfOwner")
                         .WithMany()
                         .HasForeignKey("TypeOfOwnerId");
 
                     b.Navigation("Client");
 
-                    b.Navigation("States");
+                    b.Navigation("State");
 
-                    b.Navigation("TypeOfOwners");
+                    b.Navigation("TypeOfOwner");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.LegalCase", b =>
                 {
-                    b.HasOne("EvictionFiler.Domain.Entities.Appartment", "Apartments")
+                    b.HasOne("EvictionFiler.Domain.Entities.Building", "Buildings")
                         .WithMany()
-                        .HasForeignKey("ApartmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("BuildingId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.CaseSubType", "CaseSubTypes")
+                    b.HasOne("EvictionFiler.Domain.Entities.Master.CaseSubType", "CaseSubType")
                         .WithMany()
                         .HasForeignKey("CaseSubTypeId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.CaseType", "CaseTypes")
+                    b.HasOne("EvictionFiler.Domain.Entities.Master.CaseType", "CaseType")
                         .WithMany()
                         .HasForeignKey("CaseTypeId");
 
                     b.HasOne("EvictionFiler.Domain.Entities.Client", "Clients")
                         .WithMany()
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("ClientId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.ClientRole", "ClientRoles")
+                    b.HasOne("EvictionFiler.Domain.Entities.Master.ClientRole", "ClientRole")
                         .WithMany()
                         .HasForeignKey("ClientRoleId");
 
                     b.HasOne("EvictionFiler.Domain.Entities.LandLord", "LandLords")
                         .WithMany()
-                        .HasForeignKey("LandLordId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("LandLordId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Tenant", "Tenant")
+                    b.HasOne("EvictionFiler.Domain.Entities.Tenant", "Tenants")
                         .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("TenantId");
 
-                    b.Navigation("Apartments");
+                    b.Navigation("Buildings");
 
-                    b.Navigation("CaseSubTypes");
+                    b.Navigation("CaseSubType");
 
-                    b.Navigation("CaseTypes");
+                    b.Navigation("CaseType");
 
-                    b.Navigation("ClientRoles");
+                    b.Navigation("ClientRole");
 
                     b.Navigation("Clients");
 
                     b.Navigation("LandLords");
 
-                    b.Navigation("Tenant");
+                    b.Navigation("Tenants");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CaseSubType", b =>
@@ -1224,29 +1405,28 @@ namespace EvictionFiler.Infrastructure.Migrations
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Tenant", b =>
                 {
-                    b.HasOne("EvictionFiler.Domain.Entities.Appartment", "Apartments")
-                        .WithMany()
-                        .HasForeignKey("ApartmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                    b.HasOne("EvictionFiler.Domain.Entities.Building", "Building")
+                        .WithMany("Tenants")
+                        .HasForeignKey("BuildinId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.Language", "Languages")
+                    b.HasOne("EvictionFiler.Domain.Entities.Master.Language", "Language")
                         .WithMany()
                         .HasForeignKey("LanguageId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.State", "States")
+                    b.HasOne("EvictionFiler.Domain.Entities.Master.State", "State")
                         .WithMany()
                         .HasForeignKey("StateId");
 
-                    b.Navigation("Apartments");
+                    b.Navigation("Building");
 
-                    b.Navigation("Languages");
+                    b.Navigation("Language");
 
-                    b.Navigation("States");
+                    b.Navigation("State");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.User", b =>
                 {
-                    b.HasOne("EvictionFiler.Domain.Entities.Role", "Roles")
+                    b.HasOne("EvictionFiler.Domain.Entities.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1257,7 +1437,7 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("Roles");
+                    b.Navigation("Role");
 
                     b.Navigation("Tenants");
                 });
@@ -1311,6 +1491,21 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("EvictionFiler.Domain.Entities.Building", b =>
+                {
+                    b.Navigation("Tenants");
+                });
+
+            modelBuilder.Entity("EvictionFiler.Domain.Entities.Client", b =>
+                {
+                    b.Navigation("LandLords");
+                });
+
+            modelBuilder.Entity("EvictionFiler.Domain.Entities.LandLord", b =>
+                {
+                    b.Navigation("Buildings");
                 });
 #pragma warning restore 612, 618
         }

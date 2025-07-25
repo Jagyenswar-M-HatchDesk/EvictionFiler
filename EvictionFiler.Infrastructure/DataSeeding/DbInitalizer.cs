@@ -24,6 +24,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				await SeedState(context);
 				await SeedTypeOfOwner(context);
 				await SeedCaseTypes(context);
+				await SeedLandlordTypes(context);
 				await context.SaveChangesAsync();
 
 				await SeedCaseSubTypes(context);
@@ -37,13 +38,13 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 
 		private static async Task SeedCaseSubTypes(MainDbContext context)
 		{
-			var caseTypes = context.mst_CaseTypes.ToList(); // ✅ Load case types from DB
-			var subTypes = InitialDataGenerator.GetCaseSubTypes(caseTypes); // ✅ Pass as argument
+			var caseTypes = context.MstCaseTypes.ToList(); 
+			var subTypes = InitialDataGenerator.GetCaseSubTypes(caseTypes); 
 			foreach (var subtype in subTypes)
 			{
-				if (context.mst_CaseSubTypes.FirstOrDefault(d => d.Name == subtype.Name) == null)
+				if (context.MstCaseSubTypes.FirstOrDefault(d => d.Name == subtype.Name) == null)
 				{
-					await context.mst_CaseSubTypes.AddAsync(subtype);
+					await context.MstCaseSubTypes.AddAsync(subtype);
 				}
 			}
 		}
@@ -54,9 +55,9 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			var clientroles = InitialDataGenerator.GetClientRole(); 
 			foreach (var clientrole in clientroles)
 			{
-				if (context.mst_ClienrRoles.FirstOrDefault(d => d.Name == clientrole.Name) == null)
+				if (context.MstClientRoles.FirstOrDefault(d => d.Name == clientrole.Name) == null)
 				{
-					await context.mst_ClienrRoles.AddAsync(clientrole);
+					await context.MstClientRoles.AddAsync(clientrole);
 				}
 			}
 		}
@@ -67,9 +68,9 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			var lang = InitialDataGenerator.GetLangauge();
 			foreach (var l in lang)
 			{
-				if (context.mst_Languages.FirstOrDefault(d => d.Name == l.Name) == null)
+				if (context.MstLanguages.FirstOrDefault(d => d.Name == l.Name) == null)
 				{
-					await context.mst_Languages.AddAsync(l);
+					await context.MstLanguages.AddAsync(l);
 				}
 			}
 		}
@@ -80,9 +81,9 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			var type = InitialDataGenerator.GetPremiseType();
 			foreach (var p in type)
 			{
-				if (context.mst_PremiseTypes.FirstOrDefault(d => d.Name == p.Name) == null)
+				if (context.MstPremiseTypes.FirstOrDefault(d => d.Name == p.Name) == null)
 				{
-					await context.mst_PremiseTypes.AddAsync(p);
+					await context.MstPremiseTypes.AddAsync(p);
 				}
 			}
 		}
@@ -93,9 +94,9 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			var status = InitialDataGenerator.GetRegulationStatus();
 			foreach (var p in status)
 			{
-				if (context.mst_regulationStatus.FirstOrDefault(d => d.Name == p.Name) == null)
+				if (context.MstRegulationStatus.FirstOrDefault(d => d.Name == p.Name) == null)
 				{
-					await context.mst_regulationStatus.AddAsync(p);
+					await context.MstRegulationStatus.AddAsync(p);
 				}
 			}
 		}
@@ -106,9 +107,9 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			var state = InitialDataGenerator.GetState();
 			foreach (var s in state)
 			{
-				if (context.mst_State.FirstOrDefault(d => d.Name == s.Name) == null)
+				if (context.MstStates.FirstOrDefault(d => d.Name == s.Name) == null)
 				{
-					await context.mst_State.AddAsync(s);
+					await context.MstStates.AddAsync(s);
 				}
 			}
 		}
@@ -119,9 +120,9 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			var typeOwner = InitialDataGenerator.GetTypeOfOwner();
 			foreach (var t in typeOwner)
 			{
-				if (context.mst_TypeOfOwners.FirstOrDefault(d => d.Name == t.Name) == null)
+				if (context.MstTypeOfOwners.FirstOrDefault(d => d.Name == t.Name) == null)
 				{
-					await context.mst_TypeOfOwners.AddAsync(t);
+					await context.MstTypeOfOwners.AddAsync(t);
 				}
 			}
 		}
@@ -132,13 +133,25 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			var casetypes = InitialDataGenerator.GetCaseTypes();
 			foreach (var type in casetypes)
 			{
-				if (context.mst_CaseTypes.FirstOrDefault(d => d.Name == type.Name) == null)
+				if (context.MstCaseTypes.FirstOrDefault(d => d.Name == type.Name) == null)
 				{
-					await context.mst_CaseTypes.AddAsync(type);
+					await context.MstCaseTypes.AddAsync(type);
 				}
 			}
 		}
 
-	
+		private static async Task SeedLandlordTypes(MainDbContext context)
+		{
+			var landlordtypes = InitialDataGenerator.GetLandlordTypes();
+			foreach (var type in landlordtypes)
+			{
+				if (context.MstLandlordTypes.FirstOrDefault(d => d.Name == type.Name) == null)
+				{
+					await context.MstLandlordTypes.AddAsync(type);
+				}
+			}
+		}
+
+
 	}
 }

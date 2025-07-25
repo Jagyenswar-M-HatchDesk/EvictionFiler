@@ -1,7 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using EvictionFiler.Application.DTOs;
+using EvictionFiler.Application.DTOs.UserDto;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
@@ -60,8 +60,8 @@ namespace EvictionFiler.Application.Services
 
         public async Task<bool> RegisterTenantAsync(RegisterDto model)
         {
-            var registerResult = _userRepository.RegisterTenant(model);
-            if (registerResult == null) return false;
+            var registerResult = await _userRepository.RegisterTenant(model);
+            if (!registerResult) return false;
             return true;
         }
 

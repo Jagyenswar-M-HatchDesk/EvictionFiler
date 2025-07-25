@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using EvictionFiler.Application.DTOs;
+﻿
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Domain.Entities;
+using EvictionFiler.Application.DTOs.UserDto;
 
 namespace EvictionFiler.Server.Services
 {

@@ -1,39 +1,31 @@
 ﻿using EvictionFiler.Domain.Entities;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using EvictionFiler.Domain.Entities.Master;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace EvictionFiler.Infrastructure.DbContexts
 {
     public class MainDbContext : IdentityDbContext<User, Role, Guid>
     {
         public MainDbContext(DbContextOptions<MainDbContext> options) : base(options) { }
-
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserDatabase> UserDatabases { get; set; }
-   
         public DbSet<Tenant> Tenants { get; set; }
         public DbSet<Client> Clients { get; set; }
         public DbSet<LandLord> LandLords { get; set; }
-
-		public DbSet<CaseType> mst_CaseTypes { get; set; }
-		public DbSet<CaseSubType> mst_CaseSubTypes { get; set; }
-		public DbSet<Appartment> Appartments { get; set; }
+		public DbSet<CaseType> MstCaseTypes { get; set; }
+		public DbSet<LandlordType> MstLandlordTypes { get; set; }
+		public DbSet<CaseSubType>MstCaseSubTypes { get; set; }
+		public DbSet<Building> Buildings { get; set; }
         public DbSet<LegalCase> LegalCases { get; set; }
-
-		public DbSet<TypeOfOwner> mst_TypeOfOwners { get; set; }
-		public DbSet<ClientRole> mst_ClienrRoles { get; set; }
-		public DbSet<Language> mst_Languages { get; set; }
-		public DbSet<PremiseType> mst_PremiseTypes { get; set; }
-		public DbSet<RegulationStatus> mst_regulationStatus { get; set; }
-		public DbSet<State> mst_State { get; set; }
+		public DbSet<TypeOfOwner> MstTypeOfOwners { get; set; }
+		public DbSet<ClientRole> MstClientRoles { get; set; }
+		public DbSet<Language> MstLanguages { get; set; }
+		public DbSet<PremiseType> MstPremiseTypes { get; set; }
+		public DbSet<RegulationStatus> MstRegulationStatus { get; set; }
+		public DbSet<State> MstStates { get; set; }
 
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -46,15 +38,13 @@ namespace EvictionFiler.Infrastructure.DbContexts
 
             );
 
-
-
             //var password = new PasswordHasher<object>().HashPassword(null, "Abcd@1234");
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
                     Id = Guid.Parse("84722e9d-806c-4f49-94d7-a55de8d2d76e"),
                     FirstName = "Admin",
-                    CreatedAt = new DateTime(2024, 6, 19, 12, 0, 0, DateTimeKind.Utc), 
+                    CreatedOn = new DateTime(2024, 6, 19, 12, 0, 0, DateTimeKind.Utc), 
                     Email = "admin@gmail.com",
                     UserName = "admin@gmail.com",
                     NormalizedEmail = "ADMIN@GMAIL.COM",

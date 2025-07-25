@@ -42,8 +42,6 @@ public class CodeGenratorRepository : ICodeGenratorRepository
 		int nextNumber = maxNumber + 1;
 		return $"{prefix}{nextNumber.ToString("D3")}";
 	}
-
-	// Helper method to generate Where clause
 	private static Expression<Func<TEntity, bool>> EntityHasPrefix<TEntity>(
 		Expression<Func<TEntity, string?>> selector,
 		string prefix

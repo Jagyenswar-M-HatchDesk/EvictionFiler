@@ -6,9 +6,9 @@
 @using EvictionFiler.Application.Interfaces.IServices
 
  @inject IClientService clientservice 
- @inject LandLordService landLordService 
-@inject ILandlordSevice landLordService
-@inject IApartmentService apartmentService
+ @inject ILandlordSevice landLordService 
+@inject IBuildingService buildingService
+
 @inject ITenantService tenantService
 @inject NavigationManager navManager
 @rendermode InteractiveAuto
@@ -129,7 +129,6 @@
                         <th>Phone</th>
                         <th>Fax</th>
                         <th>Address</th>
-                  
                         <th >Status</th>
                         <th class="sticky">Action</th>
                     </tr>
@@ -147,7 +146,7 @@
                                 <td>@client.Fax</td>
                              
                                 <td >
-                                    @($"{client.Address_1}, {client.Address_2}, {client.City}, {client.StateName} - {client.ZipCode}")
+                                    @($"{client.Address1}, {client.Address2}, {client.City}, {client.StateName} - {client.ZipCode}")
                                 </td>
                                 <td>
                                     Active
@@ -192,11 +191,8 @@
 
     @if (_showCreateClient)
     {
-        <CreateCLient createClient="_clientModel" OnClose="HandleCloseCreateClient" />
+        <CreateCLient createClient="_editClientModel" OnClose="HandleCloseCreateClient" />
     }
-
-
-
 
     @if (_showEditClient)
     {
@@ -212,25 +208,22 @@
 </body>
 
 @code {
+    [Parameter]
+    public Guid Id { get; set; }
     private bool _showCreateClient = false;
     private bool _showEditClient = false;
     private Guid clientIdForEdit;
-
-    // private CreateCLient createClientRef;
-    private EditClient editClientRef;
-    private List<EditLandlordDto> saveEditlandlordList = new();
-    private List<EditApartmentDto> saveEditBuildingList = new();
-    private List<EditTenantDto> saveEditTenantList = new();
+    private List<EditToLandlordDto> saveEditlandlordList = new();
+    private List<EditToBuildingDto> saveEditBuildingList = new();
+    private List<EditToTenantDto> saveEditTenantList = new();
     private string successMessage;
-    private CreateClientDto _clientModel;
-    private EditClientDto _editClientModel = new();
+    private CreateToClientDto _clientModel;
+    private EditToClientDto _editClientModel = new();
 
-    private List<CreateClientDto> clients = new();
+    private List<EditToClientDto> clients = new();
     private string searchTerm = string.Empty;
-    [Parameter]
-    public Guid Id { get; set; }
-
     private string activeTab = string.Empty;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -265,18 +258,21 @@
         clients = await clientservice.GetAllClientsAsync();
     }
 
+
     private void ShowCreateClient()
     {
-        _clientModel = new CreateClientDto();
+        _clientModel = new CreateToClientDto();
         _showCreateClient = true;
     }
+
 
     private void HandleCloseCreateClient()
     {
         _showCreateClient = false;
     }
 
-    private IEnumerable<CreateClientDto> filteredClients =>
+
+    private IEnumerable<EditToClientDto> filteredClients =>
         string.IsNullOrWhiteSpace(searchTerm)
         ? clients
         : clients.Where(c =>
@@ -291,7 +287,7 @@
 
         foreach (var landlord in landlords)
         {
-            var buildings = await apartmentService.GetBuildingsByLandlordIdAsync(landlord.Id);
+            var buildings = await buildingService.GetBuildingsByLandlordIdAsync(landlord.Id);
             if (buildings?.Any() == true)
             {
                 saveEditBuildingList.AddRange(buildings);
@@ -301,22 +297,22 @@
 
     private async Task LoadTenants(Guid clientId)
     {
-        saveEditTenantList.Clear(); // Clear old data
+        saveEditTenantList.Clear();
 
         var landlords = await landLordService.GetLandlordsByClientIdAsync(clientId);
 
         foreach (var landlord in landlords)
         {
-            var buildings = await apartmentService.GetBuildingsByLandlordIdAsync(landlord.Id);
+            var buildings = await buildingService.GetBuildingsByLandlordIdAsync(landlord.Id);
 
             foreach (var building in buildings)
             {
                 // 🟢 IMPORTANT: Ye method tenantService ka hona chahiye:
-                var tenants = await tenantService.GetTenantsByClientIdAsync(building.Id); // BuildingId dena h yaha
+                var tenants = await tenantService.GetTenantsByClientIdAsync(building.Id); 
 
                 if (tenants != null && tenants.Any())
                 {
-                    saveEditTenantList.AddRange(tenants); // ✅ Add all tenants in flat list
+                    saveEditTenantList.AddRange(tenants);
                 }
             }
         }
@@ -331,7 +327,7 @@
         saveEditlandlordList = landlords;
         if (client != null)
         {
-             _editClientModel = new EditClientDto
+             _editClientModel = new EditToClientDto
             {
                 Id = client.Id,
                 FirstName = client.FirstName,
@@ -341,13 +337,13 @@
                 Phone = client.Phone,
                 CellPhone = client.CellPhone,
                 ClientCode = client.ClientCode,
-                Address_1 = client.Address_1,
-                Address_2 = client.Address_2,
+                Address1 = client.Address1,
+                Address2 = client.Address2,
                 City = client.City,
                 StateId = client.StateId,
                 StateName = client.StateName,
                 ZipCode = client.ZipCode,
-                LandLords = landlords
+                editLandLords = landlords
             };
 
             await LoadBuildings(clientId);
@@ -375,7 +371,7 @@
                 var landlords = await landLordService.GetLandlordsByClientIdAsync(clientIdForEdit);
                 foreach (var landlord in landlords)
                 {
-                    var buildings = await apartmentService.GetBuildingsByLandlordIdAsync(landlord.Id);
+                    var buildings = await buildingService.GetBuildingsByLandlordIdAsync(landlord.Id);
                     saveEditBuildingList.AddRange(buildings);
                 }
             }

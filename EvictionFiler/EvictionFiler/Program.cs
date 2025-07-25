@@ -16,12 +16,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
 using Syncfusion.Blazor;
-using ApartmentService = EvictionFiler.Application.Services.ApartmentService;
-using CaseService = EvictionFiler.Application.Services.CaseService;
-using TenantService = EvictionFiler.Application.Services.TenantService;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,18 +48,23 @@ builder.Services.AddDbContext<MainDbContext>(
 
 );
 
-
-
 builder.Services.AddScoped<IUserservices, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICasesRepository, CasesRepository>();
-
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<ILandLordRepository, LandLordRepository>();
-builder.Services.AddScoped<IApartmentRepository, ApartmentRepository>();
+builder.Services.AddScoped<IBuildingRepository, BuildingRepository>();
 builder.Services.AddScoped<ICodeGenratorRepository, CodeGenratorRepository>();
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
-
+builder.Services.AddScoped<IStateRepository, StateRepository>();
+builder.Services.AddScoped<ITypeOwnerRepository, TypeOwnerRepository>();
+builder.Services.AddScoped<IRegulationStatusRepository, RegulationStatusRepository>();
+builder.Services.AddScoped<ICaseTypeRepository, CaseTypeRepository>();
+builder.Services.AddScoped<ICaseSubTypeRepository, CaseSubTypeRepository>();
+builder.Services.AddScoped<IClientRoleRepository, ClientRoleRepository>();
+builder.Services.AddScoped<ILandlordTypeRepository, LandlordTypeRepository>();
+builder.Services.AddScoped<IPremiseTypeRepository, PremiseTypeRepository>();
+builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<JwtAuthStateProvider>();
@@ -72,11 +74,9 @@ builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
     provider.GetRequiredService<JwtAuthStateProvider>());
 builder.Services.AddScoped<IUserservices , UserService>();
 builder.Services.AddScoped<IClientService , ClientServices>();
-//builder.Services.AddScoped<LandLordService>();
 builder.Services.AddScoped<ILandlordSevice  , LandlordService>();
-builder.Services.AddScoped<IApartmentService , ApartmentService>();
+builder.Services.AddScoped<IBuildingService , BuildingService>();
 builder.Services.AddScoped<ITenantService, TenantService>();
-builder.Services.AddScoped<ICaseService , CaseService>();
 builder.Services.AddScoped<ILegalCaseService  , LegalCaseService>();
 builder.Services.AddScoped<NavigationDataService>();
 

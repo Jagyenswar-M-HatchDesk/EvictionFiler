@@ -1,17 +1,20 @@
 ﻿@page "/createcase/{ClientId}"
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ApartmentDto
+@using EvictionFiler.Application.DTOs.BuildingDto
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Application.DTOs.LegalCaseDto
 @using EvictionFiler.Application.DTOs.TenantDto
+@using EvictionFiler.Application.Interfaces.IRepository
 @using EvictionFiler.Application.Interfaces.IServices
-
 @using EvictionFiler.Domain.Entities.Master
-@using EvictionFiler.Domain.Entities.Master
+@inject IClientRoleRepository ClientRoleRepository
+@inject ICaseTypeRepository CaseTypeRepository
+@inject ICaseSubTypeRepository CaseSubTypeRepository
 @inject ILandlordSevice _landlordService
-@inject IApartmentService _apartmentService
+@inject IBuildingService _buildingServiceService
 @inject ILegalCaseService _legalCaseService
-@inject ICaseService _caseService
 @inject ITenantService _tenantService
 @inject IClientService _clientService
 @inject NavigationManager nav
@@ -355,7 +358,7 @@
 
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy" style="white-space: nowrap;">Owner:</div>
-                                                    <div class="col-8">@landlordDetails.Landlord.TypeOfOwnerId</div>
+                                                    <div class="col-8">@landlordDetails.Landlord.TypeOwnerId</div>
                                                 </div>
 
                                                 <div class="row mb-2">
@@ -381,11 +384,6 @@
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy" style="white-space: nowrap;">EIN/SSN:</div>
                                                     <div class="col-8">@landlordDetails.Landlord.EINorSSN</div>
-                                                </div>
-
-                                                <div class="row mb-2">
-                                                    <div class="col-5 fw-semibold text-navy" style="white-space: nowrap;">Properties:</div>
-                    @*                                 <div class="col-7">@landlordDetails.Landlord.OtherProperties</div> *@
                                                 </div>
 
                                                 <div class="row mb-2">
@@ -426,11 +424,11 @@
                                           
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy">MDR_No.:</div>
-                                                    <div class="col-8">@b.MDR_Number</div>
+                                                    <div class="col-8">@b.MDRNumber</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy">LandRole:</div>
-                                                    <div class="col-8">@b.LandlordType</div>
+                                                    <div class="col-8">@b.LandlordTypeName</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-5 fw-semibold text-navy">Date of Refree:</div>
@@ -438,12 +436,12 @@
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-5 fw-semibold text-navy">Rent Regulation:</div>
-                                                    @* <div class="col-7">@b.regula</div> *@
+                                                     <div class="col-7">@b.RegulationStatusName</div> 
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy" style="white-space: nowrap;">Address:</div>
                                                     <div class="col-8">
-                                                        @($"{b.Address_1}, {b.Address_2}, {b.City}, {b.StateId} {b.Zipcode}")
+                                                        @($"{b.Address1}, {b.Address2}, {b.City}, {b.StateId} {b.Zipcode}")
                                                     </div>
                                                 </div>
                                                 
@@ -541,7 +539,7 @@
                                                 <div class="row mb-2">
                                                     <div class="col-5 fw-semibold text-navy" style="white-space: nowrap;">Address:</div>
                                                     <div class="col-7">
-                                                        @($"{buildingDetails.Building.Address_1}, {buildingDetails.Building.Address_2}, {buildingDetails.Building.City}, {buildingDetails.Building.StateName} {buildingDetails.Building.Zipcode}")
+                                                        @($"{buildingDetails.Building.Address1}, {buildingDetails.Building.Address2}, {buildingDetails.Building.City}, {buildingDetails.Building.StateName} {buildingDetails.Building.Zipcode}")
                                                     </div>
                                                 </div>
   
@@ -552,12 +550,12 @@
                                             <div class="col-6">
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy text-nowrap">M_NO.:</div>
-                                                    <div class="col-8">@buildingDetails.Building.MDR_Number</div>
+                                                    <div class="col-8">@buildingDetails.Building.MDRNumber</div>
                                                 </div>
 
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy text-nowrap">Type:</div>
-                                                    <div class="col-8">@buildingDetails.Building.PremiseName</div>
+                                                    <div class="col-8">@buildingDetails.Building.PremiseTypeName</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-4 fw-semibold text-navy text-nowrap">Interest:</div>
@@ -565,7 +563,7 @@
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-5 fw-semibold text-navy text-nowrap">Rent Regulation:</div>
-                                                    <div class="col-7">@buildingDetails.Building.RentRegulationName</div>
+                                                    <div class="col-7">@buildingDetails.Building.RegulationStatusName</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -627,7 +625,7 @@
                                                        
                                                         <div class="row mb-2">
                                                             <div class="col-5 fw-semibold text-navy">Address:</div>
-                                                            @($"{b.Address_1}, {b.Address_2}, {b.City}, {b.StateId} {b.Zipcode}")
+                                                            @($"{b.Address1}, {b.Address2}, {b.City}, {b.StateId} {b.Zipcode}")
                                                         </div>
                                                     </div>
                                                 </div>
@@ -744,9 +742,8 @@
                                             <div class="col-2">@TenantDetails.Borough</div>
                                         </div>
                                         <div class="row mb-2">
-                                            <div class="col-2 fw-semibold text-navy">Address:</div>
-                                            <div class="col-10">@TenantDetails.Address_1</div>
-
+                                            <div class="col-5 fw-semibold text-navy">Address:</div>
+                                            @($"{TenantDetails.Address1}, {TenantDetails.Address2}, {TenantDetails.City}, {TenantDetails.StateId} {TenantDetails.Zipcode}")
                                         </div>
                                     </div>
 
@@ -794,7 +791,7 @@
 
 @code {
     [Parameter] public string ClientId { get; set; }
-    private CreateEditLegalCaseModel legalcaseDto = new CreateEditLegalCaseModel();
+    private CreateToEditLegalCaseModel legalcaseDto = new CreateToEditLegalCaseModel();
     int currentStep = 0;
     int lastStep = 3;
     private List<CaseType> caseTypes = new();
@@ -805,13 +802,52 @@
     // Used for conditional rendering
     private string selectedCaseTypeName;
     private List<ClientRole> ClientRoleList = new();
+
+    private bool hasSearched = false;
+    private LandlordSearchModel landlordSearchModel = new();
+    private BuildingSearchModel buildingSearchModel = new();
+    private TenantSearchModel tenantSearchModel = new();
+    private string searchText = "";
+    private string searchBuildingText = "";
+    private string searchtenantText = "";
+    private List<EditToLandlordDto> filteredList = new();
+    private List<EditToBuildingDto> filteredBuildingList = new();
+    private List<EditToTenantDto> filteredTenantList = new();
+    private CreateToLandLordDto? selectedLandlord;
+    private CreateToBuildingDto? selectedBuilding;
+    private CreateToTenantDto? selectedTenant;
+    private bool isLandlordSelected = false;
+    private bool isBuildingSelected = false;
+    private bool isTenantSelected = false;
+    private LandlordWithBuildings? landlordDetails;
+    private BuildingWithTenant? buildingDetails;
+    private EditToTenantDto? TenantDetails;
+
+    private EditToTenantDto tenantDto = new EditToTenantDto();
+    private EditToLandlordDto landLordDto = new EditToLandlordDto();
+    private EditToBuildingDto apartmentDto = new EditToBuildingDto();
+
+    private EditToClientDto clientDto = new EditToClientDto();
+
+    private List<CreateToTenantDto> matchedTenants = new List<CreateToTenantDto>();
+    private List<CreateToLandLordDto> matchedLandLords = new List<CreateToLandLordDto>();
+    private List<CreateToClientDto> matchedClients = new List<CreateToClientDto>();
+    private List<CreateToBuildingDto> matchedBuilding = new List<CreateToBuildingDto>();
+    private bool showSuggestions = false;
+
+
     protected override async Task OnInitializedAsync()
     {
-        legalcaseDto = new CreateEditLegalCaseModel();
+        legalcaseDto = new CreateToEditLegalCaseModel();
         editContext = new EditContext(legalcaseDto);
-        caseTypes = await _caseService.GetAllCaseType();
-        ClientRoleList = await _caseService.GetAllClientRole();
+        caseTypes = await CaseTypeRepository.GetAllCaseType();
+        ClientRoleList = await ClientRoleRepository.GetAllClientRole();
     }
+
+    List<string> stepTitles = new() {
+        "Case & Role", "Landlord Info", "Property Info", " Tenant Info",
+
+    };
 
 
     private string selectedClientRoleName => ClientRoleList.FirstOrDefault(x => x.Id == legalcaseDto.ClientRoleId)?.Name;
@@ -827,7 +863,7 @@
 
             if (selectedCaseTypeName == "Holdover")
             {
-                caseSubTypes = await _caseService.GetAllCaseSubTypes(selectedGuid);
+                // caseSubTypes = await _caseService.GetAllCaseSubTypes(selectedGuid);
             }
             else
             {
@@ -839,7 +875,6 @@
             StateHasChanged();
         }
     }
-
 
     private void Next()
     {
@@ -858,15 +893,10 @@
         }
     }
 
-
- 
-
-
-
     private bool IsNextDisabled =>
         (currentStep == 0 && (
             !legalcaseDto.ClientRoleId.HasValue ||
-            (selectedClientRole == "Legal Representative" && string.IsNullOrWhiteSpace(legalcaseDto.LegalRepresentative)) ||
+            (selectedClientRoleName == "Legal Representative" && string.IsNullOrWhiteSpace(legalcaseDto.LegalRepresentative)) ||
             !legalcaseDto.CaseTypeId.HasValue ||
             (selectedCaseTypeName == "Holdover" && !legalcaseDto.CaseSubTypeId.HasValue)
         ))
@@ -884,29 +914,6 @@
             string.IsNullOrWhiteSpace(TenantDetails.FirstName)
         ));
 
-
-
-    List<string> stepTitles = new() {
-        "Case & Role", "Landlord Info", "Property Info", " Tenant Info",
-
-    };
-    private bool hasSearched = false;
-    private LandlordSearchModel landlordSearchModel = new();
-    private BuildingSearchModel buildingSearchModel = new();
-    private TenantSearchModel tenantSearchModel = new();
-    private string searchText = "";
-    private string searchBuildingText = "";
-    private string searchtenantText = "";
-    private List<CreateLandLordDto> filteredList = new();
-    private List<AddApartment> filteredBuildingList = new();
-    private List<CreateTenantDto> filteredTenantList = new();
-    private CreateLandLordDto? selectedLandlord;
-    private AddApartment? selectedBuilding;
-    private CreateTenantDto? selectedTenant;
-    private bool isLandlordSelected = false;
-    private bool isBuildingSelected = false;
-    private bool  isTenantSelected = false;
-  
     private async Task HandleInput(ChangeEventArgs e)
     {
         searchText = e?.Value?.ToString() ?? "";
@@ -937,28 +944,19 @@
         }
     }
 
-
     private async Task HandleBuildingInput(ChangeEventArgs e)
     {
         searchBuildingText = e?.Value?.ToString() ?? "";
 
         if (!string.IsNullOrWhiteSpace(searchBuildingText) && landLordDto != null)
         {
-            filteredBuildingList = await _apartmentService.SearchBuildingByCode(searchBuildingText, landLordDto.Id);
+            filteredBuildingList = await _buildingServiceService.SearchBuildingByCode(searchBuildingText, landLordDto.Id);
         }
         else
         {
             filteredBuildingList.Clear();
         }
     }
-
-
-    private LandlordWithBuildings? landlordDetails;
-    private BuildingWithTenant ?buildingDetails;
-    private EditTenantDto? TenantDetails;
-
-
-
 
     private async Task SelectLandlord(Guid id)
     {
@@ -983,7 +981,7 @@
 
     private async Task SelectBuilding(Guid id)
     {
-        buildingDetails = await _apartmentService.GetBuildingsWithTenantAsync(id);
+        buildingDetails = await _buildingServiceService.GetBuildingsWithTenantAsync(id);
 
         if (buildingDetails != null)
         {
@@ -1008,20 +1006,18 @@
             tenantSearchModel.SelectedTenant = fullName;
 
             // ✅ Create and assign tenantDto properly
-            tenantDto = new CreateTenantDto
-            {
-                Id = TenantDetails.Id,
+            tenantDto = new EditToTenantDto
+           {
                 FirstName = TenantDetails.FirstName,
                 DOB = TenantDetails.DOB,
                 SSN = TenantDetails.SSN,
                 Phone = TenantDetails.Phone,
                 Email = TenantDetails.Email,
                 LanguageId = TenantDetails.LanguageId,
-                Address_1 = TenantDetails.Address_1,
+                Address1 = TenantDetails.Address1,
                 Apt = TenantDetails.Apt,
                 Borough = TenantDetails.Borough,
                 Rent = TenantDetails.Rent,
-            
                 TenantCode = TenantDetails.TenantCode
 
             };
@@ -1045,7 +1041,7 @@
 
             case 2:
                 buildingDetails = null;
-                isBuildingSelected = false; // ✅ agar aap yeh flag use kar rahe ho
+                isBuildingSelected = false; 
                 searchBuildingText = string.Empty;
                 filteredBuildingList?.Clear();
                 break;
@@ -1058,64 +1054,8 @@
                 break;
         }
 
-        StateHasChanged(); // 🌀 UI ko refresh karo
+        StateHasChanged(); 
     }
-
-
-
-    string first_name;
-    string last_name;
-    string gender = "male";
-    string address;
-    string phone;
-    string code;
-    string date;
-    string month;
-    string year;
-
-    bool checkbox;
-    bool checkbox_other;
-
-    // Bank Info
-    string bank;
-    string branch;
-    string email;
-    string account_name;
-    string account_number;
-    string date_2;
-    string month_2;
-    string year_2;
-    string selectedClientRole;
-    string selectedCaseType;
-    string otherCaseType;
-    string holdoverSubType;
-
-    private string attorney;
-    private string firm;
-    private string registeredAgent;
-    private string residentialUnits;
-    private string commercialUnits;
-    private string dhcrRegistered;
-    private string hpdViolations;
-    private string yearBuilt;
-    private string heatWater;
-    private string BuildingCode;
-
-    private CreateTenantDto tenantDto = new CreateTenantDto();
-    private CreateLandLordDto landLordDto = new CreateLandLordDto();
-    private AddApartment apartmentDto = new AddApartment();
-  
-    private CreateClientDto clientDto = new CreateClientDto();
-
-    private List<CreateTenantDto> matchedTenants = new List<CreateTenantDto>();
-    private List<CreateLandLordDto> matchedLandLords = new List<CreateLandLordDto>();
-    private List<CreateClientDto> matchedClients = new List<CreateClientDto>();
-    private List<AddApartment> matchedBuilding = new List<AddApartment>();
-    private bool showSuggestions = false;
-
-
-
-
 
     void SaveAsDraft() => Console.WriteLine("Saving Draft...");
 
@@ -1170,10 +1110,6 @@
         }
     }
 
-
-
-
-
     private CancellationTokenSource _cts;
     private async Task OnTenantCodeChanged(ChangeEventArgs e)
     {
@@ -1195,38 +1131,28 @@
             showSuggestions = false;
         }
     }
-    private void SelectTenant(CreateTenantDto selectedTenant)
-    {
-        tenantDto = selectedTenant;
-        showSuggestions = false;
-    }
 
-    private async Task OnLandLordCodeChanged(ChangeEventArgs e)
-    {
-        _cts?.Cancel(); // cancel previous call
-        _cts = new CancellationTokenSource();
-        var token = _cts.Token;
+    // private async Task OnLandLordCodeChanged(ChangeEventArgs e)
+    // {
+    //     _cts?.Cancel(); // cancel previous call
+    //     _cts = new CancellationTokenSource();
+    //     var token = _cts.Token;
 
-        var input = e.Value?.ToString() ?? string.Empty;
-        landLordDto.LandLordCode = input;
+    //     var input = e.Value?.ToString() ?? string.Empty;
+    //     landLordDto.LandLordCode = input;
 
-        if (input.Length >= 3)
-        {
-            await Task.Delay(1000, token); // debounce
-            var landlord = await _landlordService.SearchLandlordByCode(input);
-            matchedLandLords = landlord.Where(e => e.Id == Guid.Parse(ClientId)).ToList();
-            showSuggestions = matchedLandLords.Any();
-        }
-        else
-        {
-            showSuggestions = false;
-        }
-    }
-    private void SelectLandLord(CreateLandLordDto selectedTenant)
-    {
-        landLordDto = selectedTenant;
-        showSuggestions = false;
-    }
+    //     if (input.Length >= 3)
+    //     {
+    //         await Task.Delay(1000, token); // debounce
+    //         var landlord = await _landlordService.SearchLandlordByCode(input);
+    //         matchedLandLords = landlord.Where(e => e.Id == Guid.Parse(ClientId)).ToList();
+    //         showSuggestions = matchedLandLords.Any();
+    //     }
+    //     else
+    //     {
+    //         showSuggestions = false;
+    //     }
+    // }  
 
     private async Task OnClientCodeChanged(ChangeEventArgs e)
     {
@@ -1248,12 +1174,7 @@
             showSuggestions = false;
         }
     }
-    private void SelectClient(CreateClientDto selectedClient)
-    {
-        // legalcaseDto.Company = selectedClient.Name;
 
-        showSuggestions = false;
-    }
 
     private async Task OnBuildingChanged(ChangeEventArgs e)
     {

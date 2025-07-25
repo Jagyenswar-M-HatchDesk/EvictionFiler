@@ -1,17 +1,10 @@
-﻿using EvictionFiler.Application.DTOs;
+﻿using EvictionFiler.Application.DTOs.UserDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
@@ -33,7 +26,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<User?> GetByEmailAsync(string email)
         {
-            return await _db.Users.Include(e => e.Roles).FirstOrDefaultAsync(u => u.Email == email);
+            return await _db.Users.Include(e => e.Role).FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task AddAsync(User user)
@@ -59,13 +52,12 @@ namespace EvictionFiler.Infrastructure.Repositories
                     Id = Guid.NewGuid(),
                     DatabaseName = dbName,
                     ConnectionString = connectionString,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
+                    CreatedOn = DateTime.UtcNow,
+                    UpdatedOn = DateTime.UtcNow,
                 };
                 await _db.UserDatabases.AddAsync(database);
                 await _db.SaveChangesAsync();
 
-                // Create and migrate tenant database
                 var options = new DbContextOptionsBuilder<TenantDbContext>()
                     .UseSqlServer(connectionString)
                     .EnableSensitiveDataLogging()
@@ -83,7 +75,6 @@ namespace EvictionFiler.Infrastructure.Repositories
                     await _roleManager.CreateAsync(role);
                 }
 
-                // Create user (main DB)
                 var user = new User
                 {
                     FirstName = model.FirstName,
@@ -91,28 +82,22 @@ namespace EvictionFiler.Infrastructure.Repositories
                     MiddleName = model.MiddleName,
                     Email = model.Email,
                     UserName = model.Email,
-                    //EmailConfirmed = true,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
+                    CreatedOn = DateTime.UtcNow,
+                    UpdatedOn = DateTime.UtcNow,
                     RoleId = role.Id,
                     TenantId = database.Id,
                     IsActive = true,
-                    //CreatedBy
+                   
                 };
 
                 var createResult = await _userManager.CreateAsync(user, model.Password);
                 if (!createResult.Succeeded)
                 {
-                    // optionally log createResult.Errors
+                   
                     return false;
                 }
 
                 await _userManager.AddToRoleAsync(user, model.Role);
-
-                // Optional: create the same user in the tenant DB
-                // If tenant uses Identity, you need to set up UserManager for tenantDb as well
-                // Otherwise, use raw EF to add user profile there
-
                 return true;
             }
             catch(Exception ex)
@@ -124,13 +109,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<IEnumerable<User>> GetAllUser()
         {
-            var alluser = await _db.Users.Include(e => e.Roles).ToListAsync();
+            var alluser = await _db.Users.Include(e => e.Role).ToListAsync();
             return alluser;
         }
 
         public async Task<User?> GetByIdAsync(Guid id)
         {
-            return await _db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Id == id);
+            return await _db.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<bool> UpdateUserAsync(User updatedUser)
@@ -143,7 +128,7 @@ namespace EvictionFiler.Infrastructure.Repositories
             user.MiddleName = updatedUser.MiddleName;
             user.Email = updatedUser.Email;
             user.UserName = updatedUser.Email;
-            user.UpdatedAt = DateTime.UtcNow;
+            user.UpdatedOn = DateTime.UtcNow;
             user.IsActive = updatedUser.IsActive;
 
             _db.Users.Update(user);
@@ -157,7 +142,7 @@ namespace EvictionFiler.Infrastructure.Repositories
             if (user == null) return false;
 
             user.IsDeleted = true;
-            user.UpdatedAt = DateTime.UtcNow;
+            user.UpdatedOn = DateTime.UtcNow;
 
             _db.Users.Update(user);
             await _db.SaveChangesAsync();

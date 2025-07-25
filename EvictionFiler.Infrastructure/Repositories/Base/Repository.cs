@@ -20,22 +20,15 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 			_context = context;
 			_dbSet = context.Set<T>();
 		}
-
-
 		public async Task<T> AddAsync(T entity)
 		{
 			await _dbSet.AddAsync(entity);
 			return entity;
 		}
-
 		public async Task AddRangeAsync(IEnumerable<T> entities)
 		{
 			await _dbSet.AddRangeAsync(entities);
 		}
-
-		
-
-
 		public async Task<bool> AnyAsync(Expression<Func<T, bool>>? predicate = null)
 		{
 			return await _dbSet.AnyAsync(predicate!);
@@ -78,11 +71,8 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 			if (includes != null)
 				query = includes.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
 
-			return await query.ToListAsync().ConfigureAwait(false); // 🛠 Fix: ConfigureAwait(false)
+			return await query.ToListAsync().ConfigureAwait(false);
 		}
-
-
-
 
 		public IQueryable<T> GetAllQuerable(Expression<Func<T, bool>>? predicate = null, params Expression<Func<T, object>>[]? includes)
 		{
@@ -114,9 +104,9 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 			return entity;
 		}
 
-		public  void RemoveRange(IEnumerable<T> entities)
-		{
-			return _dbSet.RemoveRange(entities);
-		}
+		//public  void RemoveRange(IEnumerable<T> entities)
+		//{
+		//	return _dbSet.RemoveRange(entities);
+		//}
 	}
 }

@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using EvictionFiler.Domain.Entities.Base.Base;
 
 namespace EvictionFiler.Domain.Entities.Master
 {
-	public class CaseSubType : AuditableBaseEntity
-	{	
-		public string ?Name { get; set; }
+	public class CaseSubType : DeletableBaseEntity
+	{
+		[MaxLength(500)]
+		public string Name { get; set; } = string.Empty;
+		[MaxLength(500)]
+		public string? Description { get; set; }
 		public Guid? CaseTypeId { get; set; }
 		[ForeignKey("CaseTypeId")]
 		public CaseType? CaseTypes { get; set; }

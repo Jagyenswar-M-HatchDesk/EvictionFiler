@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using EvictionFiler.Domain.Entities.Master;
+﻿using EvictionFiler.Domain.Entities.Master;
 
 namespace EvictionFiler.Infrastructure.DataSeeding
 {
@@ -12,24 +6,18 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 	{
 		public static IEnumerable<ClientRole> GetClientRole()
 		{
-
 			return new List<ClientRole>
 			{
 				new ClientRole() { Name = "LandLord/Owner"},
 				new ClientRole() { Name = "Tenant/Occupants"},
 				new ClientRole() { Name = "Property Manager"},
 				new ClientRole() { Name = "Legal Representative"},
-
-
-
-
 			};
 		}
 
 
 		public static IEnumerable<Language> GetLangauge()
 		{
-
 			return new List<Language>
 			{
 				new Language() { Name = "English"},
@@ -44,7 +32,6 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 
 		public static IEnumerable<PremiseType> GetPremiseType()
 		{
-
 			return new List<PremiseType>
 			{
 				new PremiseType() { Name = "Residential"},
@@ -54,13 +41,11 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 					new PremiseType() { Name = "Retail"},
 					new PremiseType() { Name = "Office"},
 					new PremiseType() { Name = "Warehouse"},
-
 			};
 		}
 
 		public static IEnumerable<RegulationStatus> GetRegulationStatus()
 		{
-
 			return new List<RegulationStatus>
 			{
 				new RegulationStatus() { Name = "Rent Stablised"},
@@ -75,7 +60,6 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 
 		public static IEnumerable<State> GetState()
 		{
-
 			return new List<State>
 			{
 				new State() { Name = "Georgia"},
@@ -86,20 +70,17 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 
 		public static IEnumerable<TypeOfOwner> GetTypeOfOwner()
 		{
-
 			return new List<TypeOfOwner>
 			{
 				new TypeOfOwner() { Name = "Corportaion"},
-					new TypeOfOwner() { Name = "LLC"},
-						new TypeOfOwner() { Name = "Individual"},
-							new TypeOfOwner() { Name = "Other"},
-
+				new TypeOfOwner() { Name = "LLC"},
+			    new TypeOfOwner() { Name = "Individual"},
+			    new TypeOfOwner() { Name = "Other"},
 			};
 		}
 
 		public static IEnumerable<CaseType> GetCaseTypes()
 		{
-
 			return new List<CaseType>
 			{
 				new CaseType() { Name = "Holdover"},
@@ -109,37 +90,47 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			};
 		}
 
+		public static IEnumerable<LandlordType> GetLandlordTypes()
+		{
+			return new List<LandlordType>
+			{
+				new LandlordType() { Name = "OwnerOfRecord"},
+				new LandlordType() { Name = "Agent"},
+				new LandlordType() { Name = "RefereeOwner"},
+				new LandlordType() { Name = "Other"},
+			};
+		}
+
 		public static IEnumerable<CaseSubType> GetCaseSubTypes(IEnumerable<CaseType> caseTypes)
 		{
-
 			var holdoverId = caseTypes.FirstOrDefault(x => x.Name == "Holdover")?.Id;
 			return new List<CaseSubType>
-	{
-		new CaseSubType { Name = "10 Days Notice - Notice To Cure To Renew Lease"  , CaseTypeId = holdoverId},
-		new CaseSubType { Name = "10 Days Notice - Referee Deed Prior Owner" ,  CaseTypeId = holdoverId },
-		new CaseSubType { Name = "10 Days Notice - Squatter Good Cause Apply"  ,  CaseTypeId = holdoverId},
-		new CaseSubType { Name = "10 Days Notice - Squatter" ,  CaseTypeId = holdoverId },
-		new CaseSubType { Name = "10 Days Notice - Tenant Of Record Vacated"  ,  CaseTypeId = holdoverId},
-		new CaseSubType { Name = "10 Days Notice To Terminate For Lease - Good Cause Apply"  ,  CaseTypeId = holdoverId},
-		new CaseSubType { Name = "30 Days Notice - Commercial"  ,  CaseTypeId = holdoverId},
-		new CaseSubType { Name = "30 Days Notice - Month To Month Section 8" ,  CaseTypeId = holdoverId},
-		new CaseSubType { Name = "30 Days Notice - Month To Month"  ,  CaseTypeId = holdoverId},
-		new CaseSubType { Name = "30 Days Notice - Primary - Non/Primary"  ,  CaseTypeId = holdoverId},
-		new CaseSubType { Name = "60 Days Notice - Intent Not To Renew Lease Section 8" ,  CaseTypeId = holdoverId},
-		new CaseSubType { Name = "60 Days Notice - Intent Not To Renew Lease" ,  CaseTypeId = holdoverId },
-		new CaseSubType { Name = "60 Days Notice - Month To Month - City FHEPS" , CaseTypeId = holdoverId},
-		new CaseSubType { Name = "60 Days Notice - Month To Month - Oral Agreement" , CaseTypeId = holdoverId},
-		new CaseSubType { Name = "60 Days Notice - Month To Month Good Cause Apply Section 8" , CaseTypeId = holdoverId},
-		new CaseSubType { Name = "60 Days Notice - Month To Month Good Cause Apply" , CaseTypeId = holdoverId},
-		new CaseSubType { Name = "60 Days Notice - Month To Month Section 8" ,  CaseTypeId = holdoverId },
-		new CaseSubType { Name = "60 Days Notice - Primary - Non/Primary" ,  CaseTypeId = holdoverId },
-		new CaseSubType { Name = "90 Days Notice - Intent Not To Renew Lease",  CaseTypeId = holdoverId },
-		new CaseSubType { Name = "90 Days Notice - Month to Month" ,  CaseTypeId = holdoverId },
-		new CaseSubType { Name = "90 Days Notice - Month To Month Section 8"  ,  CaseTypeId = holdoverId},
-		new CaseSubType { Name = "90 Days Notice - Primary -Non/Primary" ,  CaseTypeId = holdoverId },
-		new CaseSubType { Name = "90 Days Notice - Referee Deed" ,  CaseTypeId = holdoverId},
-		new CaseSubType { Name = "90 Days Notice - Tenancy at Will" ,  CaseTypeId = holdoverId }
-	};
+	          {
+		         new CaseSubType { Name = "10 Days Notice - Notice To Cure To Renew Lease"  , CaseTypeId = holdoverId},
+		         new CaseSubType { Name = "10 Days Notice - Referee Deed Prior Owner" ,  CaseTypeId = holdoverId },
+		         new CaseSubType { Name = "10 Days Notice - Squatter Good Cause Apply"  ,  CaseTypeId = holdoverId},
+		         new CaseSubType { Name = "10 Days Notice - Squatter" ,  CaseTypeId = holdoverId },
+		         new CaseSubType { Name = "10 Days Notice - Tenant Of Record Vacated"  ,  CaseTypeId = holdoverId},
+		         new CaseSubType { Name = "10 Days Notice To Terminate For Lease - Good Cause Apply"  ,  CaseTypeId = holdoverId},
+		         new CaseSubType { Name = "30 Days Notice - Commercial"  ,  CaseTypeId = holdoverId},
+		         new CaseSubType { Name = "30 Days Notice - Month To Month Section 8" ,  CaseTypeId = holdoverId},
+		         new CaseSubType { Name = "30 Days Notice - Month To Month"  ,  CaseTypeId = holdoverId},
+		         new CaseSubType { Name = "30 Days Notice - Primary - Non/Primary"  ,  CaseTypeId = holdoverId},
+		         new CaseSubType { Name = "60 Days Notice - Intent Not To Renew Lease Section 8" ,  CaseTypeId = holdoverId},
+		         new CaseSubType { Name = "60 Days Notice - Intent Not To Renew Lease" ,  CaseTypeId = holdoverId },
+		         new CaseSubType { Name = "60 Days Notice - Month To Month - City FHEPS" , CaseTypeId = holdoverId},
+		         new CaseSubType { Name = "60 Days Notice - Month To Month - Oral Agreement" , CaseTypeId = holdoverId},
+		         new CaseSubType { Name = "60 Days Notice - Month To Month Good Cause Apply Section 8" , CaseTypeId = holdoverId},
+		         new CaseSubType { Name = "60 Days Notice - Month To Month Good Cause Apply" , CaseTypeId = holdoverId},
+		         new CaseSubType { Name = "60 Days Notice - Month To Month Section 8" ,  CaseTypeId = holdoverId },
+		         new CaseSubType { Name = "60 Days Notice - Primary - Non/Primary" ,  CaseTypeId = holdoverId },
+		         new CaseSubType { Name = "90 Days Notice - Intent Not To Renew Lease",  CaseTypeId = holdoverId },
+		         new CaseSubType { Name = "90 Days Notice - Month to Month" ,  CaseTypeId = holdoverId },
+		         new CaseSubType { Name = "90 Days Notice - Month To Month Section 8"  ,  CaseTypeId = holdoverId},
+		         new CaseSubType { Name = "90 Days Notice - Primary -Non/Primary" ,  CaseTypeId = holdoverId },
+		         new CaseSubType { Name = "90 Days Notice - Referee Deed" ,  CaseTypeId = holdoverId},
+		         new CaseSubType { Name = "90 Days Notice - Tenancy at Will" ,  CaseTypeId = holdoverId }
+	         };
 		}
 
 	}

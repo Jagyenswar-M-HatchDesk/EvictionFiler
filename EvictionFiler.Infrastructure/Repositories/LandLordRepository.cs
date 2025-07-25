@@ -1,5 +1,4 @@
-﻿using EvictionFiler.Application.DTOs;
-using EvictionFiler.Application.DTOs.ApartmentDto;
+﻿using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
@@ -22,37 +21,11 @@ namespace EvictionFiler.Infrastructure.Repositories
 		public async Task<string?> GetLastLandLordCodeAsync()
 		{
 			return await _mainDbContext.LandLords
-				.OrderByDescending(l => l.CreatedAt)
+				.OrderByDescending(l => l.CreatedOn)
 				.Select(l => l.LandLordCode)
 				.FirstOrDefaultAsync();
 		}
-
-		//public async Task AddRangeAsync(List<LandLord> landlords)
-		//{
-		//	await _mainDbContext.LandLords.AddRangeAsync(landlords);
-		//}
-
-        public async Task<List<CreateLandLordDto>> SearchLandlordByCode(string code)
-        {
-            var landlord = await _mainDbContext.LandLords.Where(e => e.LandLordCode.Contains(code)).Select(e => new CreateLandLordDto
-            {
-				Id = e.Id,
-				LandLordCode = e.LandLordCode,
-				//Name = e.Name,
-				EINorSSN = e.EINorSSN,
-				Phone = e.Phone,
-				Email = e.Email,
-		
-				
-				ContactPersonName = e.ContactPersonName,
-				
-				//TypeOfOwner = e.TypeOfOwner,
-			}).ToListAsync();
-            if (landlord == null)
-                return new List<CreateLandLordDto>();
-            return landlord;
-        }
-		public async Task<List<CreateLandLordDto>> SearchLandlordsAsync(string query, Guid clientId)
+		public async Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query, Guid clientId)
 		{
 			query = query?.Trim().ToLower() ?? "";
 
@@ -65,9 +38,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 						l.LandLordCode.ToLower().StartsWith(query)
 					)
 				)
-				.Select(l => new CreateLandLordDto
+				.Select(l => new EditToLandlordDto
 				{
-					Id = l.Id,
 					FirstName = l.FirstName,
 					Email = l.Email,
 					Phone = l.Phone,
@@ -81,52 +53,45 @@ namespace EvictionFiler.Infrastructure.Repositories
 		{
 			// Landlord include State & TypeOfOwner
 			var l = await _mainDbContext.LandLords
-				.Include(x => x.States)
-				.Include(x => x.TypeOfOwners)
+				.Include(x => x.State)
+				.Include(x => x.TypeOfOwner)
 				.FirstOrDefaultAsync(x => x.Id == landlordId && x.IsDeleted != true);
 
 			if (l == null) return null;
 
-			// Appartments include related tables
-			var buildings = await _mainDbContext.Appartments
-				.Include(a => a.States)
-				.Include(a => a.premiseTypes)
-				.Include(a => a.regulationStatus)
-				.Where(a => a.LandlordId == landlordId && a.IsDeleted != true)
-				.Select(appartment => new AddApartment
+			var buildings = await _mainDbContext.Buildings
+				.Include(a => a.State)
+				.Include(a => a.PremiseType)
+				.Include(a => a.RegulationStatus)
+				.Where(a => a.LandlordId == landlordId && a.IsActive == true)
+				.Select(b => new EditToBuildingDto
 				{
-					Id = appartment.Id,
-					BuildingCode = appartment.BuildingCode,
-					ApartmentCode = appartment.ApartmentCode,
-					City = appartment.City,
-					StateId = appartment.StateId,
-					StateName = appartment.States.Name,
-					PremiseTypeId = appartment.PremiseTypeId,
-					PremiseName = appartment.premiseTypes.Name,
-					Address_1 = appartment.Address_1,
-					Address_2 = appartment.Address_2,
-					Zipcode = appartment.Zipcode,
-					MDR_Number = appartment.MDR_Number,
-					PetitionerInterest = appartment.PetitionerInterest,
-					RentRegulationId = appartment.RentRegulationId,
-					RentRegulationName = appartment.regulationStatus.Name,
-					BuildingUnits = appartment.BuildingUnits,
-					DateOfRefreeDeed = appartment.DateOfRefreeDeed,
-					LandlordType = appartment.LandlordType,
-					LandlordId = appartment.LandlordId,
-					IsDeleted = appartment.IsDeleted,
-					IsActive = appartment.IsActive,
-					CreatedAt = appartment.CreatedAt,
-					CreatedBy = appartment.CreatedBy,
-					UpdatedBy = appartment.UpdatedBy,
-					UpdatedAt = appartment.UpdatedAt,
+					BuildingCode = b.BuildingCode,
+					ApartmentCode = b.ApartmentCode,
+					City = b.City,
+					StateId = b.StateId,
+					StateName = b.State.Name,
+					PremiseTypeId = b.PremiseTypeId,
+					PremiseTypeName = b.PremiseType.Name,
+					Address1= b.Address1,
+					Address2= b.Address2,
+					Zipcode = b.Zipcode,
+					MDRNumber = b.MDRNumber,
+					PetitionerInterest = b.PetitionerInterest,
+					RegulationStatusId = b.RegulationStatusId,
+					RegulationStatusName = b.RegulationStatus.Name,
+					BuildingUnits = b.BuildingUnits,
+					DateOfRefreeDeed = b.DateOfRefreeDeed,
+					LandlordTypeId = b.LandlordTypeId,
+					LandlordTypeName = b.LandlordType.Name,
+					LandlordId = b.LandlordId,
+					
 				}).ToListAsync();
 
 			return new LandlordWithBuildings
 			{
-				Landlord = new CreateLandLordDto
+				Landlord = new EditToLandlordDto
 				{
-					Id = l.Id,
 					LandLordCode = l.LandLordCode,
 					FirstName = l.FirstName,
 					LastName = l.LastName,
@@ -136,32 +101,27 @@ namespace EvictionFiler.Infrastructure.Repositories
 					Address1 = l.Address1,
 					Address2 = l.Address2,
 					StateId = l.StateId,
-					StateName = l.States.Name,
+					StateName = l.State?.Name,
 					City = l.City,
 					Zipcode = l.Zipcode,
 					ContactPersonName = l.ContactPersonName,
-					TypeOfOwnerId = l.TypeOfOwnerId,
-					TypeOfOwnerName = l.TypeOfOwners.Name,
-					IsActive = l.IsActive,
-					IsDeleted = l.IsDeleted,
-					CreatedBy = l.CreatedBy,
-					CreatedAt = l.CreatedAt,
-					UpdatedAt = l.UpdatedAt,
-					UpdatedBy = l.UpdatedBy,
+					TypeOwnerId = l.TypeOfOwnerId,
+					TypeOwnerName = l.TypeOfOwner?.Name,
+					
 				},
 				Buildings = buildings
 			};
 		}
 
-		public async Task<List<EditLandlordDto>> GetByClientIdAsync(Guid clientId)
+		public async Task<List<EditToLandlordDto>> GetByClientIdAsync(Guid clientId)
 		{
 			var landlords = await _mainDbContext.LandLords
 				.Where(x => x.ClientId == clientId && x.IsDeleted != true)
-				.Include(x => x.States)
-				.Include(x => x.TypeOfOwners)
+				.Include(x => x.State)
+				.Include(x => x.TypeOfOwner)
 				.ToListAsync();
 
-			return landlords.Select(l => new EditLandlordDto
+			return landlords.Select(l => new EditToLandlordDto
 			{
 				Id = l.Id,
 				LandLordCode = l.LandLordCode,
@@ -173,28 +133,23 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Address1 = l.Address1,
 				Address2 = l.Address2,
 				StateId = l.StateId,
-				StateName = l.States?.Name,              
-				TypeOfOwnerName = l.TypeOfOwners?.Name,  
+				StateName = l.State.Name,              
+				TypeOwnerName = l.TypeOfOwner.Name,  
 				City = l.City,
 				Zipcode = l.Zipcode,
 				ContactPersonName = l.ContactPersonName,
-				TypeOfOwnerId = l.TypeOfOwnerId,
+				TypeOwnerId = l.TypeOfOwnerId,
 				ClientId = l.ClientId,
-				IsActive = l.IsActive,
-				IsDeleted = l.IsDeleted,
-				CreatedBy = l.CreatedBy,
-				CreatedAt = l.CreatedAt,
-				UpdatedAt = l.UpdatedAt,
-				UpdatedBy = l.UpdatedBy,
+				
 
 			}).ToList();
 		}
 
 		public async Task<List<TypeOfOwner>> GetAllOwner()
 		{
-			return await _mainDbContext.mst_TypeOfOwners.ToListAsync();
+			return await _mainDbContext.MstTypeOfOwners.ToListAsync();
 		}
 
-
+		
 	}
 }

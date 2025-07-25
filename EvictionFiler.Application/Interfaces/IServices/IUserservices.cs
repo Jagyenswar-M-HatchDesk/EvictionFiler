@@ -1,4 +1,4 @@
-﻿using EvictionFiler.Application.DTOs;
+﻿using EvictionFiler.Application.DTOs.UserDto;
 using EvictionFiler.Domain.Entities;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿using EvictionFiler.Application.DTOs;
+﻿using EvictionFiler.Application.DTOs.LegalCaseDto;
 using EvictionFiler.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -10,10 +10,10 @@ namespace EvictionFiler.Application.Interfaces.IServices
 {
     public interface ILegalCaseService
     {
-        Task<bool> AddLegalCasesAsync(CreateEditLegalCaseModel dto);
+        Task<bool> AddLegalCasesAsync(CreateToEditLegalCaseModel dto);
         Task<List<LegalCase>> GetAllAsync();
-        Task<CreateEditLegalCaseModel?> GetByIdAsync(Guid id);
-        Task<bool> UpdateAsync(CreateEditLegalCaseModel dto);
+        Task<CreateToEditLegalCaseModel?> GetByIdAsync(Guid id);
+        Task<bool> UpdateAsync(CreateToEditLegalCaseModel dto);
         Task DeleteAsync(Guid id);
 
 	}
