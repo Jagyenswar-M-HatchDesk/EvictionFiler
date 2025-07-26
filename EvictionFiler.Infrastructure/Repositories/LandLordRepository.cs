@@ -40,6 +40,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				)
 				.Select(l => new EditToLandlordDto
 				{
+					Id = l.Id,
 					FirstName = l.FirstName,
 					Email = l.Email,
 					Phone = l.Phone,
@@ -66,6 +67,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				.Where(a => a.LandlordId == landlordId && a.IsActive == true)
 				.Select(b => new EditToBuildingDto
 				{
+					Id = b.Id,
 					BuildingCode = b.BuildingCode,
 					ApartmentCode = b.ApartmentCode,
 					City = b.City,
@@ -73,8 +75,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 					StateName = b.State.Name,
 					PremiseTypeId = b.PremiseTypeId,
 					PremiseTypeName = b.PremiseType.Name,
-					Address1= b.Address1,
-					Address2= b.Address2,
+					Address1 = b.Address1,
+					Address2 = b.Address2,
 					Zipcode = b.Zipcode,
 					MDRNumber = b.MDRNumber,
 					PetitionerInterest = b.PetitionerInterest,
@@ -85,13 +87,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 					LandlordTypeId = b.LandlordTypeId,
 					LandlordTypeName = b.LandlordType.Name,
 					LandlordId = b.LandlordId,
-					
+
 				}).ToListAsync();
 
 			return new LandlordWithBuildings
 			{
 				Landlord = new EditToLandlordDto
 				{
+					Id = l.Id,
 					LandLordCode = l.LandLordCode,
 					FirstName = l.FirstName,
 					LastName = l.LastName,

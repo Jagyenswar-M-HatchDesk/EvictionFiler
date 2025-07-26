@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace EvictionFiler.Infrastructure.Migrations.Tenant
+namespace EvictionFiler.Infrastructure.Migrations.tenant
 {
     [DbContext(typeof(TenantDbContext))]
     partial class TenantDbContextModelSnapshot : ModelSnapshot
@@ -310,9 +310,6 @@ namespace EvictionFiler.Infrastructure.Migrations.Tenant
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ApartmentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Attrney")

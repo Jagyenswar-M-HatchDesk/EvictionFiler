@@ -26,19 +26,22 @@ namespace EvictionFiler.Infrastructure.Repositories
 				.Select(l => l.BuildingCode)
 				.FirstOrDefaultAsync();
 		}
-		
+
 		public async Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id)
 		{
 			var appartment = await _context.Buildings
+				.Include(x => x.LandlordType) // ✅ Include LandlordType
 				.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted != true);
 
 			if (appartment == null) return null;
 
 			var tenant = await _context.Tenants
+				.Include(t => t.Language) // ✅ Include Language
+				.Include(t => t.State)    // ✅ Include State
 				.Where(a => a.BuildinId == id && a.IsDeleted != true)
 				.Select(dto => new EditToTenantDto
 				{
-					
+					Id = dto.Id,
 					TenantCode = dto.TenantCode,
 					FirstName = dto.FirstName,
 					LastName = dto.LastName,
@@ -48,7 +51,9 @@ namespace EvictionFiler.Infrastructure.Repositories
 					Email = dto.Email,
 					LanguageId = dto.LanguageId,
 					StateId = dto.StateId,
-					Address1= dto.Address1,
+					LanguageName = dto.Language != null ? dto.Language.Name : null, // ✅ new field
+					StateName = dto.State != null ? dto.State.Name : null,         // ✅ new field
+					Address1 = dto.Address1,
 					Address2 = dto.Address2,
 					City = dto.City,
 					Zipcode = dto.Zipcode,
@@ -63,14 +68,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 					TenantRecord = dto.TenantRecord,
 					HasPriorCase = dto.HasPriorCase,
 					BuildingId = dto.BuildinId,
-				
-				}).ToListAsync();
+				})
+				.ToListAsync();
 
-            return new BuildingWithTenant
-            {
-              
-                Building = new EditToBuildingDto
-                {
+			return new BuildingWithTenant
+			{
+				Building = new EditToBuildingDto
+				{
+					Id = appartment.Id,
 					BuildingCode = appartment.BuildingCode,
 					ApartmentCode = appartment.ApartmentCode,
 					City = appartment.City,
@@ -85,14 +90,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 					BuildingUnits = appartment.BuildingUnits,
 					DateOfRefreeDeed = appartment.DateOfRefreeDeed,
 					LandlordTypeId = appartment.LandlordTypeId,
-					LandlordTypeName = appartment.LandlordType.Name,
+					LandlordTypeName = appartment.LandlordType?.Name,
 					LandlordId = appartment.LandlordId,
-					
-
 				},
 				Tenants = tenant
 			};
 		}
+
 
 		public async Task<List<EditToBuildingDto>> SearchBuildingByCode(string code, Guid landlordId)
 		{
@@ -103,7 +107,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				)
 				.Select(appartment=> new EditToBuildingDto
 				{
-					
+					Id = appartment.Id,
 					BuildingCode = appartment.BuildingCode,
 					ApartmentCode = appartment.ApartmentCode,
 					City = appartment.City,

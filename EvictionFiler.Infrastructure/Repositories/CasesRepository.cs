@@ -49,7 +49,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 			{
 				Id = legalCaseEntity.Id,
 				ClientId = legalCaseEntity.Clients?.Id, 
-				ApartmentId = legalCaseEntity.Buildings?.Id,
+				BuildingId = legalCaseEntity.Buildings?.Id,
 				LandLordId = legalCaseEntity.LandLordId,
 				TenantId = legalCaseEntity.Tenants?.Id,
 				CaseName = legalCaseEntity.CaseName,
@@ -68,22 +68,26 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 		public async Task<bool> AddCaseAsync(CreateToEditLegalCaseModel legalCase)
         {
-            var newcase = new LegalCase
-            {
-                Id = legalCase.Id,
-                Casecode = await GenerateCaseCodeAsync(),
-                TenantId = legalCase.TenantId,
-                ApartmentId = legalCase.ApartmentId,
-                LandLordId = legalCase.LandLordId,
-                ClientId = legalCase.ClientId,
-                CaseName = legalCase.CaseName,
-                ClientRoleId = legalCase.ClientRoleId,
-                LegalRepresentative = legalCase.LegalRepresentative,
-                Attrney = legalCase.Attrney,
-                AttrneyContactInfo = legalCase.AttrneyContactInfo,
-                Firm = legalCase.Firm,  
-               
-            };
+			var newcase = new LegalCase
+			{
+				Id = legalCase.Id,
+				Casecode = await GenerateCaseCodeAsync(),
+				TenantId = legalCase.TenantId,
+				BuildingId = legalCase.BuildingId,
+				LandLordId = legalCase.LandLordId,
+				ClientId = legalCase.ClientId,
+				CaseName = legalCase.CaseName,
+				CaseTypeId = legalCase.CaseTypeId,
+				CaseSubTypeId = legalCase.CaseSubTypeId,
+				ClientRoleId = legalCase.ClientRoleId,
+				LegalRepresentative = legalCase.LegalRepresentative,
+				Attrney = legalCase.Attrney,
+				AttrneyContactInfo = legalCase.AttrneyContactInfo,
+				Firm = legalCase.Firm,
+				CreatedOn = DateTime.Now,
+				
+
+			};
 
             await _context.LegalCases.AddAsync(newcase);
             var result=await _context.SaveChangesAsync();
@@ -101,7 +105,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 			if (existing == null) return false;
 
 			existing.TenantId = legalCase.TenantId;
-			existing.ApartmentId = legalCase.ApartmentId;
+			existing.BuildingId = legalCase.BuildingId;
 			existing.LandLordId = legalCase.LandLordId;
 			existing.ClientId = legalCase.ClientId;
 			existing.CaseName = legalCase.CaseName;

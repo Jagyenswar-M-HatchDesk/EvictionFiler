@@ -312,9 +312,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ApartmentId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Attrney")
                         .IsRequired()
                         .HasMaxLength(100)

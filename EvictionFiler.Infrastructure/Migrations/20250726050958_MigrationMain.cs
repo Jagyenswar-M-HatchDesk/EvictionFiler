@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMainDb : Migration
+    public partial class MigrationMain : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -608,10 +608,9 @@ namespace EvictionFiler.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Casecode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ClientId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ApartmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    BuildingId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     LandLordId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    BuildingId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CaseName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     ClientRoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     LegalRepresentative = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),

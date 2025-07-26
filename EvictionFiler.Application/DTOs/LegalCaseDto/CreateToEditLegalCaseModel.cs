@@ -6,7 +6,7 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 	{
 		public Guid Id { get; set; }
 		public Guid? ClientId { get; set; }
-		public Guid? ApartmentId { get; set; }
+		public Guid? BuildingId { get; set; }
 		public Guid? LandLordId { get; set; }
 		public Guid? TenantId { get; set; }
 		public string? CaseName { get; set; }

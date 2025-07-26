@@ -10,7 +10,7 @@ namespace EvictionFiler.Domain.Entities
         [Required]
 		public string Casecode { get; set; } = string.Empty;
 		public Guid? ClientId { get; set; } 
-        public Guid?ApartmentId { get; set; }
+        public Guid? BuildingId { get; set; }
         public Guid? LandLordId { get; set; }
         public Guid?TenantId { get; set; }
 
