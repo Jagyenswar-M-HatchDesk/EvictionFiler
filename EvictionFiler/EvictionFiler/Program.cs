@@ -120,7 +120,23 @@ else
 await app.ConfigureDataContext();
 app.UseHttpsRedirection();
 app.UseAuthentication();
-app.UseAuthorization();
+app.UseStaticFiles();
+app.UseSession();
+
+using var scope = app.Services.CreateScope();
+
+var services = scope.ServiceProvider;
+try
+{
+	var identityContext = services.GetRequiredService<MainDbContext>();
+	await identityContext.Database.MigrateAsync();
+}
+catch (Exception ex)
+{
+	var logger = services.GetRequiredService<ILogger<Program>>();
+	logger.LogError(ex, "An error occursed during migration");
+}
+
 
 app.UseAntiforgery();
 
