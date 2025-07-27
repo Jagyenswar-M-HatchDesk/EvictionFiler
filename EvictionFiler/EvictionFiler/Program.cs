@@ -121,7 +121,7 @@ await app.ConfigureDataContext();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseStaticFiles();
-app.UseSession();
+
 
 using var scope = app.Services.CreateScope();
 
