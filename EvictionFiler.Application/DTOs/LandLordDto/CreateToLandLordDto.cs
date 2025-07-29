@@ -25,6 +25,9 @@ namespace EvictionFiler.Application.DTOs.LandLordDto
 		public string? StateName { get; set; }
 		public string Zipcode { get; set; } = string.Empty;
 		public Guid? ClientId { get; set; }
+		public DateOnly DateOfRefreeDeed { get; set; }  = DateOnly.FromDateTime(DateTime.Today);
+		public Guid? LandlordTypeId { get; set; }
+		public string? LandlordTypeName { get; set; }
 		public string ? OtherLandlordTypeDescription { get; set; }
 		public List<CreateToBuildingDto>? Buildings { get; set; }
 	}

@@ -35,6 +35,11 @@ namespace EvictionFiler.Domain.Entities
 		public State? State { get; set; }
 		[MaxLength(50)]
 		public string Zipcode { get; set; } = string.Empty;
+
+		public DateOnly DateOfRefreeDeed { get; set; }
+		public Guid? LandlordTypeId { get; set; }
+		[ForeignKey("LandlordTypeId")]
+		public LandlordType? LandlordType { get; set; }
 		public Guid? ClientId { get; set; }
 		[ForeignKey("ClientId")]
 		public Client? Client { get; set; } 

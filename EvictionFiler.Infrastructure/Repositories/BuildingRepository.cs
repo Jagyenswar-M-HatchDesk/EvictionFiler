@@ -30,14 +30,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 		public async Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id)
 		{
 			var appartment = await _context.Buildings
-				.Include(x => x.LandlordType) // ✅ Include LandlordType
+				
 				.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted != true);
 
 			if (appartment == null) return null;
 
 			var tenant = await _context.Tenants
 				.Include(t => t.Language) // ✅ Include Language
-				.Include(t => t.State)    // ✅ Include State
+			
 				.Where(a => a.BuildinId == id && a.IsDeleted != true)
 				.Select(dto => new EditToTenantDto
 				{
@@ -45,21 +45,16 @@ namespace EvictionFiler.Infrastructure.Repositories
 					TenantCode = dto.TenantCode,
 					FirstName = dto.FirstName,
 					LastName = dto.LastName,
-					DOB = dto.DOB,
+				
 					SSN = dto.SSN,
 					Phone = dto.Phone,
 					Email = dto.Email,
 					LanguageId = dto.LanguageId,
-					StateId = dto.StateId,
+					
 					LanguageName = dto.Language != null ? dto.Language.Name : null, // ✅ new field
-					StateName = dto.State != null ? dto.State.Name : null,         // ✅ new field
-					Address1 = dto.Address1,
-					Address2 = dto.Address2,
-					City = dto.City,
-					Zipcode = dto.Zipcode,
-					Apt = dto.Apt,
+				
 					Borough = dto.Borough,
-					Rent = dto.Rent,
+				
 					HasPossession = dto.HasPossession,
 					HasRegulatedTenancy = dto.HasRegulatedTenancy,
 					Name_Relation = dto.Name_Relation,
@@ -88,9 +83,6 @@ namespace EvictionFiler.Infrastructure.Repositories
 					PetitionerInterest = appartment.PetitionerInterest,
 					RegulationStatusId = appartment.RegulationStatusId,
 					BuildingUnits = appartment.BuildingUnits,
-					DateOfRefreeDeed = appartment.DateOfRefreeDeed,
-					LandlordTypeId = appartment.LandlordTypeId,
-					LandlordTypeName = appartment.LandlordType?.Name,
 					LandlordId = appartment.LandlordId,
 				},
 				Tenants = tenant
@@ -120,9 +112,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 					PetitionerInterest = appartment.PetitionerInterest,
 					RegulationStatusId = appartment.RegulationStatusId,
 					BuildingUnits = appartment.BuildingUnits,
-					DateOfRefreeDeed = appartment.DateOfRefreeDeed,
-					LandlordTypeId = appartment.LandlordTypeId,
-					LandlordTypeName = appartment.LandlordType.Name,
+		
 					LandlordId = appartment.LandlordId,
 
 				})
@@ -156,9 +146,6 @@ namespace EvictionFiler.Infrastructure.Repositories
 				MDRNumber = appartment.MDRNumber,
 				PetitionerInterest = appartment.PetitionerInterest,
 				BuildingUnits = appartment.BuildingUnits,
-				DateOfRefreeDeed = appartment.DateOfRefreeDeed,
-				LandlordTypeId = appartment.LandlordTypeId,
-				LandlordTypeName = appartment.LandlordType?.Name,
 				LandlordId = appartment.LandlordId,
 			
 

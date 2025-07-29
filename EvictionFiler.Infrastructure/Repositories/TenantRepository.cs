@@ -32,19 +32,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 				TenantCode = dto.TenantCode,
 				FirstName = dto.FirstName,
 				LastName = dto.LastName,
-				DOB = dto.DOB,
+			
 				SSN = dto.SSN,
 				Phone = dto.Phone,
 				Email = dto.Email,
 				LanguageId = dto.LanguageId,
-				StateId = dto.StateId,
-				Address1 = dto.Address1,
-				Address2 = dto.Address2,
-				City = dto.City,
-				Zipcode = dto.Zipcode,
-				Apt = dto.Apt,
+			
 				Borough = dto.Borough,
-				Rent = dto.Rent,
+			
 				HasPossession = dto.HasPossession,
 				HasRegulatedTenancy = dto.HasRegulatedTenancy,
 				Name_Relation = dto.Name_Relation,
@@ -98,7 +93,6 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			// Step 3: Get all tenants linked to these apartments
 			var tenants = await _dbContext.Tenants
-		.Include(a => a.State)
 		.Include(a => a.Language)
 		.Where(t => t.BuildinId.HasValue && apartmentIds.Contains(t.BuildinId.Value) && t.IsDeleted != true)
 		.Select(dto => new EditToTenantDto
@@ -107,21 +101,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 			TenantCode = dto.TenantCode,
 			FirstName = dto.FirstName,
 			LastName = dto.LastName,
-			DOB = dto.DOB,
+		
 			SSN = dto.SSN,
 			Phone = dto.Phone,
 			Email = dto.Email,
 			LanguageId = dto.LanguageId,
-			StateId = dto.StateId,
-			StateName = dto.State.Name,
 			LanguageName = dto.Language.Name,
-			Address1 = dto.Address1,
-			Address2 = dto.Address2,
-			City = dto.City,
-			Zipcode = dto.Zipcode,
-			Apt = dto.Apt,
 			Borough = dto.Borough,
-			Rent = dto.Rent,
+	
 			HasPossession = dto.HasPossession,
 			HasRegulatedTenancy = dto.HasRegulatedTenancy,
 			Name_Relation = dto.Name_Relation,

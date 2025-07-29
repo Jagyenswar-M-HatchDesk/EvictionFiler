@@ -302,6 +302,8 @@ namespace EvictionFiler.Application.Services
 						City = l.City,
 						Zipcode = l.Zipcode,
 						ContactPersonName = l.ContactPersonName,
+						LandlordTypeId = l.LandlordTypeId,
+						DateOfRefreeDeed = l.DateOfRefreeDeed,
 						TypeOfOwnerId = l.TypeOwnerId,
 					};
 
@@ -329,8 +331,6 @@ namespace EvictionFiler.Application.Services
 								PetitionerInterest = b.PetitionerInterest,
 								RegulationStatusId = b.RegulationStatusId,
 								BuildingUnits = b.BuildingUnits,
-								DateOfRefreeDeed = b.DateOfRefreeDeed,
-								LandlordTypeId = b.LandlordTypeId,
 								LandlordId = landlord.Id
 							};
 
@@ -349,19 +349,11 @@ namespace EvictionFiler.Application.Services
 										TenantCode = tenantCode,
 										FirstName = t.FirstName,
 										LastName = t.LastName,
-										DOB = t.DOB,
 										SSN = t.SSN,
 										Phone = t.Phone,
 										Email = t.Email,
 										LanguageId = t.LanguageId,
-										StateId = t.StateId,
-										Address1 = t.Address1,
-										Address2 = t.Address2,
-										City = t.City,
-										Zipcode = t.Zipcode,
-										Apt = t.Apt,
 										Borough = t.Borough,
-										Rent = t.Rent,
 										HasPossession = t.HasPossession,
 										HasRegulatedTenancy = t.HasRegulatedTenancy,
 										Name_Relation = t.Name_Relation,
@@ -369,6 +361,18 @@ namespace EvictionFiler.Application.Services
 										Registration_No = t.Registration_No,
 										TenantRecord = t.TenantRecord,
 										HasPriorCase = t.HasPriorCase,
+										TenancyTypeId = t.TenancyTypeId,
+										RenewalOffer = t.RenewalOffer,
+										RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
+										SocialServices = t.SocialServices,
+										MonthlyRent=t.MonthlyRent,
+										LastMonthWeekRentPaid = t.LastMonthWeekRentPaid,
+										TenantShare = t.TenantShare,
+										IsERAPPaymentReceived = t.IsERAPPaymentReceived,
+										ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
+										UnitOrApartmentNumber = t.UnitOrApartmentNumber,
+										TotalRentOwed = t.TotalRentOwed,
+										IsUnitIllegalId = t.IsUnitIllegalId,
 										BuildinId = building.Id
 									};
 
@@ -485,8 +489,6 @@ namespace EvictionFiler.Application.Services
 							PetitionerInterest = b.PetitionerInterest,
 							RegulationStatusId = b.RegulationStatusId,
 							BuildingUnits = b.BuildingUnits,
-							DateOfRefreeDeed = b.DateOfRefreeDeed,
-							LandlordTypeId = b.LandlordTypeId,
 							LandlordId = landlord.Id
 						};
 
@@ -512,19 +514,13 @@ namespace EvictionFiler.Application.Services
 									TenantCode = isNewTenant ? $"TT{nextTenantNumber.ToString().PadLeft(10, '0')}" : t.TenantCode,
 									FirstName = t.FirstName,
 									LastName = t.LastName,
-									DOB = t.DOB,
+								
 									SSN = t.SSN,
 									Phone = t.Phone,
 									Email = t.Email,
 									LanguageId = t.LanguageId,
-									StateId = t.StateId,
-									Address1 = t.Address1,
-									Address2 = t.Address2,
-									City = t.City,
-									Zipcode = t.Zipcode,
-									Apt = t.Apt,
 									Borough = t.Borough,
-									Rent = t.Rent,
+								
 									HasPossession = t.HasPossession,
 									HasRegulatedTenancy = t.HasRegulatedTenancy,
 									Name_Relation = t.Name_Relation,
@@ -532,6 +528,17 @@ namespace EvictionFiler.Application.Services
 									Registration_No = t.Registration_No,
 									TenantRecord = t.TenantRecord,
 									HasPriorCase = t.HasPriorCase,
+									TenancyTypeId = t.TenancyTypeId,
+									RenewalOffer = t.RenewalOffer,
+									RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
+									SocialServices = t.SocialServices,
+									MonthlyRent = t.MonthlyRent,
+									LastMonthWeekRentPaid = t.LastMonthWeekRentPaid,
+									TenantShare = t.TenantShare,
+									ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
+									UnitOrApartmentNumber = t.UnitOrApartmentNumber,
+									TotalRentOwed = t.TotalRentOwed,
+									IsUnitIllegalId = t.IsUnitIllegalId,
 									BuildinId = building.Id
 								};
 

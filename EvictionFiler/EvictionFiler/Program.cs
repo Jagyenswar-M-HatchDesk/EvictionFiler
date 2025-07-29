@@ -65,6 +65,8 @@ builder.Services.AddScoped<IClientRoleRepository, ClientRoleRepository>();
 builder.Services.AddScoped<ILandlordTypeRepository, LandlordTypeRepository>();
 builder.Services.AddScoped<IPremiseTypeRepository, PremiseTypeRepository>();
 builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
+builder.Services.AddScoped<IUnitIllegalRepository, UnitIllegalRepository>();
+builder.Services.AddScoped<ITenancyTypeRepository, TenancyTypeRepository>();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<JwtAuthStateProvider>();

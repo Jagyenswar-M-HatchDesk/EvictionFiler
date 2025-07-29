@@ -15,17 +15,7 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public string? Name_Relation { get; set; }	
 		public Guid?LanguageId { get; set; }
 		public string? LanguageName { get; set; }
-		[Required(ErrorMessage = "Address1 is Required")]
-		public string Address1 { get; set; } = string.Empty;
-		public string? Address2 { get; set; }
-		public string ?City { get; set; } = string.Empty;
-		public Guid? StateId { get; set; }
-		public string? StateName { get; set; }
-		public string ?Zipcode { get; set; } = string.Empty;
-		public DateOnly? DOB { get; set; }
-		public double? Rent { get; set; }
 		public string? SSN { get; set; }
-		public string? Apt { get; set; }
 		public string? Borough { get; set; }
 		public bool? TenantRecord { get; set; }
 		public bool? HasPossession { get; set; }
@@ -33,7 +23,25 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public bool? OtherOccupants { get; set; }
 		public bool? HasPriorCase { get; set; }
 		public Guid? BuildingId { get; set; }
-		
+
+		//Rent Details
+		public bool? RenewalOffer { get; set; }
+		public string? RentDueEachMonthOrWeek { get; set; }
+		public double? MonthlyRent { get; set; }
+		public double? TenantShare { get; set; }
+		public string? SocialServices { get; set; }
+		public string? LastMonthWeekRentPaid { get; set; }
+		public double? TotalRentOwed { get; set; }
+		public bool? IsERAP { get; set; }
+		public bool? IsERAPPaymentReceived { get; set; }
+		public DateOnly? ERAPPaymentReceivedDate { get; set; }
+		public string? UnitOrApartmentNumber { get; set; }
+
+		public Guid? IsUnitIllegalId { get; set; }
+		public string? IsUnitIllegalName { get; set; }
+		public Guid? TenancyTypeId { get; set; }
+		public string? TenancyTypeName { get; set; }
+		public string ?TenancyTypeDescription { get; set; }
 
 	}
 }

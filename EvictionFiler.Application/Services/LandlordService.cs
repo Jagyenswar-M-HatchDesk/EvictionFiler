@@ -54,6 +54,8 @@ namespace EvictionFiler.Application.Services
 					City = dto.City,
 					Zipcode = dto.Zipcode,
 					ContactPersonName = dto.ContactPersonName,
+					DateOfRefreeDeed = dto.DateOfRefreeDeed,
+					LandlordTypeId = dto.LandlordTypeId,
 					TypeOfOwnerId = dto.TypeOwnerId,
 					ClientId = dto.ClientId,
 					CreatedOn = DateTime.Now,
@@ -94,6 +96,9 @@ namespace EvictionFiler.Application.Services
 				StateName = dto.State?.Name ?? "Unknown",
 				TypeOwnerId = dto.TypeOfOwnerId,
 				TypeOwnerName = dto.TypeOfOwner?.Name ?? "Unknown",
+				LandlordTypeId = dto.LandlordTypeId,
+				DateOfRefreeDeed = dto.DateOfRefreeDeed,
+				LandlordTypeName = dto.LandlordType?.Name ?? "Unknown",
 				City = dto.City,
 				Zipcode = dto.Zipcode,
 				ContactPersonName = dto.ContactPersonName,
@@ -130,6 +135,9 @@ namespace EvictionFiler.Application.Services
 				Address1 = dto.Address1,
 				Address2 = dto.Address2,
 				StateId = dto.StateId,
+				LandlordTypeId = dto.LandlordTypeId,
+				LandlordTypeName= dto.LandlordType?.Name,
+				DateOfRefreeDeed = dto.DateOfRefreeDeed,
 				City = dto.City,
 				Zipcode = dto.Zipcode,
 				ContactPersonName = dto.ContactPersonName,
@@ -171,6 +179,8 @@ namespace EvictionFiler.Application.Services
 					entity.City = l.City;
 					entity.Zipcode = l.Zipcode;
 					entity.EINorSSN = l.EINorSSN;
+					entity.LandlordTypeId = l.LandlordTypeId;
+					entity.DateOfRefreeDeed = l.DateOfRefreeDeed;
 					entity.ContactPersonName = l.ContactPersonName;
 				}
 			}
@@ -179,14 +189,6 @@ namespace EvictionFiler.Application.Services
 			return true;
 
 
-		}
-
-
-		public async Task<List<TypeOfOwner>> GetAllOwner()
-		{
-
-			var states = await _landLordRepository.GetAllOwner();
-			return states;
 		}
 
 	

@@ -24,6 +24,8 @@ namespace EvictionFiler.Infrastructure.DbContexts
 		public DbSet<ClientRole> MstClientRoles { get; set; }
 		public DbSet<Language> MstLanguages { get; set; }
 		public DbSet<PremiseType> MstPremiseTypes { get; set; }
+		public DbSet<TenancyType> MstTenancyTypes { get; set; }
+		public DbSet<IsUnitIllegal> MstIsUnitIllegal{ get; set; }
 		public DbSet<RegulationStatus> MstRegulationStatus { get; set; }
 		public DbSet<State> MstStates { get; set; }
 

@@ -101,6 +101,30 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			};
 		}
 
+		public static IEnumerable<TenancyType> GetTenancyTypes()
+		{
+			return new List<TenancyType>
+			{
+				new TenancyType() { Name = "Month-to-Month"},
+				new TenancyType() { Name = "At Will"},
+				new TenancyType() { Name = "Squatter"},
+				new TenancyType() { Name = "Section-8"},
+				new TenancyType() { Name = "Other"},
+			};
+		}
+
+		public static IEnumerable<IsUnitIllegal> GetIsUnitIllegal()
+		{
+			return new List<IsUnitIllegal>
+			{
+				new IsUnitIllegal() { Name = "Basement Apartment"},
+				new IsUnitIllegal() { Name = "Roming House "},
+				new IsUnitIllegal() { Name = "Attic"},
+				new IsUnitIllegal() { Name = "None"},
+			
+			};
+		}
+
 		public static IEnumerable<CaseSubType> GetCaseSubTypes(IEnumerable<CaseType> caseTypes)
 		{
 			var holdoverId = caseTypes.FirstOrDefault(x => x.Name == "Holdover")?.Id;
@@ -135,3 +159,4 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 
 	}
 }
+

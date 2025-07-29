@@ -26,7 +26,7 @@ namespace EvictionFiler.Domain.Entities
 		[ForeignKey("LanguageId")]
 		public Language? Language { get; set; }
 		[MaxLength(500)]
-		public string Address1  { get; set; } = string.Empty;
+		public string Address1 { get; set; } = string.Empty;
 		[MaxLength(500)]
 		public string? Address2 { get; set; }
 		[MaxLength(100)]
@@ -34,18 +34,17 @@ namespace EvictionFiler.Domain.Entities
 		public Guid? StateId { get; set; }
 		[ForeignKey("StateId")]
 		public State? State { get; set; }
-		[MaxLength(50)]
-		public string ?Zipcode { get; set; } = string.Empty;
-		public DateOnly? DOB { get; set; }
-		[MaxLength(100)]
-		public double ?Rent { get; set; }
+		public string? Zipcode { get; set; } = string.Empty;
+
+		public Guid? TenancyTypeId { get; set; }
+		[ForeignKey("TenancyTypeId")]
+		public TenancyType? TenancyType { get; set; }
 		[MaxLength(50)]
 		public string? SSN { get; set; }
 		[MaxLength(50)]
-		public string? Apt { get; set; }
-		[MaxLength(50)]
 		public string? Borough { get; set; } 
 		public bool? TenantRecord { get; set; }
+		public bool? RenewalOffer { get; set; }
 		public bool? HasPossession { get; set; }
 		public bool? HasRegulatedTenancy { get; set; }
 		public bool? OtherOccupants { get; set; }
@@ -53,5 +52,26 @@ namespace EvictionFiler.Domain.Entities
 		public Guid? BuildinId { get; set; }
 		[ForeignKey("BuildinId")]
 		public Building? Building { get; set; }
+
+		//Rent Details
+		[MaxLength(50)]
+		public string? RentDueEachMonthOrWeek { get; set; }
+		public double? MonthlyRent { get; set; }
+		public double? TenantShare { get; set; }
+
+		[MaxLength(250)]
+		public string? SocialServices { get; set; }
+
+		[MaxLength(50)]
+		public string? LastMonthWeekRentPaid { get; set; }
+		public double? TotalRentOwed { get; set; }
+		public bool? IsERAPPaymentReceived { get; set; }
+		public DateOnly? ERAPPaymentReceivedDate { get; set; }
+		public string? UnitOrApartmentNumber { get; set; }
+
+		public Guid? IsUnitIllegalId { get; set; }
+		[ForeignKey("IsUnitIllegalId")]
+		public IsUnitIllegal? IsUnitIllegal { get; set; }
+
 	}
 }

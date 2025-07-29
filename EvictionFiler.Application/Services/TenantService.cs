@@ -1,4 +1,6 @@
-﻿using EvictionFiler.Application.DTOs.ApartmentDto;
+﻿using System.Numerics;
+using System.Runtime.Intrinsics.X86;
+using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Application.Interfaces.IServices;
@@ -35,7 +37,7 @@ namespace EvictionFiler.Application.Services
 				}
 			}
 
-			foreach (var dto in dtoList)
+			foreach (var t in dtoList)
 			{
 				var code = $"TT{nextNumber.ToString().PadLeft(10, '0')}";
 				nextNumber++; // ✅ increment locally
@@ -44,33 +46,32 @@ namespace EvictionFiler.Application.Services
 				{
 					
 					TenantCode = code,
-					FirstName = dto.FirstName,
-					LastName = dto.LastName,
-					DOB = dto.DOB,
-					SSN = dto.SSN,
-					Phone = dto.Phone,
-					Email = dto.Email,
-					LanguageId = dto.LanguageId,
-					StateId = dto.StateId,
-					Address1 = dto.Address1,
-					Address2 = dto.Address2,
-					City = dto.City,
-					Zipcode = dto.Zipcode,
-					Apt = dto.Apt,
-					Borough = dto.Borough,
-					Rent = dto.Rent,
-					HasPossession = dto.HasPossession,
-					HasRegulatedTenancy = dto.HasRegulatedTenancy,
-					Name_Relation = dto.Name_Relation,
-					OtherOccupants = dto.OtherOccupants,
-					Registration_No = dto.Registration_No,
-					TenantRecord = dto.TenantRecord,
-					HasPriorCase = dto.HasPriorCase,
-					IsActive = true,
-					IsDeleted = false,
-					CreatedOn = DateTime.UtcNow,
-					UpdatedOn = DateTime.UtcNow	,
-					BuildinId = dto.BuildingId
+					FirstName = t.FirstName,
+					LastName = t.LastName,
+					SSN = t.SSN,
+					Phone = t.Phone,
+					Email = t.Email,
+					LanguageId = t.LanguageId,
+					Borough = t.Borough,
+					HasPossession = t.HasPossession,
+					HasRegulatedTenancy = t.HasRegulatedTenancy,
+					Name_Relation = t.Name_Relation,
+					OtherOccupants = t.OtherOccupants,
+					Registration_No = t.Registration_No,
+					TenantRecord = t.TenantRecord,
+					HasPriorCase = t.HasPriorCase,
+					TenancyTypeId = t.TenancyTypeId,
+					RenewalOffer = t.RenewalOffer,
+					RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
+					SocialServices = t.SocialServices,
+					MonthlyRent = t.MonthlyRent,
+					LastMonthWeekRentPaid = t.LastMonthWeekRentPaid,
+					TenantShare = t.TenantShare,
+					ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
+					UnitOrApartmentNumber = t.UnitOrApartmentNumber,
+					TotalRentOwed = t.TotalRentOwed,
+					IsUnitIllegalId = t.IsUnitIllegalId,
+					BuildinId = t.BuildingId,
 				};
 
 				newtenant.Add(tenant);
@@ -95,38 +96,41 @@ namespace EvictionFiler.Application.Services
 
 		public async Task<EditToTenantDto> GetByIdAsync(Guid id)
 		{
-			var tenant = await _repo.GetAsync(id);
+			var t = await _repo.GetAsync(id);
 
-			if (tenant == null)
+			if (t == null)
 				return null;
 
 			return new EditToTenantDto
 			{
-				Id = tenant.Id,
-				TenantCode = tenant.TenantCode,
-				FirstName = tenant.FirstName,
-				LastName = tenant.LastName,
-				DOB = tenant.DOB,
-				SSN = tenant.SSN,
-				Phone = tenant.Phone,
-				Email = tenant.Email,
-				LanguageId = tenant.LanguageId,
-				StateId = tenant.StateId,
-				Address1 = tenant.Address1,
-				Address2 = tenant.Address2,
-				City = tenant.City,
-				Zipcode = tenant.Zipcode,
-				Apt = tenant.Apt,
-				Borough = tenant.Borough,
-				Rent = tenant.Rent,
-				HasPossession = tenant.HasPossession,
-				HasRegulatedTenancy = tenant.HasRegulatedTenancy,
-				Name_Relation = tenant.Name_Relation,
-				OtherOccupants = tenant.OtherOccupants,
-				Registration_No = tenant.Registration_No,
-				TenantRecord = tenant.TenantRecord,
-				HasPriorCase = tenant.HasPriorCase,
-				BuildingId = tenant.BuildinId,
+				Id = t.Id,
+				TenantCode = t.TenantCode,
+				FirstName = t.FirstName,
+				LastName = t.LastName,
+				SSN = t.SSN,
+				Phone = t.Phone,
+				Email = t.Email,
+				LanguageId = t.LanguageId,
+				Borough = t.Borough,
+				HasPossession = t.HasPossession,
+				HasRegulatedTenancy = t.HasRegulatedTenancy,
+				Name_Relation = t.Name_Relation,
+				OtherOccupants = t.OtherOccupants,
+				Registration_No = t.Registration_No,
+				TenantRecord = t.TenantRecord,
+				HasPriorCase = t.HasPriorCase,
+				TenancyTypeId = t.TenancyTypeId,
+				RenewalOffer = t.RenewalOffer,
+				RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
+				SocialServices = t.SocialServices,
+				MonthlyRent = t.MonthlyRent,
+				LastMonthWeekRentPaid = t.LastMonthWeekRentPaid,
+				TenantShare = t.TenantShare,
+				ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
+				UnitOrApartmentNumber = t.UnitOrApartmentNumber,
+				TotalRentOwed = t.TotalRentOwed,
+				IsUnitIllegalId = t.IsUnitIllegalId,
+				BuildingId = t.BuildinId,
 			};
 	}
 
@@ -140,37 +144,38 @@ namespace EvictionFiler.Application.Services
 		public async Task<bool> UpdateTenantAsync(List<EditToTenantDto> dtoList)
 
 		{
-			foreach (var dto in dtoList)
+			foreach (var t in dtoList)
 			{
-				var entity = await _repo.GetAsync(dto.Id);
+				var entity = await _repo.GetAsync(t.Id);
 				if (entity != null)
 				{
-					entity.TenantCode = dto.TenantCode;
-					entity.FirstName = dto.FirstName;
-					entity.LastName = dto.LastName;
-					entity.DOB = dto.DOB;
-					entity.SSN = dto.SSN;
-					entity.Phone = dto.Phone;
-					entity.Email = dto.Email;
-					entity.LanguageId = dto.LanguageId;
-					entity.StateId = dto.StateId;
-					entity.Address1 = dto.Address1;
-					entity.Address2 = dto.Address2;
-					entity.City = dto.City;
-					entity.Zipcode = dto.Zipcode;
-					entity.Apt = dto.Apt;
-					entity.Borough = dto.Borough;
-					entity.Rent = dto.Rent;
-					entity.HasPossession = dto.HasPossession;
-					entity.HasRegulatedTenancy = dto.HasRegulatedTenancy;
-					entity.Name_Relation = dto.Name_Relation;
-					entity.OtherOccupants = dto.OtherOccupants;
-					entity.Registration_No = dto.Registration_No;
-					entity.TenantRecord = dto.TenantRecord;
-					entity.HasPriorCase = dto.HasPriorCase;
-					entity.BuildinId = dto.BuildingId;
-
-					entity.HasPriorCase = dto.HasPriorCase;
+					entity.TenantCode = t.TenantCode;
+					entity.FirstName = t.FirstName;
+					entity.LastName = t.LastName;
+					entity.SSN = t.SSN;
+					entity.Phone = t.Phone;
+					entity.Email = t.Email;
+					entity.LanguageId = t.LanguageId;
+					entity.Borough = t.Borough;
+					entity.HasPossession = t.HasPossession;
+					entity.HasRegulatedTenancy = t.HasRegulatedTenancy;
+					entity.Name_Relation = t.Name_Relation;
+					entity.OtherOccupants = t.OtherOccupants;
+					entity.Registration_No = t.Registration_No;
+					entity.TenantRecord = t.TenantRecord;
+					entity.HasPriorCase = t.HasPriorCase;
+					entity.TenancyTypeId = t.TenancyTypeId;
+					entity.RenewalOffer = t.RenewalOffer;
+					entity.RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek;
+					entity.SocialServices = t.SocialServices;
+					entity.MonthlyRent = t.MonthlyRent;
+					entity.LastMonthWeekRentPaid = t.LastMonthWeekRentPaid;
+					entity.TenantShare = t.TenantShare;
+					entity.ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate;
+					entity.UnitOrApartmentNumber = t.UnitOrApartmentNumber;
+					entity.TotalRentOwed = t.TotalRentOwed;
+					entity.IsUnitIllegalId = t.IsUnitIllegalId;
+					entity.BuildinId = t.BuildingId;
 				}
 
 				_repo.UpdateAsync(entity);
@@ -178,42 +183,41 @@ namespace EvictionFiler.Application.Services
 			}
 			return true;
 	}
-		public async Task<List<Language>> GetAllLanguage()
-		{
-			await Task.Delay(4000);
-			var lang = await _repo.GetAllLanguage();
-			return lang;
-		}
-
+	
 		public async Task<List<CreateToTenantDto>> GetAll()
 		{
 			var query = await _repo.GetAllAsync();
-			return query.Select(dto => new CreateToTenantDto
+			return query.Select(t => new CreateToTenantDto
 			{
-				TenantCode = dto.TenantCode,
-				FirstName = dto.FirstName,
-				LastName = dto.LastName,
-				DOB = dto.DOB,
-				SSN = dto.SSN,
-				Phone = dto.Phone,
-				Email = dto.Email,
-				LanguageId = dto.LanguageId,
-				StateId = dto.StateId,
-				Address1 = dto.Address1,
-				Address2 = dto.Address2,
-				City = dto.City,
-				Zipcode = dto.Zipcode,
-				Apt = dto.Apt,
-				Borough = dto.Borough,
-				Rent = dto.Rent,
-				HasPossession = dto.HasPossession,
-				HasRegulatedTenancy = dto.HasRegulatedTenancy,
-				Name_Relation = dto.Name_Relation,
-				OtherOccupants = dto.OtherOccupants,
-				Registration_No = dto.Registration_No,
-				TenantRecord = dto.TenantRecord,
-				HasPriorCase = dto.HasPriorCase,
-				BuildingId = dto.BuildinId,
+				TenantCode = t.TenantCode,
+				FirstName = t.FirstName,
+				LastName = t.LastName,
+			
+				SSN = t.SSN,
+				Phone = t.Phone,
+				Email = t.Email,
+				LanguageId = t.LanguageId,
+				Borough = t.Borough,
+				
+				HasPossession = t.HasPossession,
+				HasRegulatedTenancy = t.HasRegulatedTenancy,
+				Name_Relation = t.Name_Relation,
+				OtherOccupants = t.OtherOccupants,
+				Registration_No = t.Registration_No,
+				TenantRecord = t.TenantRecord,
+				HasPriorCase = t.HasPriorCase,
+				TenancyTypeId = t.TenancyTypeId,
+				RenewalOffer = t.RenewalOffer,
+				RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
+				SocialServices = t.SocialServices,
+				MonthlyRent = t.MonthlyRent,
+				LastMonthWeekRentPaid = t.LastMonthWeekRentPaid,
+				TenantShare = t.TenantShare,
+				ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
+				UnitOrApartmentNumber = t.UnitOrApartmentNumber,
+				TotalRentOwed = t.TotalRentOwed,
+				IsUnitIllegalId = t.IsUnitIllegalId,
+				BuildingId = t.BuildinId,
 			}).ToList();
 		}
 	}

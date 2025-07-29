@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.TenantDto;
-using EvictionFiler.Domain.Entities;
-using EvictionFiler.Domain.Entities.Master;
-using EvictionFiler.Domain.Enums;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace EvictionFiler.Application.DTOs.ApartmentDto
 {
@@ -37,10 +28,6 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 		public Guid? StateId { get; set; }
 		public string? StateName { get; set; }
 		public string ?Zipcode { get; set; } = string.Empty;
-		public DateOnly DateOfRefreeDeed { get; set; }
-		
-		public Guid? LandlordTypeId { get; set; }
-		public string? LandlordTypeName { get; set; }
 		public Guid? LandlordId { get; set; }
 
 		public List<CreateToTenantDto>? Tenants { get; set; }

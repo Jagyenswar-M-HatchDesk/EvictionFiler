@@ -83,9 +83,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 					RegulationStatusId = b.RegulationStatusId,
 					RegulationStatusName = b.RegulationStatus.Name,
 					BuildingUnits = b.BuildingUnits,
-					DateOfRefreeDeed = b.DateOfRefreeDeed,
-					LandlordTypeId = b.LandlordTypeId,
-					LandlordTypeName = b.LandlordType.Name,
+				
 					LandlordId = b.LandlordId,
 
 				}).ToListAsync();

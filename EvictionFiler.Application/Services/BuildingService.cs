@@ -37,9 +37,6 @@ namespace EvictionFiler.Application.Services
 				MDRNumber = appartment.MDRNumber,
 				PetitionerInterest = appartment.PetitionerInterest,
 				BuildingUnits = appartment.BuildingUnits,
-				DateOfRefreeDeed = appartment.DateOfRefreeDeed,
-				LandlordTypeId = appartment.LandlordTypeId,
-				LandlordTypeName = appartment.LandlordType?.Name,
 				LandlordId = appartment.LandlordId,
 				
 			}).ToList();
@@ -80,8 +77,7 @@ namespace EvictionFiler.Application.Services
 					MDRNumber = appartment.MDRNumber,
 					PetitionerInterest = appartment.PetitionerInterest,
 					BuildingUnits = appartment.BuildingUnits,
-					DateOfRefreeDeed = appartment.DateOfRefreeDeed,
-					LandlordTypeId = appartment.LandlordTypeId,
+				
 					LandlordId = appartment.LandlordId,
 				};
 
@@ -115,9 +111,7 @@ namespace EvictionFiler.Application.Services
 				MDRNumber = appartment.MDRNumber,
 				PetitionerInterest = appartment.PetitionerInterest,
 				BuildingUnits = appartment.BuildingUnits,
-				DateOfRefreeDeed = appartment.DateOfRefreeDeed,
-				LandlordTypeId = appartment.LandlordTypeId,
-				LandlordTypeName = appartment.LandlordType?.Name,
+			
 				LandlordId = appartment.LandlordId,
 			};
 	}
@@ -160,8 +154,6 @@ namespace EvictionFiler.Application.Services
 					entity.PetitionerInterest = appartment.PetitionerInterest;
 					entity.RegulationStatusId = appartment.RegulationStatusId;
 					entity.BuildingUnits = appartment.BuildingUnits;
-					entity.DateOfRefreeDeed = appartment.DateOfRefreeDeed;
-					entity.LandlordTypeId = appartment.LandlordTypeId;
 					entity.LandlordId = appartment.LandlordId;
 					
 				}

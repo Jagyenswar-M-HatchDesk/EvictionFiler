@@ -25,6 +25,8 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				await SeedTypeOfOwner(context);
 				await SeedCaseTypes(context);
 				await SeedLandlordTypes(context);
+				await SeedTenancyTypes(context);
+				await SeedIsUnitIlligal(context);
 				await context.SaveChangesAsync();
 
 				await SeedCaseSubTypes(context);
@@ -148,6 +150,30 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				if (context.MstLandlordTypes.FirstOrDefault(d => d.Name == type.Name) == null)
 				{
 					await context.MstLandlordTypes.AddAsync(type);
+				}
+			}
+		}
+
+		private static async Task SeedTenancyTypes(MainDbContext context)
+		{
+			var tenancytypes = InitialDataGenerator.GetTenancyTypes();
+			foreach (var type in tenancytypes)
+			{
+				if (context.MstTenancyTypes.FirstOrDefault(d => d.Name == type.Name) == null)
+				{
+					await context.MstTenancyTypes.AddAsync(type);
+				}
+			}
+		}
+
+		private static async Task SeedIsUnitIlligal(MainDbContext context)
+		{
+			var units = InitialDataGenerator.GetIsUnitIllegal();
+			foreach (var type in units)
+			{
+				if (context.MstIsUnitIllegal.FirstOrDefault(d => d.Name == type.Name) == null)
+				{
+					await context.MstIsUnitIllegal.AddAsync(type);
 				}
 			}
 		}
