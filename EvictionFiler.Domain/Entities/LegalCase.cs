@@ -38,6 +38,13 @@ namespace EvictionFiler.Domain.Entities
 		public Guid? CaseSubTypeId { get; set; }
 		[ForeignKey("CaseSubTypeId")]
 		public CaseSubType? CaseSubType { get; set; }
+
+		public Guid? ReasonHoldoverId { get; set; }
+		[ForeignKey("ReasonHoldoverId")]
+		public ReasonHoldover? ReasonHoldover { get; set; }
+		public string ? ReasonDescription { get; set; }
+
+		public string? ExplainDescription { get; set; }
 		[MaxLength(100)]
 		public string Attrney { get; set; } = string.Empty;
 		[MaxLength(100)]

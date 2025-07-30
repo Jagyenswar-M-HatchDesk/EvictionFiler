@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using EvictionFiler.Domain.Entities.Master;
 
 namespace EvictionFiler.Application.DTOs.LegalCaseDto
 {
 	public class CreateToEditLegalCaseModel : IValidatableObject
 	{
 		public Guid Id { get; set; }
-		public Guid? ClientId { get; set; }
+		public Guid ClientId { get; set; }
 		public Guid? BuildingId { get; set; }
 		public Guid? LandLordId { get; set; }
 		public Guid? TenantId { get; set; }
@@ -31,6 +32,11 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 
 		[Required(ErrorMessage = "Firm is required")]
 		public string Firm { get; set; } = string.Empty;
+
+		public Guid? ReasonHoldoverId { get; set; }
+		public string? ReasonDescription { get; set; }
+
+		public string? ExplainDescription { get; set; }
 		public string?SelectedCaseTypeName { get; set; }
 
 		public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

@@ -67,6 +67,7 @@ builder.Services.AddScoped<IPremiseTypeRepository, PremiseTypeRepository>();
 builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
 builder.Services.AddScoped<IUnitIllegalRepository, UnitIllegalRepository>();
 builder.Services.AddScoped<ITenancyTypeRepository, TenancyTypeRepository>();
+builder.Services.AddScoped<IReasonHoldoverRepository, ReasonHoldoverRepository>();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<JwtAuthStateProvider>();

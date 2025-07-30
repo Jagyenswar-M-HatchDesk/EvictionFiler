@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using System.Runtime.Intrinsics.X86;
 using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Application.Interfaces.IServices;
@@ -89,14 +90,28 @@ namespace EvictionFiler.Application.Services
 			return newtenant;
 		}
 
-		public async Task<List<EditToTenantDto>> SearchTenantsAsync(string query, Guid buildingId)
+		public async Task<List<EditToTenantDto>> SearchTenantsAsync(string query, Guid clientId)
 		{
-			return await _repo.SearchTenantAsync(query, buildingId);
+			return await _repo.SearchTenantAsync(query, clientId);
 		}
 
 		public async Task<EditToTenantDto> GetByIdAsync(Guid id)
 		{
-			var t = await _repo.GetAsync(id);
+			var t = await _repo
+				.GetAllQuerable(
+					x => x.Id == id,
+					x => x.TenancyType,
+					x => x.IsUnitIllegal,
+					x => x.Building, // Include Building
+					x => x.Building.State,
+					x  => x.Building.PremiseType, // Include State of Building
+					x => x.Building.RegulationStatus, // Include RegulationStatus of Building
+					x => x.Building.Landlord, // Include Landlord
+					x => x.Building.Landlord.State, // Include State of Landlord
+					x => x.Building.Landlord.LandlordType ,
+					x=>x.Building.Landlord.TypeOfOwner// Include Landlord Type
+				)
+				.FirstOrDefaultAsync();
 
 			if (t == null)
 				return null;
@@ -120,6 +135,7 @@ namespace EvictionFiler.Application.Services
 				TenantRecord = t.TenantRecord,
 				HasPriorCase = t.HasPriorCase,
 				TenancyTypeId = t.TenancyTypeId,
+				TenancyTypeName = t.TenancyType?.Name,
 				RenewalOffer = t.RenewalOffer,
 				RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
 				SocialServices = t.SocialServices,
@@ -130,9 +146,58 @@ namespace EvictionFiler.Application.Services
 				UnitOrApartmentNumber = t.UnitOrApartmentNumber,
 				TotalRentOwed = t.TotalRentOwed,
 				IsUnitIllegalId = t.IsUnitIllegalId,
+				IsUnitIllegalName = t.IsUnitIllegal?.Name,
 				BuildingId = t.BuildinId,
+
+				Building = new EditToBuildingDto
+				{
+					Id = t.Building.Id,
+					BuildingCode = t.Building.BuildingCode,
+					ApartmentCode = t.Building.ApartmentCode,
+					PremiseTypeId = t.Building.PremiseTypeId,
+					PremiseTypeName = t.Building.PremiseType.Name,
+					RegulationStatusId = t.Building.RegulationStatusId,
+					PetitionerInterest = t.Building.PetitionerInterest,
+					LandlordId = t.Building.LandlordId,
+					Address1 = t.Building.Address1,
+					Address2 = t.Building.Address2,
+					StateId = t.Building.StateId,
+					StateName = t.Building.State?.Name,
+					City = t.Building.City,
+					Zipcode = t.Building.Zipcode,
+					MDRNumber = t.Building.MDRNumber,
+					BuildingUnits = t.Building.BuildingUnits,
+					RegulationStatusName = t.Building.RegulationStatus?.Name,
+				},
+
+				Landlord = new EditToLandlordDto
+				{
+					Id = t.Building.Landlord.Id,
+					LandLordCode = t.Building.Landlord.LandLordCode,
+					FirstName = t.Building.Landlord.FirstName,
+					LastName = t.Building.Landlord.LastName,
+					TypeOwnerId= t.Building.Landlord.TypeOfOwnerId,
+					TypeOwnerName = t.Building.Landlord.TypeOfOwner.Name,
+					Email = t.Building.Landlord.Email,
+					ContactPersonName = t.Building.Landlord.ContactPersonName,
+					EINorSSN = t.Building.Landlord.EINorSSN,
+					Address1 = t.Building.Landlord.Address1,
+					Address2 = t.Building.Landlord.Address2,
+					StateId = t.Building.Landlord.StateId,
+					StateName = t.Building.Landlord.State?.Name,
+					City = t.Building.Landlord.City,
+					Zipcode = t.Building.Landlord.Zipcode,
+					Phone = t.Building.Landlord.Phone,
+					ClientId = t.Building.Landlord.ClientId,
+					LandlordTypeId = t.Building.Landlord.LandlordTypeId,
+					LandlordTypeName = t.Building.Landlord.LandlordType?.Name,
+					DateOfRefreeDeed = t.Building.Landlord.DateOfRefreeDeed,
+				},
 			};
-	}
+		}
+
+
+
 
 		public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid clientId)
 		{

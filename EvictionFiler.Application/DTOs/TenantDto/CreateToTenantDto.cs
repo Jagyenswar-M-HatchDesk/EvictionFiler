@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.LandLordDto;
 
 namespace EvictionFiler.Application.DTOs.TenantDto
 {
@@ -42,6 +44,9 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public Guid? TenancyTypeId { get; set; }
 		public string? TenancyTypeName { get; set; }
 		public string ?TenancyTypeDescription { get; set; }
+
+		public EditToBuildingDto? Building { get; set; }
+		public EditToLandlordDto? Landlord { get; set; }
 
 	}
 }

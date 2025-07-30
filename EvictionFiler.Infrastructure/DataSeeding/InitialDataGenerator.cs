@@ -125,6 +125,24 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			};
 		}
 
+		public static IEnumerable<ReasonHoldover> GetReasonHoldover()
+		{
+			return new List<ReasonHoldover>
+			{
+				new ReasonHoldover() { Name = "Month-to-Month"},
+				new ReasonHoldover() { Name = "Licencsee  "},
+				new ReasonHoldover() { Name = "Non-Primary Residence"},
+				new ReasonHoldover() { Name = "Squatter"},
+				new ReasonHoldover() { Name = "Tenant Vacated"},
+					new ReasonHoldover() { Name = "Lease Violation "},
+						new ReasonHoldover() { Name = "Commercial "},
+								new ReasonHoldover() { Name = "Prior Owner "},
+								new ReasonHoldover() { Name = "At Will "},
+								new ReasonHoldover() { Name = "Other "},
+
+			};
+		}
+
 		public static IEnumerable<CaseSubType> GetCaseSubTypes(IEnumerable<CaseType> caseTypes)
 		{
 			var holdoverId = caseTypes.FirstOrDefault(x => x.Name == "Holdover")?.Id;

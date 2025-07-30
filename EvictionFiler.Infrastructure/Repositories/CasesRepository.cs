@@ -27,6 +27,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 .Include(c => c.Clients)
 				 .Include(c => c.ClientRole)
 				.Include(c => c.Buildings)
+				.Include(c=>c.ReasonHoldover)
 				.Include(c=>c.CaseType)
 				.Include(c=>c.CaseSubType)
                 .Include(c => c.LandLords).Include(c=>c.Tenants)
@@ -48,7 +49,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 			var dto = new CreateToEditLegalCaseModel
 			{
 				Id = legalCaseEntity.Id,
-				ClientId = legalCaseEntity.Clients?.Id, 
+				ClientId = legalCaseEntity.Clients.Id, 
 				BuildingId = legalCaseEntity.Buildings?.Id,
 				LandLordId = legalCaseEntity.LandLordId,
 				TenantId = legalCaseEntity.Tenants?.Id,
@@ -80,6 +81,9 @@ namespace EvictionFiler.Infrastructure.Repositories
 				CaseTypeId = legalCase.CaseTypeId,
 				CaseSubTypeId = legalCase.CaseSubTypeId,
 				ClientRoleId = legalCase.ClientRoleId,
+				ReasonHoldoverId = legalCase.ReasonHoldoverId,
+				ExplainDescription = legalCase.ExplainDescription,
+				ReasonDescription = legalCase.ReasonDescription,
 				LegalRepresentative = legalCase.LegalRepresentative,
 				Attrney = legalCase.Attrney,
 				AttrneyContactInfo = legalCase.AttrneyContactInfo,
