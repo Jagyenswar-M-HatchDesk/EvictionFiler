@@ -42,6 +42,38 @@ namespace EvictionFiler.Domain.Entities
 		public Guid? ReasonHoldoverId { get; set; }
 		[ForeignKey("ReasonHoldoverId")]
 		public ReasonHoldover? ReasonHoldover { get; set; }
+
+		public Guid? IsUnitIllegalId { get; set; }
+		[ForeignKey("IsUnitIllegalId")]
+		public IsUnitIllegal? IsUnitIllegal { get; set; }
+
+		public bool? TenantRecord { get; set; }
+		public bool? RenewalOffer { get; set; }
+		public bool? HasPossession { get; set; }
+		public bool? OtherOccupants { get; set; }
+		public string? RentDueEachMonthOrWeek { get; set; }
+		public double? MonthlyRent { get; set; }
+		public double? TenantShare { get; set; }
+
+		[MaxLength(250)]
+		public string? SocialServices { get; set; }
+
+		[MaxLength(50)]
+		public string? LastMonthWeekRentPaid { get; set; }
+		public double? TotalRentOwed { get; set; }
+		public bool? IsERAPPaymentReceived { get; set; }
+		public DateOnly? ERAPPaymentReceivedDate { get; set; }
+		public Guid? TenancyTypeId { get; set; }
+		[ForeignKey("TenancyTypeId")]
+		public TenancyType? TenancyType { get; set; }
+		public Guid? RegulationStatusId { get; set; }
+		[ForeignKey("RegulationStatusId")]
+		public RegulationStatus? RegulationStatus { get; set; }
+
+		public Guid? LandlordTypeId { get; set; }
+		[ForeignKey("LandlordTypeId")]
+		public LandlordType? LandlordType { get; set; }
+		public DateOnly DateOfRefreeDeed { get; set; }
 		public string ? ReasonDescription { get; set; }
 
 		public string? ExplainDescription { get; set; }

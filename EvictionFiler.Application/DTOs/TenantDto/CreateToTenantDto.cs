@@ -20,7 +20,7 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public string? SSN { get; set; }
 		public string? Borough { get; set; }
 		public bool? TenantRecord { get; set; }
-		public bool? HasPossession { get; set; }
+		public bool ?HasPossession { get; set; }
 		public bool? HasRegulatedTenancy { get; set; }
 		public bool? OtherOccupants { get; set; }
 		public bool? HasPriorCase { get; set; }
@@ -35,7 +35,7 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public string? LastMonthWeekRentPaid { get; set; }
 		public double? TotalRentOwed { get; set; }
 		public bool? IsERAP { get; set; }
-		public bool? IsERAPPaymentReceived { get; set; }
+		public bool IsERAPPaymentReceived { get; set; }
 		public DateOnly? ERAPPaymentReceivedDate { get; set; }
 		public string? UnitOrApartmentNumber { get; set; }
 
@@ -47,6 +47,8 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 
 		public EditToBuildingDto? Building { get; set; }
 		public EditToLandlordDto? Landlord { get; set; }
+
+		public List<Guid> SelectedIllegalUnits { get; set; } = new();
 
 	}
 }

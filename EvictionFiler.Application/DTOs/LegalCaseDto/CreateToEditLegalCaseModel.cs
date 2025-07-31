@@ -34,6 +34,27 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 		public string Firm { get; set; } = string.Empty;
 
 		public Guid? ReasonHoldoverId { get; set; }
+		public Guid? IsUnitIllegalId { get; set; }
+
+		public bool? TenantRecord { get; set; }
+		public bool? RenewalOffer { get; set; }
+		public bool? HasPossession { get; set; }
+		public bool? OtherOccupants { get; set; }
+		public string? RentDueEachMonthOrWeek { get; set; }
+		public double? MonthlyRent { get; set; }
+		public double? TenantShare { get; set; }
+
+		[MaxLength(250)]
+		public string? SocialServices { get; set; }
+
+		[MaxLength(50)]
+		public string? LastMonthWeekRentPaid { get; set; }
+		public double? TotalRentOwed { get; set; }
+		public bool? IsERAPPaymentReceived { get; set; }
+		public DateOnly? ERAPPaymentReceivedDate { get; set; }
+		public Guid? TenancyTypeId { get; set; }
+		public Guid? RegulationStatusId { get; set; }
+		public Guid? LandlordTypeId { get; set; }
 		public string? ReasonDescription { get; set; }
 
 		public string? ExplainDescription { get; set; }
