@@ -100,12 +100,12 @@ namespace EvictionFiler.Application.Services
 			var t = await _repo
 				.GetAllQuerable(
 					x => x.Id == id,
-					x => x.TenancyType,
 					x => x.IsUnitIllegal,
 					x => x.Building, // Include Building
 					x => x.Building.State,
 					x  => x.Building.PremiseType, // Include State of Building
-					x => x.Building.RegulationStatus, // Include RegulationStatus of Building
+					x => x.Building.RegulationStatus,
+					x=>x.TenancyType,// Include RegulationStatus of Building
 					x => x.Building.Landlord, // Include Landlord
 					x => x.Building.Landlord.State, // Include State of Landlord
 					x => x.Building.Landlord.LandlordType ,
