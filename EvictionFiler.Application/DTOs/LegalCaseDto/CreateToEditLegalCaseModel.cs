@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Domain.Entities.Master;
 
 namespace EvictionFiler.Application.DTOs.LegalCaseDto
@@ -58,6 +60,8 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 		public string? ReasonDescription { get; set; }
 
 		public string? ExplainDescription { get; set; }
+
+		public CreateToTenantDto ? tenants { get; set; }
 		public string?SelectedCaseTypeName { get; set; }
 
 		public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

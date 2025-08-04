@@ -1,4 +1,7 @@
-﻿using EvictionFiler.Application.DTOs.LegalCaseDto;
+﻿using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.DTOs.LegalCaseDto;
+using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
@@ -23,15 +26,39 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 		public async Task<List<LegalCase>> GetAllCasesAsync()
         {
-            return await _context.LegalCases
-                .Include(c => c.Clients)
-				 .Include(c => c.ClientRole)
-				.Include(c => c.Buildings)
-				.Include(c=>c.ReasonHoldover)
-				.Include(c=>c.CaseType)
-				.Include(c=>c.CaseSubType)
-                .Include(c => c.LandLords).Include(c=>c.Tenants)
-                .ToListAsync();
+            return await _context.LegalCases.AsNoTracking()
+								  .Select(c => new LegalCase()
+								   {
+									  Id = c.Id,
+									  Casecode = c.Casecode,
+									  ReasonHoldover = c.ReasonHoldover,
+									  Clients = c.Clients != null ? new Client()
+									  {
+										  FirstName = c.Clients.FirstName,
+										  LastName = c.Clients.LastName,
+										  ClientCode = c.Clients.ClientCode
+									  }: new Client(),
+									  LandLords = c.LandLords != null ? new LandLord()
+									  {
+										  FirstName = c.LandLords.FirstName,
+										  LastName = c.LandLords.LastName,
+										  LandLordCode = c.LandLords.LandLordCode
+									  } : new LandLord(),
+
+										Buildings = c.Buildings != null ? new Building()
+										{
+									
+											BuildingCode = c.Buildings.BuildingCode
+										} : new Building(),
+									  Tenants = c.Tenants != null ? new Tenant()
+									  {
+
+										  TenantCode = c.Tenants.TenantCode,
+										  FirstName = c.Tenants.FirstName,
+										  LastName = c.Tenants.LastName,
+									  } : new Tenant()
+								  })
+								 .ToListAsync();
         }
 
 		public async Task<CreateToEditLegalCaseModel?> GetCaseByIdAsync(Guid id)
@@ -41,10 +68,16 @@ namespace EvictionFiler.Infrastructure.Repositories
 				.Include(c => c.Buildings)
 				.Include(c => c.LandLords)
 				.Include(c => c.Tenants)
+				.Include(c=>c.RegulationStatus)
+				.Include(c=>c.TenancyType)
+				.Include(c=>c.Buildings.State)
+				.Include(c=>c.Buildings.Landlord.State)
+					.Include(c => c.Buildings.Landlord.LandlordType)
 				.FirstOrDefaultAsync(c => c.Id == id);
 
 			if (legalCaseEntity == null)
 				return null;
+		
 
 			var dto = new CreateToEditLegalCaseModel
 			{
@@ -53,15 +86,61 @@ namespace EvictionFiler.Infrastructure.Repositories
 				BuildingId = legalCaseEntity.Buildings?.Id,
 				LandLordId = legalCaseEntity.LandLordId,
 				TenantId = legalCaseEntity.Tenants?.Id,
-				CaseName = legalCaseEntity.CaseName,
-				ClientRoleId = legalCaseEntity.ClientRoleId,
-				LegalRepresentative = legalCaseEntity.LegalRepresentative,
-				CaseTypeId = legalCaseEntity.CaseTypeId,
-				CaseSubTypeId = legalCaseEntity.CaseSubTypeId,
+				  ExplainDescription = legalCaseEntity.ExplainDescription,
+				  ReasonHoldoverId = legalCaseEntity.ReasonHoldoverId,
+				  ERAPPaymentReceivedDate = legalCaseEntity.ERAPPaymentReceivedDate,
+				  IsERAPPaymentReceived = legalCaseEntity.IsERAPPaymentReceived,
+				  HasPossession = legalCaseEntity.HasPossession,
+				  IsUnitIllegalId = legalCaseEntity.IsUnitIllegalId,
+				  LandlordTypeId = legalCaseEntity.LandlordTypeId,
+				  LastMonthWeekRentPaid = legalCaseEntity.LastMonthWeekRentPaid,
+				  MonthlyRent = legalCaseEntity.MonthlyRent,
+				  OtherOccupants = legalCaseEntity.OtherOccupants,
+				  RegulationStatusId=legalCaseEntity.RegulationStatusId,
+				  RenewalOffer = legalCaseEntity.RenewalOffer,
+				  RentDueEachMonthOrWeek = legalCaseEntity.RentDueEachMonthOrWeek,
+				  SocialServices = legalCaseEntity.SocialServices,
+				  TenancyTypeId = legalCaseEntity.TenancyTypeId,
+				  TenantRecord = legalCaseEntity.TenantRecord,
+				  TenantShare = legalCaseEntity.TenantShare,
+				  TotalRentOwed = legalCaseEntity.TotalRentOwed,
 				Casecode = legalCaseEntity.Casecode,
-				Attrney = legalCaseEntity.Attrney,
-				AttrneyContactInfo = legalCaseEntity.AttrneyContactInfo,
-				Firm = legalCaseEntity.Firm
+
+				tenants = legalCaseEntity.Tenants == null ? null : new CreateToTenantDto
+				{
+					FirstName = legalCaseEntity.Tenants.FirstName,
+					LastName = legalCaseEntity.Tenants.LastName,
+					BuildingId = legalCaseEntity.Tenants.BuildinId,
+				     UnitOrApartmentNumber = legalCaseEntity.Tenants.UnitOrApartmentNumber,
+
+					
+
+					Building = legalCaseEntity.Tenants.Building == null ? null : new EditToBuildingDto
+					{
+						Address1 = legalCaseEntity.Tenants.Building.Address1,
+						Address2 = legalCaseEntity.Tenants.Building.Address2,
+						Zipcode = legalCaseEntity.Tenants.Building.Zipcode,
+						City = legalCaseEntity.Tenants.Building.City,
+						StateId = legalCaseEntity.Tenants.Building.StateId,
+						StateName = legalCaseEntity.Tenants.Building.State.Name,
+						MDRNumber = legalCaseEntity.Tenants.Building.MDRNumber,
+						BuildingUnits = legalCaseEntity.Tenants.Building.BuildingUnits,
+					},
+
+					Landlord = legalCaseEntity.Tenants.Building.Landlord == null ? null : new EditToLandlordDto
+					{
+						FirstName = legalCaseEntity.Tenants.Building.Landlord.FirstName,
+						LastName = legalCaseEntity.Tenants.Building.Landlord.LastName,
+						Address1 = legalCaseEntity.Tenants.Building.Landlord.Address1,
+						Address2 = legalCaseEntity.Tenants.Building.Landlord.Address2,
+						Zipcode = legalCaseEntity.Tenants.Building.Landlord.Zipcode,
+						City = legalCaseEntity.Tenants.Building.Landlord.City,
+						StateId = legalCaseEntity.Tenants.Building.Landlord.StateId,
+						StateName = legalCaseEntity.Tenants.Building.Landlord.State.Name,
+						Phone = legalCaseEntity.Tenants.Building.Landlord.Phone,
+						Email = legalCaseEntity.Tenants.Building.Landlord.Email,
+					}
+				}
 			};
 
 			return dto;
