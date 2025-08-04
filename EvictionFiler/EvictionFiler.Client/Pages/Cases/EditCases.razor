@@ -9,15 +9,19 @@
 @using EvictionFiler.Application.Interfaces.IRepository
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Domain.Entities.Master
-@using EvictionFiler.Domain.Entities.Master
-@inject ILandlordSevice _landlordService
-@inject IBuildingService _apartmentService
-@inject ILegalCaseService _legalCaseService
-@inject ITenantService _tenantService
-@inject IClientService _clientService
 @inject IClientRoleRepository ClientRoleRepository
 @inject ICaseTypeRepository CaseTypeRepository
 @inject ICaseSubTypeRepository CaseSubTypeRepository
+@inject IRegulationStatusRepository RegulationStatusRepository
+@inject IReasonHoldoverRepository ReasonHoldoverRepository
+@inject ILandlordTypeRepository LandlordTypeRepository
+@inject IUnitIllegalRepository UnitIllegalRepository
+@inject ITenancyTypeRepository TenancyTypeRepository
+@inject ILandlordSevice _landlordService
+@inject IBuildingService _buildingServiceService
+@inject ILegalCaseService _legalCaseService
+@inject ITenantService _tenantService
+@inject IClientService _clientService
 @inject NavigationManager nav
 @inject NavigationDataService _dataService
 @using Blazored.Typeahead
@@ -183,472 +187,22 @@
                 }
             </div>
         }
+
     </div>
+
 </div>
 
+
+<!-- Form Content -->
 <div class="container-fluid px-4" style="margin-top: 100px; margin-bottom: 100px;">
 
     <div style="height: calc(100vh - 200px); overflow-y: auto;" class="custom-scroll">
+
         @if (currentStep == 0)
         {
-            <div class="mx-auto p-4 border rounded shadow-sm bg-white">
-                <h5 class="text-center text-navy fw-bold">Basic Information</h5>
-                <hr class="border-gold mb-4" />
-
-                <!-- Client Role + Representative Name -->
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold text-navy required-label">Client Role</label>
-                        <InputSelect class="form-select" @bind-Value="legalcaseDto.ClientRoleId">
-                            <option value="">-- Select Type --</option>
-                            @foreach (var c in ClientRoleList)
-                            {
-                                <option value="@c.Id">@c.Name</option>
-                            }
-                        </InputSelect>
-                    </div>
-
-                    @if (selectedClientRoleName == "Legal Representative")
-                    {
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-navy required-label">Representative Name</label>
-                            <input type="text" class="form-control" @bind="legalcaseDto.LegalRepresentative" placeholder="Enter Representative Name" />
-                        </div>
-                    }
-                </div>
-                <EditForm EditContext="editContext">
-
-                    <ValidationSummary />
-                    <!-- Case Type + Other Case Type -->
-                    <div class="row mb-3 d-flex align-items-center">
-                        <!-- Case Type Dropdown (Populated from DB) -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-navy required-label">Case Type</label>
-                            <select class="form-select" @onchange="OnCaseTypeChanged">
-                                <option value="">-- Select Case Type --</option>
-                                @foreach (var caseType in caseTypes)
-                                {
-                                    <option value="@caseType.Id" selected="@(legalcaseDto.CaseTypeId == caseType.Id)">
-                                        @caseType.Name
-                                    </option>
-                                }
-                            </select>
-                            <ValidationMessage For="@(() => legalcaseDto.CaseTypeId)" />
-                        </div>
-
-                        <!-- Holdover Subtypes Dropdown (if Holdover selected) -->
-                        @if (selectedCaseTypeName == "Holdover" && caseSubTypes?.Any() == true)
-                        {
-                            <div class="col-md-6 mt-3">
-                                <label class="form-label fw-semibold text-navy required-label">Holdover Case Type</label>
-                                <select class="form-select"
-                                        @bind-value="legalcaseDto.CaseSubTypeId"
-                                        @bind-value:event="onchange">
-                                    <option value="">-- Select Holdover Subtype --</option>
-                                    @foreach (var subtype in caseSubTypes)
-                                    {
-                                        <option value="@subtype.Id">@subtype.Name</option>
-                                    }
-                                </select>
-                            </div>
-                        }
-
-
-                    </div>
-                </EditForm>
-            </div>
-        }
-
-        @if (currentStep == 1)
-        {
-            <div class="mx-auto p-4 border rounded shadow-sm bg-white">
-                <h5 class="text-center text-navy fw-bold">Landlord Information</h5>
-                <hr class="border-gold mb-4" />
-
-                @{
-                    bool isCodeSearch = !string.IsNullOrWhiteSpace(searchText) &&
-                    (char.IsDigit(searchText[0]) || searchText.ToLower().StartsWith("l")); // adjust this as per your code prefix like LL, LND etc.
-                }
-
-                <EditForm Model="@landlordSearchModel">
-                    <div class="row mb-3 align-items-center">
-                        @if (!isLandlordSelected)
-                        {
-                            <label class="col-sm-1 col-form-label fw-semibold text-navy">Landlord</label>
-                            <div class="col-sm-10 position-relative">
-
-                                <input type="text"
-                                       class="form-control"
-                                       value="@searchText"
-                                       @oninput="HandleInput"
-                                       placeholder="Search landlord by Name/Code..." />
-
-                                @if (filteredList?.Any() == true)
-                                {
-                                    <ul class="list-group position-absolute w-100 shadow-sm z-3 mt-1"
-                                        style="max-height: 200px; overflow-y: auto;">
-                                        @foreach (var item in filteredList)
-                                        {
-                                            <li class="list-group-item list-group-item-action"
-                                                style="cursor: pointer;"
-                                                @onclick="@(() => SelectLandlord(item.Id))">
-                                                @item.FirstName @(!string.IsNullOrEmpty(item.LandLordCode) ? $"({item.LandLordCode})" : "")
-                                            </li>
-                                        }
-                                    </ul>
-                                }
-                                else if (hasSearched && !string.IsNullOrWhiteSpace(searchText))
-                                {
-                                    <ul class="list-group position-absolute w-100 shadow-sm z-3 mt-1">
-                                        <li class="list-group-item text-muted">No matching landlord found.</li>
-                                    </ul>
-                                }
-                            </div>
-                        }
-                    </div>
-
-                </EditForm>
-
-
-                @if (landlordDetails != null)
-                {
-
-                    <EditForm EditContext="@editContext">
-                        <DataAnnotationsValidator />
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold required-label">Attorney</label>
-                                <InputText class="form-control" @bind-Value="legalcaseDto.Attrney" placeholder="Enter Attorney" />
-                                <ValidationMessage For="@(() => legalcaseDto.Attrney)" />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold required-label">Attorney Contact Info</label>
-                                <InputText class="form-control" @bind-Value="legalcaseDto.AttrneyContactInfo" placeholder="Enter Attorney Contact Info" />
-                                <ValidationMessage For="@(() => legalcaseDto.AttrneyContactInfo)" />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold required-label">Firm</label>
-                                <InputText class="form-control" @bind-Value="legalcaseDto.Firm" placeholder="Enter Firm" />
-                                <ValidationMessage For="@(() => legalcaseDto.Firm)" />
-                            </div>
-                        </div>
-                    </EditForm>
-
-                    <div class="row mt-4">
-                        <div class="col-md-7">
-                            <div class="border rounded p-3 bg-light">
-                                <h6 class="text-navy fw-bold mb-3">Landlord Details</h6>
-                                <div class="card mb-3 shadow-sm">
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <!-- Left Column -->
-                                            <div class="col-6">
-                                                <div class="row mb-2">
-                                                    <div class="col-4 fw-semibold text-navy" style="white-space: nowrap;">Code:</div>
-                                                    <div class="col-8">@landlordDetails.Landlord.LandLordCode</div>
-                                                </div>
-
-                                                <div class="row mb-2">
-                                                    <div class="col-4 fw-semibold text-navy" style="white-space: nowrap;">Name:</div>
-                                                    <div class="col-8">@($"{landlordDetails.Landlord.FirstName} {landlordDetails.Landlord.LastName}")</div>
-                                                </div>
-
-                                                <div class="row mb-2">
-                                                    <div class="col-4 fw-semibold text-navy" style="white-space: nowrap;">Owner:</div>
-                                                    <div class="col-8">@landlordDetails.Landlord.TypeOwnerName</div>
-                                                </div>
-
-                                                <div class="row mb-2">
-                                                    <div class="col-4 fw-semibold text-navy" style="white-space: nowrap;">Email:</div>
-                                                    <div class="col-8">@landlordDetails.Landlord.Email</div>
-                                                </div>
-
-                                                <div class="row mb-2">
-                                                    <div class="col-4 fw-semibold text-navy" style="white-space: nowrap;">Address:</div>
-                                                    <div class="col-8">
-                                                        @($"{landlordDetails.Landlord.Address1}, {landlordDetails.Landlord.Address2}, {landlordDetails.Landlord.City}, {landlordDetails.Landlord.StateId} {landlordDetails.Landlord.Zipcode}")
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Right Column -->
-                                            <div class="col-6">
-                                                <div class="row mb-2">
-                                                    <div class="col-4 fw-semibold text-navy" style="white-space: nowrap;">Phone:</div>
-                                                    <div class="col-8">@landlordDetails.Landlord.Phone</div>
-                                                </div>
-
-                                                <div class="row mb-2">
-                                                    <div class="col-4 fw-semibold text-navy" style="white-space: nowrap;">EIN/SSN:</div>
-                                                    <div class="col-8">@landlordDetails.Landlord.EINorSSN</div>
-                                                </div>
-
-                                          
-
-                                                <div class="row mb-2">
-                                                    <div class="col-6 fw-semibold text-navy" style="white-space: nowrap;">Contact Person:</div>
-                                                    <div class="col-6">@landlordDetails.Landlord.ContactPersonName</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="border rounded p-3 bg-light">
-                                <h6 class="text-navy mb-3 fw-bold">Building Details</h6>
-
-                                @if (landlordDetails.Buildings?.Any() == true)
-                                {
-                                    @foreach (var b in landlordDetails.Buildings)
-                                    {
-                                        <div class="card mb-3 shadow-sm">
-                                            <div class="card-body">
-                                                <div class="row mb-2">
-                                                    <div class="col-5 fw-semibold text-navy">Building Code:</div>
-                                                    <div class="col-7">@b.BuildingCode</div>
-                                                </div>
-                                                <div class="row mb-2">
-                                                    <div class="col-4 fw-semibold text-navy">Apt Code:</div>
-                                                    <div class="col-6">@b.ApartmentCode</div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-4 fw-semibold text-navy">Interest:</div>
-                                                    <div class="col-8">@b.PetitionerInterest</div>
-                                                </div>
-
-                                                <div class="row mb-2">
-                                                    <div class="col-4 fw-semibold text-navy">MDR_No.:</div>
-                                                    <div class="col-8">@b.MDRNumber</div>
-                                                </div>
-                                              
-                                                <div class="row mb-2">
-                                                    <div class="col-5 fw-semibold text-navy">Rent Regulation:</div>
-                                                    <div class="col-7">@b.RegulationStatusName</div> 
-                                                </div>
-                                                <div class="row mb-2">
-                                                    <div class="col-4 fw-semibold text-navy" style="white-space: nowrap;">Address:</div>
-                                                    <div class="col-8">
-                                                        @($"{b.Address1}, {b.Address2}, {b.City}, {b.StateName} {b.Zipcode}")
-                                                    </div>
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-                                    }
-                                }
-                                else
-                                {
-                                    <p>No buildings found.</p>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                }
-
-            </div>
-        }
-
-
-        @if (currentStep == 2)
-        {
 
             <div class="mx-auto p-4 border rounded shadow-sm bg-white">
-                <h5 class="text-center text-navy fw-bold"> Building/Property Details</h5>
-                <hr class="border-gold mb-4" />
-
-                <EditForm Model="@buildingSearchModel">
-                    <div class="row mb-3 align-items-center">
-                        @if (!isBuildingSelected)
-                        {
-                            <label class="col-sm-2 col-form-label fw-semibold text-navy">Building/Property</label>
-                            <div class="col-sm-10 position-relative">
-                                <input type="text"
-                                       class="form-control"
-                                       value="@searchBuildingText"
-                                       @oninput="HandleBuildingInput" 
-                                       placeholder="Search Building by Code.." />
-
-                                @if (filteredBuildingList?.Any() == true)
-                                {
-                                    <ul class="list-group position-absolute w-100 shadow-sm z-3 mt-1"
-                                        style="max-height: 200px; overflow-y: auto;">
-                                        @foreach (var item in filteredBuildingList)
-                                        {
-                                            <li class="list-group-item list-group-item-action"
-                                                style="cursor: pointer;"
-                                                @onclick="@(() => SelectBuilding(item.Id))">
-                                                @item.BuildingCode
-
-                                            </li>
-                                        }
-                                    </ul>
-                                }
-                                else if (hasSearched && !string.IsNullOrWhiteSpace(searchBuildingText))
-                                {
-                                    <ul class="list-group position-absolute w-100 shadow-sm z-3 mt-1">
-                                        <li class="list-group-item text-muted">No matching buildings found.</li>
-                                    </ul>
-                                }
-                            </div>
-                        }
-                    </div>
-                </EditForm>
-
-                @if (buildingDetails != null)
-                {
-                    <div class="row mt-4">
-                        <div class="col-md-6">
-                            <div class="border rounded p-3 bg-light">
-                                <h6 class="text-navy mb-3 fw-bold">Building Details</h6>
-
-                                <div class="card mb-3 shadow-sm">
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <!-- Left Column -->
-                                            <div class="col-6">
-                                                <div class="row mb-2">
-                                                    <div class="col-4 fw-semibold text-navy text-nowrap">Code:</div>
-                                                    <div class="col-8">@buildingDetails.Building.BuildingCode</div>
-                                                </div>
-                                                <div class="row mb-2">
-                                                    <div class="col-4 fw-semibold text-navy text-nowrap">Apt Code:</div>
-                                                    <div class="col-8">@buildingDetails.Building.ApartmentCode</div>
-                                                </div>
-                                                <div class="row mb-2">
-                                                    <div class="col-4 fw-semibold text-navy text-nowrap">B.Units:</div>
-                                                    <div class="col-8">@buildingDetails.Building.BuildingUnits</div>
-                                                </div>
-                                              
-                                                <div class="row mb-2">
-                                                    <div class="col-5 fw-semibold text-navy" style="white-space: nowrap;">Address:</div>
-                                                    <div class="col-7">
-                                                        @($"{buildingDetails.Building.Address1}, {buildingDetails.Building.Address2}, {buildingDetails.Building.City}, {buildingDetails.Building.StateId} {buildingDetails.Building.Zipcode}")
-                                                    </div>
-                                                </div>
-
-
-                                            </div>
-
-                                            <!-- Right Column -->
-                                            <div class="col-6">
-                                                <div class="row mb-2">
-                                                    <div class="col-4 fw-semibold text-navy text-nowrap">M_NO.:</div>
-                                                    <div class="col-8">@buildingDetails.Building.MDRNumber</div>
-                                                </div>
-
-                                                <div class="row mb-2">
-                                                    <div class="col-4 fw-semibold text-navy text-nowrap">Type:</div>
-                                                    <div class="col-8">@buildingDetails.Building.PremiseTypeName</div>
-                                                </div>
-                                                <div class="row mb-2">
-                                                    <div class="col-4 fw-semibold text-navy text-nowrap">Interest:</div>
-                                                    <div class="col-8">@buildingDetails.Building.PetitionerInterest </div>
-                                                </div>
-                                                <div class="row mb-2">
-                                                    <div class="col-5 fw-semibold text-navy text-nowrap">Rent Regulation:</div>
-                                                    <div class="col-7">@buildingDetails.Building.RegulationStatusName</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="border rounded p-3 bg-light">
-                                <h6 class="text-navy mb-3 fw-bold">Tenant Details </h6>
-
-                                @if (buildingDetails.Tenants?.Any() == true)
-                                {
-                                    @foreach (var b in buildingDetails.Tenants)
-                                    {
-                                        <div class="card mb-3 shadow-sm">
-                                            <div class="card-body">
-                                                <div class="row">
-                                                    <!-- Left Column -->
-                                                    <div class="col-6">
-                                                        <div class="row mb-2">
-                                                            <div class="col-4 fw-semibold text-navy">Code:</div>
-                                                            <div class="col-8">@b.TenantCode</div>
-                                                        </div>
-                                                        <div class="row mb-2">
-                                                            <div class="col-4 fw-semibold text-navy">SSN:</div>
-                                                            <div class="col-8">@b.SSN</div>
-                                                        </div>
-                                                        <div class="row mb-2">
-                                                            <div class="col-4 fw-semibold text-navy">Email:</div>
-                                                            <div class="col-8">@b.Email</div>
-                                                        </div>
-                                                      
-                                                        <div class="row mb-2">
-                                                            <div class="col-6 fw-semibold text-navy">Borough:</div>
-                                                            <div class="col-6">@b.Borough</div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Right Column -->
-                                                    <div class="col-6">
-                                                        <div class="row mb-2">
-                                                            <div class="col-4 fw-semibold text-navy">Name:</div>
-                                                            <div class="col-8">@b.FirstName</div>
-                                                        </div>
-                                                        <div class="row mb-2">
-                                                            <div class="col-5 fw-semibold text-navy">Phone:</div>
-                                                            <div class="col-7">@b.Phone</div>
-                                                        </div>
-                                                        <div class="row mb-2">
-                                                            <div class="col-4 fw-semibold text-navy">Lang:</div>
-                                                            <div class="col-8">@b.LanguageName</div>
-                                                        </div>
-                                                    
-                                                       
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
-
-                                        </div>
-                                    }
-                                }
-                                else
-                                {
-                                    <p>No Tenant found.</p>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    <div class="row mt-4">
-                        <div class="col-md-12">
-                            <div class="alert alert-warning text-center fw-semibold">
-                                🚫 No Building Found for the selected landlord.
-                            </div>
-                            <div class="alert alert-info text-center fw-semibold mt-3">
-                                ℹ️ No Tenant Found.
-                            </div>
-                        </div>
-                    </div>
-                }
-
-            </div>
-        }
-
-        @if (currentStep == 3)
-        {
-
-            <div class="mx-auto p-4 border rounded shadow-sm bg-white">
-                <h5 class="text-center text-navy fw-bold">Tenants Details</h5>
+                <h5 class="text-center text-navy fw-bold">Case Details</h5>
                 <hr class="border-gold mb-4" />
 
                 <EditForm Model="@tenantSearchModel">
@@ -660,8 +214,8 @@
                                 <input type="text"
                                        class="form-control"
                                        value="@searchtenantText"
-                                       @oninput="HandleTenantInput" 
-                                       placeholder="Search tenant by Name/Code.." />
+                                       @oninput="HandleTenantInput"
+                                       placeholder="Search tenant by name/code" style="width:50%" />
 
                                 @if (filteredTenantList?.Any() == true)
                                 {
@@ -701,50 +255,778 @@
                     </div>
                 </EditForm>
 
-                @if (TenantDetails != null)
+                @if (tenantDto != null)
                 {
                     <div class="row mt-4">
-                        <div class="col-md-8">
+                        <div class="col-md-12">
                             <div class="border rounded p-3 bg-light">
-                                <h6 class="text-navy mb-3 fw-bold">Tenants Details</h6>
 
-                                <div class="card mb-3 shadow-sm">
+                                <div class="card shadow-sm">
                                     <div class="card-body">
-                                        <div class="row mb-2">
-                                            <div class="col-2 fw-semibold text-navy">Code:</div>
-                                            <div class="col-4">@TenantDetails.TenantCode</div>
-                                            <div class="col-2 fw-semibold text-navy">Name:</div>
-                                            <div class="col-4">@TenantDetails.FirstName</div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-2 fw-semibold text-navy">SSN:</div>
-                                            <div class="col-3">@TenantDetails.SSN</div>
-                                            <div class="col-3 fw-semibold text-navy">Phone:</div>
-                                            <div class="col-4">@TenantDetails.Phone</div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-2 fw-semibold text-navy">Email:</div>
-                                            <div class="col-5">@TenantDetails.Email</div>
-                                            <div class="col-2 fw-semibold text-navy">Lang:</div>
-                                            <div class="col-3">@TenantDetails.LanguageId</div>
+
+                                        <!-- SECTION 1: TENANT DETAILS -->
+                                        <div class="card shadow-sm p-4 mb-4">
+                                            <h6 class="fw-bold fs-3 mb-3">Tenant Information</h6>
+
+                                            <div class="row my-1">
+                                                <!-- Left Column (Full Name) -->
+                                                <div class="col-5">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold">Tenant's Full Name(s):</div>
+                                                        <div class="col-4">
+                                                            @($"{tenantDto.tenants?.FirstName} {tenantDto.tenants?.LastName}".Trim() ?? "-")
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Right Column (Building Address) -->
+                                                <div class="col-6">
+                                                    <div class="row">
+                                                        <div class="col-5 fw-semibold">Building Address:</div>
+                                                        <div class="col-7 ">
+                                                           @*  @(
+                                                                                                                string.IsNullOrWhiteSpace($"{tenantDto.tenants?.Building.Address1}{tenantDto.tenants?.Building.Address2} {tenantDto.tenants.Building.City} {tenantDto.tenants.Building.StateName}  {tenantDto.tenants.Building.Zipcode}")
+                                                              ? "-"
+                                                                                                                : $"{tenantDto.tenants.Building.Address1}{tenantDto.tenants.Building.Address2} {legalcaseDto.tenants.Building.City} {tenantDto.tenants.Building.StateName}  {tenantDto.tenants.Building.Zipcode}"
+                                                              ) *@
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        <div class="row mb-2">
-                                           
-                                            <div class="col-2 fw-semibold text-navy">Status:</div>
-                                      
-                                            <div class="col-2 fw-semibold text-navy">Borough:</div>
-                                            <div class="col-2">@TenantDetails.Borough</div>
+
+                                            <div class="row my-1">
+                                                <div class="col-4 fw-semibold">Unit / Apartment Number:</div>
+                                                <div class="col-4 ">@(!string.IsNullOrWhiteSpace(tenantDto.tenants.UnitOrApartmentNumber) ? tenantDto.tenants.UnitOrApartmentNumber : "-")</div>
+                                            </div>
+
+                                            <div class="my-1">
+
+                                                <div class="row my-1">
+                                                    <div class="col-12 fw-semibold">
+                                                        Is the unit illegal? (check all that apply)
+                                                    </div>
+                                                </div>
+
+                                                <!-- Options Row -->
+                                                <div class="row my-1">
+                                                    <div class="col-12 d-flex flex-wrap gap-3">
+                                                        <InputRadioGroup @bind-Value="tenantDto.IsUnitIllegalId" class="d-flex flex-wrap gap-3">
+                                                    @foreach (var option in IsUnitIllegalList)
+                                                            {
+                                                                <div class="form-check form-check-inline">
+                                                                    <InputRadio class="form-check-input" Value="@option.Id" />
+                                                                    <label class="form-check-label ms-1">@option.Name</label>
+                                                                </div>
+                                                            }
+                                                        </InputRadioGroup>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="my-1">
+                                                <div class="row mb-2">
+                                                    <div class="col-4 fw-semibold">Tenant of record?</div>
+                                                    <div class="col-4 fw-semibold">Still in possession?</div>
+                                                    <div class="col-4 fw-semibold">Other Occupants?</div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col-4 d-flex gap-3 align-items-center">
+                                                        <InputRadioGroup @bind-Value="tenantDto.TenantRecord">
+                                                            <div class="form-check">
+                                                                <InputRadio class="form-check-input" Value="true" />
+                                                                <label class="form-check-label">Yes</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <InputRadio class="form-check-input" Value="false" />
+                                                                <label class="form-check-label">No</label>
+                                                            </div>
+                                                        </InputRadioGroup>
+                                                    </div>
+
+                                                    <div class="col-4 d-flex gap-3 align-items-center">
+                                                        <InputRadioGroup @bind-Value="tenantDto.HasPossession">
+                                                            <div class="form-check">
+                                                                <InputRadio class="form-check-input" Value="true" />
+                                                                <label class="form-check-label">Yes</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <InputRadio class="form-check-input" Value="false" />
+                                                                <label class="form-check-label">No</label>
+                                                            </div>
+                                                        </InputRadioGroup>
+                                                    </div>
+
+                                                    <div class="col-4 d-flex gap-3 align-items-center">
+                                                        <InputRadioGroup @bind-Value="tenantDto.OtherOccupants">
+                                                            <div class="form-check">
+                                                                <InputRadio class="form-check-input" Value="true" />
+                                                                <label class="form-check-label">Yes</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <InputRadio class="form-check-input" Value="false" />
+                                                                <label class="form-check-label">No</label>
+                                                            </div>
+                                                        </InputRadioGroup>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row my-1">
+                                                <div class="col-4 fw-semibold">Date rent is due each month/week:</div>
+                                                <div class="col-4">
+                                                    <InputText class="form-control" @bind-Value="tenantDto.RentDueEachMonthOrWeek" />
+                                                </div>
+                                            </div>
+
+                                            <div class="row my-1">
+                                                <!-- Monthly Rent -->
+                                                <div class="col-md-4 d-flex align-items-center">
+                                                    <label class="fw-semibold me-2 mb-0" style="white-space: nowrap;">Monthly Rent ($):</label>
+                                                    <InputNumber class="form-control" style="width: 100%;" @bind-Value="tenantDto.MonthlyRent" />
+                                                </div>
+
+                                                <!-- Tenant's Share -->
+                                                <div class="col-md-4 d-flex align-items-center">
+                                                    <label class="fw-semibold me-2 mb-0" style="white-space: nowrap;">Tenant's Share ($):</label>
+                                                    <InputNumber class="form-control" style="width: 100%;" @bind-Value="tenantDto.TenantShare" />
+                                                </div>
+
+                                                <!-- Social Services -->
+                                                <div class="col-md-4 d-flex align-items-center">
+                                                    <label class="fw-semibold me-2 mb-0" style="white-space: nowrap;">Social Services (if any):</label>
+                                                    <InputText class="form-control" style="width: 100%;" @bind-Value="tenantDto.SocialServices" />
+                                                </div>
+                                            </div>
+
+
+
+                                            <div class="row my-1">
+                                                <!-- Left Column -->
+                                                <div class="col-md-6">
+                                                    <div class="row align-items-center">
+                                                        <label class="col-auto fw-semibold mb-0">Last Month/Week Rent Paid:</label>
+                                                        <div class="col">
+                                                            <InputText class="form-control" @bind-Value="tenantDto.LastMonthWeekRentPaid" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Right Column -->
+                                                <div class="col-md-6">
+                                                    <div class="row align-items-center">
+                                                        <label class="col-auto fw-semibold mb-0">Total Rent Owed ($):</label>
+                                                        <div class="col">
+                                                            <InputNumber class="form-control" @bind-Value="tenantDto.TotalRentOwed" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row my-1">
+                                                <!-- ERAP Payment Received? -->
+                                                <div class="col-md-6">
+                                                    <div class="row align-items-center">
+                                                        <label class="col-auto fw-semibold mb-0">ERAP Payment Received?</label>
+                                                        <div class="col d-flex gap-3">
+                                                            <InputRadioGroup @bind-Value="tenantDto.IsERAPPaymentReceived" class="d-flex gap-3">
+                                                                <div class="form-check">
+                                                                    <InputRadio class="form-check-input" Value="true" />
+                                                                    <label class="form-check-label">Yes</label>
+                                                                </div>
+                                                                <div class="form-check">
+                                                                    <InputRadio class="form-check-input" Value="false" />
+                                                                    <label class="form-check-label">No</label>
+                                                                </div>
+                                                            </InputRadioGroup>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- If yes, date received -->
+                                                <div class="col-md-6">
+                                                    <div class="row align-items-center">
+                                                        <label class="col-auto fw-semibold mb-0">If yes, date received:</label>
+                                                        <div class="col">
+                                                            <InputDate class="form-control" @bind-Value="tenantDto.ERAPPaymentReceivedDate" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="my-1">
+
+                                                <div class="row my-1">
+                                                    <div class="col-12 fw-semibold">
+                                                        Tenancy Type
+                                                    </div>
+                                                </div>
+
+                                                <!-- Options Row -->
+                                                <div class="row my-1">
+                                                    <div class="col-12 d-flex flex-wrap gap-3">
+                                                        <InputRadioGroup @bind-Value="tenantDto.TenancyTypeId" class="d-flex flex-wrap gap-3">
+                                                            @foreach (var option in TenancyTypeList)
+                                                            {
+                                                                <div class="form-check form-check-inline">
+                                                                    <InputRadio class="form-check-input" Value="@option.Id" />
+                                                                    <label class="form-check-label ms-1">@option.Name</label>
+                                                                </div>
+                                                            }
+                                                        </InputRadioGroup>
+                                                    </div>
+                                                </div>
+                                                <div class="row my-1">
+                                                    <!-- ERAP Payment Received? -->
+                                                    <div class="col-md-6">
+                                                        <div class="row align-items-center">
+                                                            <label class="col-auto fw-semibold mb-0">Renewal Offered Or Refused</label>
+                                                            <div class="col d-flex gap-3">
+                                                                <InputRadioGroup @bind-Value="tenantDto.RenewalOffer" class="d-flex gap-3">
+                                                                    <div class="form-check">
+                                                                        <InputRadio class="form-check-input" Value="true" />
+                                                                        <label class="form-check-label">Yes</label>
+                                                                    </div>
+                                                                    <div class="form-check">
+                                                                        <InputRadio class="form-check-input" Value="false" />
+                                                                        <label class="form-check-label">No</label>
+                                                                    </div>
+                                                                </InputRadioGroup>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+
+
                                         </div>
-                                      
+
+                                        <!-- SECTION 2: PROPERTY / BUILDING -->
+                                        @if (tenantDto.tenants.Building != null)
+                                        {
+
+                                            <div class="card shadow-sm p-4 mb-4">
+                                                <h6 class="fw-bold fs-3 mb-3">Building Information</h6>
+
+
+
+                                                <div class="row my-1">
+                                                    <div class="col-3 fw-semibold">Building Address:</div>
+                                                    <div class="col-4">
+                                                       @(
+                                                            string.IsNullOrWhiteSpace($"{tenantDto.tenants.Building.Address1}{tenantDto.tenants.Building.Address2} {tenantDto.tenants.Building.City} {tenantDto.tenants.Building.StateName}  {tenantDto.tenants.Building.Zipcode}")
+                                                              ? "-"
+                                                                                                    : $"{tenantDto.tenants.Building.Address1}{tenantDto.tenants.Building.Address2} {tenantDto.tenants.Building.City} {tenantDto.tenants.Building.StateName}  {tenantDto.tenants.Building.Zipcode}"
+                                                              )
+                                        </div>
                                     </div>
+                                    <div class="row my-1">
+                                        <!-- MDR Number -->
+                                        <div class="col-md-3">
+                                            <div class="row align-items-center">
+                                                <label class="col-auto fw-semibold mb-0">MDR Number:</label>
+                                                <div class="col">
+                                                            @($"{tenantDto.tenants.Building.MDRNumber}".Trim() ?? "-")
+                                                </div>
+                                            </div>
+                                        </div>
 
+                                                    <!-- Number Of Units in the building -->
+                                                    <div class="col-md-4">
+                                                        <div class="row align-items-center">
+                                                            <label class="col-auto fw-semibold mb-0">Number Of Units in the building:</label>
+                                                            <div class="col">
+                                                                @(!string.IsNullOrWhiteSpace(tenantDto.tenants.Building.BuildingUnits) ? tenantDto.tenants.Building.BuildingUnits : "-")
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <div class="row my-1">
+                                                    <!-- Label in full width -->
+                                                    <div class="col-12 fw-semibold">
+                                                        Rent Regulation Status
+                                                    </div>
+
+                                                    <!-- Radio buttons in next row -->
+                                                    <div class="col-12">
+                                                        <InputRadioGroup @bind-Value="tenantDto.RegulationStatusId" class="d-flex flex-wrap gap-3">
+                                                @foreach (var option in RegulationList)
+                                                            {
+                                                                <div class="form-check form-check-inline">
+                                                                    <InputRadio class="form-check-input" Value="@option.Id" />
+                                                                    <label class="form-check-label ms-1">@option.Name</label>
+                                                                </div>
+                                                            }
+                                                        </InputRadioGroup>
+                                                    </div>
+                                                </div>
+
+
+                                            </div>
+                                        }
+
+                                        <!-- SECTION 3: LANDLORD -->
+                                        @if (tenantDto.tenants.Landlord != null)
+                                        {
+
+                                            <div class="card shadow-sm p-4 mb-4">
+                                                <h6 class="fw-bold fs-3 mb-3">LandLord  Information</h6>
+
+                                                <div class="row my-1">
+                                                    <!-- Full Name or Entity Name -->
+                                                    <div class="col-md-6">
+                                                        <div class="row align-items-center">
+                                                            <label class="col-auto fw-semibold mb-0">Full Name or Entity Name:</label>
+                                                            <div class="col ">
+                                                                @($"{tenantDto.tenants.Landlord.FirstName} {tenantDto.tenants.Landlord.LastName}".Trim() ?? "-")
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Mailing Address -->
+                                                    <div class="col-md-6">
+                                                        <div class="row align-items-center">
+                                                            <label class="col-auto fw-semibold mb-0">Mailing Address:</label>
+                                                            <div class="col ">
+                                                               @(
+                                                                  string.IsNullOrWhiteSpace($"{tenantDto.tenants.Landlord?.Address1}{tenantDto.tenants.Landlord?.Address2}{tenantDto.tenants.Landlord?.City}{tenantDto.tenants.Landlord?.StateName}{tenantDto.tenants.Landlord?.Zipcode}")
+                                                                  ? "-"
+                                                                  : $"{tenantDto.tenants.Landlord.Address1}, {tenantDto.tenants.Landlord.Address2}, {tenantDto.tenants.Landlord.City}, {tenantDto.tenants.Landlord.StateName} - {tenantDto.tenants.Landlord.Zipcode}"
+                                                                  ) 
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                                <div class="row my-1">
+                                                    <!-- Phone Number -->
+                                                    <div class="col-md-6">
+                                                        <div class="row align-items-center">
+                                                            <label class="col-auto fw-semibold mb-0">Phone Number:</label>
+                                                            <div class="col ">
+                                                                @(!string.IsNullOrWhiteSpace(tenantDto.tenants.Landlord.Phone) ? tenantDto.tenants.Landlord.Phone : "-")
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Email -->
+                                                    <div class="col-md-6">
+                                                        <div class="row align-items-center">
+                                                            <label class="col-auto fw-semibold mb-0">Email:</label>
+                                                            <div class="col">
+                                                                @(!string.IsNullOrWhiteSpace(tenantDto.tenants.Landlord.Email) ? tenantDto.tenants.Landlord.Email : "-")
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row my-1">
+                                                    <!-- Label full-width -->
+                                                    <div class="col-12 fw-semibold mb-1">Are You the:</div>
+
+                                                    <!-- Input radios in next row -->
+                                                    <div class="col-12 d-flex flex-wrap gap-3">
+                                                        <InputRadioGroup @bind-Value="tenantDto.tenants.Landlord.LandlordTypeId" class="d-flex flex-wrap gap-3">
+                                                @foreach (var option in LandLordTypeList)
+                                                            {
+                                                                <div class="form-check form-check-inline">
+                                                                    <InputRadio class="form-check-input" Value="@option.Id" />
+                                                                    <label class="form-check-label ms-1">@option.Name</label>
+                                                                </div>
+                                                            }
+                                                        </InputRadioGroup>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row my-1">
+                                                    <div class="col-4 fw-semibold">If purchased at foreClosure : </div>
+                                                    <div class="col-4">
+                                                        <InputDate class="form-control"
+                                                                   @bind-Value="@tenantDto.tenants.Landlord.DateOfRefreeDeed"
+                                                                   id="dateRefereeDeed"
+                                                                   placeholder="Select date" />
+
+                                                    </div>
+                                                </div>
+
+
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
                     </div>
+
+                    <EditForm EditContext="@editContext">
+                        <div class="row my-2">
+                            <div class="col-md-12">
+                                <InputRadioGroup @bind-Value="tenantDto.ReasonHoldoverId" class="mb-3 required-label">
+                                    <div class="row align-items-start">
+                                        <div class="col-auto">
+                                            <label class="form-label mb-0" style="margin-top:5px">Reason Holdover:</label>
+                                        </div>
+                                        <div class="col">
+                                            <div class="d-flex flex-wrap align-items-start">
+                                                @foreach (var role in ReasonHoldoverList)
+                                                {
+                                                    <div class="d-flex align-items-start " @key="role.Id">
+                                                        <div class="form-check d-flex align-items-center m-0">
+                                                            <InputRadio class="form-check-input me-1" Value="@role.Id" />
+                                                            <label class="form-check-label ms-1" style="margin-top:5px">
+                                                                @role.Name
+                                                            </label>
+                                                        </div>
+
+                                                        @if (tenantDto.ReasonHoldoverId == role.Id && role.Name == "Other")
+                                                        {
+                                                            <InputText class="form-control"
+                                                                       placeholder="Please specify"
+                                                                       style="max-width: 200px; height: 36px;"
+                                                                       @bind-Value="tenantDto.ReasonDescription" />
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </InputRadioGroup>
+
+                            </div>
+
+
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-2 ">
+                                <label class="form-label fw-semibold ">Explain:</label>
+
+                            </div>
+
+                            <div class="col-md-10">
+
+                                <InputTextArea class="form-control" @bind-Value="legalcaseDto.ExplainDescription" placeholder="Enter Explanation" style="width: 100%;" />
+                            </div>
+
+                        </div>
+
+                    </EditForm>
                 }
+
+            </div>
+        }
+
+        @if (currentStep == 1)
+        {
+            <div class="mx-auto p-4 border rounded shadow-sm bg-white">
+                <h5 class="text-center text-navy fw-bold">Summary View</h5>
+                <hr class="border-gold mb-4" />
+
+                @if (TenantDetails != null)
+                {
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="border rounded p-3 bg-light">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+
+                                        <!-- SECTION 1: TENANT INFORMATION -->
+                                        <div class="card shadow-sm p-4 mb-4">
+                                            <h6 class="fw-bold fs-3 mb-3">Tenant Information</h6>
+
+                                            <div class="row mb-2">
+                                                <div class="col-6">
+                                                    <div class="row">
+                                                        <div class="col-5 fw-semibold">Tenant's Full Name(s):</div>
+                                                        <div class="col-7">
+                                                            @($"{TenantDetails.FirstName} {TenantDetails.LastName}".Trim() ?? "-")
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-6">
+                                                    <div class="row">
+                                                        <div class="col-5 fw-semibold">Building Address:</div>
+                                                        <div class="col-7">
+                                                            @(
+                                                                                                                string.IsNullOrWhiteSpace($"{TenantDetails.Building?.Address1}{TenantDetails.Building?.Address2}{TenantDetails.Building?.City}{TenantDetails.Building?.StateName}{TenantDetails.Building?.Zipcode}")
+                                                                                                                ? "-"
+                                                                                                                : $"{TenantDetails.Building?.Address1} {TenantDetails.Building?.Address2} {TenantDetails.Building?.City} {TenantDetails.Building?.StateName} {TenantDetails.Building?.Zipcode}"
+                                                                                                                )
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+
+
+                                            <div class="row mb-2">
+                                                <div class="col-6">
+                                                    <div class="row">
+                                                        <div class="col-5 fw-semibold">Unit / Apartment Number:</div>
+                                                        <div class="col-7">
+                                                            @(!string.IsNullOrWhiteSpace(TenantDetails.UnitOrApartmentNumber) ? TenantDetails.UnitOrApartmentNumber : "-")
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-6">
+                                                    <div class="row">
+                                                        <div class="col-5 fw-semibold">Is the unit illegal?</div>
+                                                        <div class="col-7">
+                                                            @(IsUnitIllegalList.FirstOrDefault(x => x.Id == TenantDetails.IsUnitIllegalId)?.Name ?? "-")
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="row mb-2">
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold">Tenant of record?</div>
+                                                        <div class="col-6">
+                                                            @(TenantDetails.TenantRecord == true ? "Yes" : TenantDetails.TenantRecord == false ? "No" : "-")
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold">Other Occupants?</div>
+                                                        <div class="col-6">
+                                                            @(TenantDetails.OtherOccupants == true ? "Yes" : TenantDetails.OtherOccupants == false ? "No" : "-")
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold">Still in possession?</div>
+                                                        <div class="col-6">
+                                                            @(TenantDetails.HasPossession == true ? "Yes" : TenantDetails.HasPossession == false ? "No" : "-")
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+
+
+
+                                            <div class="row mb-2">
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold">Monthly Rent ($):</div>
+                                                        <div class="col-6">@TenantDetails.MonthlyRent</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold">Rent Due (Month/Week):</div>
+                                                        <div class="col-6">
+                                                            @(!string.IsNullOrWhiteSpace(TenantDetails.RentDueEachMonthOrWeek) ? TenantDetails.RentDueEachMonthOrWeek : "-")
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold">Tenant's Share ($):</div>
+                                                        <div class="col-6">@TenantDetails.TenantShare</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="row mb-2">
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold">Social Services:</div>
+                                                        <div class="col-6">@TenantDetails.SocialServices</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold">Total Rent Owed ($):</div>
+                                                        <div class="col-6">@TenantDetails.TotalRentOwed</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold">Last Rent Paid (Month/Week):</div>
+                                                        <div class="col-6">@TenantDetails.LastMonthWeekRentPaid</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-2">
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold">ERAP Payment Received:</div>
+                                                        <div class="col-6">@(TenantDetails.IsERAPPaymentReceived ? "Yes" : "No")</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold">ERAP Payment Date:</div>
+                                                        <div class="col-6">@((TenantDetails.ERAPPaymentReceivedDate?.ToString("MM/dd/yyyy")) ?? "-")</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold"> </div>
+                                                        <div class="col-6"> </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+
+                                        </div>
+
+                                        <!-- SECTION 2: BUILDING INFO -->
+                                        <div class="card shadow-sm p-4 mb-4">
+                                            <h6 class="fw-bold fs-3 mb-3">Building Information</h6>
+
+                                            <div class="row my-1">
+                                                <div class="col-5 fw-semibold">Building Address:</div>
+                                                <div class="col-7">
+                                                    @(
+                                                                                                string.IsNullOrWhiteSpace($"{TenantDetails.Building?.Address1}{TenantDetails.Building?.Address2}{TenantDetails.Building?.City}{TenantDetails.Building?.StateName}{TenantDetails.Building?.Zipcode}")
+                                                                                                ? "-"
+                                                                                                : $"{TenantDetails.Building?.Address1} {TenantDetails.Building?.Address2} {TenantDetails.Building?.City} {TenantDetails.Building?.StateName} {TenantDetails.Building?.Zipcode}"
+                                                                                                )
+                                                </div>
+                                            </div>
+
+                                            <div class="row my-1">
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold">MDR Number:</div>
+                                                        <div class="col-5">@TenantDetails.Building.MDRNumber</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-7 fw-semibold">Number of Units:</div>
+                                                        <div class="col-5">@TenantDetails.Building.BuildingUnits</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-8 fw-semibold">Regulation Status:</div>
+                                                        <div class="col-4">
+                                                            @(RegulationList.FirstOrDefault(x => x.Id == TenantDetails.Building.RegulationStatusId)?.Name ?? "-")
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+
+                                        <!-- SECTION 3: LANDLORD INFO -->
+                                        <div class="card shadow-sm p-4 mb-4">
+                                            <h6 class="fw-bold fs-3 mb-3">Landlord Information</h6>
+
+                                            <div class="row my-1">
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold">Full Name or Entity:</div>
+                                                        <div class="col-6">@($"{TenantDetails.Landlord.FirstName} {TenantDetails.Landlord.LastName}".Trim() ?? "-")</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold">Phone:</div>
+                                                        <div class="col-6">@(TenantDetails.Landlord.Phone ?? "-")</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-5 fw-semibold">Email:</div>
+                                                        <div class="col-7">@TenantDetails.Landlord.Email</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="row my-1">
+
+
+                                                <div class="col-3 fw-semibold">Mailing Address:</div>
+                                                <div class="col-8">
+                                                    @(string.IsNullOrWhiteSpace($"{TenantDetails.Landlord?.Address1}{TenantDetails.Landlord?.City}")
+                                                                                                ? "-"
+                                                                                                : $"{TenantDetails.Landlord.Address1}, {TenantDetails.Landlord.City}, {TenantDetails.Landlord.StateName} {TenantDetails.Landlord.Zipcode}")
+                                        </div>
+                                    </div>
+
+                                            <div class="row mb-2">
+                                                <div class="col-4">
+                                                    <div class="row">
+                                                        <div class="col-6 fw-semibold">Are You the:</div>
+                                                        <div class="col-6">
+                                                            @(LandLordTypeList.FirstOrDefault(x => x.Id == TenantDetails.Landlord.LandlordTypeId)?.Name ?? "-")
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-8">
+                                                    <div class="row">
+                                                        <div class="col-5 fw-semibold">Date of Foreclosure Purchase:</div>
+                                                        <div class="col-7">
+                                                            @(TenantDetails.Landlord.DateOfRefreeDeed)
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                            </div>
+
+
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        }
+
+                <div class="row mb-2">
+                    <div class="col-4 fw-semibold">Reason Holdover:</div>
+                    <div class="col-8">
+                        @(ReasonHoldoverList.FirstOrDefault(x => x.Id == legalcaseDto.ReasonHoldoverId)?.Name ?? "-")
+                    </div>
+
+                    @if (ReasonHoldoverList.FirstOrDefault(x => x.Id == legalcaseDto.ReasonHoldoverId)?.Name == "Other")
+                    {
+                        <div class="col-4 fw-semibold">Other Reason:</div>
+                        <div class="col-8">
+                            @legalcaseDto.ReasonDescription
+                        </div>
+                    }
+
+                    <div class="col-4 fw-semibold">Explain:</div>
+                    <div class="col-8">
+                        @legalcaseDto.ExplainDescription
+                    </div>
+                </div>
+
 
             </div>
         }
@@ -762,241 +1044,123 @@
         <button class="btn bg-navy text-white" @onclick="Back" disabled="@(currentStep == 0)">← Back</button>
 
         <!-- Right Buttons -->
-        <div class="d-flex gap-2" style="position:fixed ;right:40px">
-            @if (currentStep > 0 && currentStep < lastStep)
-            {
-                <button class="btn btn-outline-warning" @onclick="ResetStep">Reset</button>
-            }
+        <div class="d-flex gap-2" style="position:fixed; right:40px">
             @if (currentStep < lastStep)
             {
+                <button class="btn btn-outline-warning" @onclick="ResetStep">Reset</button>
                 <button class="btn bg-gold text-white" @onclick="Next" disabled="@IsNextDisabled">Next →</button>
             }
             @if (currentStep == lastStep)
             {
                 <button class="btn btn-outline-warning" @onclick="ResetStep">Reset</button>
-                <button class="btn btn-outline-warning" @onclick="ResetStep">SaveAsDraft</button>
+                <button class="btn btn-outline-warning" @onclick="SaveAsDraft">Save As Draft</button>
                 <button class="btn btn-success" disabled="@IsNextDisabled" @onclick="Submit">Submit</button>
             }
         </div>
     </div>
+
 </div>
 
 @code {
-
     [Parameter]
     public Guid caseId { get; set; }
-    // [Parameter] public string ClientId { get; set; }
-    private CreateToEditLegalCaseModel legalCase = new();
+    [Parameter] public string ClientId { get; set; }
+    private CreateToEditLegalCaseModel legalcaseDto = new CreateToEditLegalCaseModel();
     int currentStep = 0;
-    int lastStep = 3;
-    private List<CaseType> caseTypes = new();
-    private List<CaseSubType> caseSubTypes = new();
+    int lastStep = 1;
     private EditContext editContext;
     // Used for conditional rendering
-    private string selectedCaseTypeName;
+    private bool hasSearched = false;
+
+    private TenantSearchModel tenantSearchModel = new();
+    private string searchtenantText = "";
+    private List<EditToTenantDto> filteredTenantList = new();
+    private CreateToLandLordDto? selectedLandlord;
+    private CreateToBuildingDto? selectedBuilding;
+    private CreateToTenantDto? selectedTenant;
+    private bool isLandlordSelected = false;
+    private bool isBuildingSelected = false;
+    private bool isTenantSelected = false;
     private LandlordWithBuildings? landlordDetails;
     private BuildingWithTenant? buildingDetails;
     private EditToTenantDto? TenantDetails;
-    public Guid? SelectedLandlord { get; set; }
-    public Guid? SelectedBuilding { get; set; }
-    public Guid? SelectedTenant{ get; set; }
-    private List<ClientRole> ClientRoleList = new();
 
-    private string selectedClientRoleName => ClientRoleList.FirstOrDefault(x => x.Id == legalcaseDto.ClientRoleId)?.Name;
+    private CreateToEditLegalCaseModel tenantDtos = new CreateToEditLegalCaseModel();
+    private EditToLandlordDto landLordDto = new EditToLandlordDto();
+    private EditToBuildingDto apartmentDto = new EditToBuildingDto();
+
+    private EditToClientDto clientDto = new EditToClientDto();
+
+    private List<CreateToTenantDto> matchedTenants = new List<CreateToTenantDto>();
+    private List<CreateToLandLordDto> matchedLandLords = new List<CreateToLandLordDto>();
+    private List<CreateToClientDto> matchedClients = new List<CreateToClientDto>();
+    private List<CreateToBuildingDto> matchedBuilding = new List<CreateToBuildingDto>();
+    private bool showSuggestions = false;
+
+    public List<ReasonHoldover> ReasonHoldoverList = new();
+    public List<IsUnitIllegal> IsUnitIllegalList = new();
+    private List<RegulationStatus> RegulationList = new();
+    private List<LandlordType> LandLordTypeList = new();
+    private List<TenancyType> TenancyTypeList = new();
+
+    private CreateToEditLegalCaseModel ?tenantDto;
+
     protected override async Task OnInitializedAsync()
     {
+        legalcaseDto = new CreateToEditLegalCaseModel();
         editContext = new EditContext(legalcaseDto);
-        caseTypes = await CaseTypeRepository.GetAllCaseType();
-        ClientRoleList = await ClientRoleRepository.GetAllClientRole();
-        legalcaseDto = await _legalCaseService.GetByIdAsync(caseId); 
-
-        if (legalcaseDto?.CaseTypeId != null)
-        {
-            var selectedType = caseTypes.FirstOrDefault(ct => ct.Id == legalcaseDto.CaseTypeId);
-            selectedCaseTypeName = selectedType?.Name;
-
-            if (selectedCaseTypeName == "Holdover")
-            {
-                 caseSubTypes = await CaseSubTypeRepository.GetSubTypesByCaseTypeIdAsync(legalcaseDto.CaseTypeId.Value);
-            }
-        }
-
-        if (legalcaseDto?.LandLordId != null)
-        {
-            await LoadLandlordDetailsAsync(legalcaseDto.LandLordId.Value);
-        }
-
-        if (legalcaseDto?.BuildingId != null)
-        {
-            await LoadBuildingDetailsAsync(legalcaseDto.BuildingId.Value);
-        }
-        if (legalcaseDto?.TenantId != null)
-        {
-            await LoadTenantDetailsAsync(legalcaseDto.TenantId.Value);
-        }
+        ReasonHoldoverList = await ReasonHoldoverRepository.GetAllTReasonHoldover();
+        IsUnitIllegalList = await UnitIllegalRepository.GetAllUnitIllegal();
+        RegulationList = await RegulationStatusRepository.GetAllRegulationStatus();
+        LandLordTypeList = await LandlordTypeRepository.GetAllLandLordType();
+        TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
+        // legalcaseDto.ClientId = Guid.Parse(ClientId);
+                await LoadDataAsync();
     }
 
+    List<string> stepTitles = new() {
+        "Create Cases", "View"
 
-    private async Task LoadLandlordDetailsAsync(Guid landlordId)
+    };
+
+  
+
+    private async Task LoadDataAsync()
     {
-        landlordDetails = await _landlordService.GetLandlordWithBuildingsAsync(landlordId);
-        isLandlordSelected = landlordDetails != null;
-        searchText = landlordDetails?.Landlord?.FirstName ?? "";
-
-        // Set the selected landlord id as string here to enable Next button
-        landlordSearchModel.SelectedLandlord = landlordId.ToString();
-
-        StateHasChanged();
+        legalcaseDto = await _legalCaseService.GetByIdAsync(caseId); // 👈 Add this
+        tenantDto = legalcaseDto; // 👈 If needed
+        isTenantSelected = true;
     }
 
 
-
-
-    private async Task LoadTenantDetailsAsync(Guid tenantId)
-    {
-        TenantDetails = await _tenantService.GetByIdAsync(tenantId);
-
-        // ✅ pick the first or null
-        isTenantSelected = TenantDetails != null;
-        searchtenantText = TenantDetails?.FirstName ?? "";
-        tenantSearchModel.SelectedTenant = tenantId.ToString();
-
-        StateHasChanged();
-    }
-
-
-
-    private async Task LoadBuildingDetailsAsync(Guid apartmentId)
-    {
-        buildingDetails = await _apartmentService.GetBuildingsWithTenantAsync(apartmentId); // create/use proper method
-        isBuildingSelected = buildingDetails != null;
-        searchBuildingText = buildingDetails?.Building?.BuildingCode ?? "";
-
-        buildingSearchModel.SelectedBuilding = apartmentId.ToString();
-
-        StateHasChanged();
-    }
-
-
-
-
-
-
-    private async Task OnCaseTypeChanged(ChangeEventArgs e)
-    {
-        if (Guid.TryParse(e.Value?.ToString(), out var selectedGuid))
-        {
-            legalcaseDto.CaseTypeId = selectedGuid;
-
-            var selectedType = caseTypes.FirstOrDefault(ct => ct.Id == selectedGuid);
-            selectedCaseTypeName = selectedType?.Name;
-
-            if (selectedCaseTypeName == "Holdover")
-            {
-                // caseSubTypes = await CaseSubTypeRepository.GetAllCaseSubTypes(selectedGuid);
-            }
-            else
-            {
-                caseSubTypes = new();
-                legalcaseDto.CaseSubTypeId = null;
-            }
-
-            // Force UI refresh
-            StateHasChanged();
-        }
-    }
+ 
 
 
     private void Next()
     {
-        bool isValid = true;
 
-        if (currentStep == 0 || currentStep == 3) // only validate legalcaseDto where needed
-            isValid = editContext.Validate();
-
-        if (isValid)
-        {
-            var selectedType = caseTypes.FirstOrDefault(x => x.Id == legalcaseDto.CaseTypeId);
-            selectedCaseTypeName = selectedType?.Name;
-
-            currentStep++;
-        }
-        else
-        {
-            Console.WriteLine("Form is not valid.");
-        }
+        currentStep++;
     }
-
-
-
-
 
     private bool IsNextDisabled =>
-       (currentStep == 0 && 
-      
-      (selectedClientRole == "Legal Representative" && string.IsNullOrWhiteSpace(legalcaseDto.LegalRepresentative)) ||
-      legalcaseDto.CaseTypeId == null ||
-      (selectedCaseTypeName == "Holdover" && legalcaseDto.CaseSubTypeId == null)
-  )
-       ||
-      (currentStep == 1 && landlordSearchModel.SelectedLandlord == null)
-      ||
-      (currentStep == 2 && (
-          buildingDetails == null ||
-          buildingDetails.Building == null ||
-          string.IsNullOrWhiteSpace(buildingDetails.Building.ApartmentCode)
-      ))
-      ||
-      (currentStep == 3 && (
-          TenantDetails == null ||
-          string.IsNullOrWhiteSpace(TenantDetails.FirstName)
-      ));
+        (currentStep == 0 && (
+            TenantDetails == null ||
+            string.IsNullOrWhiteSpace(TenantDetails.FirstName)
+        ));
 
 
-    List<string> stepTitles = new() {
-        "Case & Role", "Landlord Info", "Property Info", " Tenant Info",
-
-    };
-    private bool hasSearched = false;
-    private LandlordSearchModel landlordSearchModel = new();
-    private BuildingSearchModel buildingSearchModel = new();
-    private TenantSearchModel tenantSearchModel = new();
-    private string searchText = "";
-    private string searchBuildingText = "";
-    private string searchtenantText = "";
-    private List<EditToLandlordDto> filteredList = new();
-    private List<EditToBuildingDto> filteredBuildingList = new();
-    private List<EditToTenantDto> filteredTenantList = new();
-    private EditToLandlordDto? selectedLandlord;
-    private EditToBuildingDto? selectedBuilding;
-    private EditToTenantDto? selectedTenant;
-    private bool isLandlordSelected = false;
-    private bool isBuildingSelected = false;
-    private bool isTenantSelected = false;
-
-    private async Task HandleInput(ChangeEventArgs e)
-    {
-        searchText = e?.Value?.ToString() ?? "";
-        hasSearched = true;
-        if (!string.IsNullOrWhiteSpace(searchText))
-        {
-            filteredList = await _landlordService.SearchLandlordsAsync(searchText, legalcaseDto.ClientId);
-
-        }
-        else
-        {
-            filteredList.Clear();
-        }
-
-    }
 
     private async Task HandleTenantInput(ChangeEventArgs e)
     {
         searchtenantText = e?.Value?.ToString() ?? "";
         hasSearched = true;
-        if (!string.IsNullOrWhiteSpace(searchtenantText))
+
+        Console.WriteLine($"Search Text: {searchtenantText}");
+        Console.WriteLine($"Client ID: {legalcaseDto.ClientId}");
+
+        if (!string.IsNullOrWhiteSpace(searchtenantText) && legalcaseDto.ClientId != Guid.Empty)
         {
-            filteredTenantList = await _tenantService.SearchTenantsAsync(searchtenantText, legalcaseDto.BuildingId ?? Guid.Empty);
+            filteredTenantList = await _tenantService.SearchTenantsAsync(searchtenantText, legalcaseDto.ClientId);
         }
         else
         {
@@ -1005,183 +1169,35 @@
     }
 
 
-    private async Task HandleBuildingInput(ChangeEventArgs e)
-    {
-        searchBuildingText = e?.Value?.ToString() ?? "";
-
-        if (!string.IsNullOrWhiteSpace(searchBuildingText) && landLordDto != null)
-        {
-            filteredBuildingList = await _apartmentService.SearchBuildingByCode(searchBuildingText, legalcaseDto.LandLordId ?? Guid.Empty);
-        }
-        else
-        {
-            filteredBuildingList.Clear();
-        }
-    }
 
 
-
-
-
-
-
-    private async Task SelectLandlord(Guid id)
-    {
-        landlordDetails = await _landlordService.GetLandlordWithBuildingsAsync(id);
-
-        if (landlordDetails?.Landlord != null)
-        {
-            var fullName = $"{landlordDetails.Landlord.FirstName} {landlordDetails.Landlord.LastName}";
-
-            searchText = fullName;
-            landlordSearchModel.SelectedLandlord = fullName;
-
-            landLordDto = landlordDetails.Landlord;
-
-            legalcaseDto.LandLordId = id; // ✅ Assign the selected LandlordId
-        }
-
-        filteredList.Clear();
-        hasSearched = false;
-        isLandlordSelected = true;
-        searchText = "";
-        StateHasChanged();
-    }
-
-
-    private async Task SelectBuilding(Guid id)
-    {
-        buildingDetails = await _apartmentService.GetBuildingsWithTenantAsync(id);
-
-        if (buildingDetails != null)
-        {
-            searchBuildingText = buildingDetails.Building.BuildingCode;
-            buildingSearchModel.SelectedBuilding = buildingDetails.Building.BuildingCode;
-            apartmentDto = buildingDetails.Building;
-
-            legalcaseDto.BuildingId = id;
-        }
-
-        filteredBuildingList.Clear();
-        isBuildingSelected = true;
-        searchBuildingText = "";
-        hasSearched = false;
-    }
 
     private async Task SelectTenant(Guid id)
     {
-        TenantDetails = await _tenantService.GetByIdAsync(id);
-
-        if (TenantDetails != null)
-        {
-            var fullName = $"{TenantDetails.FirstName} {TenantDetails.LastName}";
-            searchtenantText = fullName;
-            tenantSearchModel.SelectedTenant = fullName;
-
-            // ✅ Create and assign tenantDto properly
-            tenantDto = new EditToTenantDto
-            {
-                Id = TenantDetails.Id,
-                FirstName = TenantDetails.FirstName,
-             
-                SSN = TenantDetails.SSN,
-                Phone = TenantDetails.Phone,
-                Email = TenantDetails.Email,
-                LanguageId = TenantDetails.LanguageId,
-                Borough = TenantDetails.Borough,
-                LanguageName = TenantDetails.LanguageName,   
-                // LeaseStatus = TenantDetails.LeaseStatus,
-                TenantCode = TenantDetails.TenantCode
-
-            };
-        }
-
+        tenantDto = await _legalCaseService.GetByIdAsync(id);
+        searchtenantText = "";
         filteredTenantList.Clear();
         hasSearched = false;
     }
 
 
-    private void ResetStep()
+
+    private async Task ResetStep()
     {
         switch (currentStep)
         {
-            case 1:
-                landlordDetails = null;
-                isLandlordSelected = false;
-                landlordSearchModel.SelectedLandlord = null;
-                searchText = string.Empty;
-                break;
 
-            case 2:
-                buildingDetails = null;
-                isBuildingSelected = false; // ✅ agar aap yeh flag use kar rahe ho
-                searchBuildingText = string.Empty;
-                filteredBuildingList?.Clear();
-                break;
-
-            case 3:
-                TenantDetails = null;
+            case 0:
+                tenantDto = null;
                 isTenantSelected = false;
                 searchtenantText = string.Empty;
                 filteredTenantList?.Clear();
                 break;
         }
+       
 
-        StateHasChanged(); // 🌀 UI ko refresh karo
+        StateHasChanged();
     }
-
-
-
-    string first_name;
-    string last_name;
-    string gender = "male";
-    string address;
-    string phone;
-    string code;
-    string date;
-    string month;
-    string year;
-
-    bool checkbox;
-    bool checkbox_other;
-
-    // Bank Info
-    string bank;
-    string branch;
-    string email;
-    string account_name;
-    string account_number;
-    string date_2;
-    string month_2;
-    string year_2;
-    string selectedClientRole;
-    string selectedCaseType;
-    string otherCaseType;
-    string holdoverSubType;
-
-    private string attorney;
-    private string firm;
-    private string registeredAgent;
-    private string residentialUnits;
-    private string commercialUnits;
-    private string dhcrRegistered;
-    private string hpdViolations;
-    private string yearBuilt;
-    private string heatWater;
-    private string BuildingCode;
-
-    private EditToTenantDto tenantDto = new EditToTenantDto();
-    private EditToLandlordDto landLordDto = new EditToLandlordDto();
-    private EditToBuildingDto apartmentDto = new EditToBuildingDto();
-    private CreateToEditLegalCaseModel legalcaseDto = new CreateToEditLegalCaseModel();
-    private CreateToClientDto clientDto = new CreateToClientDto();
-
-    private List<CreateToTenantDto> matchedTenants = new List<CreateToTenantDto>();
-    private List<CreateToLandLordDto> matchedLandLords = new List<CreateToLandLordDto>();
-    private List<CreateToClientDto> matchedClients = new List<CreateToClientDto>();
-    private List<CreateToBuildingDto> matchedBuilding = new List<CreateToBuildingDto>();
-    private bool showSuggestions = false;
-
 
     void SaveAsDraft() => Console.WriteLine("Saving Draft...");
 
@@ -1190,102 +1206,51 @@
 
     private async Task Submit()
     {
-        if (legalcaseDto == null)
-            return;
+        var result = false;
 
-        // Ensure required fields are present before update
-        if (legalcaseDto.CaseTypeId == Guid.Empty)
+        if (legalcaseDto == null || legalcaseDto.Id == Guid.Empty)
         {
-            Console.WriteLine("❌ CaseTypeId is required.");
-            return;
+            legalcaseDto.Id = Guid.NewGuid();
+            legalcaseDto.LandLordId = TenantDetails.Landlord?.Id ?? Guid.Empty;
+            legalcaseDto.BuildingId = TenantDetails.Building?.Id ?? Guid.Empty;
+            legalcaseDto.TenantId = TenantDetails?.Id ?? Guid.Empty;
+            legalcaseDto.IsUnitIllegalId = TenantDetails?.IsUnitIllegalId ?? Guid.Empty;
+            legalcaseDto.TenantRecord = TenantDetails?.TenantRecord;
+            legalcaseDto.RenewalOffer = TenantDetails?.RenewalOffer;
+            legalcaseDto.HasPossession = TenantDetails?.HasPossession;
+            legalcaseDto.OtherOccupants = TenantDetails?.OtherOccupants;
+            legalcaseDto.HasPossession = TenantDetails?.HasPossession;
+            legalcaseDto.RentDueEachMonthOrWeek = TenantDetails?.RentDueEachMonthOrWeek;
+            legalcaseDto.MonthlyRent = TenantDetails?.MonthlyRent;
+            legalcaseDto.TenantShare = TenantDetails?.TenantShare;
+            legalcaseDto.SocialServices = TenantDetails?.SocialServices;
+            legalcaseDto.LastMonthWeekRentPaid = TenantDetails?.LastMonthWeekRentPaid;
+            legalcaseDto.TotalRentOwed = TenantDetails?.TotalRentOwed;
+            legalcaseDto.SocialServices = TenantDetails?.SocialServices;
+            legalcaseDto.IsERAPPaymentReceived = TenantDetails?.IsERAPPaymentReceived;
+            legalcaseDto.ERAPPaymentReceivedDate = TenantDetails?.ERAPPaymentReceivedDate;
+            legalcaseDto.TenancyTypeId = TenantDetails?.TenancyTypeId ?? Guid.Empty;
+            legalcaseDto.RegulationStatusId = TenantDetails.Building.RegulationStatusId ?? Guid.Empty;
+            legalcaseDto.LandlordTypeId = TenantDetails?.Landlord.LandlordTypeId ?? Guid.Empty;
+            legalcaseDto.ClientId = Guid.Parse(ClientId);
+            legalcaseDto.CaseName = _dataService.CaseName;
+
+            legalcaseDto.ReasonHoldoverId = legalcaseDto.ReasonHoldoverId;
+            legalcaseDto.ExplainDescription = legalcaseDto.ExplainDescription;
+            legalcaseDto.ReasonDescription = legalcaseDto.ReasonDescription;
+
+            result = await _legalCaseService.AddLegalCasesAsync(legalcaseDto);
+            _dataService.CaseName = null;
         }
 
-        if (legalcaseDto.LandLordId == Guid.Empty || legalcaseDto.BuildingId == Guid.Empty || legalcaseDto.TenantId == Guid.Empty)
-        {
-            Console.WriteLine("❌ Landlord, Apartment, or Tenant is missing.");
-            return;
-        }
-
-        // Optional: Set subtype name if CaseType is Holdover
-        if (selectedCaseTypeName == "Holdover" && legalcaseDto.CaseSubTypeId != null)
-        {
-            var subType = caseSubTypes.FirstOrDefault(s => s.Id == legalcaseDto.CaseSubTypeId);
-            // legalcaseDto.CaseSubTypeName = subType?.Name; // Uncomment if your DTO has CaseSubTypeName
-        }
-
-        // 🔁 Call update service
-        var result = await _legalCaseService.UpdateAsync(legalcaseDto);
 
         if (result)
         {
             nav.NavigateTo("/cases?success=true");
         }
-        else
-        {
-            Console.WriteLine("❌ Failed to update the case.");
-        }
     }
-
-
-
-
-
-
 
     private CancellationTokenSource _cts;
-    private async Task OnTenantCodeChanged(ChangeEventArgs e)
-    {
-        _cts?.Cancel(); // cancel previous call
-        _cts = new CancellationTokenSource();
-        var token = _cts.Token;
-
-        var input = e.Value?.ToString() ?? string.Empty;
-        tenantDto.TenantCode = input;
-
-        if (input.Length >= 3)
-        {
-            await Task.Delay(1000, token); // debounce
-            matchedTenants = await _tenantService.SearchTenantbyCode(input);
-            showSuggestions = matchedTenants.Any();
-        }
-        else
-        {
-            showSuggestions = false;
-        }
-    }
-    private void SelectTenant(EditToTenantDto selectedTenant)
-    {
-        tenantDto = selectedTenant;
-        showSuggestions = false;
-    }
-
-    // private async Task OnLandLordCodeChanged(ChangeEventArgs e)
-    // {
-    //     _cts?.Cancel(); // cancel previous call
-    //     _cts = new CancellationTokenSource();
-    //     var token = _cts.Token;
-
-    //     var input = e.Value?.ToString() ?? string.Empty;
-    //     landLordDto.LandLordCode = input;
-
-    //     if (input.Length >= 3)
-    //     {
-    //         await Task.Delay(1000, token); // debounce
-    //         var landlord = await _landlordService.SearchLandlordByCode(input);
-    //         // matchedLandLords = landlord.Where(e => e.Id == Guid.Parse(ClientId)).ToList();
-    //         showSuggestions = matchedLandLords.Any();
-    //     }
-    //     else
-    //     {
-    //         showSuggestions = false;
-    //     }
-    // }
-
-    private void SelectLandLord(EditToLandlordDto selectedTenant)
-    {
-        landLordDto = selectedTenant;
-        showSuggestions = false;
-    }
 
     private async Task OnClientCodeChanged(ChangeEventArgs e)
     {
@@ -1307,12 +1272,7 @@
             showSuggestions = false;
         }
     }
-    private void SelectClient(CreateToClientDto selectedClient)
-    {
-        // legalcaseDto.Company = selectedClient.Name;
 
-        showSuggestions = false;
-    }
 
     private async Task OnBuildingChanged(ChangeEventArgs e)
     {
@@ -1337,4 +1297,3 @@
     }
 
 }
-

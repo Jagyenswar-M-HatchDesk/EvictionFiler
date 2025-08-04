@@ -48,7 +48,7 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public EditToBuildingDto? Building { get; set; }
 		public EditToLandlordDto? Landlord { get; set; }
 
-		public List<Guid> SelectedIllegalUnits { get; set; } = new();
+	
 
 	}
 }
