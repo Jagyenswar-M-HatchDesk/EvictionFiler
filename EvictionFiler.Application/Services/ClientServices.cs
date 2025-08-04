@@ -38,7 +38,7 @@ namespace EvictionFiler.Application.Services
 
 			return query.Select(client => new EditToClientDto
 				{
-				  Id= client.Id,
+				    Id= client.Id,
 					ClientCode = client.ClientCode ?? "",
 					FirstName = client.FirstName ?? "",
 					LastName = client.LastName ?? "",

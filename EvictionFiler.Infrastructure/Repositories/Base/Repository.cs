@@ -95,7 +95,7 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 
 		public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null, params Expression<Func<T, object>>[]? includes)
 		{
-			var query = _dbSet.AsNoTracking().AsQueryable(); // 🛠 Fix: Add AsNoTracking()
+			var query = _dbSet.AsNoTracking().AsQueryable(); 
 
 			if (predicate != null)
 				query = query.Where(predicate);

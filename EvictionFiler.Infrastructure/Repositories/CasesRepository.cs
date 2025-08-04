@@ -26,15 +26,39 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 		public async Task<List<LegalCase>> GetAllCasesAsync()
         {
-            return await _context.LegalCases
-                .Include(c => c.Clients)
-				 .Include(c => c.ClientRole)
-				.Include(c => c.Buildings)
-				.Include(c=>c.ReasonHoldover)
-				.Include(c=>c.CaseType)
-				.Include(c=>c.CaseSubType)
-                .Include(c => c.LandLords).Include(c=>c.Tenants)
-                .ToListAsync();
+            return await _context.LegalCases.AsNoTracking()
+								  .Select(c => new LegalCase()
+								   {
+									  Id = c.Id,
+									  Casecode = c.Casecode,
+									  ReasonHoldover = c.ReasonHoldover,
+									  Clients = c.Clients != null ? new Client()
+									  {
+										  FirstName = c.Clients.FirstName,
+										  LastName = c.Clients.LastName,
+										  ClientCode = c.Clients.ClientCode
+									  }: new Client(),
+									  LandLords = c.LandLords != null ? new LandLord()
+									  {
+										  FirstName = c.LandLords.FirstName,
+										  LastName = c.LandLords.LastName,
+										  LandLordCode = c.LandLords.LandLordCode
+									  } : new LandLord(),
+
+										Buildings = c.Buildings != null ? new Building()
+										{
+									
+											BuildingCode = c.Buildings.BuildingCode
+										} : new Building(),
+									  Tenants = c.Tenants != null ? new Tenant()
+									  {
+
+										  TenantCode = c.Tenants.TenantCode,
+										  FirstName = c.Tenants.FirstName,
+										  LastName = c.Tenants.LastName,
+									  } : new Tenant()
+								  })
+								 .ToListAsync();
         }
 
 		public async Task<CreateToEditLegalCaseModel?> GetCaseByIdAsync(Guid id)
