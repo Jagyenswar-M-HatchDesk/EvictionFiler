@@ -59,24 +59,40 @@ namespace EvictionFiler.Infrastructure.Repositories
 		{
 			query = query?.Trim().ToLower() ?? "";
 
+			//var tenants = await _dbContext.Tenants
+			//	.Include(t => t.Building)
+			//		.ThenInclude(b => b.Landlord)
+			//	.Where(t =>
+			//		t.Building.Landlord.ClientId == clientId &&
+			//		(t.FirstName.ToLower().Contains(query) || t.LastName.ToLower().Contains(query))
+
+			//	)
+			//	.Select(t => new EditToTenantDto
+			//	{
+			//		Id = t.Id,
+			//		FirstName = t.FirstName,
+			//		LastName = t.LastName,
+			//		Email = t.Email,
+			//		Phone = t.Phone,
+			//		TenantCode = t.TenantCode
+			//	})
+			//	.ToListAsync();
+
 			var tenants = await _dbContext.Tenants
-				.Include(t => t.Building)
-					.ThenInclude(b => b.Landlord)
-				.Where(t =>
-					t.Building.Landlord.ClientId == clientId &&
-					(t.FirstName.ToLower().Contains(query) || t.LastName.ToLower().Contains(query))
-					
-				)
-				.Select(t => new EditToTenantDto
-				{
-					Id = t.Id,
-					FirstName = t.FirstName,
-					LastName = t.LastName,
-					Email = t.Email,
-					Phone = t.Phone,
-					TenantCode = t.TenantCode
-				})
-				.ToListAsync();
+	.Include(t => t.Building)
+		.ThenInclude(b => b.Landlord)
+	.Where(t => t.Building.Landlord.ClientId == clientId)
+	.Select(t => new EditToTenantDto
+	{
+		Id = t.Id,
+		FirstName = t.FirstName,
+		LastName = t.LastName,
+		Email = t.Email,
+		Phone = t.Phone,
+		TenantCode = t.TenantCode
+	})
+	.ToListAsync();
+
 
 			return tenants;
 		}

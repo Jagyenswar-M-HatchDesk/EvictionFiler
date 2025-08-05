@@ -38,9 +38,10 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public bool IsERAPPaymentReceived { get; set; }
 		public DateOnly? ERAPPaymentReceivedDate { get; set; }
 		public string? UnitOrApartmentNumber { get; set; }
-
+		[Required(ErrorMessage = "IsUnitIllegal is Required")]
 		public Guid? IsUnitIllegalId { get; set; }
 		public string? IsUnitIllegalName { get; set; }
+		[Required(ErrorMessage = "Tenancy Type is Required")]
 		public Guid? TenancyTypeId { get; set; }
 		public string? TenancyTypeName { get; set; }
 		public string ?TenancyTypeDescription { get; set; }

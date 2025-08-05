@@ -70,6 +70,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				.Include(c => c.Tenants)
 				.Include(c=>c.RegulationStatus)
 				.Include(c=>c.TenancyType)
+				.Include(c => c.ReasonHoldover)
 				.Include(c=>c.Buildings.State)
 				.Include(c=>c.Buildings.Landlord.State)
 					.Include(c => c.Buildings.Landlord.LandlordType)
@@ -103,6 +104,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 				  TenancyTypeId = legalCaseEntity.TenancyTypeId,
 				  TenantRecord = legalCaseEntity.TenantRecord,
 				  TenantShare = legalCaseEntity.TenantShare,
+				  
+				  
 				  TotalRentOwed = legalCaseEntity.TotalRentOwed,
 				Casecode = legalCaseEntity.Casecode,
 
@@ -112,6 +115,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 					LastName = legalCaseEntity.Tenants.LastName,
 					BuildingId = legalCaseEntity.Tenants.BuildinId,
 				     UnitOrApartmentNumber = legalCaseEntity.Tenants.UnitOrApartmentNumber,
+					 
 
 					
 
@@ -125,6 +129,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 						StateName = legalCaseEntity.Tenants.Building.State.Name,
 						MDRNumber = legalCaseEntity.Tenants.Building.MDRNumber,
 						BuildingUnits = legalCaseEntity.Tenants.Building.BuildingUnits,
+						RegulationStatusId = legalCaseEntity.Tenants.Building.RegulationStatusId
 					},
 
 					Landlord = legalCaseEntity.Tenants.Building.Landlord == null ? null : new EditToLandlordDto
@@ -139,6 +144,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 						StateName = legalCaseEntity.Tenants.Building.Landlord.State.Name,
 						Phone = legalCaseEntity.Tenants.Building.Landlord.Phone,
 						Email = legalCaseEntity.Tenants.Building.Landlord.Email,
+						LandlordTypeId = legalCaseEntity.Tenants.Building.Landlord.LandlordTypeId,
 					}
 				}
 			};
@@ -156,14 +162,11 @@ namespace EvictionFiler.Infrastructure.Repositories
 				BuildingId = legalCase.BuildingId,
 				LandLordId = legalCase.LandLordId,
 				ClientId = legalCase.ClientId,
-				CaseName = legalCase.CaseName,
-				CaseTypeId = legalCase.CaseTypeId,
-				CaseSubTypeId = legalCase.CaseSubTypeId,
-				ClientRoleId = legalCase.ClientRoleId,
+			
 				ReasonHoldoverId = legalCase.ReasonHoldoverId,
 				ExplainDescription = legalCase.ExplainDescription,
 				ReasonDescription = legalCase.ReasonDescription,
-				LegalRepresentative = legalCase.LegalRepresentative,
+			
 				IsUnitIllegalId = legalCase.IsUnitIllegalId,
 				TenancyTypeId = legalCase.TenancyTypeId,
 				RenewalOffer = legalCase.RenewalOffer,
@@ -182,9 +185,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				MonthlyRent = legalCase.MonthlyRent,
 				TotalRentOwed = legalCase.TotalRentOwed,
 
-				Attrney = legalCase.Attrney,
-				AttrneyContactInfo = legalCase.AttrneyContactInfo,
-				Firm = legalCase.Firm,
+			
 				CreatedOn = DateTime.Now,
 				
 
@@ -206,18 +207,28 @@ namespace EvictionFiler.Infrastructure.Repositories
 			if (existing == null) return false;
 
 			existing.TenantId = legalCase.TenantId;
-			existing.BuildingId = legalCase.BuildingId;
-			existing.LandLordId = legalCase.LandLordId;
 			existing.ClientId = legalCase.ClientId;
-			existing.CaseName = legalCase.CaseName;
-			existing.ClientRoleId = legalCase.ClientRoleId;
-			existing.LegalRepresentative = legalCase.LegalRepresentative;
-			existing.Attrney = legalCase.Attrney;
-			existing.AttrneyContactInfo = legalCase.AttrneyContactInfo;
-			existing.Firm = legalCase.Firm;
-			existing.CaseSubTypeId = legalCase.CaseSubTypeId;
-			existing.CaseTypeId = legalCase.CaseTypeId;
-
+			existing.ReasonHoldoverId = legalCase.ReasonHoldoverId;
+			existing.ExplainDescription = legalCase.ExplainDescription;
+			existing.ReasonDescription = legalCase.ReasonDescription;
+			existing.IsUnitIllegalId = legalCase.IsUnitIllegalId;
+			existing.TenancyTypeId = legalCase.TenancyTypeId;
+			existing.RenewalOffer = legalCase.RenewalOffer;
+			existing.TenantRecord = legalCase.TenantRecord;
+			existing.HasPossession = legalCase.HasPossession;
+			existing.OtherOccupants = legalCase.OtherOccupants;
+			existing.TenantShare = legalCase.TenantShare;
+			existing.SocialServices = legalCase.SocialServices;
+			existing.LastMonthWeekRentPaid = legalCase.LastMonthWeekRentPaid;
+			existing.IsERAPPaymentReceived = legalCase.IsERAPPaymentReceived;
+			existing.ERAPPaymentReceivedDate = legalCase.ERAPPaymentReceivedDate;
+			existing.RegulationStatusId = legalCase.RegulationStatusId;
+			existing.LandlordTypeId = legalCase.LandlordTypeId;
+			existing.RentDueEachMonthOrWeek = legalCase.RentDueEachMonthOrWeek;
+			existing.MonthlyRent = legalCase.MonthlyRent;
+			existing.TotalRentOwed = legalCase.TotalRentOwed;
+			
+				
 			_context.LegalCases.Update(existing);
 			await _context.SaveChangesAsync();
 

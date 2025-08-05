@@ -103,7 +103,8 @@ namespace EvictionFiler.Application.Services
 					x => x.IsUnitIllegal,
 					x => x.Building, // Include Building
 					x => x.Building.State,
-					x  => x.Building.PremiseType, // Include State of Building
+					x  => x.Building.PremiseType,
+			
 					x => x.Building.RegulationStatus,
 					x=>x.TenancyType,// Include RegulationStatus of Building
 					x => x.Building.Landlord, // Include Landlord
