@@ -14,8 +14,9 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		[Required(ErrorMessage = "Email is Required")]
 		public string Email { get; set; } = string.Empty;
 		public string? Phone { get; set; } = string.Empty;
-		public string? Name_Relation { get; set; }	
-		public Guid?LanguageId { get; set; }
+		public string? Name_Relation { get; set; }
+        [Required(ErrorMessage = "Select Language")]
+        public Guid? LanguageId { get; set; }
 		public string? LanguageName { get; set; }
 		public string? SSN { get; set; }
 		public string? Borough { get; set; }
@@ -24,7 +25,8 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public bool? HasRegulatedTenancy { get; set; }
 		public bool? OtherOccupants { get; set; }
 		public bool? HasPriorCase { get; set; }
-		public Guid? BuildingId { get; set; }
+        [Required(ErrorMessage = "Select Building")]
+        public Guid? BuildingId { get; set; }
 
 		//Rent Details
 		public bool? RenewalOffer { get; set; }

@@ -15,7 +15,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 		Task<List<CreateToTenantDto>> SearchTenantbyCode(string code);
 		Task<List<EditToTenantDto>> SearchTenantsAsync(string query, Guid buildingId);
 		Task<EditToTenantDto> GetByIdAsync(Guid id);
-		Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid clientId);
+		Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? clientId);
 		Task<bool> UpdateTenantAsync(List<EditToTenantDto> dto);
 		Task<List<CreateToTenantDto>> GetAll();
 

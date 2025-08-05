@@ -24,7 +24,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 		public async Task<List<State>> GetAllState()
 		{
-			return await _context.MstStates.ToListAsync();
+			return await _context.MstStates.Where(e=>!string.IsNullOrEmpty(e.Name)).ToListAsync();
 		}
 	}
 }

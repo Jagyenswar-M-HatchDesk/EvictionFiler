@@ -10,7 +10,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 		Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query, Guid clientId);
 		Task<CreateToLandLordDto?> GetLandLordByIdAsync(Guid id);
 		Task<LandlordWithBuildings?> GetLandlordWithBuildingsAsync(Guid landlordId);
-		Task<List<EditToLandlordDto>> GetLandlordsByClientIdAsync(Guid clientId);
+		Task<List<EditToLandlordDto>> GetLandlordsByClientIdAsync(Guid? clientId);
 		Task<bool> UpdateLandLordsAsync(List<EditToLandlordDto> landlords);
 	}
 }

@@ -83,7 +83,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 
 
-		public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid buildingId)
+		public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? buildingId)
 		{
 			var apartmentIds = await _dbContext.Buildings
 			.Where(a => a.Id == buildingId && (a.IsDeleted == false || a.IsDeleted == null))
@@ -93,7 +93,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			// Step 3: Get all tenants linked to these apartments
 			var tenants = await _dbContext.Tenants
-		.Include(a => a.Language)
+		.Include(a => a.Language).Include(e=>e.IsUnitIllegal).Include(e=>e.TenancyType)
 		.Where(t => t.BuildinId.HasValue && apartmentIds.Contains(t.BuildinId.Value) && t.IsDeleted != true)
 		.Select(dto => new EditToTenantDto
 		{
@@ -101,12 +101,23 @@ namespace EvictionFiler.Infrastructure.Repositories
 			TenantCode = dto.TenantCode,
 			FirstName = dto.FirstName,
 			LastName = dto.LastName,
-		
+			UnitOrApartmentNumber = dto.UnitOrApartmentNumber,
+			RentDueEachMonthOrWeek = dto.RentDueEachMonthOrWeek,
+			MonthlyRent = dto.MonthlyRent,
+			TenantShare = dto.TenantShare,
+			SocialServices = dto.SocialServices,
+			LastMonthWeekRentPaid = dto.LastMonthWeekRentPaid,
+			TotalRentOwed = dto.TotalRentOwed,
+			IsUnitIllegalId = dto.IsUnitIllegalId,
+			IsUnitIllegalName = dto.IsUnitIllegal!.Name,
+			TenancyTypeId = dto.TenancyTypeId,
+			TenancyTypeName = dto.TenancyType!.Name,
+			RenewalOffer = dto.RenewalOffer,
 			SSN = dto.SSN,
 			Phone = dto.Phone,
 			Email = dto.Email,
 			LanguageId = dto.LanguageId,
-			LanguageName = dto.Language.Name,
+			LanguageName = dto.Language!.Name,
 			Borough = dto.Borough,
 	
 			HasPossession = dto.HasPossession,

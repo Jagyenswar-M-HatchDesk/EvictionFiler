@@ -9,7 +9,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 		Task<List<EditToClientDto>> GetAllClientsAsync();
 		Task<bool> UpdateClientAsync(EditToClientDto dto);
 		Task<List<State>> GetAllState();
-		Task<EditToClientDto?> GetClientByIdAsync(Guid id);
+		Task<EditToClientDto?> GetClientByIdAsync(Guid? id);
 		Task<bool> DeleteClientAsync(Guid id);
 		Task<List<CreateToClientDto>> SearchClientByCode(string code);
 	}
