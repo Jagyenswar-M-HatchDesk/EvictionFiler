@@ -200,7 +200,7 @@ namespace EvictionFiler.Application.Services
 
 
 
-		public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid clientId)
+		public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? clientId)
 		{
 			var tenants = await _repo.GetTenantsByClientIdAsync(clientId);
 			return tenants;

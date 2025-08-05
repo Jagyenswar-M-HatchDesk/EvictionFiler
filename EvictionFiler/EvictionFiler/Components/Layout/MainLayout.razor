@@ -1,21 +1,43 @@
-﻿@inherits LayoutComponentBase
+﻿@using EvictionFiler.Client.SpinnerService
+@inject SpinnerService SpinnerService
+@inherits LayoutComponentBase
+<style>
+    .spinnerContainer {
+        position: fixed !important;
+        z-index: 500000 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        height: 100% !important;
+        top: 0 !important;
+        right: 0 !important;
+        background-color: #00000017 !important;
+        margin-top: 8px !important;
+        user-select: none !important;
+    }
 
+    .spinnerIcon {
+        width: 60px !important;
+        height: 60px !important;
+        border-width: 0.4em; /* Default is 0.25em */
+    }
+</style>
 <div class="app-container">
-    
-     <NavMenu /> 
-   
-
-    @* <main>
-       @*  <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+    @if (showSpinner)
+    {
+        <div class="spinnerContainer">
+            <div class="text-center">
+                <div class="spinner-border text-primary spinnerIcon" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-dark">Loading...</p>
+            </div>
         </div>
- *
-        <article class="content px-4">
-            @Body
-        </article>
-    </main> *@
+    }
+     <NavMenu /> 
 
-    <div class="main-content">
+    <div class="main-content" style="@(showSpinner ? "opacity: 0.4;" : "opacity: 1;")">
         @Body
     </div>
 </div>
@@ -25,3 +47,31 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private bool showSpinner = false;
+
+    protected override void OnInitialized()
+    {
+        SpinnerService.OnShow += Show;
+        SpinnerService.OnHide += Hide;
+    }
+
+    private void Show()
+    {
+        showSpinner = true;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void Hide()
+    {
+        showSpinner = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        SpinnerService.OnShow -= Show;
+        SpinnerService.OnHide -= Hide;
+    }
+}

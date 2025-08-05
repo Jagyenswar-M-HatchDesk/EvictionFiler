@@ -151,7 +151,7 @@ namespace EvictionFiler.Application.Services
 			return await _landLordRepository.GetLandlordWithBuildingsAsync(landlordId);
 		}
 
-		public async Task<List<EditToLandlordDto>> GetLandlordsByClientIdAsync(Guid clientId)
+		public async Task<List<EditToLandlordDto>> GetLandlordsByClientIdAsync(Guid? clientId)
 		{
 			var landlords = await _landLordRepository.GetByClientIdAsync(clientId);
 			return landlords;

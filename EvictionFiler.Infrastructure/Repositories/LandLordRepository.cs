@@ -114,7 +114,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 			};
 		}
 
-		public async Task<List<EditToLandlordDto>> GetByClientIdAsync(Guid clientId)
+		public async Task<List<EditToLandlordDto>> GetByClientIdAsync(Guid? clientId)
 		{
 			var landlords = await _mainDbContext.LandLords
 				.Where(x => x.ClientId == clientId && x.IsDeleted != true)

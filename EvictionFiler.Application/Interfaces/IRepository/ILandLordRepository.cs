@@ -15,7 +15,7 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
 		Task<string?> GetLastLandLordCodeAsync();
         Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query, Guid clientId);
 		Task<LandlordWithBuildings?> GetLandlordWithBuildingsAsync(Guid landlordId);
-        Task<List<EditToLandlordDto>> GetByClientIdAsync(Guid clientId);
+        Task<List<EditToLandlordDto>> GetByClientIdAsync(Guid? clientId);
         Task<List<TypeOfOwner>> GetAllOwner();
 	
 	}

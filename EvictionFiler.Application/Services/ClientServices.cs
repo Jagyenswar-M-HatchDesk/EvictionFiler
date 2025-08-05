@@ -197,7 +197,7 @@ namespace EvictionFiler.Application.Services
 		//	return true;
 		//}
 
-		public async Task<EditToClientDto?> GetClientByIdAsync(Guid id)
+		public async Task<EditToClientDto?> GetClientByIdAsync(Guid? id)
 		{
 			var client = await _clientRepo.GetAsync(id);
 
@@ -402,9 +402,21 @@ namespace EvictionFiler.Application.Services
 		{
 			var existingClient = await _clientRepo.GetClientWithAllDetailsAsync(client.Id);
 			if (existingClient == null) return false;
-
-			// 1. Update Client basic info
-			existingClient.FirstName = client.FirstName;
+            List<Guid> landlordIds = existingClient.LandLords.Select(e => e.Id).ToList();
+            List<Guid> existingBuildingIds = new List<Guid>();
+            List<Guid> existingTenantsIds = new List<Guid>();
+            foreach (var l in existingClient.LandLords)
+            {
+                var BuildingIds = l.Buildings.Select(e => e.Id).ToList();
+				existingBuildingIds.AddRange(BuildingIds);
+                foreach (var j in l.Buildings)
+                {
+                    var TenantsIds = j.Tenants.Select(e => e.Id).ToList();
+                    existingTenantsIds.AddRange(TenantsIds);
+                }
+            }
+            // 1. Update Client basic info
+            existingClient.FirstName = client.FirstName;
 			existingClient.LastName = client.LastName;
 			existingClient.Email = client.Email;
 			existingClient.Address1 = client.Address1;
@@ -435,9 +447,17 @@ namespace EvictionFiler.Application.Services
 			var lastTenantCode = await _tenantRepo.GetLasttenantCodeAsync();
 			int nextTenantNumber = string.IsNullOrEmpty(lastTenantCode) ? 1 : int.Parse(lastTenantCode[2..]) + 1;
 
-			foreach (var l in client.editLandLords)
+			
+                
+            foreach (var l in client.editLandLords)
 			{
-				bool isNewLandlord = l.Id == Guid.Empty;
+				bool isNewLandlord = false;
+
+                if (!landlordIds.Contains(l.Id))
+				{
+                     isNewLandlord = true;
+                }
+				
 
 				var landlord = new LandLord
 				{
@@ -470,9 +490,15 @@ namespace EvictionFiler.Application.Services
 
 				if (l.editBuildings != null)
 				{
-					foreach (var b in l.editBuildings)
+					
+					bool isNewBuilding = false;
+
+                    foreach (var b in l.editBuildings)
 					{
-						bool isNewBuilding = b.Id == Guid.Empty;
+						if(!existingBuildingIds.Contains(b.Id))
+						{
+                            isNewBuilding = true;
+                        }
 
 						var building = new Building
 						{
@@ -504,9 +530,13 @@ namespace EvictionFiler.Application.Services
 
 						if (b.editTenants != null)
 						{
-							foreach (var t in b.editTenants)
+                            bool isNewTenant = false;
+                            foreach (var t in b.editTenants)
 							{
-								bool isNewTenant = t.Id == Guid.Empty;
+								if(!existingTenantsIds.Contains(t.Id))
+								{
+									isNewTenant = true;
+								}
 
 								var tenant = new Tenant
 								{

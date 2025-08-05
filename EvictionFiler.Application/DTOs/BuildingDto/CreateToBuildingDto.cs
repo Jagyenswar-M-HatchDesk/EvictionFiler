@@ -21,14 +21,15 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 		public Guid? RegulationStatusId { get; set; }
 		public string? RegulationStatusName { get; set; }
 		public string? PetitionerInterest { get; set; }
-		[Required(ErrorMessage = "Address 1 is Required")]
+		
 		public string Address1 { get; set; } = string.Empty;
 		public string? Address2 { get; set; }
 		public string? City { get; set; } = string.Empty;
 		public Guid? StateId { get; set; }
 		public string? StateName { get; set; }
 		public string ?Zipcode { get; set; } = string.Empty;
-		public Guid? LandlordId { get; set; }
+        [Required(ErrorMessage = "Select LandLord")]
+        public Guid? LandlordId { get; set; }
 
 		public List<CreateToTenantDto>? Tenants { get; set; }
 

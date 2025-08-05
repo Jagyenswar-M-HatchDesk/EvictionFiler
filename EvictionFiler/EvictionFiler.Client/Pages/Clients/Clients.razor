@@ -4,7 +4,8 @@
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.TenantDto
 @using EvictionFiler.Application.Interfaces.IServices
-
+@using EvictionFiler.Client.SpinnerService
+@inject SpinnerService Spinnerservice
  @inject IClientService clientservice 
  @inject ILandlordSevice landLordService 
 @inject IBuildingService buildingService
@@ -15,91 +16,102 @@
 <PageTitle>Clients</PageTitle>
 <style>
     .status-active {
-        background-color: rgba(25,135,84,1);
-        color: #fff;
-        padding: 2px 7px;
-        border-radius: 1rem;
-        font-size: 12px;
+    background-color: rgba(25,135,84,1);
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 1rem;
+    font-size: 12px;
     }
 
     .container {
-        /* background-color: #F2F0EC; */
-        border: solid 1px #F2F0EC;
-        box-shadow: 0 15px 20px #F2F0EC !important;
+    /* background-color: #F2F0EC; */
+    border: solid 1px #F2F0EC;
+    box-shadow: 0 15px 20px #F2F0EC !important;
     }
 
     .btn-primary {
-        background-color: #1F365D;
-        border-color: #1F365D;
+    background-color: #1F365D;
+    border-color: #1F365D;
     }
 
-        .btn-primary:hover {
-            background-color: #162646;
-            border-color: #162646;
-        }
+    .btn-primary:hover {
+    background-color: #162646;
+    border-color: #162646;
+    }
 
     .page-link {
-        color: #1F365D;
+    color: #1F365D;
     }
 
-        .page-link.active,
-        .page-item.active .page-link {
-            background-color: #1F365D;
-            border-color: #1F365D;
-            color: #F2F0EC;
-        }
+    .page-link.active,
+    .page-item.active .page-link {
+    background-color: #1F365D;
+    border-color: #1F365D;
+    color: #F2F0EC;
+    }
 
     table.table thead th {
-        color: #1F365D;
-        background: #F2F0EC;
-        margin-bottom: 0px !important;
+    color: #1F365D;
+    background: #F2F0EC;
+    margin-bottom: 0px !important;
     }
 
     h5, p, small {
-        color: #1F365D;
+    color: #1F365D;
     }
 
     .adv-btn {
-        color: #1F365D;
-        background: #FFF;
+    color: #1F365D;
+    background: #FFF;
     }
 
-        .adv-btn:hover {
-            color: #FFF;
-            background: #1F365D;
-        }
+    .adv-btn:hover {
+    color: #FFF;
+    background: #1F365D;
+    }
 
-        .adv-btn.active-adv-btn {
-            background-color: #1F365D !important;
-            color: #F2F0EC !important;
-            border-color: #1F365D !important;
-        }
+    .adv-btn.active-adv-btn {
+    background-color: #1F365D !important;
+    color: #F2F0EC !important;
+    border-color: #1F365D !important;
+    }
 
 
     .table-responsive {
-        overflow-x: auto; /* Enable horizontal scroll */
-        position: relative;
+    overflow-x: auto; /* Enable horizontal scroll */
+    position: relative;
     }
 
     table th, table td {
-        white-space: nowrap;
+    white-space: nowrap;
     }
 
     th.sticky, td.sticky {
-        position: sticky;
-        right: 0;
-        background: #F2F0EC; /* Same as container background */
-        z-index: 2;
-        text-align: center;
+    position: sticky;
+    right: 0;
+    background: #F2F0EC; /* Same as container background */
+    z-index: 2;
+    text-align: center;
     }
 
     /* Make sure header sticky stays above other cells */
     th.sticky {
-        z-index: 3;
+    z-index: 3;
     }
 </style>
 
 <body class="p-4">
+    @*  @if (isLoading)
+    {
+        <div class="text-center mt-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading client data...</p>
+        </div>
+    }
+    else
+    { *@
     <div class="container p-4 rounded shadow-sm bg-white">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -147,15 +159,15 @@
 
                                 <td>
                                     @(string.IsNullOrWhiteSpace($"{client.Address1}{client.Address2}{client.City}{client.StateName}{client.ZipCode}")
-                                                                ? "-" : $"{client.Address1}, {client.Address2}, {client.City}, {client.StateName} - {client.ZipCode}")
-                        </td>
+                                                                            ? "-" : $"{client.Address1}, {client.Address2}, {client.City}, {client.StateName} - {client.ZipCode}")
+                                </td>
                                 <td>
                                     Active
                                     @* @(client.IsActive == true ? "Active" : client.IsActive == false ? "Inactive" : "Not Set") *@
                                 </td>
 
                                 <td class="sticky">
-                                    <i class="fa-solid fa-pen-to-square text-navy me-3 " @onclick="() => EditClient(client.Id)" style="cursor: pointer;"  title="Edit"></i>
+                                    <i class="fa-solid fa-pen-to-square text-navy me-3 " @onclick="() => ShowAddEditClient(client.Id)" style="cursor: pointer;" title="Edit"></i>
                                     <i class="fa-solid fa-trash-can text-danger " @onclick=" ()=>DeleteClient(client.Id)" style="cursor: pointer;" title="Delete"></i>
                                 </td>
                             </tr>
@@ -183,7 +195,7 @@
                         @successMessage
                     </div>
                     <button type="button" class="btn-close btn-close-white me-2 m-auto"
-                            @onclick="() => successMessage = string.Empty"></button>
+                    @onclick="() => successMessage = string.Empty"></button>
                 </div>
             </div>
         </div>
@@ -198,13 +210,13 @@
     @if (_showEditClient)
     {
         <EditClient editClient="_editClientModel"
-                    Landlords="saveEditlandlordList"
-                    Buildings="saveEditBuildingList"
-                    Tenants="saveEditTenantList"
-                    OnClose="HandleCloseEditClient" />
+        Landlords="saveEditlandlordList"
+        Buildings="saveEditBuildingList"
+        Tenants="saveEditTenantList"
+        OnClose="HandleCloseEditClient" />
     }
 
-
+    @* } *@
 
 </body>
 
@@ -213,7 +225,8 @@
     public Guid Id { get; set; }
     private bool _showCreateClient = false;
     private bool _showEditClient = false;
-    private Guid clientIdForEdit;
+    private bool isLoading = true;
+    private Guid? clientIdForEdit;
     private List<EditToLandlordDto> saveEditlandlordList = new();
     private List<EditToBuildingDto> saveEditBuildingList = new();
     private List<EditToTenantDto> saveEditTenantList = new();
@@ -228,6 +241,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Spinnerservice.Show();
+        //isLoading = true;
         var uri = new Uri(navManager.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
@@ -255,9 +270,10 @@
 
             navManager.NavigateTo("/clients", forceLoad: false);
         }
-     
-          clients = await clientservice.GetAllClientsAsync();
-            
+
+        clients = await clientservice.GetAllClientsAsync();
+        //isLoading = false;
+        Spinnerservice.Hide();
     }
 
 
@@ -282,7 +298,7 @@
             (!string.IsNullOrWhiteSpace(c.Email) && c.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
             (!string.IsNullOrWhiteSpace(c.Phone) && c.Phone.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
 
-    private async Task LoadBuildings(Guid clientId)
+    private async Task LoadBuildings(Guid? clientId)
     {
          var landlords = await landLordService.GetLandlordsByClientIdAsync(clientId);
         saveEditBuildingList.Clear();
@@ -297,7 +313,7 @@
         }
     }
 
-    private async Task LoadTenants(Guid clientId)
+    private async Task LoadTenants(Guid? clientId)
     {
         saveEditTenantList.Clear();
 
@@ -320,7 +336,7 @@
         }
     }
 
-    private async Task EditClient(Guid clientId)
+    private async Task ShowAddEditClient(Guid? clientId=null)
     {
         clientIdForEdit = clientId;
 
