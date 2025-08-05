@@ -717,8 +717,9 @@
                         </div>
                     </div>
 
-                    <EditForm EditContext="@editContext">
+                    <EditForm Model="@legalcaseDto" OnValidSubmit="Next">
                         <DataAnnotationsValidator />
+ 
                         <div class="row my-3 my-4">
                             <div class="col-md-12">
                                 <InputRadioGroup @bind-Value="legalcaseDto.ReasonHoldoverId" class="mb-3 required-label">
@@ -731,7 +732,7 @@
                                                 @foreach (var role in ReasonHoldoverList)
                                                 {
                                                     <div class="d-flex align-items-start mx-3" @key="role.Id">
-                                                        <div class="form-check d-flex align-items-center m-0">
+                                                        <div class="form-check d-flex align-items-center ms-1">
                                                             <InputRadio class="form-check-input me-1" Value="@role.Id" />
                                                             <label class="form-check-label ms-1" style="margin-top:5px">
                                                                 @role.Name
@@ -757,7 +758,7 @@
 
 
                         </div>
-                        <div class="row mb-3">
+                        <div class="row mb-5">
                             <div class="col-2 ">
                                 <label class="form-label fw-semibold ">Explain:</label>
 
@@ -769,6 +770,8 @@
                             </div>
 
                         </div>
+
+                        <button type="submit" class="btn bg-gold text-white" style="margin-top:-25px;  display:flex;  float:right">Next →</button>
 
                     </EditForm>
                 }
@@ -1131,12 +1134,15 @@
             @if (currentStep < lastStep)
             {
                 <button class="btn btn-outline-warning" @onclick="ResetStep">Reset</button>
-                <button class="btn bg-gold text-white" @onclick="Next" disabled="@IsNextDisabled">Next →</button>
+              @*   <button class="btn bg-gold text-white" @onclick="OnBottomNextClicked" disabled="@IsNextDisabled">
+                    Next →
+                </button> *@
+
             }
             @if (currentStep == lastStep)
             {
                 <button class="btn btn-outline-warning" @onclick="ResetStep">Reset</button>
-                <button class="btn btn-outline-warning" @onclick="SaveAsDraft">Save As Draft</button>
+                @* <button class="btn btn-outline-warning" @onclick="SaveAsDraft">Save As Draft</button> *@
                 <button class="btn btn-success" disabled="@IsNextDisabled" @onclick="Submit">Submit</button>
             }
         </div>
@@ -1146,10 +1152,10 @@
 
 @code {
     [Parameter] public string ClientId { get; set; }
-    private CreateToEditLegalCaseModel legalcaseDto = new CreateToEditLegalCaseModel();
+    private CreateToEditLegalCaseModel legalcaseDto { get; set; }
     int currentStep = 0;
     int lastStep = 1;
-    private EditContext editContext;
+   private EditContext editContext;
     // Used for conditional rendering
     private bool hasSearched = false;
 
@@ -1201,24 +1207,24 @@
 
     };
 
-
-
     private void Next()
     {
-        var isValid = editContext.Validate();
-
-        if (isValid)
-        {
-            currentStep++;
-        }
+        currentStep++;
     }
-
     private bool IsNextDisabled =>
         (currentStep == 0 && (
             TenantDetails == null ||
             string.IsNullOrWhiteSpace(TenantDetails.FirstName)
         ));
-
+    private void OnBottomNextClicked()
+    {
+       
+        var editContext = new EditContext(legalcaseDto);
+        if (editContext.Validate())
+        {
+            Next();
+        }
+    }
 
 
     private async Task HandleTenantInput(ChangeEventArgs e)
@@ -1310,6 +1316,12 @@
                 isTenantSelected = false;
                 searchtenantText = string.Empty;
                  filteredTenantList?.Clear();
+                break;
+            case 1:
+                TenantDetails = null;
+                isTenantSelected = false;
+                searchtenantText = string.Empty;
+                filteredTenantList?.Clear();
                 break;
         }
 

@@ -18,7 +18,7 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 		public Guid? ReasonHoldoverId { get; set; }
 		public string? ReasonHoldoverName { get; set; }
 
-		[Required(ErrorMessage = "Please select UnitIllegal.")]
+	
 		public Guid? IsUnitIllegalId { get; set; }
 		public bool? TenantRecord { get; set; }
 		public bool? RenewalOffer { get; set; }
@@ -36,12 +36,12 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 		public double? TotalRentOwed { get; set; }
 		public bool? IsERAPPaymentReceived { get; set; }
 		public DateOnly? ERAPPaymentReceivedDate { get; set; }
-		[Required(ErrorMessage = "Please select Tenancy Type.")]
+		
 		public Guid? TenancyTypeId { get; set; }
 
-		[Required(ErrorMessage = "Please select Regulation Type.")]
+		
 		public Guid? RegulationStatusId { get; set; }
-		[Required(ErrorMessage = "Please select LandLord Type.")]
+		
 		public Guid? LandlordTypeId { get; set; }
 		public string? ReasonDescription { get; set; }
 
