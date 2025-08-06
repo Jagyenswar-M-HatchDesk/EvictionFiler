@@ -12,5 +12,6 @@ namespace EvictionFiler.Application.Interfaces.IServices
 		Task<LandlordWithBuildings?> GetLandlordWithBuildingsAsync(Guid landlordId);
 		Task<List<EditToLandlordDto>> GetLandlordsByClientIdAsync(Guid? clientId);
 		Task<bool> UpdateLandLordsAsync(List<EditToLandlordDto> landlords);
-	}
+        Task<string> GetLastLandLordCode();
+    }
 }

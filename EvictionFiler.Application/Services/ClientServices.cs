@@ -251,6 +251,7 @@ namespace EvictionFiler.Application.Services
 
 				var newclient = new Client
 				{
+					Id = Guid.NewGuid(),
 					ClientCode = clientCode,
 					FirstName = client.FirstName,
 					LastName = client.LastName,
@@ -266,31 +267,30 @@ namespace EvictionFiler.Application.Services
 				};
 
 				await _clientRepo.AddAsync(newclient);
-				await _unitOfWork.SaveChangesAsync();
+				//await _unitOfWork.SaveChangesAsync();
 
 				var landlords = new List<LandLord>();
 				var buildings = new List<Building>();
 				var tenants = new List<Tenant>();
 
-				var lastLandlordCode = await _landlordrepo.GetLastLandLordCodeAsync();
-				int nextLandlordNumber = string.IsNullOrEmpty(lastLandlordCode) ? 1 : int.Parse(lastLandlordCode[2..]) + 1;
+				//var lastLandlordCode = await _landlordrepo.GetLastLandLordCodeAsync();
+				//int nextLandlordNumber = string.IsNullOrEmpty(lastLandlordCode) ? 1 : int.Parse(lastLandlordCode[2..]) + 1;
 
-				var lastBuildingCode = await _buildingrepo.GetLastBuildingCodeAsync();
-				int nextBuildingNumber = string.IsNullOrEmpty(lastBuildingCode) ? 1 : int.Parse(lastBuildingCode[2..]) + 1;
+				//var lastBuildingCode = await _buildingrepo.GetLastBuildingCodeAsync();
+				//int nextBuildingNumber = string.IsNullOrEmpty(lastBuildingCode) ? 1 : int.Parse(lastBuildingCode[2..]) + 1;
 
-				var lastTenantCode = await _tenantRepo.GetLasttenantCodeAsync();
-				int nextTenantNumber = string.IsNullOrEmpty(lastTenantCode) ? 1 : int.Parse(lastTenantCode[2..]) + 1;
+				//var lastTenantCode = await _tenantRepo.GetLasttenantCodeAsync();
+				//int nextTenantNumber = string.IsNullOrEmpty(lastTenantCode) ? 1 : int.Parse(lastTenantCode[2..]) + 1;
 
 				foreach (var l in client.editLandLords)
 				{
-					var landlordCode = $"LL{nextLandlordNumber.ToString().PadLeft(10, '0')}";
-					nextLandlordNumber++;
+					
 
 					var landlord = new LandLord
 					{
 						Id = l.Id,
 						ClientId = newclient.Id,
-						LandLordCode = landlordCode,
+						LandLordCode = l.LandLordCode,
 						FirstName = l.FirstName,
 						LastName = l.LastName,
 						EINorSSN = l.EINorSSN,
@@ -313,13 +313,12 @@ namespace EvictionFiler.Application.Services
 					{
 						foreach (var b in l.editBuildings)
 						{
-							var buildingCode = $"BB{nextBuildingNumber.ToString().PadLeft(10, '0')}";
-							nextBuildingNumber++;
+							
 
 							var building = new Building
 							{
 								Id = b.Id,
-								BuildingCode = buildingCode,
+								BuildingCode = b.BuildingCode,
 								ApartmentCode = b.ApartmentCode,
 								City = b.City,
 								StateId = b.StateId,
@@ -340,13 +339,10 @@ namespace EvictionFiler.Application.Services
 							{
 								foreach (var t in b.editTenants)
 								{
-									var tenantCode = $"TT{nextTenantNumber.ToString().PadLeft(10, '0')}";
-									nextTenantNumber++;
-
 									var tenant = new Tenant
 									{
 										Id = t.Id,
-										TenantCode = tenantCode,
+										TenantCode = t.TenantCode,
 										FirstName = t.FirstName,
 										LastName = t.LastName,
 										SSN = t.SSN,
@@ -398,6 +394,8 @@ namespace EvictionFiler.Application.Services
 			}
 		}
 
+		
+
 		public async Task<bool> UpdateClientAsync(EditToClientDto client)
 		{
 			var existingClient = await _clientRepo.GetClientWithAllDetailsAsync(client.Id);
@@ -438,14 +436,14 @@ namespace EvictionFiler.Application.Services
 			var tenantsToAdd = new List<Tenant>();
 			var tenantsToUpdate = new List<Tenant>();
 
-			var lastLandlordCode = await _landlordrepo.GetLastLandLordCodeAsync();
-			int nextLandlordNumber = string.IsNullOrEmpty(lastLandlordCode) ? 1 : int.Parse(lastLandlordCode[2..]) + 1;
+			//var lastLandlordCode = await _landlordrepo.GetLastLandLordCodeAsync();
+			//int nextLandlordNumber = string.IsNullOrEmpty(lastLandlordCode) ? 1 : int.Parse(lastLandlordCode[2..]) + 1;
 
-			var lastBuildingCode = await _buildingrepo.GetLastBuildingCodeAsync();
-			int nextBuildingNumber = string.IsNullOrEmpty(lastBuildingCode) ? 1 : int.Parse(lastBuildingCode[2..]) + 1;
+			//var lastBuildingCode = await _buildingrepo.GetLastBuildingCodeAsync();
+			//int nextBuildingNumber = string.IsNullOrEmpty(lastBuildingCode) ? 1 : int.Parse(lastBuildingCode[2..]) + 1;
 
-			var lastTenantCode = await _tenantRepo.GetLasttenantCodeAsync();
-			int nextTenantNumber = string.IsNullOrEmpty(lastTenantCode) ? 1 : int.Parse(lastTenantCode[2..]) + 1;
+			//var lastTenantCode = await _tenantRepo.GetLasttenantCodeAsync();
+			//int nextTenantNumber = string.IsNullOrEmpty(lastTenantCode) ? 1 : int.Parse(lastTenantCode[2..]) + 1;
 
 			
                 
@@ -463,7 +461,7 @@ namespace EvictionFiler.Application.Services
 				{
 					Id = isNewLandlord ? Guid.NewGuid() : l.Id,
 					ClientId = existingClient.Id,
-					LandLordCode = isNewLandlord ? $"LL{nextLandlordNumber.ToString().PadLeft(10, '0')}" : l.LandLordCode,
+					LandLordCode = l.LandLordCode,
 					FirstName = l.FirstName,
 					LastName = l.LastName,
 					EINorSSN = l.EINorSSN,
@@ -481,7 +479,7 @@ namespace EvictionFiler.Application.Services
 				if (isNewLandlord)
 				{
 					landlordsToAdd.Add(landlord);
-					nextLandlordNumber++;
+					//nextLandlordNumber++;
 				}
 				else
 				{
@@ -503,7 +501,7 @@ namespace EvictionFiler.Application.Services
 						var building = new Building
 						{
 							Id = isNewBuilding ? Guid.NewGuid() : b.Id,
-							BuildingCode = isNewBuilding ? $"BB{nextBuildingNumber.ToString().PadLeft(10, '0')}" : b.BuildingCode,
+							BuildingCode = b.BuildingCode,
 							ApartmentCode = b.ApartmentCode,
 							City = b.City,
 							StateId = b.StateId,
@@ -521,7 +519,7 @@ namespace EvictionFiler.Application.Services
 						if (isNewBuilding)
 						{
 							buildingsToAdd.Add(building);
-							nextBuildingNumber++;
+							//nextBuildingNumber++;
 						}
 						else
 						{
@@ -541,7 +539,7 @@ namespace EvictionFiler.Application.Services
 								var tenant = new Tenant
 								{
 									Id = isNewTenant ? Guid.NewGuid() : t.Id,
-									TenantCode = isNewTenant ? $"TT{nextTenantNumber.ToString().PadLeft(10, '0')}" : t.TenantCode,
+									TenantCode = t.TenantCode,
 									FirstName = t.FirstName,
 									LastName = t.LastName,
 								
@@ -575,7 +573,7 @@ namespace EvictionFiler.Application.Services
 								if (isNewTenant)
 								{
 									tenantsToAdd.Add(tenant);
-									nextTenantNumber++;
+									//nextTenantNumber++;
 								}
 								else
 								{

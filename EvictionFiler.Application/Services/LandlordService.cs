@@ -191,6 +191,12 @@ namespace EvictionFiler.Application.Services
 
 		}
 
-	
-	}
+        public async Task<string> GetLastLandLordCode()
+        {
+            var lastlandlord = await _landLordRepository.GetLastLandLordCodeAsync();
+            return lastlandlord!;
+        }
+
+
+    }
 }

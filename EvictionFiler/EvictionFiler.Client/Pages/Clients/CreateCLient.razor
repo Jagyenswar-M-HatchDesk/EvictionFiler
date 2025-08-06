@@ -309,7 +309,7 @@
                     <h5 class="color-text fw-bold mb-0">LANDLORD INFORMATION</h5>
                     <div>
                         <button class="btn btn-outline-secondary fw-semibold me-2"
-                                @onclick="@BackToLandlordList">
+                                @onclick="@BackToPreviousTab">
                             ←
                         </button>
                        @*  <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button> *@
@@ -570,7 +570,7 @@
                     <div>
                         @* <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button> *@
                         <button class="btn btn-outline-secondary fw-semibold me-2"
-                                @onclick="@BackToBuildingList">
+                                @onclick="@BackToPreviousTab">
                             ←
                         </button>
                         <button class="btn bg-navy text-white" @onclick="ToggleBuildingForm">@GetToggleButtonText()</button>
@@ -772,7 +772,7 @@
                     <h5 class="color-text fw-bold mb-0">TENANT INFORMATION</h5>
                     <div>
                         <button class="btn btn-outline-secondary fw-semibold me-2"
-                                @onclick="@BackToTenantList">
+                                @onclick="@BackToPreviousTab">
                             ←
                         </button>
                         @* <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button> *@
@@ -1251,6 +1251,11 @@
     private List<LandlordType> LandLordTypeList = new();
     private List<TenancyType> TenancyTypeList = new();
     private List<IsUnitIllegal> IsUnitIllegalList = new();
+    private string LatestLandLordCode = "";
+    private string LatestBuildingCode = "";
+    private string LatestTenantCode = "";
+    private Stack<string> tabHistory = new();
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -1265,6 +1270,9 @@
             LandLordTypeList = await LandlordTypeRepository.GetAllLandLordType();
             TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
             IsUnitIllegalList = await UnitIllegalRepository.GetAllUnitIllegal();
+            LatestLandLordCode = await _landlordService.GetLastLandLordCode();
+            LatestBuildingCode = await _apartmentService.GetLastBuilding();
+            LatestTenantCode = await _tenantService.GetLastTenantCode();
         }
     }  
 
@@ -1334,9 +1342,35 @@
                 return;
             }
         }
-
+        if (!string.IsNullOrEmpty(activeTab))
+        {
+            tabHistory.Push(activeTab);
+        }
         // All checks passed: change tab
         activeTab = tab;
+    }
+    
+    private void BackToPreviousTab()
+    {
+        if (tabHistory.Count > 0)
+        {
+            activeTab = tabHistory.Pop();
+
+            showLandlordForm = false;
+            showBuildingForm = false;
+            showTanentForm = false;
+
+            // Reset forms if needed
+            if (activeTab == "landlord") showLandlordForm = false;
+            else if (activeTab == "building") showBuildingForm = false;
+            else if (activeTab == "tanent") showTanentForm = false;
+        }
+        else
+        {
+            activeTab = string.Empty;
+        }
+
+        StateHasChanged();
     }
 
     private void ToggleLandlordForm() => showLandlordForm = !showLandlordForm;
@@ -1363,6 +1397,11 @@
             .FirstOrDefault(x => x.Id == landlord.StateId)?.Name ?? "";
         landlord.LandlordTypeName = LandLordTypeList
             .FirstOrDefault(x => x.Id == landlord.LandlordTypeId)?.Name ?? "";
+
+        int nextNumber = int.Parse(LatestLandLordCode[2..]) + 1;
+        LatestLandLordCode = $"LL{nextNumber.ToString().PadLeft(10, '0')}";
+
+        landlord.LandLordCode = LatestLandLordCode;
         savelandlordList.Add(landlord);
 
         landlord = new();
@@ -1385,6 +1424,11 @@
 
                 tenant.IsUnitIllegalName = IsUnitIllegalList
             .FirstOrDefault(x => x.Id == tenant.IsUnitIllegalId)?.Name ?? "";
+        
+        int nextNumber = int.Parse(LatestTenantCode[2..]) + 1;
+        LatestTenantCode = $"TT{nextNumber.ToString().PadLeft(10, '0')}";
+
+        tenant.TenantCode = LatestTenantCode;
 
         saveTanentList.Add(tenant);
 
@@ -1410,6 +1454,10 @@
 
         building.RegulationStatusName = RegulationList
        .FirstOrDefault(x => x.Id == building.RegulationStatusId)?.Name ?? "";
+        int nextNumber = int.Parse(LatestBuildingCode[2..]) + 1;
+        LatestBuildingCode = $"BB{nextNumber.ToString().PadLeft(10, '0')}";
+
+        building.BuildingCode = LatestBuildingCode;
 
         apartmentList.Add(building);
         building = new();

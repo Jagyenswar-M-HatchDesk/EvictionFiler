@@ -161,10 +161,14 @@ namespace EvictionFiler.Application.Services
 				_repository.UpdateAsync(entity);
 				await _unitOfWork.SaveChangesAsync();
 			}
-				return true;
-
+			return true;
 		}
 
+		public async Task<string> GetLastBuilding()
+		{
+            var lastBuildingCode = await _repository.GetLastBuildingCodeAsync();
+			return lastBuildingCode!;
+        }
 		
 	}
 }

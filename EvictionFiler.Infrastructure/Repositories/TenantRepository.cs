@@ -19,7 +19,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 		public async Task<string?> GetLasttenantCodeAsync()
 		{
 			return await _dbContext.Tenants
-				.OrderByDescending(l => l.CreatedOn)
+				.OrderByDescending(l => l.TenantCode)
 				.Select(l => l.TenantCode)
 				.FirstOrDefaultAsync();
 		}

@@ -22,7 +22,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 		public async Task<string?> GetLastBuildingCodeAsync()
 		{
 			return await _context.Buildings
-				.OrderByDescending(l => l.CreatedOn)
+				.OrderByDescending(l => l.BuildingCode)
 				.Select(l => l.BuildingCode)
 				.FirstOrDefaultAsync();
 		}
@@ -147,6 +147,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 				PetitionerInterest = appartment.PetitionerInterest,
 				BuildingUnits = appartment.BuildingUnits,
 				LandlordId = appartment.LandlordId,
+				IsActive = appartment.IsActive,
+				IsDeleted = appartment.IsDeleted,
 			
 
 			}).ToList();
