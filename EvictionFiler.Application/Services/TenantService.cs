@@ -12,17 +12,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EvictionFiler.Application.Services
 {
-    public class TenantService : ITenantService
-    {
+	public class TenantService : ITenantService
+	{
 		private readonly ITenantRepository _repo;
 		private readonly IUnitOfWork _unitOfWork;
 
-		public TenantService(ITenantRepository services , IUnitOfWork unitOfWork)
+		public TenantService(ITenantRepository services, IUnitOfWork unitOfWork)
 		{
 			_repo = services;
 			_unitOfWork = unitOfWork;
 		}
-	public async Task<bool> AddTenantAsync(List<CreateToTenantDto> dtoList)
+		public async Task<bool> AddTenantAsync(List<CreateToTenantDto> dtoList)
 		{
 			var newtenant = new List<Tenant>();
 
@@ -45,7 +45,7 @@ namespace EvictionFiler.Application.Services
 
 				var tenant = new Tenant
 				{
-					
+
 					TenantCode = code,
 					FirstName = t.FirstName,
 					LastName = t.LastName,
@@ -103,14 +103,14 @@ namespace EvictionFiler.Application.Services
 					x => x.IsUnitIllegal,
 					x => x.Building, // Include Building
 					x => x.Building.State,
-					x  => x.Building.PremiseType,
-			
+					x => x.Building.PremiseType,
+
 					x => x.Building.RegulationStatus,
-					x=>x.TenancyType,// Include RegulationStatus of Building
+					x => x.TenancyType,// Include RegulationStatus of Building
 					x => x.Building.Landlord, // Include Landlord
 					x => x.Building.Landlord.State, // Include State of Landlord
-					x => x.Building.Landlord.LandlordType ,
-					x=>x.Building.Landlord.TypeOfOwner// Include Landlord Type
+					x => x.Building.Landlord.LandlordType,
+					x => x.Building.Landlord.TypeOfOwner// Include Landlord Type
 				)
 				.FirstOrDefaultAsync();
 
@@ -177,7 +177,7 @@ namespace EvictionFiler.Application.Services
 					LandLordCode = t.Building.Landlord.LandLordCode,
 					FirstName = t.Building.Landlord.FirstName,
 					LastName = t.Building.Landlord.LastName,
-					TypeOwnerId= t.Building.Landlord.TypeOfOwnerId,
+					TypeOwnerId = t.Building.Landlord.TypeOfOwnerId,
 					TypeOwnerName = t.Building.Landlord.TypeOfOwner.Name,
 					Email = t.Building.Landlord.Email,
 					ContactPersonName = t.Building.Landlord.ContactPersonName,
@@ -248,8 +248,8 @@ namespace EvictionFiler.Application.Services
 				await _unitOfWork.SaveChangesAsync();
 			}
 			return true;
-	}
-	
+		}
+
 		public async Task<List<CreateToTenantDto>> GetAll()
 		{
 			var query = await _repo.GetAllAsync();
@@ -258,13 +258,13 @@ namespace EvictionFiler.Application.Services
 				TenantCode = t.TenantCode,
 				FirstName = t.FirstName,
 				LastName = t.LastName,
-			
+
 				SSN = t.SSN,
 				Phone = t.Phone,
 				Email = t.Email,
 				LanguageId = t.LanguageId,
 				Borough = t.Borough,
-				
+
 				HasPossession = t.HasPossession,
 				HasRegulatedTenancy = t.HasRegulatedTenancy,
 				Name_Relation = t.Name_Relation,
@@ -285,6 +285,12 @@ namespace EvictionFiler.Application.Services
 				IsUnitIllegalId = t.IsUnitIllegalId,
 				BuildingId = t.BuildinId,
 			}).ToList();
+		}
+
+		public async Task<string> GetLastTenantCode()
+		{
+			var lastTenantCode = await _repo.GetLasttenantCodeAsync();
+			return lastTenantCode!;
 		}
 	}
 }

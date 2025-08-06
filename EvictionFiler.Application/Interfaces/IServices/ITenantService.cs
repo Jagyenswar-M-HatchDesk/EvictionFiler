@@ -18,6 +18,8 @@ namespace EvictionFiler.Application.Interfaces.IServices
 		Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? clientId);
 		Task<bool> UpdateTenantAsync(List<EditToTenantDto> dto);
 		Task<List<CreateToTenantDto>> GetAll();
+		Task<string> GetLastTenantCode();
 
-	}
+
+    }
 }
