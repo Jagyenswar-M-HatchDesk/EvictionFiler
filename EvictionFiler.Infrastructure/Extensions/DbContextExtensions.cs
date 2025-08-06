@@ -7,32 +7,51 @@ namespace EvictionFiler.Infrastructure.Extensions
 {
 	public static class DbContextExtensions
 	{
+		//public static async Task<IApplicationBuilder> ConfigureDataContext(this IApplicationBuilder app)
+		//{
+		//	try
+		//	{
+		//		using var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope();
+		//		var services = serviceScope.ServiceProvider;
+		//		using (var scope = services.CreateScope())
+		//		{
+		//			using (var context = scope.ServiceProvider.GetRequiredService<MainDbContext>())
+		//			{
+		//				try
+		//				{
+		//					await DbInitalizer.Seed(context);
+		//				}
+		//				catch (Exception)
+		//				{
+
+		//				}
+		//			}
+		//		}
+		//		return app;
+		//	}
+		//	catch (Exception)
+		//	{
+		//		throw;
+		//	}
+		//}
+
 		public static async Task<IApplicationBuilder> ConfigureDataContext(this IApplicationBuilder app)
 		{
+			using var scope = app.ApplicationServices.CreateScope();
+			var context = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+
 			try
 			{
-				using var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope();
-				var services = serviceScope.ServiceProvider;
-				using (var scope = services.CreateScope())
-				{
-					using (var context = scope.ServiceProvider.GetRequiredService<MainDbContext>())
-					{
-						try
-						{
-							await DbInitalizer.Seed(context);
-						}
-						catch (Exception)
-						{
-
-						}
-					}
-				}
-				return app;
+				await DbInitalizer.Seed(context);
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
-				throw;
+				Console.WriteLine("Seeding failed: " + ex.Message);
+				// optionally log
 			}
+
+			return app;
 		}
+
 	}
 }
