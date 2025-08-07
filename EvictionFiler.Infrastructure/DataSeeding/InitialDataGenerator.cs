@@ -20,6 +20,17 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			};
 		}
 
+		public static IEnumerable<CaseType> GetCaseTypes()
+		{
+
+			return new List<CaseType>
+		{
+			new CaseType() { Name = "Holdover"},
+			new CaseType() { Name = "HP Action"},
+			new CaseType() { Name = "NonPayment"},
+			new CaseType() { Name = "Licence"},
+		};
+		}
 
 		public static IEnumerable<PremiseType> GetPremiseType()
 		{
