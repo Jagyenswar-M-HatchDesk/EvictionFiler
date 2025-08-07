@@ -65,6 +65,7 @@ builder.Services.AddScoped<ICaseSubTypeRepository, CaseSubTypeRepository>();
 builder.Services.AddScoped<IClientRoleRepository, ClientRoleRepository>();
 builder.Services.AddScoped<ILandlordTypeRepository, LandlordTypeRepository>();
 builder.Services.AddScoped<IPremiseTypeRepository, PremiseTypeRepository>();
+builder.Services.AddScoped<IAdditionalOccupantsRepository, AdditionalOccupantsRepository>();
 builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
 builder.Services.AddScoped<IUnitIllegalRepository, UnitIllegalRepository>();
 builder.Services.AddScoped<ITenancyTypeRepository, TenancyTypeRepository>();

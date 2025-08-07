@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using EvictionFiler.Domain.Entities.Base.Base;
 using EvictionFiler.Domain.Entities.Master;
-using Microsoft.EntityFrameworkCore;
 
 namespace EvictionFiler.Domain.Entities
 {
@@ -68,10 +67,11 @@ namespace EvictionFiler.Domain.Entities
 		public bool? IsERAPPaymentReceived { get; set; }
 		public DateOnly? ERAPPaymentReceivedDate { get; set; }
 		public string? UnitOrApartmentNumber { get; set; }
-
 		public Guid? IsUnitIllegalId { get; set; }
 		[ForeignKey("IsUnitIllegalId")]
 		public IsUnitIllegal? IsUnitIllegal { get; set; }
+
+	
 
 	}
 }

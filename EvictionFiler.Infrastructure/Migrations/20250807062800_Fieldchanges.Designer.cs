@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250807062800_Fieldchanges")]
+    partial class Fieldchanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,9 +58,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<Guid?>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
 
@@ -65,8 +65,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TenantId");
 
                     b.ToTable("AdditionalOccupants");
                 });
@@ -1141,6 +1139,9 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("AdditionalOccupantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Address1")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -1283,6 +1284,8 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AdditionalOccupantId");
 
                     b.HasIndex("BuildinId");
 
@@ -1573,15 +1576,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.AdditionalOccupants", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.Tenant", "Tenants")
-                        .WithMany()
-                        .HasForeignKey("TenantId");
-
-                    b.Navigation("Tenants");
-                });
-
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Building", b =>
                 {
                     b.HasOne("EvictionFiler.Domain.Entities.LandLord", "Landlord")
@@ -1731,6 +1725,10 @@ namespace EvictionFiler.Infrastructure.Migrations
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Tenant", b =>
                 {
+                    b.HasOne("EvictionFiler.Domain.Entities.AdditionalOccupants", "AdditionalOccupant")
+                        .WithMany()
+                        .HasForeignKey("AdditionalOccupantId");
+
                     b.HasOne("EvictionFiler.Domain.Entities.Building", "Building")
                         .WithMany("Tenants")
                         .HasForeignKey("BuildinId");
@@ -1750,6 +1748,8 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasOne("EvictionFiler.Domain.Entities.Master.TenancyType", "TenancyType")
                         .WithMany()
                         .HasForeignKey("TenancyTypeId");
+
+                    b.Navigation("AdditionalOccupant");
 
                     b.Navigation("Building");
 

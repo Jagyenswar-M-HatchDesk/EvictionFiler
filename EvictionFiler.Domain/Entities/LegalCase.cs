@@ -78,10 +78,15 @@ namespace EvictionFiler.Domain.Entities
 
 		public string? ExplainDescription { get; set; }
 		[MaxLength(100)]
-		public string Attrney { get; set; } = string.Empty;
+		public string ?Attrney { get; set; } 
 		[MaxLength(100)]
-		public string AttrneyContactInfo { get; set; } = string.Empty;
+		public string ?AttrneyContactInfo { get; set; }
 		[MaxLength(50)]
-		public string Firm { get; set; } = string.Empty;
+		public string ?Firm { get; set; } 
+
+		public string ? OtherPropertiesBuildingId { get;set; }
+
+		public bool? tenantReceive { get; set; }
+		public string? ExplainTenancyReceiveDescription { get; set; }
 	}
 }

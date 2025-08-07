@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250807092555_UpdatetenantTable2")]
+    partial class UpdatetenantTable2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1141,6 +1144,9 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("AdditialOccupantsId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Address1")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -1283,6 +1289,10 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AdditialOccupantsId")
+                        .IsUnique()
+                        .HasFilter("[AdditialOccupantsId] IS NOT NULL");
 
                     b.HasIndex("BuildinId");
 
@@ -1731,6 +1741,10 @@ namespace EvictionFiler.Infrastructure.Migrations
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Tenant", b =>
                 {
+                    b.HasOne("EvictionFiler.Domain.Entities.AdditionalOccupants", "AdditionalOccupantsTenants")
+                        .WithOne()
+                        .HasForeignKey("EvictionFiler.Domain.Entities.Tenant", "AdditialOccupantsId");
+
                     b.HasOne("EvictionFiler.Domain.Entities.Building", "Building")
                         .WithMany("Tenants")
                         .HasForeignKey("BuildinId");
@@ -1750,6 +1764,8 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasOne("EvictionFiler.Domain.Entities.Master.TenancyType", "TenancyType")
                         .WithMany()
                         .HasForeignKey("TenancyTypeId");
+
+                    b.Navigation("AdditionalOccupantsTenants");
 
                     b.Navigation("Building");
 

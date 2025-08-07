@@ -1,6 +1,7 @@
 ﻿@using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Application.DTOs.OccupantDto
 @using EvictionFiler.Application.DTOs.TenantDto
 @using EvictionFiler.Application.Interfaces.IRepository
 @using EvictionFiler.Application.Interfaces.IServices
@@ -22,6 +23,8 @@
 @inject IUnitIllegalRepository UnitIllegalRepository
 @inject ITenancyTypeRepository TenancyTypeRepository
 @inject ILandlordTypeRepository LandlordTypeRepository
+
+
 @rendermode InteractiveAuto
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
@@ -905,29 +908,75 @@ aria-labelledby="createUserLabel">
                                 <InputText class="form-control" @bind-Value="tenant.LastMonthWeekRentPaid" placeholder="Enter Last Paid Info" />
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label>Total Rent Owed</label>
                                 <InputNumber class="form-control" @bind-Value="tenant.TotalRentOwed" placeholder="Enter Total Owed" />
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-4">
                                 <label>Reg. No.</label>
                                 <InputText class="form-control" @bind-Value="tenant.Registration_No" placeholder="Enter Registration No." />
                             </div>
-                            <div class="col-md-3">
+                           @*  <div class="col-md-3">
                                 <label>Name & Relations</label>
                                 <InputTextArea class="form-control"
                                 @bind-Value="tenant.Name_Relation"
                                 placeholder="Enter Name & Relation"
                                 rows="3" />
+                            </div> *@
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-auto">
+                                <label class="me-2">Additional Occupants</label>
+                            </div>
+
+                            <div class="col">
+                                @for (int i = 0; i < occupants.Count; i++)
+                                {
+                                    var index = i;
+
+                                    <div class="row mb-2">
+                                        <div class="col-auto">
+                                            <div class="form-check">
+                                                <input type="checkbox"
+                                                       class="form-check-input"
+                                                       @bind="occupants[index].IsChecked" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col">
+                                            @if (occupants[index].IsChecked)
+                                            {
+                                                <div class="row">
+                                                    <div class="col-auto">
+                                                        <InputText class="form-control" placeholder="Name"
+                                                                   @bind-Value="occupants[index].Name" />
+                                                    </div>
+                                                    <div class="col">
+                                                        <InputText class="form-control" placeholder="Relation"
+                                                                   @bind-Value="occupants[index].Relation" />
+                                                    </div>
+                                                </div>
+
+                                                @* ✅ Add new only if this is last item and has data *@
+                                                @if (index == occupants.Count - 1 && !string.IsNullOrWhiteSpace(occupants[index].Name))
+                                                {
+                                                    occupants.Add(new AdditionalOccupantDto());
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                }
                             </div>
                         </div>
 
 
 
 
+
                         <div class="row mb-3">
 
-                            <InputRadioGroup @bind-Value="tenant.IsUnitIllegalId" class="mb-3 required-label">
+                            <InputRadioGroup @bind-Value="tenant.IsUnitIllegalId" class="mb-3">
                                 <div class="row align-items-center">
                                     <div class="col-auto">
                                         <label class="form-label mb-0 required-lebel" style="margin-top:5px">Is the Unit Illegal:</label>
@@ -1016,9 +1065,6 @@ aria-labelledby="createUserLabel">
                             </InputRadioGroup>
                             <ValidationMessage For="@(() => tenant.TenancyTypeId)" />
                         </div>
-
-
-
                         <div class="row mb-3">
                             <!-- Tenant of Record -->
                             <div class="col-md-6">
@@ -1141,12 +1187,7 @@ aria-labelledby="createUserLabel">
 
                         </div>
 
-                        @*   <!-- Submit Button -->
-                        <div class="row">
-                            <div class="col">
-                                @* <button type="submit" class="btn bg-navy text-white mt-2">Save </button> *@
-                        @* </div> *@
-                        @* </div>  *@
+                   
                     </EditForm>
                 }
 
@@ -1258,6 +1299,14 @@ aria-labelledby="createUserLabel">
     private string LatestTenantCode = "";
     private Stack<string> tabHistory = new();
 
+    private bool shouldAddNewOccupant = false;
+
+     private List<AdditionalOccupantDto> occupants = new()
+    {
+        new AdditionalOccupantDto()
+    };
+
+  
 
     protected override async Task OnInitializedAsync()
     {
@@ -1277,10 +1326,20 @@ aria-labelledby="createUserLabel">
             LatestBuildingCode = await _apartmentService.GetLastBuilding();
             LatestTenantCode = await _tenantService.GetLastTenantCode();
         }
-
+        occupants.Add(new AdditionalOccupantDto());
 
     }
 
+    private void OnCheckboxChanged(int index, ChangeEventArgs e)
+    {
+        occupants[index].IsChecked = (bool)e.Value!;
+
+        // Add next checkbox if last one is checked
+        if (occupants[index].IsChecked && index == occupants.Count - 1)
+        {
+            occupants.Add(new AdditionalOccupantDto());
+        }
+    }
     private void BackToLandlordList()
     {
         showLandlordForm = false;
@@ -1451,6 +1510,10 @@ aria-labelledby="createUserLabel">
         LatestTenantCode = $"TT{nextNumber.ToString().PadLeft(10, '0')}";
 
         tenant.TenantCode = LatestTenantCode;
+        tenant.occupants = occupants
+     .Where(x => x.IsChecked && !string.IsNullOrWhiteSpace(x.Name))
+     .ToList();
+
 
         saveTanentList.Add(tenant);
 

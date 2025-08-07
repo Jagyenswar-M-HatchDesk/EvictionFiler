@@ -20,6 +20,7 @@ namespace EvictionFiler.Infrastructure.DbContexts
 		public DbSet<CaseSubType>MstCaseSubTypes { get; set; }
 		public DbSet<Building> Buildings { get; set; }
         public DbSet<LegalCase> LegalCases { get; set; }
+		public DbSet<AdditionalOccupants> AdditionalOccupants { get; set; }
 		public DbSet<TypeOfOwner> MstTypeOfOwners { get; set; }
 		public DbSet<ClientRole> MstClientRoles { get; set; }
 		public DbSet<Language> MstLanguages { get; set; }

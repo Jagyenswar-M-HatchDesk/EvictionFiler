@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using EvictionFiler.Application.DTOs.ClientDto;
+using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
@@ -16,18 +17,20 @@ namespace EvictionFiler.Application.Services
 		private readonly ILandLordRepository _landlordrepo;
 		private readonly IBuildingRepository _buildingrepo;
 		private readonly ITenantRepository _tenantRepo;
+		private readonly IAdditionalOccupantsRepository _additionalOccupantsRepo;
 		
 		public ClientServices(
 	   IClientRepository clientRepo, IUnitOfWork unitOfWork,
 		ILandLordRepository landLordRepo,
 		IBuildingRepository buildingrepo,
-		ITenantRepository tenantRepo)
+		ITenantRepository tenantRepo , IAdditionalOccupantsRepository additionalOccupantsRepo)
 		{
 			_clientRepo = clientRepo;
 			_unitOfWork = unitOfWork;
 			_landlordrepo = landLordRepo;
 			_buildingrepo = buildingrepo;
 			_tenantRepo = tenantRepo;
+			_additionalOccupantsRepo = additionalOccupantsRepo;
 			
 		}
 
@@ -272,6 +275,7 @@ namespace EvictionFiler.Application.Services
 				var landlords = new List<LandLord>();
 				var buildings = new List<Building>();
 				var tenants = new List<Tenant>();
+				var occupants = new List<AdditionalOccupants>();
 
 				//var lastLandlordCode = await _landlordrepo.GetLastLandLordCodeAsync();
 				//int nextLandlordNumber = string.IsNullOrEmpty(lastLandlordCode) ? 1 : int.Parse(lastLandlordCode[2..]) + 1;
@@ -361,7 +365,7 @@ namespace EvictionFiler.Application.Services
 										RenewalOffer = t.RenewalOffer,
 										RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
 										SocialServices = t.SocialServices,
-										MonthlyRent=t.MonthlyRent,
+										MonthlyRent = t.MonthlyRent,
 										LastMonthWeekRentPaid = t.LastMonthWeekRentPaid,
 										TenantShare = t.TenantShare,
 										IsERAPPaymentReceived = t.IsERAPPaymentReceived,
@@ -371,8 +375,23 @@ namespace EvictionFiler.Application.Services
 										IsUnitIllegalId = t.IsUnitIllegalId,
 										BuildinId = building.Id
 									};
+										if (t.occupants != null)
+									    {
+										    foreach (var o in t.occupants)
+										    {
+										    	var occupant = new AdditionalOccupants
+											       {
+											       	//Id = o.Id,
+											       	Name = o.Name,
+											       	Relation = o.Relation,
+											       	TenantId = tenant.Id,
+											       };
+										    
+										      occupants.Add(occupant);
+										    };
 
-									tenants.Add(tenant);
+										tenants.Add(tenant);
+									}
 								}
 							}
 						}
@@ -382,6 +401,7 @@ namespace EvictionFiler.Application.Services
 				await _landlordrepo.AddRangeAsync(landlords);
 				await _buildingrepo.AddRangeAsync(buildings);
 				await _tenantRepo.AddRangeAsync(tenants);
+				await _additionalOccupantsRepo.AddRangeAsync(occupants);
 
 				var result = await _unitOfWork.SaveChangesAsync();
 				return result > 0;
