@@ -24,169 +24,171 @@
 @inject IClientService _clientService
 @inject NavigationManager nav
 @inject NavigationDataService _dataService
+@using EvictionFiler.Client.SpinnerService
+@inject SpinnerService spinnerservice
 @using Blazored.Typeahead
 @using EvictionFiler.Domain.Entities
 
 @rendermode InteractiveAuto
 <style>
     .stepper-row::-webkit-scrollbar {
-        height: 3px; /* thinner scrollbar */
+    height: 3px; /* thinner scrollbar */
     }
 
     .stepper-row::-webkit-scrollbar-thumb {
-        background-color: #888;
-        border-radius: 10px;
+    background-color: #888;
+    border-radius: 10px;
     }
 
     .stepper-row::-webkit-scrollbar-track {
-        background: transparent;
+    background: transparent;
     }
 
     /* For Firefox */
     .stepper-row {
-        scrollbar-width: thin;
-        scrollbar-color: #888 transparent;
+    scrollbar-width: thin;
+    scrollbar-color: #888 transparent;
     }
 
     .stepper-container {
-        /*   background-color: #F7F6F3; */
-        padding: 30px 20px;
-        border-radius: 6px;
-        /*   box-shadow: 0 1px 3px rgba(0,0,0,0.1); */
-        overflow-x: auto;
-        white-space: nowrap;
+    /*   background-color: #F7F6F3; */
+    padding: 30px 20px;
+    border-radius: 6px;
+    /*   box-shadow: 0 1px 3px rgba(0,0,0,0.1); */
+    overflow-x: auto;
+    white-space: nowrap;
     }
 
     .stepper-row {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        min-width: max-content;
-        overflow-x: auto; /* move it here */
-        white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: max-content;
+    overflow-x: auto; /* move it here */
+    white-space: nowrap;
     }
 
 
     .stepper-step {
-        display: flex;
-        align-items: center;
-        font-size: 14px;
-        font-weight: 500;
-        gap: 6px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 500;
+    gap: 6px;
     }
 
-        .stepper-step .circle {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            flex-shrink: 0;
-        }
+    .stepper-step .circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    }
 
     .circle.done {
-        background-color: #5cb85c;
-        color: white;
+    background-color: #5cb85c;
+    color: white;
     }
 
     .circle.active {
-        background-color: #1F365D;
-        color: white;
+    background-color: #1F365D;
+    color: white;
     }
 
     .circle.upcoming {
-        background-color: #ccc;
-        color: white;
+    background-color: #ccc;
+    color: white;
     }
 
     .text.done,
     .text.active {
-        color: #007bff;
-        font-weight: 600;
+    color: #007bff;
+    font-weight: 600;
     }
 
     .text.upcoming {
-        color: #aaa;
+    color: #aaa;
     }
 
     .arrow {
-        color: #ccc;
-        margin: 0 8px;
+    color: #ccc;
+    margin: 0 8px;
     }
 
     .nav-buttons {
-        display: flex;
-        gap: 6px;
+    display: flex;
+    gap: 6px;
     }
 
     .circle.done {
-        background-color: #D4A844;
-        color: white;
+    background-color: #D4A844;
+    color: white;
     }
 
     .text.done,
     .text.active {
-        color: #1F365D;
-        font-weight: 600;
+    color: #1F365D;
+    font-weight: 600;
     }
 
-  
+
 
     .custom-scroll::-webkit-scrollbar {
-        width: 6px;
+    width: 6px;
     }
 
     .custom-scroll::-webkit-scrollbar-thumb {
-        background-color: #ccc;
-        border-radius: 3px;
+    background-color: #ccc;
+    border-radius: 3px;
     }
 
     .custom-scroll {
-        scrollbar-width: thin;
+    scrollbar-width: thin;
     }
 
     .required-label::after {
-        content: " *";
-        color: red;
+    content: " *";
+    color: red;
     }
 
     .stepper-row {
-        display: flex;
-        justify-content: space-between; /* ✅ the magic */
-        align-items: center;
-        width: 100%;
-        overflow-x: auto;
-        white-space: nowrap;
+    display: flex;
+    justify-content: space-between; /* ✅ the magic */
+    align-items: center;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
     }
 
     .stepper-step {
-        display: flex;
-        align-items: center;
-        font-size: 14px;
-        font-weight: 500;
-        gap: 6px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 500;
+    gap: 6px;
     }
 
     .stepper-row {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        overflow-x: auto;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    overflow-x: auto;
     }
 
     .stepper-step {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
     }
 
     .step-line {
-        height: 2px;
-        background-color: #ccc;
-        margin: 0 8px;
+    height: 2px;
+    background-color: #ccc;
+    margin: 0 8px;
     }
 
 </style>
@@ -245,10 +247,10 @@
                             <label class="col-sm-1 col-form-label fw-semibold text-navy">Tenant</label>
                             <div class="col-sm-10 position-relative">
                                 <input type="text"
-                                       class="form-control"
-                                       value="@searchtenantText"
-                                       @oninput="HandleTenantInput"
-                                       placeholder="Search tenant by name/code" style="width:50%" />
+                                class="form-control"
+                                value="@searchtenantText"
+                                @oninput="HandleTenantInput"
+                                placeholder="Search tenant by name/code" style="width:50%" />
 
                                 @if (filteredTenantList?.Any() == true)
                                 {
@@ -258,12 +260,12 @@
 
 
                                     <ul class="list-group position-absolute shadow-sm z-3 mt-1"
-                                        style="max-height: 200px; overflow-y: auto;width:49%;">
+                                    style="max-height: 200px; overflow-y: auto;width:49%;">
                                         @foreach (var item in filteredTenantList)
                                         {
                                             <li class="list-group-item list-group-item-action"
-                                                style="cursor: pointer;"
-                                                @onclick="@(() => SelectTenant(item.Id))">
+                                            style="cursor: pointer;"
+                                            @onclick="@(() => SelectTenant(item.Id))">
                                                 @if (isCodeSearch)
                                                 {
                                                     <span>@item.TenantCode (@item.FirstName)</span>
@@ -329,10 +331,10 @@
                                         <div class="col-auto fw-semibold">Building Address:</div>
                                         <div class="col-7 ">
                                             @(
-                                                string.IsNullOrWhiteSpace($"{TenantDetails.Building?.Address1}{TenantDetails.Building?.Address2}{TenantDetails.Building?.City}{TenantDetails.Building?.StateName}{TenantDetails.Building?.Zipcode}")
-                                                ? "-"
-                                                : $"{TenantDetails.Building.Address1}{TenantDetails.Building.Address2} {TenantDetails.Building.City} {TenantDetails.Building.StateName}  {TenantDetails.Building.Zipcode}"
-                                                )
+                                                    string.IsNullOrWhiteSpace($"{TenantDetails.Building?.Address1}{TenantDetails.Building?.Address2}{TenantDetails.Building?.City}{TenantDetails.Building?.StateName}{TenantDetails.Building?.Zipcode}")
+                                                    ? "-"
+                                                    : $"{TenantDetails.Building.Address1}{TenantDetails.Building.Address2} {TenantDetails.Building.City} {TenantDetails.Building.StateName}  {TenantDetails.Building.Zipcode}"
+                                                    )
                                         </div>
                                     </div>
 
@@ -417,8 +419,8 @@
 
                                         <div class="mx-2">
                                             <div class="row my-2 align-items-center">
-                                                <div class="col-4 fw-semibold">Date rent is due each month/week:</div>
-                                                <div class="col-4">
+                                                <div class="col-auto fw-semibold">Date rent is due each month/week:</div>
+                                                <div class="col">
                                                     <InputText class="form-control" @bind-Value="TenantDetails.RentDueEachMonthOrWeek" />
                                                 </div>
                                             </div>
@@ -585,8 +587,8 @@
                                             <div class="col-auto fw-semibold">Building Address:</div>
                                             <div class="col-9">
                                                 @(string.IsNullOrWhiteSpace($"{TenantDetails.Building?.Address1}{TenantDetails.Building?.Address2}{TenantDetails.Building?.City}{TenantDetails.Building?.StateName}{TenantDetails.Building?.Zipcode}")
-                                                    ? "-"
-                                                    : $"{TenantDetails.Building.Address1} {TenantDetails.Building.Address2} {TenantDetails.Building.City} {TenantDetails.Building.StateName}  {TenantDetails.Building.Zipcode}")
+                                                        ? "-"
+                                                        : $"{TenantDetails.Building.Address1} {TenantDetails.Building.Address2} {TenantDetails.Building.City} {TenantDetails.Building.StateName}  {TenantDetails.Building.Zipcode}")
                                             </div>
                                         </div>
 
@@ -645,10 +647,10 @@
                                                     <label class="col-auto fw-semibold mb-0">Mailing Address:</label>
                                                     <div class="col ">
                                                         @(
-                                                            string.IsNullOrWhiteSpace($"{TenantDetails.Landlord?.Address1}{TenantDetails.Landlord?.Address2}{TenantDetails.Landlord?.City}{TenantDetails.Landlord?.StateName}{TenantDetails.Landlord?.Zipcode}")
-                                                            ? "-"
-                                                            : $"{TenantDetails.Landlord.Address1}, {TenantDetails.Landlord.Address2}, {TenantDetails.Landlord.City}, {TenantDetails.Landlord.StateName} - {TenantDetails.Landlord.Zipcode}"
-                                                            )
+                                                                string.IsNullOrWhiteSpace($"{TenantDetails.Landlord?.Address1}{TenantDetails.Landlord?.Address2}{TenantDetails.Landlord?.City}{TenantDetails.Landlord?.StateName}{TenantDetails.Landlord?.Zipcode}")
+                                                                ? "-"
+                                                                : $"{TenantDetails.Landlord.Address1}, {TenantDetails.Landlord.Address2}, {TenantDetails.Landlord.City}, {TenantDetails.Landlord.StateName} - {TenantDetails.Landlord.Zipcode}"
+                                                                )
                                                     </div>
                                                 </div>
                                             </div>
@@ -698,9 +700,9 @@
                                             <div class="col-4 fw-semibold">If purchased at foreClosure : </div>
                                             <div class="col-4">
                                                 <InputDate class="form-control"
-                                                           @bind-Value="@TenantDetails.Landlord.DateOfRefreeDeed"
-                                                           id="dateRefereeDeed"
-                                                           placeholder="Select date" />
+                                                @bind-Value="@TenantDetails.Landlord.DateOfRefreeDeed"
+                                                id="dateRefereeDeed"
+                                                placeholder="Select date" />
 
                                             </div>
                                         </div>
@@ -719,7 +721,7 @@
 
                     <EditForm Model="@legalcaseDto" OnValidSubmit="Next" Id="ReasonForm">
                         <DataAnnotationsValidator />
- 
+
                         <div class="row my-3 my-4">
                             <div class="col-md-12">
                                 <InputRadioGroup @bind-Value="legalcaseDto.ReasonHoldoverId" class="mb-3 required-label">
@@ -742,9 +744,9 @@
                                                         @if (legalcaseDto.ReasonHoldoverId == role.Id && role.Name == "Other")
                                                         {
                                                             <InputText class="form-control"
-                                                                       placeholder="Please specify"
-                                                                       style="max-width: 200px; height: 36px;"
-                                                                       @bind-Value="legalcaseDto.ReasonDescription" />
+                                                            placeholder="Please specify"
+                                                            style="max-width: 200px; height: 36px;"
+                                                            @bind-Value="legalcaseDto.ReasonDescription" />
                                                         }
                                                     </div>
                                                 }
@@ -813,8 +815,8 @@
                                         <div class="col-6">
 
                                             <div class="row">
-                                                <div class="col-6 fw-semibold">Unit / Apartment Number:</div>
-                                                <div class="col-4">
+                                                <div class="col-auto fw-semibold">Unit / Apartment Number:</div>
+                                                <div class="col">
                                                     @(!string.IsNullOrWhiteSpace(TenantDetails.UnitOrApartmentNumber) ? TenantDetails.UnitOrApartmentNumber : "-")
                                                 </div>
                                             </div>
@@ -822,15 +824,15 @@
                                     </div>
 
                                     <div class="row mb-2 my-4">
-                                        <div class="col-6">
+                                        <div class="col">
                                             <div class="row">
                                                 <div class="col-auto fw-semibold">Building Address:</div>
                                                 <div class="col">
                                                     @(
-                                                        string.IsNullOrWhiteSpace($"{TenantDetails.Building?.Address1}{TenantDetails.Building?.Address2}{TenantDetails.Building?.City}{TenantDetails.Building?.StateName}{TenantDetails.Building?.Zipcode}")
-                                                        ? "-"
-                                                        : $"{TenantDetails.Building?.Address1} {TenantDetails.Building?.Address2} {TenantDetails.Building?.City} {TenantDetails.Building?.StateName} {TenantDetails.Building?.Zipcode}"
-                                                        )
+                                                            string.IsNullOrWhiteSpace($"{TenantDetails.Building?.Address1}{TenantDetails.Building?.Address2}{TenantDetails.Building?.City}{TenantDetails.Building?.StateName}{TenantDetails.Building?.Zipcode}")
+                                                            ? "-"
+                                                            : $"{TenantDetails.Building?.Address1} {TenantDetails.Building?.Address2} {TenantDetails.Building?.City} {TenantDetails.Building?.StateName} {TenantDetails.Building?.Zipcode}"
+                                                            )
                                                 </div>
                                             </div>
 
@@ -956,10 +958,10 @@
                                         </div>
                                     </div>
 
-                                    
+
                                 </div>
 
-                                
+
 
                             </div>
 
@@ -974,10 +976,10 @@
                                     <div class="col-auto fw-semibold">Building Address:</div>
                                     <div class="col">
                                         @(
-                                            string.IsNullOrWhiteSpace($"{TenantDetails.Building?.Address1}{TenantDetails.Building?.Address2}{TenantDetails.Building?.City}{TenantDetails.Building?.StateName}{TenantDetails.Building?.Zipcode}")
-                                            ? "-"
-                                            : $"{TenantDetails.Building?.Address1} {TenantDetails.Building?.Address2} {TenantDetails.Building?.City} {TenantDetails.Building?.StateName} {TenantDetails.Building?.Zipcode}"
-                                            )
+                                                string.IsNullOrWhiteSpace($"{TenantDetails.Building?.Address1}{TenantDetails.Building?.Address2}{TenantDetails.Building?.City}{TenantDetails.Building?.StateName}{TenantDetails.Building?.Zipcode}")
+                                                ? "-"
+                                                : $"{TenantDetails.Building?.Address1} {TenantDetails.Building?.Address2} {TenantDetails.Building?.City} {TenantDetails.Building?.StateName} {TenantDetails.Building?.Zipcode}"
+                                                )
                                     </div>
                                 </div>
 
@@ -1025,14 +1027,14 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-4">
+                                    <div class="col-3">
                                         <div class="row">
                                             <div class="col-auto fw-semibold">Phone:</div>
                                             <div class="col">@(TenantDetails.Landlord.Phone ?? "-")</div>
                                         </div>
                                     </div>
 
-                                    <div class="col-4">
+                                    <div class="col-5">
                                         <div class="row">
                                             <div class="col-auto fw-semibold">Email:</div>
                                             <div class="col">@TenantDetails.Landlord.Email</div>
@@ -1047,8 +1049,8 @@
                                     <div class="col-auto fw-semibold">Mailing Address:</div>
                                     <div class="col">
                                         @(string.IsNullOrWhiteSpace($"{TenantDetails.Landlord?.Address1}{TenantDetails.Landlord?.City}")
-                                            ? "-"
-                                            : $"{TenantDetails.Landlord.Address1}, {TenantDetails.Landlord.City}, {TenantDetails.Landlord.StateName} {TenantDetails.Landlord.Zipcode}")
+                                                ? "-"
+                                                : $"{TenantDetails.Landlord.Address1}, {TenantDetails.Landlord.City}, {TenantDetails.Landlord.StateName} {TenantDetails.Landlord.Zipcode}")
                                     </div>
                                 </div>
 
@@ -1092,7 +1094,7 @@
                             @(ReasonHoldoverList.FirstOrDefault(x => x.Id == legalcaseDto.ReasonHoldoverId)?.Name ?? "-")
                         </div>
                     </div>
-                    
+
 
                     @if (ReasonHoldoverList.FirstOrDefault(x => x.Id == legalcaseDto.ReasonHoldoverId)?.Name == "Other")
                     {
@@ -1102,7 +1104,7 @@
                                 @legalcaseDto.ReasonDescription
                             </div>
                         </div>
-                        
+
                     }
                     <div class="row my-4 mb-2 align-items-center">
                         <div class="col-auto fw-semibold">Explain:</div>
@@ -1110,7 +1112,7 @@
                             @legalcaseDto.ExplainDescription
                         </div>
                     </div>
-                    
+
                 </div>
 
 
@@ -1317,7 +1319,7 @@
                 searchtenantText = string.Empty;
                 filteredTenantList?.Clear();
                 break;
-           
+
         }
 
         StateHasChanged();
@@ -1330,6 +1332,7 @@
 
     private async Task Submit()
     {
+        spinnerservice.Show();
         var result = false;
 
         if (legalcaseDto == null || legalcaseDto.Id == Guid.Empty)
@@ -1372,6 +1375,7 @@
         {
             nav.NavigateTo("/cases?success=true");
         }
+
     }
 
     private CancellationTokenSource _cts;

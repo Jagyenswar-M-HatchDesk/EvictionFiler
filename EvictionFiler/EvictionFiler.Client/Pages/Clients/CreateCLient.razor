@@ -7,6 +7,8 @@
 @using EvictionFiler.Application.Services
 @using EvictionFiler.Domain.Entities.Master
 @using Microsoft.AspNetCore.Components.Forms
+@using EvictionFiler.Client.SpinnerService
+@inject SpinnerService spinnerservice
 
 @inject IClientService _clientService
 @inject ILandlordSevice _landlordService
@@ -26,139 +28,139 @@
 
 <style>
     :root {
-        --bs-primary: #1F365D;
-        --bs-warning: #D4A844;
-        --bs-light: #F7F6F3;
+    --bs-primary: #1F365D;
+    --bs-warning: #D4A844;
+    --bs-light: #F7F6F3;
     }
 
     body {
-        background-color: var(--bs-light);
+    background-color: var(--bs-light);
     }
 
     .offcanvas.show {
-        transform: translateX(0%);
+    transform: translateX(0%);
     }
 
     .offcanvas {
-        transform: translateX(100%);
-        width: 900px !important;
-        transition: transform 0.5s ease-in-out;
+    transform: translateX(100%);
+    width: 900px !important;
+    transition: transform 0.5s ease-in-out;
     }
 
     .color-text {
-        color: var(--bs-primary);
+    color: var(--bs-primary);
     }
 
     .form-control::placeholder {
-        font-size: 0.9rem;
+    font-size: 0.9rem;
     }
 
     .input-group-text {
-        background-color: var(--bs-light);
-        color: var(--bs-primary);
-        font-weight: 500;
+    background-color: var(--bs-light);
+    color: var(--bs-primary);
+    font-weight: 500;
     }
 
     .form-wrapper {
-        transition: transform 0.5s ease, opacity 0.5s ease;
-        will-change: transform, opacity;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    will-change: transform, opacity;
     }
 
-        /* .form-wrapper.hidden {
-            transform: translateX(-100%);
-            opacity: 0;
-            pointer-events: none;
-        } */
+    /* .form-wrapper.hidden {
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+    } */
 
     .overlay-form {
-        animation: slideIn 0.5s ease forwards;
-        background-color: white;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    animation: slideIn 0.5s ease forwards;
+    background-color: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
     }
 
     @@keyframes slideIn {
-        from
+    from
 
     {
-        opacity: 0;
-        transform: translateX(100%);
+    opacity: 0;
+    transform: translateX(100%);
     }
 
     to {
-        opacity: 1;
-        transform: translateX(0%);
+    opacity: 1;
+    transform: translateX(0%);
     }
 
     }
 
     .form-wrapper.hidden {
-        display: none !important;
+    display: none !important;
     }
     .vertical-buttons button {
-       /*  min-width: 100px; */
-        text-align: center;
+    /*  min-width: 100px; */
+    text-align: center;
     }
 
     .vertical-tab-button {
-        writing-mode: vertical-rl; /* vertical top-to-bottom */
-        text-orientation: upright;
-        background-color: #f0f2f5;
-        color: #1F365D;
-        font-weight: 700;
-        font-size: 14px;
-        border: none;
-        padding: 12px 8px;
-        border-radius: 10px;
-        margin-bottom: 12px;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    writing-mode: vertical-rl; /* vertical top-to-bottom */
+    text-orientation: upright;
+    background-color: #f0f2f5;
+    color: #1F365D;
+    font-weight: 700;
+    font-size: 14px;
+    border: none;
+    padding: 12px 8px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
 
-        .vertical-tab-button:hover {
-            background-color: #1F365D;
-            color: white;
-            transform: translateY(-2px);
-        }
+    .vertical-tab-button:hover {
+    background-color: #1F365D;
+    color: white;
+    transform: translateY(-2px);
+    }
 
     .active-vertical {
-        background: linear-gradient(135deg, #1F365D, #2F4F7F);
-        color: white;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #1F365D, #2F4F7F);
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
 
-  /*   .tab-button {
-        background: transparent;
-        color: #1F365D;
-        border: 2px solid transparent;
-        padding: 0.6rem 1rem;
-        min-width: 120px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-radius: 8px;
-        transition: all 0.3s ease-in-out;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    /*   .tab-button {
+    background: transparent;
+    color: #1F365D;
+    border: 2px solid transparent;
+    padding: 0.6rem 1rem;
+    min-width: 120px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     }
 
-        .tab-button:hover {
-            background: #1F365D;
-            color: white;
-            border-color: #1F365D;
-            transform: translateY(-2px);
-        }
+    .tab-button:hover {
+    background: #1F365D;
+    color: white;
+    border-color: #1F365D;
+    transform: translateY(-2px);
+    }
 
     .active-tab {
-        background: linear-gradient(135deg, #1F365D, #2F4F7F);
-        color: white !important;
-        border-color: #1F365D;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #1F365D, #2F4F7F);
+    color: white !important;
+    border-color: #1F365D;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     } */
     .required-label::after {
-        content: " *";
-        color: red;
+    content: " *";
+    color: red;
     }
 
 </style>
@@ -166,14 +168,14 @@
 
 
 <div class="offcanvas offcanvas-end show border-start shadow bg-white"
-     tabindex="-1" id="createClient"
-  
-     aria-labelledby="createUserLabel">
+tabindex="-1" id="createClient"
+
+aria-labelledby="createUserLabel">
 
     <div class="offcanvas-header border-bottom">
-        
-            <h5 class="offcanvas-title fw-bold color-text" id="createUserLabel">Add Client</h5>
-        
+
+        <h5 class="offcanvas-title fw-bold color-text" id="createUserLabel">Add Client</h5>
+
         <button type="button" class="btn-close" @onclick="HideAsync" aria-label="Close"></button>
     </div>
 
@@ -184,7 +186,7 @@
 
                 <EditForm Model="@createClient" OnValidSubmit="SubmitClientAsync">
                     <DataAnnotationsValidator />
-                   
+
                     <div class="row">
 
                         <div class="col-md-4 mb-3">
@@ -193,7 +195,7 @@
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
                                 <InputText class="form-control" @bind-Value="createClient.FirstName" placeholder="Enter First Name" />
                             </div>
-                           
+
                         </div>
                         <div class="col-md-3 mb-3">
                             <label class="form-label color-text">Last Name</label>
@@ -201,8 +203,8 @@
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
                                 <InputText class="form-control" @bind-Value="createClient.LastName" placeholder="Enter Last Name" />
                             </div>
-                            </div>
-                            
+                        </div>
+
                         <div class="col-md-5 mb-3">
                             <label class="form-label color-text required-label">Email</label>
                             <div class="input-group">
@@ -213,7 +215,7 @@
                     </div>
 
                     <div class="row">
-                      
+
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text">Phone</label>
                             <div class="input-group">
@@ -235,7 +237,7 @@
                                 <InputText class="form-control" @bind-Value="createClient.Fax" placeholder="Fax Number" />
                             </div>
                         </div>
-                      
+
                     </div>
 
                     <div class="row">
@@ -253,7 +255,7 @@
                                 <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                 <InputText class="form-control" @bind-Value="createClient.Address2" placeholder="Enter Second Address" />
                             </div>
-                          
+
                         </div>
                     </div>
 
@@ -276,9 +278,9 @@
                                 <InputText class="form-control" @bind-Value="createClient.City"  placeholder="Enter City"/>
                             </div>
 
-                        
+
                         </div>
-                  
+
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text ">Zip Code</label>
                             <div class="input-group">
@@ -286,10 +288,10 @@
                                 <InputText class="form-control" @bind-Value="createClient.ZipCode" />
                             </div>
                         </div>
-                      
+
                     </div>
 
-                  
+
                 </EditForm>
 
             </div>
@@ -297,7 +299,7 @@
             <!-- Vertical Overlay Buttons -->
             <div class="vertical-buttons d-flex flex-column align-items-center position-absolute end-0 top-50 translate-middle-y ">
                 <button class="vertical-tab-button @(activeTab == "landlord" ? "active-vertical" : "")" @onclick="@(() => SetActiveTab("landlord"))">LANDLORD</button>
-                
+
             </div>
         </div>
 
@@ -309,10 +311,10 @@
                     <h5 class="color-text fw-bold mb-0">LANDLORD INFORMATION</h5>
                     <div>
                         <button class="btn btn-outline-secondary fw-semibold me-2"
-                                @onclick="@BackToLandlordList">
+                        @onclick="@BackToPreviousTab">
                             ←
                         </button>
-                       @*  <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button> *@
+                        @*  <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button> *@
                         <button class="btn bg-navy text-white" @onclick="ToggleLandlordForm">@GetToggleButtonText()</button>
                         @if (showLandlordForm)
                         {
@@ -326,9 +328,9 @@
                     <EditForm Id="landlordForm" Model="@landlord" OnValidSubmit="SaveLandlordAsync">
 
                         <DataAnnotationsValidator />
-                        
+
                         <div class="row mb-3">
-                       
+
                             <div class="col-md-3">
                                 <label class="required-label">First Name</label>
 
@@ -337,17 +339,17 @@
                                     <InputText class="form-control" @bind-Value="landlord.FirstName" placeholder="Enter First Name" />
                                 </div>
                                 <ValidationMessage For="@(() => landlord.FirstName)" />
-                             
+
                             </div>
                             <div class="col-md-3">
-                            <label>Last Name</label>
+                                <label>Last Name</label>
 
-                            <div class="input-group mb-3">
-                                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <InputText class="form-control" @bind-Value="landlord.LastName" placeholder="Enter Last Name" />
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <InputText class="form-control" @bind-Value="landlord.LastName" placeholder="Enter Last Name" />
+                                </div>
                             </div>
-                            </div>
-                             <div class="col-md-3">
+                            <div class="col-md-3">
                                 <label>EIN/SSN</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text">
@@ -358,9 +360,9 @@
 
 
                             </div>
-                        
-                                <div class="col-md-3">
-                                    <label class="required-label">Type of Owner</label>
+
+                            <div class="col-md-3">
+                                <label class="required-label">Type of Owner</label>
                                 <InputSelect class="form-select" @bind-Value="landlord.TypeOwnerId">
                                     <option value="">-- Select Type --</option>
                                     @foreach (var Own in TypeOwnerList)
@@ -369,11 +371,11 @@
                                     }
                                 </InputSelect>
                                 <ValidationMessage For="@(() => landlord.TypeOwnerId)" />
-                                </div>
+                            </div>
 
                         </div>
-                           
-                  
+
+
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label >Phone</label>
@@ -381,7 +383,7 @@
                                     <span class="input-group-text"><i class="bi bi-phone"></i></span>
                                     <InputText class="form-control" @bind-Value="landlord.Phone" placeholder="Enter Phone " />
                                 </div>
-                               
+
                             </div>
                             <div class="col-md-4">
                                 <label class="required-label">Email</label>
@@ -389,12 +391,12 @@
                                 <div class="input-group">
                                     <span class="input-group-text">@@</span>
                                     <InputText class="form-control" @bind-Value="landlord.Email" placeholder="Enter Email" />
-                                    
+
                                 </div>
                                 <ValidationMessage For="@(() => landlord.Email)" />
-                              
+
                             </div>
-                           
+
                             <div class="col-md-4">
                                 <label >Contact Person Name</label>
 
@@ -404,9 +406,9 @@
                                 </div>
 
                             </div>
-                           
+
                         </div>
-                        
+
 
                         <div class="row mb-3">
                             <div class="col">
@@ -424,7 +426,7 @@
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                     <InputText class="form-control" @bind-Value="landlord.Address2" placeholder="Enter Second Address " />
                                 </div>
-                               
+
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -438,7 +440,7 @@
                                     }
                                 </InputSelect>
                             </div>
-                          
+
                             <div class="col">
                                 <label>City</label>
 
@@ -449,7 +451,7 @@
 
 
                             </div>
-                           
+
                             <div class="col">
                                 <label>Zip Code</label>
                                 <div class="input-group">
@@ -466,9 +468,9 @@
                             </div>
                             <div class="col-lg-3">
                                 <InputDate class="form-control"
-                                           @bind-Value="landlord.DateOfRefreeDeed"
-                                           id="dateRefereeDeed"
-                                           placeholder="Select date" />
+                                @bind-Value="landlord.DateOfRefreeDeed"
+                                id="dateRefereeDeed"
+                                placeholder="Select date" />
                             </div>
                         </div>
                         <InputRadioGroup @bind-Value="landlord.LandlordTypeId" class="mb-3 required-label">
@@ -491,9 +493,9 @@
                                                 @if (role.Name == "Other" && landlord.LandlordTypeId == role.Id)
                                                 {
                                                     <InputText class="form-control"
-                                                               placeholder="Please specify"
-                                                               style="max-width: 200px; height: 36px;"
-                                                               @bind-Value="landlord.OtherLandlordTypeDescription" />
+                                                    placeholder="Please specify"
+                                                    style="max-width: 200px; height: 36px;"
+                                                    @bind-Value="landlord.OtherLandlordTypeDescription" />
                                                 }
                                             </div>
                                         }
@@ -504,56 +506,56 @@
                         <ValidationMessage For="@(() => landlord.LandlordTypeId)" />
                         @* <button type="submit" class="btn bg-navy text-white mt-3">Save </button> *@
                     </EditForm>
-                   
+
                 }
 
                 @if (!showLandlordForm){
-                <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
-                    <table class="table table-bordered mt-4" style="min-width: 1000px;">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>EIN</th>
-                                <th>Contact Person Name</th>
-                                <th>Type of Owner</th>
-                                   <th>Date of Refree</th>
-                                <th>Address</th>
-                                <th>Status</th>
-                                <th class="sticky">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (savelandlordList.Any())
-                            {
-                                @foreach (var l in savelandlordList)
+                    <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
+                        <table class="table table-bordered mt-4" style="min-width: 1000px;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>EIN</th>
+                                    <th>Contact Person Name</th>
+                                    <th>Type of Owner</th>
+                                    <th>Date of Refree</th>
+                                    <th>Address</th>
+                                    <th>Status</th>
+                                    <th class="sticky">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (savelandlordList.Any())
+                                {
+                                    @foreach (var l in savelandlordList)
+                                    {
+                                        <tr>
+                                            <td>@(string.IsNullOrWhiteSpace(l.FirstName + l.LastName) ? "-" : l.FirstName + " " + l.LastName)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(l.Email) ? "-" : l.Email)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(l.Phone) ? "-" : l.Phone)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(l.EINorSSN) ? "-" : l.EINorSSN)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(l.ContactPersonName) ? "-" : l.ContactPersonName)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(l.TypeOwnerName) ? "-" : l.TypeOwnerName)</td>
+                                            <td>@(l.DateOfRefreeDeed == DateOnly.MinValue ? "-" : l.DateOfRefreeDeed.ToString("MM/dd/yyyy"))</td>
+                                            <td>
+                                                @(string.IsNullOrWhiteSpace($"{l.Address1}{l.Address2}{l.City}{l.StateName}{l.Zipcode}")
+                                                                  ? "-" : $"{l.Address1}, {l.Address2}, {l.City}, {l.StateName} - {l.Zipcode}")
+                                            </td>
+                                            <td>Active</td>
+                                        </tr>
+                                    }
+                                }
+                                else
                                 {
                                     <tr>
-                                        <td>@(string.IsNullOrWhiteSpace(l.FirstName + l.LastName) ? "-" : l.FirstName + " " + l.LastName)</td>
-                                        <td>@(string.IsNullOrWhiteSpace(l.Email) ? "-" : l.Email)</td>
-                                        <td>@(string.IsNullOrWhiteSpace(l.Phone) ? "-" : l.Phone)</td>
-                                        <td>@(string.IsNullOrWhiteSpace(l.EINorSSN) ? "-" : l.EINorSSN)</td>
-                                        <td>@(string.IsNullOrWhiteSpace(l.ContactPersonName) ? "-" : l.ContactPersonName)</td>
-                                         <td>@(string.IsNullOrWhiteSpace(l.TypeOwnerName) ? "-" : l.TypeOwnerName)</td>
-                                            <td>@(l.DateOfRefreeDeed == DateOnly.MinValue ? "-" : l.DateOfRefreeDeed.ToString("MM/dd/yyyy"))</td>
-                                         <td>
-                                            @(string.IsNullOrWhiteSpace($"{l.Address1}{l.Address2}{l.City}{l.StateName}{l.Zipcode}")
-                                              ? "-" : $"{l.Address1}, {l.Address2}, {l.City}, {l.StateName} - {l.Zipcode}")
-                                         </td>
-                                        <td>Active</td>
+                                        <td colspan="7" class="text-muted">No landlords added yet.</td>
                                     </tr>
                                 }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="7" class="text-muted">No landlords added yet.</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                            </tbody>
+                        </table>
+                    </div>
                     <div class="vertical-buttons d-flex flex-column align-items-center position-absolute end-0 top-0 translate-middle-y ">
                         <button class="vertical-tab-button @(activeTab == "building" ? "active-vertical" : "")" @onclick="@(() => SetActiveTab("building"))" style="position:relative ; top:15rem">BUILDING</button>
                     </div>
@@ -570,7 +572,7 @@
                     <div>
                         @* <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button> *@
                         <button class="btn btn-outline-secondary fw-semibold me-2"
-                                @onclick="@BackToBuildingList">
+                        @onclick="@BackToPreviousTab">
                             ←
                         </button>
                         <button class="btn bg-navy text-white" @onclick="ToggleBuildingForm">@GetToggleButtonText()</button>
@@ -586,7 +588,7 @@
 
                     <EditForm  id="buildingForm" Model="@building" OnValidSubmit="SaveBuildingAsync">
                         <DataAnnotationsValidator />
-                     
+
                         <div class="row mb-3">
                             <div class="col-md-3">
                                 <label class="required-label">Landlord</label>
@@ -604,7 +606,7 @@
                                 <InputText class="form-control" @bind-Value="building.ApartmentCode" placeholder="Enter Code"/>
                                 <ValidationMessage For="@(() => building.ApartmentCode)" />
                             </div>
-                        
+
                             <div class="col-md-4">
                                 <label>MDR Number</label>
                                 <InputText class="form-control" @bind-Value="building.MDRNumber"  Placeholder="Enter Number"/>
@@ -640,12 +642,12 @@
                                 </InputSelect>
                                 <ValidationMessage For="@(() => building.RegulationStatusId)" />
                             </div>
-                          
+
                             <div class="col-md-4">
-                            <label>Petitioner Interest</label>
+                                <label>Petitioner Interest</label>
                                 <InputText class="form-control" @bind-Value="building.PetitionerInterest" placeholder="Enter Intrest" />
-                        </div>
-                      
+                            </div>
+
                         </div>
 
                         <div class="row mb-3">
@@ -655,8 +657,8 @@
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                     <InputText class="form-control" @bind-Value="building.Address1" placeholder="Enter First Address" />
                                 </div>
-                                    <ValidationMessage For="@(() => building.Address1)" />
-                              
+                                <ValidationMessage For="@(() => building.Address1)" />
+
                             </div>
                             <div class="col">
                                 <label>Address Line 2</label>
@@ -664,7 +666,7 @@
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                     <InputText class="form-control" @bind-Value="building.Address2"  placeholder="Enter Second Address"/>
                                 </div>
-                            
+
                             </div>
                         </div>
 
@@ -687,7 +689,7 @@
                                     <InputText class="form-control" @bind-Value="building.City" placeholder="Enter City " />
                                 </div>
                             </div>
-                           
+
 
                             <div class="col">
                                 <label>Zip Code</label>
@@ -699,18 +701,18 @@
                             </div>
                         </div>
 
-                       
 
 
-  
+
+
                         <!-- Submit Button -->
                         @* <button type="submit" class="btn bg-navy text-white mt-2">Save</button> *@
                     </EditForm>
                 }
 
                 @if (!showBuildingForm){
-                <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
-                    <table class="table table-bordered mt-4" style="min-width: 1000px;">
+                    <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
+                        <table class="table table-bordered mt-4" style="min-width: 1000px;">
                             <thead>
                                 <tr>
                                     <th>Code</th>
@@ -722,46 +724,46 @@
                                     <th>Building Units</th>
                                     <th>Date Of Refree</th>
                                     <th>Status</th>
-                                 
+
                                 </tr>
                             </thead>
-                    <tbody>
-                        @if (apartmentList.Any())
-                        {
-                            @foreach (var b in apartmentList)
-                            {
+                            <tbody>
+                                @if (apartmentList.Any())
+                                {
+                                    @foreach (var b in apartmentList)
+                                    {
                                         <tr>
                                             <td>@(string.IsNullOrWhiteSpace(b.ApartmentCode) ? "-" : b.ApartmentCode)</td>
                                             <td>@(string.IsNullOrWhiteSpace(b.PremiseTypeName) ? "-" : b.PremiseTypeName)</td>
                                             <td>
                                                 @(string.IsNullOrWhiteSpace($"{b.Address1}{b.Address2}{b.City}{b.StateName}{b.StateName}")
-                                                    ? "-"
-                                                    : $"{b.Address1}, {b.Address2}, {b.City}, {b.StateName} - {b.Zipcode}"
-                                                    )
-                                        </td>
-                                        <td>@(string.IsNullOrWhiteSpace(b.MDRNumber) ? "-" : b.MDRNumber)</td>
-                                        <td>@(string.IsNullOrWhiteSpace(b.PetitionerInterest) ? "-" : b.PetitionerInterest)</td>
-                                        <td>@(string.IsNullOrWhiteSpace(b.RegulationStatusName) ? "-" : b.RegulationStatusName)</td>
-                                        <td>@(string.IsNullOrWhiteSpace(b.BuildingUnits) ? "-" : b.BuildingUnits))</td>
-                                       
-                                         <td>Active</td>
-                                         
+                                                                    ? "-"
+                                                                    : $"{b.Address1}, {b.Address2}, {b.City}, {b.StateName} - {b.Zipcode}"
+                                                                    )
+                                            </td>
+                                            <td>@(string.IsNullOrWhiteSpace(b.MDRNumber) ? "-" : b.MDRNumber)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(b.PetitionerInterest) ? "-" : b.PetitionerInterest)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(b.RegulationStatusName) ? "-" : b.RegulationStatusName)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(b.BuildingUnits) ? "-" : b.BuildingUnits))</td>
+
+                                            <td>Active</td>
+
                                         </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr><td colspan="10" class="text-muted">No buildings added yet.</td></tr>
-                        }
-                    </tbody>
-                </table>
-                </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr><td colspan="10" class="text-muted">No buildings added yet.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                     <div class="vertical-buttons d-flex flex-column align-items-center position-absolute end-0 top-0 translate-middle-y ">
                         <button class="vertical-tab-button @(activeTab == "tanent" ? "active-vertical" : "")" @onclick="@(() => SetActiveTab("tanent"))" style="position:relative ; top:15rem">Tanent</button>
 
                     </div>
                 }
-             </div>
+            </div>
         }
 
 
@@ -772,7 +774,7 @@
                     <h5 class="color-text fw-bold mb-0">TENANT INFORMATION</h5>
                     <div>
                         <button class="btn btn-outline-secondary fw-semibold me-2"
-                                @onclick="@BackToTenantList">
+                        @onclick="@BackToPreviousTab">
                             ←
                         </button>
                         @* <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button> *@
@@ -790,7 +792,7 @@
                         <DataAnnotationsValidator />
                         <!-- Row 1: Apartment Selection -->
                         <div class="row mb-3">
-                        
+
                             <div class="col-md-3">
                                 <label class="required-label">Building</label>
                                 <InputSelect class="form-select" @bind-Value="tenant.BuildingId">
@@ -801,7 +803,7 @@
                                     }
                                 </InputSelect>
                                 <ValidationMessage For="@(() => tenant.BuildingId)" />
-                                </div>
+                            </div>
                             <div class="col-md-4">
                                 <label class="required-label">First Name</label>
                                 <div class="input-group">
@@ -810,22 +812,22 @@
                                 </div>
                                 <ValidationMessage For="@(() => tenant.FirstName)" />
                             </div>
-                          <div class="col-md-3">
-                            <label>Last Name</label>
-                            <div class="input-group mb-3">
-                                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <InputText class="form-control" @bind-Value="tenant.LastName" placeholder="Enter Last Name" />
+                            <div class="col-md-3">
+                                <label>Last Name</label>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <InputText class="form-control" @bind-Value="tenant.LastName" placeholder="Enter Last Name" />
+                                </div>
+
                             </div>
 
-                        </div>
-                          
-                    
+
                             <div class="col-md-2">
                                 <label>Unit/AptNumber</label>
                                 <InputText class="form-control" @bind-Value="tenant.UnitOrApartmentNumber" placeholder="Enter Unit or Apt No." />
                             </div>
-                            </div>
-                    
+                        </div>
+
 
                         <!-- Row 2: Email, Phone language  , ein -->
                         <div class="row mb-4">
@@ -835,19 +837,19 @@
                                     <span class="input-group-text">@@</span>
                                     <InputText class="form-control" @bind-Value="tenant.Email" placeholder="Enter Email"/>
                                 </div>
-                                    <ValidationMessage For="@(() => tenant.Email)" />
-                               
-                            </div>
-                          
-                                <div class="col-md-3">
-                                    <label>Phone</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="bi bi-phone"></i></span>
-                                        <InputText class="form-control" @bind-Value="tenant.Phone" placeholder="Enter Phone " />
-                                    </div>
+                                <ValidationMessage For="@(() => tenant.Email)" />
 
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>Phone</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                                    <InputText class="form-control" @bind-Value="tenant.Phone" placeholder="Enter Phone " />
                                 </div>
-                          
+
+                            </div>
+
                             <div class="col-md-3">
                                 <label>EIN/SSN</label>
 
@@ -890,7 +892,7 @@
                                 <label>Borough</label>
                                 <InputText class="form-control" @bind-Value="tenant.Borough" placeholder="Enter Borough" />
                             </div>
-                               <div class="col-md-2">
+                            <div class="col-md-2">
                                 <label>Social Services</label>
                                 <InputText class="form-control" @bind-Value="tenant.SocialServices" placeholder="Enter Social Service Info" />
                             </div>
@@ -898,7 +900,7 @@
                         </div>
 
                         <div class="row mb-3">
-                         
+
                             <div class="col-md-4">
                                 <label>Last Rent Paid</label>
                                 <InputText class="form-control" @bind-Value="tenant.LastMonthWeekRentPaid" placeholder="Enter Last Paid Info" />
@@ -912,16 +914,16 @@
                                 <label>Reg. No.</label>
                                 <InputText class="form-control" @bind-Value="tenant.Registration_No" placeholder="Enter Registration No." />
                             </div>
-                                <div class="col-md-3">
+                            <div class="col-md-3">
                                 <label>Name & Relations</label>
                                 <InputTextArea class="form-control"
-                                               @bind-Value="tenant.Name_Relation"
-                                               placeholder="Enter Name & Relation"
-                                               rows="3" />
+                                @bind-Value="tenant.Name_Relation"
+                                placeholder="Enter Name & Relation"
+                                rows="3" />
                             </div>
                         </div>
 
-                     
+
 
 
                         <div class="row mb-3">
@@ -949,8 +951,8 @@
                                     </div>
                                 </div>
                             </InputRadioGroup>
-                                   <ValidationMessage For="@(() => tenant.IsUnitIllegalId)" />
-                       
+                            <ValidationMessage For="@(() => tenant.IsUnitIllegalId)" />
+
                         </div>
 
                         <div class="row mb-3">
@@ -982,42 +984,42 @@
                         </div>
 
                         <div class="row mb-3">
-                       
-                                <InputRadioGroup @bind-Value="tenant.TenancyTypeId" class="mb-3 required-label">
-                                    <div class="row align-items-center">
-                                        <div class="col-auto">
-                                            <label class="form-label mb-0 required-label" style="margin-top:5px">Tenancy Type:</label>
-                                        </div>
-                                        <div class="col">
-                                            <div class="d-flex flex-wrap align-items-center gap-4">
-                                                @foreach (var role in TenancyTypeList)
-                                                {
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <div class="form-check d-flex align-items-center m-0">
-                                                            <InputRadio Value="@role.Id" class="form-check-input me-1" />
-                                                            <label class="form-check-label ms-1" style="margin-top:5px">
-                                                                @role.Name
-                                                            </label>
-                                                        </div>
 
-                                                        @if (role.Name == "Other" && tenant.TenancyTypeId == role.Id)
-                                                        {
-                                                            <InputText class="form-control"
-                                                                       placeholder="Please specify"
-                                                                       style="max-width: 200px; height: 36px;"
-                                                                       @bind-Value="tenant.TenancyTypeDescription" />
-                                                        }
+                            <InputRadioGroup @bind-Value="tenant.TenancyTypeId" class="mb-3 required-label">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <label class="form-label mb-0 required-label" style="margin-top:5px">Tenancy Type:</label>
+                                    </div>
+                                    <div class="col">
+                                        <div class="d-flex flex-wrap align-items-center gap-4">
+                                            @foreach (var role in TenancyTypeList)
+                                            {
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="form-check d-flex align-items-center m-0">
+                                                        <InputRadio Value="@role.Id" class="form-check-input me-1" />
+                                                        <label class="form-check-label ms-1" style="margin-top:5px">
+                                                            @role.Name
+                                                        </label>
                                                     </div>
-                                                }
-                                            </div>
+
+                                                    @if (role.Name == "Other" && tenant.TenancyTypeId == role.Id)
+                                                    {
+                                                        <InputText class="form-control"
+                                                        placeholder="Please specify"
+                                                        style="max-width: 200px; height: 36px;"
+                                                        @bind-Value="tenant.TenancyTypeDescription" />
+                                                    }
+                                                </div>
+                                            }
                                         </div>
                                     </div>
-                                </InputRadioGroup>
+                                </div>
+                            </InputRadioGroup>
                             <ValidationMessage For="@(() => tenant.TenancyTypeId)" />
                         </div>
 
-                    
-                       
+
+
                         <div class="row mb-3">
                             <!-- Tenant of Record -->
                             <div class="col-md-6">
@@ -1062,43 +1064,43 @@
 
                             <div class="col-md-6">
 
-                            <InputRadioGroup @bind-Value="tenant.HasRegulatedTenancy">
-                                <div class="d-flex align-items-center">
-                                    <label class="form-label mb-0 me-2">Is this a rent regulated tenancy:</label>
+                                <InputRadioGroup @bind-Value="tenant.HasRegulatedTenancy">
+                                    <div class="d-flex align-items-center">
+                                        <label class="form-label mb-0 me-2">Is this a rent regulated tenancy:</label>
 
-                                    <div class="form-check me-2">
-                                        <InputRadio class="form-check-input" Value="true" />
-                                        <label class="form-check-label">Yes</label>
-                                    </div>
+                                        <div class="form-check me-2">
+                                            <InputRadio class="form-check-input" Value="true" />
+                                            <label class="form-check-label">Yes</label>
+                                        </div>
 
-                                    <div class="form-check">
-                                        <InputRadio class="form-check-input" Value="false" />
-                                        <label class="form-check-label">No</label>
+                                        <div class="form-check">
+                                            <InputRadio class="form-check-input" Value="false" />
+                                            <label class="form-check-label">No</label>
+                                        </div>
                                     </div>
-                                </div>
-                            </InputRadioGroup>
+                                </InputRadioGroup>
                             </div>
                             <div class="col-md-6">
-                            <InputRadioGroup @bind-Value="tenant.OtherOccupants" >
-                                <div class="d-flex align-items-center">
-                                    <label class="form-label mb-0 me-2">Other Occupants:</label>
+                                <InputRadioGroup @bind-Value="tenant.OtherOccupants" >
+                                    <div class="d-flex align-items-center">
+                                        <label class="form-label mb-0 me-2">Other Occupants:</label>
 
-                                    <div class="form-check me-2">
-                                        <InputRadio class="form-check-input" Value="true" />
-                                        <label class="form-check-label">Yes</label>
-                                    </div>
+                                        <div class="form-check me-2">
+                                            <InputRadio class="form-check-input" Value="true" />
+                                            <label class="form-check-label">Yes</label>
+                                        </div>
 
-                                    <div class="form-check">
-                                        <InputRadio class="form-check-input" Value="false" />
-                                        <label class="form-check-label">No</label>
+                                        <div class="form-check">
+                                            <InputRadio class="form-check-input" Value="false" />
+                                            <label class="form-check-label">No</label>
+                                        </div>
                                     </div>
-                                </div>
-                            </InputRadioGroup>
+                                </InputRadioGroup>
 
                             </div>
-                           
+
                         </div>
-                      
+
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <InputRadioGroup @bind-Value="tenant.HasPriorCase">
@@ -1118,7 +1120,7 @@
                                 </InputRadioGroup>
 
                             </div>
-                              <div class="col-md-6">
+                            <div class="col-md-6">
 
                                 <InputRadioGroup @bind-Value="tenant.RenewalOffer">
                                     <div class="d-flex align-items-center">
@@ -1135,23 +1137,23 @@
                                         </div>
                                     </div>
                                 </InputRadioGroup>
-                               
+
                             </div>
 
-</div>
-                        
-                      @*   <!-- Submit Button -->
+                        </div>
+
+                        @*   <!-- Submit Button -->
                         <div class="row">
                             <div class="col">
                                 @* <button type="submit" class="btn bg-navy text-white mt-2">Save </button> *@
-                            @* </div> *@
+                        @* </div> *@
                         @* </div>  *@
                     </EditForm>
                 }
 
                 @if (!showTanentForm){
-                <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
-                    <table class="table table-bordered mt-4" style="min-width: 1200px;">
+                    <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
+                        <table class="table table-bordered mt-4" style="min-width: 1200px;">
                             <thead class="table-light">
                                 <tr>
                                     <th>First Name</th>
@@ -1198,14 +1200,14 @@
                                     </tr>
                                 }
                             </tbody>
-                    </table>
-                </div>
+                        </table>
+                    </div>
                 }
             </div>
         }
 
 
-</div>
+    </div>
 
 
     <div class="sticky-footer bg-white border-top p-3 d-flex justify-content-between gap-2">
@@ -1217,9 +1219,9 @@
             <button class="btn btn-outline-secondary px-4 fw-semibold" @onclick="HideAsync">Cancel</button>
             <button class="btn bg-navy text-white px-4 fw-semibold" disabled="@(!IsClientFormValid())" @onclick="SubmitClientAsync">Submit</button>
         </div>
-        
+
     </div>
- 
+
 
 </div>
 
@@ -1251,9 +1253,15 @@
     private List<LandlordType> LandLordTypeList = new();
     private List<TenancyType> TenancyTypeList = new();
     private List<IsUnitIllegal> IsUnitIllegalList = new();
+    private string LatestLandLordCode = "";
+    private string LatestBuildingCode = "";
+    private string LatestTenantCode = "";
+    private Stack<string> tabHistory = new();
+
 
     protected override async Task OnInitializedAsync()
     {
+
         if (createClient != null)
         {
 
@@ -1265,7 +1273,12 @@
             LandLordTypeList = await LandlordTypeRepository.GetAllLandLordType();
             TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
             IsUnitIllegalList = await UnitIllegalRepository.GetAllUnitIllegal();
+            LatestLandLordCode = await _landlordService.GetLastLandLordCode();
+            LatestBuildingCode = await _apartmentService.GetLastBuilding();
+            LatestTenantCode = await _tenantService.GetLastTenantCode();
         }
+
+
     }  
 
     private void BackToLandlordList()
@@ -1302,7 +1315,7 @@
         StateHasChanged();
     }
 
-  
+
     private async Task SetActiveTab(string tab)
     {
         // Step 1: Client tab complete hona chahiye for Landlord
@@ -1334,9 +1347,35 @@
                 return;
             }
         }
-
+        if (!string.IsNullOrEmpty(activeTab))
+        {
+            tabHistory.Push(activeTab);
+        }
         // All checks passed: change tab
         activeTab = tab;
+    }
+
+    private void BackToPreviousTab()
+    {
+        if (tabHistory.Count > 0)
+        {
+            activeTab = tabHistory.Pop();
+
+            showLandlordForm = false;
+            showBuildingForm = false;
+            showTanentForm = false;
+
+            // Reset forms if needed
+            if (activeTab == "landlord") showLandlordForm = false;
+            else if (activeTab == "building") showBuildingForm = false;
+            else if (activeTab == "tanent") showTanentForm = false;
+        }
+        else
+        {
+            activeTab = string.Empty;
+        }
+
+        StateHasChanged();
     }
 
     private void ToggleLandlordForm() => showLandlordForm = !showLandlordForm;
@@ -1363,6 +1402,11 @@
             .FirstOrDefault(x => x.Id == landlord.StateId)?.Name ?? "";
         landlord.LandlordTypeName = LandLordTypeList
             .FirstOrDefault(x => x.Id == landlord.LandlordTypeId)?.Name ?? "";
+
+        int nextNumber = int.Parse(LatestLandLordCode[2..]) + 1;
+        LatestLandLordCode = $"LL{nextNumber.ToString().PadLeft(10, '0')}";
+
+        landlord.LandLordCode = LatestLandLordCode;
         savelandlordList.Add(landlord);
 
         landlord = new();
@@ -1380,11 +1424,16 @@
         tenant.LanguageName = LangList
             .FirstOrDefault(x => x.Id == tenant.LanguageId)?.Name ?? "";
 
-              tenant.TenancyTypeName = TenancyTypeList
-            .FirstOrDefault(x => x.Id == tenant.TenancyTypeId)?.Name ?? "";
+        tenant.TenancyTypeName = TenancyTypeList
+      .FirstOrDefault(x => x.Id == tenant.TenancyTypeId)?.Name ?? "";
 
-                tenant.IsUnitIllegalName = IsUnitIllegalList
-            .FirstOrDefault(x => x.Id == tenant.IsUnitIllegalId)?.Name ?? "";
+        tenant.IsUnitIllegalName = IsUnitIllegalList
+    .FirstOrDefault(x => x.Id == tenant.IsUnitIllegalId)?.Name ?? "";
+
+        int nextNumber = int.Parse(LatestTenantCode[2..]) + 1;
+        LatestTenantCode = $"TT{nextNumber.ToString().PadLeft(10, '0')}";
+
+        tenant.TenantCode = LatestTenantCode;
 
         saveTanentList.Add(tenant);
 
@@ -1410,6 +1459,10 @@
 
         building.RegulationStatusName = RegulationList
        .FirstOrDefault(x => x.Id == building.RegulationStatusId)?.Name ?? "";
+        int nextNumber = int.Parse(LatestBuildingCode[2..]) + 1;
+        LatestBuildingCode = $"BB{nextNumber.ToString().PadLeft(10, '0')}";
+
+        building.BuildingCode = LatestBuildingCode;
 
         apartmentList.Add(building);
         building = new();
@@ -1417,9 +1470,10 @@
         return Task.CompletedTask;
     }
 
-   
+
     private async Task SubmitClientAsync()
     {
+        spinnerservice.Show();
         if (createClient == null)
             return;
 

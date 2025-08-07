@@ -21,7 +21,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 		public async Task<string?> GetLastLandLordCodeAsync()
 		{
 			return await _mainDbContext.LandLords
-				.OrderByDescending(l => l.CreatedOn)
+				.OrderByDescending(l => l.LandLordCode)
 				.Select(l => l.LandLordCode)
 				.FirstOrDefaultAsync();
 		}
@@ -141,6 +141,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 				ContactPersonName = l.ContactPersonName,
 				TypeOwnerId = l.TypeOfOwnerId,
 				ClientId = l.ClientId,
+				IsDeleted = l.IsDeleted,
+				IsActive = l.IsActive,
 				
 
 			}).ToList();

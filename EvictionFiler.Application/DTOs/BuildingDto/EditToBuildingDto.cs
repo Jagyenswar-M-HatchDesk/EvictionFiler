@@ -8,6 +8,7 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 	{
 		public Guid Id { get; set; }
 		public List<EditToTenantDto> editTenants { get; set; } = new();
-
-	}
+        public bool IsActive { get; set; }
+        public bool? IsDeleted { get; set; }
+    }
 }
