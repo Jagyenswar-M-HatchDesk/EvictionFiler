@@ -4,6 +4,8 @@
 @using EvictionFiler.Domain.Entities
 @inject ILegalCaseService _service
 @inject IClientService _clientservice
+@using EvictionFiler.Client.SpinnerService
+@inject SpinnerService spinnerservice
 
 @inject NavigationManager navManager
 <PageTitle>Cases</PageTitle>
@@ -258,7 +260,7 @@
                         <th>Client </th>
                         <th>LandLord </th>
                         <th>Tenant </th>
-                         <th>Reason Holdover</th> 
+                        <th>Reason Holdover</th> 
                         <th>Last Action Date</th>
                         <th>Status</th>
 
@@ -284,7 +286,7 @@
                                     @($"{cas?.Tenants?.TenantCode ?? ""} - {cas?.Tenants?.FirstName ?? ""} {cas?.Tenants?.LastName ?? ""}")
                                 </td>
                                 <td>@(cas?.ReasonHoldover?.Name ?? "-")</td> 
-                              
+
                                 <td>@( cas?.CreatedOn.ToString("MM/dd/yyyy"))</td>
                                 @if (cas?.IsActive == true && cas.IsDeleted == false)
                                 {
@@ -301,11 +303,11 @@
 
                                 <td class="sticky">
                                     <i class="fa-solid fa-pen-to-square text-navy me-3" style="cursor:pointer"
-                                       @onclick="@(() => EditCase(cas.Id))"
-                                       title="Edit"></i>
+                                    @onclick="@(() => EditCase(cas.Id))"
+                                    title="Edit"></i>
                                     <i class="fa-solid fa-trash-can text-danger" title="Delete" style="cursor:pointer"></i>
                                 </td>
-                              
+
                             </tr>
 
                         }
@@ -316,7 +318,7 @@
                             <td colspan="10" class="text-muted">No Cases found.</td>
                         </tr>
                     }
-                   
+
                 </tbody>
             </table>
         </div>
@@ -345,7 +347,7 @@
                         @successMessage
                     </div>
                     <button type="button" class="btn-close btn-close-white me-2 m-auto"
-                            @onclick="() => successMessage = string.Empty"></button>
+                    @onclick="() => successMessage = string.Empty"></button>
                 </div>
             </div>
         </div>
@@ -402,6 +404,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        spinnerservice.Show();
         var uri = new Uri(navManager.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
@@ -413,8 +416,10 @@
 
             navManager.NavigateTo("/cases", forceLoad: true);
         }
+        await Task.Delay(500);
 
-        await GetAllCases(); 
+        await GetAllCases();
+        spinnerservice.Hide();
     }
 
 
