@@ -101,16 +101,17 @@ namespace EvictionFiler.Application.Services
 				.GetAllQuerable(
 					x => x.Id == id,
 					x => x.IsUnitIllegal,
-					x => x.Building, // Include Building
+				
+					x => x.Building, 
 					x => x.Building.State,
 					x => x.Building.PremiseType,
-
+					
 					x => x.Building.RegulationStatus,
-					x => x.TenancyType,// Include RegulationStatus of Building
-					x => x.Building.Landlord, // Include Landlord
-					x => x.Building.Landlord.State, // Include State of Landlord
+					x => x.TenancyType,
+					x => x.Building.Landlord,
+					x => x.Building.Landlord.State, 
 					x => x.Building.Landlord.LandlordType,
-					x => x.Building.Landlord.TypeOfOwner// Include Landlord Type
+					x => x.Building.Landlord.TypeOfOwner
 				)
 				.FirstOrDefaultAsync();
 
@@ -197,9 +198,6 @@ namespace EvictionFiler.Application.Services
 				},
 			};
 		}
-
-
-
 
 		public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? clientId)
 		{

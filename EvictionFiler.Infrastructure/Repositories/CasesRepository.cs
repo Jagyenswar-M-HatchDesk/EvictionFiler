@@ -162,7 +162,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				BuildingId = legalCase.BuildingId,
 				LandLordId = legalCase.LandLordId,
 				ClientId = legalCase.ClientId,
-			
+			    CaseTypeId = legalCase.CaseTypeId,
 				ReasonHoldoverId = legalCase.ReasonHoldoverId,
 				ExplainDescription = legalCase.ExplainDescription,
 				ReasonDescription = legalCase.ReasonDescription,

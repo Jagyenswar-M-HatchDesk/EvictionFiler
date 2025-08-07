@@ -56,5 +56,8 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 		[MaxLength(50)]
 		public string? Firm { get; set; }
 
+		public bool? tenantReceive { get; set; }
+		public string? ExplainTenancyReceiveDescription { get; set; }
+
 	}
 }
