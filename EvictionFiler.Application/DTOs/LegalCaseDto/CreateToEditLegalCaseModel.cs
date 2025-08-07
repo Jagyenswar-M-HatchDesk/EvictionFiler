@@ -12,7 +12,8 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 		public Guid? BuildingId { get; set; }
 		public Guid? LandLordId { get; set; }
 		public Guid? TenantId { get; set; }
-		
+		public Guid? CaseTypeId { get; set; }
+
 		public string? Casecode { get; set; }
 		[Required(ErrorMessage = "Please select Reason Holdover.")]
 		public Guid? ReasonHoldoverId { get; set; }
@@ -48,7 +49,12 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 		public string? ExplainDescription { get; set; }
 
 		public CreateToTenantDto ? tenants { get; set; }
-	
-	
+
+		public string? Attrney { get; set; }
+		[MaxLength(100)]
+		public string? AttrneyContactInfo { get; set; }
+		[MaxLength(50)]
+		public string? Firm { get; set; }
+
 	}
 }

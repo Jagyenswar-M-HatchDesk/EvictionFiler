@@ -149,6 +149,7 @@ namespace EvictionFiler.Application.Services
 				IsUnitIllegalId = t.IsUnitIllegalId,
 				IsUnitIllegalName = t.IsUnitIllegal?.Name,
 				BuildingId = t.BuildinId,
+			
 
 				Building = new EditToBuildingDto
 				{

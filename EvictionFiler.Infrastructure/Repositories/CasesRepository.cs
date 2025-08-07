@@ -184,6 +184,9 @@ namespace EvictionFiler.Infrastructure.Repositories
 				RentDueEachMonthOrWeek = legalCase.RentDueEachMonthOrWeek,
 				MonthlyRent = legalCase.MonthlyRent,
 				TotalRentOwed = legalCase.TotalRentOwed,
+				Attrney = legalCase.Attrney,
+				AttrneyContactInfo = legalCase.AttrneyContactInfo,
+				Firm = legalCase.Firm,
 
 			
 				CreatedOn = DateTime.Now,
