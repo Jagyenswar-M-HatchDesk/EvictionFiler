@@ -66,6 +66,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 			var legalCaseEntity = await _context.LegalCases
 				.Include(c => c.Clients)
 				.Include(c => c.Buildings)
+					.Include(c => c.CaseType)
 				.Include(c => c.LandLords)
 				.Include(c => c.Tenants)
 				.Include(c=>c.RegulationStatus)
@@ -104,6 +105,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 				  TenancyTypeId = legalCaseEntity.TenancyTypeId,
 				  TenantRecord = legalCaseEntity.TenantRecord,
 				  TenantShare = legalCaseEntity.TenantShare,
+				  CaseTypeId = legalCaseEntity.CaseTypeId,
+				  Attrney = legalCaseEntity.Attrney,
+				  AttrneyContactInfo = legalCaseEntity.AttrneyContactInfo,
+				  Firm = legalCaseEntity.Firm,
+				  tenantReceive = legalCaseEntity.tenantReceive,
+				  ExplainTenancyReceiveDescription = legalCaseEntity.ExplainTenancyReceiveDescription,
 				  
 				  
 				  TotalRentOwed = legalCaseEntity.TotalRentOwed,
@@ -126,7 +133,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 						Zipcode = legalCaseEntity.Tenants.Building.Zipcode,
 						City = legalCaseEntity.Tenants.Building.City,
 						StateId = legalCaseEntity.Tenants.Building.StateId,
-						StateName = legalCaseEntity.Tenants.Building.State.Name,
+						//StateName = legalCaseEntity.Tenants.Building.State.Name,
 						MDRNumber = legalCaseEntity.Tenants.Building.MDRNumber,
 						BuildingUnits = legalCaseEntity.Tenants.Building.BuildingUnits,
 						RegulationStatusId = legalCaseEntity.Tenants.Building.RegulationStatusId
@@ -141,7 +148,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 						Zipcode = legalCaseEntity.Tenants.Building.Landlord.Zipcode,
 						City = legalCaseEntity.Tenants.Building.Landlord.City,
 						StateId = legalCaseEntity.Tenants.Building.Landlord.StateId,
-						StateName = legalCaseEntity.Tenants.Building.Landlord.State.Name,
+						//StateName = legalCaseEntity.Tenants.Building.Landlord.State.Name,
 						Phone = legalCaseEntity.Tenants.Building.Landlord.Phone,
 						Email = legalCaseEntity.Tenants.Building.Landlord.Email,
 						LandlordTypeId = legalCaseEntity.Tenants.Building.Landlord.LandlordTypeId,
@@ -230,8 +237,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 			existing.RentDueEachMonthOrWeek = legalCase.RentDueEachMonthOrWeek;
 			existing.MonthlyRent = legalCase.MonthlyRent;
 			existing.TotalRentOwed = legalCase.TotalRentOwed;
-			
-				
+			existing.Attrney = legalCase.Attrney;
+			existing.AttrneyContactInfo = legalCase.AttrneyContactInfo;
+			existing.Firm = legalCase.Firm;
+			existing.tenantReceive = legalCase.tenantReceive;
+			existing.CaseTypeId = legalCase.CaseTypeId;
+
+
 			_context.LegalCases.Update(existing);
 			await _context.SaveChangesAsync();
 

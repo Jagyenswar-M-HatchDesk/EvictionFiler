@@ -1046,10 +1046,9 @@ aria-labelledby="createUserLabel">
                             <div class="col-auto">
                                 <label class="me-2">Additional Occupants</label>
                             </div>
-                            @if(tenant.occupants != null)
-                            {
+                            
                                 <div class="col">
-                                    @for (int i = 0; i < tenant.occupants.Count; i++)
+                                    @for (int i = 0; i < occupants.Count; i++)
                                     {
                                         var index = i;
 
@@ -1058,26 +1057,26 @@ aria-labelledby="createUserLabel">
                                                 <div class="form-check">
                                                     <input type="checkbox"
                                                            class="form-check-input"
-                                                           @bind="tenant.occupants[index].IsChecked" />
+                                                           @bind="occupants[index].IsChecked" />
                                                 </div>
                                             </div>
 
                                             <div class="col">
-                                                @if (tenant.occupants[index].IsChecked)
+                                                @if (occupants[index].IsChecked)
                                                 {
                                                     <div class="row">
                                                         <div class="col-auto">
                                                             <InputText class="form-control" placeholder="Name"
-                                                                       @bind-Value="tenant.occupants[index].Name" />
+                                                                       @bind-Value="occupants[index].Name" />
                                                         </div>
                                                         <div class="col">
                                                             <InputText class="form-control" placeholder="Relation"
-                                                                       @bind-Value="tenant.occupants[index].Relation" />
+                                                                       @bind-Value="occupants[index].Relation" />
                                                         </div>
                                                     </div>
 
                                                     @* ✅ Add new only if this is last item and has data *@
-                                                    @if (index == tenant.occupants.Count - 1 && !string.IsNullOrWhiteSpace(occupants[index].Name))
+                                                    @if (index == occupants.Count - 1 && !string.IsNullOrWhiteSpace(occupants[index].Name))
                                                     {
                                                         occupants.Add(new AdditionalOccupantDto());
                                                     }
@@ -1086,7 +1085,7 @@ aria-labelledby="createUserLabel">
                                         </div>
                                     }
                                 </div>
-                            }
+                            
                           
                         </div>
 
@@ -1462,9 +1461,9 @@ aria-labelledby="createUserLabel">
             LatestBuildingCode = await _apartmentService.GetLastBuilding();
             LatestTenantCode = await _tenantService.GetLastTenantCode();
         }
-        occupants.Add(new AdditionalOccupantDto());
-    
-  }
+        //occupants.Add(new AdditionalOccupantDto());
+
+    }
 
     private void OnCheckboxChanged(int index, ChangeEventArgs e)
     {
@@ -1697,11 +1696,20 @@ aria-labelledby="createUserLabel">
 
     private async Task EditTenant(Guid TenantId)
     {
+        
         selectedTenantId = TenantId;
         showTanentForm = true;
         activeTab = "tanent";
 
         tenant = Tenants.FirstOrDefault(l => l.Id == TenantId) ?? new();
+        if(tenant.occupants.Count > 0)
+        {
+            occupants.AddRange(tenant.occupants);
+        }
+        else
+        {
+            occupants.Add(new AdditionalOccupantDto());
+        }
 
         StateHasChanged();
     }

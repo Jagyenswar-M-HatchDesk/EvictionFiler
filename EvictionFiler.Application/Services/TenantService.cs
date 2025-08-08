@@ -101,7 +101,7 @@ namespace EvictionFiler.Application.Services
 				.GetAllQuerable(
 					x => x.Id == id,
 					x => x.IsUnitIllegal,
-				
+				    
 					x => x.Building, 
 					x => x.Building.State,
 					x => x.Building.PremiseType,

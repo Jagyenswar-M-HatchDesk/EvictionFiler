@@ -455,7 +455,8 @@ namespace EvictionFiler.Application.Services
 			var buildingsToUpdate = new List<Building>();
 			var tenantsToAdd = new List<Tenant>();
 			var tenantsToUpdate = new List<Tenant>();
-			var addoccupants = new List<AdditionalOccupants>();
+			var addoccupantsToAdd = new List<AdditionalOccupants>();
+			var addoccupantsToUpdate = new List<AdditionalOccupants>();
 
 			//var lastLandlordCode = await _landlordrepo.GetLastLandLordCodeAsync();
 			//int nextLandlordNumber = string.IsNullOrEmpty(lastLandlordCode) ? 1 : int.Parse(lastLandlordCode[2..]) + 1;
@@ -596,22 +597,26 @@ namespace EvictionFiler.Application.Services
 									{
 										if (o.Id == Guid.Empty) // New
 										{
-											addoccupants.Add(new AdditionalOccupants
+											var addtionlOccupants = new AdditionalOccupants
 											{
 												Id = Guid.NewGuid(),
 												Name = o.Name,
 												Relation = o.Relation,
 												TenantId = tenant.Id
-											});
+											};
+											addoccupantsToAdd.Add(addtionlOccupants);
+
 										}
-										else // Existing
+										else 
 										{
 											var existingOcc = await _additionalOccupantsRepo.GetAsync(o.Id);
 											if (existingOcc != null)
 											{
 												existingOcc.Name = o.Name;
 												existingOcc.Relation = o.Relation;
-												addoccupants.Add(existingOcc);
+												existingOcc.TenantId = tenant.Id;
+												addoccupantsToUpdate.Add(existingOcc);
+
 											}
 											else
 											{
@@ -656,10 +661,10 @@ namespace EvictionFiler.Application.Services
 			if (tenantsToUpdate.Any())
 				_tenantRepo.UpdateRange(tenantsToUpdate);
 
-			if (addoccupants.Any())
-				await _additionalOccupantsRepo.AddRangeAsync(addoccupants);
-			if (addoccupants.Any())
-				_additionalOccupantsRepo.UpdateRange(addoccupants);
+			if (addoccupantsToAdd.Any())
+				await _additionalOccupantsRepo.AddRangeAsync(addoccupantsToAdd);
+			if (addoccupantsToUpdate.Any())
+				_additionalOccupantsRepo.UpdateRange(addoccupantsToUpdate);
 
 			await _unitOfWork.SaveChangesAsync();
 			return true;
