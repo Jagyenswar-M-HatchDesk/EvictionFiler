@@ -1,6 +1,7 @@
 ﻿@using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Application.DTOs.OccupantDto
 @using EvictionFiler.Application.DTOs.TenantDto
 @using EvictionFiler.Application.Interfaces.IRepository
 @using EvictionFiler.Application.Interfaces.IServices
@@ -1030,24 +1031,64 @@ aria-labelledby="createUserLabel">
                                 <InputText class="form-control" @bind-Value="tenant.LastMonthWeekRentPaid" placeholder="Enter Last Paid Info" />
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label>Total Rent Owed</label>
                                 <InputNumber class="form-control" @bind-Value="tenant.TotalRentOwed" placeholder="Enter Total Owed" />
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-4">
                                 <label>Reg. No.</label>
                                 <InputText class="form-control" @bind-Value="tenant.Registration_No" placeholder="Enter Registration No." />
                             </div>
-                            <div class="col-md-3">
-                                <label>Name & Relations</label>
-                                <InputTextArea class="form-control"
-                                @bind-Value="tenant.Name_Relation"
-                                placeholder="Enter Name & Relation"
-                                rows="3" />
-                            </div>
+                       
                         </div>
 
+                        <div class="row mb-3">
+                            <div class="col-auto">
+                                <label class="me-2">Additional Occupants</label>
+                            </div>
+                            @if(tenant.occupants != null)
+                            {
+                                <div class="col">
+                                    @for (int i = 0; i < tenant.occupants.Count; i++)
+                                    {
+                                        var index = i;
 
+                                        <div class="row mb-2">
+                                            <div class="col-auto">
+                                                <div class="form-check">
+                                                    <input type="checkbox"
+                                                           class="form-check-input"
+                                                           @bind="tenant.occupants[index].IsChecked" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col">
+                                                @if (tenant.occupants[index].IsChecked)
+                                                {
+                                                    <div class="row">
+                                                        <div class="col-auto">
+                                                            <InputText class="form-control" placeholder="Name"
+                                                                       @bind-Value="tenant.occupants[index].Name" />
+                                                        </div>
+                                                        <div class="col">
+                                                            <InputText class="form-control" placeholder="Relation"
+                                                                       @bind-Value="tenant.occupants[index].Relation" />
+                                                        </div>
+                                                    </div>
+
+                                                    @* ✅ Add new only if this is last item and has data *@
+                                                    @if (index == tenant.occupants.Count - 1 && !string.IsNullOrWhiteSpace(occupants[index].Name))
+                                                    {
+                                                        occupants.Add(new AdditionalOccupantDto());
+                                                    }
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                          
+                        </div>
 
 
                         <div class="row mb-3">
@@ -1398,6 +1439,12 @@ aria-labelledby="createUserLabel">
 
 
     private List<LandlordType> LandLordTypeList = new();
+
+    private List<AdditionalOccupantDto> occupants = new()
+    {
+        new AdditionalOccupantDto()
+    };
+
     protected override async Task OnInitializedAsync()
     {
         
@@ -1415,7 +1462,19 @@ aria-labelledby="createUserLabel">
             LatestBuildingCode = await _apartmentService.GetLastBuilding();
             LatestTenantCode = await _tenantService.GetLastTenantCode();
         }
+        occupants.Add(new AdditionalOccupantDto());
+    
+  }
 
+    private void OnCheckboxChanged(int index, ChangeEventArgs e)
+    {
+        occupants[index].IsChecked = (bool)e.Value!;
+
+        // Add next checkbox if last one is checked
+        if (occupants[index].IsChecked && index == occupants.Count - 1)
+        {
+            occupants.Add(new AdditionalOccupantDto());
+        }
     }
 
     private string GetToggleButtonText() => (activeTab == "landlord" && showLandlordForm) || (activeTab == "building" && showBuildingForm) || (activeTab == "tanent" && showTanentForm)
@@ -1593,6 +1652,10 @@ aria-labelledby="createUserLabel">
             LatestTenantCode = $"TT{nextNumber.ToString().PadLeft(10, '0')}";
 
             tenant.TenantCode = LatestTenantCode;
+            tenant.occupants = occupants
+    .Where(x => x.IsChecked && !string.IsNullOrWhiteSpace(x.Name))
+    .ToList();
+
             Tenants.Add(tenant);
         }
         else
@@ -1618,6 +1681,9 @@ aria-labelledby="createUserLabel">
                 existing.Registration_No = tenant.Registration_No;
                 existing.TenantRecord = tenant.TenantRecord;
                 existing.HasPriorCase = tenant.HasPriorCase;
+                existing.occupants = tenant.occupants
+            .Where(x => x.IsChecked && !string.IsNullOrWhiteSpace(x.Name))
+            .ToList();
             }
         }
 
@@ -1634,19 +1700,6 @@ aria-labelledby="createUserLabel">
         selectedTenantId = TenantId;
         showTanentForm = true;
         activeTab = "tanent";
-
-        // if (apartmentList == null || !apartmentList.Any())
-        // {
-        //     // ✅ Load apartments of client landlords
-        //     var landlords = await _landlordService.GetLandlordsByClientIdAsync(editClient.Id);
-        //     apartmentList = new();
-
-        //     foreach (var l in landlords)
-        //     {
-        //         var buildings = await _apartmentService.GetBuildingsByLandlordIdAsync(l.Id);
-        //         apartmentList.AddRange(buildings);
-        //     }
-        // }
 
         tenant = Tenants.FirstOrDefault(l => l.Id == TenantId) ?? new();
 

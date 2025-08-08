@@ -71,7 +71,7 @@ namespace EvictionFiler.Domain.Entities
 		[ForeignKey("IsUnitIllegalId")]
 		public IsUnitIllegal? IsUnitIllegal { get; set; }
 
-	
+		public ICollection<AdditionalOccupants>? Occupants { get; set; }
 
 	}
 }

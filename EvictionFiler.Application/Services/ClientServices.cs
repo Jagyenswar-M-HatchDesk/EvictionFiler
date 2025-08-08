@@ -455,6 +455,7 @@ namespace EvictionFiler.Application.Services
 			var buildingsToUpdate = new List<Building>();
 			var tenantsToAdd = new List<Tenant>();
 			var tenantsToUpdate = new List<Tenant>();
+			var addoccupants = new List<AdditionalOccupants>();
 
 			//var lastLandlordCode = await _landlordrepo.GetLastLandLordCodeAsync();
 			//int nextLandlordNumber = string.IsNullOrEmpty(lastLandlordCode) ? 1 : int.Parse(lastLandlordCode[2..]) + 1;
@@ -465,9 +466,9 @@ namespace EvictionFiler.Application.Services
 			//var lastTenantCode = await _tenantRepo.GetLasttenantCodeAsync();
 			//int nextTenantNumber = string.IsNullOrEmpty(lastTenantCode) ? 1 : int.Parse(lastTenantCode[2..]) + 1;
 
-			
-                
-            foreach (var l in client.editLandLords)
+
+
+			foreach (var l in client.editLandLords)
 			{
 				bool isNewLandlord = false;
 
@@ -549,9 +550,9 @@ namespace EvictionFiler.Application.Services
 						if (b.editTenants != null)
 						{
                             bool isNewTenant = false;
-                            foreach (var t in b.editTenants)
+							foreach (var t in b.editTenants)
 							{
-								if(!existingTenantsIds.Contains(t.Id))
+								if (!existingTenantsIds.Contains(t.Id))
 								{
 									isNewTenant = true;
 								}
@@ -562,13 +563,13 @@ namespace EvictionFiler.Application.Services
 									TenantCode = t.TenantCode,
 									FirstName = t.FirstName,
 									LastName = t.LastName,
-								
+
 									SSN = t.SSN,
 									Phone = t.Phone,
 									Email = t.Email,
 									LanguageId = t.LanguageId,
 									Borough = t.Borough,
-								
+
 									HasPossession = t.HasPossession,
 									HasRegulatedTenancy = t.HasRegulatedTenancy,
 									Name_Relation = t.Name_Relation,
@@ -589,6 +590,38 @@ namespace EvictionFiler.Application.Services
 									IsUnitIllegalId = t.IsUnitIllegalId,
 									BuildinId = building.Id
 								};
+								if (t.occupants != null)
+								{
+									foreach (var o in t.occupants)
+									{
+										if (o.Id == Guid.Empty) // New
+										{
+											addoccupants.Add(new AdditionalOccupants
+											{
+												Id = Guid.NewGuid(),
+												Name = o.Name,
+												Relation = o.Relation,
+												TenantId = tenant.Id
+											});
+										}
+										else // Existing
+										{
+											var existingOcc = await _additionalOccupantsRepo.GetAsync(o.Id);
+											if (existingOcc != null)
+											{
+												existingOcc.Name = o.Name;
+												existingOcc.Relation = o.Relation;
+												addoccupants.Add(existingOcc);
+											}
+											else
+											{
+												// Id sent from UI but record missing in DB
+												// Either ignore or treat as new
+											}
+										}
+									}
+
+								}
 
 								if (isNewTenant)
 								{
@@ -622,6 +655,11 @@ namespace EvictionFiler.Application.Services
 				await _tenantRepo.AddRangeAsync(tenantsToAdd);
 			if (tenantsToUpdate.Any())
 				_tenantRepo.UpdateRange(tenantsToUpdate);
+
+			if (addoccupants.Any())
+				await _additionalOccupantsRepo.AddRangeAsync(addoccupants);
+			if (addoccupants.Any())
+				_additionalOccupantsRepo.UpdateRange(addoccupants);
 
 			await _unitOfWork.SaveChangesAsync();
 			return true;

@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Application.DTOs.TenantDto;
+﻿using EvictionFiler.Application.DTOs.OccupantDto;
+using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
@@ -109,7 +110,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			// Step 3: Get all tenants linked to these apartments
 			var tenants = await _dbContext.Tenants
-		.Include(a => a.Language).Include(e=>e.IsUnitIllegal).Include(e=>e.TenancyType)
+		.Include(a => a.Language).Include(e => e.IsUnitIllegal).Include(e => e.TenancyType).Include(e => e.Occupants)
 		.Where(t => t.BuildinId.HasValue && apartmentIds.Contains(t.BuildinId.Value) && t.IsDeleted != true)
 		.Select(dto => new EditToTenantDto
 		{
@@ -135,7 +136,6 @@ namespace EvictionFiler.Infrastructure.Repositories
 			LanguageId = dto.LanguageId,
 			LanguageName = dto.Language!.Name,
 			Borough = dto.Borough,
-	
 			HasPossession = dto.HasPossession,
 			HasRegulatedTenancy = dto.HasRegulatedTenancy,
 			Name_Relation = dto.Name_Relation,
@@ -143,7 +143,16 @@ namespace EvictionFiler.Infrastructure.Repositories
 			Registration_No = dto.Registration_No,
 			TenantRecord = dto.TenantRecord,
 			HasPriorCase = dto.HasPriorCase,
-			BuildingId = dto.BuildinId
+			BuildingId = dto.BuildinId,
+			occupants = dto.Occupants
+				.Select(o => new AdditionalOccupantDto
+				{
+					Id = o.Id,
+					Name = o.Name,
+					Relation = o.Relation,
+					TenantId = o.TenantId,
+					IsChecked = true
+				}).ToList()
 		}).ToListAsync();
 
 
