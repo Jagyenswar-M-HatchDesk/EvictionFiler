@@ -61,59 +61,154 @@ namespace EvictionFiler.Infrastructure.Repositories
 								 .ToListAsync();
         }
 
+		//public async Task<CreateToEditLegalCaseModel?> GetCaseByIdAsync(Guid id)
+		//{
+		//	var legalCaseEntity = await _context.LegalCases
+		//		.Include(c => c.Clients)
+		//		.Include(c => c.Buildings)
+		//			.Include(c => c.CaseType)
+		//		.Include(c => c.LandLords)
+		//		.Include(c => c.Tenants)
+		//		.Include(c=>c.RegulationStatus)
+		//		.Include(c=>c.TenancyType)
+		//		.Include(c => c.ReasonHoldover)
+		//		.Include(c=>c.Buildings.State)
+		//		.Include(c=>c.Buildings.Landlord.State)
+		//			.Include(c => c.Buildings.Landlord.LandlordType)
+		//		.FirstOrDefaultAsync(c => c.Id == id);
+
+		//	if (legalCaseEntity == null)
+		//		return null;
+
+
+		//	var dto = new CreateToEditLegalCaseModel
+		//	{
+		//		Id = legalCaseEntity.Id,
+		//		ClientId = legalCaseEntity.Clients.Id, 
+		//		BuildingId = legalCaseEntity.Buildings?.Id,
+		//		LandLordId = legalCaseEntity.LandLordId,
+		//		TenantId = legalCaseEntity.Tenants?.Id,
+		//		  ExplainDescription = legalCaseEntity.ExplainDescription,
+		//		  ReasonHoldoverId = legalCaseEntity.ReasonHoldoverId,
+		//		  ERAPPaymentReceivedDate = legalCaseEntity.ERAPPaymentReceivedDate,
+		//		  IsERAPPaymentReceived = legalCaseEntity.IsERAPPaymentReceived,
+		//		  HasPossession = legalCaseEntity.HasPossession,
+		//		  IsUnitIllegalId = legalCaseEntity.IsUnitIllegalId,
+		//		  LandlordTypeId = legalCaseEntity.LandlordTypeId,
+		//		  LastMonthWeekRentPaid = legalCaseEntity.LastMonthWeekRentPaid,
+		//		  MonthlyRent = legalCaseEntity.MonthlyRent,
+		//		  OtherOccupants = legalCaseEntity.OtherOccupants,
+		//		  RegulationStatusId=legalCaseEntity.RegulationStatusId,
+		//		  RenewalOffer = legalCaseEntity.RenewalOffer,
+		//		  RentDueEachMonthOrWeek = legalCaseEntity.RentDueEachMonthOrWeek,
+		//		  SocialServices = legalCaseEntity.SocialServices,
+		//		  TenancyTypeId = legalCaseEntity.TenancyTypeId,
+		//		  TenantRecord = legalCaseEntity.TenantRecord,
+		//		  TenantShare = legalCaseEntity.TenantShare,
+		//		  CaseTypeId = legalCaseEntity.CaseTypeId,
+		//		  Attrney = legalCaseEntity.Attrney,
+		//		  AttrneyContactInfo = legalCaseEntity.AttrneyContactInfo,
+		//		  Firm = legalCaseEntity.Firm,
+		//		  tenantReceive = legalCaseEntity.tenantReceive,
+		//		  ExplainTenancyReceiveDescription = legalCaseEntity.ExplainTenancyReceiveDescription,
+
+
+		//		  TotalRentOwed = legalCaseEntity.TotalRentOwed,
+		//		Casecode = legalCaseEntity.Casecode,
+
+		//		tenants = legalCaseEntity.Tenants == null ? null : new CreateToTenantDto
+		//		{
+		//			FirstName = legalCaseEntity.Tenants.FirstName,
+		//			LastName = legalCaseEntity.Tenants.LastName,
+		//			BuildingId = legalCaseEntity.Tenants.BuildinId,
+		//		     UnitOrApartmentNumber = legalCaseEntity.Tenants.UnitOrApartmentNumber,
+
+
+
+
+		//			Building = legalCaseEntity.Tenants.Building == null ? null : new EditToBuildingDto
+		//			{
+		//				Address1 = legalCaseEntity.Tenants.Building.Address1,
+		//				Address2 = legalCaseEntity.Tenants.Building.Address2,
+		//				Zipcode = legalCaseEntity.Tenants.Building.Zipcode,
+		//				City = legalCaseEntity.Tenants.Building.City,
+		//				StateId = legalCaseEntity.Tenants.Building.StateId,
+		//				//StateName = legalCaseEntity.Tenants.Building.State.Name,
+		//				MDRNumber = legalCaseEntity.Tenants.Building.MDRNumber,
+		//				BuildingUnits = legalCaseEntity.Tenants.Building.BuildingUnits,
+		//				RegulationStatusId = legalCaseEntity.Tenants.Building.RegulationStatusId
+		//			},
+
+		//			Landlord = legalCaseEntity.Tenants.Building.Landlord == null ? null : new EditToLandlordDto
+		//			{
+		//				FirstName = legalCaseEntity.Tenants.Building.Landlord.FirstName,
+		//				LastName = legalCaseEntity.Tenants.Building.Landlord.LastName,
+		//				Address1 = legalCaseEntity.Tenants.Building.Landlord.Address1,
+		//				Address2 = legalCaseEntity.Tenants.Building.Landlord.Address2,
+		//				Zipcode = legalCaseEntity.Tenants.Building.Landlord.Zipcode,
+		//				City = legalCaseEntity.Tenants.Building.Landlord.City,
+		//				StateId = legalCaseEntity.Tenants.Building.Landlord.StateId,
+		//				//StateName = legalCaseEntity.Tenants.Building.Landlord.State.Name,
+		//				Phone = legalCaseEntity.Tenants.Building.Landlord.Phone,
+		//				Email = legalCaseEntity.Tenants.Building.Landlord.Email,
+		//				LandlordTypeId = legalCaseEntity.Tenants.Building.Landlord.LandlordTypeId,
+		//			}
+		//		}
+		//	};
+
+		//	return dto;
+		//}
+
 		public async Task<CreateToEditLegalCaseModel?> GetCaseByIdAsync(Guid id)
 		{
 			var legalCaseEntity = await _context.LegalCases
 				.Include(c => c.Clients)
 				.Include(c => c.Buildings)
-					.Include(c => c.CaseType)
+				.Include(c => c.CaseType)
 				.Include(c => c.LandLords)
 				.Include(c => c.Tenants)
-				.Include(c=>c.RegulationStatus)
-				.Include(c=>c.TenancyType)
+				.Include(c => c.RegulationStatus)
+				.Include(c => c.TenancyType)
 				.Include(c => c.ReasonHoldover)
-				.Include(c=>c.Buildings.State)
-				.Include(c=>c.Buildings.Landlord.State)
-					.Include(c => c.Buildings.Landlord.LandlordType)
+				.Include(c => c.Buildings.State)
+				.Include(c => c.Buildings.Landlord.State)
+				.Include(c => c.Buildings.Landlord.LandlordType)
 				.FirstOrDefaultAsync(c => c.Id == id);
 
 			if (legalCaseEntity == null)
 				return null;
-		
 
 			var dto = new CreateToEditLegalCaseModel
 			{
 				Id = legalCaseEntity.Id,
-				ClientId = legalCaseEntity.Clients.Id, 
+				ClientId = legalCaseEntity.Clients.Id,
 				BuildingId = legalCaseEntity.Buildings?.Id,
 				LandLordId = legalCaseEntity.LandLordId,
 				TenantId = legalCaseEntity.Tenants?.Id,
-				  ExplainDescription = legalCaseEntity.ExplainDescription,
-				  ReasonHoldoverId = legalCaseEntity.ReasonHoldoverId,
-				  ERAPPaymentReceivedDate = legalCaseEntity.ERAPPaymentReceivedDate,
-				  IsERAPPaymentReceived = legalCaseEntity.IsERAPPaymentReceived,
-				  HasPossession = legalCaseEntity.HasPossession,
-				  IsUnitIllegalId = legalCaseEntity.IsUnitIllegalId,
-				  LandlordTypeId = legalCaseEntity.LandlordTypeId,
-				  LastMonthWeekRentPaid = legalCaseEntity.LastMonthWeekRentPaid,
-				  MonthlyRent = legalCaseEntity.MonthlyRent,
-				  OtherOccupants = legalCaseEntity.OtherOccupants,
-				  RegulationStatusId=legalCaseEntity.RegulationStatusId,
-				  RenewalOffer = legalCaseEntity.RenewalOffer,
-				  RentDueEachMonthOrWeek = legalCaseEntity.RentDueEachMonthOrWeek,
-				  SocialServices = legalCaseEntity.SocialServices,
-				  TenancyTypeId = legalCaseEntity.TenancyTypeId,
-				  TenantRecord = legalCaseEntity.TenantRecord,
-				  TenantShare = legalCaseEntity.TenantShare,
-				  CaseTypeId = legalCaseEntity.CaseTypeId,
-				  Attrney = legalCaseEntity.Attrney,
-				  AttrneyContactInfo = legalCaseEntity.AttrneyContactInfo,
-				  Firm = legalCaseEntity.Firm,
-				  tenantReceive = legalCaseEntity.tenantReceive,
-				  ExplainTenancyReceiveDescription = legalCaseEntity.ExplainTenancyReceiveDescription,
-				  
-				  
-				  TotalRentOwed = legalCaseEntity.TotalRentOwed,
+				ExplainDescription = legalCaseEntity.ExplainDescription,
+				ReasonHoldoverId = legalCaseEntity.ReasonHoldoverId,
+				ERAPPaymentReceivedDate = legalCaseEntity.ERAPPaymentReceivedDate,
+				IsERAPPaymentReceived = legalCaseEntity.IsERAPPaymentReceived,
+				HasPossession = legalCaseEntity.HasPossession,
+				IsUnitIllegalId = legalCaseEntity.IsUnitIllegalId,
+				LandlordTypeId = legalCaseEntity.LandlordTypeId,
+				LastMonthWeekRentPaid = legalCaseEntity.LastMonthWeekRentPaid,
+				MonthlyRent = legalCaseEntity.MonthlyRent,
+				OtherOccupants = legalCaseEntity.OtherOccupants,
+				RegulationStatusId = legalCaseEntity.RegulationStatusId,
+				RenewalOffer = legalCaseEntity.RenewalOffer,
+				RentDueEachMonthOrWeek = legalCaseEntity.RentDueEachMonthOrWeek,
+				SocialServices = legalCaseEntity.SocialServices,
+				TenancyTypeId = legalCaseEntity.TenancyTypeId,
+				TenantRecord = legalCaseEntity.TenantRecord,
+				TenantShare = legalCaseEntity.TenantShare,
+				CaseTypeId = legalCaseEntity.CaseTypeId,
+				Attrney = legalCaseEntity.Attrney,
+				AttrneyContactInfo = legalCaseEntity.AttrneyContactInfo,
+				Firm = legalCaseEntity.Firm,
+				tenantReceive = legalCaseEntity.tenantReceive,
+				ExplainTenancyReceiveDescription = legalCaseEntity.ExplainTenancyReceiveDescription,
+				TotalRentOwed = legalCaseEntity.TotalRentOwed,
 				Casecode = legalCaseEntity.Casecode,
 
 				tenants = legalCaseEntity.Tenants == null ? null : new CreateToTenantDto
@@ -121,19 +216,16 @@ namespace EvictionFiler.Infrastructure.Repositories
 					FirstName = legalCaseEntity.Tenants.FirstName,
 					LastName = legalCaseEntity.Tenants.LastName,
 					BuildingId = legalCaseEntity.Tenants.BuildinId,
-				     UnitOrApartmentNumber = legalCaseEntity.Tenants.UnitOrApartmentNumber,
-					 
-
-					
+					UnitOrApartmentNumber = legalCaseEntity.Tenants.UnitOrApartmentNumber,
 
 					Building = legalCaseEntity.Tenants.Building == null ? null : new EditToBuildingDto
 					{
+						Id = legalCaseEntity.Tenants.Building.Id,
 						Address1 = legalCaseEntity.Tenants.Building.Address1,
 						Address2 = legalCaseEntity.Tenants.Building.Address2,
 						Zipcode = legalCaseEntity.Tenants.Building.Zipcode,
 						City = legalCaseEntity.Tenants.Building.City,
 						StateId = legalCaseEntity.Tenants.Building.StateId,
-						//StateName = legalCaseEntity.Tenants.Building.State.Name,
 						MDRNumber = legalCaseEntity.Tenants.Building.MDRNumber,
 						BuildingUnits = legalCaseEntity.Tenants.Building.BuildingUnits,
 						RegulationStatusId = legalCaseEntity.Tenants.Building.RegulationStatusId
@@ -141,6 +233,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 					Landlord = legalCaseEntity.Tenants.Building.Landlord == null ? null : new EditToLandlordDto
 					{
+						Id  =legalCaseEntity.Tenants.Building.Landlord.Id,
 						FirstName = legalCaseEntity.Tenants.Building.Landlord.FirstName,
 						LastName = legalCaseEntity.Tenants.Building.Landlord.LastName,
 						Address1 = legalCaseEntity.Tenants.Building.Landlord.Address1,
@@ -148,7 +241,6 @@ namespace EvictionFiler.Infrastructure.Repositories
 						Zipcode = legalCaseEntity.Tenants.Building.Landlord.Zipcode,
 						City = legalCaseEntity.Tenants.Building.Landlord.City,
 						StateId = legalCaseEntity.Tenants.Building.Landlord.StateId,
-						//StateName = legalCaseEntity.Tenants.Building.Landlord.State.Name,
 						Phone = legalCaseEntity.Tenants.Building.Landlord.Phone,
 						Email = legalCaseEntity.Tenants.Building.Landlord.Email,
 						LandlordTypeId = legalCaseEntity.Tenants.Building.Landlord.LandlordTypeId,
@@ -156,8 +248,41 @@ namespace EvictionFiler.Infrastructure.Repositories
 				}
 			};
 
+			// 🔹 Load Other Property Building Details
+			if (!string.IsNullOrWhiteSpace(legalCaseEntity.OtherPropertiesBuildingId))
+			{
+				var buildingIds = legalCaseEntity.OtherPropertiesBuildingId
+					.Split(',', StringSplitOptions.RemoveEmptyEntries)
+					.Select(id => Guid.Parse(id))
+					.ToList();
+
+				var otherBuildings = await _context.Buildings
+					.Where(b => buildingIds.Contains(b.Id))
+					.Select(b => new EditToBuildingDto
+					{
+						Id = b.Id,
+						BuildingCode = b.BuildingCode,
+						ApartmentCode = b.ApartmentCode,
+						City = b.City,
+						StateId = b.StateId,
+						PremiseTypeId = b.PremiseTypeId,
+						Address1 = b.Address1,
+						Address2 = b.Address2,
+						Zipcode = b.Zipcode,
+						MDRNumber = b.MDRNumber,
+						PetitionerInterest = b.PetitionerInterest,
+						RegulationStatusId = b.RegulationStatusId,
+						BuildingUnits = b.BuildingUnits,
+						LandlordId = b.LandlordId
+					})
+					.ToListAsync();
+
+				dto.OtherPropertiesBuildings = otherBuildings;
+			}
+
 			return dto;
 		}
+
 
 		public async Task<bool> AddCaseAsync(CreateToEditLegalCaseModel legalCase)
         {
@@ -242,7 +367,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 			existing.Firm = legalCase.Firm;
 			existing.tenantReceive = legalCase.tenantReceive;
 			existing.CaseTypeId = legalCase.CaseTypeId;
-
+			existing.OtherPropertiesBuildingId = legalCase.OtherPropertiesBuildingId;
 
 			_context.LegalCases.Update(existing);
 			await _context.SaveChangesAsync();

@@ -18,7 +18,7 @@
 @inject IUnitIllegalRepository UnitIllegalRepository
 @inject ITenancyTypeRepository TenancyTypeRepository
 @inject ILandlordSevice _landlordService
-@inject IBuildingService _buildingServiceService
+@inject IBuildingService _buildingService
 @inject ILegalCaseService _legalCaseService
 @inject ITenantService _tenantService
 @inject IClientService _clientService
@@ -228,17 +228,7 @@
 </div>
 
 
-<!-- Form Content -->
-@* @if (isLoading)
-{
-    <div class="text-center mt-5">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-        <p>Loading case data...</p>
-    </div>
-} else
-{ *@
+
 <div class="container-fluid px-4" style="margin-top: 50px; margin-bottom: 100px;">
 
     <div style="height: calc(100vh - 200px); overflow-y: auto;" class="custom-scroll">
@@ -687,10 +677,111 @@
                                                 }
                                             </InputRadioGroup>
                                         </div>
-                                        @*   <div class="text-danger">
-                                                        <ValidationMessage For="@(() => tenantDto.tenants.Building.RegulationStatusId)" />
-                                                    </div> *@
+                                     
                                     </div>
+                                @if (SelectedCaseTypeName == "NonPayment")
+                                {
+                                     <EditForm Model="@buildingSearchModel">
+                                                  <div class="row mb-3 d-flex gap-2 align-items-center">
+                                                       <div class="col-12">
+                                      
+                                           <div class="row">
+                                               <div class="col-auto">
+                                                   <label class=" col-form-label fw-semibold text-navy">List Other Properties</label>
+                                               </div>
+                                      
+                                               <div class="col position-relative">
+                                                   <input type="text"
+                                                          class="form-control"
+                                                          value="@searchbuildingText"
+                                                          @oninput="HandleBuildingInput"
+                                                          placeholder="Search another building"
+                                                          style="width:50%" />
+                                      
+                                                   @if (filteredBuildingList?.Any() == true)
+                                                   {
+                                                       bool isCodeSearch = !string.IsNullOrWhiteSpace(searchbuildingText) &&
+                                                                        (char.IsDigit(searchbuildingText[0]) || searchbuildingText.ToLower().StartsWith("t"));
+                                      
+                                                       <ul class="list-group position-absolute shadow-sm z-3 mt-1"
+                                                           style="max-height: 200px; overflow-y: auto;width:49%;">
+                                                                            @foreach (var item in filteredBuildingList)
+                                                           {
+                                                               <li class="list-group-item list-group-item-action"
+                                                                   style="cursor: pointer;"
+                                                                   @onclick="@(() => SelectBuilding(item.Id))">
+                                                                   @if (isCodeSearch)
+                                                                   {
+                                                                       <span>@item.BuildingCode </span>
+                                                                   }
+                                                                   else
+                                                                   {
+                                                                      <span>(@item.BuildingCode)</span>
+                                                                   }
+                                                               </li>
+                                                           }
+                                                       </ul>
+                                                   }
+                                                   else if (hasSearched && !string.IsNullOrWhiteSpace(searchbuildingText))
+                                                   {
+                                                       <ul class="list-group position-absolute w-100 shadow-sm z-3 mt-1">
+                                                           <li class="list-group-item text-muted">No matching Building found.</li>
+                                                       </ul>
+                                                   }
+                                               </div>
+                                           </div> 
+                                      
+                                       
+                                                                  </div>
+                                                             </div>
+                                                     </EditForm>
+
+                                    @if (selectedBuildings.Any())
+                                    {
+                                        @foreach (var b in selectedBuildings)
+                                        {
+                                            <div class="card shadow-sm p-4 mb-3">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <h6 class="fw-bold fs-4">Another Building Information</h6>
+                                                     <button class="btn btn-sm btn-danger"
+                                                            @onclick="@(() => RemoveBuilding(b.Id))">
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                                <hr />
+
+                                                <div class="mx-3">
+                                                    <div class="row my-4">
+                                                        <div class="col-md-5">
+                                                            <div class="row align-items-center">
+                                                                <label class="col-auto fw-semibold mb-0">MDR Number:</label>
+                                                                <div class="col-4">@(!string.IsNullOrWhiteSpace(b.MDRNumber) ? b.MDRNumber : "N/A")</div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-7">
+                                                            <div class="row align-items-center">
+                                                                <label class="col-auto fw-semibold mb-0">Number Of Units:</label>
+                                                                <div class="col-3">@(!string.IsNullOrWhiteSpace(b.BuildingUnits) ? b.BuildingUnits : "N/A")</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row my-4">
+                                                        <div class="col-auto fw-semibold">Building Address:</div>
+                                                        <div class="col-9">
+                                                            @(string.IsNullOrWhiteSpace($"{b.Address1}{b.Address2}{b.City}{b.StateName}{b.Zipcode}")
+                                                                                                ? "N/A"
+                                                                                                : $"{b.Address1} {b.Address2} {b.City} {b.StateName} {b.Zipcode}")
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                                        }
+                                    }
+
+
+                                }
 
 
                                 </div>
@@ -897,6 +988,7 @@
 
             </div>
         }
+       
         @if (currentStep == 1)
         {
             <div class="mx-auto p-4 border rounded shadow-sm bg-white">
@@ -988,7 +1080,7 @@
                                     </div>
                                 </div>
 
-                        @if (SelectedCaseTypeName == "NonPayment")
+                             @if (SelectedCaseTypeName == "NonPayment")
                                 {
                                     <div class="row mb-2 my-4">
                                         <div class="col-12">
@@ -1077,6 +1169,98 @@
                             </div>
                         </div>
 
+                          <div class="card shadow-sm p-4 mb-3">
+                            <div class=" mb-3">
+                                <h6 class="fw-bold fs-4">Building Information</h6>
+                                <hr />
+                            </div>
+
+                            <div class="row mb-2 my-4">
+                                <div class="col-auto fw-semibold">Building Address:</div>
+                                <div class="col">
+                                    @(
+                                         string.IsNullOrWhiteSpace($"{tenantDto.tenants.Building?.Address1}{tenantDto.tenants.Building?.Address2}{tenantDto.tenants.Building?.City}{tenantDto.tenants.Building?.StateName}{tenantDto.tenants.Building?.Zipcode}")
+                                         ? "N/A"
+                                         : $"{tenantDto.tenants.Building?.Address1} {tenantDto.tenants.Building?.Address2} {tenantDto.tenants.Building?.City} {tenantDto.tenants.Building?.StateName} {tenantDto.tenants.Building?.Zipcode}"
+                                         )
+                                </div>
+                            </div>
+
+                                <div class="row mb-2 my-4">
+                                    <div class="col-4">
+                                        <div class="row">
+                                            <div class="col-auto fw-semibold">MDR Number:</div>
+                                            <div class="col">@(tenantDto.tenants.Building.MDRNumber ?? "N/A")</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-4">
+                                        <div class="row">
+                                            <div class="col-auto fw-semibold">Number of Units:</div>
+                                            <div class="col">@(tenantDto.tenants.Building.BuildingUnits ?? "N/A")</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-4">
+                                        <div class="row">
+                                            <div class="col-auto fw-semibold">Regulation Status:</div>
+                                            <div class="col">
+                                                @(RegulationList.FirstOrDefault(x => x.Id == tenantDto.tenants.Building.RegulationStatusId)?.Name ?? "-")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                        @if (SelectedCaseTypeName == "NonPayment")
+                                {
+                                    @if (selectedBuildings.Any())
+                                    {
+                                        @foreach (var b in selectedBuildings)
+                                        {
+                                            <div class="card shadow-sm p-4 mb-3">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <h6 class="fw-bold fs-4">Another Building Information</h6>
+                                                    @*  <button class="btn btn-sm btn-danger"
+                                                            @onclick="@(() => RemoveBuilding(b.Id))">
+                                                        Remove
+                                                    </button> *@
+                                                </div>
+                                                <hr />
+
+                                                <div class="mx-3">
+                                                    <div class="row my-4">
+                                                        <div class="col-md-5">
+                                                            <div class="row align-items-center">
+                                                                <label class="col-auto fw-semibold mb-0">MDR Number:</label>
+                                                                <div class="col-4">@(!string.IsNullOrWhiteSpace(b.MDRNumber) ? b.MDRNumber : "N/A")</div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-7">
+                                                            <div class="row align-items-center">
+                                                                <label class="col-auto fw-semibold mb-0">Number Of Units:</label>
+                                                                <div class="col-3">@(!string.IsNullOrWhiteSpace(b.BuildingUnits) ? b.BuildingUnits : "N/A")</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row my-4">
+                                                        <div class="col-auto fw-semibold">Building Address:</div>
+                                                        <div class="col-9">
+                                                            @(string.IsNullOrWhiteSpace($"{b.Address1}{b.Address2}{b.City}{b.StateName}{b.Zipcode}")
+                                                                                                    ? "N/A"
+                                                                                                    : $"{b.Address1} {b.Address2} {b.City} {b.StateName} {b.Zipcode}")
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                                                }
+                                    }
+
+
+                                }
+
+                        </div>
+
                         <!-- SECTION 3: LANDLORD INFO -->
                         <div class="card shadow-sm p-4 mb-4">
                             <div class="mb-3">
@@ -1141,7 +1325,7 @@
                                 </div>
                             </div>
 
-                    @if (SelectedCaseTypeName == "NonPayment")
+                         @if (SelectedCaseTypeName == "NonPayment")
                             {
                                 <div class="card p-4 mb-4 my-4">
                                     <div class="mb-3">
@@ -1250,12 +1434,14 @@
     private EditContext editContext;
     // Used for conditional rendering
     private bool hasSearched = false;
-
+    private string searchbuildingText = "";
+    private List<EditToBuildingDto> filteredBuildingList = new();
     private TenantSearchModel tenantSearchModel = new();
+    private BuildingSearchModel buildingSearchModel = new();
     private string searchtenantText = "";
     private List<EditToTenantDto> filteredTenantList = new();
     private CreateToLandLordDto? selectedLandlord;
-    private CreateToBuildingDto? selectedBuilding;
+    private List<EditToBuildingDto> selectedBuildings = new();
     private CreateToTenantDto? selectedTenant;
     private bool isLandlordSelected = false;
     private bool isBuildingSelected = false;
@@ -1311,9 +1497,6 @@
         spinnerservice.Hide();
     }
 
-
-
-
     List<string> stepTitles = new() {
         "Edit", "Review & Submit"
 
@@ -1321,28 +1504,110 @@
 
 
 
-    private async Task LoadDataAsync()
+    // private async Task LoadDataAsync()
+    // {
+    //     legalcaseDto = await _legalCaseService.GetByIdAsync(caseId);
+    //     tenantDto = legalcaseDto; 
+
+    //     tenantDto.SelectedTenantId = legalcaseDto.TenantId;
+
+    //     CaseTypeList = await CaseTypeRepository.GetAllCaseType() ?? new List<CaseType>();
+
+
+    //     // CaseTypeList = await CaseTypeRepository.GetAllCaseType();
+    //     var holdoverCase = CaseTypeList.FirstOrDefault(x => x.Name == "Holdover");
+    //     if (holdoverCase != null)
+    //     {
+    //         tenantDto.CaseTypeId = holdoverCase.Id;
+    //     }
+    //     isTenantSelected = true;
+    // }
+
+
+  
+private async Task LoadDataAsync()
+{
+
+    legalcaseDto = await _legalCaseService.GetByIdAsync(caseId);
+
+ 
+    tenantDto = legalcaseDto;
+    tenantDto.SelectedTenantId = legalcaseDto.TenantId;
+
+ 
+    selectedBuildings = legalcaseDto.OtherPropertiesBuildings?.ToList() 
+                        ?? new List<EditToBuildingDto>();
+
+    CaseTypeList = await CaseTypeRepository.GetAllCaseType() ?? new List<CaseType>();
+
+
+    if (caseId == Guid.Empty) 
     {
-        legalcaseDto = await _legalCaseService.GetByIdAsync(caseId);
-        tenantDto = legalcaseDto; 
-
-        tenantDto.SelectedTenantId = legalcaseDto.TenantId;
-
-        CaseTypeList = await CaseTypeRepository.GetAllCaseType() ?? new List<CaseType>();
-
-
-        // CaseTypeList = await CaseTypeRepository.GetAllCaseType();
         var holdoverCase = CaseTypeList.FirstOrDefault(x => x.Name == "Holdover");
         if (holdoverCase != null)
         {
-            tenantDto.CaseTypeId = holdoverCase.Id;
+            legalcaseDto.CaseTypeId = holdoverCase.Id;
         }
-        isTenantSelected = true;
+    }
+  
+
+    isTenantSelected = true;
+}
+
+
+    private async Task HandleBuildingInput(ChangeEventArgs e)
+    {
+        searchbuildingText = e?.Value?.ToString() ?? "";
+        hasSearched = true;
+
+        if (!string.IsNullOrWhiteSpace(searchbuildingText) && tenantDto.tenants.Landlord != null)
+        {
+            filteredBuildingList = await _buildingService.SearchBuildingByCode(
+                searchbuildingText,
+                tenantDto.tenants.Landlord.Id,
+                 tenantDto.tenants.Building.Id
+            );
+        }
+        else
+        {
+            filteredBuildingList.Clear();
+        }
     }
 
 
+    private async Task SelectBuilding(Guid buildingId)
+    {
+        var building = await _buildingService.GetBuildingByIdAsync(buildingId);
 
+        if (building != null && !selectedBuildings.Any(b => b.Id == building.Id))
+        {
+            selectedBuildings.Add(building);
 
+            // Update OtherBuildingId with comma separated IDs
+            var ids = selectedBuildings.Select(b => b.Id.ToString());
+            legalcaseDto.OtherPropertiesBuildingId = string.Join(",", ids);
+        }
+
+        searchbuildingText = "";
+        filteredBuildingList.Clear();
+        hasSearched = false;
+    }
+
+    private void RemoveBuilding(Guid buildingId)
+    {
+        var buildingToRemove = selectedBuildings.FirstOrDefault(b => b.Id == buildingId);
+        if (buildingToRemove != null)
+        {
+            selectedBuildings.Remove(buildingToRemove);
+            UpdateOtherBuildingIds();
+        }
+    }
+
+    private void UpdateOtherBuildingIds()
+    {
+        var ids = selectedBuildings.Select(b => b.Id.ToString());
+        legalcaseDto.OtherPropertiesBuildingId = string.Join(",", ids);
+    }
 
 
     private void Next()
@@ -1474,11 +1739,6 @@
         hasSearched = false;
     }
 
-
-
-
-
-
     private async Task ResetStep()
     {
         switch (currentStep)
@@ -1511,7 +1771,7 @@
         {
             if (legalcaseDto != null && legalcaseDto.Id != Guid.Empty)
             {
-                // legalcaseDto.TenantId = tenantDto?.TenantId ?? Guid.Empty;
+                
                 legalcaseDto.TenantId = tenantDto?.SelectedTenantId ?? legalcaseDto.TenantId;
                 legalcaseDto.IsUnitIllegalId = tenantDto?.IsUnitIllegalId ?? Guid.Empty;
                 legalcaseDto.TenantRecord = tenantDto?.TenantRecord;
@@ -1538,6 +1798,15 @@
                 legalcaseDto.ReasonHoldoverId = tenantDto.ReasonHoldoverId;
                 legalcaseDto.ExplainDescription = tenantDto.ExplainDescription;
                 legalcaseDto.ReasonDescription = tenantDto.ReasonDescription;
+
+                if (selectedBuildings != null && selectedBuildings.Any())
+                {
+                    legalcaseDto.OtherPropertiesBuildingId = string.Join(",", selectedBuildings.Select(b => b.Id));
+                }
+                else
+                {
+                    legalcaseDto.OtherPropertiesBuildingId = null;
+                }
 
                 result = await _legalCaseService.UpdateAsync(legalcaseDto);
                 _dataService.CaseName = null;

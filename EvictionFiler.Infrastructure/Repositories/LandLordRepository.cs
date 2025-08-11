@@ -119,6 +119,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 			var landlords = await _mainDbContext.LandLords
 				.Where(x => x.ClientId == clientId && x.IsDeleted != true)
 				.Include(x => x.State)
+				.Include(x => x.LandlordType)
 				.Include(x => x.TypeOfOwner)
 				.ToListAsync();
 
@@ -134,6 +135,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Address1 = l.Address1,
 				Address2 = l.Address2,
 				StateId = l.StateId,
+				LandlordTypeId = l.LandlordTypeId,
+				LandlordTypeName = l.LandlordType != null ? l.LandlordType.Name : string.Empty,
 				StateName = l.State != null ? l.State.Name : string.Empty,
 				TypeOwnerName = l.TypeOfOwner != null ? l.TypeOfOwner.Name : string.Empty,
 				City = l.City,

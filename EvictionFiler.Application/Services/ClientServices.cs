@@ -495,7 +495,8 @@ namespace EvictionFiler.Application.Services
 					City = l.City,
 					Zipcode = l.Zipcode,
 					ContactPersonName = l.ContactPersonName,
-					TypeOfOwnerId = l.TypeOwnerId
+					TypeOfOwnerId = l.TypeOwnerId,
+					LandlordTypeId = l.LandlordTypeId,
 				};
 
 				if (isNewLandlord)
