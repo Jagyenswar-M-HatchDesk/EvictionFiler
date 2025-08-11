@@ -186,7 +186,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				IsERAPPaymentReceived = legalCase.IsERAPPaymentReceived,
 				ERAPPaymentReceivedDate = legalCase.ERAPPaymentReceivedDate,
 				RegulationStatusId = legalCase.RegulationStatusId,
-				
+				OtherPropertiesBuildingId = legalCase.OtherPropertiesBuildingId,
 				LandlordTypeId = legalCase.LandlordTypeId,
 				RentDueEachMonthOrWeek = legalCase.RentDueEachMonthOrWeek,
 				MonthlyRent = legalCase.MonthlyRent,

@@ -18,7 +18,7 @@
 @inject IUnitIllegalRepository UnitIllegalRepository
 @inject ITenancyTypeRepository TenancyTypeRepository
 @inject ILandlordSevice _landlordService
-@inject IBuildingService _buildingServiceService
+@inject IBuildingService _buildingService
 @inject ILegalCaseService _legalCaseService
 @inject ITenantService _tenantService
 @inject IClientService _clientService
@@ -240,8 +240,6 @@
                 <h5 class="text-center text-navy fw-bold fs-3">Case Details</h5>
                 <hr class="border-gold mb-4" />
 
-
-
                 <EditForm Model="@tenantSearchModel">
                     <div class="row mb-3 d-flex gap-2 align-items-center">
 
@@ -261,9 +259,7 @@
                                     </select>
                                 </div>
                          </div>
-                           
-                             
-                          
+
                          </div>
                          <div class="col-12">
                             @if (!isTenantSelected)
@@ -326,11 +322,7 @@
                 {
                     <div class="row mt-4">
                         <div class="col-md-12">
-                            @* <div class="border rounded p-3 bg-light"> *@
-
-                            @*  <div class="card shadow-sm"> *@
-                            @* <div class="card-body"> *@
-
+            
                             <!-- SECTION 1: TENANT DETAILS -->
                             <div class="card shadow-sm p-4 mb-4">
                                 <div class=" mb-3">
@@ -345,7 +337,7 @@
                                             <div class="row">
                                                 <div class="col-auto fw-semibold">Tenant's Full Name(s):</div>
                                                 <div class="col-6">
-                                                    @($"{TenantDetails.FirstName} {TenantDetails.LastName}".Trim() ?? "-")
+                                                    @($"{TenantDetails.FirstName} {TenantDetails.LastName}".Trim() ?? "N/A")
                                                 </div>
                                             </div>
                                         </div>
@@ -355,7 +347,7 @@
 
                                             <div class="row ">
                                                 <div class="col-auto fw-semibold">Unit / Apartment Number:</div>
-                                                <div class="col-4 ">@(!string.IsNullOrWhiteSpace(TenantDetails.UnitOrApartmentNumber) ? TenantDetails.UnitOrApartmentNumber : "-")</div>
+                                                <div class="col-4 ">@(!string.IsNullOrWhiteSpace(TenantDetails.UnitOrApartmentNumber) ? TenantDetails.UnitOrApartmentNumber : "N/A")</div>
                                             </div>
                                         </div>
                                     </div>
@@ -364,7 +356,7 @@
                                         <div class="col-7 ">
                                             @(
                                                     string.IsNullOrWhiteSpace($"{TenantDetails.Building?.Address1}{TenantDetails.Building?.Address2}{TenantDetails.Building?.City}{TenantDetails.Building?.StateName}{TenantDetails.Building?.Zipcode}")
-                                                    ? "-"
+                                                    ? "N/A"
                                                     : $"{TenantDetails.Building.Address1}{TenantDetails.Building.Address2} {TenantDetails.Building.City} {TenantDetails.Building.StateName}  {TenantDetails.Building.Zipcode}"
                                                     )
                                         </div>
@@ -622,7 +614,7 @@
                                                 <div class="row align-items-center">
                                                     <label class="col-auto fw-semibold mb-0">MDR Number:</label>
                                                     <div class="col-4">
-                                                        @($"{TenantDetails.Building.MDRNumber}".Trim() ?? "-")
+                                                        @($"{TenantDetails.Building.MDRNumber}".Trim() ?? "N/A")
                                                     </div>
                                                 </div>
                                             </div>
@@ -632,7 +624,7 @@
                                                 <div class="row align-items-center">
                                                     <label class="col-auto fw-semibold mb-0">Number Of Units in the building:</label>
                                                     <div class="col-3">
-                                                        @(!string.IsNullOrWhiteSpace(TenantDetails.Building.BuildingUnits) ? TenantDetails.Building.BuildingUnits : "-")
+                                                        @(!string.IsNullOrWhiteSpace(TenantDetails.Building.BuildingUnits) ? TenantDetails.Building.BuildingUnits : "N/A")
                                                     </div>
                                                 </div>
                                             </div>
@@ -641,7 +633,7 @@
                                             <div class="col-auto fw-semibold">Building Address:</div>
                                             <div class="col-9">
                                                 @(string.IsNullOrWhiteSpace($"{TenantDetails.Building?.Address1}{TenantDetails.Building?.Address2}{TenantDetails.Building?.City}{TenantDetails.Building?.StateName}{TenantDetails.Building?.Zipcode}")
-                                                        ? "-"
+                                                        ? "N/A"
                                                         : $"{TenantDetails.Building.Address1} {TenantDetails.Building.Address2} {TenantDetails.Building.City} {TenantDetails.Building.StateName}  {TenantDetails.Building.Zipcode}")
                                             </div>
                                         </div>
@@ -667,29 +659,109 @@
                                         </div>
                                         @if (SelectedCaseTypeName == "NonPayment")
                                         {
-                                            <div class="row mb-2 my-4">
-                                                <div class="col-12">
+                                           <EditForm Model="@buildingSearchModel">
+                                                  <div class="row mb-3 d-flex gap-2 align-items-center">
+                                                       <div class="col-12">
+                                      
+                                           <div class="row">
+                                               <div class="col-auto">
+                                                   <label class=" col-form-label fw-semibold text-navy">List Other Properties</label>
+                                               </div>
+                                      
+                                               <div class="col position-relative">
+                                                   <input type="text"
+                                                          class="form-control"
+                                                          value="@searchbuildingText"
+                                                          @oninput="HandleBuildingInput"
+                                                          placeholder="Search another building"
+                                                          style="width:50%" />
+                                      
+                                                   @if (filteredBuildingList?.Any() == true)
+                                                   {
+                                                       bool isCodeSearch = !string.IsNullOrWhiteSpace(searchbuildingText) &&
+                                                                        (char.IsDigit(searchbuildingText[0]) || searchbuildingText.ToLower().StartsWith("t"));
+                                      
+                                                       <ul class="list-group position-absolute shadow-sm z-3 mt-1"
+                                                           style="max-height: 200px; overflow-y: auto;width:49%;">
+                                                                            @foreach (var item in filteredBuildingList)
+                                                           {
+                                                               <li class="list-group-item list-group-item-action"
+                                                                   style="cursor: pointer;"
+                                                                   @onclick="@(() => SelectBuilding(item.Id))">
+                                                                   @if (isCodeSearch)
+                                                                   {
+                                                                       <span>@item.BuildingCode </span>
+                                                                   }
+                                                                   else
+                                                                   {
+                                                                                        <span>(@item.BuildingCode)</span>
+                                                                   }
+                                                               </li>
+                                                           }
+                                                       </ul>
+                                                   }
+                                                   else if (hasSearched && !string.IsNullOrWhiteSpace(searchbuildingText))
+                                                   {
+                                                       <ul class="list-group position-absolute w-100 shadow-sm z-3 mt-1">
+                                                           <li class="list-group-item text-muted">No matching Building found.</li>
+                                                       </ul>
+                                                   }
+                                               </div>
+                                           </div> 
+                                      
+                                       
+                                                                  </div>
+                                                             </div>
+                                                     </EditForm>
+                                           
+                                                @if (selectedBuildings.Any())
+                                                {
+                                                    @foreach (var b in selectedBuildings)
+                                                    {
+                                                        <div class="card shadow-sm p-4 mb-3">
+                                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                                <h6 class="fw-bold fs-4">Another Building Information</h6>
+                                                                <button class="btn btn-sm btn-danger"
+                                                                        @onclick="@(() => RemoveBuilding(b.Id))">
+                                                                    Remove
+                                                                </button>
+                                                            </div>
+                                                            <hr />
 
-                                                    <div class="row">
-                                                        <div class="col-auto">
-                                                            <label class="col-form-label fw-semibold text-navy">List Other Properties</label>
-                                                        </div>
+                                                            <div class="mx-3">
+                                                                <div class="row my-4">
+                                                                    <div class="col-md-5">
+                                                                        <div class="row align-items-center">
+                                                                            <label class="col-auto fw-semibold mb-0">MDR Number:</label>
+                                                                            <div class="col-4">@(!string.IsNullOrWhiteSpace(b.MDRNumber) ? b.MDRNumber : "N/A")</div>
+                                                                        </div>
+                                                                    </div>
 
-                                                        <div class="col position-relative">
-                                                            <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Search another Building"
-                                                            style="width:50%" />
+                                                                    <div class="col-md-7">
+                                                                        <div class="row align-items-center">
+                                                                            <label class="col-auto fw-semibold mb-0">Number Of Units:</label>
+                                                                            <div class="col-3">@(!string.IsNullOrWhiteSpace(b.BuildingUnits) ? b.BuildingUnits : "N/A")</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
 
-                                                        </div>
-                                                    </div>
-
-
-                                                </div>
-                                            </div>
-                                        }
+                                                                <div class="row my-4">
+                                                                    <div class="col-auto fw-semibold">Building Address:</div>
+                                                                    <div class="col-9">
+                                                                        @(string.IsNullOrWhiteSpace($"{b.Address1}{b.Address2}{b.City}{b.StateName}{b.Zipcode}")
+                                                                                                                    ? "N/A"
+                                                                                                                    : $"{b.Address1} {b.Address2} {b.City} {b.StateName} {b.Zipcode}")
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
+                                                        }
+                                                }
+
+                                            
+                                        }
+                                               </div>
+                                           </div>
                             }
 
                             <!-- SECTION 3: LANDLORD -->
@@ -709,7 +781,7 @@
                                                 <div class="row ">
                                                     <label class="col-auto fw-semibold mb-0">Full Name or Entity Name:</label>
                                                     <div class="col ">
-                                                        @($"{TenantDetails.Landlord.FirstName} {TenantDetails.Landlord.LastName}".Trim() ?? "-")
+                                                        @($"{TenantDetails.Landlord.FirstName} {TenantDetails.Landlord.LastName}".Trim() ?? "N/A")
                                                     </div>
                                                 </div>
                                             </div>
@@ -721,7 +793,7 @@
                                                     <div class="col ">
                                                         @(
                                                                 string.IsNullOrWhiteSpace($"{TenantDetails.Landlord?.Address1}{TenantDetails.Landlord?.Address2}{TenantDetails.Landlord?.City}{TenantDetails.Landlord?.StateName}{TenantDetails.Landlord?.Zipcode}")
-                                                                ? "-"
+                                                                ? "N/A"
                                                                 : $"{TenantDetails.Landlord.Address1}, {TenantDetails.Landlord.Address2}, {TenantDetails.Landlord.City}, {TenantDetails.Landlord.StateName} - {TenantDetails.Landlord.Zipcode}"
                                                                 )
                                                     </div>
@@ -735,7 +807,7 @@
                                                 <div class="row align-items-center">
                                                     <label class="col-auto fw-semibold mb-0">Phone Number:</label>
                                                     <div class="col ">
-                                                        @(!string.IsNullOrWhiteSpace(TenantDetails.Landlord.Phone) ? TenantDetails.Landlord.Phone : "-")
+                                                        @(!string.IsNullOrWhiteSpace(TenantDetails.Landlord.Phone) ? TenantDetails.Landlord.Phone : "N/A")
                                                     </div>
                                                 </div>
                                             </div>
@@ -745,7 +817,7 @@
                                                 <div class="row align-items-center">
                                                     <label class="col-auto fw-semibold mb-0">Email:</label>
                                                     <div class="col">
-                                                        @(!string.IsNullOrWhiteSpace(TenantDetails.Landlord.Email) ? TenantDetails.Landlord.Email : "-")
+                                                        @(!string.IsNullOrWhiteSpace(TenantDetails.Landlord.Email) ? TenantDetails.Landlord.Email : "N/A")
                                                     </div>
                                                 </div>
                                             </div>
@@ -830,9 +902,7 @@
 
                                 </div>
                             }
-                            @* </div> *@
-                            @* </div> *@
-                            @* </div> *@
+                    
                         </div>
                     </div>
 
@@ -980,7 +1050,7 @@
                                             <div class="row">
                                                 <div class="col-auto fw-semibold">Other Occupants?</div>
                                                 <div class="col">
-                                                    @(TenantDetails.OtherOccupants == true ? "Yes" : TenantDetails.OtherOccupants == false ? "No" : "-")
+                                                    @(TenantDetails.OtherOccupants == true ? "Yes" : TenantDetails.OtherOccupants == false ? "No" : "N/A")
                                                 </div>
                                             </div>
                                         </div>
@@ -1066,7 +1136,7 @@
                                                 <div class="col-6">
                                                     <div class="row">
                                                         <div class="col-auto fw-semibold">ERAP Payment Date:</div>
-                                                        <div class="col">@((TenantDetails.ERAPPaymentReceivedDate?.ToString("MM/dd/yyyy")) ?? "-")</div>
+                                                        <div class="col">@((TenantDetails.ERAPPaymentReceivedDate?.ToString("MM/dd/yyyy")) ?? "N/A")</div>
                                                     </div>
                                                 </div>
      
@@ -1093,7 +1163,7 @@
                                     <div class="col">
                                         @(
                                                 string.IsNullOrWhiteSpace($"{TenantDetails.Building?.Address1}{TenantDetails.Building?.Address2}{TenantDetails.Building?.City}{TenantDetails.Building?.StateName}{TenantDetails.Building?.Zipcode}")
-                                                ? "-"
+                                                ? "N/A"
                                                 : $"{TenantDetails.Building?.Address1} {TenantDetails.Building?.Address2} {TenantDetails.Building?.City} {TenantDetails.Building?.StateName} {TenantDetails.Building?.Zipcode}"
                                                 )
                                     </div>
@@ -1103,14 +1173,14 @@
                                     <div class="col-4">
                                         <div class="row">
                                             <div class="col-auto fw-semibold">MDR Number:</div>
-                                            <div class="col">@TenantDetails.Building.MDRNumber</div>
+                                        <div class="col">@(TenantDetails.Building.MDRNumber ?? "N/A")</div>
                                         </div>
                                     </div>
 
                                     <div class="col-4">
                                         <div class="row">
                                             <div class="col-auto fw-semibold">Number of Units:</div>
-                                            <div class="col">@TenantDetails.Building.BuildingUnits</div>
+                                            <div class="col">@(TenantDetails.Building.BuildingUnits ?? "N/A")</div>
                                         </div>
                                     </div>
 
@@ -1123,28 +1193,58 @@
                                         </div>
                                     </div>
                                 </div>
-                            <div class="row mb-2 my-4">
-                                <div class="col-12">
-                         
-                                        <div class="row">
-                                            <div class="col-auto">
-                                                <label class="col-form-label fw-semibold text-navy">List Other Properties</label>
-                                            </div>
-
-                                            <div class="col position-relative">
-                                                <input type="text"
-                                                       class="form-control"
-                                                     
-                                                       placeholder="Search tenant by name/code"
-                                                       style="width:50%" />
-
-                                              </div>
-                                        </div>
-
+                        @if (SelectedCaseTypeName == "NonPayment")
+                                {
                                     
+
+                                    @if (selectedBuildings.Any())
+                                    {
+                                        @foreach (var b in selectedBuildings)
+                                        {
+                                            <div class="card shadow-sm p-4 mb-3">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <h6 class="fw-bold fs-4">Another Building Information</h6>
+                                                   @*  <button class="btn btn-sm btn-danger"
+                                                            @onclick="@(() => RemoveBuilding(b.Id))">
+                                                        Remove
+                                                    </button> *@
+                                                </div>
+                                                <hr />
+
+                                                <div class="mx-3">
+                                                    <div class="row my-4">
+                                                        <div class="col-md-5">
+                                                            <div class="row align-items-center">
+                                                                <label class="col-auto fw-semibold mb-0">MDR Number:</label>
+                                                                <div class="col-4">@(!string.IsNullOrWhiteSpace(b.MDRNumber) ? b.MDRNumber : "N/A")</div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-7">
+                                                            <div class="row align-items-center">
+                                                                <label class="col-auto fw-semibold mb-0">Number Of Units:</label>
+                                                                <div class="col-3">@(!string.IsNullOrWhiteSpace(b.BuildingUnits) ? b.BuildingUnits : "N/A")</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row my-4">
+                                                        <div class="col-auto fw-semibold">Building Address:</div>
+                                                        <div class="col-9">
+                                                            @(string.IsNullOrWhiteSpace($"{b.Address1}{b.Address2}{b.City}{b.StateName}{b.Zipcode}")
+                                                                                                    ? "N/A"
+                                                                                                    : $"{b.Address1} {b.Address2} {b.City} {b.StateName} {b.Zipcode}")
+                                    </div>
+                                </div>
                             </div>
-                            </div>
-                            </div>
+                        </div>
+                                                }
+                                    }
+
+
+                                }
+
+                        </div>
 
                             <!-- SECTION 3: LANDLORD INFO -->
                             <div class="card shadow-sm p-4 mb-4">
@@ -1158,14 +1258,14 @@
                                     <div class="col-4">
                                         <div class="row">
                                             <div class="col-auto fw-semibold">Full Name or Entity:</div>
-                                            <div class="col">@($"{TenantDetails.Landlord.FirstName} {TenantDetails.Landlord.LastName}".Trim() ?? "-")</div>
+                                            <div class="col">@($"{TenantDetails.Landlord.FirstName} {TenantDetails.Landlord.LastName}".Trim() ?? "N/A")</div>
                                         </div>
                                     </div>
 
                                     <div class="col-3">
                                         <div class="row">
                                             <div class="col-auto fw-semibold">Phone:</div>
-                                            <div class="col">@(TenantDetails.Landlord.Phone ?? "-")</div>
+                                            <div class="col">@(TenantDetails.Landlord.Phone ?? "N/A")</div>
                                         </div>
                                     </div>
 
@@ -1182,7 +1282,7 @@
                                     <div class="col-auto fw-semibold">Mailing Address:</div>
                                     <div class="col">
                                         @(string.IsNullOrWhiteSpace($"{TenantDetails.Landlord?.Address1}{TenantDetails.Landlord?.City}")
-                                                ? "-"
+                                                ? "N/A"
                                                 : $"{TenantDetails.Landlord.Address1}, {TenantDetails.Landlord.City}, {TenantDetails.Landlord.StateName} {TenantDetails.Landlord.Zipcode}")
                                     </div>
                                 </div>
@@ -1327,21 +1427,23 @@
     private bool hasSearched = false;
 
     private TenantSearchModel tenantSearchModel = new();
+  private BuildingSearchModel buildingSearchModel = new();
     private string searchtenantText = "";
+    private string searchbuildingText = "";
     private List<EditToTenantDto> filteredTenantList = new();
+      private List<EditToBuildingDto> filteredBuildingList = new();
     private CreateToLandLordDto? selectedLandlord;
-    private CreateToBuildingDto? selectedBuilding;
     private CreateToTenantDto? selectedTenant;
     private bool isLandlordSelected = false;
     private bool isBuildingSelected = false;
     private bool isTenantSelected = false;
     private LandlordWithBuildings? landlordDetails;
-    private BuildingWithTenant? buildingDetails;
+    private EditToBuildingDto? buildingDetails;
     private EditToTenantDto? TenantDetails;
 
     private EditToTenantDto tenantDto = new EditToTenantDto();
     private EditToLandlordDto landLordDto = new EditToLandlordDto();
-    private EditToBuildingDto apartmentDto = new EditToBuildingDto();
+    private EditToBuildingDto buildingDto = new EditToBuildingDto();
 
     private EditToClientDto clientDto = new EditToClientDto();
 
@@ -1357,6 +1459,9 @@
     private List<LandlordType> LandLordTypeList = new();
     private List<CaseType> CaseTypeList = new();
     private List<TenancyType> TenancyTypeList = new();
+
+    private List<EditToBuildingDto> selectedBuildings = new(); // multiple selected building details
+
 
     private string SelectedCaseTypeName =>
         CaseTypeList.FirstOrDefault(x => x.Id == legalcaseDto.CaseTypeId)?.Name;
@@ -1423,7 +1528,59 @@
     }
 
 
+private async Task HandleBuildingInput(ChangeEventArgs e)
+{
+    searchbuildingText = e?.Value?.ToString() ?? "";
+    hasSearched = true;
 
+    if (!string.IsNullOrWhiteSpace(searchbuildingText) && TenantDetails.Landlord != null)
+    {
+        filteredBuildingList = await _buildingService.SearchBuildingByCode(
+            searchbuildingText,
+            TenantDetails.Landlord.Id,      
+            TenantDetails.Building.Id      
+        );
+    }
+    else
+    {
+        filteredBuildingList.Clear();
+    }
+}
+
+
+    private async Task SelectBuilding(Guid buildingId)
+    {
+        var building = await _buildingService.GetBuildingByIdAsync(buildingId);
+
+        if (building != null && !selectedBuildings.Any(b => b.Id == building.Id))
+        {
+            selectedBuildings.Add(building);
+
+            // Update OtherBuildingId with comma separated IDs
+            var ids = selectedBuildings.Select(b => b.Id.ToString());
+            legalcaseDto.OtherPropertiesBuildingId = string.Join(",", ids);
+        }
+
+        searchbuildingText = "";
+        filteredBuildingList.Clear();
+        hasSearched = false;
+    }
+
+    private void RemoveBuilding(Guid buildingId)
+    {
+        var buildingToRemove = selectedBuildings.FirstOrDefault(b => b.Id == buildingId);
+        if (buildingToRemove != null)
+        {
+            selectedBuildings.Remove(buildingToRemove);
+            UpdateOtherBuildingIds();
+        }
+    }
+
+    private void UpdateOtherBuildingIds()
+    {
+        var ids = selectedBuildings.Select(b => b.Id.ToString());
+        legalcaseDto.OtherPropertiesBuildingId = string.Join(",", ids);
+    }
 
 
     private async Task SelectTenant(Guid id)
@@ -1535,7 +1692,6 @@
             legalcaseDto.RegulationStatusId = TenantDetails.Building.RegulationStatusId ?? Guid.Empty;
             legalcaseDto.LandlordTypeId = TenantDetails?.Landlord.LandlordTypeId ?? Guid.Empty;
             legalcaseDto.ClientId = Guid.Parse(ClientId);
-
             legalcaseDto.CaseTypeId = legalcaseDto.CaseTypeId;
             legalcaseDto.Attrney = legalcaseDto.Attrney;
              legalcaseDto.AttrneyContactInfo = legalcaseDto.AttrneyContactInfo;
@@ -1609,7 +1765,7 @@
         var token = _cts.Token;
 
         var input = e.Value?.ToString() ?? string.Empty;
-        apartmentDto.ApartmentCode = input;
+        buildingDto.ApartmentCode = input;
 
         if (input.Length >= 3)
         {

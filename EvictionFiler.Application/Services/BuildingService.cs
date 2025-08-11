@@ -4,6 +4,7 @@ using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
+using Microsoft.EntityFrameworkCore;
 
 namespace EvictionFiler.Application.Services
 {
@@ -116,9 +117,9 @@ namespace EvictionFiler.Application.Services
 			};
 	}
 
-		public async Task<List<EditToBuildingDto>> SearchBuildingByCode(string code, Guid landlordId)
+		public async Task<List<EditToBuildingDto>> SearchBuildingByCode(string code, Guid landlordId , Guid excludeBuildingId)
 		{
-			return await _repository.SearchBuildingByCode(code, landlordId);
+			return await _repository.SearchBuildingByCode(code, landlordId , excludeBuildingId);
 		}
 
 		public async Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id)
@@ -169,6 +170,12 @@ namespace EvictionFiler.Application.Services
             var lastBuildingCode = await _repository.GetLastBuildingCodeAsync();
 			return lastBuildingCode!;
         }
-		
+
+		public async Task<EditToBuildingDto> GetBuildingByIdAsync(Guid buildingId)
+		{
+			var building = await _repository.GetBuildingByIdAsync(buildingId);
+			return building!;
+		}
+
 	}
 }

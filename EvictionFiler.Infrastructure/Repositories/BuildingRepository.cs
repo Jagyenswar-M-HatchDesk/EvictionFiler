@@ -90,14 +90,16 @@ namespace EvictionFiler.Infrastructure.Repositories
 		}
 
 
-		public async Task<List<EditToBuildingDto>> SearchBuildingByCode(string code, Guid landlordId)
+		public async Task<List<EditToBuildingDto>> SearchBuildingByCode(string code, Guid landlordId, Guid excludeBuildingId)
 		{
 			return await _context.Buildings
 				.Where(appartment =>
-					appartment.LandlordId == landlordId && 
-					appartment.BuildingCode.StartsWith(code)
+					appartment.LandlordId == landlordId &&
+					appartment.Id != excludeBuildingId && // current building exclude
+					appartment.BuildingCode.StartsWith(code) &&
+					appartment.IsDeleted != true
 				)
-				.Select(appartment=> new EditToBuildingDto
+				.Select(appartment => new EditToBuildingDto
 				{
 					Id = appartment.Id,
 					BuildingCode = appartment.BuildingCode,
@@ -112,12 +114,11 @@ namespace EvictionFiler.Infrastructure.Repositories
 					PetitionerInterest = appartment.PetitionerInterest,
 					RegulationStatusId = appartment.RegulationStatusId,
 					BuildingUnits = appartment.BuildingUnits,
-		
-					LandlordId = appartment.LandlordId,
-
+					LandlordId = appartment.LandlordId
 				})
 				.ToListAsync();
 		}
+
 
 		public async Task<List<EditToBuildingDto>> GetBuildingsByLandlordIdAsync(Guid landlordId)
 		{
@@ -155,7 +156,40 @@ namespace EvictionFiler.Infrastructure.Repositories
 		}
 
 
-	
+		public async Task<EditToBuildingDto> GetBuildingByIdAsync(Guid buildingId)
+		{
+			var appartment = await _context.Buildings
+				.Include(a => a.State)
+				.Include(a => a.PremiseType)
+				.Include(a => a.RegulationStatus)
+				.FirstOrDefaultAsync(x => x.Id == buildingId && x.IsDeleted != true);
+
+			if (appartment == null) return null;
+
+			return new EditToBuildingDto
+			{
+				Id = appartment.Id,
+				BuildingCode = appartment.BuildingCode,
+				ApartmentCode = appartment.ApartmentCode,
+				City = appartment.City,
+				StateId = appartment.StateId,
+				StateName = appartment.State?.Name,
+				PremiseTypeId = appartment.PremiseTypeId,
+				PremiseTypeName = appartment.PremiseType?.Name,
+				RegulationStatusId = appartment.RegulationStatusId,
+				RegulationStatusName = appartment.RegulationStatus?.Name,
+				Address1 = appartment.Address1,
+				Address2 = appartment.Address2,
+				Zipcode = appartment.Zipcode,
+				MDRNumber = appartment.MDRNumber,
+				PetitionerInterest = appartment.PetitionerInterest,
+				BuildingUnits = appartment.BuildingUnits,
+				LandlordId = appartment.LandlordId,
+				IsActive = appartment.IsActive,
+				IsDeleted = appartment.IsDeleted
+			};
+		}
+
 
 
 	}

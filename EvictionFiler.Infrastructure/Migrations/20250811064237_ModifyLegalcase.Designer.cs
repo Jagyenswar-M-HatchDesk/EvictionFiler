@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250811064237_ModifyLegalcase")]
+    partial class ModifyLegalcase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -455,8 +458,8 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<bool?>("OtherOccupants")
                         .HasColumnType("bit");
 
-                    b.Property<string>("OtherPropertiesBuildingId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("OtherPropertiesBuildingId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ReasonDescription")
                         .HasColumnType("nvarchar(max)");
