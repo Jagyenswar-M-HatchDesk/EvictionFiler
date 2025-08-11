@@ -22,6 +22,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				await SeedRegulationStatus(context);
 				await SeedState(context);
 				await SeedTypeOfOwner(context);
+				await SeedFormTypes(context);
 				await SeedLandlordTypes(context);
 				await SeedReasonHolder(context);
 				await SeedTenancyTypes(context);
@@ -57,6 +58,19 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				if (context.MstLanguages.FirstOrDefault(d => d.Name == l.Name) == null)
 				{
 					await context.MstLanguages.AddAsync(l);
+				}
+			}
+		}
+
+		private static async Task SeedFormTypes(MainDbContext context)
+		{
+
+			var lang = InitialDataGenerator.GetFormTypes();
+			foreach (var l in lang)
+			{
+				if (context.MstFormTypes.FirstOrDefault(d => d.Name == l.Name) == null)
+				{
+					await context.MstFormTypes.AddAsync(l);
 				}
 			}
 		}

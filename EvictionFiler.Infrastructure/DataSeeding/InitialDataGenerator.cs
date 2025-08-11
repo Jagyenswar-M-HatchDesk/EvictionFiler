@@ -4,9 +4,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 {
 	public class InitialDataGenerator
 	{
-		
-
-
+	
 		public static IEnumerable<Language> GetLangauge()
 		{
 			return new List<Language>
@@ -81,7 +79,21 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			};
 		}
 
-		
+		public static IEnumerable<FormTypes> GetFormTypes()
+		{
+			var caseTypes = GetCaseTypes().ToList();
+
+			// IDs find karo
+			var holdoverId = caseTypes.FirstOrDefault(c => c.Name == "Holdover")?.Id;
+			var nonPaymentId = caseTypes.FirstOrDefault(c => c.Name == "NonPayment")?.Id;
+			return new List<FormTypes>
+			{
+				new FormTypes() { Name = "90 Days Notice" , CaseTypeId=holdoverId , HTML=""},
+				new FormTypes() { Name = "5 Days Notice" , CaseTypeId=holdoverId , HTML=""},
+				new FormTypes() { Name = "30 Days Notice" , CaseTypeId=nonPaymentId , HTML=""},
+				
+			};
+		}
 
 		public static IEnumerable<LandlordType> GetLandlordTypes()
 		{
