@@ -19,6 +19,9 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				await SeedLanguage(context);
 				await SeedPremiseType(context);
 				await SeedCaseTypes(context);
+				await context.SaveChangesAsync();
+
+
 				await SeedRegulationStatus(context);
 				await SeedState(context);
 				await SeedTypeOfOwner(context);
@@ -64,13 +67,23 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 
 		private static async Task SeedFormTypes(MainDbContext context)
 		{
+			var formTypes = InitialDataGenerator.GetFormTypes();
 
-			var lang = InitialDataGenerator.GetFormTypes();
-			foreach (var l in lang)
+			foreach (var formType in formTypes)
 			{
-				if (context.MstFormTypes.FirstOrDefault(d => d.Name == l.Name) == null)
+				if (context.MstFormTypes.FirstOrDefault(d => d.Name == formType.Name) == null)
 				{
-					await context.MstFormTypes.AddAsync(l);
+					var caseType = context.MstCaseTypes.FirstOrDefault(c => c.Name == formType.CaseTypeName);
+
+					if (caseType != null)
+					{
+						formType.CaseTypeId = caseType.Id; 
+						await context.MstFormTypes.AddAsync(formType);
+					}
+					else
+					{
+						Console.WriteLine($"[Seed Warning] CaseType '{formType.CaseTypeName}' not found for FormType '{formType.Name}'");
+					}
 				}
 			}
 		}

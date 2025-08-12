@@ -162,6 +162,52 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.ToTable("Buildings");
                 });
 
+            modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseForms", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("DateTime");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("File")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HTML")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LegalCaseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LegalCaseId");
+
+                    b.ToTable("CaseForms");
+                });
+
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Client", b =>
                 {
                     b.Property<Guid>("Id")
@@ -665,6 +711,55 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("MstClientRoles");
+                });
+
+            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.FormTypes", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CaseTypeId")
+                        .HasMaxLength(500)
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("DateTime");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("HTML")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaseTypeId");
+
+                    b.ToTable("MstFormTypes");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.IsUnitIllegal", b =>
@@ -1609,6 +1704,15 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Navigation("State");
                 });
 
+            modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseForms", b =>
+                {
+                    b.HasOne("EvictionFiler.Domain.Entities.LegalCase", "LegalCase")
+                        .WithMany()
+                        .HasForeignKey("LegalCaseId");
+
+                    b.Navigation("LegalCase");
+                });
+
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Client", b =>
                 {
                     b.HasOne("EvictionFiler.Domain.Entities.Master.State", "State")
@@ -1727,6 +1831,15 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasForeignKey("CaseTypeId");
 
                     b.Navigation("CaseTypes");
+                });
+
+            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.FormTypes", b =>
+                {
+                    b.HasOne("EvictionFiler.Domain.Entities.Master.CaseType", "CaseType")
+                        .WithMany()
+                        .HasForeignKey("CaseTypeId");
+
+                    b.Navigation("CaseType");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Tenant", b =>

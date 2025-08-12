@@ -18,5 +18,8 @@ namespace EvictionFiler.Domain.Entities.Master
 		[ForeignKey("CaseTypeId")]
 		public CaseType? CaseType { get; set; }
 		public string? HTML { get; set; }
+
+		[NotMapped]
+		public string CaseTypeName { get; set; }
 	}
 }

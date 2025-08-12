@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class MainMigration : Migration
+    public partial class InitialMain : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -160,6 +160,27 @@ namespace EvictionFiler.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MstReasonHoldover",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    UpdatedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "DateTime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MstReasonHoldover", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MstRegulationStatus",
                 columns: table => new
                 {
@@ -304,6 +325,33 @@ namespace EvictionFiler.Infrastructure.Migrations
                     table.PrimaryKey("PK_MstCaseSubTypes", x => x.Id);
                     table.ForeignKey(
                         name: "FK_MstCaseSubTypes_MstCaseTypes_CaseTypeId",
+                        column: x => x.CaseTypeId,
+                        principalTable: "MstCaseTypes",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MstFormTypes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    CaseTypeId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 500, nullable: true),
+                    HTML = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    UpdatedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "DateTime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MstFormTypes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MstFormTypes_MstCaseTypes_CaseTypeId",
                         column: x => x.CaseTypeId,
                         principalTable: "MstCaseTypes",
                         principalColumn: "Id");
@@ -663,6 +711,33 @@ namespace EvictionFiler.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AdditionalOccupants",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Relation = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    UpdatedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "DateTime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AdditionalOccupants", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AdditionalOccupants_Tenants_TenantId",
+                        column: x => x.TenantId,
+                        principalTable: "Tenants",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "LegalCases",
                 columns: table => new
                 {
@@ -677,9 +752,32 @@ namespace EvictionFiler.Infrastructure.Migrations
                     LegalRepresentative = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CaseTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CaseSubTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Attrney = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    AttrneyContactInfo = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Firm = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ReasonHoldoverId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsUnitIllegalId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    TenantRecord = table.Column<bool>(type: "bit", nullable: true),
+                    RenewalOffer = table.Column<bool>(type: "bit", nullable: true),
+                    HasPossession = table.Column<bool>(type: "bit", nullable: true),
+                    OtherOccupants = table.Column<bool>(type: "bit", nullable: true),
+                    RentDueEachMonthOrWeek = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    MonthlyRent = table.Column<double>(type: "float", nullable: true),
+                    TenantShare = table.Column<double>(type: "float", nullable: true),
+                    SocialServices = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    LastMonthWeekRentPaid = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    TotalRentOwed = table.Column<double>(type: "float", nullable: true),
+                    IsERAPPaymentReceived = table.Column<bool>(type: "bit", nullable: true),
+                    ERAPPaymentReceivedDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    TenancyTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RegulationStatusId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    LandlordTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DateOfRefreeDeed = table.Column<DateOnly>(type: "date", nullable: false),
+                    ReasonDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ExplainDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Attrney = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    AttrneyContactInfo = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Firm = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    OtherPropertiesBuildingId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    tenantReceive = table.Column<bool>(type: "bit", nullable: true),
+                    ExplainTenancyReceiveDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
@@ -723,9 +821,61 @@ namespace EvictionFiler.Infrastructure.Migrations
                         principalTable: "MstClientRoles",
                         principalColumn: "Id");
                     table.ForeignKey(
+                        name: "FK_LegalCases_MstIsUnitIllegal_IsUnitIllegalId",
+                        column: x => x.IsUnitIllegalId,
+                        principalTable: "MstIsUnitIllegal",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_LegalCases_MstLandlordTypes_LandlordTypeId",
+                        column: x => x.LandlordTypeId,
+                        principalTable: "MstLandlordTypes",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_LegalCases_MstReasonHoldover_ReasonHoldoverId",
+                        column: x => x.ReasonHoldoverId,
+                        principalTable: "MstReasonHoldover",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_LegalCases_MstRegulationStatus_RegulationStatusId",
+                        column: x => x.RegulationStatusId,
+                        principalTable: "MstRegulationStatus",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_LegalCases_MstTenancyTypes_TenancyTypeId",
+                        column: x => x.TenancyTypeId,
+                        principalTable: "MstTenancyTypes",
+                        principalColumn: "Id");
+                    table.ForeignKey(
                         name: "FK_LegalCases_Tenants_TenantId",
                         column: x => x.TenantId,
                         principalTable: "Tenants",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CaseForms",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    HTML = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    File = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LegalCaseId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    UpdatedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "DateTime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CaseForms", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CaseForms_LegalCases_LegalCaseId",
+                        column: x => x.LegalCaseId,
+                        principalTable: "LegalCases",
                         principalColumn: "Id");
                 });
 
@@ -748,6 +898,11 @@ namespace EvictionFiler.Infrastructure.Migrations
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
                 values: new object[] { new Guid("f5ab29da-356e-42df-a3ad-d91bbf644550"), new Guid("84722e9d-806c-4f49-94d7-a55de8d2d76e") });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AdditionalOccupants_TenantId",
+                table: "AdditionalOccupants",
+                column: "TenantId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -819,6 +974,11 @@ namespace EvictionFiler.Infrastructure.Migrations
                 column: "StateId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CaseForms_LegalCaseId",
+                table: "CaseForms",
+                column: "LegalCaseId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Clients_StateId",
                 table: "Clients",
                 column: "StateId");
@@ -869,9 +1029,34 @@ namespace EvictionFiler.Infrastructure.Migrations
                 column: "ClientRoleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_LegalCases_IsUnitIllegalId",
+                table: "LegalCases",
+                column: "IsUnitIllegalId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_LegalCases_LandLordId",
                 table: "LegalCases",
                 column: "LandLordId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LegalCases_LandlordTypeId",
+                table: "LegalCases",
+                column: "LandlordTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LegalCases_ReasonHoldoverId",
+                table: "LegalCases",
+                column: "ReasonHoldoverId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LegalCases_RegulationStatusId",
+                table: "LegalCases",
+                column: "RegulationStatusId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LegalCases_TenancyTypeId",
+                table: "LegalCases",
+                column: "TenancyTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LegalCases_TenantId",
@@ -881,6 +1066,11 @@ namespace EvictionFiler.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_MstCaseSubTypes_CaseTypeId",
                 table: "MstCaseSubTypes",
+                column: "CaseTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MstFormTypes_CaseTypeId",
+                table: "MstFormTypes",
                 column: "CaseTypeId");
 
             migrationBuilder.CreateIndex(
@@ -913,6 +1103,9 @@ namespace EvictionFiler.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "AdditionalOccupants");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -928,10 +1121,22 @@ namespace EvictionFiler.Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "LegalCases");
+                name: "CaseForms");
+
+            migrationBuilder.DropTable(
+                name: "MstFormTypes");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "LegalCases");
+
+            migrationBuilder.DropTable(
+                name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "UserDatabases");
 
             migrationBuilder.DropTable(
                 name: "MstCaseSubTypes");
@@ -940,13 +1145,10 @@ namespace EvictionFiler.Infrastructure.Migrations
                 name: "MstClientRoles");
 
             migrationBuilder.DropTable(
+                name: "MstReasonHoldover");
+
+            migrationBuilder.DropTable(
                 name: "Tenants");
-
-            migrationBuilder.DropTable(
-                name: "AspNetRoles");
-
-            migrationBuilder.DropTable(
-                name: "UserDatabases");
 
             migrationBuilder.DropTable(
                 name: "MstCaseTypes");

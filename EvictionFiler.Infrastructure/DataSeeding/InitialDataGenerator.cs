@@ -24,9 +24,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			return new List<CaseType>
 		{
 			new CaseType() { Name = "Holdover"},
-			new CaseType() { Name = "HP Action"},
 			new CaseType() { Name = "NonPayment"},
-			new CaseType() { Name = "Licence"},
 		};
 		}
 
@@ -81,16 +79,12 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 
 		public static IEnumerable<FormTypes> GetFormTypes()
 		{
-			var caseTypes = GetCaseTypes().ToList();
-
-			// IDs find karo
-			var holdoverId = caseTypes.FirstOrDefault(c => c.Name == "Holdover")?.Id;
-			var nonPaymentId = caseTypes.FirstOrDefault(c => c.Name == "NonPayment")?.Id;
+			
 			return new List<FormTypes>
 			{
-				new FormTypes() { Name = "90 Days Notice" , CaseTypeId=holdoverId , HTML=""},
-				new FormTypes() { Name = "5 Days Notice" , CaseTypeId=holdoverId , HTML=""},
-				new FormTypes() { Name = "30 Days Notice" , CaseTypeId=nonPaymentId , HTML=""},
+				new FormTypes() { Name = "90 Days Notice" , CaseTypeName = "HoldOver" , HTML=""},
+				new FormTypes() { Name = "5 Days Notice" , CaseTypeName = "HoldOver" , HTML=""},
+				new FormTypes() { Name = "30 Days Notice" , CaseTypeName = "NonPayment", HTML=""},
 				
 			};
 		}
