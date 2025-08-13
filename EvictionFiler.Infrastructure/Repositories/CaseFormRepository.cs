@@ -6,6 +6,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using HtmlRendererCore.PdfSharp;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 using PdfSharpCore;
 using PdfSharpCore.Pdf;
 
@@ -92,11 +93,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 			// 1. Template fetch
 			var template = await _context.MstFormTypes
 				.Where(f => f.Id == formTypeId)
-				.Select(f => f.HTML)
+				  .Select(f => new { f.HTML, f.Name })
 				.FirstOrDefaultAsync();
 
-			if (string.IsNullOrEmpty(template))
+			if (string.IsNullOrEmpty(template.HTML))
 				throw new Exception("Template not found.");
+
+			DateTime noticeDate = CalculateNoticeDate(template.Name);
 
 			// 2. Case + landlord + property details
 			var caseDetails = await (from lc in _context.LegalCases
@@ -110,7 +113,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 										 LandlordAddress = landlord.Address1 + " " + landlord.Address2 + " " +
 														   landlord.City + " " + landlord.State.Name + " " + landlord.Zipcode,
 										 LandlordPhone = landlord.Phone,
-										 LandlordDate = landlord.CreatedOn,
+										 
 										 LandlordEmail = landlord.Email,
 										 PropertyAddress = building.Address1 + " " + building.Address2 + " " +
 														   building.City + " " + building.State.Name + " " + building.Zipcode,
@@ -123,14 +126,15 @@ namespace EvictionFiler.Infrastructure.Repositories
 				throw new Exception("Case details not found.");
 
 			// 3. Fill HTML
-			string filledHtml = template
+			string filledHtml = template.HTML
 				.Replace("{{LandlordName}}", caseDetails.LandlordName ?? "")
 				.Replace("{{LandlordAddress}}", caseDetails.LandlordAddress ?? "")
 				.Replace("{{LandlordPhone}}", caseDetails.LandlordPhone ?? "")
 				.Replace("{{LandlordEmail}}", caseDetails.LandlordEmail ?? "")
-				.Replace("{{LandlordDate}}", caseDetails.LandlordDate.ToString("MM/dd/yyyy"))
+				.Replace("{{LandlordDate}}", noticeDate.ToString("MM/dd/yyyy"))
 				.Replace("{{PropertyAddress}}", caseDetails.PropertyAddress ?? "")
 				.Replace("{{ApartmentNumber}}", caseDetails.ApartmentNumber ?? "")
+				.Replace("{{CurrentDate}}", DateTime.Now.ToString("MM/dd/yyyy"))
 				.Replace("{{NumberofRoom}}", caseDetails.NumberofRoom ?? "")
 				.Replace("{{TenantName}}", caseDetails.TenantName ?? "");
 
@@ -181,7 +185,23 @@ namespace EvictionFiler.Infrastructure.Repositories
 			return await _context.SaveChangesAsync() > 0;
 		}
 
+		private DateTime CalculateNoticeDate(string formName)
+		{
+			int noticeDays = 0;
 
+			if (string.IsNullOrEmpty(formName))
+				return DateTime.Now;
+
+			if (formName.ToLower().Contains("90 days"))
+				noticeDays = 90;
+			else if (formName.ToLower().Contains("5 days"))
+				noticeDays = 5;
+			else if (formName.ToLower().Contains("30 days"))
+				noticeDays = 30;
+		
+
+			return DateTime.Now.AddDays(noticeDays);
+		}
 
 		public async Task<byte[]?> GetPdfBytesAsync(Guid id)
 		{
