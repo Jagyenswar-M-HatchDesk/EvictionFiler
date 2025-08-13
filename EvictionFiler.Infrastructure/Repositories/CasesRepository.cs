@@ -1,8 +1,11 @@
-﻿using EvictionFiler.Application.DTOs.ApartmentDto;
+﻿using System.Net;
+using System.Text.RegularExpressions;
+using EvictionFiler.Application.DTOs;
+using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.LegalCaseDto;
 using EvictionFiler.Application.DTOs.TenantDto;
-using EvictionFiler.Application.Interfaces.IUserRepository;
+using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
@@ -61,104 +64,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 								 .ToListAsync();
         }
 
-		//public async Task<CreateToEditLegalCaseModel?> GetCaseByIdAsync(Guid id)
-		//{
-		//	var legalCaseEntity = await _context.LegalCases
-		//		.Include(c => c.Clients)
-		//		.Include(c => c.Buildings)
-		//			.Include(c => c.CaseType)
-		//		.Include(c => c.LandLords)
-		//		.Include(c => c.Tenants)
-		//		.Include(c=>c.RegulationStatus)
-		//		.Include(c=>c.TenancyType)
-		//		.Include(c => c.ReasonHoldover)
-		//		.Include(c=>c.Buildings.State)
-		//		.Include(c=>c.Buildings.Landlord.State)
-		//			.Include(c => c.Buildings.Landlord.LandlordType)
-		//		.FirstOrDefaultAsync(c => c.Id == id);
-
-		//	if (legalCaseEntity == null)
-		//		return null;
-
-
-		//	var dto = new CreateToEditLegalCaseModel
-		//	{
-		//		Id = legalCaseEntity.Id,
-		//		ClientId = legalCaseEntity.Clients.Id, 
-		//		BuildingId = legalCaseEntity.Buildings?.Id,
-		//		LandLordId = legalCaseEntity.LandLordId,
-		//		TenantId = legalCaseEntity.Tenants?.Id,
-		//		  ExplainDescription = legalCaseEntity.ExplainDescription,
-		//		  ReasonHoldoverId = legalCaseEntity.ReasonHoldoverId,
-		//		  ERAPPaymentReceivedDate = legalCaseEntity.ERAPPaymentReceivedDate,
-		//		  IsERAPPaymentReceived = legalCaseEntity.IsERAPPaymentReceived,
-		//		  HasPossession = legalCaseEntity.HasPossession,
-		//		  IsUnitIllegalId = legalCaseEntity.IsUnitIllegalId,
-		//		  LandlordTypeId = legalCaseEntity.LandlordTypeId,
-		//		  LastMonthWeekRentPaid = legalCaseEntity.LastMonthWeekRentPaid,
-		//		  MonthlyRent = legalCaseEntity.MonthlyRent,
-		//		  OtherOccupants = legalCaseEntity.OtherOccupants,
-		//		  RegulationStatusId=legalCaseEntity.RegulationStatusId,
-		//		  RenewalOffer = legalCaseEntity.RenewalOffer,
-		//		  RentDueEachMonthOrWeek = legalCaseEntity.RentDueEachMonthOrWeek,
-		//		  SocialServices = legalCaseEntity.SocialServices,
-		//		  TenancyTypeId = legalCaseEntity.TenancyTypeId,
-		//		  TenantRecord = legalCaseEntity.TenantRecord,
-		//		  TenantShare = legalCaseEntity.TenantShare,
-		//		  CaseTypeId = legalCaseEntity.CaseTypeId,
-		//		  Attrney = legalCaseEntity.Attrney,
-		//		  AttrneyContactInfo = legalCaseEntity.AttrneyContactInfo,
-		//		  Firm = legalCaseEntity.Firm,
-		//		  tenantReceive = legalCaseEntity.tenantReceive,
-		//		  ExplainTenancyReceiveDescription = legalCaseEntity.ExplainTenancyReceiveDescription,
-
-
-		//		  TotalRentOwed = legalCaseEntity.TotalRentOwed,
-		//		Casecode = legalCaseEntity.Casecode,
-
-		//		tenants = legalCaseEntity.Tenants == null ? null : new CreateToTenantDto
-		//		{
-		//			FirstName = legalCaseEntity.Tenants.FirstName,
-		//			LastName = legalCaseEntity.Tenants.LastName,
-		//			BuildingId = legalCaseEntity.Tenants.BuildinId,
-		//		     UnitOrApartmentNumber = legalCaseEntity.Tenants.UnitOrApartmentNumber,
-
-
-
-
-		//			Building = legalCaseEntity.Tenants.Building == null ? null : new EditToBuildingDto
-		//			{
-		//				Address1 = legalCaseEntity.Tenants.Building.Address1,
-		//				Address2 = legalCaseEntity.Tenants.Building.Address2,
-		//				Zipcode = legalCaseEntity.Tenants.Building.Zipcode,
-		//				City = legalCaseEntity.Tenants.Building.City,
-		//				StateId = legalCaseEntity.Tenants.Building.StateId,
-		//				//StateName = legalCaseEntity.Tenants.Building.State.Name,
-		//				MDRNumber = legalCaseEntity.Tenants.Building.MDRNumber,
-		//				BuildingUnits = legalCaseEntity.Tenants.Building.BuildingUnits,
-		//				RegulationStatusId = legalCaseEntity.Tenants.Building.RegulationStatusId
-		//			},
-
-		//			Landlord = legalCaseEntity.Tenants.Building.Landlord == null ? null : new EditToLandlordDto
-		//			{
-		//				FirstName = legalCaseEntity.Tenants.Building.Landlord.FirstName,
-		//				LastName = legalCaseEntity.Tenants.Building.Landlord.LastName,
-		//				Address1 = legalCaseEntity.Tenants.Building.Landlord.Address1,
-		//				Address2 = legalCaseEntity.Tenants.Building.Landlord.Address2,
-		//				Zipcode = legalCaseEntity.Tenants.Building.Landlord.Zipcode,
-		//				City = legalCaseEntity.Tenants.Building.Landlord.City,
-		//				StateId = legalCaseEntity.Tenants.Building.Landlord.StateId,
-		//				//StateName = legalCaseEntity.Tenants.Building.Landlord.State.Name,
-		//				Phone = legalCaseEntity.Tenants.Building.Landlord.Phone,
-		//				Email = legalCaseEntity.Tenants.Building.Landlord.Email,
-		//				LandlordTypeId = legalCaseEntity.Tenants.Building.Landlord.LandlordTypeId,
-		//			}
-		//		}
-		//	};
-
-		//	return dto;
-		//}
-
+		
 		public async Task<CreateToEditLegalCaseModel?> GetCaseByIdAsync(Guid id)
 		{
 			var legalCaseEntity = await _context.LegalCases
@@ -406,6 +312,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 			string newCode = "EF" + nextNumber.ToString("D10");
 			return newCode;
 		}
+
+		
+
+
 
 	}
 }

@@ -30,5 +30,6 @@ namespace EvictionFiler.Application.DTOs.LandLordDto
 		public string? LandlordTypeName { get; set; }
 		public string ? OtherLandlordTypeDescription { get; set; }
 		public List<CreateToBuildingDto>? Buildings { get; set; }
+		public DateTime CreatedOn { get; set; }
 	}
 }

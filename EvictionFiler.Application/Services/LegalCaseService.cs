@@ -1,4 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.LegalCaseDto;
+using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;

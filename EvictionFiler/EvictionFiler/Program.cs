@@ -1,4 +1,5 @@
 using System.Text;
+using BlazorDownloadFile;
 using EvictionFiler.Application;
 using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.Interfaces.IRepository;
@@ -39,6 +40,8 @@ builder.Services.AddIdentity<User, Role>(options =>
 })
 .AddEntityFrameworkStores<MainDbContext>()
 .AddDefaultTokenProviders();
+builder.Services.AddBlazorDownloadFile();
+
 
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddDbContext<MainDbContext>(
@@ -56,6 +59,7 @@ builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<ILandLordRepository, LandLordRepository>();
 builder.Services.AddScoped<IBuildingRepository, BuildingRepository>();
 builder.Services.AddScoped<ICodeGenratorRepository, CodeGenratorRepository>();
+builder.Services.AddScoped<ICaseFormRepository, CaseFormRepository>();
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
 builder.Services.AddScoped<IStateRepository, StateRepository>();
 builder.Services.AddScoped<ITypeOwnerRepository, TypeOwnerRepository>();
@@ -69,6 +73,7 @@ builder.Services.AddScoped<IAdditionalOccupantsRepository, AdditionalOccupantsRe
 builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
 builder.Services.AddScoped<IUnitIllegalRepository, UnitIllegalRepository>();
 builder.Services.AddScoped<ITenancyTypeRepository, TenancyTypeRepository>();
+builder.Services.AddScoped<IFormTypesRepository, FormTypesRepository>();
 builder.Services.AddScoped<IReasonHoldoverRepository, ReasonHoldoverRepository>();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
 builder.Services.AddAuthorizationCore();
@@ -83,6 +88,7 @@ builder.Services.AddScoped<IClientService , ClientServices>();
 builder.Services.AddScoped<ILandlordSevice  , LandlordService>();
 builder.Services.AddScoped<IBuildingService , BuildingService>();
 builder.Services.AddScoped<ITenantService, TenantService>();
+builder.Services.AddScoped<ICaseFormService, CaseFormService>();
 builder.Services.AddScoped<ILegalCaseService  , LegalCaseService>();
 builder.Services.AddScoped<NavigationDataService>();
 

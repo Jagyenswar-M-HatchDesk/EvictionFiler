@@ -1,8 +1,9 @@
-﻿using EvictionFiler.Application.DTOs.LegalCaseDto;
+﻿using System.Threading.Tasks;
+using EvictionFiler.Application.DTOs.LegalCaseDto;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 
-namespace EvictionFiler.Application.Interfaces.IUserRepository
+namespace EvictionFiler.Application.Interfaces.IRepository
 {
     public interface ICasesRepository
     {
@@ -11,8 +12,9 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
 		Task<bool> AddCaseAsync(CreateToEditLegalCaseModel legalCase);
         Task<bool> UpdateCasesAsync(CreateToEditLegalCaseModel legalCase);
 		Task DeleteCaseAsync(Guid id);
-     
       
+
+
 	}
 
 }

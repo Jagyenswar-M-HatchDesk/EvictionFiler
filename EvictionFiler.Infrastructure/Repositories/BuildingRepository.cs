@@ -1,7 +1,7 @@
 ﻿using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.BuildingDto;
 using EvictionFiler.Application.DTOs.TenantDto;
-using EvictionFiler.Application.Interfaces.IUserRepository;
+using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;

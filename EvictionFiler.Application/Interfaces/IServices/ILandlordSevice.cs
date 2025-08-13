@@ -7,8 +7,8 @@ namespace EvictionFiler.Application.Interfaces.IServices
 	{
 		Task<bool> AddLandLordAsync(List<CreateToLandLordDto> dto);
 		Task<List<CreateToLandLordDto>> GetAllLandLordsAsync();
-		Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query, Guid clientId);
 		Task<CreateToLandLordDto?> GetLandLordByIdAsync(Guid id);
+		Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query, Guid clientId);
 		Task<LandlordWithBuildings?> GetLandlordWithBuildingsAsync(Guid landlordId);
 		Task<List<EditToLandlordDto>> GetLandlordsByClientIdAsync(Guid? clientId);
 		Task<bool> UpdateLandLordsAsync(List<EditToLandlordDto> landlords);

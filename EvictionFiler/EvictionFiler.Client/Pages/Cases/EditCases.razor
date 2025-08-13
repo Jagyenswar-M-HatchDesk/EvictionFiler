@@ -1,8 +1,10 @@
 ﻿ @page "/EditCase/{caseId:guid}"
+@using BlazorDownloadFile
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.BuildingDto
 @using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.DTOs.FormTypeDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
 @using EvictionFiler.Application.DTOs.TenantDto
@@ -15,11 +17,15 @@
 @inject IRegulationStatusRepository RegulationStatusRepository
 @inject IReasonHoldoverRepository ReasonHoldoverRepository
 @inject ILandlordTypeRepository LandlordTypeRepository
+@inject ICaseFormRepository CaseFormRepository
+@inject ICasesRepository CasesRepository
 @inject IUnitIllegalRepository UnitIllegalRepository
+@inject IFormTypesRepository FormTypesRepository
 @inject ITenancyTypeRepository TenancyTypeRepository
 @inject ILandlordSevice _landlordService
 @inject IBuildingService _buildingService
 @inject ILegalCaseService _legalCaseService
+@inject ICaseFormService _CaseFormService
 @inject ITenantService _tenantService
 @inject IClientService _clientService
 @inject NavigationManager nav
@@ -28,6 +34,11 @@
 @inject SpinnerService spinnerservice
 @using Blazored.Typeahead
 @using EvictionFiler.Domain.Entities
+
+@inject IBlazorDownloadFileService DownloadFileService
+
+
+
 
 @rendermode InteractiveAuto
 <style>
@@ -258,9 +269,6 @@
                                     </select>
                                 </div>
                             </div>
-
-
-
                         </div>
                 
                         <div class="col-12">
@@ -1389,6 +1397,88 @@
             </div>
         }
 
+        @if (currentStep == 2)
+        {
+            <div class="mx-auto p-4 border rounded shadow-sm bg-white">
+                <h5 class="text-center text-navy fs-3 fw-bold">Generate Forms</h5>
+                <hr class="border-gold mb-4" />
+
+                <EditForm Model="@noticeModel" >
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-12">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <label class="col-form-label fw-semibold text-navy">Form Type</label>
+                                </div>
+
+                                <!-- Dropdown + Button Side by Side -->
+                                <div class="col d-flex align-items-center gap-3">
+                                    <select class="form-select w-auto" @bind="noticeModel.FormTypeId">
+                                        <option value="">-- Select Form Type --</option>
+                                        @foreach (var formType in FormTypeList)
+                                        {
+                                            <option value="@formType.Id">@formType.Name</option>
+                                        }
+                                    </select>
+
+                                    <!-- Generate Notice Button -->
+                                    <button type="submit" class="btn bg-navy text-white" @onclick="GenerateNotice">
+                                        Generate 
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </EditForm>
+
+                <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
+                    <table class="table table-bordered mt-4" style="min-width: 800px;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Id</th>
+                                <th>Form Type</th>
+                                <th>Created Date</th>
+                                <th class="sticky">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (caseFormDto != null && caseFormDto.Any())
+                            {
+                                int index = 1;
+                                @foreach (var form in caseFormDto)
+                                {
+                                    <tr>
+                                        <td>@index</td>
+                                        <td>@form.FormTypeName</td>
+                                        <td>@form.CreatedOn.ToString("dd/MM/yyyy")</td>
+                                        <td>
+                                            <!-- View Icon -->
+                                            <button class="btn btn-link p-0" title="View" ">
+                                                <i class="fa fa-eye text-primary" style="font-size:18px;"></i>
+                                            </button>
+
+                                            <!-- Download Icon -->
+                                            <button class="btn btn-link p-0" title="Download" @onclick="() => DownloadPdf(form.Id)" style="margin-left:10px;">
+                                                <i class="fa fa-download text-success" style="font-size:18px;"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    index++;
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-muted text-center">No notices generated yet.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        }
+
     </div>
 </div>
 
@@ -1405,32 +1495,30 @@
 
         <!-- Right Buttons -->
         <div class="d-flex gap-2" style="position:fixed; right:40px">
-            @if (currentStep < lastStep)
+            @if (currentStep < lastStep && currentStep != 1)
             {
                 <button class="btn btn-outline-warning" @onclick="ResetStep">Reset</button>
                 <button class="btn bg-gold text-white" form="ReasonForm">Next →</button>
             }
-            @if (currentStep == lastStep)
+            @if (currentStep == 1)
             {
                 <button class="btn btn-outline-warning" @onclick="ResetStep">Reset</button>
-                @* <button class="btn btn-outline-warning" @onclick="SaveAsDraft">Save As Draft</button> *@
-
-
-                <button class="btn btn-success" @onclick="Submit">Submit</button>
-
+                <button class="btn btn-outline-warning" @onclick="SaveAsDraft">Save</button>
+                <button class="btn btn-success" @onclick="Submit">Submit & Next</button>
             }
         </div>
     </div>
-
 </div>
+
 
 @code {
     [Parameter]
     public Guid caseId { get; set; }
     [Parameter] public string ClientId { get; set; }
+    private GenrateNoticeModel noticeModel = new GenrateNoticeModel();
     private CreateToEditLegalCaseModel legalcaseDto = new CreateToEditLegalCaseModel();
     int currentStep = 0;
-    int lastStep = 1;
+    int lastStep = 2;
     private EditContext editContext;
     // Used for conditional rendering
     private bool hasSearched = false;
@@ -1467,12 +1555,24 @@
     private List<RegulationStatus> RegulationList = new();
     private List<LandlordType> LandLordTypeList = new();
     private List<TenancyType> TenancyTypeList = new();
+      private List<FormTypes> FormTypeList = new();
     private bool isLoading = true;
     private bool isSubmitting = true;
     private List<CaseType> CaseTypeList = new();
 
-    private Guid? SelectedTenantId;
+    private List<GenrateNoticeModel> caseFormDto = new();
 
+private async Task LoadCaseForms()
+{
+        caseFormDto = await _CaseFormService.GetCaseFormsByCaseId(CurrentCaseId.Value);
+}
+
+
+    private Guid? SelectedTenantId;
+ 
+    [Parameter] public Guid ?CurrentCaseId { get; set; }
+
+    
 
 
     private CreateToEditLegalCaseModel? tenantDto;
@@ -1498,44 +1598,130 @@
     }
 
     List<string> stepTitles = new() {
-        "Edit", "Review & Submit" , "Genrate Notice"
+        "Edit", "Review & Submit" , "Genrate Forms"
 
     };
 
 
 
-  
-
-
-  
-private async Task LoadDataAsync()
-{
-
-    legalcaseDto = await _legalCaseService.GetByIdAsync(caseId);
-
- 
-    tenantDto = legalcaseDto;
-    tenantDto.SelectedTenantId = legalcaseDto.TenantId;
-
- 
-    selectedBuildings = legalcaseDto.OtherPropertiesBuildings?.ToList() 
-                        ?? new List<EditToBuildingDto>();
-
-    CaseTypeList = await CaseTypeRepository.GetAllCaseType() ?? new List<CaseType>();
-
-
-    if (caseId == Guid.Empty) 
+    private async Task OnFormTypeChanged(ChangeEventArgs e)
     {
-        var holdoverCase = CaseTypeList.FirstOrDefault(x => x.Name == "Holdover");
-        if (holdoverCase != null)
+        noticeModel.FormTypeId = Guid.Parse(e.Value.ToString());
+    }
+
+
+
+    private async Task GenerateNotice()
+    {
+        if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty && noticeModel.FormTypeId.HasValue)
         {
-            legalcaseDto.CaseTypeId = holdoverCase.Id;
+            var success = await CaseFormRepository.GenerateNoticeAsync(
+                CurrentCaseId.Value,
+                noticeModel.FormTypeId.Value
+            );
+
+            if (success)
+            {
+                await LoadCaseForms();
+            }
+        }
+        else
+        {
+            
         }
     }
-  
 
-    isTenantSelected = true;
-}
+    private async Task DownloadPdf(Guid id)
+    {
+        var pdfBytes = await CaseFormRepository.GetPdfBytesAsync(id);
+
+        if (pdfBytes != null)
+        {
+            var fileName = $"Form_{id}.pdf";
+            await DownloadFileService.DownloadFile(fileName, pdfBytes, "application/pdf");
+        }
+    }
+
+
+
+    @* private async Task LoadDataAsync()
+    {
+
+        legalcaseDto = await _legalCaseService.GetByIdAsync(caseId);
+
+
+        tenantDto = legalcaseDto;
+        tenantDto.SelectedTenantId = legalcaseDto.TenantId;
+
+
+        selectedBuildings = legalcaseDto.OtherPropertiesBuildings?.ToList() 
+                            ?? new List<EditToBuildingDto>();
+
+        CaseTypeList = await CaseTypeRepository.GetAllCaseType() ?? new List<CaseType>();
+
+
+        if (caseId == Guid.Empty) 
+        {
+            var holdoverCase = CaseTypeList.FirstOrDefault(x => x.Name == "Holdover");
+            if (holdoverCase != null)
+            {
+                legalcaseDto.CaseTypeId = holdoverCase.Id;
+            }
+        }
+
+        if ( caseId != Guid.Empty)
+        {
+            CurrentCaseId = caseId;
+
+            // Agar aap case ka data la rahe ho to yaha fetch karo
+            var caseDetails = await CasesRepository.GetCaseByIdAsync(caseId);
+            // noticeModel ke liye default values set kar sakte ho
+        }
+
+        isTenantSelected = true;
+    } *@
+
+
+    private async Task LoadDataAsync()
+    {
+       
+        CaseTypeList = await CaseTypeRepository.GetAllCaseType() ?? new List<CaseType>();
+
+       
+        if (caseId != Guid.Empty)
+        {
+           
+            legalcaseDto = await _legalCaseService.GetByIdAsync(caseId);
+            tenantDto = legalcaseDto ?? new CreateToEditLegalCaseModel();
+            tenantDto.SelectedTenantId = legalcaseDto?.TenantId ?? Guid.Empty;
+
+            selectedBuildings = legalcaseDto?.OtherPropertiesBuildings?.ToList()
+                                ?? new List<EditToBuildingDto>();
+            CurrentCaseId = caseId;
+
+        
+        }
+        else
+        {
+            
+            legalcaseDto = new CreateToEditLegalCaseModel();
+            tenantDto = new CreateToEditLegalCaseModel();
+            selectedBuildings = new List<EditToBuildingDto>();
+
+            // Default case type Holdover set kar do
+            var holdoverCase = CaseTypeList.FirstOrDefault(x => x.Name == "Holdover");
+            if (holdoverCase != null)
+            {
+                legalcaseDto.CaseTypeId = holdoverCase.Id;
+            }
+
+            // CurrentCaseId ko null rakhna hi better hai is case me
+            CurrentCaseId = null;
+        }
+
+        // Tenant select flag
+        isTenantSelected = true;
+    }
 
 
     private async Task HandleBuildingInput(ChangeEventArgs e)
@@ -1616,10 +1802,6 @@ private async Task LoadDataAsync()
         }
     }
 
-
-
-
-
     private async Task SelectTenant(Guid id)
     {
         TenantDetails = await _tenantService.GetByIdAsync(id);
@@ -1633,7 +1815,7 @@ private async Task LoadDataAsync()
             tenantDto = new CreateToEditLegalCaseModel
                 {
                      SelectedTenantId = TenantDetails.Id,
-                    // Id = TenantDetails.Id,
+                // Id = TenantDetails.Id,
                     TenancyTypeId = TenantDetails.TenancyTypeId,
                     RenewalOffer = TenantDetails.RenewalOffer,
                     RentDueEachMonthOrWeek = TenantDetails.RentDueEachMonthOrWeek,
@@ -1754,7 +1936,7 @@ private async Task LoadDataAsync()
         {
             if (legalcaseDto != null && legalcaseDto.Id != Guid.Empty)
             {
-                
+
                 legalcaseDto.TenantId = tenantDto?.SelectedTenantId ?? legalcaseDto.TenantId;
                 legalcaseDto.IsUnitIllegalId = tenantDto?.IsUnitIllegalId ?? Guid.Empty;
                 legalcaseDto.TenantRecord = tenantDto?.TenantRecord;
@@ -1797,7 +1979,10 @@ private async Task LoadDataAsync()
 
             if (result)
             {
-                nav.NavigateTo("/cases?success=true");
+                currentStep++;
+                FormTypeList = await FormTypesRepository.GetAllFormTYpes();
+                await LoadCaseForms();
+
             }
         }
         finally

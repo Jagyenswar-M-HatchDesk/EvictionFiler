@@ -309,6 +309,7 @@ namespace EvictionFiler.Application.Services
 						LandlordTypeId = l.LandlordTypeId,
 						DateOfRefreeDeed = l.DateOfRefreeDeed,
 						TypeOfOwnerId = l.TypeOwnerId,
+						CreatedOn = l.CreatedOn,
 					};
 
 					landlords.Add(landlord);
@@ -334,7 +335,8 @@ namespace EvictionFiler.Application.Services
 								PetitionerInterest = b.PetitionerInterest,
 								RegulationStatusId = b.RegulationStatusId,
 								BuildingUnits = b.BuildingUnits,
-								LandlordId = landlord.Id
+								LandlordId = landlord.Id,
+								CreatedOn = landlord.CreatedOn,
 							};
 
 							buildings.Add(building);
@@ -373,7 +375,9 @@ namespace EvictionFiler.Application.Services
 										UnitOrApartmentNumber = t.UnitOrApartmentNumber,
 										TotalRentOwed = t.TotalRentOwed,
 										IsUnitIllegalId = t.IsUnitIllegalId,
-										BuildinId = building.Id
+										BuildinId = building.Id,
+										CreatedOn = building.CreatedOn,
+										
 									};
 										if (t.occupants != null)
 									    {
