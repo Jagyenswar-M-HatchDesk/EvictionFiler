@@ -35,6 +35,7 @@
 @using Blazored.Typeahead
 @using EvictionFiler.Domain.Entities
 
+
 @inject IBlazorDownloadFileService DownloadFileService
 
 
@@ -1453,9 +1454,11 @@
                                         <td>@form.CreatedOn.ToString("dd/MM/yyyy")</td>
                                         <td>
                                             <!-- View Icon -->
-                                            <button class="btn btn-link p-0" title="View" ">
+                                            <button class="btn btn-link p-0" title="View"
+                                                    @onclick="@(() => ViewPdf(form.File))">
                                                 <i class="fa fa-eye text-primary" style="font-size:18px;"></i>
                                             </button>
+
 
                                             <!-- Download Icon -->
                                             <button class="btn btn-link p-0" title="Download" @onclick="() => DownloadPdf(form.Id)" style="margin-left:10px;">
@@ -1562,10 +1565,7 @@
 
     private List<GenrateNoticeModel> caseFormDto = new();
 
-private async Task LoadCaseForms()
-{
-        caseFormDto = await _CaseFormService.GetCaseFormsByCaseId(CurrentCaseId.Value);
-}
+
 
 
     private Guid? SelectedTenantId;
@@ -1573,6 +1573,10 @@ private async Task LoadCaseForms()
     [Parameter] public Guid ?CurrentCaseId { get; set; }
 
     
+private async Task LoadCaseForms()
+{
+        caseFormDto = await _CaseFormService.GetCaseFormsByCaseId(CurrentCaseId.Value);
+}
 
 
     private CreateToEditLegalCaseModel? tenantDto;
@@ -1589,7 +1593,6 @@ private async Task LoadCaseForms()
         RegulationList = await RegulationStatusRepository.GetAllRegulationStatus();
         LandLordTypeList = await LandlordTypeRepository.GetAllLandLordType();
         TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
-
 
         await Task.Delay(500);
         await LoadDataAsync();
@@ -1628,6 +1631,15 @@ private async Task LoadCaseForms()
         else
         {
             
+        }
+    }
+
+     private void ViewPdf(string filePath)
+    {
+        if (!string.IsNullOrWhiteSpace(filePath))
+        {
+            var fullUrl = nav.BaseUri.TrimEnd('/') + filePath;
+            nav.NavigateTo(fullUrl, forceLoad: true);
         }
     }
 

@@ -34,6 +34,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 								   {
 									  Id = c.Id,
 									  Casecode = c.Casecode,
+									  CreatedOn = c.CreatedOn,
 									  ReasonHoldover = c.ReasonHoldover,
 									  Clients = c.Clients != null ? new Client()
 									  {
@@ -225,8 +226,6 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Attrney = legalCase.Attrney,
 				AttrneyContactInfo = legalCase.AttrneyContactInfo,
 				Firm = legalCase.Firm,
-
-			
 				CreatedOn = DateTime.Now,
 				
 
@@ -274,6 +273,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 			existing.tenantReceive = legalCase.tenantReceive;
 			existing.CaseTypeId = legalCase.CaseTypeId;
 			existing.OtherPropertiesBuildingId = legalCase.OtherPropertiesBuildingId;
+			existing.CreatedOn = legalCase.CreatedOn;
 
 			_context.LegalCases.Update(existing);
 			await _context.SaveChangesAsync();

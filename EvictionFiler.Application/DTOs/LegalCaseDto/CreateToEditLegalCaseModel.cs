@@ -59,7 +59,7 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 		public bool? tenantReceive { get; set; }
 		public string? ExplainTenancyReceiveDescription { get; set; }
 		public Guid? SelectedTenantId { get; set; }
-
+		public DateTime CreatedOn { get; set; }
 		public List<EditToBuildingDto> OtherPropertiesBuildings { get; set; } = new();
 
 
