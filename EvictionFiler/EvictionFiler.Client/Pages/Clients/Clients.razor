@@ -158,8 +158,18 @@
                                 <td>@(string.IsNullOrWhiteSpace(client.Fax) ? "-" : client.Fax)</td>
 
                                 <td>
-                                    @(string.IsNullOrWhiteSpace($"{client.Address1}{client.Address2}{client.City}{client.StateName}{client.ZipCode}")
-                                                                                ? "-" : $"{client.Address1}, {client.Address2}, {client.City}, {client.StateName} - {client.ZipCode}")
+                                    @{
+                                        var parts = new List<string>();
+
+                                        if (!string.IsNullOrWhiteSpace(client.Address1)) parts.Add(client.Address1);
+                                        if (!string.IsNullOrWhiteSpace(client.Address2)) parts.Add(client.Address2);
+                                        if (!string.IsNullOrWhiteSpace(client.City)) parts.Add(client.City);
+                                        if (!string.IsNullOrWhiteSpace(client.StateName)) parts.Add(client.StateName);
+                                        if (!string.IsNullOrWhiteSpace(client.ZipCode)) parts.Add(client.ZipCode);
+
+                                        var fullAddress = parts.Any() ? string.Join(", ", parts) : "-";
+                                    }
+                                    @fullAddress
                                 </td>
                                 <td>
                                     Active

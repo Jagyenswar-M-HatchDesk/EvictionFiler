@@ -304,21 +304,21 @@ aria-labelledby="createUserLabel">
                             <label class="form-label color-text">Phone</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                                <InputText class="form-control" @bind-Value="editClient.Phone" />
+                                <InputText class="form-control" @bind-Value="editClient.Phone"    @oninput="@(e => FormatPhone(e, "editClient"))" />
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text">Cell Phone</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-phone"></i></span>
-                                <InputText class="form-control" @bind-Value="editClient.CellPhone" />
+                                <InputText class="form-control" @bind-Value="editClient.CellPhone" oninput="@FormatCellPhone" />
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text ">Fax</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-printer"></i></span>
-                                <InputText class="form-control" @bind-Value="editClient.Fax" placeholder="Fax Number" />
+                                <InputText class="form-control" @bind-Value="editClient.Fax" placeholder="Fax Number" oninput="@FormatFax" />
                             </div>
                         </div>
 
@@ -392,10 +392,10 @@ aria-labelledby="createUserLabel">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="color-text fw-bold mb-0">
                         @(
-                                                        showLandlordForm && landlord != null && landlord.Id != Guid.Empty
-                                                        ? $"LandLord - {landlord.FirstName} {landlord.LastName} / {landlord.LandLordCode}"
-                                                        : "LANDLORD"
-                                                        )
+                           showLandlordForm && landlord != null && landlord.Id != Guid.Empty
+                           ? $"LandLord - {landlord.FirstName} {landlord.LastName} / {landlord.LandLordCode}"
+                           : "LANDLORD"
+                           )
                     </h5>
 
                     <div>
@@ -456,7 +456,7 @@ aria-labelledby="createUserLabel">
                                 <label>Phone</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-phone"></i></span>
-                                    <InputText class="form-control" @bind-Value="landlord.Phone" placeholder="Enter Phone " />
+                                    <InputText class="form-control" @bind-Value="landlord.Phone" placeholder="Enter Phone " @oninput="@(e => FormatPhone(e, "landlord"))" />
                                 </div>
 
                             </div>
@@ -627,9 +627,18 @@ aria-labelledby="createUserLabel">
 
 
                                             <td>
-                                                @(
-                                                                                string.IsNullOrWhiteSpace($"{l.Address1}{l.Address2}{l.City}{l.StateName}{l.Zipcode}")
-                                                                                ? "-" : $"{l.Address1}, {l.Address2}, {l.City}, {l.StateName} - {l.Zipcode}")
+                                                @{
+                                                    var parts = new List<string>();
+
+                                                    if (!string.IsNullOrWhiteSpace(l.Address1)) parts.Add(l.Address1);
+                                                    if (!string.IsNullOrWhiteSpace(l.Address2)) parts.Add(l.Address2);
+                                                    if (!string.IsNullOrWhiteSpace(l.City)) parts.Add(l.City);
+                                                    if (!string.IsNullOrWhiteSpace(l.StateName)) parts.Add(l.StateName);
+                                                    if (!string.IsNullOrWhiteSpace(l.Zipcode)) parts.Add(l.Zipcode);
+
+                                                    var fullAddress = parts.Any() ? string.Join(", ", parts) : "-";
+                                                }
+                                                @fullAddress
                                             </td>
 
                                             <td>@(l.IsActive ? "Active" : "InActive")</td>
@@ -668,10 +677,10 @@ aria-labelledby="createUserLabel">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="color-text fw-bold mb-0">
                         @(
-                                                        showBuildingForm && building != null && building.Id != Guid.Empty
-                                                        ? $"Building - {building.BuildingCode}"
-                                                        : "Building"
-                                                        )
+                            showBuildingForm && building != null && building.Id != Guid.Empty
+                            ? $"Building - {building.BuildingCode}"
+                            : "Building"
+                            )
                     </h5>
 
                     <div>
@@ -846,10 +855,18 @@ aria-labelledby="createUserLabel">
                                             <td>@(string.IsNullOrWhiteSpace(b.PremiseTypeName) ? "-" : b.PremiseTypeName)</td>
 
                                             <td>
-                                                @(
-                                                                                string.IsNullOrWhiteSpace($"{b.Address1}{b.Address2}{b.City}{b.StateName}{b.Zipcode}")
-                                                                                ? "-" : $"{b.Address1}, {b.Address2}, {b.City}, {b.StateName} - {b.Zipcode}"
-                                                                                )
+                                                @{
+                                                    var parts = new List<string>();
+
+                                                    if (!string.IsNullOrWhiteSpace(b.Address1)) parts.Add(b.Address1);
+                                                    if (!string.IsNullOrWhiteSpace(b.Address2)) parts.Add(b.Address2);
+                                                    if (!string.IsNullOrWhiteSpace(b.City)) parts.Add(b.City);
+                                                    if (!string.IsNullOrWhiteSpace(b.StateName)) parts.Add(b.StateName);
+                                                    if (!string.IsNullOrWhiteSpace(b.Zipcode)) parts.Add(b.Zipcode);
+
+                                                    var fullAddress = parts.Any() ? string.Join(", ", parts) : "-";
+                                                }
+                                                @fullAddress
                                             </td>
                                             <td>@(string.IsNullOrWhiteSpace(b.MDRNumber) ? "-" : b.MDRNumber)</td>
                                             <td>@(string.IsNullOrWhiteSpace(b.PetitionerInterest) ? "-" : b.PetitionerInterest)</td>
@@ -967,7 +984,7 @@ aria-labelledby="createUserLabel">
                                 <label>Phone</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-phone"></i></span>
-                                    <InputText class="form-control" @bind-Value="tenant.Phone" placeholder="Enter Phone " />
+                                    <InputText class="form-control" @bind-Value="tenant.Phone" placeholder="Enter Phone " @oninput="@(e => FormatPhone(e, "tenant"))" />
                                 </div>
 
                             </div>
@@ -1006,12 +1023,26 @@ aria-labelledby="createUserLabel">
 
                             <div class="col-md-2">
                                 <label>Monthly Rent</label>
+                                                    <div class="input-group mb-3">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-currency-dollar"></i>
+                                    </span>
+
+        
                                 <InputNumber class="form-control" @bind-Value="tenant.MonthlyRent" placeholder="Enter Monthly Rent" />
+                                </div>
                             </div>
 
                             <div class="col-md-2">
                                 <label>Tenant's Share</label>
+                                                    <div class="input-group mb-3">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-percent"></i>
+                                    </span>
+
+        
                                 <InputNumber class="form-control" @bind-Value="tenant.TenantShare" placeholder="Enter Tenant Share" />
+                                </div>
                             </div>
                             <div class="col-md-2">
                                 <label>Borough</label>
@@ -1028,12 +1059,26 @@ aria-labelledby="createUserLabel">
 
                             <div class="col-md-4">
                                 <label>Last Rent Paid</label>
+                                                    <div class="input-group mb-3">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-currency-dollar"></i>
+                                    </span>
+
+        
                                 <InputText class="form-control" @bind-Value="tenant.LastMonthWeekRentPaid" placeholder="Enter Last Paid Info" />
+                                </div>
                             </div>
 
                             <div class="col-md-4">
                                 <label>Total Rent Owed</label>
+                                                    <div class="input-group mb-3">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-currency-dollar"></i>
+                                    </span>
+
+        
                                 <InputNumber class="form-control" @bind-Value="tenant.TotalRentOwed" placeholder="Enter Total Owed" />
+                                </div>
                             </div>
                             <div class="col-md-4">
                                 <label>Reg. No.</label>
@@ -1484,6 +1529,54 @@ aria-labelledby="createUserLabel">
     {
         showLandlordForm = false;
         landlord = new();
+    }
+
+    private void FormatPhone(ChangeEventArgs e, string target)
+    {
+        var phoneValue = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(phoneValue))
+            return;
+
+        var formattedPhone = ApplyMask(phoneValue);
+
+        switch (target)
+        {
+            case "editClient":
+                editClient.Phone = formattedPhone;
+                break;
+            case "landlord":
+                landlord.Phone = formattedPhone;
+                break;
+            case "tenant":
+                tenant.Phone = formattedPhone;
+                break;
+        }
+    }
+
+    private void FormatCellPhone(ChangeEventArgs e)
+    {
+        editClient.CellPhone = ApplyMask(e.Value?.ToString());
+    }
+
+    private void FormatFax(ChangeEventArgs e)
+    {
+        editClient.Fax = ApplyMask(e.Value?.ToString());
+    }
+
+    private string ApplyMask(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return string.Empty;
+
+        // Sirf digits rakho
+        var digits = new string(input.Where(char.IsDigit).ToArray());
+
+        if (digits.Length <= 3)
+            return digits;
+        else if (digits.Length <= 6)
+            return $"{digits.Substring(0, 3)}-{digits.Substring(3)}";
+        else
+            return $"{digits.Substring(0, 3)}-{digits.Substring(3, 3)}-{digits.Substring(6)}";
     }
 
     private void BackToBuildingList()

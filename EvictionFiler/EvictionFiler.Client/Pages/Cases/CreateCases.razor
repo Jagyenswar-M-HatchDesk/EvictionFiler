@@ -191,6 +191,12 @@
     margin: 0 8px;
     }
 
+    .btn:disabled,
+    .btn[disabled] {
+        pointer-events: auto !important;
+        cursor: not-allowed !important;
+    }
+
 </style>
 
 <!-- upper Step Tracker + Navigation Buttons -->
@@ -245,13 +251,12 @@
 
                       <div class="col-12">
                           <div class="row">
-                              <div class="col-auto">
-                                    <label class=" col-form-label fw-semibold text-navy">Case Type</label>
+                              <div class="col-2">
+                                    <label class=" col-form-label fw-semibold text-navy required-label">Case Type</label>
                                </div>
-                                <div class="col">
-                                    <select class="form-select w-25" @bind="legalcaseDto.CaseTypeId">
-                                        >
-                                        <option value="">-- Select Case Type --</option>
+                                <div class="col-8">
+                                    <select class="form-select w-50" @bind="legalcaseDto.CaseTypeId">
+
                                         @foreach (var caseType in CaseTypeList)
                                         {
                                             <option value="@caseType.Id">@caseType.Name</option>
@@ -265,11 +270,11 @@
                             @if (!isTenantSelected)
                             {
                                 <div class="row">
-                                    <div class="col-auto">
-                                        <label class="col-sm-1 col-form-label fw-semibold text-navy">Tenant</label>
+                                    <div class="col-2">
+                                        <label class=" col-form-label fw-semibold text-navy required-label">Tenant</label>
                                     </div>
 
-                                    <div class="col position-relative">
+                                    <div class="col-8">
                                         <input type="text"
                                                class="form-control"
                                                value="@searchtenantText"
@@ -354,16 +359,20 @@
                                     <div class="row my-4">
                                         <div class="col-auto fw-semibold">Building Address:</div>
                                         <div class="col-7 ">
-                                            @(
-                                                    string.IsNullOrWhiteSpace($"{TenantDetails.Building?.Address1}{TenantDetails.Building?.Address2}{TenantDetails.Building?.City}{TenantDetails.Building?.StateName}{TenantDetails.Building?.Zipcode}")
-                                                    ? "N/A"
-                                                    : $"{TenantDetails.Building.Address1}{TenantDetails.Building.Address2} {TenantDetails.Building.City} {TenantDetails.Building.StateName}  {TenantDetails.Building.Zipcode}"
-                                                    )
+                                            @{
+                                                var parts = new List<string>();
+
+                                                if (!string.IsNullOrWhiteSpace(TenantDetails.Building.Address1)) parts.Add(TenantDetails.Building.Address1);
+                                                if (!string.IsNullOrWhiteSpace(TenantDetails.Building.Address2)) parts.Add(TenantDetails.Building.Address2);
+                                                if (!string.IsNullOrWhiteSpace(TenantDetails.Building.City)) parts.Add(TenantDetails.Building.City);
+                                                if (!string.IsNullOrWhiteSpace(TenantDetails.Building.StateName)) parts.Add(TenantDetails.Building.StateName);
+                                                if (!string.IsNullOrWhiteSpace(TenantDetails.Building.Zipcode)) parts.Add(TenantDetails.Building.Zipcode);
+
+                                                var fullAddress = parts.Any() ? string.Join(", ", parts) : "-";
+                                            }
+                                            @fullAddress
                                         </div>
                                     </div>
-
-
-
 
                                     <div class="my-4">
 
@@ -632,9 +641,18 @@
                                         <div class="row my-4">
                                             <div class="col-auto fw-semibold">Building Address:</div>
                                             <div class="col-9">
-                                                @(string.IsNullOrWhiteSpace($"{TenantDetails.Building?.Address1}{TenantDetails.Building?.Address2}{TenantDetails.Building?.City}{TenantDetails.Building?.StateName}{TenantDetails.Building?.Zipcode}")
-                                                        ? "N/A"
-                                                        : $"{TenantDetails.Building.Address1} {TenantDetails.Building.Address2} {TenantDetails.Building.City} {TenantDetails.Building.StateName}  {TenantDetails.Building.Zipcode}")
+                                                @{
+                                                    var partBuilding = new List<string>();
+
+                                                    if (!string.IsNullOrWhiteSpace(TenantDetails.Building.Address1)) partBuilding.Add(TenantDetails.Building.Address1);
+                                                    if (!string.IsNullOrWhiteSpace(TenantDetails.Building.Address2)) partBuilding.Add(TenantDetails.Building.Address2);
+                                                    if (!string.IsNullOrWhiteSpace(TenantDetails.Building.City)) partBuilding.Add(TenantDetails.Building.City);
+                                                    if (!string.IsNullOrWhiteSpace(TenantDetails.Building.StateName)) partBuilding.Add(TenantDetails.Building.StateName);
+                                                    if (!string.IsNullOrWhiteSpace(TenantDetails.Building.Zipcode)) partBuilding.Add(TenantDetails.Building.Zipcode);
+
+                                                    var fullBuildingAddress = partBuilding.Any() ? string.Join(", ", partBuilding) : "-";
+                                                }
+                                                @fullBuildingAddress
                                             </div>
                                         </div>
 
@@ -694,7 +712,7 @@
                                                                    }
                                                                    else
                                                                    {
-                                                                                        <span>(@item.BuildingCode)</span>
+                                                                     <span>(@item.BuildingCode)</span>
                                                                    }
                                                                </li>
                                                            }
@@ -748,9 +766,18 @@
                                                                 <div class="row my-4">
                                                                     <div class="col-auto fw-semibold">Building Address:</div>
                                                                     <div class="col-9">
-                                                                        @(string.IsNullOrWhiteSpace($"{b.Address1}{b.Address2}{b.City}{b.StateName}{b.Zipcode}")
-                                                                                                                    ? "N/A"
-                                                                                                                                                       : $"{b.Address1} {b.Address2} {b.City} {b.StateName} {b.Zipcode}")
+                                                                    @{
+                                                                        var p = new List<string>();
+
+                                                                        if (!string.IsNullOrWhiteSpace(b.Address1)) p.Add(b.Address1);
+                                                                        if (!string.IsNullOrWhiteSpace(b.Address2)) p.Add(b.Address2);
+                                                                        if (!string.IsNullOrWhiteSpace(b.City)) p.Add(b.City);
+                                                                        if (!string.IsNullOrWhiteSpace(b.StateName)) p.Add(b.StateName);
+                                                                        if (!string.IsNullOrWhiteSpace(b.Zipcode)) p.Add(b.Zipcode);
+
+                                                                        var Address = p.Any() ? string.Join(", ", p) : "-";
+                                                                    }
+                                                                    @Address
                                                                            </div>
                                                                        </div>
                                                                    </div>
@@ -791,11 +818,18 @@
                                                 <div class="row ">
                                                     <label class="col-auto fw-semibold mb-0">Mailing Address:</label>
                                                     <div class="col ">
-                                                        @(
-                                                                string.IsNullOrWhiteSpace($"{TenantDetails.Landlord?.Address1}{TenantDetails.Landlord?.Address2}{TenantDetails.Landlord?.City}{TenantDetails.Landlord?.StateName}{TenantDetails.Landlord?.Zipcode}")
-                                                                ? "N/A"
-                                                                : $"{TenantDetails.Landlord.Address1}, {TenantDetails.Landlord.Address2}, {TenantDetails.Landlord.City}, {TenantDetails.Landlord.StateName} - {TenantDetails.Landlord.Zipcode}"
-                                                                )
+                                                        @{
+                                                            var partlandlord = new List<string>();
+
+                                                            if (!string.IsNullOrWhiteSpace(TenantDetails.Landlord.Address1)) partlandlord.Add(TenantDetails.Landlord.Address1);
+                                                            if (!string.IsNullOrWhiteSpace(TenantDetails.Landlord.Address2)) partlandlord.Add(TenantDetails.Landlord.Address2);
+                                                            if (!string.IsNullOrWhiteSpace(TenantDetails.Landlord.City)) partlandlord.Add(TenantDetails.Landlord.City);
+                                                            if (!string.IsNullOrWhiteSpace(TenantDetails.Landlord.StateName)) partlandlord.Add(TenantDetails.Landlord.StateName);
+                                                            if (!string.IsNullOrWhiteSpace(TenantDetails.Landlord.Zipcode)) partlandlord.Add(TenantDetails.Landlord.Zipcode);
+
+                                                            var fulllandlordAddress = partlandlord.Any() ? string.Join(", ", partlandlord) : "-";
+                                                        }
+                                                        @fulllandlordAddress
                                                     </div>
                                                 </div>
                                             </div>
@@ -913,15 +947,15 @@
                             <div class="col-md-12">
                                 <InputRadioGroup @bind-Value="legalcaseDto.ReasonHoldoverId" class="mb-3 required-label">
                                     <div class="row align-items-start">
-                                        <div class="col-2">
+                                        <div class="col-auto">
                                             <label class="form-label fw-semibold mb-0 required-label" style="margin-top:5px">Reason Holdover:</label>
                                         </div>
                                         <div class="col">
-                                            <div class="d-flex flex-wrap align-items-start">
+                                            <div class="d-flex flex-wrap align-items-start" >
                                              
                                                 @foreach (var role in ReasonHoldoverList)
                                                 {
-                                                    <div class="d-flex align-items-center gap-2">
+                                                    <div class="d-flex align-items-center gap-2" style="margin-left:10px">
                                                         <div class="form-check d-flex align-items-center m-0">
                                                             <InputRadio Value="@role.Id" class="form-check-input me-1" />
                                                             <label class="form-check-label ms-1" style="margin-top:5px">
@@ -1014,11 +1048,18 @@
                                             <div class="row">
                                                 <div class="col-auto fw-semibold">Building Address:</div>
                                                 <div class="col">
-                                                    @(
-                                                            string.IsNullOrWhiteSpace($"{TenantDetails.Building?.Address1}{TenantDetails.Building?.Address2}{TenantDetails.Building?.City}{TenantDetails.Building?.StateName}{TenantDetails.Building?.Zipcode}")
-                                                            ? "N/A"
-                                                            : $"{TenantDetails.Building?.Address1} {TenantDetails.Building?.Address2} {TenantDetails.Building?.City} {TenantDetails.Building?.StateName} {TenantDetails.Building?.Zipcode}"
-                                                            )
+                                                    @{
+                                                        var parts = new List<string>();
+
+                                                        if (!string.IsNullOrWhiteSpace(TenantDetails.Building.Address1)) parts.Add(TenantDetails.Building.Address1);
+                                                        if (!string.IsNullOrWhiteSpace(TenantDetails.Building.Address2)) parts.Add(TenantDetails.Building.Address2);
+                                                        if (!string.IsNullOrWhiteSpace(TenantDetails.Building.City)) parts.Add(TenantDetails.Building.City);
+                                                        if (!string.IsNullOrWhiteSpace(TenantDetails.Building.StateName)) parts.Add(TenantDetails.Building.StateName);
+                                                        if (!string.IsNullOrWhiteSpace(TenantDetails.Building.Zipcode)) parts.Add(TenantDetails.Building.Zipcode);
+
+                                                        var fullAddress = parts.Any() ? string.Join(", ", parts) : "-";
+                                                    }
+                                                    @fullAddress
                                                 </div>
                                             </div>
 
@@ -1114,13 +1155,13 @@
                                                         <div class="col">@TenantDetails.SocialServices</div>
                                                     </div>
                                                 </div>
-                                                <div class="col-4">
+                                                <div class="col-3">
                                                     <div class="row">
                                                         <div class="col-auto fw-semibold">Total Rent Owed ($):</div>
                                                         <div class="col">@TenantDetails.TotalRentOwed</div>
                                                     </div>
                                                 </div>
-                                                <div class="col-4">
+                                                <div class="col-5">
                                                     <div class="row">
                                                         <div class="col-auto fw-semibold">Last Rent Paid (Month/Week):</div>
                                                         <div class="col">@TenantDetails.LastMonthWeekRentPaid</div>
@@ -1163,11 +1204,18 @@
                                 <div class="row mb-2 my-4">
                                     <div class="col-auto fw-semibold">Building Address:</div>
                                     <div class="col">
-                                        @(
-                                                string.IsNullOrWhiteSpace($"{TenantDetails.Building?.Address1}{TenantDetails.Building?.Address2}{TenantDetails.Building?.City}{TenantDetails.Building?.StateName}{TenantDetails.Building?.Zipcode}")
-                                                ? "N/A"
-                                                : $"{TenantDetails.Building?.Address1} {TenantDetails.Building?.Address2} {TenantDetails.Building?.City} {TenantDetails.Building?.StateName} {TenantDetails.Building?.Zipcode}"
-                                                )
+                                        @{
+                                            var partBuilding = new List<string>();
+
+                                            if (!string.IsNullOrWhiteSpace(TenantDetails.Building.Address1)) partBuilding.Add(TenantDetails.Building.Address1);
+                                            if (!string.IsNullOrWhiteSpace(TenantDetails.Building.Address2)) partBuilding.Add(TenantDetails.Building.Address2);
+                                            if (!string.IsNullOrWhiteSpace(TenantDetails.Building.City)) partBuilding.Add(TenantDetails.Building.City);
+                                            if (!string.IsNullOrWhiteSpace(TenantDetails.Building.StateName)) partBuilding.Add(TenantDetails.Building.StateName);
+                                            if (!string.IsNullOrWhiteSpace(TenantDetails.Building.Zipcode)) partBuilding.Add(TenantDetails.Building.Zipcode);
+
+                                            var fullBuildingAddress = partBuilding.Any() ? string.Join(", ", partBuilding) : "-";
+                                        }
+                                        @fullBuildingAddress
                                     </div>
                                 </div>
 
@@ -1233,9 +1281,18 @@
                                                     <div class="row my-4">
                                                         <div class="col-auto fw-semibold">Building Address:</div>
                                                         <div class="col-9">
-                                                            @(string.IsNullOrWhiteSpace($"{b.Address1}{b.Address2}{b.City}{b.StateName}{b.Zipcode}")
-                                                                                                    ? "N/A"
-                                                                                                    : $"{b.Address1} {b.Address2} {b.City} {b.StateName} {b.Zipcode}")
+                                                            @{
+                                                                var p = new List<string>();
+
+                                                                if (!string.IsNullOrWhiteSpace(b.Address1)) p.Add(b.Address1);
+                                                                if (!string.IsNullOrWhiteSpace(b.Address2)) p.Add(b.Address2);
+                                                                if (!string.IsNullOrWhiteSpace(b.City)) p.Add(b.City);
+                                                                if (!string.IsNullOrWhiteSpace(b.StateName)) p.Add(b.StateName);
+                                                                if (!string.IsNullOrWhiteSpace(b.Zipcode)) p.Add(b.Zipcode);
+
+                                                                var Address = p.Any() ? string.Join(", ", p) : "-";
+                                                            }
+                                                            @Address
                                     </div>
                                 </div>
                             </div>
@@ -1283,9 +1340,18 @@
 
                                     <div class="col-auto fw-semibold">Mailing Address:</div>
                                     <div class="col">
-                                        @(string.IsNullOrWhiteSpace($"{TenantDetails.Landlord?.Address1}{TenantDetails.Landlord?.City}")
-                                                ? "N/A"
-                                                : $"{TenantDetails.Landlord.Address1}, {TenantDetails.Landlord.City}, {TenantDetails.Landlord.StateName} {TenantDetails.Landlord.Zipcode}")
+                                            @{
+                                                var partlandlord = new List<string>();
+
+                                                if (!string.IsNullOrWhiteSpace(TenantDetails.Landlord.Address1)) partlandlord.Add(TenantDetails.Landlord.Address1);
+                                                if (!string.IsNullOrWhiteSpace(TenantDetails.Landlord.Address2)) partlandlord.Add(TenantDetails.Landlord.Address2);
+                                                if (!string.IsNullOrWhiteSpace(TenantDetails.Landlord.City)) partlandlord.Add(TenantDetails.Landlord.City);
+                                                if (!string.IsNullOrWhiteSpace(TenantDetails.Landlord.StateName)) partlandlord.Add(TenantDetails.Landlord.StateName);
+                                                if (!string.IsNullOrWhiteSpace(TenantDetails.Landlord.Zipcode)) partlandlord.Add(TenantDetails.Landlord.Zipcode);
+
+                                                var fulllandlordAddress = partlandlord.Any() ? string.Join(", ", partlandlord) : "-";
+                                            }
+                                            @fulllandlordAddress
                                     </div>
                                 </div>
 
@@ -1396,14 +1462,14 @@
     </div>
     <div class="container-fluid d-flex justify-content-between align-items-center">
         <!-- Left Button -->
-        <button class="btn bg-navy text-white" @onclick="Back" disabled="@(currentStep == 0)">← Back</button>
+        <button class="btn bg-navy text-white"  @onclick="Back" disabled="@(currentStep == 0)">← Back</button>
 
         <!-- Right Buttons -->
         <div class="d-flex gap-2" style="position:fixed; right:40px">
             @if (currentStep < lastStep)
             {
                 <button class="btn btn-outline-warning" @onclick="ResetStep">Reset</button>
-                <button class="btn bg-gold text-white" form="ReasonForm">
+                <button class="btn bg-gold text-white next-btn" form="ReasonForm" disabled="@IsNextDisabled">
                     Next →
                 </button>
 
@@ -1411,7 +1477,6 @@
             @if (currentStep == lastStep)
             {
                 <button class="btn btn-outline-warning" @onclick="ResetStep">Reset</button>
-                @* <button class="btn btn-outline-warning" @onclick="SaveAsDraft">Save As Draft</button> *@
                 <button class="btn btn-success" disabled="@IsNextDisabled" @onclick="Submit">Submit</button>
             }
         </div>

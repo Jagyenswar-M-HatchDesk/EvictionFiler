@@ -131,38 +131,16 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
-
-    /*   .tab-button {
-    background: transparent;
-    color: #1F365D;
-    border: 2px solid transparent;
-    padding: 0.6rem 1rem;
-    min-width: 120px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-radius: 8px;
-    transition: all 0.3s ease-in-out;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    }
-
-    .tab-button:hover {
-    background: #1F365D;
-    color: white;
-    border-color: #1F365D;
-    transform: translateY(-2px);
-    }
-
-    .active-tab {
-    background: linear-gradient(135deg, #1F365D, #2F4F7F);
-    color: white !important;
-    border-color: #1F365D;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    } */
     .required-label::after {
     content: " *";
     color: red;
     }
+
+    .btn-navy {
+        background-color: #020336;
+    color: white;
+    border: none;
+}
 
 </style>
 @using System.Collections.Generic
@@ -220,21 +198,21 @@ aria-labelledby="createUserLabel">
                             <label class="form-label color-text">Phone</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                                <InputText class="form-control" @bind-Value="createClient.Phone" />
+                                <InputText class="form-control" @bind-Value="createClient.Phone" @oninput="@(e => FormatPhone(e, "createClient"))" />
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text">Cell Phone</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-phone"></i></span>
-                                <InputText class="form-control" @bind-Value="createClient.CellPhone" />
+                                <InputText class="form-control" @bind-Value="createClient.CellPhone" oninput="@FormatCellPhone" />
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text ">Fax</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-printer"></i></span>
-                                <InputText class="form-control" @bind-Value="createClient.Fax" placeholder="Fax Number" />
+                                <InputText class="form-control" @bind-Value="createClient.Fax" placeholder="Fax Number" oninput="@FormatFax" />
                             </div>
                         </div>
 
@@ -381,7 +359,7 @@ aria-labelledby="createUserLabel">
                                 <label>Phone</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-phone"></i></span>
-                                    <InputText class="form-control" @bind-Value="landlord.Phone" placeholder="Enter Phone " />
+                                    <InputText class="form-control" @bind-Value="landlord.Phone" placeholder="Enter Phone " @oninput="@(e => FormatPhone(e, "landlord"))" />
                                 </div>
 
                             </div>
@@ -541,9 +519,20 @@ aria-labelledby="createUserLabel">
                                             <td>@(string.IsNullOrWhiteSpace(l.TypeOwnerName) ? "-" : l.TypeOwnerName)</td>
                                             <td>@(l.DateOfRefreeDeed == DateOnly.MinValue ? "-" : l.DateOfRefreeDeed.ToString("MM/dd/yyyy"))</td>
                                             <td>
-                                                @(string.IsNullOrWhiteSpace($"{l.Address1}{l.Address2}{l.City}{l.StateName}{l.Zipcode}")
-                                                        ? "-" : $"{l.Address1}, {l.Address2}, {l.City}, {l.StateName} - {l.Zipcode}")
+                                                @{
+                                                    var parts = new List<string>();
+
+                                                    if (!string.IsNullOrWhiteSpace(l.Address1)) parts.Add(l.Address1);
+                                                    if (!string.IsNullOrWhiteSpace(l.Address2)) parts.Add(l.Address2);
+                                                    if (!string.IsNullOrWhiteSpace(l.City)) parts.Add(l.City);
+                                                    if (!string.IsNullOrWhiteSpace(l.StateName)) parts.Add(l.StateName);
+                                                    if (!string.IsNullOrWhiteSpace(l.Zipcode)) parts.Add(l.Zipcode);
+
+                                                    var fullAddress = parts.Any() ? string.Join(", ", parts) : "-";
+                                                }
+                                                @fullAddress
                                             </td>
+
                                             <td>Active</td>
                                         </tr>
                                     }
@@ -724,7 +713,7 @@ aria-labelledby="createUserLabel">
                                     <th>Interest</th>
                                     <th>Rent Regulation</th>
                                     <th>Building Units</th>
-                                    <th>Date Of Refree</th>
+                                   
                                     <th>Status</th>
 
                                 </tr>
@@ -738,16 +727,24 @@ aria-labelledby="createUserLabel">
                                             <td>@(string.IsNullOrWhiteSpace(b.ApartmentCode) ? "-" : b.ApartmentCode)</td>
                                             <td>@(string.IsNullOrWhiteSpace(b.PremiseTypeName) ? "-" : b.PremiseTypeName)</td>
                                             <td>
-                                                @(string.IsNullOrWhiteSpace($"{b.Address1}{b.Address2}{b.City}{b.StateName}{b.StateName}")
-                                                        ? "-"
-                                                        : $"{b.Address1}, {b.Address2}, {b.City}, {b.StateName} - {b.Zipcode}"
-                                                        )
+                                                @{
+                                                    var parts = new List<string>();
+
+                                                    if (!string.IsNullOrWhiteSpace(b.Address1)) parts.Add(b.Address1);
+                                                    if (!string.IsNullOrWhiteSpace(b.Address2)) parts.Add(b.Address2);
+                                                    if (!string.IsNullOrWhiteSpace(b.City)) parts.Add(b.City);
+                                                    if (!string.IsNullOrWhiteSpace(b.StateName)) parts.Add(b.StateName);
+                                                    if (!string.IsNullOrWhiteSpace(b.Zipcode)) parts.Add(b.Zipcode);
+
+                                                    var fullAddress = parts.Any() ? string.Join(", ", parts) : "-";
+                                                }
+                                                @fullAddress
                                             </td>
                                             <td>@(string.IsNullOrWhiteSpace(b.MDRNumber) ? "-" : b.MDRNumber)</td>
                                             <td>@(string.IsNullOrWhiteSpace(b.PetitionerInterest) ? "-" : b.PetitionerInterest)</td>
                                             <td>@(string.IsNullOrWhiteSpace(b.RegulationStatusName) ? "-" : b.RegulationStatusName)</td>
-                                            <td>@(string.IsNullOrWhiteSpace(b.BuildingUnits) ? "-" : b.BuildingUnits))</td>
-
+                                            <td>@(string.IsNullOrWhiteSpace(b.BuildingUnits) ? "-" : b.BuildingUnits)</td>
+                                          
                                             <td>Active</td>
 
                                         </tr>
@@ -847,7 +844,7 @@ aria-labelledby="createUserLabel">
                                 <label>Phone</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-phone"></i></span>
-                                    <InputText class="form-control" @bind-Value="tenant.Phone" placeholder="Enter Phone " />
+                                    <InputText class="form-control" @bind-Value="tenant.Phone" placeholder="Enter Phone " @oninput="@(e => FormatPhone(e, "tenant"))" />
                                 </div>
 
                             </div>
@@ -878,17 +875,39 @@ aria-labelledby="createUserLabel">
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label>Date Rent (Month/Week)</label>
-                                <InputText class="form-control" @bind-Value="tenant.RentDueEachMonthOrWeek" placeholder="e.g. 1st, Monday" />
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-currency-dollar"></i>
+                                    </span>
+
+        
+                                    <InputText class="form-control" @bind-Value="tenant.RentDueEachMonthOrWeek" placeholder="e.g. 1st, Monday" />
+                                </div>
+                                
                             </div>
 
                             <div class="col-md-2">
                                 <label>Monthly Rent</label>
+                                  <div class="input-group mb-3">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-currency-dollar"></i>
+                                    </span>
+
+        
                                 <InputNumber class="form-control" @bind-Value="tenant.MonthlyRent" placeholder="Enter Monthly Rent" />
+                                </div>
                             </div>
 
                             <div class="col-md-2">
                                 <label>Tenant's Share</label>
+                                  <div class="input-group mb-3">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-percent"></i>
+                                    </span>
+
                                 <InputNumber class="form-control" @bind-Value="tenant.TenantShare" placeholder="Enter Tenant Share" />
+        
+                                </div>
                             </div>
                             <div class="col-md-2">
                                 <label>Borough</label>
@@ -905,24 +924,32 @@ aria-labelledby="createUserLabel">
 
                             <div class="col-md-4">
                                 <label>Last Rent Paid</label>
+                                   <div class="input-group mb-3">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-currency-dollar"></i>
+                                    </span>
+
+        
                                 <InputText class="form-control" @bind-Value="tenant.LastMonthWeekRentPaid" placeholder="Enter Last Paid Info" />
+                                </div>
                             </div>
 
                             <div class="col-md-4">
                                 <label>Total Rent Owed</label>
+                                   <div class="input-group mb-3">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-currency-dollar"></i>
+                                    </span>
+
+        
                                 <InputNumber class="form-control" @bind-Value="tenant.TotalRentOwed" placeholder="Enter Total Owed" />
+                                </div>
                             </div>
                             <div class="col-md-4">
                                 <label>Reg. No.</label>
                                 <InputText class="form-control" @bind-Value="tenant.Registration_No" placeholder="Enter Registration No." />
                             </div>
-                           @*  <div class="col-md-3">
-                                <label>Name & Relations</label>
-                                <InputTextArea class="form-control"
-                                @bind-Value="tenant.Name_Relation"
-                                placeholder="Enter Name & Relation"
-                                rows="3" />
-                            </div> *@
+                        
                         </div>
 
                         <div class="row mb-3">
@@ -979,7 +1006,7 @@ aria-labelledby="createUserLabel">
                             <InputRadioGroup @bind-Value="tenant.IsUnitIllegalId" class="mb-3">
                                 <div class="row align-items-center">
                                     <div class="col-auto">
-                                        <label class="form-label mb-0 required-lebel" style="margin-top:5px">Is the Unit Illegal:</label>
+                                        <label class="form-label mb-0 required-label" style="margin-top:5px">Is the Unit Illegal:</label>
                                     </div>
                                     <div class="col">
                                         <div class="d-flex flex-wrap align-items-center gap-4">
@@ -1251,26 +1278,57 @@ aria-labelledby="createUserLabel">
     </div>
 
 
+   @if (!showLandlordForm && !showBuildingForm && !showTanentForm)
+{
     <div class="sticky-footer bg-white border-top p-3 d-flex justify-content-between gap-2">
         @if (!IsClientFormValid())
         {
-            <div class="text-danger mt-2">Please fill all required client fields to enable Submit.</div>
+            <div class="text-danger mt-2">
+                Please fill all required client fields to enable Submit.
+            </div>
         }
-        <div class="d-flex gap-2 ">
-            <button class="btn btn-outline-secondary px-4 fw-semibold" @onclick="HideAsync">Cancel</button>
-            <button class="btn bg-navy text-white px-4 fw-semibold" disabled="@(!IsClientFormValid())" @onclick="SubmitClientAsync">Submit</button>
-        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary px-4 fw-semibold" @onclick="CheckCancel">Cancel</button>
 
+            @if (showCancelPopup)
+            {
+                <div class="modal-backdrop fade show"></div>
+                <div class="modal fade show d-block" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Confirm Cancel</h5>
+                            </div>
+                            <div class="modal-body">
+                                <p>Do you want to cancel?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" @onclick="() => showCancelPopup = false">No</button>
+                                <button class="btn btn-navy" @onclick="ConfirmCancel">Yes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <button class="btn bg-navy text-white px-4 fw-semibold"
+                    disabled="@(!IsClientFormValid())"
+                    @onclick="SubmitClientAsync">
+                Submit
+            </button>
+        </div>
     </div>
+}
+
 
 
 </div>
 
 @code {
-    [Parameter] public EditToClientDto createClient { get; set; } = new();
-    [Parameter]
-    public EventCallback OnClose { get; set; }
-    [Parameter] public EventCallback<CreateToClientDto> Submit { get; set; }
+        [Parameter] public EditToClientDto createClient { get; set; } = new();
+        [Parameter]
+        public EventCallback OnClose { get; set; }
+        [Parameter] public EventCallback<CreateToClientDto> Submit { get; set; }
 
     private string activeTab = string.Empty;
 
@@ -1301,12 +1359,13 @@ aria-labelledby="createUserLabel">
 
     private bool shouldAddNewOccupant = false;
 
-     private List<AdditionalOccupantDto> occupants = new()
+    private List<AdditionalOccupantDto> occupants = new()
     {
         new AdditionalOccupantDto()
     };
 
-  
+    private bool showCancelPopup = false;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -1345,6 +1404,60 @@ aria-labelledby="createUserLabel">
         showLandlordForm = false;
         landlord = new();
     }
+    private void FormatPhone(ChangeEventArgs e, string target)
+    {
+        var phoneValue = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(phoneValue))
+            return;
+
+        var formattedPhone = ApplyMask(phoneValue);
+
+        switch (target)
+        {
+            case "createClient":
+                createClient.Phone = formattedPhone;
+                break;
+            case "landlord":
+                landlord.Phone = formattedPhone;
+                break;
+            case "tenant":
+                tenant.Phone = formattedPhone;
+                break;
+        }
+    }
+
+
+
+    private void FormatCellPhone(ChangeEventArgs e)
+    {
+        createClient.CellPhone = ApplyMask(e.Value?.ToString());
+    }
+
+    private void FormatFax(ChangeEventArgs e)
+    {
+        createClient.Fax = ApplyMask(e.Value?.ToString());
+    }
+
+    private string ApplyMask(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return string.Empty;
+
+        // Sirf digits rakho
+        var digits = new string(input.Where(char.IsDigit).ToArray());
+
+        // Max 10 digits lo
+        if (digits.Length > 10)
+            digits = digits.Substring(0, 10);
+
+        if (digits.Length <= 3)
+            return digits;
+        else if (digits.Length <= 6)
+            return $"{digits.Substring(0, 3)}-{digits.Substring(3)}";
+        else
+            return $"{digits.Substring(0, 3)}-{digits.Substring(3, 3)}-{digits.Substring(6)}";
+    }
+
 
     private void BackToBuildingList()
     {
@@ -1364,13 +1477,51 @@ aria-labelledby="createUserLabel">
             !string.IsNullOrWhiteSpace(createClient.Email);
     }
 
-    public async Task HideAsync()
+    private void CheckCancel()
     {
-        activeTab = string.Empty;
-        showLandlordForm = false;
-        showBuildingForm = false;
-        showTanentForm = false;
-        await OnClose.InvokeAsync();
+        // Agar koi bhi field filled hai to modal dikhao
+        if (!string.IsNullOrWhiteSpace(createClient.FirstName) ||
+            !string.IsNullOrWhiteSpace(createClient.LastName) ||
+            !string.IsNullOrWhiteSpace(createClient.Email) ||
+            !string.IsNullOrWhiteSpace(createClient.Phone) ||
+            !string.IsNullOrWhiteSpace(createClient.CellPhone) ||
+            !string.IsNullOrWhiteSpace(createClient.Fax) ||
+            !string.IsNullOrWhiteSpace(createClient.Address1) ||
+            !string.IsNullOrWhiteSpace(createClient.Address2) ||
+            !string.IsNullOrWhiteSpace(createClient.City) ||
+            !string.IsNullOrWhiteSpace(createClient.ZipCode))
+        {
+            showCancelPopup = true;
+        }
+        else
+        {
+
+            createClient = new EditToClientDto();
+        }
+    }
+
+    private void ConfirmCancel()
+    {
+        HideAsync();
+
+        // Popup close
+        showCancelPopup = false;
+
+        StateHasChanged();
+    }
+
+    public async Task HideAsync() { 
+
+        if(createClient != null)
+        {
+            createClient.FirstName = "";
+            createClient.Email = "";
+        }
+        activeTab = string.Empty; 
+        showLandlordForm = false; 
+        showBuildingForm = false; 
+        showTanentForm = false; 
+        await OnClose.InvokeAsync(); 
         StateHasChanged();
     }
 
