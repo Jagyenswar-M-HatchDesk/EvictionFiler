@@ -27,7 +27,6 @@ namespace EvictionFiler.Infrastructure.Repositories
 	}
 
 
-
 		public async Task<bool> GenerateNoticeAsync(Guid legalCaseId, Guid formTypeId)
 		{
 			try
@@ -73,10 +72,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 					.Replace("{{LandlordAddress}}", caseDetails.LandlordAddress ?? "")
 					.Replace("{{LandlordPhone}}", caseDetails.LandlordPhone ?? "")
 					.Replace("{{LandlordEmail}}", caseDetails.LandlordEmail ?? "")
-					.Replace("{{LandlordDate}}", noticeDate.ToString("MM/dd/yyyy"))
+					.Replace("{{LandlordDate}}", noticeDate.ToString("dd/MM/yyyy"))
 					.Replace("{{PropertyAddress}}", caseDetails.PropertyAddress ?? "")
 					.Replace("{{ApartmentNumber}}", caseDetails.ApartmentNumber ?? "")
-					.Replace("{{CurrentDate}}", DateTime.Now.ToString("MM/dd/yyyy"))
+					.Replace("{{CurrentDate}}", DateTime.Now.ToString("dd/MM/yyyy"))
 					.Replace("{{NumberofRoom}}", caseDetails.NumberofRoom ?? "")
 					.Replace("{{TenantName}}", caseDetails.TenantName ?? "");
 
