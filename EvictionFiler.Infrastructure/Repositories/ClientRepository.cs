@@ -34,28 +34,48 @@ namespace EvictionFiler.Infrastructure.Repositories
 				.FirstOrDefaultAsync();
 		}
 
-		public async Task<List<CreateToClientDto>> SearchClientByCode(string code)
-        {
-            var client = await _context.Clients.Where(e => e.ClientCode.Contains(code)).Select(e => new CreateToClientDto
-            {
-              
-                ClientCode = e.ClientCode,
-                FirstName = e.FirstName,
-                Email = e.Email,
-                Address1 = e.Address1,
-                Address2= e.Address2,
-                City = e.City,
-				StateId = e.StateId,
-				ZipCode = e.ZipCode,
-                Phone = e.Phone,
-                CellPhone = e.CellPhone,
-                Fax = e.Fax,
+		public async Task<List<CreateToClientDto>> SearchClient(string searchTerm)
+		{
+			if (string.IsNullOrWhiteSpace(searchTerm))
+				return new List<CreateToClientDto>();
 
-            }).ToListAsync();
-            if (client == null)
-                return new List<CreateToClientDto>();
-            return client;
-        }
+			searchTerm = searchTerm.Trim().ToLower();
+
+			var client = await _context.Clients
+				.Where(e =>
+					(e.ClientCode != null && e.ClientCode.ToLower().Contains(searchTerm)) ||
+					(e.FirstName != null && e.FirstName.ToLower().Contains(searchTerm)) ||
+					(e.LastName != null && e.LastName.ToLower().Contains(searchTerm)) ||
+					(e.Email != null && e.Email.ToLower().Contains(searchTerm)) ||
+					(e.Phone != null && e.Phone.ToLower().Contains(searchTerm)) ||
+					(e.CellPhone != null && e.CellPhone.ToLower().Contains(searchTerm)) ||
+					(e.Fax != null && e.Fax.ToLower().Contains(searchTerm)) ||
+					(e.Address1 != null && e.Address1.ToLower().Contains(searchTerm)) ||
+					(e.Address2 != null && e.Address2.ToLower().Contains(searchTerm)) ||
+					(e.City != null && e.City.ToLower().Contains(searchTerm)) ||
+					  (e.IsActive ? "active" : "inactive").Contains(searchTerm)
+				)
+				.Select(e => new CreateToClientDto
+				{
+					ClientCode = e.ClientCode,
+					FirstName = e.FirstName,
+					LastName = e.LastName,
+					Email = e.Email,
+					Address1 = e.Address1,
+					Address2 = e.Address2,
+					City = e.City,
+					StateId = e.StateId,
+					ZipCode = e.ZipCode,
+					Phone = e.Phone,
+					CellPhone = e.CellPhone,
+					Fax = e.Fax,
+					Status = e.IsActive 
+				})
+				.ToListAsync();
+
+			return client ?? new List<CreateToClientDto>();
+		}
+
 
 		public async Task<string> GenerateClientCodeAsync()
 		{

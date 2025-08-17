@@ -1,5 +1,6 @@
 ﻿@page "/cases"
 @using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.DTOs.PaginationDto
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Domain.Entities
 @inject ILegalCaseService _service
@@ -268,9 +269,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (cases.Count() > 0)
+                    @if (pagedcases != null && pagedcases.Items.Any())
                     {
-                        @foreach (var cas in cases)
+                        @foreach (var cas in pagedcases.Items)
                         {
 
                             <tr>
@@ -324,17 +325,34 @@
         </div>
 
         <!-- Pagination -->
-        <div class="d-flex justify-content-between mt-3">
-            <small>Showing 1 to 10 of 11 entries</small>
-            <nav>
-                <ul class="pagination mb-0">
-                    <li class="page-item disabled"><a class="page-link" href="#">←</a></li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">→</a></li>
-                </ul>
-            </nav>
-        </div>
+        @if (pagedcases != null && pagedcases.TotalCount > 0)
+        {
+            <div class="d-flex justify-content-between mt-3">
+                <small>
+                    Showing @(((currentPage - 1) * pageSize) + 1)
+                    to @(Math.Min(currentPage * pageSize, pagedcases.TotalCount))
+                    of @pagedcases.TotalCount entries
+                </small>
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(currentPage - 1)">←</button>
+                        </li>
+                        @for (int i = 1; i <= Math.Ceiling((double)pagedcases.TotalCount / pageSize); i++)
+                        {
+                            var pageNumber = i;
+                            <li class="page-item @(pageNumber == currentPage ? "active" : "")">
+                                <button class="page-link" @onclick="() => ChangePage(pageNumber)">@pageNumber</button>
+                            </li>
+                        }
+                        <li class="page-item @(currentPage == Math.Ceiling((double)pagedcases.TotalCount / pageSize) ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(currentPage + 1)">→</button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+
 
     </div>
 
@@ -388,13 +406,15 @@
     private string showClient = string.Empty;
     private bool ViewSearch = false;
 
-    private List<EditToClientDto> AllClients = new();
+    private PaginationDto<EditToClientDto> AllClients = new();
     private List<EditToClientDto> FilteredClients = new();
 
     private SelectClientModal clientModal;
     private string successMessage;
     private Guid selectedClientId = new Guid();
-    // private List<CreateClientDto> AllClients = new();
+    private PaginationDto<LegalCase> pagedcases;
+    private int currentPage = 1;
+    private int pageSize = 10;
 
     private void EditCase(Guid caseId)
     {
@@ -425,9 +445,18 @@
 
     private async Task GetAllCases()
     {
-        allcases = await _service.GetAllAsync();
+        pagedcases = await _service.GetAllAsync(currentPage, pageSize);
        
-        AllClients = await _clientservice.GetAllClientsAsync();
+        AllClients = await _clientservice.GetAllClientsAsync(currentPage, pageSize);
+    }
+
+    private async Task ChangePage(int page)
+    {
+        if (page >= 1 && page <= Math.Ceiling((double)pagedcases.TotalCount / pageSize))
+        {
+            currentPage = page;
+            await GetAllCases();
+        }
     }
 
     void FocusOnNavigate()
@@ -435,20 +464,20 @@
         navManager.NavigateTo("/case");
     }
 
-    private IEnumerable<LegalCase> cases =>
-    allcases.Where(c =>
-        (string.IsNullOrWhiteSpace(searchcasecode) || (!string.IsNullOrWhiteSpace(c.Casecode) && c.Casecode.Contains(searchcasecode, StringComparison.OrdinalIgnoreCase))) &&
-        (string.IsNullOrWhiteSpace(searchTermClient) || (!string.IsNullOrWhiteSpace(c.Clients?.ClientCode) && c.Clients.ClientCode.Contains(searchTermClient, StringComparison.OrdinalIgnoreCase))) &&
-        (string.IsNullOrWhiteSpace(searchTermTenant) || (!string.IsNullOrWhiteSpace(c.Tenants?.TenantCode) && c.Tenants.TenantCode.Contains(searchTermTenant, StringComparison.OrdinalIgnoreCase))) &&
-        (string.IsNullOrWhiteSpace(searchTermLandLord) || (!string.IsNullOrWhiteSpace(c.LandLords?.LandLordCode) && c.LandLords.LandLordCode.Contains(searchTermLandLord, StringComparison.OrdinalIgnoreCase))) &&
-        (string.IsNullOrWhiteSpace(searchTermApt) || (!string.IsNullOrWhiteSpace(c.Buildings?.ApartmentCode) && c.Buildings.ApartmentCode.Contains(searchTermApt, StringComparison.OrdinalIgnoreCase))) &&
-        // (string.IsNullOrWhiteSpace(searchTermCaseType) || (!string.IsNullOrWhiteSpace(c.CaseType) && c.CaseType.Contains(searchTermCaseType, StringComparison.OrdinalIgnoreCase))) &&
-        // (string.IsNullOrWhiteSpace(searchTermDept) || (!string.IsNullOrWhiteSpace(c.D) && c.Department.Contains(searchTermDept, StringComparison.OrdinalIgnoreCase))) &&
-        (string.IsNullOrWhiteSpace(searchTermDate) ||
-           (DateTime.TryParse(searchTermDate, out var date) && c.CreatedOn.Date == date.Date))
+    // private IEnumerable<LegalCase> cases =>
+    // pagedcases.Where(c =>
+    //     (string.IsNullOrWhiteSpace(searchcasecode) || (!string.IsNullOrWhiteSpace(c.Casecode) && c.Casecode.Contains(searchcasecode, StringComparison.OrdinalIgnoreCase))) &&
+    //     (string.IsNullOrWhiteSpace(searchTermClient) || (!string.IsNullOrWhiteSpace(c.Clients?.ClientCode) && c.Clients.ClientCode.Contains(searchTermClient, StringComparison.OrdinalIgnoreCase))) &&
+    //     (string.IsNullOrWhiteSpace(searchTermTenant) || (!string.IsNullOrWhiteSpace(c.Tenants?.TenantCode) && c.Tenants.TenantCode.Contains(searchTermTenant, StringComparison.OrdinalIgnoreCase))) &&
+    //     (string.IsNullOrWhiteSpace(searchTermLandLord) || (!string.IsNullOrWhiteSpace(c.LandLords?.LandLordCode) && c.LandLords.LandLordCode.Contains(searchTermLandLord, StringComparison.OrdinalIgnoreCase))) &&
+    //     (string.IsNullOrWhiteSpace(searchTermApt) || (!string.IsNullOrWhiteSpace(c.Buildings?.ApartmentCode) && c.Buildings.ApartmentCode.Contains(searchTermApt, StringComparison.OrdinalIgnoreCase))) &&
+    //     // (string.IsNullOrWhiteSpace(searchTermCaseType) || (!string.IsNullOrWhiteSpace(c.CaseType) && c.CaseType.Contains(searchTermCaseType, StringComparison.OrdinalIgnoreCase))) &&
+    //     // (string.IsNullOrWhiteSpace(searchTermDept) || (!string.IsNullOrWhiteSpace(c.D) && c.Department.Contains(searchTermDept, StringComparison.OrdinalIgnoreCase))) &&
+    //     (string.IsNullOrWhiteSpace(searchTermDate) ||
+    //        (DateTime.TryParse(searchTermDate, out var date) && c.CreatedOn.Date == date.Date))
 
 
-    );
+    // );
 
     private bool StatusMatches(LegalCase c, string status)
     {
@@ -462,17 +491,17 @@
     }
 
 
-    private void OnInputChanged(ChangeEventArgs e)
-    {
-        var input = e.Value?.ToString()?.ToLower() ?? "";
-        FilteredClients = AllClients
-            .Where(c => c.FirstName?.ToLower().Contains(input) == true ||
-                        c.LastName?.ToLower().Contains(input) == true ||
-                        c.ClientCode?.ToLower().Contains(input) == true)
-            .ToList();
-        ViewSearch = FilteredClients.Any();
+    // private void OnInputChanged(ChangeEventArgs e)
+    // {
+    //     var input = e.Value?.ToString()?.ToLower() ?? "";
+    //     FilteredClients = AllClients
+    //         .Where(c => c.FirstName?.ToLower().Contains(input) == true ||
+    //                     c.LastName?.ToLower().Contains(input) == true ||
+    //                     c.ClientCode?.ToLower().Contains(input) == true)
+    //         .ToList();
+    //     ViewSearch = FilteredClients.Any();
 
-    }
+    // }
     private async Task SelectClient(CreateToClientDto client)
     {
 
@@ -484,7 +513,7 @@
 
     private async Task SelectClientmodal()
     {
-        await clientModal.Show(AllClients);
+        await clientModal.Show(AllClients.Items);
     }
 }
 

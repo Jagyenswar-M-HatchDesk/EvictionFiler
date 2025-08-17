@@ -20,6 +20,7 @@ namespace EvictionFiler.Application.DTOs.ClientDto
 		public string? Phone { get; set; }
 		public string? CellPhone { get; set; }
 		public string? Fax { get; set; }
+		public bool Status { get; set; }
 		public List<CreateToLandLordDto> LandLords { get; set; } = new();
 	
 
