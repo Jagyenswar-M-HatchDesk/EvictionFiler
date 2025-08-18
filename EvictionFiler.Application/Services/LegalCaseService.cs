@@ -78,23 +78,21 @@ namespace EvictionFiler.Application.Services
 		}
 
 
-
-
 		public async Task<CreateToEditLegalCaseModel> GetByIdAsync(Guid id)
 		{
 			var legalCaseEntity = await _repository.GetAllQuerable(
 		predicate: c => c.Id == id,
 		(Expression<Func<LegalCase, object>>)(c => c.Clients),
-		c => (object)c.Buildings,
-		c => (object)c.CaseType,
-		c => (object)c.LandLords,
-		c => (object)c.Tenants,
-		c => (object)c.RegulationStatus,
-		c => (object)c.TenancyType,
-		c => (object)c.ReasonHoldover,
-		c => (object)c.Buildings.State,
-		c => (object)c.Buildings.Landlord.State,
-		c => (object)c.Buildings.Landlord.LandlordType
+		c =>c.Buildings,
+		c =>c.CaseType,
+		c =>c.LandLords,
+		c =>c.Tenants,
+		c =>c.RegulationStatus,
+		c =>c.TenancyType,
+		c =>c.ReasonHoldover,
+		c =>c.Buildings.State,
+		c =>c.Buildings.Landlord.State,
+		c => c.Buildings.Landlord.LandlordType
 	)
 	.FirstOrDefaultAsync();
 

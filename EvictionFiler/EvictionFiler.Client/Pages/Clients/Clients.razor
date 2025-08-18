@@ -102,17 +102,7 @@
 </style>
 
 <body class="p-4">
-    @*  @if (isLoading)
-    {
-        <div class="text-center mt-5">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p>Loading client data...</p>
-        </div>
-    }
-    else
-    { *@
+
     <div class="container p-4 rounded shadow-sm bg-white">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -125,7 +115,7 @@
                 <i class="fa fa-plus me-1"></i> Add New
             </button>
             <div class="position-relative">
-                <input class="form-control border-navy  text-navy" style="border-color: #020336" placeholder="Search.." @bind="searchTerm" @bind:event="oninput" />
+                <input class="form-control border-navy  text-navy" style="border-color: #020336" placeholder="Search.." @bind="searchTerm" @oninput="OnSearchChanged" />
                 <button class="btn position-absolute top-50 end-0 translate-middle-y text-navy" type="button">
                     <i class="fa fa-search"></i>
                 </button>
@@ -173,8 +163,8 @@
                                     @fullAddress
                                 </td>
                                 <td>
-                                    Active
-                                    @* @(client.IsActive == true ? "Active" : client.IsActive == false ? "Inactive" : "Not Set") *@
+                                   
+                                    @(client.Status == true ? "Active" : client.Status == false ? "Inactive" : "Not Set")
                                 </td>
 
                                 <td class="sticky">
@@ -330,6 +320,14 @@
         await LoadClients();
     }
 
+    private async Task OnSearchChanged(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+        currentPage = 1; 
+        await LoadClients();
+    }
+
+
     private async Task ChangePage(int page)
     {
         if (page >= 1 && page <= Math.Ceiling((double)pagedClients.TotalCount / pageSize))
@@ -467,7 +465,7 @@
         if (isDeleted)
         {
         
-            pagedClients = await clientservice.GetAllClientsAsync(currentPage, pageSize);
+            pagedClients = await clientservice.GetAllClientsAsync(currentPage, pageSize , searchTerm);
             StateHasChanged();
         }
     }

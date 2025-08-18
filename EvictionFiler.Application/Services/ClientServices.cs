@@ -43,23 +43,27 @@ namespace EvictionFiler.Application.Services
 			if (!string.IsNullOrWhiteSpace(searchTerm))
 			{
 				var lowerSearch = searchTerm.ToLower();
-				query = query.Where(client =>
-					client.ClientCode.ToLower().Contains(lowerSearch) ||
-					client.FirstName.ToLower().Contains(lowerSearch) ||
-					client.LastName.ToLower().Contains(lowerSearch) ||
-					client.Email.ToLower().Contains(lowerSearch) ||
-					client.Phone.ToLower().Contains(lowerSearch) ||
-					client.CellPhone.ToLower().Contains(lowerSearch) ||
-					client.Fax.ToLower().Contains(lowerSearch) ||
-					client.Address1.ToLower().Contains(lowerSearch) ||
-					client.Address2.ToLower().Contains(lowerSearch) ||
-					client.City.ToLower().Contains(lowerSearch) ||
-					(client.IsActive ? "active" : "inactive").Contains(lowerSearch)
-				);
-			}
+                query = query.Where(client =>
+                       (client.ClientCode ?? "").ToLower().Contains(lowerSearch) ||
+                       (client.FirstName ?? "").ToLower().Contains(lowerSearch) ||
+                       (client.LastName ?? "").ToLower().Contains(lowerSearch) ||
+                       (client.Email ?? "").ToLower().Contains(lowerSearch) ||
+                       (client.Phone ?? "").ToLower().Contains(lowerSearch) ||
+                       (client.CellPhone ?? "").ToLower().Contains(lowerSearch) ||
+                       (client.Fax ?? "").ToLower().Contains(lowerSearch) ||
+                       (client.Address1 ?? "").ToLower().Contains(lowerSearch) ||
+                       (client.Address2 ?? "").ToLower().Contains(lowerSearch) ||
+                       (client.City ?? "").ToLower().Contains(lowerSearch) ||
+                        (client.ZipCode ?? "").ToLower().Contains(lowerSearch) ||
+                       ((client.State != null ? client.State.Name : "") ?? "").ToLower().Contains(lowerSearch) ||
+                     ((client.IsActive ? "active" : "inactive").ToLower().Contains(lowerSearch))
+
+                 );
+
+            }
 
 
-			var totalCount = query.Count();
+            var totalCount = query.Count();
 
 			var clients = query
 		.OrderBy(c => c.Id) 
@@ -81,7 +85,7 @@ namespace EvictionFiler.Application.Services
 			Fax = client.Fax ?? "",
 			Phone = client.Phone ?? "",
 			CellPhone = client.CellPhone ?? "",
-			//Status = client.IsActive ? "Active" : "Inactive"
+			Status = client.IsActive 
 		})
 		.ToList();
 
