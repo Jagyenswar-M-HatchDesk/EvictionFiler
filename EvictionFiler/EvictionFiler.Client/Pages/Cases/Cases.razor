@@ -1,5 +1,6 @@
 ﻿@page "/cases"
 @using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.DTOs.LegalCaseDto
 @using EvictionFiler.Application.DTOs.PaginationDto
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Domain.Entities
@@ -172,19 +173,19 @@
         <div class="row g-2 mb-3">
             <!-- Four default search boxes -->
             <div class="col-md-3 position-relative">
-                <input class="form-control search-box" placeholder="Search by Case Code" @bind="searchcasecode" @bind:event="oninput" />
+                <input class="form-control search-box" placeholder="Search by Case Code" @bind="searchcasecode" @oninput="@(e => OnSearchChanged(e, "CaseCode"))"  />
                 <button class="search-btn" type="button">
                     <i class="fa fa-search"></i>
                 </button>
             </div>
             <div class="col-md-3 position-relative">
-                <input class="form-control search-box" placeholder="Search by Client" @bind="searchTermClient" @bind:event="oninput" />
+                <input class="form-control search-box" placeholder="Search by Client" @bind="searchTermClient" @oninput="@(e => OnSearchChanged(e, "Client"))" /> 
                 <button class="search-btn" type="button">
                     <i class="fa fa-search"></i>
                 </button>
             </div>
             <div class="col-md-3 position-relative">
-                <input class="form-control search-box" placeholder="Search by Tenant" @bind="searchTermTenant" @bind:event="oninput" />
+                <input class="form-control search-box" placeholder="Search by Tenant" @bind="searchTermTenant" @oninput="@(e => OnSearchChanged(e, "Tenant"))" /> 
                 <button class="search-btn" type="button">
                     <i class="fa fa-search"></i>
                 </button>
@@ -202,26 +203,26 @@
         <div class="collapse mb-3" id="advancedFilters">
             <div class="row g-2">
                 <div class="col-md-3 position-relative">
-                    <input class="form-control search-box" placeholder="Search by LandLord" @bind="searchTermLandLord" @bind:event="oninput" />
+                    <input class="form-control search-box" placeholder="Search by LandLord" @bind="searchTermLandLord" @oninput="@(e => OnSearchChanged(e, "Landlord"))" /> 
                     <button class="search-btn" type="button">
                         <i class="fa fa-search"></i>
                     </button>
                 </div>
                 <div class="col-md-3 position-relative">
-                    <input class="form-control search-box" placeholder="Search by Reason Holdover" @bind="searchTermResonHoldover" @bind:event="oninput" />
+                    <input class="form-control search-box" placeholder="Search by Reason Holdover" @bind="searchTermResonHoldover" @oninput="@(e => OnSearchChanged(e, "ReasonHoldover"))" />
                     <button class="search-btn" type="button">
                         <i class="fa fa-search"></i>
                     </button>
                 </div>
 
                 <div class="col-md-3 position-relative">
-                    <input class="form-control search-box" placeholder="Search by Action Date" @bind="searchTermDate" @bind:event="oninput" />
+                    <input class="form-control search-box" placeholder="Search by Action Date" @bind="searchTermDate" @oninput="@(e => OnSearchChanged(e, "ActionDate"))" />
                     <button class="search-btn" type="button">
                         <i class="fa fa-search"></i>
                     </button>
                 </div>
                 <div class="col-md-3 position-relative">
-                    <input class="form-control search-box" placeholder="Search by Status" @bind="searchTermStatus" @bind:event="oninput" />
+                    <input class="form-control search-box" placeholder="Search by Status" @bind="searchTermStatus" @oninput="@(e => OnSearchChanged(e, "Status"))" /> 
                     <button class="search-btn" type="button">
                         <i class="fa fa-search"></i>
                     </button>
@@ -268,18 +269,9 @@
                                 <td>@(cas?.ReasonHoldover?.Name ?? "-")</td> 
 
                                 <td>@( cas?.CreatedOn.ToString("MM/dd/yyyy"))</td>
-                                @if (cas?.IsActive == true && cas.IsDeleted == false)
-                                {
-                                    <td><span class="status-active ms-2">Active</span></td>
-                                }
-                                @if (cas?.IsDeleted == true && cas.IsActive == false)
-                                {
-                                    <td><span class="status-delete ms-2">InActive</span></td>
-                                }
-                                @if (cas?.IsDeleted == false && cas.IsActive == false)
-                                {
-                                    <td><span class="status-archive  ms-2">Archive</span></td>
-                                }
+                            <td>
+                                    @(cas.IsActive == true ? "Active" : cas.IsActive == false ? "Inactive" : "Not Set")
+                            </td>
 
                                 <td class="sticky">
                                     <i class="fa-solid fa-pen-to-square text-navy me-3" style="cursor:pointer"
@@ -426,10 +418,56 @@
 
     private async Task GetAllCases()
     {
-        pagedcases = await _service.GetAllAsync(currentPage, pageSize);
-       
-        AllClients = await _clientservice.GetAllClientsAsync(currentPage, pageSize, searchTerm);
+
+        var filters = new CaseFilterDto
+        {
+            CaseCode = searchcasecode,
+            Client = searchTermClient,
+            Tenant = searchTermTenant,
+            LandLord = searchTermLandLord,
+            ReasonHoldover = searchTermResonHoldover,
+            ActionDate = searchTermDate,
+            Status = searchTermStatus
+        };
+        pagedcases = await _service.GetAllAsync(currentPage, pageSize, filters);
+
+     
     }
+
+private async Task OnSearchChanged(ChangeEventArgs e, string field)
+{
+    var value = e.Value?.ToString() ?? string.Empty;
+
+    switch (field)
+    {
+        case "CaseCode":
+            searchcasecode = value;
+            break;
+        case "Client":
+            searchTermClient = value;
+            break;
+        case "Tenant":
+            searchTermTenant = value;
+            break;
+        case "Landlord":
+            searchTermLandLord = value;
+            break;
+        case "ReasonHoldover":
+            searchTermResonHoldover = value;
+            break;
+        case "ActionDate":
+            searchTermDate = value;
+            break;
+        case "Status":
+            searchTermStatus = value;
+            break;
+    }
+
+    currentPage = 1; // new search ke time page reset ho jaye
+    await GetAllCases();
+}
+
+
 
     private async Task ChangePage(int page)
     {
@@ -445,20 +483,7 @@
         navManager.NavigateTo("/case");
     }
 
-    // private IEnumerable<LegalCase> cases =>
-    // pagedcases.Where(c =>
-    //     (string.IsNullOrWhiteSpace(searchcasecode) || (!string.IsNullOrWhiteSpace(c.Casecode) && c.Casecode.Contains(searchcasecode, StringComparison.OrdinalIgnoreCase))) &&
-    //     (string.IsNullOrWhiteSpace(searchTermClient) || (!string.IsNullOrWhiteSpace(c.Clients?.ClientCode) && c.Clients.ClientCode.Contains(searchTermClient, StringComparison.OrdinalIgnoreCase))) &&
-    //     (string.IsNullOrWhiteSpace(searchTermTenant) || (!string.IsNullOrWhiteSpace(c.Tenants?.TenantCode) && c.Tenants.TenantCode.Contains(searchTermTenant, StringComparison.OrdinalIgnoreCase))) &&
-    //     (string.IsNullOrWhiteSpace(searchTermLandLord) || (!string.IsNullOrWhiteSpace(c.LandLords?.LandLordCode) && c.LandLords.LandLordCode.Contains(searchTermLandLord, StringComparison.OrdinalIgnoreCase))) &&
-    //     (string.IsNullOrWhiteSpace(searchTermApt) || (!string.IsNullOrWhiteSpace(c.Buildings?.ApartmentCode) && c.Buildings.ApartmentCode.Contains(searchTermApt, StringComparison.OrdinalIgnoreCase))) &&
-    //     // (string.IsNullOrWhiteSpace(searchTermCaseType) || (!string.IsNullOrWhiteSpace(c.CaseType) && c.CaseType.Contains(searchTermCaseType, StringComparison.OrdinalIgnoreCase))) &&
-    //     // (string.IsNullOrWhiteSpace(searchTermDept) || (!string.IsNullOrWhiteSpace(c.D) && c.Department.Contains(searchTermDept, StringComparison.OrdinalIgnoreCase))) &&
-    //     (string.IsNullOrWhiteSpace(searchTermDate) ||
-    //        (DateTime.TryParse(searchTermDate, out var date) && c.CreatedOn.Date == date.Date))
-
-
-    // );
+    
 
     private bool StatusMatches(LegalCase c, string status)
     {
@@ -467,33 +492,24 @@
             "active" => c.IsActive == true && !c.IsDeleted == false,
             "inactive" => !c.IsActive == false && c.IsDeleted == true,
             "archive" => !c.IsActive == false && !c.IsDeleted == false,
-            _ => true // If status search term doesn't match known values, don't filter
+            _ => true 
         };
     }
 
 
-    // private void OnInputChanged(ChangeEventArgs e)
-    // {
-    //     var input = e.Value?.ToString()?.ToLower() ?? "";
-    //     FilteredClients = AllClients
-    //         .Where(c => c.FirstName?.ToLower().Contains(input) == true ||
-    //                     c.LastName?.ToLower().Contains(input) == true ||
-    //                     c.ClientCode?.ToLower().Contains(input) == true)
-    //         .ToList();
-    //     ViewSearch = FilteredClients.Any();
 
-    // }
     private async Task SelectClient(CreateToClientDto client)
     {
 
-        // showClient = SelectedClient.FirstName + " " + SelectedClient.LastName + " - (" + SelectedClient.ClientCode + ")";
+       
         showClient = $"{client.FirstName} {client.LastName} - ({client.ClientCode})";
         ViewSearch = false;
-        //await OnClientSelected.InvokeAsync(clientId);
+    
     }
 
     private async Task SelectClientmodal()
     {
+        AllClients = await _clientservice.GetAllClientsAsync(currentPage, pageSize, searchTerm);
         await clientModal.Show(AllClients.Items);
     }
 }

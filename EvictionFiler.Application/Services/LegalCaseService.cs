@@ -72,9 +72,9 @@ namespace EvictionFiler.Application.Services
 			return false;
 		}
 
-		public async Task<PaginationDto<LegalCase>> GetAllAsync(int pageNumber, int pageSize)
+		public async Task<PaginationDto<LegalCase>> GetAllAsync(int pageNumber, int pageSize ,CaseFilterDto Filters)
 		{
-			return await _repository.GetAllCasesAsync(pageNumber , pageSize);
+			return await _repository.GetAllCasesAsync(pageNumber , pageSize , Filters);
 		}
 
 

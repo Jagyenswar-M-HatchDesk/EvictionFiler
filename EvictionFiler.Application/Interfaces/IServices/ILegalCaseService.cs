@@ -12,9 +12,11 @@ namespace EvictionFiler.Application.Interfaces.IServices
     public interface ILegalCaseService
     {
         Task<bool> AddLegalCasesAsync(CreateToEditLegalCaseModel dto);
-        Task<PaginationDto<LegalCase>> GetAllAsync(int pageNumber, int pageSize);
+        //Task<PaginationDto<LegalCase>> GetAllAsync(int pageNumber, int pageSize , string searchTerm);
+        Task<PaginationDto<LegalCase>> GetAllAsync(int pageNumber, int pageSize, CaseFilterDto Filters);
 
-		Task<CreateToEditLegalCaseModel?> GetByIdAsync(Guid id);
+
+        Task<CreateToEditLegalCaseModel?> GetByIdAsync(Guid id);
         Task<bool> UpdateAsync(CreateToEditLegalCaseModel dto);
         Task DeleteAsync(Guid id);
 
