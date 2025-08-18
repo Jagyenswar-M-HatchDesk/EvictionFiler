@@ -21,10 +21,9 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				await SeedCaseTypes(context);
 				await context.SaveChangesAsync();
 
-
-				await SeedRegulationStatus(context);
+                await SeedRenewalStatus(context);
+                await SeedRegulationStatus(context);
 				await SeedState(context);
-				await SeedTypeOfOwner(context);
 				await SeedFormTypes(context);
 				await SeedLandlordTypes(context);
 				await SeedReasonHolder(context);
@@ -65,7 +64,20 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			}
 		}
 
-		private static async Task SeedFormTypes(MainDbContext context)
+        private static async Task SeedRenewalStatus(MainDbContext context)
+        {
+
+            var renewal = InitialDataGenerator.GetRenewalStatus();
+            foreach (var r in renewal)
+            {
+                if (context.MstRenewalStatus.FirstOrDefault(d => d.Name == r.Name) == null)
+                {
+                    await context.MstRenewalStatus.AddAsync(r);
+                }
+            }
+        }
+
+        private static async Task SeedFormTypes(MainDbContext context)
 		{
 			var formTypes = InitialDataGenerator.GetFormTypes();
 

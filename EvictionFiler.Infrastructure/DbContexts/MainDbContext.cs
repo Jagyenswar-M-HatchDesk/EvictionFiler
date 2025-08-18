@@ -23,7 +23,8 @@ namespace EvictionFiler.Infrastructure.DbContexts
 		public DbSet<AdditionalOccupants> AdditionalOccupants { get; set; }
 		public DbSet<TypeOfOwner> MstTypeOfOwners { get; set; }
 		public DbSet<ClientRole> MstClientRoles { get; set; }
-		public DbSet<FormTypes> MstFormTypes { get; set; }
+        public DbSet<RenewalStatus> MstRenewalStatus { get; set; }
+        public DbSet<FormTypes> MstFormTypes { get; set; }
 		public DbSet<CaseForms> CaseForms { get; set; }
 		public DbSet<Language> MstLanguages { get; set; }
 		public DbSet<PremiseType> MstPremiseTypes { get; set; }

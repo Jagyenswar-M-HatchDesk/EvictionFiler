@@ -74,6 +74,7 @@ builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
 builder.Services.AddScoped<IUnitIllegalRepository, UnitIllegalRepository>();
 builder.Services.AddScoped<ITenancyTypeRepository, TenancyTypeRepository>();
 builder.Services.AddScoped<IFormTypesRepository, FormTypesRepository>();
+builder.Services.AddScoped<IRenewalStatusRepository, RenewalStatusRepository>();
 builder.Services.AddScoped<IReasonHoldoverRepository, ReasonHoldoverRepository>();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
 builder.Services.AddAuthorizationCore();

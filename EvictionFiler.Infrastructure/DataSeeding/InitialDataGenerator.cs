@@ -28,7 +28,19 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 		};
 		}
 
-		public static IEnumerable<PremiseType> GetPremiseType()
+        public static IEnumerable<RenewalStatus> GetRenewalStatus()
+        {
+
+            return new List<RenewalStatus>
+        {
+            new RenewalStatus() { Name = "Renewed"},
+            new RenewalStatus() { Name = "Not Renewed"},
+        };
+        }
+
+
+        
+        public static IEnumerable<PremiseType> GetPremiseType()
 		{
 			return new List<PremiseType>
 			{

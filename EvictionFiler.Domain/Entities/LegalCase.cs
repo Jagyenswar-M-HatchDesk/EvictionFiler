@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using EvictionFiler.Domain.Entities.Base.Base;
 using EvictionFiler.Domain.Entities.Master;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace EvictionFiler.Domain.Entities
 {
@@ -50,7 +51,8 @@ namespace EvictionFiler.Domain.Entities
 		public bool? TenantRecord { get; set; }
 		public bool? RenewalOffer { get; set; }
 		public bool? HasPossession { get; set; }
-		public bool? OtherOccupants { get; set; }
+   
+        public bool? OtherOccupants { get; set; }
 		public string? RentDueEachMonthOrWeek { get; set; }
 		public double? MonthlyRent { get; set; }
 		public double? TenantShare { get; set; }
@@ -88,5 +90,16 @@ namespace EvictionFiler.Domain.Entities
 
 		public bool? tenantReceive { get; set; }
 		public string? ExplainTenancyReceiveDescription { get; set; }
-	}
+
+      //new Property add 
+		public bool? WrittenLease { get; set; }
+        public DateOnly? DateTenantMoved { get; set; }
+
+        public DateOnly? OralStart { get; set; }
+
+        public DateOnly? OralEnd { get; set; }
+        public Guid? RenewalStatusId { get; set; }
+        [ForeignKey("RenewalStatusId")]
+        public RenewalStatus? RenewalStatus { get; set; }
+    }
 }

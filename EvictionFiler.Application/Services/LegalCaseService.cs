@@ -58,6 +58,11 @@ namespace EvictionFiler.Application.Services
 				AttrneyContactInfo = legalCase.AttrneyContactInfo,
 				Firm = legalCase.Firm,
 				CreatedOn = DateTime.Now,
+				OralStart = legalCase.OralStart,
+				OralEnd = legalCase.OralEnd,	
+				WrittenLease = legalCase.WrittenLease,
+				RenewalStatusId = legalCase.RenewalStatusId,
+				DateTenantMoved = legalCase.DateTenantMoved,
 
 
 			};
@@ -89,7 +94,8 @@ namespace EvictionFiler.Application.Services
 		c =>c.Tenants,
 		c =>c.RegulationStatus,
 		c =>c.TenancyType,
-		c =>c.ReasonHoldover,
+        c => c.RenewalStatus,
+        c =>c.ReasonHoldover,
 		c =>c.Buildings.State,
 		c =>c.Buildings.Landlord.State,
 		c => c.Buildings.Landlord.LandlordType
@@ -130,6 +136,11 @@ namespace EvictionFiler.Application.Services
 				tenantReceive = legalCaseEntity.tenantReceive,
 				ExplainTenancyReceiveDescription = legalCaseEntity.ExplainTenancyReceiveDescription,
 				TotalRentOwed = legalCaseEntity.TotalRentOwed,
+				OralEnd = legalCaseEntity.OralEnd,
+				OralStart = legalCaseEntity.OralStart,
+				WrittenLease = legalCaseEntity.WrittenLease,
+				RenewalStatusId = legalCaseEntity.RenewalStatusId,
+				DateTenantMoved= legalCaseEntity.DateTenantMoved,
 				Casecode = legalCaseEntity.Casecode,
 
 				tenants = legalCaseEntity.Tenants == null ? null : new CreateToTenantDto
@@ -205,8 +216,13 @@ namespace EvictionFiler.Application.Services
 			existing.CaseTypeId = legalCase.CaseTypeId;
 			existing.OtherPropertiesBuildingId = legalCase.OtherPropertiesBuildingId;
 			existing.CreatedOn = legalCase.CreatedOn;
+            existing.OralEnd = legalCase.OralEnd;
+            existing.OralStart = legalCase.OralStart;
+            existing.WrittenLease = legalCase.WrittenLease;
+            existing.DateTenantMoved = legalCase.DateTenantMoved;
+            existing.RenewalStatusId = legalCase.RenewalStatusId;
 
-		  _repository.UpdateAsync(existing);
+            _repository.UpdateAsync(existing);
 			 await _unitOfWork.SaveChangesAsync();
 
 			return true;

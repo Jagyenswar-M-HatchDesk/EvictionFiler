@@ -1,7 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-using EvictionFiler.Application.DTOs.ApartmentDto;
+﻿using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Domain.Entities.Master;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvictionFiler.Application.DTOs.LegalCaseDto
 {
@@ -63,6 +64,15 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
         public bool Status { get; set; }
         public List<EditToBuildingDto> OtherPropertiesBuildings { get; set; } = new();
 
+        public bool? WrittenLease { get; set; }
+        public DateOnly? DateTenantMoved { get; set; }
 
-	}
+        public DateOnly? OralStart { get; set; }
+
+        public DateOnly? OralEnd { get; set; }
+        public Guid? RenewalStatusId { get; set; }
+       
+
+
+    }
 }
