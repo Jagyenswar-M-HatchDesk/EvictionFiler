@@ -44,13 +44,11 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 		{
 			return new List<PremiseType>
 			{
-				new PremiseType() { Name = "Residential"},
-					new PremiseType() { Name = "Commercial"},
-					new PremiseType() { Name = "Industrial"},
-					new PremiseType() { Name = "Mixed Use"},
-					new PremiseType() { Name = "Retail"},
-					new PremiseType() { Name = "Office"},
-					new PremiseType() { Name = "Warehouse"},
+				new PremiseType() { Name = "One Family"},
+					new PremiseType() { Name = "Two Family"},
+					new PremiseType() { Name = "Three Family"},
+					new PremiseType() { Name = "Four Family"},
+				
 			};
 		}
 
@@ -68,14 +66,23 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			};
 		}
 
-		public static IEnumerable<State> GetState()
+        public static IEnumerable<DateRent> GetDateRent()
+        {
+            return Enumerable.Range(1, 31)  
+                             .Select(i => new DateRent { Name = i.ToString() })
+                             .ToList();
+        }
+
+
+        public static IEnumerable<State> GetState()
 		{
 			return new List<State>
 			{
 				new State() { Name = "Georgia"},
 				new State() { Name = "Calofornia"},
 				new State() { Name = "Florida"},
-			};
+                new State() { Name = "New York"},
+            };
 		}
 
 		public static IEnumerable<TypeOfOwner> GetTypeOfOwner()

@@ -246,25 +246,26 @@ namespace EvictionFiler.Application.Services
 										Phone = t.Phone,
 										Email = t.Email,
 										LanguageId = t.LanguageId,
-										Borough = t.Borough,
+									
 										HasPossession = t.HasPossession,
 										HasRegulatedTenancy = t.HasRegulatedTenancy,
-										Name_Relation = t.Name_Relation,
+										MoveInDate = t.MoveInDate,
 										OtherOccupants = t.OtherOccupants,
-										Registration_No = t.Registration_No,
+									
 										TenantRecord = t.TenantRecord,
 										HasPriorCase = t.HasPriorCase,
 										TenancyTypeId = t.TenancyTypeId,
 										RenewalOffer = t.RenewalOffer,
-										RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
+										//Additionaltenants= t.Add,
+									RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId,
 										SocialServices = t.SocialServices,
 										MonthlyRent = t.MonthlyRent,
-										LastMonthWeekRentPaid = t.LastMonthWeekRentPaid,
+									
 										TenantShare = t.TenantShare,
 										IsERAPPaymentReceived = t.IsERAPPaymentReceived,
 										ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
 										UnitOrApartmentNumber = t.UnitOrApartmentNumber,
-										TotalRentOwed = t.TotalRentOwed,
+									
 										IsUnitIllegalId = t.IsUnitIllegalId,
 										BuildinId = building.Id,
 										CreatedOn = building.CreatedOn,
@@ -463,25 +464,25 @@ namespace EvictionFiler.Application.Services
 									Phone = t.Phone,
 									Email = t.Email,
 									LanguageId = t.LanguageId,
-									Borough = t.Borough,
+							
 
 									HasPossession = t.HasPossession,
 									HasRegulatedTenancy = t.HasRegulatedTenancy,
-									Name_Relation = t.Name_Relation,
+									//Name_Relation = t.Name_Relation,
 									OtherOccupants = t.OtherOccupants,
-									Registration_No = t.Registration_No,
+									
 									TenantRecord = t.TenantRecord,
 									HasPriorCase = t.HasPriorCase,
 									TenancyTypeId = t.TenancyTypeId,
 									RenewalOffer = t.RenewalOffer,
-									RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
+									//RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
 									SocialServices = t.SocialServices,
 									MonthlyRent = t.MonthlyRent,
-									LastMonthWeekRentPaid = t.LastMonthWeekRentPaid,
+								
 									TenantShare = t.TenantShare,
 									ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
 									UnitOrApartmentNumber = t.UnitOrApartmentNumber,
-									TotalRentOwed = t.TotalRentOwed,
+								
 									IsUnitIllegalId = t.IsUnitIllegalId,
 									BuildinId = building.Id
 								};

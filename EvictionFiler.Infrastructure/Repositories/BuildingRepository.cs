@@ -53,13 +53,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 					
 					LanguageName = dto.Language != null ? dto.Language.Name : null, // ✅ new field
 				
-					Borough = dto.Borough,
-				
+			
 					HasPossession = dto.HasPossession,
 					HasRegulatedTenancy = dto.HasRegulatedTenancy,
-					Name_Relation = dto.Name_Relation,
+					//Name_Relation = dto.Name_Relation,
 					OtherOccupants = dto.OtherOccupants,
-					Registration_No = dto.Registration_No,
+		
 					TenantRecord = dto.TenantRecord,
 					HasPriorCase = dto.HasPriorCase,
 					BuildingId = dto.BuildinId,

@@ -19,7 +19,8 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				await SeedLanguage(context);
 				await SeedPremiseType(context);
 				await SeedCaseTypes(context);
-				await context.SaveChangesAsync();
+                await SeedDateRent(context);
+                await context.SaveChangesAsync();
 
                 await SeedRenewalStatus(context);
                 await SeedRegulationStatus(context);
@@ -50,8 +51,20 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			}
 		}
 
+        private static async Task SeedDateRent(MainDbContext context)
+        {
+            var dateRent = InitialDataGenerator.GetDateRent();
+            foreach (var date in dateRent)
+            {
+                if (context.MstDateRent.FirstOrDefault(d => d.Name == date.Name) == null)
+                {
+                    await context.MstDateRent.AddAsync(date);
+                }
+            }
+        }
 
-		private static async Task SeedLanguage(MainDbContext context)
+
+        private static async Task SeedLanguage(MainDbContext context)
 		{
 
 			var lang = InitialDataGenerator.GetLangauge();

@@ -40,13 +40,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Email = dto.Email,
 				LanguageId = dto.LanguageId,
 			
-				Borough = dto.Borough,
+			
 			
 				HasPossession = dto.HasPossession,
 				HasRegulatedTenancy = dto.HasRegulatedTenancy,
-				Name_Relation = dto.Name_Relation,
+				//Name_Relation = dto.Name_Relation,
 				OtherOccupants = dto.OtherOccupants,
-				Registration_No = dto.Registration_No,
+			
 				TenantRecord = dto.TenantRecord,
 				HasPriorCase = dto.HasPriorCase,
 				BuildingId = dto.BuildinId
@@ -120,12 +120,11 @@ namespace EvictionFiler.Infrastructure.Repositories
 			FirstName = dto.FirstName,
 			LastName = dto.LastName,
 			UnitOrApartmentNumber = dto.UnitOrApartmentNumber,
-			RentDueEachMonthOrWeek = dto.RentDueEachMonthOrWeek,
+			//RentDueEachMonthOrWeek = dto.RentDueEachMonthOrWeek,
 			MonthlyRent = dto.MonthlyRent,
 			TenantShare = dto.TenantShare,
 			SocialServices = dto.SocialServices,
-			LastMonthWeekRentPaid = dto.LastMonthWeekRentPaid,
-			TotalRentOwed = dto.TotalRentOwed,
+			
 			IsUnitIllegalId = dto.IsUnitIllegalId,
 			IsUnitIllegalName = dto.IsUnitIllegal!.Name,
 			TenancyTypeId = dto.TenancyTypeId,
@@ -136,12 +135,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 			Email = dto.Email,
 			LanguageId = dto.LanguageId,
 			LanguageName = dto.Language!.Name,
-			Borough = dto.Borough,
+	
 			HasPossession = dto.HasPossession,
 			HasRegulatedTenancy = dto.HasRegulatedTenancy,
-			Name_Relation = dto.Name_Relation,
+			//Name_Relation = dto.Name_Relation,
 			OtherOccupants = dto.OtherOccupants,
-			Registration_No = dto.Registration_No,
+			
 			TenantRecord = dto.TenantRecord,
 			HasPriorCase = dto.HasPriorCase,
 			BuildingId = dto.BuildinId,

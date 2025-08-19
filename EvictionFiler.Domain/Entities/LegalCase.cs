@@ -101,5 +101,7 @@ namespace EvictionFiler.Domain.Entities
         public Guid? RenewalStatusId { get; set; }
         [ForeignKey("RenewalStatusId")]
         public RenewalStatus? RenewalStatus { get; set; }
+
+      
     }
 }

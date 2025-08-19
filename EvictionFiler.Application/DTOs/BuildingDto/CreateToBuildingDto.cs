@@ -9,10 +9,12 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 	{
 
 		public string BuildingCode { get; set; } = string.Empty;
-		[Required(ErrorMessage = "Code is Required")]
+		
 		public string? ApartmentCode { get; set; }
-		public string? MDRNumber { get; set; }
-		public string? BuildingUnits { get; set; }
+        [Required(ErrorMessage = "MDR Number is Required")]
+        public string? MDRNumber { get; set; }
+        [Required(ErrorMessage = "Building Unit is Required")]
+        public string? BuildingUnits { get; set; }
 		[Required(ErrorMessage = "Premise Type is Required")]
 		public Guid? PremiseTypeId { get; set; }
 		public string? PremiseTypeName { get; set; }
@@ -33,7 +35,14 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 
 		public List<CreateToTenantDto>? Tenants { get; set; }
 
-		
+        public string CompletedAddress
+        {
+            get
+            {
+                var parts = new List<string> { Address1, Address2, City, StateName, Zipcode };
+                return string.Join(", ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+            }
+        }
 
-	}
+    }
 }

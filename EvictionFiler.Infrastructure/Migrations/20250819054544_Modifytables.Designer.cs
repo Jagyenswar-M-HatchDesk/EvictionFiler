@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250819054544_Modifytables")]
+    partial class Modifytables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,55 +24,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.AdditioanlTenants", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastName")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<Guid?>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TenantId");
-
-                    b.ToTable("AdditioanlTenants");
-                });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.AdditionalOccupants", b =>
                 {
@@ -1484,8 +1438,9 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<bool?>("RenewalOffer")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("RentDueEachMonthOrWeekId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("RentDueEachMonthOrWeek")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("SSN")
                         .HasMaxLength(50)
@@ -1530,8 +1485,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasIndex("IsUnitIllegalId");
 
                     b.HasIndex("LanguageId");
-
-                    b.HasIndex("RentDueEachMonthOrWeekId");
 
                     b.HasIndex("StateId");
 
@@ -1816,15 +1769,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.AdditioanlTenants", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.Tenant", "Tenants")
-                        .WithMany()
-                        .HasForeignKey("TenantId");
-
-                    b.Navigation("Tenants");
-                });
-
             modelBuilder.Entity("EvictionFiler.Domain.Entities.AdditionalOccupants", b =>
                 {
                     b.HasOne("EvictionFiler.Domain.Entities.Tenant", "Tenants")
@@ -2025,10 +1969,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("LanguageId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.DateRent", "RentDueEachMonthOrWeek")
-                        .WithMany()
-                        .HasForeignKey("RentDueEachMonthOrWeekId");
-
                     b.HasOne("EvictionFiler.Domain.Entities.Master.State", "State")
                         .WithMany()
                         .HasForeignKey("StateId");
@@ -2042,8 +1982,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Navigation("IsUnitIllegal");
 
                     b.Navigation("Language");
-
-                    b.Navigation("RentDueEachMonthOrWeek");
 
                     b.Navigation("State");
 

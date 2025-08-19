@@ -13,14 +13,13 @@ namespace EvictionFiler.Domain.Entities
 		public string FirstName { get; set; } = string.Empty;
 		[MaxLength(100)]
 		public string? LastName { get; set; }
-		[MaxLength(50)]
-		public string? Registration_No { get; set; }
+	
 		[MaxLength(250)]
 		public string Email { get; set; } = string.Empty;
 		[MaxLength(50)]
 		public string? Phone { get; set; } = string.Empty;
 		[MaxLength(100)]
-		public string? Name_Relation { get; set; } 
+		public string? Additionaltenants { get; set; } 
 		public Guid? LanguageId { get; set; }
 		[ForeignKey("LanguageId")]
 		public Language? Language { get; set; }
@@ -40,8 +39,7 @@ namespace EvictionFiler.Domain.Entities
 		public TenancyType? TenancyType { get; set; }
 		[MaxLength(50)]
 		public string? SSN { get; set; }
-		[MaxLength(50)]
-		public string? Borough { get; set; } 
+		
 		public bool? TenantRecord { get; set; }
 		public bool? RenewalOffer { get; set; }
 		public bool? HasPossession { get; set; }
@@ -53,25 +51,26 @@ namespace EvictionFiler.Domain.Entities
 		public Building? Building { get; set; }
 
 		//Rent Details
-		[MaxLength(50)]
-		public string? RentDueEachMonthOrWeek { get; set; }
-		public double? MonthlyRent { get; set; }
+	
+        
+        [ForeignKey("RentDueEachMonthOrWeekId")]
+        public Guid? RentDueEachMonthOrWeekId { get; set; }
+        public DateRent? RentDueEachMonthOrWeek { get; set; }
+        public double? MonthlyRent { get; set; }
 		public double? TenantShare { get; set; }
 
 		[MaxLength(250)]
 		public string? SocialServices { get; set; }
 
-		[MaxLength(50)]
-		public string? LastMonthWeekRentPaid { get; set; }
-		public double? TotalRentOwed { get; set; }
+	
 		public bool? IsERAPPaymentReceived { get; set; }
 		public DateOnly? ERAPPaymentReceivedDate { get; set; }
 		public string? UnitOrApartmentNumber { get; set; }
 		public Guid? IsUnitIllegalId { get; set; }
 		[ForeignKey("IsUnitIllegalId")]
 		public IsUnitIllegal? IsUnitIllegal { get; set; }
-
-		public ICollection<AdditionalOccupants>? Occupants { get; set; }
+        public DateOnly? MoveInDate { get; set; }
+        public ICollection<AdditionalOccupants>? Occupants { get; set; }
 
 	}
 }

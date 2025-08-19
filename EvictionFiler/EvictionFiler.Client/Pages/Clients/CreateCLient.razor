@@ -23,7 +23,7 @@
 @inject IUnitIllegalRepository UnitIllegalRepository
 @inject ITenancyTypeRepository TenancyTypeRepository
 @inject ILandlordTypeRepository LandlordTypeRepository
-
+@inject IDateRentRepository  DateRentRepository
 
 @rendermode InteractiveAuto
 @inject NavigationManager Navigation
@@ -593,18 +593,20 @@ aria-labelledby="createUserLabel">
                                 <ValidationMessage For="@(() => building.LandlordId)" />
                             </div>
                             <div class="col-md-2">
-                                <label class="required-label">Apt Code</label>
+                                <label>Apt Code</label>
                                 <InputText class="form-control" @bind-Value="building.ApartmentCode" placeholder="Enter Code" />
-                                <ValidationMessage For="@(() => building.ApartmentCode)" />
+                                
                             </div>
 
                             <div class="col-md-4">
-                                <label>MDR Number</label>
+                                <label class="required-label">MDR Number</label>
                                 <InputText class="form-control" @bind-Value="building.MDRNumber" Placeholder="Enter Number" />
+                                <ValidationMessage For="@(() => building.MDRNumber)" />
                             </div>
                             <div class="col-md-3">
-                                <label for="BuildingUnit"> Building Units(No.)</label>
+                                <label for="BuildingUnit" class="required-label"> Building Units(No.)</label>
                                 <InputText class="form-control" id="BuildingUnit" @bind-Value="building.BuildingUnits" placeholder="Enter Building Units" />
+                                <ValidationMessage For="@(() => building.BuildingUnits)" />
                             </div>
                         </div>
 
@@ -795,7 +797,7 @@ aria-labelledby="createUserLabel">
 
                             <div class="col-md-3">
                                 <label class="required-label">Building</label>
-                                <InputSelect class="form-select" @bind-Value="tenant.BuildingId">
+                                <InputSelect class="form-select" @bind-Value="tenant.BuildingId" @onchange="OnBuildingChanged">
                                     <option value="">-- Select Building --</option>
                                     @foreach (var apartment in apartmentList)
                                     {
@@ -813,10 +815,11 @@ aria-labelledby="createUserLabel">
                                 <ValidationMessage For="@(() => tenant.FirstName)" />
                             </div>
                             <div class="col-md-3">
-                                <label>Last Name</label>
+                                <label class="required-label">Last Name</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="bi bi-person"></i></span>
                                     <InputText class="form-control" @bind-Value="tenant.LastName" placeholder="Enter Last Name" />
+                                    <ValidationMessage For="@(() => tenant.LastName)" />
                                 </div>
 
                             </div>
@@ -824,7 +827,8 @@ aria-labelledby="createUserLabel">
 
                             <div class="col-md-2">
                                 <label>Unit/AptNumber</label>
-                                <InputText class="form-control" @bind-Value="tenant.UnitOrApartmentNumber" placeholder="Enter Unit or Apt No." />
+                                <InputText class="form-control required-label" @bind-Value="tenant.UnitOrApartmentNumber" placeholder="Enter Unit or Apt No." />
+                                <ValidationMessage For="@(() => tenant.UnitOrApartmentNumber)" />
                             </div>
                         </div>
 
@@ -832,16 +836,16 @@ aria-labelledby="createUserLabel">
                         <!-- Row 2: Email, Phone language  , ein -->
                         <div class="row mb-4">
                             <div class="col-md-4">
-                                <label class="required-label">Email</label>
+                                <label>Email</label>
                                 <div class="input-group">
                                     <span class="input-group-text">@@</span>
                                     <InputText class="form-control" @bind-Value="tenant.Email" placeholder="Enter Email" />
                                 </div>
-                                <ValidationMessage For="@(() => tenant.Email)" />
+        
 
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label>Phone</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-phone"></i></span>
@@ -850,7 +854,7 @@ aria-labelledby="createUserLabel">
 
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label>EIN/SSN</label>
 
                                 <div class="input-group mb-3">
@@ -861,34 +865,63 @@ aria-labelledby="createUserLabel">
                                 </div>
                             </div>
 
-                            <div class="col-md-2">
-                                <label class="required-label">Language</label>
-                                <InputSelect class="form-select" @bind-Value="tenant.LanguageId">
-                                    <option value="">-- Select Language --</option>
-                                    @foreach (var l in LangList)
+                        </div>
+
+
+                        <div class="row mb-4">
+                        <div class="col-md-3">
+                            <label>Language</label>
+                            <InputSelect class="form-select" @bind-Value="tenant.LanguageId">
+                                <option value="">-- Select Language --</option>
+                                @foreach (var l in LangList)
+                                {
+                                    <option value="@l.Id">@l.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+                            <div class="col-md-4">
+                                <label>Social Services</label>
+                                <InputText class="form-control" @bind-Value="tenant.SocialServices" placeholder="Enter Social Service Info" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="required-label">Tenancy Type</label>
+                                <InputSelect class="form-select" @bind-Value="tenant.TenancyTypeId">
+                                    <option value="">-- Select Type --</option>
+                                    @foreach (var l in TenancyTypeList)
                                     {
                                         <option value="@l.Id">@l.Name</option>
                                     }
                                 </InputSelect>
+                            <ValidationMessage For="@(() => tenant.TenancyTypeId)" />
                             </div>
-
+                            <div class="col-md-2">
+                                <label>Date</label>
+                                <InputDate class="form-control" @bind-Value="tenant.MoveInDate" placeholder="Select Date" />
+                            </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label>Date Rent (Month/Week)</label>
+                            <div class="col-md-3">
+                                <label class="required-label">Date Rent (M/W)</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text">
                                         <i class="bi bi-currency-dollar"></i>
                                     </span>
-
+                                    <InputSelect class="form-select" @bind-Value="tenant.RentDueEachMonthOrWeekId">
+                                    <option value="">-- Select Type --</option>
+                                    @foreach (var l in DateRentList)
+                                    {
+                                        <option value="@l.Id">@l.Name</option>
+                                    }
+                                </InputSelect>
         
-                                    <InputText class="form-control" @bind-Value="tenant.RentDueEachMonthOrWeek" placeholder="e.g. 1st, Monday" />
+                                  
+                                    <ValidationMessage For="@(() => tenant.RentDueEachMonthOrWeekId)" />
                                 </div>
                                 
                             </div>
 
-                            <div class="col-md-2">
-                                <label>Monthly Rent</label>
+                            <div class="col-md-3">
+                                <label class="required-label">Monthly Rent</label>
                                   <div class="input-group mb-3">
                                     <span class="input-group-text">
                                         <i class="bi bi-currency-dollar"></i>
@@ -896,6 +929,7 @@ aria-labelledby="createUserLabel">
 
         
                                 <InputNumber class="form-control" @bind-Value="tenant.MonthlyRent" placeholder="Enter Monthly Rent" />
+                                    <ValidationMessage For="@(() => tenant.MonthlyRent)" />
                                 </div>
                             </div>
 
@@ -910,127 +944,80 @@ aria-labelledby="createUserLabel">
         
                                 </div>
                             </div>
-                            <div class="col-md-2">
-                                <label>Borough</label>
-                                <InputText class="form-control" @bind-Value="tenant.Borough" placeholder="Enter Borough" />
-                            </div>
-                            <div class="col-md-2">
-                                <label>Social Services</label>
-                                <InputText class="form-control" @bind-Value="tenant.SocialServices" placeholder="Enter Social Service Info" />
+
+                         
+                            <div class="col-md-4">
+                                <label>Units Illegal</label>
+                                <InputSelect class="form-select" @bind-Value="tenant.IsUnitIllegalId">
+                                    <option value="">-- Select Units --</option>
+                                    @foreach (var l in IsUnitIllegalList)
+                                    {
+                                        <option value="@l.Id">@l.Name</option>
+                                    }
+                                </InputSelect>
+                            <ValidationMessage For="@(() => tenant.IsUnitIllegalId)" />
                             </div>
 
                         </div>
 
-                        <div class="row mb-3">
+                          <div class="row mb-3">
+                            <div class="col-auto">
+                                <label class="me-2 required-label">Building Address</label>
+                            </div>
+                            <div class="col">
+                                <InputText class="form-control" @bind-Value="tenant.CompletedAddress" disabled />
 
-                            <div class="col-md-4">
-                                <label>Last Rent Paid</label>
-                                   <div class="input-group mb-3">
-                                    <span class="input-group-text">
-                                        <i class="bi bi-currency-dollar"></i>
-                                    </span>
-
-        
-                                <InputText class="form-control" @bind-Value="tenant.LastMonthWeekRentPaid" placeholder="Enter Last Paid Info" />
-                                </div>
                             </div>
 
-                            <div class="col-md-4">
-                                <label>Total Rent Owed</label>
-                                   <div class="input-group mb-3">
-                                    <span class="input-group-text">
-                                        <i class="bi bi-currency-dollar"></i>
-                                    </span>
-
-        
-                                <InputNumber class="form-control" @bind-Value="tenant.TotalRentOwed" placeholder="Enter Total Owed" />
-                                </div>
                             </div>
-                            <div class="col-md-4">
-                                <label>Reg. No.</label>
-                                <InputText class="form-control" @bind-Value="tenant.Registration_No" placeholder="Enter Registration No." />
-                            </div>
-                        
-                        </div>
 
                         <div class="row mb-3">
                             <div class="col-auto">
-                                <label class="me-2">Additional Occupants</label>
+                                <label class="me-2 required-label">Additional Tenants</label>
                             </div>
 
                             <div class="col">
                                 @for (int i = 0; i < occupants.Count; i++)
                                 {
-                                    var index = i;
+                                    var item = occupants[i];
+                                    <div class="row mb-2" @key="item">
+                                      
 
-                                    <div class="row mb-2">
                                         <div class="col-auto">
-                                            <div class="form-check">
-                                                <input type="checkbox"
-                                                       class="form-check-input"
-                                                       @bind="occupants[index].IsChecked" />
-                                            </div>
-                                        </div>
-
-                                        <div class="col">
-                                            @if (occupants[index].IsChecked)
+                                            <!-- Sirf last row me + button -->
+                                            @if (i == occupants.Count - 1)
                                             {
-                                                <div class="row">
-                                                    <div class="col-auto">
-                                                        <InputText class="form-control" placeholder="Name"
-                                                                   @bind-Value="occupants[index].Name" />
-                                                    </div>
-                                                    <div class="col">
-                                                        <InputText class="form-control" placeholder="Relation"
-                                                                   @bind-Value="occupants[index].Relation" />
-                                                    </div>
-                                                </div>
+                                                <button type="button" class="btn btn-sm btn-success me-1"
+                                                        @onclick="() => AddTenant(item)" disabled="@item.IsVisible">
+                                                    +
+                                                </button>
+                                            }
 
-                                                @* ✅ Add new only if this is last item and has data *@
-                                                @if (index == occupants.Count - 1 && !string.IsNullOrWhiteSpace(occupants[index].Name))
-                                                {
-                                                    occupants.Add(new AdditionalOccupantDto());
-                                                }
+                                            <!-- Minus button (only when inputs visible) -->
+                                            @if (item.IsVisible)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-danger"
+                                                        @onclick="() => RemoveTenant(item)">
+                                                    -
+                                                </button>
                                             }
                                         </div>
+                                        @if (item.IsVisible)
+                                        {
+                                            <!-- Show input fields -->
+                                            <div class="col-auto">
+                                                <InputText class="form-control" placeholder="First Name"
+                                                           @bind-Value="item.FirstName" />
+                                            </div>
+                                            <div class="col-auto">
+                                                <InputText class="form-control" placeholder="Last Name"
+                                                           @bind-Value="item.LastName" />
+                                            </div>
+                                        }
                                     </div>
                                 }
                             </div>
                         </div>
-
-
-
-
-
-                        <div class="row mb-3">
-
-                            <InputRadioGroup @bind-Value="tenant.IsUnitIllegalId" class="mb-3">
-                                <div class="row align-items-center">
-                                    <div class="col-auto">
-                                        <label class="form-label mb-0 required-label" style="margin-top:5px">Is the Unit Illegal:</label>
-                                    </div>
-                                    <div class="col">
-                                        <div class="d-flex flex-wrap align-items-center gap-4">
-                                            @foreach (var role in IsUnitIllegalList)
-                                            {
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <div class="form-check d-flex align-items-center m-0">
-                                                        <InputRadio Value="@role.Id" class="form-check-input me-1" />
-                                                        <label class="form-check-label ms-1" style="margin-top:5px">
-                                                            @role.Name
-                                                        </label>
-                                                    </div>
-
-                                                </div>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            </InputRadioGroup>
-                            <ValidationMessage For="@(() => tenant.IsUnitIllegalId)" />
-
-                        </div>
-
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <InputRadioGroup @bind-Value="tenant.IsERAPPaymentReceived">
@@ -1059,40 +1046,7 @@ aria-labelledby="createUserLabel">
                             }
                         </div>
 
-                        <div class="row mb-3">
-
-                            <InputRadioGroup @bind-Value="tenant.TenancyTypeId" class="mb-3 required-label">
-                                <div class="row align-items-center">
-                                    <div class="col-auto">
-                                        <label class="form-label mb-0 required-label" style="margin-top:5px">Tenancy Type:</label>
-                                    </div>
-                                    <div class="col">
-                                        <div class="d-flex flex-wrap align-items-center gap-4">
-                                            @foreach (var role in TenancyTypeList)
-                                            {
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <div class="form-check d-flex align-items-center m-0">
-                                                        <InputRadio Value="@role.Id" class="form-check-input me-1" />
-                                                        <label class="form-check-label ms-1" style="margin-top:5px">
-                                                            @role.Name
-                                                        </label>
-                                                    </div>
-
-                                                    @if (role.Name == "Other" && tenant.TenancyTypeId == role.Id)
-                                                    {
-                                                        <InputText class="form-control"
-                                                        placeholder="Please specify"
-                                                        style="max-width: 200px; height: 36px;"
-                                                        @bind-Value="tenant.TenancyTypeDescription" />
-                                                    }
-                                                </div>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            </InputRadioGroup>
-                            <ValidationMessage For="@(() => tenant.TenancyTypeId)" />
-                        </div>
+                
                         <div class="row mb-3">
                             <!-- Tenant of Record -->
                             <div class="col-md-6">
@@ -1232,12 +1186,12 @@ aria-labelledby="createUserLabel">
                                     <th>Phone</th>
                                     <th>SSN</th>
                                     <th>Language</th>
-                                    <th>Borough</th>
+                                 
                                     <th>Monthly Rent</th>
                                     <th>Tenant's Share</th>
                                     <th>ERAP Received</th>
                                     <th>ERAP Date</th>
-                                    <th>Reg. No.</th>
+                                   
                                 </tr>
                             </thead>
                             <tbody>
@@ -1253,12 +1207,12 @@ aria-labelledby="createUserLabel">
                                             <td>@t.Phone</td>
                                             <td>@t.SSN</td>
                                             <td>@t.LanguageName</td>
-                                            <td>@t.Borough</td>
+                                          
                                             <td>@t.MonthlyRent</td>
                                             <td>@t.TenantShare</td>
                                             <td>@(t.IsERAPPaymentReceived == true ? "Yes" : "No")</td>
                                             <td>@(t.ERAPPaymentReceivedDate?.ToString("dd-MM-yyyy"))</td>
-                                            <td>@t.Registration_No</td>
+                                          
                                         </tr>
                                     }
                                 }
@@ -1326,10 +1280,10 @@ aria-labelledby="createUserLabel">
 </div>
 
 @code {
-        [Parameter] public EditToClientDto createClient { get; set; } = new();
-        [Parameter]
-        public EventCallback OnClose { get; set; }
-        [Parameter] public EventCallback<CreateToClientDto> Submit { get; set; }
+    [Parameter] public EditToClientDto createClient { get; set; } = new();
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<CreateToClientDto> Submit { get; set; }
 
     private string activeTab = string.Empty;
 
@@ -1353,6 +1307,7 @@ aria-labelledby="createUserLabel">
     private List<LandlordType> LandLordTypeList = new();
     private List<TenancyType> TenancyTypeList = new();
     private List<IsUnitIllegal> IsUnitIllegalList = new();
+    private List<DateRent> DateRentList = new();
     private string LatestLandLordCode = "";
     private string LatestBuildingCode = "";
     private string LatestTenantCode = "";
@@ -1360,10 +1315,7 @@ aria-labelledby="createUserLabel">
 
     private bool shouldAddNewOccupant = false;
 
-    private List<AdditionalOccupantDto> occupants = new()
-    {
-        new AdditionalOccupantDto()
-    };
+
 
     private bool showCancelPopup = false;
 
@@ -1378,6 +1330,7 @@ aria-labelledby="createUserLabel">
             TypeOwnerList = await TypeOwnerRepository.GetAllOwner();
             RegulationList = await RegulationStatusRepository.GetAllRegulationStatus();
             premiseTypesList = await PremiseTypeRepository.GetAllPremiseType();
+            DateRentList = await DateRentRepository.GetAllDateRent();
             LangList = await LanguageRepository.GetAllLanguage();
             LandLordTypeList = await LandlordTypeRepository.GetAllLandLordType();
             TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
@@ -1386,20 +1339,52 @@ aria-labelledby="createUserLabel">
             LatestBuildingCode = await _apartmentService.GetLastBuilding();
             LatestTenantCode = await _tenantService.GetLastTenantCode();
         }
-        occupants.Add(new AdditionalOccupantDto());
+        occupants.Add(new AddtionalTenantDto());
 
     }
 
-    private void OnCheckboxChanged(int index, ChangeEventArgs e)
-    {
-        occupants[index].IsChecked = (bool)e.Value!;
 
-        // Add next checkbox if last one is checked
-        if (occupants[index].IsChecked && index == occupants.Count - 1)
+    private void OnBuildingChanged(ChangeEventArgs e)
+    {
+        var selectedId = Guid.Parse(e.Value.ToString());
+        var selectedBuilding = apartmentList.FirstOrDefault(b => b.Id == selectedId);
+
+        if (selectedBuilding != null)
         {
-            occupants.Add(new AdditionalOccupantDto());
+            tenant.CompletedAddress = selectedBuilding.CompletedAddress;
         }
     }
+
+
+    private List<AddtionalTenantDto> occupants = new()
+    {
+        new AddtionalTenantDto()
+    };
+
+    private void AddTenant(AddtionalTenantDto current)
+    {
+        if (!current.IsVisible)
+        {
+            current.IsVisible = true; // inputs dikhao
+            occupants.Add(new AddtionalTenantDto()); // fresh row add karo
+        }
+    }
+
+    private void RemoveTenant(AddtionalTenantDto current)
+    {
+        if (occupants.Contains(current))
+        {
+            occupants.Remove(current);
+        }
+
+        // agar sab rows remove ho gayi ho to ek fresh + row add karo
+        if (!occupants.Any())
+        {
+            occupants.Add(new AddtionalTenantDto());
+        }
+    }
+
+
     private void BackToLandlordList()
     {
         showLandlordForm = false;
@@ -1659,9 +1644,9 @@ aria-labelledby="createUserLabel">
         LatestTenantCode = $"TT{nextNumber.ToString().PadLeft(10, '0')}";
 
         tenant.TenantCode = LatestTenantCode;
-        tenant.occupants = occupants
-     .Where(x => x.IsChecked && !string.IsNullOrWhiteSpace(x.Name))
-     .ToList();
+     //    tenant.occupants = occupants
+     // .Where(x => x.IsChecked && !string.IsNullOrWhiteSpace(x.Name))
+     // .ToList();
 
 
         saveTanentList.Add(tenant);

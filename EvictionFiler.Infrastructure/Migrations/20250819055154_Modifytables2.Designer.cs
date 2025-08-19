@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250819055154_Modifytables2")]
+    partial class Modifytables2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1484,8 +1487,9 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<bool?>("RenewalOffer")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("RentDueEachMonthOrWeekId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("RentDueEachMonthOrWeek")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("SSN")
                         .HasMaxLength(50)
@@ -1530,8 +1534,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasIndex("IsUnitIllegalId");
 
                     b.HasIndex("LanguageId");
-
-                    b.HasIndex("RentDueEachMonthOrWeekId");
 
                     b.HasIndex("StateId");
 
@@ -2025,10 +2027,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("LanguageId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.DateRent", "RentDueEachMonthOrWeek")
-                        .WithMany()
-                        .HasForeignKey("RentDueEachMonthOrWeekId");
-
                     b.HasOne("EvictionFiler.Domain.Entities.Master.State", "State")
                         .WithMany()
                         .HasForeignKey("StateId");
@@ -2042,8 +2040,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Navigation("IsUnitIllegal");
 
                     b.Navigation("Language");
-
-                    b.Navigation("RentDueEachMonthOrWeek");
 
                     b.Navigation("State");
 
