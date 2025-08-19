@@ -53,7 +53,11 @@ namespace EvictionFiler.Domain.Entities
 		public bool? HasPossession { get; set; }
    
         public bool? OtherOccupants { get; set; }
-		public string? RentDueEachMonthOrWeek { get; set; }
+
+        public Guid? RentDueEachMonthOrWeekId { get; set; }
+        [ForeignKey("RentDueEachMonthOrWeekId")]
+        public DateRent? RentDueEachMonthOrWeek { get; set; }
+
 		public double? MonthlyRent { get; set; }
 		public double? TenantShare { get; set; }
 

@@ -198,21 +198,21 @@ aria-labelledby="createUserLabel">
                             <label class="form-label color-text">Phone</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                                <InputText class="form-control" @bind-Value="createClient.Phone" @oninput="@(e => FormatPhone(e, "createClient"))" />
+                                <InputText class="form-control" @bind-Value="createClient.Phone" placeholder="Enter Phone Number" @oninput="@(e => FormatPhone(e, "createClient"))" />
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text">Cell Phone</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-phone"></i></span>
-                                <InputText class="form-control" @bind-Value="createClient.CellPhone" oninput="@FormatCellPhone" />
+                                <InputText class="form-control" @bind-Value="createClient.CellPhone"  placeholder="Enter cell Phone " oninput="@FormatCellPhone" />
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label color-text ">Fax</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-printer"></i></span>
-                                <InputText class="form-control" @bind-Value="createClient.Fax" placeholder="Fax Number" oninput="@FormatFax" />
+                                <InputText class="form-control" @bind-Value="createClient.Fax" placeholder="Fax Number"  oninput="@FormatFax" />
                             </div>
                         </div>
 
@@ -826,7 +826,7 @@ aria-labelledby="createUserLabel">
 
 
                             <div class="col-md-2">
-                                <label>Unit/AptNumber</label>
+                                <label class=" required-label">Unit/AptNum</label>
                                 <InputText class="form-control required-label" @bind-Value="tenant.UnitOrApartmentNumber" placeholder="Enter Unit or Apt No." />
                                 <ValidationMessage For="@(() => tenant.UnitOrApartmentNumber)" />
                             </div>
@@ -869,7 +869,7 @@ aria-labelledby="createUserLabel">
 
 
                         <div class="row mb-4">
-                        <div class="col-md-3">
+                            <div class="col-md-3">
                             <label>Language</label>
                             <InputSelect class="form-select" @bind-Value="tenant.LanguageId">
                                 <option value="">-- Select Language --</option>
@@ -903,11 +903,9 @@ aria-labelledby="createUserLabel">
                             <div class="col-md-3">
                                 <label class="required-label">Date Rent (M/W)</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text">
-                                        <i class="bi bi-currency-dollar"></i>
-                                    </span>
+                                 
                                     <InputSelect class="form-select" @bind-Value="tenant.RentDueEachMonthOrWeekId">
-                                    <option value="">-- Select Type --</option>
+                                    <option value="">-- Select Date --</option>
                                     @foreach (var l in DateRentList)
                                     {
                                         <option value="@l.Id">@l.Name</option>
@@ -960,7 +958,7 @@ aria-labelledby="createUserLabel">
 
                         </div>
 
-                          <div class="row mb-3">
+                        <div class="row mb-3">
                             <div class="col-auto">
                                 <label class="me-2 required-label">Building Address</label>
                             </div>
@@ -1356,6 +1354,48 @@ aria-labelledby="createUserLabel">
     }
 
 
+   
+
+    private Task SaveTenantAsync()
+    {
+        if (tenant.Id == Guid.Empty)
+        {
+            tenant.Id = Guid.NewGuid();
+        }
+
+        tenant.LanguageName = LangList
+            .FirstOrDefault(x => x.Id == tenant.LanguageId)?.Name ?? "";
+
+        tenant.TenancyTypeName = TenancyTypeList
+      .FirstOrDefault(x => x.Id == tenant.TenancyTypeId)?.Name ?? "";
+
+        tenant.IsUnitIllegalName = IsUnitIllegalList
+    .FirstOrDefault(x => x.Id == tenant.IsUnitIllegalId)?.Name ?? "";
+        int nextNumber = 0;
+        if (LatestTenantCode != null)
+        {
+            nextNumber = int.Parse(LatestTenantCode[2..]) + 1;
+
+        }
+        else
+        {
+            nextNumber = 1;
+        }
+        LatestTenantCode = $"TT{nextNumber.ToString().PadLeft(10, '0')}";
+
+        tenant.TenantCode = LatestTenantCode;
+        tenant.AdditioalTenants = occupants
+     .Where(x => x.IsVisible && !string.IsNullOrWhiteSpace(x.FirstName))
+     .ToList();
+
+
+        saveTanentList.Add(tenant);
+
+        tenant = new();
+        showTanentForm = false;
+        return Task.CompletedTask;
+    }
+
     private List<AddtionalTenantDto> occupants = new()
     {
         new AddtionalTenantDto()
@@ -1617,44 +1657,7 @@ aria-labelledby="createUserLabel">
         return Task.CompletedTask;
     }
 
-    private Task SaveTenantAsync()
-    {
-        if (tenant.Id == Guid.Empty)
-        {
-            tenant.Id = Guid.NewGuid();
-        }
 
-        tenant.LanguageName = LangList
-            .FirstOrDefault(x => x.Id == tenant.LanguageId)?.Name ?? "";
-
-        tenant.TenancyTypeName = TenancyTypeList
-      .FirstOrDefault(x => x.Id == tenant.TenancyTypeId)?.Name ?? "";
-
-        tenant.IsUnitIllegalName = IsUnitIllegalList
-    .FirstOrDefault(x => x.Id == tenant.IsUnitIllegalId)?.Name ?? "";
-        int nextNumber = 0;
-        if (LatestTenantCode != null)
-        {
-            nextNumber = int.Parse(LatestTenantCode[2..]) + 1;
-
-        }
-        else{
-            nextNumber = 1;
-        }
-        LatestTenantCode = $"TT{nextNumber.ToString().PadLeft(10, '0')}";
-
-        tenant.TenantCode = LatestTenantCode;
-     //    tenant.occupants = occupants
-     // .Where(x => x.IsChecked && !string.IsNullOrWhiteSpace(x.Name))
-     // .ToList();
-
-
-        saveTanentList.Add(tenant);
-
-        tenant = new();
-        showTanentForm = false;
-        return Task.CompletedTask;
-    }
 
 
     private Task SaveBuildingAsync()

@@ -111,7 +111,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			// Step 3: Get all tenants linked to these apartments
 			var tenants = await _dbContext.Tenants
-		.Include(a => a.Language).Include(e => e.IsUnitIllegal).Include(e => e.TenancyType).Include(e => e.Occupants)
+		.Include(a => a.Language).Include(e => e.IsUnitIllegal).Include(e => e.TenancyType).Include(e => e.AddTenants)
 		.Where(t => t.BuildinId.HasValue && apartmentIds.Contains(t.BuildinId.Value) && t.IsDeleted != true)
 		.Select(dto => new EditToTenantDto
 		{
@@ -120,7 +120,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 			FirstName = dto.FirstName,
 			LastName = dto.LastName,
 			UnitOrApartmentNumber = dto.UnitOrApartmentNumber,
-			//RentDueEachMonthOrWeek = dto.RentDueEachMonthOrWeek,
+
+			RentDueEachMonthOrWeekId = dto.RentDueEachMonthOrWeekId,
 			MonthlyRent = dto.MonthlyRent,
 			TenantShare = dto.TenantShare,
 			SocialServices = dto.SocialServices,
@@ -139,19 +140,20 @@ namespace EvictionFiler.Infrastructure.Repositories
 			HasPossession = dto.HasPossession,
 			HasRegulatedTenancy = dto.HasRegulatedTenancy,
 			//Name_Relation = dto.Name_Relation,
+			AdditionalTenant = dto.Additionaltenants,
 			OtherOccupants = dto.OtherOccupants,
 			
 			TenantRecord = dto.TenantRecord,
 			HasPriorCase = dto.HasPriorCase,
 			BuildingId = dto.BuildinId,
-			occupants = dto.Occupants
-				.Select(o => new AdditionalOccupantDto
+            AdditioalTenants = dto.AddTenants
+                .Select(o => new AddtionalTenantDto
 				{
 					Id = o.Id,
-					Name = o.Name,
-					Relation = o.Relation,
+					FirstName = o.FirstName,
+					LastName = o.LastName,
 					TenantId = o.TenantId,
-					IsChecked = true
+					IsVisible = true
 				}).ToList()
 		}).ToListAsync();
 

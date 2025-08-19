@@ -51,7 +51,7 @@ namespace EvictionFiler.Application.Services
 				RegulationStatusId = legalCase.RegulationStatusId,
 				OtherPropertiesBuildingId = legalCase.OtherPropertiesBuildingId,
 				LandlordTypeId = legalCase.LandlordTypeId,
-				RentDueEachMonthOrWeek = legalCase.RentDueEachMonthOrWeek,
+				RentDueEachMonthOrWeekId = legalCase.RentDueEachMonthOrWeekId,
 				MonthlyRent = legalCase.MonthlyRent,
 				TotalRentOwed = legalCase.TotalRentOwed,
 				Attrney = legalCase.Attrney,
@@ -124,7 +124,7 @@ namespace EvictionFiler.Application.Services
 				OtherOccupants = legalCaseEntity.OtherOccupants,
 				RegulationStatusId = legalCaseEntity.RegulationStatusId,
 				RenewalOffer = legalCaseEntity.RenewalOffer,
-				RentDueEachMonthOrWeek = legalCaseEntity.RentDueEachMonthOrWeek,
+				RentDueEachMonthOrWeekId = legalCaseEntity.RentDueEachMonthOrWeekId,
 				SocialServices = legalCaseEntity.SocialServices,
 				TenancyTypeId = legalCaseEntity.TenancyTypeId,
 				TenantRecord = legalCaseEntity.TenantRecord,
@@ -206,7 +206,7 @@ namespace EvictionFiler.Application.Services
 			existing.ERAPPaymentReceivedDate = legalCase.ERAPPaymentReceivedDate;
 			existing.RegulationStatusId = legalCase.RegulationStatusId;
 			existing.LandlordTypeId = legalCase.LandlordTypeId;
-			existing.RentDueEachMonthOrWeek = legalCase.RentDueEachMonthOrWeek;
+			existing.RentDueEachMonthOrWeekId = legalCase.RentDueEachMonthOrWeekId;
 			existing.MonthlyRent = legalCase.MonthlyRent;
 			existing.TotalRentOwed = legalCase.TotalRentOwed;
 			existing.Attrney = legalCase.Attrney;

@@ -1,4 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.OccupantDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Domain.Entities.Master;
 using System.ComponentModel.DataAnnotations;
@@ -26,7 +27,7 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 		public bool? RenewalOffer { get; set; }
 		public bool? HasPossession { get; set; }
 		public bool? OtherOccupants { get; set; }
-		public string? RentDueEachMonthOrWeek { get; set; }
+		public Guid? RentDueEachMonthOrWeekId { get; set; }
 		public double? MonthlyRent { get; set; }
 		public double? TenantShare { get; set; }
 
@@ -71,8 +72,8 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 
         public DateOnly? OralEnd { get; set; }
         public Guid? RenewalStatusId { get; set; }
-       
 
+        public List<AdditionalOccupantDto>? AddOccupants { get; set; }
 
     }
 }

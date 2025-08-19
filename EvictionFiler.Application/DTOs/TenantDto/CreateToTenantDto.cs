@@ -15,7 +15,7 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 	
 		public string Email { get; set; } = string.Empty;
 		public string? Phone { get; set; } = string.Empty;
-		public string? Name_Relation { get; set; }
+		public string? AdditionalTenant { get; set; }
      
         public Guid? LanguageId { get; set; }
 		public string? LanguageName { get; set; }
@@ -33,6 +33,8 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public bool? RenewalOffer { get; set; }
         [Required(ErrorMessage = "Date Rent (M/W) is Required")]
         public Guid? RentDueEachMonthOrWeekId { get; set; }
+
+        public string? RentDueEachMonthOrWeekName { get; set; }
         [Required(ErrorMessage = "Monthly Rent is Required")]
         public double? MonthlyRent { get; set; }
 		public double? TenantShare { get; set; }
@@ -54,7 +56,7 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public string? TenancyTypeName { get; set; }
 		public string ?TenancyTypeDescription { get; set; }
 
-		public List<AddtionalTenantDto>? AdditionalTenant { get; set; }
+		public List<AddtionalTenantDto>? AdditioalTenants { get; set; }
 		public EditToBuildingDto? Building { get; set; }
 		public EditToLandlordDto? Landlord { get; set; }
         public DateOnly? MoveInDate { get; set; }

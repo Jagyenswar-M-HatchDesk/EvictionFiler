@@ -140,7 +140,7 @@ namespace EvictionFiler.Application.Services
 				TenancyTypeId = t.TenancyTypeId,
 				TenancyTypeName = t.TenancyType?.Name,
 				RenewalOffer = t.RenewalOffer,
-				//RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
+				RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId,
 				SocialServices = t.SocialServices,
 				MonthlyRent = t.MonthlyRent,
 		

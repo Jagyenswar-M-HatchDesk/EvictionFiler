@@ -18,20 +18,21 @@ namespace EvictionFiler.Application.Services
 		private readonly ILandLordRepository _landlordrepo;
 		private readonly IBuildingRepository _buildingrepo;
 		private readonly ITenantRepository _tenantRepo;
-		private readonly IAdditionalOccupantsRepository _additionalOccupantsRepo;
+		private readonly IAdditionalTenantsRepository _additionalTenantsRepo;
+		
 		
 		public ClientServices(
 	   IClientRepository clientRepo, IUnitOfWork unitOfWork,
 		ILandLordRepository landLordRepo,
 		IBuildingRepository buildingrepo,
-		ITenantRepository tenantRepo , IAdditionalOccupantsRepository additionalOccupantsRepo)
+		ITenantRepository tenantRepo , IAdditionalTenantsRepository additionalTenantsRepo)
 		{
 			_clientRepo = clientRepo;
 			_unitOfWork = unitOfWork;
 			_landlordrepo = landLordRepo;
 			_buildingrepo = buildingrepo;
 			_tenantRepo = tenantRepo;
-			_additionalOccupantsRepo = additionalOccupantsRepo;
+            _additionalTenantsRepo = additionalTenantsRepo;
 			
 		}
 
@@ -166,7 +167,7 @@ namespace EvictionFiler.Application.Services
 				var landlords = new List<LandLord>();
 				var buildings = new List<Building>();
 				var tenants = new List<Tenant>();
-				var occupants = new List<AdditionalOccupants>();
+				var addtenants = new List<AdditioanlTenants>();
 
 				//var lastLandlordCode = await _landlordrepo.GetLastLandLordCodeAsync();
 				//int nextLandlordNumber = string.IsNullOrEmpty(lastLandlordCode) ? 1 : int.Parse(lastLandlordCode[2..]) + 1;
@@ -251,13 +252,13 @@ namespace EvictionFiler.Application.Services
 										HasRegulatedTenancy = t.HasRegulatedTenancy,
 										MoveInDate = t.MoveInDate,
 										OtherOccupants = t.OtherOccupants,
-									
+								        
 										TenantRecord = t.TenantRecord,
 										HasPriorCase = t.HasPriorCase,
 										TenancyTypeId = t.TenancyTypeId,
 										RenewalOffer = t.RenewalOffer,
-										//Additionaltenants= t.Add,
-									RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId,
+										Additionaltenants = t.AdditionalTenant,
+										RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId,
 										SocialServices = t.SocialServices,
 										MonthlyRent = t.MonthlyRent,
 									
@@ -271,19 +272,19 @@ namespace EvictionFiler.Application.Services
 										CreatedOn = building.CreatedOn,
 										
 									};
-										if (t.occupants != null)
+										if (t.AdditioalTenants != null)
 									    {
-										    foreach (var o in t.occupants)
+										    foreach (var o in t.AdditioalTenants)
 										    {
-										    	var occupant = new AdditionalOccupants
+										    	var additionaltenants = new AdditioanlTenants
 											       {
 											       	//Id = o.Id,
-											       	Name = o.Name,
-											       	Relation = o.Relation,
+											       	FirstName = o.FirstName,
+											       	LastName = o.LastName,
 											       	TenantId = tenant.Id,
 											       };
-										    
-										      occupants.Add(occupant);
+
+                                            addtenants.Add(additionaltenants);
 										    };
 
 										tenants.Add(tenant);
@@ -297,7 +298,7 @@ namespace EvictionFiler.Application.Services
 				await _landlordrepo.AddRangeAsync(landlords);
 				await _buildingrepo.AddRangeAsync(buildings);
 				await _tenantRepo.AddRangeAsync(tenants);
-				await _additionalOccupantsRepo.AddRangeAsync(occupants);
+				await _additionalTenantsRepo.AddRangeAsync(addtenants);
 
 				var result = await _unitOfWork.SaveChangesAsync();
 				return result > 0;
@@ -349,8 +350,8 @@ namespace EvictionFiler.Application.Services
 			var buildingsToUpdate = new List<Building>();
 			var tenantsToAdd = new List<Tenant>();
 			var tenantsToUpdate = new List<Tenant>();
-			var addoccupantsToAdd = new List<AdditionalOccupants>();
-			var addoccupantsToUpdate = new List<AdditionalOccupants>();
+			var addtenantsToAdd = new List<AdditioanlTenants>();
+			var addtenantsToupdate = new List<AdditioanlTenants>();
 
 			//var lastLandlordCode = await _landlordrepo.GetLastLandLordCodeAsync();
 			//int nextLandlordNumber = string.IsNullOrEmpty(lastLandlordCode) ? 1 : int.Parse(lastLandlordCode[2..]) + 1;
@@ -465,10 +466,11 @@ namespace EvictionFiler.Application.Services
 									Email = t.Email,
 									LanguageId = t.LanguageId,
 							
-
+									RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId,
 									HasPossession = t.HasPossession,
 									HasRegulatedTenancy = t.HasRegulatedTenancy,
 									//Name_Relation = t.Name_Relation,
+									Additionaltenants = t.AdditionalTenant,
 									OtherOccupants = t.OtherOccupants,
 									
 									TenantRecord = t.TenantRecord,
@@ -478,7 +480,7 @@ namespace EvictionFiler.Application.Services
 									//RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
 									SocialServices = t.SocialServices,
 									MonthlyRent = t.MonthlyRent,
-								
+								MoveInDate  = t.MoveInDate,
 									TenantShare = t.TenantShare,
 									ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
 									UnitOrApartmentNumber = t.UnitOrApartmentNumber,
@@ -486,31 +488,31 @@ namespace EvictionFiler.Application.Services
 									IsUnitIllegalId = t.IsUnitIllegalId,
 									BuildinId = building.Id
 								};
-								if (t.occupants != null)
+								if (t.AdditioalTenants != null)
 								{
-									foreach (var o in t.occupants)
+									foreach (var o in t.AdditioalTenants)
 									{
 										if (o.Id == Guid.Empty) // New
 										{
-											var addtionlOccupants = new AdditionalOccupants
-											{
-												Id = Guid.NewGuid(),
-												Name = o.Name,
-												Relation = o.Relation,
-												TenantId = tenant.Id
-											};
-											addoccupantsToAdd.Add(addtionlOccupants);
+                                            var additionaltenants = new AdditioanlTenants
+                                            {
+                                                //Id = o.Id,
+                                                FirstName = o.FirstName,
+                                                LastName = o.LastName,
+                                                TenantId = tenant.Id,
+                                            };
+                                            addtenantsToAdd.Add(additionaltenants);
 
 										}
 										else 
 										{
-											var existingOcc = await _additionalOccupantsRepo.GetAsync(o.Id);
+											var existingOcc = await _additionalTenantsRepo.GetAsync(o.Id);
 											if (existingOcc != null)
 											{
-												existingOcc.Name = o.Name;
-												existingOcc.Relation = o.Relation;
+												existingOcc.FirstName = o.FirstName;
+												existingOcc.LastName = o.LastName;
 												existingOcc.TenantId = tenant.Id;
-												addoccupantsToUpdate.Add(existingOcc);
+                                                addtenantsToupdate.Add(existingOcc);
 
 											}
 											else
@@ -556,10 +558,10 @@ namespace EvictionFiler.Application.Services
 			if (tenantsToUpdate.Any())
 				_tenantRepo.UpdateRange(tenantsToUpdate);
 
-			if (addoccupantsToAdd.Any())
-				await _additionalOccupantsRepo.AddRangeAsync(addoccupantsToAdd);
-			if (addoccupantsToUpdate.Any())
-				_additionalOccupantsRepo.UpdateRange(addoccupantsToUpdate);
+			if (addtenantsToAdd.Any())
+				await _additionalTenantsRepo.AddRangeAsync(addtenantsToAdd);
+			if (addtenantsToupdate.Any())
+				_additionalTenantsRepo.UpdateRange(addtenantsToupdate);
 
 			await _unitOfWork.SaveChangesAsync();
 			return true;

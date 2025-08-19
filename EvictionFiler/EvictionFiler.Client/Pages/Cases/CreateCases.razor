@@ -18,6 +18,7 @@
 @inject IRenewalStatusRepository RenewalStatusRepository
 @inject IUnitIllegalRepository UnitIllegalRepository
 @inject ITenancyTypeRepository TenancyTypeRepository
+@inject IDateRentRepository DateRentRepository
 @inject ILandlordSevice _landlordService
 @inject IBuildingService _buildingService
 @inject ILegalCaseService _legalCaseService
@@ -532,7 +533,13 @@
                                             <div class="row my-2 align-items-center">
                                                 <div class="col-auto fw-semibold">Date rent is due each month/week:</div>
                                                 <div class="col">
-                                                    <InputText class="form-control" />
+                                                    <InputSelect class="form-select" @bind-Value="TenantDetails.RentDueEachMonthOrWeekId">
+                                                        <option value="">-- Select Date --</option>
+                                                        @foreach (var l in DateRentList)
+                                                        {
+                                                            <option value="@l.Id">@l.Name</option>
+                                                        }
+                                                    </InputSelect>
                                                 </div>
                                             </div>
 
@@ -562,7 +569,7 @@
                                                     <div class="row align-items-center">
                                                         <label class="col-auto fw-semibold mb-0">Last Month/Week Rent Paid:</label>
                                                         <div class="col">
-                                                            <InputText class="form-control" @bind-Value="TenantDetails.LastMonthWeekRentPaid" />
+                                                            <InputText class="form-control" @bind-Value="legalcaseDto.LastMonthWeekRentPaid" />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -572,7 +579,7 @@
                                                     <div class="row align-items-center">
                                                         <label class="col-auto fw-semibold mb-0">Total Rent Owed ($):</label>
                                                         <div class="col">
-                                                            <InputNumber class="form-control" @bind-Value="TenantDetails.TotalRentOwed" />
+                                                            <InputNumber class="form-control" @bind-Value="legalcaseDto.TotalRentOwed" />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1055,7 +1062,7 @@
 
                         </div>
 
-                        @* <button type="submit" class="btn bg-gold text-white" style="margin-top:-25px;  display:flex;  float:right">Next →</button> *@
+                          <button type="submit" class="btn bg-gold text-white" style="margin-top:-25px;  display:flex;  float:right">Next →</button> 
 
                     </EditForm>
                 }
@@ -1240,7 +1247,9 @@
                                                 <div class="col-4">
                                                     <div class="row">
                                                         <div class="col-auto fw-semibold">Rent Due (Month/Week):</div>
-                                                       
+                                                       <div class="col">
+                                                            @(DateRentList.FirstOrDefault(x => x.Id == TenantDetails.RentDueEachMonthOrWeekId)?.Name ?? "N/A")
+                                                       </div>
                                                     </div>
                                                 </div>
                                                 <div class="col-4">
@@ -1260,13 +1269,13 @@
                                                 <div class="col-3">
                                                     <div class="row">
                                                         <div class="col-auto fw-semibold">Total Rent Owed ($):</div>
-                                                        <div class="col">@TenantDetails.TotalRentOwed</div>
+                                                        <div class="col">@legalcaseDto.TotalRentOwed</div>
                                                     </div>
                                                 </div>
                                                 <div class="col-5">
                                                     <div class="row">
                                                         <div class="col-auto fw-semibold">Last Rent Paid (Month/Week):</div>
-                                                        <div class="col">@TenantDetails.LastMonthWeekRentPaid</div>
+                                                        <div class="col">@legalcaseDto.LastMonthWeekRentPaid</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1572,7 +1581,7 @@
             @if (currentStep < lastStep)
             {
                 <button class="btn btn-outline-warning" @onclick="ResetStep">Reset</button>
-                <button class="btn bg-gold text-white next-btn" form="ReasonForm"  disabled="@IsNextDisabled">
+                <button class="btn bg-gold text-white next-btn" form="ReasonForm" disabled="@IsNextDisabled">
                     Next →
                 </button>
 
@@ -1630,7 +1639,7 @@
     private List<CaseType> CaseTypeList = new();
     private List<RenewalStatus> RenewalStatusList = new();
     private List<TenancyType> TenancyTypeList = new();
-
+    private List<DateRent> DateRentList = new();
     private List<EditToBuildingDto> selectedBuildings = new();
 
 
@@ -1647,6 +1656,7 @@
         LandLordTypeList = await LandlordTypeRepository.GetAllLandLordType();
         TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
         RenewalStatusList = await RenewalStatusRepository.GetAllRenewalStatus();
+        DateRentList = await DateRentRepository.GetAllDateRent();
         legalcaseDto.ClientId = Guid.Parse(ClientId);
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
         var holdoverCase = CaseTypeList.FirstOrDefault(x => x.Name == "Holdover");
@@ -1779,7 +1789,8 @@ private async Task HandleBuildingInput(ChangeEventArgs e)
                     
                     HasPossession = TenantDetails.HasPossession,
                     HasRegulatedTenancy = TenantDetails.HasRegulatedTenancy,
-                    Name_Relation = TenantDetails.Name_Relation,
+                    // Name_Relation = TenantDetails.Name_Relation,
+                    AdditioalTenants = TenantDetails.AdditioalTenants,
                     OtherOccupants = TenantDetails.OtherOccupants,
                 
                     TenantRecord = TenantDetails.TenantRecord,
