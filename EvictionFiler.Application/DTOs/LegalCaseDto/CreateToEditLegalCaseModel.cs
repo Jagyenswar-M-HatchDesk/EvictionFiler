@@ -73,7 +73,7 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
         public DateOnly? OralEnd { get; set; }
         public Guid? RenewalStatusId { get; set; }
 
-        public List<AdditionalOccupantDto>? AddOccupants { get; set; }
+        public List<AdditionalOccupantDto>? AdditionalOccupants { get; set; }
 
     }
 }

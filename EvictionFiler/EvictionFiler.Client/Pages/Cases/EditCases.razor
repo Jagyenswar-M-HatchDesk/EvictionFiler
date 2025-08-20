@@ -7,6 +7,7 @@
 @using EvictionFiler.Application.DTOs.FormTypeDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
+@using EvictionFiler.Application.DTOs.OccupantDto
 @using EvictionFiler.Application.DTOs.TenantDto
 @using EvictionFiler.Application.Interfaces.IRepository
 @using EvictionFiler.Application.Interfaces.IServices
@@ -21,6 +22,7 @@
 @inject ICasesRepository CasesRepository
 @inject IUnitIllegalRepository UnitIllegalRepository
 @inject IFormTypesRepository FormTypesRepository
+@inject IDateRentRepository DateRentRepository
 @inject IRenewalStatusRepository RenewalStatusRepository
 @inject ITenancyTypeRepository TenancyTypeRepository
 @inject ILandlordSevice _landlordService
@@ -392,6 +394,31 @@
                                     </div>
                                 </div>
 
+                                @if (SelectedCaseTypeName == "NonPayment")
+                                {
+                                    <div class="row my-1">
+                                        <!-- Left Column (Full Name) -->
+                                        <div class="col-6">
+                                            <div class="row">
+                                                <div class="col-auto fw-semibold">Tenant's Phone:</div>
+                                                <div class="col-6">
+                                                    @(!string.IsNullOrWhiteSpace(tenantDto.tenants.Phone) ? tenantDto.tenants.Phone : "N/A")
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Right Column (Building Address) -->
+                                        <div class="col-6">
+
+                                            <div class="row ">
+                                                <div class="col-auto fw-semibold">Tenants's Email:</div>
+                                                <div class="col-4 ">@(!string.IsNullOrWhiteSpace(tenantDto.tenants.Email) ? tenantDto.tenants.Email : "N/A")</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+
                                 <div class="my-2">
 
                                     <div class="row my-1">
@@ -484,8 +511,7 @@
                                     </div>
                                 }
 
-                                <EditForm Model="@legalcaseDto" OnValidSubmit="Next" Id="ReasonForm">
-                                    <DataAnnotationsValidator />
+                            
                                     <div class="my-4">
                                         <div class="row mb-2">
                                             <div class="col-6 fw-semibold">Is there a written Lease??</div>
@@ -520,7 +546,7 @@
                                         </div>
 
                                     </div>
-                                </EditForm>
+                             
 
                                 <div class="row my-4">
                                     <!-- Monthly Rent -->
@@ -541,17 +567,75 @@
                                         <InputDate class="form-control" style="width: 50%;" @bind-Value="tenantDto.DateTenantMoved" />
                                     </div>
                                 </div>
+                                @if (SelectedCaseTypeName == "NonPayment")
+                                {
+                                <div class="row mb-3">
+                                    <div class="col-auto">
+                                        <label class="me-2 required-label">Additional Occupants</label>
+                                    </div>
 
+                                    <div class="col">
+                                        @for (int i = 0; i < tenantDto.AdditionalOccupants.Count; i++)
+                                        {
+                                            var item = tenantDto.AdditionalOccupants[i];
+                                            <div class="row mb-2" @key="i">
+
+                                                <div class="col-auto">
+                                                    <!-- Minus button (only when inputs visible) -->
+                                                    @if (item.IsVisible)
+                                                    {
+                                                        <button type="button" class="btn btn-sm btn-danger"
+                                                                @onclick="() => RemoveTenant(item)">
+                                                            -
+                                                        </button>
+                                                    }
+                                                </div>
+
+                                                @if (item.IsVisible)
+                                                {
+                                                    <!-- Show input fields -->
+                                                    <div class="col-auto">
+                                                        <InputText class="form-control" placeholder="Enter Name"
+                                                                   @bind-Value="item.Name" />
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <InputText class="form-control" placeholder="Enter Relation"
+                                                                   @bind-Value="item.Relation" />
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+
+                                        <!-- Hamesha neeche + button -->
+                                        <div class="row mt-2">
+                                            <div class="col-auto">
+                                                <button type="button" class="btn btn-sm btn-success"
+                                                        @onclick="AddNewTenant">
+                                                    + 
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                }
                                 <div class="card p-4 mb-4 mt-2">
                                     <div class="my-3">
                                         <h5 class="fw-semibold fs-5">Rent Information</h5>
                                     </div>
 
                                     <div class="mx-2">
+
                                         <div class="row my-2 align-items-center">
                                             <div class="col-auto fw-semibold">Date rent is due each month/week:</div>
-                                            <div class="col">
-                                              
+                                            <div class="col-3">
+                                                <InputSelect class="form-select" @bind-Value="tenantDto.RentDueEachMonthOrWeekId">
+                                                    <option value="">-- Select Date --</option>
+                                                    @foreach (var l in DateRentList)
+                                                    {
+                                                        <option value="@l.Id">@l.Name</option>
+                                                    }
+                                                </InputSelect>
                                             </div>
                                         </div>
 
@@ -1143,6 +1227,30 @@
                                     </div>
                                 </div>
 
+                                @if (SelectedCaseTypeName == "NonPayment")
+                                {
+                                    <div class="row my-1">
+                                        <!-- Left Column (Full Name) -->
+                                        <div class="col-6">
+                                            <div class="row">
+                                                <div class="col-auto fw-semibold">Tenant's Phone:</div>
+                                                <div class="col-6">
+                                                    @($"{tenantDto.tenants.Phone}".Trim() ?? "N/A")
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Right Column (Building Address) -->
+                                        <div class="col-6">
+
+                                            <div class="row ">
+                                                <div class="col-auto fw-semibold">Tenants's Email:</div>
+                                                <div class="col-4 ">@(!string.IsNullOrWhiteSpace(tenantDto.tenants.Email) ? tenantDto.tenants.Email : "N/A")</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
                                 <div class="row mb-2 my-2">
                                     <div class="col-4">
                                         <div class="row">
@@ -1230,6 +1338,43 @@
                                     </div>
                                 </div>
 
+                                @if (SelectedCaseTypeName == "NonPayment")
+                                {
+
+                                <div class="row mt-4">
+                                    <div class="col-auto fw-semibold">
+                                        <div class="col-auto">Additional Occupants:</div>
+
+
+                                    </div>
+                                    <div class="col-5">
+                                        @if (tenantDto.AdditionalOccupants.Any(o => o.IsVisible))
+                                        {
+                                            <table class="table table-bordered table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        <th>Relation</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var occ in tenantDto.AdditionalOccupants.Where(o => o.IsVisible))
+                                                    {
+                                                        <tr>
+                                                            <td>@occ.Name</td>
+                                                            <td>@occ.Relation</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        }
+                                        else
+                                        {
+                                            <p class="text-muted">No additional tenants added yet.</p>
+                                        }
+                                    </div>
+                                </div>
+                                }
                             <!-- Rent Information -->
                             <div class="card p-4 mb-4 my-4">
                                 <div class="mb-3">
@@ -1247,9 +1392,9 @@
                                         <div class="col-4">
                                             <div class="row">
                                                 <div class="col-auto fw-semibold">Rent Due (Month/Week):</div>
-                                                <div class="col">
-                                                    
-                                                </div>
+                                                    <div class="col">
+                                                        @(DateRentList.FirstOrDefault(x => x.Id == tenantDto.RentDueEachMonthOrWeekId)?.Name ?? "N/A")
+                                                    </div>
                                             </div>
                                         </div>
 
@@ -1328,6 +1473,9 @@
                                         @fullBuildingAddress
                                 </div>
                             </div>
+
+                          
+
 
                                 <div class="row mb-2 my-4">
                                     <div class="col-4">
@@ -1700,10 +1848,11 @@
     private List<TenancyType> TenancyTypeList = new();
       private List<FormTypes> FormTypeList = new();
     private List<RenewalStatus> RenewalStatusList = new();
+
     private bool isLoading = true;
     private bool isSubmitting = true;
     private List<CaseType> CaseTypeList = new();
-
+    private List<DateRent> DateRentList = new();
     private List<GenrateNoticeModel> caseFormDto = new();
 
 
@@ -1735,10 +1884,13 @@ private async Task LoadCaseForms()
         LandLordTypeList = await LandlordTypeRepository.GetAllLandLordType();
         TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
         RenewalStatusList = await RenewalStatusRepository.GetAllRenewalStatus();
+        DateRentList = await DateRentRepository.GetAllDateRent();
         await Task.Delay(500);
         await LoadDataAsync();
 
         spinnerservice.Hide();
+
+         occupants.Add(new AdditionalOccupantDto());
     }
 
     List<string> stepTitles = new() {
@@ -1746,6 +1898,32 @@ private async Task LoadCaseForms()
 
     };
 
+    private List<AdditionalOccupantDto> occupants = new()
+    {
+        new AdditionalOccupantDto()
+    };
+
+    private void AddNewTenant()
+    {
+        tenantDto.AdditionalOccupants.Add(new AdditionalOccupantDto
+        {
+            IsVisible = true
+        });
+    }
+
+    private void RemoveTenant(AdditionalOccupantDto current)
+    {
+        if (tenantDto.AdditionalOccupants.Contains(current))
+        {
+            tenantDto.AdditionalOccupants.Remove(current);
+        }
+
+        // Agar list empty ho gayi toh ek fresh row add karo
+        if (!tenantDto.AdditionalOccupants.Any())
+        {
+            tenantDto.AdditionalOccupants.Add(new AdditionalOccupantDto { IsVisible = true });
+        }
+    }
 
 
     private async Task OnFormTypeChanged(ChangeEventArgs e)
@@ -1975,7 +2153,7 @@ private async Task LoadCaseForms()
                 // Id = TenantDetails.Id,
                     TenancyTypeId = TenantDetails.TenancyTypeId,
                     RenewalOffer = TenantDetails.RenewalOffer,
-                    // RentDueEachMonthOrWeek = TenantDetails.RentDueEachMonthOrWeek,
+                    RentDueEachMonthOrWeekId = TenantDetails.RentDueEachMonthOrWeekId,
                     SocialServices = TenantDetails.SocialServices,
                     MonthlyRent = TenantDetails.MonthlyRent,
                     LastMonthWeekRentPaid = TenantDetails.LastMonthWeekRentPaid,
@@ -2132,6 +2310,10 @@ private async Task LoadCaseForms()
                 legalcaseDto.WrittenLease = tenantDto.WrittenLease;
                 legalcaseDto.DateTenantMoved = tenantDto.DateTenantMoved;
                 legalcaseDto.RenewalStatusId = tenantDto.RenewalStatusId;
+                legalcaseDto.AdditionalOccupants = tenantDto?.AdditionalOccupants
+    ?.Where(o => !string.IsNullOrWhiteSpace(o.Name) && !string.IsNullOrWhiteSpace(o.Relation))
+    .ToList() ?? new List<AdditionalOccupantDto>();
+
 
                 if (selectedBuildings != null && selectedBuildings.Any())
                 {

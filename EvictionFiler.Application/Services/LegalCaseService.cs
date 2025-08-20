@@ -3,6 +3,7 @@ using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.LegalCaseDto;
+using EvictionFiler.Application.DTOs.OccupantDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
@@ -16,15 +17,19 @@ namespace EvictionFiler.Application.Services
 	public class LegalCaseService : ILegalCaseService
 	{
 		private readonly ICasesRepository _repository;
+		private readonly IAdditionalOccupantsRepository _additionalOccupantsRepo;
 		private readonly IUnitOfWork _unitOfWork;
-		public LegalCaseService(ICasesRepository repository , IUnitOfWork unitOfWork)
+		public LegalCaseService(ICasesRepository repository , IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
 		{
 			_repository = repository;
 			_unitOfWork = unitOfWork;
-		}
+			_additionalOccupantsRepo = additionalOccupantsRepo;
+
+        }
 
 		public async Task<bool> AddLegalCasesAsync(CreateToEditLegalCaseModel legalCase)
 		{
+            var addoccupants = new List<AdditionalOccupants>();
 			var legalCases = new LegalCase
 			{
 				Id = legalCase.Id,
@@ -59,16 +64,36 @@ namespace EvictionFiler.Application.Services
 				Firm = legalCase.Firm,
 				CreatedOn = DateTime.Now,
 				OralStart = legalCase.OralStart,
-				OralEnd = legalCase.OralEnd,	
+				OralEnd = legalCase.OralEnd,
 				WrittenLease = legalCase.WrittenLease,
 				RenewalStatusId = legalCase.RenewalStatusId,
-				DateTenantMoved = legalCase.DateTenantMoved,
-
-
+				DateTenantMoved = legalCase.DateTenantMoved
 			};
 
+                if (legalCase.AdditionalOccupants != null)
+            {
+                foreach (var o in legalCase.AdditionalOccupants)
+                {
+                    var additionaloccu = new AdditionalOccupants
+                    {
+                        //Id = o.Id,
+                        Name = o.Name,
+                        Relation = o.Relation,
+                        LegalCaseId = legalCase.Id,
+                    };
+
+                    addoccupants.Add(additionaloccu);
+                }
+                ;
+
+
+            }
+            ;
+
 			await _repository.AddAsync(legalCases);
-			var result = await _unitOfWork.SaveChangesAsync();
+			await _additionalOccupantsRepo.AddRangeAsync(addoccupants);
+
+            var result = await _unitOfWork.SaveChangesAsync();
 
 			if (result != null)
 			{
@@ -97,6 +122,7 @@ namespace EvictionFiler.Application.Services
         c => c.RenewalStatus,
         c =>c.ReasonHoldover,
 		c =>c.Buildings.State,
+		c=>c.Addoccupants,
 		c =>c.Buildings.Landlord.State,
 		c => c.Buildings.Landlord.LandlordType
 	)
@@ -140,8 +166,19 @@ namespace EvictionFiler.Application.Services
 				OralStart = legalCaseEntity.OralStart,
 				WrittenLease = legalCaseEntity.WrittenLease,
 				RenewalStatusId = legalCaseEntity.RenewalStatusId,
-				DateTenantMoved= legalCaseEntity.DateTenantMoved,
+				DateTenantMoved = legalCaseEntity.DateTenantMoved,
 				Casecode = legalCaseEntity.Casecode,
+				AdditionalOccupants = legalCaseEntity.Addoccupants
+				.Select(o => new AdditionalOccupantDto
+				{
+					Id = o.Id,
+					Name = o.Name,
+					Relation = o.Relation,
+					LegalCaseId = o.LegalCaseId,
+					IsVisible = true
+				}).ToList(),
+
+
 
 				tenants = legalCaseEntity.Tenants == null ? null : new CreateToTenantDto
 				{
@@ -183,53 +220,125 @@ namespace EvictionFiler.Application.Services
 			return dto; 
 		}
 
-		public async Task<bool> UpdateAsync(CreateToEditLegalCaseModel legalCase)
-		{
-			var existing = await _repository.GetAsync(legalCase.Id);
-			if (existing == null) return false;
+        //public async Task<bool> UpdateAsync(CreateToEditLegalCaseModel legalCase)
+        //{
+        //	var existing = await _repository.GetAsync(legalCase.Id);
+        //	if (existing == null) return false;
 
-			existing.TenantId = legalCase.TenantId;
-			existing.ClientId = legalCase.ClientId;
-			existing.ReasonHoldoverId = legalCase.ReasonHoldoverId;
-			existing.ExplainDescription = legalCase.ExplainDescription;
-			existing.ReasonDescription = legalCase.ReasonDescription;
-			existing.IsUnitIllegalId = legalCase.IsUnitIllegalId;
-			existing.TenancyTypeId = legalCase.TenancyTypeId;
-			existing.RenewalOffer = legalCase.RenewalOffer;
-			existing.TenantRecord = legalCase.TenantRecord;
-			existing.HasPossession = legalCase.HasPossession;
-			existing.OtherOccupants = legalCase.OtherOccupants;
-			existing.TenantShare = legalCase.TenantShare;
-			existing.SocialServices = legalCase.SocialServices;
-			existing.LastMonthWeekRentPaid = legalCase.LastMonthWeekRentPaid;
-			existing.IsERAPPaymentReceived = legalCase.IsERAPPaymentReceived;
-			existing.ERAPPaymentReceivedDate = legalCase.ERAPPaymentReceivedDate;
-			existing.RegulationStatusId = legalCase.RegulationStatusId;
-			existing.LandlordTypeId = legalCase.LandlordTypeId;
-			existing.RentDueEachMonthOrWeekId = legalCase.RentDueEachMonthOrWeekId;
-			existing.MonthlyRent = legalCase.MonthlyRent;
-			existing.TotalRentOwed = legalCase.TotalRentOwed;
-			existing.Attrney = legalCase.Attrney;
-			existing.AttrneyContactInfo = legalCase.AttrneyContactInfo;
-			existing.Firm = legalCase.Firm;
-			existing.tenantReceive = legalCase.tenantReceive;
-			existing.CaseTypeId = legalCase.CaseTypeId;
-			existing.OtherPropertiesBuildingId = legalCase.OtherPropertiesBuildingId;
-			existing.CreatedOn = legalCase.CreatedOn;
+        //	existing.TenantId = legalCase.TenantId;
+        //	existing.ClientId = legalCase.ClientId;
+        //	existing.ReasonHoldoverId = legalCase.ReasonHoldoverId;
+        //	existing.ExplainDescription = legalCase.ExplainDescription;
+        //	existing.ReasonDescription = legalCase.ReasonDescription;
+        //	existing.IsUnitIllegalId = legalCase.IsUnitIllegalId;
+        //	existing.TenancyTypeId = legalCase.TenancyTypeId;
+        //	existing.RenewalOffer = legalCase.RenewalOffer;
+        //	existing.TenantRecord = legalCase.TenantRecord;
+        //	existing.HasPossession = legalCase.HasPossession;
+        //	existing.OtherOccupants = legalCase.OtherOccupants;
+        //	existing.TenantShare = legalCase.TenantShare;
+        //	existing.SocialServices = legalCase.SocialServices;
+        //	existing.LastMonthWeekRentPaid = legalCase.LastMonthWeekRentPaid;
+        //	existing.IsERAPPaymentReceived = legalCase.IsERAPPaymentReceived;
+        //	existing.ERAPPaymentReceivedDate = legalCase.ERAPPaymentReceivedDate;
+        //	existing.RegulationStatusId = legalCase.RegulationStatusId;
+        //	existing.LandlordTypeId = legalCase.LandlordTypeId;
+        //	existing.RentDueEachMonthOrWeekId = legalCase.RentDueEachMonthOrWeekId;
+        //	existing.MonthlyRent = legalCase.MonthlyRent;
+        //	existing.TotalRentOwed = legalCase.TotalRentOwed;
+        //	existing.Attrney = legalCase.Attrney;
+        //	existing.AttrneyContactInfo = legalCase.AttrneyContactInfo;
+        //	existing.Firm = legalCase.Firm;
+        //	existing.tenantReceive = legalCase.tenantReceive;
+        //	existing.CaseTypeId = legalCase.CaseTypeId;
+        //	existing.OtherPropertiesBuildingId = legalCase.OtherPropertiesBuildingId;
+        //	existing.CreatedOn = legalCase.CreatedOn;
+        //          existing.OralEnd = legalCase.OralEnd;
+        //          existing.OralStart = legalCase.OralStart;
+        //          existing.WrittenLease = legalCase.WrittenLease;
+        //          existing.DateTenantMoved = legalCase.DateTenantMoved;
+        //          existing.RenewalStatusId = legalCase.RenewalStatusId;
+
+        //          _repository.UpdateAsync(existing);
+        //	 await _unitOfWork.SaveChangesAsync();
+
+        //	return true;
+
+        //}
+
+        public async Task<bool> UpdateAsync(CreateToEditLegalCaseModel legalCase)
+        {
+            var existing = await _repository.GetAsync(legalCase.Id);
+            if (existing == null) return false;
+
+            // Pehle existing legal case fields update karo (already hai)
+            existing.TenantId = legalCase.TenantId;
+            existing.ClientId = legalCase.ClientId;
+            existing.ReasonHoldoverId = legalCase.ReasonHoldoverId;
+            existing.ExplainDescription = legalCase.ExplainDescription;
+            existing.ReasonDescription = legalCase.ReasonDescription;
+            existing.IsUnitIllegalId = legalCase.IsUnitIllegalId;
+            existing.TenancyTypeId = legalCase.TenancyTypeId;
+            existing.RenewalOffer = legalCase.RenewalOffer;
+            existing.TenantRecord = legalCase.TenantRecord;
+            existing.HasPossession = legalCase.HasPossession;
+            existing.OtherOccupants = legalCase.OtherOccupants;
+            existing.TenantShare = legalCase.TenantShare;
+            existing.SocialServices = legalCase.SocialServices;
+            existing.LastMonthWeekRentPaid = legalCase.LastMonthWeekRentPaid;
+            existing.IsERAPPaymentReceived = legalCase.IsERAPPaymentReceived;
+            existing.ERAPPaymentReceivedDate = legalCase.ERAPPaymentReceivedDate;
+            existing.RegulationStatusId = legalCase.RegulationStatusId;
+            existing.LandlordTypeId = legalCase.LandlordTypeId;
+            existing.RentDueEachMonthOrWeekId = legalCase.RentDueEachMonthOrWeekId;
+            existing.MonthlyRent = legalCase.MonthlyRent;
+            existing.TotalRentOwed = legalCase.TotalRentOwed;
+            existing.Attrney = legalCase.Attrney;
+            existing.AttrneyContactInfo = legalCase.AttrneyContactInfo;
+            existing.Firm = legalCase.Firm;
+            existing.tenantReceive = legalCase.tenantReceive;
+            existing.CaseTypeId = legalCase.CaseTypeId;
+            existing.OtherPropertiesBuildingId = legalCase.OtherPropertiesBuildingId;
+            existing.CreatedOn = legalCase.CreatedOn;
             existing.OralEnd = legalCase.OralEnd;
             existing.OralStart = legalCase.OralStart;
             existing.WrittenLease = legalCase.WrittenLease;
             existing.DateTenantMoved = legalCase.DateTenantMoved;
             existing.RenewalStatusId = legalCase.RenewalStatusId;
 
+       
+
+            // Purane occupants delete karo jo DB me the
+            var oldOccupants = await _additionalOccupantsRepo.GetAllAsync(x => x.LegalCaseId == legalCase.Id);
+            foreach (var old in oldOccupants)
+            {
+                await _additionalOccupantsRepo.DeleteAsync(old.Id);
+            }
+
+            // Naye occupants insert karo
+            if (legalCase.AdditionalOccupants != null && legalCase.AdditionalOccupants.Any())
+            {
+                foreach (var occ in legalCase.AdditionalOccupants)
+                {
+                    await _additionalOccupantsRepo.AddAsync(new AdditionalOccupants
+                    {
+                        Id = Guid.NewGuid(),
+                        LegalCaseId = legalCase.Id,
+                        Name = occ.Name,
+                        Relation = occ.Relation
+                    });
+                }
+            }
+
+            // Save changes
             _repository.UpdateAsync(existing);
-			 await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
-			return true;
+            return true;
+        }
 
-		}
 
-		public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id)
 		{
 			var legalCase = await _repository.GetAsync(id);
 			if (legalCase != null)

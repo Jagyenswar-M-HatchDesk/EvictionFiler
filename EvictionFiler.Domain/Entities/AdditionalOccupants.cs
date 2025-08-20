@@ -15,9 +15,9 @@ namespace EvictionFiler.Domain.Entities
 		public string Name { get; set; } = string.Empty;
 		[MaxLength(500)]
 		public string? Relation { get; set; }
-		public Guid? TenantId { get; set; }
-		[ForeignKey("TenantId")]
-		public virtual Tenant? Tenants { get; set; }
+		public Guid LegalCaseId { get; set; }
+		[ForeignKey("LegalCaseId")]
+		public virtual LegalCase? LegalCase { get; set; }
 
 	}
 }

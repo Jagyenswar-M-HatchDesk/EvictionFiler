@@ -95,6 +95,9 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("LegalCaseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -104,9 +107,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<Guid?>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
 
@@ -115,7 +115,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TenantId");
+                    b.HasIndex("LegalCaseId");
 
                     b.ToTable("AdditionalOccupants");
                 });
@@ -1829,11 +1829,13 @@ namespace EvictionFiler.Infrastructure.Migrations
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.AdditionalOccupants", b =>
                 {
-                    b.HasOne("EvictionFiler.Domain.Entities.Tenant", "Tenants")
+                    b.HasOne("EvictionFiler.Domain.Entities.LegalCase", "LegalCase")
                         .WithMany()
-                        .HasForeignKey("TenantId");
+                        .HasForeignKey("LegalCaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Tenants");
+                    b.Navigation("LegalCase");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Building", b =>

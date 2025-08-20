@@ -469,7 +469,7 @@ namespace EvictionFiler.Application.Services
 									RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId,
 									HasPossession = t.HasPossession,
 									HasRegulatedTenancy = t.HasRegulatedTenancy,
-									//Name_Relation = t.Name_Relation,
+								
 									Additionaltenants = t.AdditionalTenant,
 									OtherOccupants = t.OtherOccupants,
 									
@@ -477,7 +477,7 @@ namespace EvictionFiler.Application.Services
 									HasPriorCase = t.HasPriorCase,
 									TenancyTypeId = t.TenancyTypeId,
 									RenewalOffer = t.RenewalOffer,
-									//RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
+									
 									SocialServices = t.SocialServices,
 									MonthlyRent = t.MonthlyRent,
 								MoveInDate  = t.MoveInDate,

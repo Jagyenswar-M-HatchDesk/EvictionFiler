@@ -20,6 +20,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				await SeedPremiseType(context);
 				await SeedCaseTypes(context);
                 await SeedDateRent(context);
+				await SeedTypeOfOwner(context);
                 await context.SaveChangesAsync();
 
                 await SeedRenewalStatus(context);

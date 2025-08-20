@@ -12,7 +12,7 @@ namespace EvictionFiler.Application.DTOs.OccupantDto
 		public string ?Name { get; set; }
 		public string ?Relation { get; set; }
 
-		public Guid? TenantId { get; set; }
-		public bool IsChecked { get; set; }
-	}
+		public Guid? LegalCaseId { get; set; }
+        public bool IsVisible { get; set; } = false;
+    }
 }

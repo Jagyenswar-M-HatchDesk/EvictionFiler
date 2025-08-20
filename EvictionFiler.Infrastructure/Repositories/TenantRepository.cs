@@ -139,8 +139,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 	
 			HasPossession = dto.HasPossession,
 			HasRegulatedTenancy = dto.HasRegulatedTenancy,
-			//Name_Relation = dto.Name_Relation,
-			AdditionalTenant = dto.Additionaltenants,
+	
 			OtherOccupants = dto.OtherOccupants,
 			
 			TenantRecord = dto.TenantRecord,
