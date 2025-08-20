@@ -24,5 +24,18 @@ namespace EvictionFiler.Infrastructure.Repositories
 		{
 			return await _context.MstFormTypes.ToListAsync();
 		}
-	}
+
+        public async Task<List<FormTypes>> GetFormTypesByCaseTypeAsync(Guid caseTypeId)
+        {
+            return await _context.MstFormTypes
+                .Where(f => f.CaseTypeId == caseTypeId)
+                .Select(f => new FormTypes
+                {
+                    Id = f.Id,
+                    Name = f.Name
+                })
+                .ToListAsync();
+        }
+
+    }
 }

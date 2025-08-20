@@ -102,8 +102,8 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			return new List<FormTypes>
 			{
 				new FormTypes() { Name = "90 Days Notice" , CaseTypeName = "HoldOver" , HTML=""},
-				new FormTypes() { Name = "5 Days Notice" , CaseTypeName = "HoldOver" , HTML=""},
-				new FormTypes() { Name = "30 Days Notice" , CaseTypeName = "NonPayment", HTML=""},
+				new FormTypes() { Name = "5 Days Notice" , CaseTypeName = "NonPayment" , HTML=""},
+				new FormTypes() { Name = "14 Days Notice" , CaseTypeName = "NonPayment", HTML=""},
 				
 			};
 		}

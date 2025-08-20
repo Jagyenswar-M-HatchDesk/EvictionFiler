@@ -10,5 +10,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
 	public interface IFormTypesRepository
 	{
 		Task<List<FormTypes>> GetAllFormTYpes();
-	}
+		Task<List<FormTypes>> GetFormTypesByCaseTypeAsync(Guid caseTypeId);
+
+    }
 }

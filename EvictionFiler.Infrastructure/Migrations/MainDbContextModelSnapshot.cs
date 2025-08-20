@@ -1830,7 +1830,7 @@ namespace EvictionFiler.Infrastructure.Migrations
             modelBuilder.Entity("EvictionFiler.Domain.Entities.AdditionalOccupants", b =>
                 {
                     b.HasOne("EvictionFiler.Domain.Entities.LegalCase", "LegalCase")
-                        .WithMany()
+                        .WithMany("Addoccupants")
                         .HasForeignKey("LegalCaseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2142,6 +2142,11 @@ namespace EvictionFiler.Infrastructure.Migrations
             modelBuilder.Entity("EvictionFiler.Domain.Entities.LandLord", b =>
                 {
                     b.Navigation("Buildings");
+                });
+
+            modelBuilder.Entity("EvictionFiler.Domain.Entities.LegalCase", b =>
+                {
+                    b.Navigation("Addoccupants");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Tenant", b =>

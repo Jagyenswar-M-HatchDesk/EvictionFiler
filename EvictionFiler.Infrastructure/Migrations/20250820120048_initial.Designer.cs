@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    [Migration("20250819121215_initial ")]
+    [Migration("20250820120048_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -1833,7 +1833,7 @@ namespace EvictionFiler.Infrastructure.Migrations
             modelBuilder.Entity("EvictionFiler.Domain.Entities.AdditionalOccupants", b =>
                 {
                     b.HasOne("EvictionFiler.Domain.Entities.LegalCase", "LegalCase")
-                        .WithMany()
+                        .WithMany("Addoccupants")
                         .HasForeignKey("LegalCaseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2145,6 +2145,11 @@ namespace EvictionFiler.Infrastructure.Migrations
             modelBuilder.Entity("EvictionFiler.Domain.Entities.LandLord", b =>
                 {
                     b.Navigation("Buildings");
+                });
+
+            modelBuilder.Entity("EvictionFiler.Domain.Entities.LegalCase", b =>
+                {
+                    b.Navigation("Addoccupants");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Tenant", b =>

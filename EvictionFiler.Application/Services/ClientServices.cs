@@ -353,14 +353,7 @@ namespace EvictionFiler.Application.Services
 			var addtenantsToAdd = new List<AdditioanlTenants>();
 			var addtenantsToupdate = new List<AdditioanlTenants>();
 
-			//var lastLandlordCode = await _landlordrepo.GetLastLandLordCodeAsync();
-			//int nextLandlordNumber = string.IsNullOrEmpty(lastLandlordCode) ? 1 : int.Parse(lastLandlordCode[2..]) + 1;
-
-			//var lastBuildingCode = await _buildingrepo.GetLastBuildingCodeAsync();
-			//int nextBuildingNumber = string.IsNullOrEmpty(lastBuildingCode) ? 1 : int.Parse(lastBuildingCode[2..]) + 1;
-
-			//var lastTenantCode = await _tenantRepo.GetLasttenantCodeAsync();
-			//int nextTenantNumber = string.IsNullOrEmpty(lastTenantCode) ? 1 : int.Parse(lastTenantCode[2..]) + 1;
+			
 
 
 
