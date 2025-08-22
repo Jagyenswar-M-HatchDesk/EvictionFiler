@@ -268,14 +268,22 @@
                                     <label class=" col-form-label fw-semibold text-navy required-label">Case Type</label>
                                 </div>
                                 <div class="col-8">
-                                    <select class="form-select w-50" @bind="legalcaseDto.CaseTypeId">
-                                        >
-                                      
+                                  @*   <select class="form-select w-50" @bind="legalcaseDto.CaseTypeId" @onchange="OnCaseTypeChanged">
+                                        @foreach (var caseType in CaseTypeList)
+                                        {
+                                            <option value="@caseType.Id">@caseType.Name</option>
+                                        }
+                                    </select> *@
+
+                                    <select class="form-select w-50"
+                                            value="@legalcaseDto.CaseTypeId"
+                                            @onchange="OnCaseTypeChanged">
                                         @foreach (var caseType in CaseTypeList)
                                         {
                                             <option value="@caseType.Id">@caseType.Name</option>
                                         }
                                     </select>
+
                                 </div>
                             </div>
                         </div>
@@ -1706,7 +1714,7 @@
                                 <div class="col d-flex align-items-center gap-3">
                                     <select class="form-select w-auto" @bind="noticeModel.FormTypeId">
                                         <option value="">-- Select Form Type --</option>
-                                        @foreach (var formType in FormTypeList)
+                                        @foreach (var formType in FilteredFormTypeList)
                                         {
                                             <option value="@formType.Id">@formType.Name</option>
                                         }
@@ -1726,6 +1734,9 @@
                 </div>
 
                 <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
+                    <h5 class="text-center text-navy fs-3 fw-bold">Case Activities</h5>
+                    <hr class="border-gold mb-4" />
+
                     <table class="table table-bordered mt-4" style="min-width: 800px;">
                         <thead class="table-light">
                             <tr>
@@ -1849,7 +1860,7 @@
     private List<RegulationStatus> RegulationList = new();
     private List<LandlordType> LandLordTypeList = new();
     private List<TenancyType> TenancyTypeList = new();
-      private List<FormTypes> FormTypeList = new();
+    private List<FormTypes> FilteredFormTypeList = new();
     private List<RenewalStatus> RenewalStatusList = new();
 
     private bool isLoading = true;
@@ -1900,6 +1911,28 @@ private async Task LoadCaseForms()
         "Edit", "Review & Submit" , "Genrate Forms"
 
     };
+
+
+    private async Task OnCaseTypeChanged(ChangeEventArgs e)
+    {
+        if (Guid.TryParse(e.Value?.ToString(), out var selectedId))
+        {
+            legalcaseDto.CaseTypeId = selectedId;
+
+            // Sirf is case type ke form types API se laa rahe hain
+            FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(selectedId);
+
+            // Reset selected form type
+            noticeModel.FormTypeId = Guid.Empty;
+
+            // UI refresh
+            StateHasChanged();
+        }
+    }
+
+
+
+
 
     private List<AdditionalOccupantDto> occupants = new()
     {
@@ -1980,44 +2013,6 @@ private async Task LoadCaseForms()
         spinnerservice.Hide();
     }
 
-
-
-    @* private async Task LoadDataAsync()
-    {
-
-        legalcaseDto = await _legalCaseService.GetByIdAsync(caseId);
-
-
-        tenantDto = legalcaseDto;
-        tenantDto.SelectedTenantId = legalcaseDto.TenantId;
-
-
-        selectedBuildings = legalcaseDto.OtherPropertiesBuildings?.ToList() 
-                            ?? new List<EditToBuildingDto>();
-
-        CaseTypeList = await CaseTypeRepository.GetAllCaseType() ?? new List<CaseType>();
-
-
-        if (caseId == Guid.Empty) 
-        {
-            var holdoverCase = CaseTypeList.FirstOrDefault(x => x.Name == "Holdover");
-            if (holdoverCase != null)
-            {
-                legalcaseDto.CaseTypeId = holdoverCase.Id;
-            }
-        }
-
-        if ( caseId != Guid.Empty)
-        {
-            CurrentCaseId = caseId;
-
-            // Agar aap case ka data la rahe ho to yaha fetch karo
-            var caseDetails = await CasesRepository.GetCaseByIdAsync(caseId);
-            // noticeModel ke liye default values set kar sakte ho
-        }
-
-        isTenantSelected = true;
-    } *@
 
 
     private async Task LoadDataAsync()
@@ -2334,7 +2329,9 @@ private async Task LoadCaseForms()
             if (result)
             {
                 currentStep++;
-                FormTypeList = await FormTypesRepository.GetAllFormTYpes();
+                FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId.Value);
+
+                // FormTypeList = await FormTypesRepository.GetAllFormTYpes();
                 await LoadCaseForms();
 
             }
