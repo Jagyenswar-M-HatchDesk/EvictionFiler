@@ -1,0 +1,122 @@
+﻿@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.FormTypeDto
+@using EvictionFiler.Application.DTOs.UserDto
+@using EvictionFiler.Application.Interfaces.IRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Domain.Entities.Master
+@using EvictionFiler.Client.SpinnerService
+@using Syncfusion.Blazor.RichTextEditor
+@using Radzen.Blazor
+
+@inject ICaseTypeRepository CaseTypeRepository
+@inject IManageFormService ManageFormService
+@inject SpinnerService spinnerservice
+@inject NavigationManager Navigation
+
+<style>
+    .offcanvas.show {
+        transform: translateX(0%);
+    }
+
+    .offcanvas {
+        transform: translateX(100%);
+        width: 500px !important;
+    }
+
+    .color-text {
+        color: #1F365D;
+    }
+
+    .required-label::after {
+        content: " *";
+        color: red;
+    }
+</style>
+
+<div class="offcanvas offcanvas-end show border-start shadow bg-white"
+     tabindex="-1" id="createClient"
+     aria-labelledby="createUserLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="createUserLabel">Add New Form</h5>
+        <button type="button" class="btn-close text-reset" @onclick="HideAsync"></button>
+    </div>
+
+    <div class="offcanvas-body">
+        <EditForm Model="@createForm" OnValidSubmit="SubmitFormAsync">
+            <DataAnnotationsValidator />
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label color-text required-label">Form type</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
+                        <InputText class="form-control" @bind-Value="createForm.Name" placeholder="Enter Form Name" />
+                    </div>
+                    <ValidationMessage For="@(() => createForm.Name)" />
+                </div>
+
+                <div class="mb-4 col-md-6">
+                    <label class="form-label color-text required-label">Case type</label>
+                    <select class="form-select" @bind="createForm.CaseTypeId">
+                        @foreach (var caseType in CaseTypeList)
+                        {
+                            <option value="@caseType.Id">@caseType.Name</option>
+                        }
+                    </select>
+                    <ValidationMessage For="@(() => createForm.CaseTypeId)" />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <label class="form-label color-text">HTML</label>
+                  @*   <RadzenHtmlEditor @bind-Value="createForm.HTML"
+                                      Style="height: 300px; width: 100%;" /> *@
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa fa-code color-text"></i></span>
+                        <InputTextArea class="form-control" @bind-Value="createForm.HTML" placeholder="Write Your Html" />
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter] public FormAddEditViewModelDto createForm { get; set; } = new();
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private List<CaseType> CaseTypeList = new();
+    private bool IsVisible { get; set; } = false;
+    private string content = "<p>Initial content</p>";
+
+    protected override async Task OnInitializedAsync()
+    {
+        CaseTypeList = await CaseTypeRepository.GetAllCaseType();
+    }
+
+    public async Task HideAsync()
+    {
+        await OnClose.InvokeAsync();
+        StateHasChanged();
+    }
+
+    private async Task SubmitFormAsync()
+    {
+        spinnerservice.Show();
+
+        if (createForm == null)
+            return;
+
+        var isSaved = await ManageFormService.CreateForm(createForm);
+        if (isSaved)
+        {
+            Navigation.NavigateTo("/manage-forms?success=true", true);
+        }
+    }
+}

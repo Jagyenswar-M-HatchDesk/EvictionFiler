@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Domain.Entities.Master;
+﻿using EvictionFiler.Application.Interfaces.IRepository.Base;
+using EvictionFiler.Domain.Entities.Master;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Interfaces.IRepository
 {
-    public interface IManageFormRepository
+    public interface IManageFormRepository : IRepository<FormTypes>
     {
         Task<List<FormTypes>> GetAllForm();
     }

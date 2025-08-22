@@ -220,51 +220,7 @@ namespace EvictionFiler.Application.Services
 			return dto; 
 		}
 
-        //public async Task<bool> UpdateAsync(CreateToEditLegalCaseModel legalCase)
-        //{
-        //	var existing = await _repository.GetAsync(legalCase.Id);
-        //	if (existing == null) return false;
-
-        //	existing.TenantId = legalCase.TenantId;
-        //	existing.ClientId = legalCase.ClientId;
-        //	existing.ReasonHoldoverId = legalCase.ReasonHoldoverId;
-        //	existing.ExplainDescription = legalCase.ExplainDescription;
-        //	existing.ReasonDescription = legalCase.ReasonDescription;
-        //	existing.IsUnitIllegalId = legalCase.IsUnitIllegalId;
-        //	existing.TenancyTypeId = legalCase.TenancyTypeId;
-        //	existing.RenewalOffer = legalCase.RenewalOffer;
-        //	existing.TenantRecord = legalCase.TenantRecord;
-        //	existing.HasPossession = legalCase.HasPossession;
-        //	existing.OtherOccupants = legalCase.OtherOccupants;
-        //	existing.TenantShare = legalCase.TenantShare;
-        //	existing.SocialServices = legalCase.SocialServices;
-        //	existing.LastMonthWeekRentPaid = legalCase.LastMonthWeekRentPaid;
-        //	existing.IsERAPPaymentReceived = legalCase.IsERAPPaymentReceived;
-        //	existing.ERAPPaymentReceivedDate = legalCase.ERAPPaymentReceivedDate;
-        //	existing.RegulationStatusId = legalCase.RegulationStatusId;
-        //	existing.LandlordTypeId = legalCase.LandlordTypeId;
-        //	existing.RentDueEachMonthOrWeekId = legalCase.RentDueEachMonthOrWeekId;
-        //	existing.MonthlyRent = legalCase.MonthlyRent;
-        //	existing.TotalRentOwed = legalCase.TotalRentOwed;
-        //	existing.Attrney = legalCase.Attrney;
-        //	existing.AttrneyContactInfo = legalCase.AttrneyContactInfo;
-        //	existing.Firm = legalCase.Firm;
-        //	existing.tenantReceive = legalCase.tenantReceive;
-        //	existing.CaseTypeId = legalCase.CaseTypeId;
-        //	existing.OtherPropertiesBuildingId = legalCase.OtherPropertiesBuildingId;
-        //	existing.CreatedOn = legalCase.CreatedOn;
-        //          existing.OralEnd = legalCase.OralEnd;
-        //          existing.OralStart = legalCase.OralStart;
-        //          existing.WrittenLease = legalCase.WrittenLease;
-        //          existing.DateTenantMoved = legalCase.DateTenantMoved;
-        //          existing.RenewalStatusId = legalCase.RenewalStatusId;
-
-        //          _repository.UpdateAsync(existing);
-        //	 await _unitOfWork.SaveChangesAsync();
-
-        //	return true;
-
-        //}
+   
 
         public async Task<bool> UpdateAsync(CreateToEditLegalCaseModel legalCase)
         {

@@ -797,7 +797,7 @@ aria-labelledby="createUserLabel">
 
                             <div class="col-md-3">
                                 <label class="required-label">Building</label>
-                                <InputSelect class="form-select" @bind-Value="tenant.BuildingId" @onchange="@(e => OnBuildingChanged(e))">
+                                <InputSelect class="form-select" @bind-Value="tenant.BuildingId" @bind-Value:after="OnBuildingChanged">
                                     <option value="">-- Select Building --</option>
                                     @foreach (var apartment in apartmentList)
                                     {
@@ -945,7 +945,7 @@ aria-labelledby="createUserLabel">
 
                          
                             <div class="col-md-4">
-                                <label>Units Illegal</label>
+                                <label class="required-label">Units Illegal</label>
                                 <InputSelect class="form-select" @bind-Value="tenant.IsUnitIllegalId">
                                     <option value="">-- Select Units --</option>
                                     @foreach (var l in IsUnitIllegalList)
@@ -958,7 +958,7 @@ aria-labelledby="createUserLabel">
 
                         </div>
 
-                       @*  <div class="row mb-3">
+                        <div class="row mb-3">
                             <div class="col-auto">
                                 <label class="me-2 required-label">Building Address</label>
                             </div>
@@ -967,7 +967,7 @@ aria-labelledby="createUserLabel">
 
                             </div>
 
-                            </div> *@
+                            </div>
 
                         <div class="row mb-3">
                             <div class="col-auto">
@@ -985,7 +985,7 @@ aria-labelledby="createUserLabel">
                                             <!-- Sirf last row me + button -->
                                             @if (i == occupants.Count - 1)
                                             {
-                                                <button type="button" class="btn btn-sm btn-success me-1"
+                                                <button type="button" class="btn btn-sm bg-navy text-white me-1"
                                                         @onclick="() => AddTenant(item)" disabled="@item.IsVisible">
                                                     +
                                                 </button>
@@ -1341,23 +1341,23 @@ aria-labelledby="createUserLabel">
 
     }
 
-    private async Task OnBuildingChanged(ChangeEventArgs e)
+    private async Task OnBuildingChanged()
     {
-        if (Guid.TryParse(e.Value?.ToString(), out Guid buildingId))
-        {
-            tenant.BuildingId = buildingId;
+        // if (Guid.TryParse(e.Value?.ToString(), out Guid buildingId))
+        // {
+        //tenant.BuildingId = buildingId;
 
-       
-            await LoadCompleteAddress(buildingId);
 
-            StateHasChanged();
-        }
+        await LoadCompleteAddress((Guid)tenant.BuildingId!);
+
+        StateHasChanged();
+        // }
     }
 
 
-    private async Task LoadCompleteAddress(Guid buildingId)
+    private async Task LoadCompleteAddress(Guid selectedId)
     {
-        var building = await _apartmentService.GetByIdAsync(buildingId);
+        var building = apartmentList.Where(x => x.Id== selectedId).FirstOrDefault();
 
         if (building != null)
         {
@@ -1369,6 +1369,42 @@ aria-labelledby="createUserLabel">
         }
     }
 
+    private Task SaveBuildingAsync()
+
+    {
+        if (building.Id == Guid.Empty)
+        {
+            building.Id = Guid.NewGuid();
+        }
+
+        building.PremiseTypeName = premiseTypesList
+           .FirstOrDefault(x => x.Id == building.PremiseTypeId)?.Name ?? "";
+
+        building.StateName = StatesList
+            .FirstOrDefault(x => x.Id == building.StateId)?.Name ?? "";
+
+        building.RegulationStatusName = RegulationList
+       .FirstOrDefault(x => x.Id == building.RegulationStatusId)?.Name ?? "";
+        int nextNumber = 0;
+        if (LatestBuildingCode != null)
+        {
+            nextNumber = int.Parse(LatestBuildingCode[2..]) + 1;
+
+        }
+        else
+        {
+            nextNumber = 1;
+        }
+        LatestBuildingCode = $"BB{nextNumber.ToString().PadLeft(10, '0')}";
+
+        building.BuildingCode = LatestBuildingCode;
+
+
+        apartmentList.Add(building);
+        building = new();
+        showBuildingForm = false;
+        return Task.CompletedTask;
+    }
    
 
     private Task SaveTenantAsync()
@@ -1675,42 +1711,7 @@ aria-labelledby="createUserLabel">
 
 
 
-    private Task SaveBuildingAsync()
 
-    {
-        if (building.Id == Guid.Empty)
-        {
-            building.Id = Guid.NewGuid();
-        }
-
-        building.PremiseTypeName = premiseTypesList
-           .FirstOrDefault(x => x.Id == building.PremiseTypeId)?.Name ?? "";
-
-        building.StateName = StatesList
-            .FirstOrDefault(x => x.Id == building.StateId)?.Name ?? "";
-
-        building.RegulationStatusName = RegulationList
-       .FirstOrDefault(x => x.Id == building.RegulationStatusId)?.Name ?? "";
-        int nextNumber = 0;
-        if (LatestBuildingCode != null)
-        {
-            nextNumber = int.Parse(LatestBuildingCode[2..]) + 1;
-
-        }
-        else
-        {
-            nextNumber = 1;
-        }
-        LatestBuildingCode = $"BB{nextNumber.ToString().PadLeft(10, '0')}";
-
-        building.BuildingCode = LatestBuildingCode;
-      
-
-        apartmentList.Add(building);
-        building = new();
-        showBuildingForm = false;
-        return Task.CompletedTask;
-    }
 
 
     private async Task SubmitClientAsync()

@@ -1,6 +1,7 @@
 ﻿using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
+using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,10 +11,10 @@ using System.Threading.Tasks;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
-    public class ManageFormRepository : IManageFormRepository
+    public class ManageFormRepository : Repository<FormTypes>,IManageFormRepository
     {
         private readonly MainDbContext _context;
-        public ManageFormRepository(MainDbContext context)
+        public ManageFormRepository(MainDbContext context) : base(context)
         { 
             _context = context;
         }

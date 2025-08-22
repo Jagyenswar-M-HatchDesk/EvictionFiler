@@ -1,0 +1,127 @@
+﻿@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.FormTypeDto
+@using EvictionFiler.Application.DTOs.UserDto
+@using EvictionFiler.Application.Interfaces.IRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Domain.Entities.Master
+@using EvictionFiler.Client.SpinnerService
+
+@inject ICaseTypeRepository CaseTypeRepository
+@inject IManageFormService ManageFormService
+@inject SpinnerService spinnerservice
+@inject NavigationManager Navigation
+
+<style>
+    .offcanvas.show {
+        transform: translateX(0%);
+    }
+
+    .offcanvas {
+        transform: translateX(100%); 
+        width: 500px !important;
+    }
+
+    .color-text {
+        color: #1F365D;
+    }
+
+    .required-label::after {
+        content: " *";
+        color: red;
+    }
+
+</style>
+
+<div class="offcanvas offcanvas-end show border-start shadow bg-white"
+     tabindex="-1" id="createClient"
+     aria-labelledby="createUserLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="createUserLabel">Edit Form</h5>
+        <button type="button" class="btn-close text-reset" @onclick="HideAsync"></button>
+    </div>
+
+    <div class="offcanvas-body">
+        <EditForm Model="@editForm" OnValidSubmit="SubmitFormAsync">
+            <DataAnnotationsValidator />
+         
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label color-text required-label">Form type</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
+                        <InputText class="form-control" @bind-Value="editForm.Name" placeholder="Enter Form Name" />
+                    </div>
+                    <ValidationMessage For="@(() => editForm.Name)" />
+                </div>
+
+
+                <div class="mb-4 col-md-6">
+                    <label class="form-label color-text required-label">Case type</label>
+                    <select class="form-select" @bind="editForm.CaseTypeId">
+
+                        @foreach (var caseType in CaseTypeList)
+                        {
+                            <option value="@caseType.Id">@caseType.Name</option>
+                        }
+                    </select>
+                    <ValidationMessage For="@(() => editForm.CaseTypeId)" />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <label class="form-label color-text">HTML</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa fa-code color-text"></i></span>
+                        <InputTextArea class="form-control" @bind-Value="editForm.HTML" placeholder="Write Your Html" />
+                    </div>
+                </div>
+               
+            </div>
+
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary btn-lg" >Submit</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public FormAddEditViewModelDto editForm { get; set; } = new();
+    [Parameter] public EventCallback OnClose { get; set; }
+    private List<CaseType> CaseTypeList = new();
+    private bool IsVisible { get; set; } = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+   
+        CaseTypeList = await CaseTypeRepository.GetAllCaseType();
+
+    }
+
+    public async Task HideAsync()
+    {
+        await OnClose.InvokeAsync();
+        StateHasChanged();
+    }
+
+
+    private async Task SubmitFormAsync()
+    {
+        spinnerservice.Show();
+        if (editForm == null)
+            return;
+
+        // Save the full nested object
+        var isSaved = await ManageFormService.UpdateFormAsync(editForm);
+        if (isSaved)
+        {
+            Navigation.NavigateTo("/manage-forms?success=true", true);
+        }
+    }
+}
+

@@ -1,4 +1,3 @@
-using System.Text;
 using BlazorDownloadFile;
 using EvictionFiler.Application;
 using EvictionFiler.Application.DTOs;
@@ -19,7 +18,10 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Radzen;
 using Syncfusion.Blazor;
+using System.Text;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,6 +45,9 @@ builder.Services.AddIdentity<User, Role>(options =>
 builder.Services.AddBlazorDownloadFile();
 
 
+
+
+
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddDbContext<MainDbContext>(
 	options => options.UseSqlServer(
@@ -51,6 +56,11 @@ builder.Services.AddDbContext<MainDbContext>(
 	)
 
 );
+builder.Services.AddScoped<DialogService>();
+builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<TooltipService>();
+builder.Services.AddScoped<ContextMenuService>();
+
 
 builder.Services.AddScoped<IUserservices, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -78,6 +88,7 @@ builder.Services.AddScoped<ITenancyTypeRepository, TenancyTypeRepository>();
 builder.Services.AddScoped<IFormTypesRepository, FormTypesRepository>();
 builder.Services.AddScoped<IRenewalStatusRepository, RenewalStatusRepository>();
 builder.Services.AddScoped<IReasonHoldoverRepository, ReasonHoldoverRepository>();
+builder.Services.AddScoped<IManageFormRepository, ManageFormRepository>();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<JwtAuthStateProvider>();
@@ -89,6 +100,7 @@ builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
 builder.Services.AddScoped<IUserservices , UserService>();
 builder.Services.AddScoped<IClientService , ClientServices>();
 builder.Services.AddScoped<ILandlordSevice  , LandlordService>();
+builder.Services.AddScoped<IManageFormService, ManageFormService>();
 builder.Services.AddScoped<IBuildingService , BuildingService>();
 builder.Services.AddScoped<ITenantService, TenantService>();
 builder.Services.AddScoped<ICaseFormService, CaseFormService>();

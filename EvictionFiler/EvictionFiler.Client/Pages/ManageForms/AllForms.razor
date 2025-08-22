@@ -1,10 +1,18 @@
 ﻿@page "/manage-forms"
 @using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.FormTypeDto
+@using EvictionFiler.Application.DTOs.PaginationDto
 @using EvictionFiler.Application.DTOs.UserDto
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Client.Pages.User
 @using EvictionFiler.Domain.Entities
 @inject IUserservices _userService
+@using EvictionFiler.Client.SpinnerService
+@inject SpinnerService Spinnerservice
+@inject NavigationManager navManager
+@inject IManageFormService ManageFormService
+
+
 <PageTitle>Manage Forms</PageTitle>
 
 <!-- Bootstrap CSS -->
@@ -148,7 +156,7 @@
         <!-- Search Filters -->
         <div class="g-2 mb-3 d-flex justify-content-between align-items-center">
             <!-- Four default search boxes -->
-            <button class="btn btn-primary" @onclick="AddUser">Add New</button>
+            <button class="btn btn-primary" @onclick="ShowCreateform">Add New</button>
             <div class="position-relative w-50">
                 <input class="form-control border border-primary text-navy" placeholder="Search.." @bind="searchTerm" @bind:event="oninput" />
                 <button class="search-btn" type="button">
@@ -171,27 +179,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @* @if (caseFormDto != null && caseFormDto.Any())
+                    @if (pagedforms != null && pagedforms.Items.Any())
                     {
                         int index = 1;
-                        @foreach (var form in caseFormDto)
+                        @foreach (var form in pagedforms.Items)
                         {
                             <tr>
                                 <td>@index</td>
-                                <td>@form.FormTypeName</td>
+                                <td>@form.Name</td>
+                                <td>@form.CaseTypeName</td>
                                 <td>@form.CreatedOn.ToString("dd/MM/yyyy")</td>
-                                <td>
-                                    <!-- View Icon -->
-                                    <button class="btn btn-link p-0" title="View"
-                                            @onclick="@(() => ViewPdf(form.File))">
-                                        <i class="fa fa-eye text-primary" style="font-size:18px;"></i>
-                                    </button>
-
-
-                                    <!-- Download Icon -->
-                                    <button class="btn btn-link p-0" title="Download" @onclick="() => DownloadPdf(form.Id)" style="margin-left:10px;">
-                                        <i class="fa fa-download text-success" style="font-size:18px;"></i>
-                                    </button>
+                                <td class="sticky">
+                                    <i class="fa-solid fa-pen-to-square text-navy me-3 " @onclick="() => ShowAddEditForm(form.Id)" style="cursor: pointer;" title="Edit"></i>
+                                    <i class="fa-solid fa-trash-can text-danger " @onclick=" ()=>DeleteForm(form.Id.Value)" style="cursor: pointer;" title="Delete"></i>
                                 </td>
                             </tr>
                             index++;
@@ -202,83 +202,170 @@
                         <tr>
                             <td colspan="4" class="text-muted text-center">No notices generated yet.</td>
                         </tr>
-                    } *@
+                    } 
                 </tbody>
             </table>
         </div>
 
         <!-- Pagination -->
-        <div class="d-flex justify-content-between mt-3">
-            <small>Showing 1 to 10 of 11 entries</small>
-            <nav>
-                <ul class="pagination mb-0">
-                    <li class="page-item disabled"><a class="page-link" href="#">←</a></li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">→</a></li>
-                </ul>
-            </nav>
-        </div>
+        @if (pagedforms != null && pagedforms.TotalCount > 0)
+        {
+            <div class="d-flex justify-content-between mt-3">
+                <small>
+                    Showing @(((currentPage - 1) * pageSize) + 1)
+                    to @(Math.Min(currentPage * pageSize, pagedforms.TotalCount))
+                    of @pagedforms.TotalCount entries
+                </small>
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(currentPage - 1)">←</button>
+                        </li>
+                        @for (int i = 1; i <= Math.Ceiling((double)pagedforms.TotalCount / pageSize); i++)
+                        {
+                            var pageNumber = i;
+                            <li class="page-item @(pageNumber == currentPage ? "active" : "")">
+                                <button class="page-link" @onclick="() => ChangePage(pageNumber)">@pageNumber</button>
+                            </li>
+                        }
+                        <li class="page-item @(currentPage == Math.Ceiling((double)pagedforms.TotalCount / pageSize) ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(currentPage + 1)">→</button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+
 
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
-    <CreateUsers @ref="createUserRef" Submit="Handle" />
+       @if (_showCreateForm)
+    {
+        <CreateForm createForm="FormDto" OnClose="HandleCloseCreateform" />
+    }
+
+    @if (_showEditForm)
+    {
+        <EditForms editForm="FormDto" OnClose="HandleCloseEditForm" />
+    }
 </body>
 
 
 @code {
-    private string searchTerm = string.Empty;
 
+    private bool _showCreateForm = false;
+    private bool _showEditForm = false;
+    private Guid? formIdForEdit;
+    private FormAddEditViewModelDto FormDto = new();
+    private string successMessage;
+    private int currentPage = 1;
+    private int pageSize = 10;
+    private string searchTerm = "";
+    private PaginationDto<FormAddEditViewModelDto> pagedforms;
 
-    private CreateUsers createUserRef;
-
-    private async Task AddUser()
-    {
-        var modal = new RegisterDto();
-        createUserRef.Show(modal);
-
-        var alluser = _userService.GetAllUserAsync();
-    }
-    private CancellationTokenSource _cts;
-
-    public async Task Handle()
-    {
-        // Your existing DB logic here
-        _cts?.Cancel(); // cancel previous call
-        _cts = new CancellationTokenSource();
-        var token = _cts.Token;
-        await Task.Delay(1000, token);
-        createUserRef.Hide();
-        allUsers = await _userService.GetAllUserAsync();
-
-        StateHasChanged();
-    }
-    private IEnumerable<User> allUsers = new List<User>();
-
-    private IEnumerable<User> cases =>
-       string.IsNullOrWhiteSpace(searchTerm)
-       ? allUsers
-       : allUsers.Where(c =>
-           (!string.IsNullOrWhiteSpace(c.FirstName) && c.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
-           (!string.IsNullOrWhiteSpace(c.LastName) && c.LastName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
-           (!string.IsNullOrWhiteSpace(c.Email) && c.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
-           (!string.IsNullOrWhiteSpace(c.PhoneNumber) && c.PhoneNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
     protected override async Task OnInitializedAsync()
     {
-        await GetAllCases();
+        Spinnerservice.Show();
+        //isLoading = true;
+        var uri = new Uri(navManager.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.TryGetValue("success", out var isSuccess) && isSuccess == "true")
+        {
+            successMessage = "Form  submitted successfully!";
+            StateHasChanged();
+
+            await Task.Delay(2000);
+            successMessage = string.Empty;
+            StateHasChanged();
+
+            navManager.NavigateTo("/manage-forms", forceLoad: false);
+        }
+
+        // ✅ Edit success message
+        else if (query.TryGetValue("edit", out var isEdit) && isEdit == "true")
+        {
+            successMessage = "Client updated successfully!";
+            StateHasChanged();
+
+            await Task.Delay(2000);
+            successMessage = string.Empty;
+            StateHasChanged();
+
+            navManager.NavigateTo("/manage-forms", forceLoad: false);
+        }
+        await Task.Delay(1000);
+        await LoadForms();
+        Spinnerservice.Hide();
     }
 
-
-
-    private async Task GetAllCases()
+    private async Task LoadForms()
     {
-        allUsers = await _userService.GetAllUserAsync();
-        StateHasChanged();
+        pagedforms = await ManageFormService.GetAllFormAsync(currentPage, pageSize, searchTerm);
     }
 
+
+    private void ShowCreateform()
+    {
+        FormDto = new FormAddEditViewModelDto();
+        _showCreateForm = true;
+    }
+
+
+    private void HandleCloseCreateform()
+    {
+        _showCreateForm = false;
+    }
+
+    private void HandleCloseEditForm()
+    {
+        _showEditForm = false;
+    }
+
+
+    private async Task ChangePage(int page)
+    {
+        if (page >= 1 && page <= Math.Ceiling((double)pagedforms.TotalCount / pageSize))
+        {
+            currentPage = page;
+            await LoadForms();
+        }
+    }
+
+    private async Task ShowAddEditForm(Guid? formId = null)
+    {
+        formIdForEdit = formId;
+
+        var form = await ManageFormService.GetFormByIdAsync(formId);
+
+        if (form != null)
+        {
+            FormDto = new FormAddEditViewModelDto
+                {
+                    Id = form.Id,
+                    HTML = form.HTML,
+                    CaseTypeId = form.CaseTypeId,
+                    Name = form.Name,
+
+
+                };
+
+            _showEditForm = true;
+        }
+    }
+  
+        public async Task DeleteForm(Guid id)
+    {
+        bool isDeleted = await ManageFormService.DeleteFormAsync(id);
+
+        if (isDeleted)
+        {
+        
+            pagedforms = await ManageFormService.GetAllFormAsync(currentPage, pageSize , searchTerm);
+            StateHasChanged();
+        }
+    }
     
 
 
