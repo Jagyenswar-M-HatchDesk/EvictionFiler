@@ -43,7 +43,7 @@ builder.Services.AddIdentity<User, Role>(options =>
 .AddEntityFrameworkStores<MainDbContext>()
 .AddDefaultTokenProviders();
 builder.Services.AddBlazorDownloadFile();
-
+builder.Services.AddRadzenComponents();
 
 
 
