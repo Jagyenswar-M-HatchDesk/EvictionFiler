@@ -12,5 +12,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 	{
 		Task<List<GenrateNoticeModel>> GetCaseFormsByCaseId(Guid caseId);
 		Task<GenrateNoticeModel?> GetCaseFormByIdAsync(Guid id);
-	}
+		Task<bool> DeleteDetailAsync(Guid id);
+
+    }
 }

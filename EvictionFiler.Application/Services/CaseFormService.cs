@@ -62,5 +62,14 @@ namespace EvictionFiler.Application.Services
 				CreatedOn = dto.CreatedOn,
 			};
 		}
-	}
+
+        public async Task<bool> DeleteDetailAsync(Guid id)
+        {
+            var client = await _caseFormRepository.DeleteAsync(id);
+            var deleterecordes = await _unitOfWork.SaveChangesAsync();
+            if (deleterecordes > 0)
+                return true;
+            return false;
+        }
+    }
 }

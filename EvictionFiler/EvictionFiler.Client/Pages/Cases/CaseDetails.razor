@@ -1,0 +1,939 @@
+﻿@page "/CaseDetails/{caseId:guid}"
+@using EvictionFiler.Application.DTOs.ApartmentDto
+@using EvictionFiler.Application.DTOs.FormTypeDto
+@using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Application.DTOs.LegalCaseDto
+@using EvictionFiler.Application.DTOs.TenantDto
+@using EvictionFiler.Application.Interfaces.IRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@inject NavigationManager Navigation
+@inject ILegalCaseService _service
+@using EvictionFiler.Client.SpinnerService
+@using EvictionFiler.Domain.Entities.Master
+@using EvictionFiler.Infrastructure.Repositories
+@inject SpinnerService spinnerservice
+@inject ICaseFormRepository CaseFormRepository
+@inject IFormTypesRepository FormTypesRepository
+@inject ICaseFormService _CaseFormService
+<style>
+    p{
+        font-size:10px !important;
+    }
+    td{
+        font-size: 10px !important;
+    }
+
+  
+    /* Tabs styling */
+    .custom-tabs {
+        display: flex;
+        border: 1px solid #ccc;
+        border-bottom: none;
+    }
+
+    .custom-tabs .nav-item {
+        flex: 1;
+        text-align: center;
+        border-right: 1px solid #ccc;
+    }
+
+        .custom-tabs .nav-item:last-child {
+            border-right: none;
+        }
+
+    .custom-tabs .nav-link {
+        color: #000;
+        font-weight: 600;
+        padding: 2px 5px;
+        border-radius: 0;
+        background-color: #f8f9fa;
+        border: none;
+        font-size:10px;
+    }
+
+        /* Active tab design */
+        .custom-tabs .nav-link.active {
+            background-color: #0d3e77;
+            color: #fff;
+            font-weight: bold;
+            border: none;
+        }
+
+    /* Card shadow */
+    .card {
+        border: 1px solid #ccc;
+    }
+
+    /* Primary buttons */
+    .btn-primary {
+        background-color: #0d3e77;
+        border-color: #0d3e77;
+    }
+
+        .btn-primary:hover {
+            background-color: #0a2d57;
+            border-color: #0a2d57;
+        }
+
+    /* Submit button */
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    /* Cancel button */
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+
+
+    
+  </style>
+<div class="container-fluid p-3">
+    <div class="row">
+       
+
+        <!-- RIGHT CONTENT -->
+        @if(legalcaseDto.tenants != null)
+        {
+            <!-- LEFT SIDEBAR -->
+            <div class="col-md-3">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 d-flex align-items-center justify-content-between">
+                                <h6>CASE NO:</h6>
+                                <i class="fa fa-plus me-1" @onclick="Createcase"></i>
+
+                            </div>
+                        </div>
+                        <h6 class="fw-bold">NP0175030 </h6>
+                        <h6>(L&T)</h6>
+                        <button class="btn bg-navy text-white mb-3" style="font-size:10px">View Previous Cases</button>
+                        <hr />
+
+                        <div>
+                            <h6 class="fw-bold">Payment Information</h6>
+                            <div class="row">
+                                <div class="col-7 ">
+                                    <p>ACCOUNT BALANCE:</p>
+                                    <p>ACCOUNT CREDIT:</p>
+                                    <p>BALANCE ON CASE:</p>
+                                    <p>LAST PAYMENT:</p>
+                                    <p>GO TO OPEN RECEIVABLES:</p>
+                                </div>
+                                <div class="col-5">
+                                    <p>$49,437.50</p>
+                                    <p>$49.50</p>
+                                    <p>$429.50</p>
+                                    <p>07/10/2025</p>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+
+
+                        <h6 class="fw-bold">NONPAYMENT</h6>
+                        <div class="row">
+                            <div class="col-auto ">
+                                <p>CASE STARTED ON:</p>
+
+                            </div>
+                            <div class="col">
+                                <p>08/16/2025</p>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="card-body bg-navy text-white" style="min-height:415px">
+                        <h6 class="fw-bold">Contact Information</h6>
+                        <p>TR75, TRYAX REALTY</p>
+                        <div class="row">
+                            <div class="col-12 d-flex gap-2">
+                                <i class="bi bi-envelope text-white" style="font-size: 12px;"></i>
+                                <p class="text-white"> @(string.IsNullOrWhiteSpace(legalcaseDto.tenants.Landlord.Email) ? "N/A" : legalcaseDto.tenants.Landlord.Email)</p>
+                            </div>
+
+
+                        </div>
+                        <div class="row">
+                            <div class="col-12 d-flex gap-2">
+                                <i class="bi bi-telephone  text-white" style="font-size: 12px;"></i>
+                                <p class="text-white">
+                                    @(string.IsNullOrWhiteSpace(legalcaseDto.tenants.Landlord.Phone) ? "N/A" : legalcaseDto.tenants.Landlord.Phone)
+                                </p>
+                            </div>
+
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 d-flex gap-2">
+                                <i class="bi bi-geo-alt  text-white" style="font-size: 12px;"></i>
+                                <p class="text-white">
+                                    @{
+                                        var partlandlord = new List<string>();
+
+                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.tenants.Landlord.Address1)) partlandlord.Add(legalcaseDto.tenants.Landlord.Address1);
+                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.tenants.Landlord.Address2)) partlandlord.Add(legalcaseDto.tenants.Landlord.Address2);
+                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.tenants.Landlord.City)) partlandlord.Add(legalcaseDto.tenants.Landlord.City);
+                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.tenants.Landlord.StateName)) partlandlord.Add(legalcaseDto.tenants.Landlord.StateName);
+                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.tenants.Landlord.Zipcode)) partlandlord.Add(legalcaseDto.tenants.Landlord.Zipcode);
+
+                                        var fulllandlordAddress = partlandlord.Any() ? string.Join(", ", partlandlord) : "-";
+                                    }
+                                    @fulllandlordAddress
+                                </p>
+                            </div>
+                        </div>
+
+
+
+                        <h6>Contact Person</h6>
+                        <div class="row">
+                            <div class="col-12 d-flex gap-2">
+                                <i class="bi bi-envelope text-white" style="font-size: 12px;"></i>
+                               <p class="text-white"> @(string.IsNullOrWhiteSpace(legalcaseDto.tenants.Landlord.Email) ? "N/A" : legalcaseDto.tenants.Landlord.Email)</p>
+                            </div>
+
+
+                        </div>
+                        <div class="row">
+                            <div class="col-12 d-flex gap-2">
+                                <i class="bi bi-envelope text-white" style="font-size: 12px;"></i>
+                                <p class="text-white"> @(string.IsNullOrWhiteSpace(legalcaseDto.tenants.Landlord.Email) ? "N/A" : legalcaseDto.tenants.Landlord.Email)</p>
+                            </div>
+
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="row mb-3">
+                    <!-- Building Information -->
+                    <div class="col-md-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body" style="height:290px">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="fw-bold mb-0">Building Information</h6>
+                                    <i class="bi bi-search text-navy" style="cursor: pointer; font-size: 16px;"></i>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-borderless mb-0">
+                                        <tbody>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase" style="width: 35%;">Key:</td>
+                                                <td>@(string.IsNullOrWhiteSpace(legalcaseDto.tenants.Building.RegulationStatusName) ? "N/A" : legalcaseDto.tenants.Building.RegulationStatusName)</td>
+                                            </tr>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase">MDR:</td>
+                                                <td>@(string.IsNullOrWhiteSpace(legalcaseDto.tenants.Building.MDRNumber) ? "N/A" : legalcaseDto.tenants.Building.MDRNumber)</td>
+                                            </tr>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase">Country:</td>
+                                                <td>@(string.IsNullOrWhiteSpace(legalcaseDto.tenants.Building.StateName) ? "N/A" : legalcaseDto.tenants.Building.StateName)</td>
+                                            </tr>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase">Address:</td>
+                                                <td>
+                                                    @{
+                                                        var parts = new List<string>();
+
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.tenants.Building.Address1)) parts.Add(legalcaseDto.tenants.Building.Address1);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.tenants.Building.Address2)) parts.Add(legalcaseDto.tenants.Building.Address2);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.tenants.Building.City)) parts.Add(legalcaseDto.tenants.Building.City);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.tenants.Building.StateName)) parts.Add(legalcaseDto.tenants.Building.StateName);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.tenants.Building.Zipcode)) parts.Add(legalcaseDto.tenants.Building.Zipcode);
+
+                                                        var fullAddress = parts.Any() ? string.Join(", ", parts) : "-";
+                                                    }
+                                                    @fullAddress
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-uppercase">Landlord:</td>
+                                                <td>Bradhurst Associates L.L.C.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body" style="height:290px">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="fw-bold mb-0">Tenant Information</h6>
+                                    <i class="bi bi-pencil-fill text-navy" style="cursor: pointer; font-size: 16px;"></i>
+
+
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-borderless mb-0">
+                                        <tbody>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase" style="width: 35%;">Name:</td>
+                                                <td>@(string.IsNullOrWhiteSpace(legalcaseDto.tenants.FirstName + legalcaseDto.tenants.LastName) ? "-" : legalcaseDto.tenants.FirstName + " " + legalcaseDto.tenants.LastName)</td>
+                                            </tr>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase">Apt/House:</td>
+                                                <td>@(string.IsNullOrWhiteSpace(legalcaseDto.tenants.UnitOrApartmentNumber) ? "N/A" : legalcaseDto.tenants.UnitOrApartmentNumber)</td>
+                                            </tr>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase">Address:</td>
+                                                <td>
+                                                    @{
+                                                        var part = new List<string>();
+
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.tenants.Building.Address1)) part.Add(legalcaseDto.tenants.Building.Address1);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.tenants.Building.Address2)) part.Add(legalcaseDto.tenants.Building.Address2);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.tenants.Building.City)) part.Add(legalcaseDto.tenants.Building.City);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.tenants.Building.StateName)) part.Add(legalcaseDto.tenants.Building.StateName);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.tenants.Building.Zipcode)) part.Add(legalcaseDto.tenants.Building.Zipcode);
+
+                                                        var fulAddress = part.Any() ? string.Join(", ", part) : "-";
+                                                    }
+                                                    @fulAddress
+                                                </td>
+                                            </tr>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase">Email:</td>
+                                                <td>@(string.IsNullOrWhiteSpace(legalcaseDto.tenants.Email) ? "N/A" : legalcaseDto.tenants.Email)</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-uppercase">Phone:</td>
+                                                <td>@(string.IsNullOrWhiteSpace(legalcaseDto.tenants.Phone) ? "N/A" : legalcaseDto.tenants.Phone)</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Court Information -->
+                    <div class="col-md-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body" style="height:290px">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="fw-bold mb-0">Court Information</h6>
+                                    <i class="bi bi-pencil-fill text-navy" style="cursor: pointer; font-size: 16px;"></i>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-borderless mb-0">
+                                        <tbody>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase" style="width: 40%;">Court:</td>
+                                                <td>New York Residential</td>
+                                            </tr>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase">Room No.:</td>
+                                                <td>29</td>
+                                            </tr>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase">Part:</td>
+                                                <td>-</td>
+                                            </tr>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase">Judge:</td>
+                                                <td>-</td>
+                                            </tr>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase">Index No.:</td>
+                                                <td>-</td>
+                                            </tr>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase">Marshal:</td>
+                                                <td>N/A</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-uppercase">Docket No.:</td>
+                                                <td>-</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Rent & Stipulations -->
+                <div class="row mb-3">
+                    <!-- Stipulations -->
+                    <div class="col-md-8">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h6 class="fw-bold">Stipulations</h6>
+                                <div class="row">
+
+                                    <div class="col">
+                                        <div class="card shadow-sm">
+                                            <div class="card-body" style="height:150px">
+                                                <p>Payment Dates</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col">
+                                        <div class="card shadow-sm">
+                                            <div class="card-body" style="height:150px">
+                                                <p>Vacante Dates</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="card shadow-sm">
+                                            <div class="card-body" style="height:150px">
+                                                <p>Access/Repair Dates</p>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rent Description -->
+                    <div class="col-md-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body" style="height: 220px;">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="fw-bold mb-0">Rent Description</h6>
+                                    <i class="bi bi-pencil-fill text-navy" style="cursor: pointer; font-size: 16px;"></i>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-borderless mb-0">
+                                        <tbody>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase" style="width: 60%;">Monthly Rent:</td>
+                                                <td>$970.27</td>
+                                            </tr>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase">Rent Distribution Total:</td>
+                                                <td>$1,640.13</td>
+                                            </tr>
+                                            <tr class="border-bottom">
+                                                <td class="fw-bold text-uppercase">Additional Charges:</td>
+                                                <td>$0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-uppercase">Legal Print:</td>
+                                                <td>-</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Action Dates -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card shadow-sm mb-3">
+                            <div class="card-body">
+                                <h6 class="fw-bold">Action Dates</h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm">
+                                            <div class="card-body" style="height: 260px;">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <h6 class="fw-bold mb-0" style="font:13px">DISPO DEPT</h6>
+                                                    @* <i class="bi bi-clipboard-data text-primary" style="cursor: pointer; font-size: 16px;"></i> *@
+                                                </div>
+
+                                                <div class="table-responsive">
+                                                    <table class="table table-borderless mb-0">
+                                                        <tbody>
+
+                                                            <tr class="border-bottom">
+                                                                <td class="fw-bold text-uppercase">Demand:</td>
+                                                                <td>--</td>
+                                                            </tr>
+                                                            <tr class="border-bottom">
+                                                                <td class="fw-bold text-uppercase">Demand Served:</td>
+                                                                <td>--</td>
+                                                            </tr>
+                                                            <tr class="border-bottom">
+                                                                <td class="fw-bold text-uppercase">sec8:</td>
+                                                                <td>08/16/2025</td>
+                                                            </tr>
+                                                            <tr class="border-bottom">
+                                                                <td class="fw-bold text-uppercase">Dispo:</td>
+                                                                <td>--</td>
+                                                            </tr>
+                                                            <tr class="border-bottom">
+                                                                <td class="fw-bold text-uppercase">Index Added :</td>
+                                                                <td>--</td>
+                                                            </tr>
+                                                            <tr class="border-bottom">
+                                                                <td class="fw-bold text-uppercase">Petition Served:</td>
+                                                                <td>--</td>
+                                                            </tr>
+
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm">
+                                            <div class="card-body" style="height: 260px;">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <h6 class="fw-bold mb-0" style="font:13px">WARRENT DEPT</h6>
+                                                    @* <i class="bi bi-clipboard-data text-primary" style="cursor: pointer; font-size: 16px;"></i> *@
+                                                </div>
+
+                                                <div class="table-responsive">
+                                                    <table class="table table-borderless mb-0">
+                                                        <tbody>
+
+                                                            <tr class="border-bottom">
+                                                                <td class="fw-bold text-uppercase">Docket:</td>
+                                                                <td>--</td>
+                                                            </tr>
+                                                            <tr class="border-bottom">
+                                                                <td class="fw-bold text-uppercase">W/Request:</td>
+                                                                <td>--</td>
+                                                            </tr>
+                                                            <tr class="border-bottom">
+                                                                <td class="fw-bold text-uppercase">W/Issued:</td>
+                                                                <td>--</td>
+                                                            </tr>
+                                                            <tr class="border-bottom">
+                                                                <td class="fw-bold text-uppercase">Notice Srv:</td>
+                                                                <td>--</td>
+                                                            </tr>
+                                                            <tr class="border-bottom">
+                                                                <td class="fw-bold text-uppercase">Notice-Reserve :</td>
+                                                                <td>--</td>
+                                                            </tr>
+
+
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm">
+                                            <div class="card-body" style="height: 260px;">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <h6 class="fw-bold mb-0" style="font:13px">Eviction DEPT</h6>
+                                                    @* <i class="bi bi-clipboard-data text-primary" style="cursor: pointer; font-size: 16px;"></i> *@
+                                                </div>
+
+                                                <div class="table-responsive">
+                                                    <table class="table table-borderless mb-0">
+                                                        <tbody>
+
+                                                            <tr class="border-bottom">
+                                                                <td class="fw-bold text-uppercase">Marshal:</td>
+                                                                <td>--</td>
+                                                            </tr>
+                                                            <tr class="border-bottom">
+                                                                <td class="fw-bold text-uppercase">E/sechdule:</td>
+                                                                <td>--</td>
+                                                            </tr>
+                                                            <tr class="border-bottom">
+                                                                <td class="fw-bold text-uppercase">L/possession:</td>
+                                                                <td>--</td>
+                                                            </tr>
+                                                            <tr class="border-bottom">
+                                                                <td class="fw-bold text-uppercase">E/Aborted:</td>
+                                                                <td>--</td>
+                                                            </tr>
+
+
+
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+
+            </div>
+        }
+    </div>
+
+    <div class="row">
+        <div class="col-6">
+            <!-- Tabs Section -->
+            <div class="row">
+                <div class="col-12">
+                    <!-- Tabs Section -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul class="nav nav-tabs custom-tabs ">
+                                <li class="nav-item">
+                                    <a class="nav-link active" href="#">CASE ACTIONS</a>
+                                  
+                                </li>
+                                <li class="nav-item">
+                                 
+                                    <a class="nav-link" href="#">UPLOAD/VIEW DOCUMENTS</a>
+                                   
+                                </li>
+                                <li class="nav-item">
+                             
+                                    <a class="nav-link" href="#">SEND TO PROCESS SERVER</a>
+                                </li>
+                            </ul>
+                        </div>
+                      </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul class="nav nav-tabs custom-tabs ">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#">SEND TO MARSHAL</a>
+
+                                </li>
+                                <li class="nav-item">
+
+                                    <a class="nav-link" href="#">ADD NOTES</a>
+
+                                </li>
+                                <li class="nav-item">
+
+                                    <a class="nav-link" href="#">ADDITIONAL CHARGES</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul class="nav nav-tabs custom-tabs ">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#">FILE A MOTION</a>
+
+                                </li>
+                                <li class="nav-item">
+
+                                    <a class="nav-link" href="#">COURT APPEARANCE FEE</a>
+
+                                </li>
+                               
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <!-- Case Actions Form -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-body" style="font-size:10px">
+
+                    <EditForm Model="@noticeModel">
+                        <div class="row mb-3 align-items-center">
+                            <div class="col-12">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <label class="col-form-label fw-semibold text-navy">Form Type</label>
+                                    </div>
+
+                                    <!-- Dropdown + Button Side by Side -->
+                                    <div class="col d-flex align-items-center gap-3">
+                                        <select class="form-select w-auto" @bind="noticeModel.FormTypeId" style="font-size:10px">
+                                            <option value="">-- Select Form Type --</option>
+                                            @foreach (var formType in FilteredFormTypeList)
+                                            {
+                                                <option value="@formType.Id">@formType.Name</option>
+                                            }
+                                        </select>
+
+                                        <!-- Generate Notice Button -->
+                                        <button type="submit" class="btn bg-navy text-white" @onclick="GenerateNotice" style="font-size:10px">
+                                            Generate
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </EditForm>
+
+
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <!-- Case Activity History Table -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                   <div class="row">
+                       <div class="col-12 d-flex justify-content-between align-items-center">
+                            <h6 class="fw-bold font-size:12px">Case Activity History</h6>
+                            <button class="btn btn-success mt-3" style="font-size:10px">Case Status History</button>
+                       </div>
+                      </div>
+
+                    <!-- Table Wrapper for Horizontal Scroll -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped mt-2">
+                            <thead class="table-light">
+                                <tr style="font-size:10px">
+                                    <th>Id</th>
+                                    <th>Form Type</th>
+                                    <th>Created By</th>
+                                    <th>Created On</th>
+
+                                    <th class="sticky">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @if (caseFormDto != null && caseFormDto.Any())
+                                {
+                                    int index = 1;
+                                    @foreach (var form in caseFormDto)
+                                    {
+                                        <tr>
+                                            <td>@index</td>
+                                            <td>@form.FormTypeName</td>
+                                            <td>Admin</td>
+                                            <td>@form.CreatedOn.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-link text-primary"><i class="bi bi-envelope"></i></button>
+                                                <button class="btn btn-sm btn-link text-success" @onclick="@(() => ViewPdf(form.File))"><i class="bi bi-printer"></i></button>
+                                                <button class="btn btn-sm btn-link text-warning" ><i class="bi bi-pencil"></i></button>
+                                                <button class="btn btn-sm btn-link text-danger" @onclick="@(() => DeleteCaseDetail(form.Id))"><i class="bi bi-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                        index++;
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-muted text-center">No notices generated yet.</td>
+                                    </tr>
+                                }
+
+
+                            
+                                
+                            </tbody>
+                        </table>
+                    </div>
+
+                  
+                </div>
+            </div>
+        </div>
+
+</div>
+</div>
+@code {
+    [Parameter]
+    public Guid caseId { get; set; }
+    private CreateToEditLegalCaseModel legalcaseDto = new CreateToEditLegalCaseModel();
+    private List<FormTypes> FilteredFormTypeList = new();
+    private GenrateNoticeModel noticeModel = new GenrateNoticeModel();
+    [Parameter] public Guid? CurrentCaseId { get; set; }
+    private List<GenrateNoticeModel> caseFormDto = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        spinnerservice.Show();
+        await LoadCaseDetails();
+        await LoadCaseForms();
+        spinnerservice.Hide();
+    }
+
+    private async Task LoadCaseDetails()
+    {
+        legalcaseDto = await _service.GetByIdAsync(caseId);
+        FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId.Value);
+        CurrentCaseId = caseId;
+        if (legalcaseDto != null)
+        {
+            var fullName = $"{legalcaseDto.tenants.FirstName} {legalcaseDto.tenants.LastName}";
+
+
+            legalcaseDto = new CreateToEditLegalCaseModel
+            {
+
+                Id = legalcaseDto.Id,
+                TenancyTypeId = legalcaseDto.TenancyTypeId,
+                RenewalOffer = legalcaseDto.RenewalOffer,
+                RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                SocialServices = legalcaseDto.SocialServices,
+                MonthlyRent = legalcaseDto.MonthlyRent,
+                LastMonthWeekRentPaid = legalcaseDto.LastMonthWeekRentPaid,
+                TenantShare = legalcaseDto.TenantShare,
+                ERAPPaymentReceivedDate = legalcaseDto.ERAPPaymentReceivedDate,
+                TotalRentOwed = legalcaseDto.TotalRentOwed,
+                IsUnitIllegalId = legalcaseDto.IsUnitIllegalId,
+                BuildingId = legalcaseDto.BuildingId,
+                Attrney = legalcaseDto.Attrney,
+                AttrneyContactInfo = legalcaseDto.AttrneyContactInfo,
+                Firm = legalcaseDto.Firm,
+                ReasonHoldoverId = legalcaseDto.ReasonHoldoverId,
+                ExplainDescription = legalcaseDto.ExplainDescription,
+                OralStart = legalcaseDto.OralStart,
+                OralEnd = legalcaseDto.OralEnd,
+                WrittenLease = legalcaseDto.WrittenLease,
+                DateTenantMoved = legalcaseDto.DateTenantMoved,
+                RenewalStatusId = legalcaseDto.RenewalStatusId,
+
+
+
+                // ✅ Properly map to 'tenants' property
+                tenants = new CreateToTenantDto
+                {
+                    // Id = legalcaseDto.tenants.Id,
+                    FirstName = legalcaseDto.tenants.FirstName,
+                    LastName = legalcaseDto.tenants.LastName,
+                    SSN = legalcaseDto.tenants.SSN,
+                    Phone = legalcaseDto.tenants.Phone,
+                    Email = legalcaseDto.tenants.Email,
+                    LanguageId = legalcaseDto.tenants.LanguageId,
+
+                    HasPossession = legalcaseDto.tenants.HasPossession,
+                    HasRegulatedTenancy = legalcaseDto.tenants.HasRegulatedTenancy,
+
+                    AdditionalTenant = legalcaseDto.tenants.AdditionalTenant,
+                    OtherOccupants = legalcaseDto.tenants.OtherOccupants,
+
+                    TenantRecord = legalcaseDto.tenants.TenantRecord,
+                    TenancyTypeId = legalcaseDto.tenants.TenancyTypeId,
+                    RenewalOffer = legalcaseDto.tenants.RenewalOffer,
+
+                    SocialServices = legalcaseDto.tenants.SocialServices,
+                    MonthlyRent = legalcaseDto.tenants.MonthlyRent,
+                    LastMonthWeekRentPaid = legalcaseDto.tenants.LastMonthWeekRentPaid,
+                    TenantShare = legalcaseDto.tenants.TenantShare,
+                    ERAPPaymentReceivedDate = legalcaseDto.tenants.ERAPPaymentReceivedDate,
+                    UnitOrApartmentNumber = legalcaseDto.tenants.UnitOrApartmentNumber,
+                    TotalRentOwed = legalcaseDto.tenants.TotalRentOwed,
+                    IsUnitIllegalId = legalcaseDto.tenants.IsUnitIllegalId,
+                    BuildingId = legalcaseDto.tenants.BuildingId,
+
+                    Building = legalcaseDto.tenants.Building == null ? null : new EditToBuildingDto
+                    {
+                        Address1 = legalcaseDto.tenants.Building.Address1,
+                        Address2 = legalcaseDto.tenants.Building.Address2,
+                        Zipcode = legalcaseDto.tenants.Building.Zipcode,
+                        City = legalcaseDto.tenants.Building.City,
+                        StateId = legalcaseDto.tenants.Building.StateId,
+                        StateName = legalcaseDto.tenants.Building.StateName,
+                        MDRNumber = legalcaseDto.tenants.Building.MDRNumber,
+                        BuildingUnits = legalcaseDto.tenants.Building.BuildingUnits,
+                        RegulationStatusId = legalcaseDto.tenants.Building.RegulationStatusId,
+                        RegulationStatusName = legalcaseDto.tenants.Building.RegulationStatusName,
+
+                    },
+
+                    Landlord = legalcaseDto.tenants.Landlord == null ? null : new EditToLandlordDto
+                    {
+                        FirstName = legalcaseDto.tenants.Landlord.FirstName,
+                        LastName = legalcaseDto.tenants.Landlord.LastName,
+                        Address1 = legalcaseDto.tenants.Landlord.Address1,
+                        Address2 = legalcaseDto.tenants.Landlord.Address2,
+                        Zipcode = legalcaseDto.tenants.Landlord.Zipcode,
+                        City = legalcaseDto.tenants.Landlord.City,
+                        StateId = legalcaseDto.tenants.Landlord.StateId,
+                        StateName = legalcaseDto.tenants.Landlord.StateName,
+                        Phone = legalcaseDto.tenants.Landlord.Phone,
+                        Email = legalcaseDto.tenants.Landlord.Email,
+                        LandlordTypeId = legalcaseDto.tenants.Landlord.LandlordTypeId,
+                    }
+                },
+
+
+            };
+        }
+    }
+
+    private async Task GenerateNotice()
+    {
+        spinnerservice.Show();
+        if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty && noticeModel.FormTypeId.HasValue)
+        {
+            var success = await CaseFormRepository.GenerateNoticeAsync(
+                CurrentCaseId.Value,
+                noticeModel.FormTypeId.Value
+            );
+
+            if (success)
+            {
+                await LoadCaseForms();
+            }
+        }
+        else
+        {
+
+        }
+        spinnerservice.Hide();
+    }
+
+    private void ViewPdf(string filePath)
+    {
+        if (!string.IsNullOrWhiteSpace(filePath))
+        {
+            var fullUrl = Navigation.BaseUri.TrimEnd('/') + filePath;
+            Navigation.NavigateTo(fullUrl, forceLoad: true);
+        }
+    }
+
+
+    private async Task LoadCaseForms()
+    {
+        caseFormDto = await _CaseFormService.GetCaseFormsByCaseId(CurrentCaseId.Value);
+    }
+
+    private void Createcase()
+    {
+        Navigation.NavigateTo("/cases");
+    }
+
+
+
+    public async Task DeleteCaseDetail(Guid id)
+    {
+        bool isDeleted = await _CaseFormService.DeleteDetailAsync(id);
+
+        if (isDeleted)
+        {
+
+            caseFormDto = await _CaseFormService.GetCaseFormsByCaseId(CurrentCaseId.Value);
+            StateHasChanged();
+        }
+    }
+
+
+    }
+
+
+

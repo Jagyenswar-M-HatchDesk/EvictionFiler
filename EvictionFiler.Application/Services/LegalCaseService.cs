@@ -197,8 +197,10 @@ namespace EvictionFiler.Application.Services
 						StateId = legalCaseEntity.Tenants.Building.StateId,
 						MDRNumber = legalCaseEntity.Tenants.Building.MDRNumber,
 						BuildingUnits = legalCaseEntity.Tenants.Building.BuildingUnits,
-						RegulationStatusId = legalCaseEntity.Tenants.Building.RegulationStatusId
-					},
+						RegulationStatusId = legalCaseEntity.Tenants.Building.RegulationStatusId,
+
+                        RegulationStatusName = legalCaseEntity.Tenants.Building.RegulationStatus.Name
+                    },
 
 					Landlord = legalCaseEntity.Tenants.Building.Landlord == null ? null : new EditToLandlordDto
 					{
