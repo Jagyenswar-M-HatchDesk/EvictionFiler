@@ -1,108 +1,369 @@
 ﻿@page "/dashboard"
+@using EvictionFiler.Application.DTOs.DashboardDto
+@using EvictionFiler.Application.DTOs.LegalCaseDto
+@using EvictionFiler.Application.DTOs.PaginationDto
+@using EvictionFiler.Application.Interfaces.IRepository
+@using EvictionFiler.Client.SpinnerService
+@inject SpinnerService spinnerservice
+@using EvictionFiler.Client.Components.Layout
+@using EvictionFiler.Domain.Entities
+@inject IDashBoardRepository DashBoardRepository;
 
-<style>
-    .menu-items{
-        display:flex;
-        align-items:center;
-        font-family: Montserrat', sans-serif;
+
+  
+ 
+
+    <style >
+    td {
+        font-size: 13px !important;
+    }
+    .status-active {
+        background-color: rgba(25,135,84,1);
+        color: #fff;
+        padding: 2px 7px;
+        border-radius: 1rem;
+        font-size: 12px;
     }
 
-    .menu-label {
-        font-family: 'Montserrat', sans-serif;
-        font-weight: 500;
-        color:black;
-        cursor:pointer !important;
-    
+    .container {
+        /* background-color: #F2F0EC; */
+        border: solid 1px #F2F0EC;
+        box-shadow: 0 15px 20px #F2F0EC !important;
+    }
+
+    .btn-primary {
+        background-color: #1F365D;
+        border-color: #1F365D;
+    }
+
+        .btn-primary:hover {
+            background-color: #162646;
+            border-color: #162646;
+        }
+
+    .page-link {
+        color: #1F365D;
+    }
+
+        .page-link.active,
+        .page-item.active .page-link {
+            background-color: #1F365D;
+            border-color: #1F365D;
+            color: #F2F0EC;
+        }
+
+    table.table thead th {
+        color: #1F365D;
+        background: #F2F0EC;
+        margin-bottom: 0px !important;
+    }
+
+    h5, p, small {
+        color: #1F365D;
+    }
+
+    .adv-btn {
+        color: #1F365D;
+        background: #FFF;
+    }
+
+        .adv-btn:hover {
+            color: #FFF;
+            background: #1F365D;
+        }
+
+        .adv-btn.active-adv-btn {
+            background-color: #1F365D !important;
+            color: #F2F0EC !important;
+            border-color: #1F365D !important;
+        }
+
+
+    .table-responsive {
+        overflow-x: auto; /* Enable horizontal scroll */
+        position: relative;
+    }
+
+    table th, table td {
+        white-space: nowrap;
+    }
+
+    th.sticky, td.sticky {
+        position: sticky;
+        right: 0;
+        background: #F2F0EC; /* Same as container background */
+        z-index: 2;
+        text-align: center;
+    }
+
+    /* Make sure header sticky stays above other cells */
+    th.sticky {
+        z-index: 3;
+    }
+
+    .search-box {
+        width: 100%;
+        padding-right: 3rem; /* space for the button */
+        padding-left: 1rem;
+        /* border-radius: 1.5rem; */
+        border: 2px solid #020336;
+        background-color: #FFF; /* dark background */
+        color: black;
+        height: 2.5rem;
+    }
+
+        .search-box::placeholder {
+            color: darkgrey;
+        }
+
+        .search-box:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+            background: #c6d1e3;
+        }
+
+    .search-btn {
+        position: absolute;
+        right: 0.7rem;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: none;
+        color: #020336;
+        cursor: pointer;
+        padding: 0;
+        font-size: 1.2rem;
+    }
+
+        .search-btn:hover {
+            color: #1F365D;
+        }
+
+    .status-delete {
+        background-color: rgba(220,53,69,1);
+        color: #fff;
+        padding: 2px 7px;
+        border-radius: 1rem;
+        font-size: 12px;
+    }
+
+    .status-archive {
+        background-color: rgba(255, 193, 7, 1);
+        color: #fff;
+        padding: 2px 7px;
+        border-radius: 1rem;
+        font-size: 12px;
     }
 </style>
 
-<!-- 3-Column Layout -->
-<div class="row align-items-center">
 
-    <!-- LEFT COLUMN (Empty) -->
-    <div class="col-3 d-flex align-items-center mt-2">
-        <div class="position-relative ms-3" style="cursor: pointer;" title="Notification">
-            <i class="fas fa-bell fa-lg text-dark"></i>
 
-            <!-- Notification Badge -->
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                3
-                <span class="visually-hidden">unread messages</span>
-            </span>
+<div>
+   <NavMenu />
+ <body class="p-4">
+ <div class="container p-4 rounded shadow-sm ">
+    <div class="row g-2 mb-3 mt-2">
+        <!-- Four default search boxes -->
+        <div class="col-md-3 position-relative">
+            <input class="form-control search-box" placeholder="Search by Case Code" @bind="searchcasecode"  />
+            <button class="search-btn" type="button">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+        <div class="col-md-3 position-relative">
+            <input class="form-control search-box" placeholder="Search by Client" @bind="searchTermClient"  />
+            <button class="search-btn" type="button">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+        <div class="col-md-3 position-relative">
+            <input class="form-control search-box" placeholder="Search by Tenant" @bind="searchTermTenant"  />
+            <button class="search-btn" type="button">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+       
+           <div class="col-md-3 d-flex align-items-center">
+                    <button id="advToggleButton" class="btn btn-outline-secondary adv-btn w-100" aria-expanded="false">
+                        Advanced <span id="advIcon">▼</span>
+                    </button>
+
+            </div>
+     
+    </div>
+            <div class="collapse mb-3" id="advancedFilters">
+    <div class="row g-2 mb-3">
+           <div class="col-md-3 position-relative">
+            <input class="form-control search-box" placeholder="Search by LandLord" @bind="searchTermLandLord"/>
+            <button class="search-btn" type="button">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+        <div class="col-md-3 position-relative">
+            <input class="form-control search-box" placeholder="Search by Reason Holdover" @bind="searchTermResonHoldover"  />
+            <button class="search-btn" type="button">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+
+        <div class="col-md-3 position-relative">
+            <input class="form-control search-box" placeholder="Search by Action Date" @bind="searchTermDate" />
+            <button class="search-btn" type="button">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+        <div class="col-md-3 position-relative">
+            <input class="form-control search-box" placeholder="Search by Status" @bind="searchTermStatus"  />
+            <button class="search-btn" type="button">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+       
+    </div>
+    </div>
+    <div class="row mb-3">
+         <div class="col-md-12">
+            <button type="submit" class="btn bg-navy text-white me-2" style="font-size:18px ; width:100%" @onclick="Search">Search</button>
         </div>
     </div>
+</div>
+    @if (searchResults != null && searchResults.Items.Any())
+    {
+        <div class="row mt-3 d-flex justify-content-center">
+            @foreach (var item in searchResults.Items)
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold mb-0">Search Information</h6>
+                                @* <i class="bi bi-search text-navy" style="cursor: pointer; font-size: 16px;"></i> *@
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-borderless mb-0">
+                                    <tbody>
+                                        <tr class="border-bottom">
+                                            <td class="fw-bold text-uppercase">Case Code:</td>
+                                            <td>@(string.IsNullOrWhiteSpace(item.Casecode) ? "-" : item.Casecode)</td>
+                                        </tr>
+                                        <tr class="border-bottom">
+                                            <td class="fw-bold text-uppercase" style="width: 35%;">Landlord's Name:</td>
+                                            <td>@(string.IsNullOrWhiteSpace(item.LandLords?.FirstName + item.LandLords?.LastName) ? "-" : item.LandLords.FirstName + " " + item.LandLords.LastName)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (isSearched)
+    {
+        <tr style="display:flex; justify-content:center; font-size:14px">
+            <td colspan="10" class="text-muted">  <i class="bi bi-exclamation-circle"></i>No results found.</td>
+        </tr>
+      
+    }
 
 
-    <!-- CENTER COLUMN: Menu Icons with Justify Between -->
-    <div class="col-4 d-flex justify-content-between">
-        <ul class="d-flex justify-content-between w-100" style="list-style: none; padding-left: 0; font-size: 16px; margin: 0;">
-            <li class="menu-items">
-                <a title="envelope" class=" text-decoration-none menu-label">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
-                     <i class="fas fa-envelope"></i>
-
-                </a>
-                @* <span style="margin-left: 8px;">Email</span> *@
-            </li>
-            <li class="menu-items">
-                <a title="Reminder" class=" text-decoration-none menu-label">
-                    <i class="fas fa-clock"></i>
-
-                </a>
-               
-             
-            </li>
-            <li class="menu-items">
-                <a title="Draft" class=" text-decoration-none menu-label">
-                
-
-                <i class="fas fa-file-alt"></i>
-                </a>
-
-              
-            </li>
-            <li class="menu-items">
-                <a title="Upload" class=" text-decoration-none menu-label">
-
-                <i class="fas fa-upload"></i>
-                </a>
-                
-            </li>
-            <li class="menu-items">
-                <a title="Download" class=" text-decoration-none menu-label">
-
-
-
-                <i class="fas fa-download"></i>
-                </a>
-            </li>
-            <li class="menu-items">
-                <a title="Send" class=" text-decoration-none menu-label">
-                <i class="fas fa-paper-plane"></i>
-
-                </a>
-            
-            </li>
-            <li class="menu-items">
-                <a title="Edit" class=" text-decoration-none menu-label">
-                    <i class="fas fa-edit"></i>
-
-                </a>
-               
-             
-            </li>
-        </ul>
-    </div>
-
-    <!-- RIGHT COLUMN: Search Bar -->
-    <div class="col-5 d-flex justify-content-end">
-        <input type="text"
-               placeholder="Ask anything (e.g. What is the MDR for 123 Flatbush Ave?)"
-               style="width: 100%; padding: 7px 20px; font-size: 13px; border: 1px solid #ccc; border-radius: 8px;" />
-        <button style="margin-left: 10px; background-color: #1F365D; color: white; border: none; padding: 4px 16px; border-radius: 8px; cursor: pointer;">
-            <i class="fas fa-search"></i>
-        </button>
-    </div>
-
+    </body>
 </div>
 
+<script>
+    // Get elements
+    var advButton = document.getElementById('advToggleButton');
+    var advIcon = document.getElementById('advIcon');
+    var advancedCollapse = document.getElementById('advancedFilters');
+
+    // Bootstrap collapse instance
+    var bsCollapse = new bootstrap.Collapse(advancedCollapse, {
+        toggle: false
+    });
+
+    // Button click par toggle hoga
+    advButton.addEventListener('click', function () {
+        bsCollapse.toggle();
+    });
+
+    // Collapse open hone par
+    advancedCollapse.addEventListener('shown.bs.collapse', function () {
+        advButton.classList.add('active-adv-btn');
+        advIcon.innerHTML = "▲"; // arrow up
+        advButton.setAttribute("aria-expanded", "true");
+    });
+
+    // Collapse close hone par
+    advancedCollapse.addEventListener('hidden.bs.collapse', function () {
+        advButton.classList.remove('active-adv-btn');
+        advIcon.innerHTML = "▼"; // arrow down
+        advButton.setAttribute("aria-expanded", "false");
+    });
+</script>
+
+
+@code {
+    private string searchText;
+    private bool isSearched = false;
+
+    private string searchcasecode = string.Empty;
+    private string searchTermClient = string.Empty;
+    private string searchTermTenant = string.Empty;
+    private string searchTermLandLord = string.Empty;
+    private string searchTermCaseType = string.Empty;
+    private string searchTermStatus = string.Empty;
+    private string searchTermDept = string.Empty;
+    private string searchTermDate = string.Empty;
+    private string searchTermResonHoldover = string.Empty;
+
+    private PaginationDto<LegalCase> searchResults;
+    private int currentPage = 1;
+    private int pageSize = 10;
+    private string searchTerm = "";
+
+
+    private async Task Search()
+    {
+        // ✅ Check if all search fields are empty
+        if (string.IsNullOrWhiteSpace(searchcasecode) &&
+            string.IsNullOrWhiteSpace(searchTermClient) &&
+            string.IsNullOrWhiteSpace(searchTermTenant) &&
+            string.IsNullOrWhiteSpace(searchTermLandLord) &&
+            string.IsNullOrWhiteSpace(searchTermResonHoldover) &&
+            string.IsNullOrWhiteSpace(searchTermDate) &&
+            string.IsNullOrWhiteSpace(searchTermStatus))
+        {
+            // Agar koi bhi filter fill nahi kiya gaya
+            searchResults = null;
+            isSearched = true;
+
+            // Spinner hatao
+            spinnerservice.Hide();
+
+            return;
+        }
+
+        spinnerservice.Show();
+        isSearched = true;
+
+        var filters = new CaseFilterDto
+        {
+            CaseCode = searchcasecode,
+            Client = searchTermClient,
+            Tenant = searchTermTenant,
+            LandLord = searchTermLandLord,
+            ReasonHoldover = searchTermResonHoldover,
+            ActionDate = searchTermDate,
+            Status = searchTermStatus
+        };
+
+        searchResults = await DashBoardRepository.Search(currentPage, pageSize, filters);
+
+        spinnerservice.Hide();
+    }
+
+}

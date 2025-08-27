@@ -134,6 +134,7 @@ namespace EvictionFiler.Application.Services
 			var dto = new CreateToEditLegalCaseModel
 			{
 				Id = legalCaseEntity.Id,
+				
 				ClientId = legalCaseEntity.Clients.Id,
 				BuildingId = legalCaseEntity.Buildings?.Id,
 				LandLordId = legalCaseEntity.LandLordId,

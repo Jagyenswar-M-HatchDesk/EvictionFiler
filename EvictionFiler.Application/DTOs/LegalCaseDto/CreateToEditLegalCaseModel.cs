@@ -15,8 +15,8 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 		public Guid? LandLordId { get; set; }
 		public Guid? TenantId { get; set; }
 		public Guid? CaseTypeId { get; set; }
-
-		public string? Casecode { get; set; }
+        public string? CaseTypeName { get; set; }
+        public string? Casecode { get; set; }
 		[Required(ErrorMessage = "Please select Reason Holdover.")]
 		public Guid? ReasonHoldoverId { get; set; }
 		public string? ReasonHoldoverName { get; set; }
