@@ -27,6 +27,100 @@ namespace EvictionFiler.Infrastructure.Repositories
             _context = context;
         }
 
+        public async Task<List<string>> GetTenantSuggestions(string term)
+        {
+            term = term.ToLower().Trim();
+
+            IQueryable<string> query;
+
+            if (term.StartsWith("t")) 
+            {
+                query = _context.Tenants
+                    .Where(c => c.TenantCode.ToLower().Contains(term))
+                    .Select(c => c.TenantCode);
+            }
+            else
+            {
+                query = _context.Tenants
+              .Where(c => (c.FirstName + " " + c.LastName).ToLower().StartsWith(term))
+           .Select(c => c.FirstName + " " + c.LastName);
+            }
+
+            return await query.Take(5).ToListAsync();
+        }
+
+        public async Task<List<string>> GetLandlordSuggestions(string term)
+        {
+            term = term.ToLower().Trim();
+
+            IQueryable<string> query;
+
+            if (term.StartsWith("l")) 
+            {
+                query = _context.LandLords
+                    .Where(c => c.LandLordCode.ToLower().Contains(term))
+                    .Select(c => c.LandLordCode);
+            }
+            else
+            {
+                query = _context.LandLords
+                        .Where(c => (c.FirstName + " " + c.LastName).ToLower().StartsWith(term))
+                        .Select(c => c.FirstName + " " + c.LastName);
+            }
+
+            return await query.Take(5).ToListAsync();
+        }
+
+
+        public async Task<List<string>> GetCaseSuggestions(string term)
+        {
+            term = term.ToLower().Trim();
+
+            return await _context.LegalCases
+                .Where(c => c.Casecode.ToLower().Contains(term))
+                .Select(c => c.Casecode)
+                .Take(5)
+                .ToListAsync();
+        }
+
+        public async Task<List<string>> GetReasonHoldoverSuggestions(string term)
+        {
+            term = term.ToLower().Trim();
+
+            return await _context.MstReasonHoldover
+                .Where(c => c.Name.ToLower().ToLower().StartsWith(term))
+                .Select(c => c.Name)
+                .Take(10)
+                .ToListAsync();
+        }
+
+
+
+
+        public async Task<List<string>> GetClientSuggestions(string term)
+        {
+            term = term.ToLower().Trim();
+
+            IQueryable<string> query;
+
+            if (term.StartsWith("c")) 
+            {
+                query = _context.Clients
+                    .Where(c => c.ClientCode.ToLower().Contains(term))
+                    .Select(c => c.ClientCode);
+            }
+            else 
+            {
+                query = _context.Clients
+              .Where(c => (c.FirstName + " " + c.LastName).ToLower().StartsWith(term))
+           .Select(c => c.FirstName + " " + c.LastName);
+            }
+
+            return await query.Take(5).ToListAsync();
+        }
+
+
+
 
         public async Task<PaginationDto<LegalCase>> Search(int pageNumber, int pageSize, CaseFilterDto filters)
         {
@@ -146,399 +240,7 @@ namespace EvictionFiler.Infrastructure.Repositories
             };
         }
 
-        public async Task<List<DashboardSearchResultDto>> SearchDashboardAsync(string searchText)
-        {
-            var result = new List<DashboardSearchResultDto>();
-            searchText = searchText?.Trim().ToLower();
-
-            // 1️⃣ Search by Client Name
-            var clients = await _context.Clients
-                .Include(c=>c.State)
-         .Include(c => c.LandLords)
-             .ThenInclude(l => l.State)
-         .Include(c => c.LandLords)
-             .ThenInclude(l => l.TypeOfOwner)
-         .Include(c => c.LandLords)
-             .ThenInclude(l => l.LandlordType)
-         .Include(c => c.LandLords)
-             .ThenInclude(l => l.Buildings)
-                 .ThenInclude(b => b.State)
-         .Include(c => c.LandLords)
-             .ThenInclude(l => l.Buildings)
-                 .ThenInclude(b => b.PremiseType)
-         .Include(c => c.LandLords)
-             .ThenInclude(l => l.Buildings)
-                 .ThenInclude(b => b.RegulationStatus)
-         .Include(c => c.LandLords)
-             .ThenInclude(l => l.Buildings)
-                 .ThenInclude(b => b.Tenants)
-                     .ThenInclude(t => t.State)
-         .Where(c =>
-             EF.Functions.Like((c.FirstName + " " + c.LastName).ToLower(), $"%{searchText}%") ||
-             EF.Functions.Like(c.FirstName.ToLower(), $"%{searchText}%") ||
-             EF.Functions.Like(c.LastName.ToLower(), $"%{searchText}%") ||
-             EF.Functions.Like(c.ClientCode.ToLower(), $"%{searchText}%")
-         )
-         .ToListAsync();
-
-
-
-            foreach (var client in clients)
-            {
-                foreach (var landlord in client.LandLords)
-                {
-                    foreach (var building in landlord.Buildings)
-                    {
-                        foreach (var tenant in building.Tenants)
-                        {
-                            result.Add(new DashboardSearchResultDto
-                            {
-                                ClientDto = new CreateToClientDto
-                                {
-
-                                    ClientCode = client.ClientCode,   
-                                    FirstName = client.FirstName,     
-                                    LastName = client.LastName,       
-                                    Email = client.Email,            
-                                    Address1 = client.Address1,    
-                                    Address2 = client.Address2,       
-                                    City = client.City,              
-                                    StateId = client.StateId,   
-                                    StateName = client.State.Name,
-                                    ZipCode = client.ZipCode,         
-                                    Phone = client.Phone,        
-                                    CellPhone = client.CellPhone,    
-                                    Fax = client.Fax,                
-                               
-                                },
-                                LandLordDto = new CreateToLandLordDto
-                                {
-
-                                    LandLordCode = landlord.LandLordCode,
-                                    FirstName = landlord.FirstName,
-                                    LastName = landlord.LastName,
-                                    TypeOwnerId = landlord.TypeOfOwnerId,
-                                    TypeOwnerName = landlord.TypeOfOwner.Name,
-                                    Phone = landlord.Phone,
-                                    Email = landlord.Email,
-                                    EINorSSN = landlord.EINorSSN,
-                                    ContactPersonName = landlord.ContactPersonName,
-                                    Address1 = landlord.Address1,
-                                    Address2 = landlord.Address2,
-                                    City = landlord.City,
-                                    StateId = landlord.StateId,
-                                    //StateName = landlord.State.Name,
-                                    Zipcode = landlord.Zipcode,
-                                    DateOfRefreeDeed = landlord.DateOfRefreeDeed,
-                                    LandlordTypeId = landlord.LandlordTypeId,
-                                    
-                                     LandlordTypeName= landlord.LandlordType.Name,
-                                   
-                                },
-                                BuildingDto = new CreateToBuildingDto
-                                {
-
-                                    BuildingCode = building.BuildingCode,
-                                    ApartmentCode = building.ApartmentCode,
-                                    MDRNumber = building.MDRNumber,
-                                    BuildingUnits = building.BuildingUnits,
-                                    PremiseTypeId = building.PremiseTypeId,
-                                    PremiseTypeName = building.PremiseType.Name,
-                                    RegulationStatusId = building.RegulationStatusId,
-                                    RegulationStatusName = building.RegulationStatus.Name,
-                                    PetitionerInterest = building.PetitionerInterest,
-                                    Address1 = building.Address1,
-                                    Address2 = building.Address2,
-                                    City = building.City,
-                                    StateId = building.StateId,
-                                    StateName = building.State != null ? building.State.Name : null,
-                                    Zipcode = building.Zipcode,
-
-                                },
-                                TenantDto = new CreateToTenantDto
-                                {
-
-                                    TenantCode = tenant.TenantCode,
-                                    FirstName = tenant.FirstName,
-                                    LastName = tenant.LastName,
-                                    Email = tenant.Email,
-                                    Phone = tenant.Phone,
-                                    LanguageId = tenant.LanguageId,
-                                    TenancyTypeId = tenant.TenancyTypeId,
-                                    SSN = tenant.SSN,
-                                    TenantRecord = tenant.TenantRecord,
-                                    RenewalOffer = tenant.RenewalOffer,
-                                    HasPossession = tenant.HasPossession,
-                                    HasRegulatedTenancy = tenant.HasRegulatedTenancy,
-                                    OtherOccupants = tenant.OtherOccupants,
-                                    HasPriorCase = tenant.HasPriorCase,
-                                    
-                                    RentDueEachMonthOrWeekId = tenant.RentDueEachMonthOrWeekId,
-                                    MonthlyRent = tenant.MonthlyRent,
-                                    TenantShare = tenant.TenantShare,
-                                    SocialServices = tenant.SocialServices,
-                                 
-                                    ERAPPaymentReceivedDate = tenant.ERAPPaymentReceivedDate,
-                                    UnitOrApartmentNumber = tenant.UnitOrApartmentNumber,
-                                    IsUnitIllegalId = tenant.IsUnitIllegalId,
-                                    MoveInDate = tenant.MoveInDate,
-                                }
-                            });
-                        }
-                    }
-                }
-            }
-
-            // 2️⃣ Search by Landlord Name
-            var landlords = await _context.LandLords
-              .Include(l => l.State)
-              .Include(l => l.TypeOfOwner)
-                .Include(l => l.LandlordType)
-             .Include(l => l.Buildings)
-                 .ThenInclude(b => b.State)
-       
-             .Include(l => l.Buildings)
-                 .ThenInclude(b => b.PremiseType)
         
-             .Include(l => l.Buildings)
-                 .ThenInclude(b => b.RegulationStatus)
-        
-             .Include(l => l.Buildings)
-                 .ThenInclude(b => b.Tenants)
-                     .ThenInclude(t => t.State)
-                  .Where(l =>
-                             (l.FirstName + " " + l.LastName).ToLower().Contains(searchText.ToLower()) // ✅ Full Name
-                             || l.FirstName.ToLower().Contains(searchText.ToLower())                  // ✅ First Name
-                             || l.LastName.ToLower().Contains(searchText.ToLower())
-                               || l.LandLordCode.ToLower().Contains(searchText) // ✅ Last Name
-                         )
-                .ToListAsync();
-
-            foreach (var landlord in landlords)
-            {
-                foreach (var building in landlord.Buildings)
-                {
-                    foreach (var tenant in building.Tenants)
-                    {
-                        result.Add(new DashboardSearchResultDto
-                        {
-                            LandLordDto = new CreateToLandLordDto
-                            {
-
-                                LandLordCode = landlord.LandLordCode,
-                                FirstName = landlord.FirstName,
-                                LastName = landlord.LastName,
-                                TypeOwnerId = landlord.TypeOfOwnerId,
-                                TypeOwnerName = landlord.TypeOfOwner.Name,
-                                Phone = landlord.Phone,
-                                Email = landlord.Email,
-                                EINorSSN = landlord.EINorSSN,
-                                ContactPersonName = landlord.ContactPersonName,
-                                Address1 = landlord.Address1,
-                                Address2 = landlord.Address2,
-                                City = landlord.City,
-                                StateId = landlord.StateId,
-                                //StateName = landlord.State.Name,
-                                Zipcode = landlord.Zipcode,
-                                DateOfRefreeDeed = landlord.DateOfRefreeDeed,
-                                LandlordTypeId = landlord.LandlordTypeId,
-
-                                LandlordTypeName = landlord.LandlordType.Name,
-                            },
-                            BuildingDto = new CreateToBuildingDto
-                            {
-                                BuildingCode = building.BuildingCode,
-                                ApartmentCode = building.ApartmentCode,
-                                MDRNumber = building.MDRNumber,
-                                BuildingUnits = building.BuildingUnits,
-                                PremiseTypeId = building.PremiseTypeId,
-                                PremiseTypeName = building.PremiseType.Name,
-                                RegulationStatusId = building.RegulationStatusId,
-                                RegulationStatusName = building.RegulationStatus.Name,
-                                PetitionerInterest = building.PetitionerInterest,
-                                Address1 = building.Address1,
-                                Address2 = building.Address2,
-                                City = building.City,
-                                StateId = building.StateId,
-                                StateName = building.State != null ? building.State.Name : null,
-                                Zipcode = building.Zipcode,
-
-                            },
-                            TenantDto = new CreateToTenantDto
-                            {
-                                TenantCode = tenant.TenantCode,
-                                FirstName = tenant.FirstName,
-                                LastName = tenant.LastName,
-                                Email = tenant.Email,
-                                Phone = tenant.Phone,
-                                LanguageId = tenant.LanguageId,
-                                TenancyTypeId = tenant.TenancyTypeId,
-                                SSN = tenant.SSN,
-                                TenantRecord = tenant.TenantRecord,
-                                RenewalOffer = tenant.RenewalOffer,
-                                HasPossession = tenant.HasPossession,
-                                HasRegulatedTenancy = tenant.HasRegulatedTenancy,
-                                OtherOccupants = tenant.OtherOccupants,
-                                HasPriorCase = tenant.HasPriorCase,
-
-                                RentDueEachMonthOrWeekId = tenant.RentDueEachMonthOrWeekId,
-                                MonthlyRent = tenant.MonthlyRent,
-                                TenantShare = tenant.TenantShare,
-                                SocialServices = tenant.SocialServices,
-
-                                ERAPPaymentReceivedDate = tenant.ERAPPaymentReceivedDate,
-                                UnitOrApartmentNumber = tenant.UnitOrApartmentNumber,
-                                IsUnitIllegalId = tenant.IsUnitIllegalId,
-                                MoveInDate = tenant.MoveInDate,
-                            }
-                        });
-                    }
-                }
-            }
-
-            // 3️⃣ Search by Building Name
-            var buildings = await _context.Buildings
-
-                .Include(b=>b.State)
-                 .Include(b => b.PremiseType)
-                   .Include(b => b.RegulationStatus)
-                 .Include(b => b.Tenants)
-                     .ThenInclude(t => t.State)
-                .Where(b => b.BuildingCode.ToLower().Contains(searchText))
-                .ToListAsync();
-
-            foreach (var building in buildings)
-            {
-                foreach (var tenant in building.Tenants)
-                {
-                    result.Add(new DashboardSearchResultDto
-                    {
-                        BuildingDto = new CreateToBuildingDto
-                        {
-                            BuildingCode = building.BuildingCode,
-                            ApartmentCode = building.ApartmentCode,
-                            MDRNumber = building.MDRNumber,
-                            BuildingUnits = building.BuildingUnits,
-                            PremiseTypeId = building.PremiseTypeId,
-                            PremiseTypeName = building.PremiseType.Name,
-                            RegulationStatusId = building.RegulationStatusId,
-                            RegulationStatusName = building.RegulationStatus.Name,
-                            PetitionerInterest = building.PetitionerInterest,
-                            Address1 = building.Address1,
-                            Address2 = building.Address2,
-                            City = building.City,
-                            StateId = building.StateId,
-                            StateName = building.State != null ? building.State.Name : null,
-                            Zipcode = building.Zipcode,
-
-                        },
-                        TenantDto = new CreateToTenantDto
-                        {
-
-                            TenantCode = tenant.TenantCode,
-                            FirstName = tenant.FirstName,
-                            LastName = tenant.LastName,
-                            Email = tenant.Email,
-                            Phone = tenant.Phone,
-                            LanguageId = tenant.LanguageId,
-                            TenancyTypeId = tenant.TenancyTypeId,
-                            SSN = tenant.SSN,
-                            TenantRecord = tenant.TenantRecord,
-                            RenewalOffer = tenant.RenewalOffer,
-                            HasPossession = tenant.HasPossession,
-                            HasRegulatedTenancy = tenant.HasRegulatedTenancy,
-                            OtherOccupants = tenant.OtherOccupants,
-                            HasPriorCase = tenant.HasPriorCase,
-
-                            RentDueEachMonthOrWeekId = tenant.RentDueEachMonthOrWeekId,
-                            MonthlyRent = tenant.MonthlyRent,
-                            TenantShare = tenant.TenantShare,
-                            SocialServices = tenant.SocialServices,
-
-                            ERAPPaymentReceivedDate = tenant.ERAPPaymentReceivedDate,
-                            UnitOrApartmentNumber = tenant.UnitOrApartmentNumber,
-                            IsUnitIllegalId = tenant.IsUnitIllegalId,
-                            MoveInDate = tenant.MoveInDate,
-                        }
-                    });
-                }
-            }
-
-            // 4️⃣ Search by Tenant Name
-            var tenants = await _context.Tenants
-                  .Where(t =>
-                             (t.FirstName + " " + t.LastName).ToLower().Contains(searchText.ToLower()) // ✅ Full Name
-                             || t.FirstName.ToLower().Contains(searchText.ToLower())                  // ✅ First Name
-                             || t.LastName.ToLower().Contains(searchText.ToLower())
-                               || t.TenantCode.ToLower().Contains(searchText) // ✅ Last Name
-                         )
-                .ToListAsync();
-
-            foreach (var tenant in tenants)
-            {
-                result.Add(new DashboardSearchResultDto
-                {
-                    TenantDto = new CreateToTenantDto
-                    {
-
-                        TenantCode = tenant.TenantCode,
-                        FirstName = tenant.FirstName,
-                        LastName = tenant.LastName,
-                        Email = tenant.Email,
-                        Phone = tenant.Phone,
-                        LanguageId = tenant.LanguageId,
-                        TenancyTypeId = tenant.TenancyTypeId,
-                        SSN = tenant.SSN,
-                        TenantRecord = tenant.TenantRecord,
-                        RenewalOffer = tenant.RenewalOffer,
-                        HasPossession = tenant.HasPossession,
-                        HasRegulatedTenancy = tenant.HasRegulatedTenancy,
-                        OtherOccupants = tenant.OtherOccupants,
-                        HasPriorCase = tenant.HasPriorCase,
-
-                        RentDueEachMonthOrWeekId = tenant.RentDueEachMonthOrWeekId,
-                        MonthlyRent = tenant.MonthlyRent,
-                        TenantShare = tenant.TenantShare,
-                        SocialServices = tenant.SocialServices,
-
-                        ERAPPaymentReceivedDate = tenant.ERAPPaymentReceivedDate,
-                        UnitOrApartmentNumber = tenant.UnitOrApartmentNumber,
-                        IsUnitIllegalId = tenant.IsUnitIllegalId,
-                        MoveInDate = tenant.MoveInDate,
-                    }
-                });
-            }
-
-            // 5️⃣ Search by Case Number / Case Type
-            var cases = await _context.LegalCases 
-                .Include(cs=>cs.CaseType)
-                 .Include(cs => cs.ReasonHoldover)
-                .Where(cs => cs.Casecode.ToLower().Contains(searchText)
-                          || cs.CaseType.Name.ToLower().Contains(searchText))
-                .ToListAsync();
-
-            foreach (var legalCase in cases)
-            {
-                result.Add(new DashboardSearchResultDto
-                {
-                    caseDto = new CreateToEditLegalCaseModel
-                    {
-                        Id = legalCase.Id,
-                        Casecode = legalCase.Casecode,
-                        CaseTypeName = legalCase.CaseType.Name,
-                        ReasonHoldoverName = legalCase.ReasonHoldover.Name,
-                        Attrney = legalCase.Attrney,
-                        AttrneyContactInfo = legalCase.AttrneyContactInfo,
-                        Firm = legalCase.Firm
-
-
-                    },
-
-                });
-            }
-
-            return result;
-        }
     }
 
 }
