@@ -1,4 +1,4 @@
-﻿using EvictionFiler.Application.Interfaces.IRepository;
+﻿using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;

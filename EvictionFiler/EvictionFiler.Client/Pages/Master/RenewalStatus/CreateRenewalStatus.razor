@@ -1,0 +1,131 @@
+﻿@using EvictionFiler.Application.DTOs
+
+@using EvictionFiler.Application.DTOs.MasterDtos
+@using EvictionFiler.Application.DTOs.MasterDtos.RenewalStatusDto
+@using EvictionFiler.Application.DTOs.UserDto
+@using EvictionFiler.Application.Interfaces.IRepository
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Application.Interfaces.IServices.Master
+@using EvictionFiler.Client.SpinnerService
+@using EvictionFiler.Domain.Entities.Master
+@using Radzen.Blazor
+@using Syncfusion.Blazor.RichTextEditor
+
+@inject IRenewalStatusService RenewalStatusService
+@inject SpinnerService spinnerservice
+@inject NavigationManager Navigation
+
+<style>
+    .offcanvas.show {
+        transform: translateX(0%);
+    }
+
+    .btn-primary {
+        background-color: #1F365D;
+        border-color: #1F365D;
+    }
+
+        .btn-primary:hover {
+            background-color: #162646;
+            border-color: #162646;
+        }
+    .offcanvas {
+        transform: translateX(100%);
+        width: 450px !important;
+    }
+
+    .color-text {
+        color: #1F365D;
+    }
+
+    .required-label::after {
+        content: " *";
+        color: red;
+    }
+
+    /* Modal Content Styling */
+    .modal-dialog {
+        max-width: 900px;
+    }
+
+    .modal-content {
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    .modal-body {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .manage {
+        margin-top: 30px;
+    }
+</style>
+
+<div class="offcanvas offcanvas-end show border-start shadow bg-white"
+     tabindex="-1" id="createClient"
+     aria-labelledby="createUserLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="createUserLabel">Add New RenewalStatus</h5>
+        <button type="button" class="btn-close text-reset" @onclick="HideAsync"></button>
+    </div>
+
+    <div class="offcanvas-body">
+        <EditForm Model="@createRenewalStatus" OnValidSubmit="Submit">
+            <DataAnnotationsValidator />
+
+            <div class="row mb-3 d-flex align-items-center">
+                <div class="col-md-8">
+                    <label class="form-label color-text required-label">Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
+                        <InputText class="form-control" @bind-Value="createRenewalStatus.Name" placeholder="Enter RenewalStatus Name" />
+                    </div>
+                    <ValidationMessage For="@(() => createRenewalStatus.Name)" />
+                </div>
+                <div class="col-md-4 manage">
+                   
+                  
+
+                    <button type="submit" class="btn btn-primary ">Submit</button>
+                 
+                </div>
+              
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public EditToRenewalStatusDto createRenewalStatus { get; set; } = new();
+    [Parameter] public EventCallback OnClose { get; set; }
+
+
+
+    public async Task HideAsync()
+    {
+        await OnClose.InvokeAsync();
+        StateHasChanged();
+    }
+
+    private async Task Submit()
+    {
+        spinnerservice.Show();
+
+        if (createRenewalStatus == null)
+            return;
+
+        var isSaved = await RenewalStatusService.Create(createRenewalStatus);
+        if (isSaved)
+        {
+            Navigation.NavigateTo("/Settings/renewal-status?success=true", true);
+        }
+    }
+
+
+
+   
+}

@@ -430,7 +430,7 @@
                         @foreach (var submenu in submenuMap["Drafting"])
                         {
                             <a class="submenu-link text-decoration-none @(activeMenu == submenu.Title ? "active-submenu" : "")"
-                               @onclick="@(() => NavigateToReporting(submenu.Title))">
+                               >
 
                                 <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
                                 <span class="submenu-text hide-on-collapse">@submenu.Title</span>
@@ -444,7 +444,7 @@
                         @foreach (var submenu in submenuMap["Drafting"])
                         {
                             <a class="dropdown-item submenu-link text-decoration-none   @(activeMenu == submenu.Title ? "active-submenu" : "")"
-                               @onclick="@(() => NavigateToReporting(submenu.Title))">
+                            >
 
                                 <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
                                 <span class="submenu-text ">@submenu.Title</span>
@@ -452,15 +452,55 @@
                         }
                     </div>
                 }
-                    
+
+
+                <div class="nav flex-column "
+                     @onmouseover="@(() => HoveredMenu = "Settings")"
+                     @onmouseout="@(() => HoveredMenu = null)">
+                    <a title="Manage Forms" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Settings") || (isCollapsed && IsSubmenuActive("Forms")) ? "active" : "")"
+                       @onclick="@(() => ToggleMenu("Settings"))">
+                        <i class="fa-solid fa-gears"></i>
+
+
+                        <span class="hide-on-collapse menu-label">Settings</span>
+                    </a>
+
                 </div>
+
+                @if (!isCollapsed && IsExpanded("Settings"))
+                {
+                    <div class="ms-3 submenu-container">
+                        @foreach (var submenu in submenuMap["Settings"])
+                        {
+                            <a class="submenu-link text-decoration-none @(activeMenu == submenu.Title ? "active-submenu" : "")"
+                               @onclick="@(() => NavigateToSettings(submenu.Title))">
+
+                                <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
+                                <span class="submenu-text hide-on-collapse">@submenu.Title</span>
+                            </a>
+                        }
+                    </div>
+                }
+                else if (isCollapsed && HoveredMenu == "Settings")
+                {
+                    <div class="flyout-menu submenu-container">
+                        @foreach (var submenu in submenuMap["Settings"])
+                        {
+                            <a class="dropdown-item submenu-link text-decoration-none   @(activeMenu == submenu.Title ? "active-submenu" : "")"
+                               @onclick="@(() => NavigateToSettings(submenu.Title))">
+
+                                <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
+                                <span class="submenu-text ">@submenu.Title</span>
+                            </a>
+                        }
+                    </div>
+                }
+
+            </div>
          
 
             <hr style="color:gray" />
             <div class="profile-section mt-auto d-flex flex-column">
-
-                <!-- Profile Link -->
-                <!-- Profile Link -->
                 <a class="sidebar-link text-decoration-none p-2 d-flex align-items-center justify-content-between"
                    @onclick="ToggleProfileOptions">
                     <div class="d-flex align-items-center">
@@ -546,7 +586,7 @@
         string[] menus = {
     "Home", "ManageCases", "Users", "Client", "Drafting",
     "Reporting", "Accounting", "Maintenance",
-    "Process", "Transfer", "FormsPrint","NYCEFEmail"
+    "Process", "Transfer", "FormsPrint","NYCEFEmail" , "Settings"
 };
         foreach (var menu in menus)
         {
@@ -564,6 +604,8 @@
         }
 
     }
+
+
 
 
     void ToggleMenu(string menu)
@@ -604,7 +646,8 @@
                 break;
             case "NYCEFEmail":
                 break;
-
+            case "Settings":
+                break;
 
             default:
                 nav.NavigateTo("/");
@@ -740,10 +783,79 @@
             ("Counterclaims", "fa-solid fa-balance-scale"),
             ("Notice of Appearance", "fa-solid fa-eye"),
             ("Stipulation to Discontinue", "fa-solid fa-file-contract"),
-            ("Stipulation of Settlement", "fa-solid fa-handshake")
+            ("Stipulation of Settlement", "fa-solid fa-handshake"),
+                 
+
         }
+
+
+    },
+
+     { "Settings", new()
+        {
+          
+            ("State", "fa-solid fa-map-location-dot"),
+            ("CaseType", "fa-solid fa-briefcase"),
+            ("LandlordType", "fa-solid fa-user-tie"),
+            ("TenancyType", "fa-solid fa-house-user"),
+            ("PremiseType", "fa-solid fa-building"),
+            ("Language", "fa-solid fa-language"),
+            ("ReasonHoldover", "fa-solid fa-file-circle-question"),
+            ("RenewalStatus", "fa-solid fa-arrows-rotate"),
+            ("RentRegulation", "fa-solid fa-file-invoice-dollar"),
+            ("TypeOfOwner", "fa-solid fa-user-tag"),
+            ("UnitIlligal", "fa-solid fa-house-crack")
+
+        }
+
+
     }
 };
+
+
+    void NavigateToSettings(string submenu)
+    {
+        activeMenu = submenu;
+
+        switch (submenu)
+        {
+            case "State":
+                nav.NavigateTo("/Settings/State");
+                break;
+            case "CaseType":
+                nav.NavigateTo("/Settings/case-type");
+                break;
+            case "LandlordType":
+                nav.NavigateTo("/Settings/landlord-type");
+                break;
+            case "TenancyType":
+                nav.NavigateTo("/Settings/tenancy-type");
+                break;
+            case "PremiseType":
+                nav.NavigateTo("/Settings/premise-type");
+                break;
+            case "Language":
+                nav.NavigateTo("/Settings/language");
+                break;
+            case "ReasonHoldover":
+                nav.NavigateTo("/Settings/reason-holdover");
+                break;
+            case "RenewalStatus":
+                nav.NavigateTo("/Settings/renewal-status");
+                break;
+            case "RentRegulation":
+                nav.NavigateTo("/Settings/rent-regulation");
+                break;
+            case "TypeOfOwner":
+                nav.NavigateTo("/Settings/type-of-owner");
+                break;
+            case "UnitIlligal":
+                nav.NavigateTo("/Settings/unit-illigal");
+                break;
+
+
+        }
+    }
 
 
     void NavigateToReporting(string submenu)
