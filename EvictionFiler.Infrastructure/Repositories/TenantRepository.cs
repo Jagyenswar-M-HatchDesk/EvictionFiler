@@ -57,51 +57,38 @@ namespace EvictionFiler.Infrastructure.Repositories
             return tenant;
         }
 
-		public async Task<List<EditToTenantDto>> SearchTenantAsync(string query, Guid clientId)
-		{
-			query = query?.Trim().ToLower() ?? "";
+        public async Task<List<EditToTenantDto>> SearchTenantAsync(string query, Guid clientId)
+        {
+            query = query?.Trim().ToLower() ?? "";
 
-			//var tenants = await _dbContext.Tenants
-			//	.Include(t => t.Building)
-			//		.ThenInclude(b => b.Landlord)
-			//	.Where(t =>
-			//		t.Building.Landlord.ClientId == clientId &&
-			//		(t.FirstName.ToLower().Contains(query) || t.LastName.ToLower().Contains(query))
+            var tenants = await _dbContext.Tenants
+                .Include(t => t.Building)
+                    .ThenInclude(b => b.Landlord)
+                .Where(t =>
+                    t.Building.Landlord.ClientId == clientId && (
+                        t.TenantCode.ToLower().Contains(query) ||
+                        (t.FirstName + " " + t.LastName).ToLower().StartsWith(query)
+                    )
+                )
+                .Select(t => new EditToTenantDto
+                {
+                    Id = t.Id,
+                    FirstName = t.FirstName,
+                    LastName = t.LastName,
+                    Email = t.Email,
+                    Phone = t.Phone,
+                    TenantCode = t.TenantCode
+                })
+                .Take(10)
+                .ToListAsync();
 
-			//	)
-			//	.Select(t => new EditToTenantDto
-			//	{
-			//		Id = t.Id,
-			//		FirstName = t.FirstName,
-			//		LastName = t.LastName,
-			//		Email = t.Email,
-			//		Phone = t.Phone,
-			//		TenantCode = t.TenantCode
-			//	})
-			//	.ToListAsync();
-
-			var tenants = await _dbContext.Tenants
-	.Include(t => t.Building)
-		.ThenInclude(b => b.Landlord)
-	.Where(t => t.Building.Landlord.ClientId == clientId)
-	.Select(t => new EditToTenantDto
-	{
-		Id = t.Id,
-		FirstName = t.FirstName,
-		LastName = t.LastName,
-		Email = t.Email,
-		Phone = t.Phone,
-		TenantCode = t.TenantCode
-	})
-	.ToListAsync();
-
-
-			return tenants;
-		}
+            return tenants;
+        }
 
 
 
-		public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? buildingId)
+
+        public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? buildingId)
 		{
 			var apartmentIds = await _dbContext.Buildings
 			.Where(a => a.Id == buildingId && (a.IsDeleted == false || a.IsDeleted == null))

@@ -10,126 +10,10 @@
 @inject NavigationManager Navigation
 
 
-
-<style>
-    .flyout-menu {
-        border-radius: 7px;
-        overflow: hidden;
-    }
-
-    .menu-icon
-    {
-        width: 17px;
-         height: 20px; 
-        margin-left: 3px;
-    }
-    /* Submenu container */
-    .submenu-container {
-        display: flex;
-        flex-direction: column;
-        margin-top: 5px;
-    }
-
-    /* Submenu link */
-    .submenu-link {
-        display: flex;
-        align-items: flex-start; 
-        gap: 10px; 
-        padding: 6px 10px;
-        border-radius: 5px;
-        color: #1F365D;
-        cursor: pointer !important;
-        transition: all 0.2s ease;
-   
-        line-height: 1.3; 
-        cursor: pointer !important;
-    }
-
-        /* Hover effect */
-        .submenu-link:hover {
-            
-            color: #f2f0ec !important;
-            background: #6b84af;
-            text-decoration: none;
-        }
-
-    /* Submenu icon */
-    .submenu-icon {
-        min-width: 20px; /* ✅ Fix icon width */
-        text-align: center;
-        font-size: 16px;
-        margin-top: 2px; /* Align top for multiline */
-    }
-
-    /* Submenu text */
-    .submenu-text {
-        font-size: 14px;
-        white-space: normal; /* ✅ Allow text wrapping */
-        word-break: break-word; /* ✅ Break long words */
-        flex: 1; /* Take remaining space */
-    }
-
-
-    .active-submenu {
-        background-color: #0d6efd;
-        color: #fff !important;
-        border-radius: 5px;
-    }
-
-    .create-case-btn {
-        background-color: #eadf83; /* light yellow */
-        color: #333;
-        font-weight: 600;
-        border: none;
-        border-radius: 8px;
-        padding: 8px 12px;
-        margin: 10px 12px;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        transition: all 0.3s ease;
-        gap:5px;
-        width: 90%;
-        text-align: left;
-    }
-
-        .create-case-btn .icon-plus {
-       
-            font-size: 14px;
-        }
-
-    /* 🔒 When sidebar is collapsed — use same class that controls it */
-    .collapsed .create-case-btn {
-        width: 30px;
-        height: 30px;
-        padding: 0;
-        justify-content: center;
-        margin: 10px auto; /* center the circle */
-        border-radius: 50%;
-    }
-
-    .collapsed .create-case-btn .icon-plus{
-            display: flex;
-            font-size: 14px;
-            justify-content: center;
-            align-items: center;
-    }
-
-        /* Hide the text when collapsed */
-    .collapsed .create-case-btn span {
-            display: none;
-        }
-
-
-
-
-</style>
 <div class="d-flex navbar-custom">
     @if (!isSettingsMode)
     {
         <nav class="sidebar d-flex flex-column vh-100 @(isCollapsed ? "collapsed" : "")">
-
-
             @if (isCollapsed)
             {
                 <div class="fw-bold"
@@ -144,8 +28,7 @@
                      class="logo-img" />
             }
 
-           
-
+          
             <div class="flex-grow-1 flex-column v-scroll-auto scroll-hidden">
                 <div class="nav flex-column">
                     <button class="create-case-btn" >
@@ -164,7 +47,6 @@
                             <i class="fa-solid fa-gauge menu-icon" ></i>
 
                             <span class="hide-on-collapse menu-label" > Dashboard</span>
-
 
                         </a>
                         
@@ -388,7 +270,7 @@
                                 <span class="submenu-text hide-on-collapse">@submenu.Title</span>
                             </a>
                         }
-                    </div>
+                    </div><SideMenu />
                 }
                 else if (isCollapsed && HoveredMenu == "Process")
                 {
@@ -534,7 +416,8 @@
                      @onmouseout="@(() => HoveredMenu = null)">
                     <a title="Manage Forms" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Drafting") || (isCollapsed && IsSubmenuActive("Forms")) ? "active" : "")"
                        @onclick="@(() => ToggleMenu("Drafting"))">
-                            <i class="fa-solid fa-user menu-icon"></i>
+                          <i class="fa-solid fa-drafting-compass"></i>
+
 
                         <span class="hide-on-collapse menu-label">Drafting Library</span>
                         </a>
@@ -577,36 +460,47 @@
             <div class="profile-section mt-auto d-flex flex-column">
 
                 <!-- Profile Link -->
-
-                <a  class="sidebar-link text-decoration-none p-2" @onclick="ToggleProfileOptions">
-                    <i class="fa-regular fa-user menu-icon"></i>
-
-                    @if (Name != null)
+                <!-- Profile Link -->
+                <a class="sidebar-link text-decoration-none p-2 d-flex align-items-center justify-content-between"
+                   @onclick="ToggleProfileOptions">
+                    <div class="d-flex align-items-center">
+                        <i class="fa-regular fa-user menu-icon"></i>
+                        @if (!isCollapsed && Name != null)
+                        {
+                            <span class="hide-on-collapse menu-label ms-2">@Name</span>
+                        }
+                    </div>
+                    @if (!isCollapsed)
                     {
-                        <span class="hide-on-collapse menu-label">@Name</span>
+                        <i class="fa-solid @(showProfileOptions ? "fa-chevron-up" : "fa-chevron-down")"></i>
                     }
                 </a>
+
+                <!-- Submenu -->
                 @if (showProfileOptions)
                 {
-                    <div class="bg-white border rounded shadow p-2 position-absolute" style="bottom: 60px; left: 10px; z-index: 1000;">
-                        <a href="javascript:void(0);" class="dropdown-item text-dark" @onclick="LogoutUser">
+                    <div class="submenu-container @(isCollapsed ? "submenu-flyout" : "")">
+                        <a href="/profile" class="dropdown-item text-dark d-flex align-items-center p-2">
+                            <i class="fa-solid fa-id-badge me-2"></i> My Profile
+                        </a>
+                     
+                        <a href="javascript:void(0);" class="dropdown-item text-dark d-flex align-items-center p-2"
+                           @onclick="LogoutUser">
                             <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
                         </a>
                     </div>
                 }
 
-
+                <!-- Help Link -->
                 <a href="NotImplemented" class="sidebar-link text-decoration-none p-2">
                     <i class="fa-solid fa-circle-question menu-icon"></i>
-
                     <span class="hide-on-collapse menu-label">Help/FAQ</span>
                 </a>
-                <!-- Settings Link -->
 
-                <div class="sidebar-bottom  d-flex flex-column  position-relative">
-                    <a class="sidebar-link text-decoration-none p-2 " @onclick="ToggleSettingsMode">
+                <!-- Settings & Collapse Button -->
+                <div class="sidebar-bottom d-flex flex-column position-relative">
+                    <a class="sidebar-link text-decoration-none p-2" @onclick="ToggleSettingsMode">
                         <i class="fa-solid fa-gears"></i>
-
                         <span class="hide-on-collapse menu-label">Settings</span>
                     </a>
                     <div class="toggle-btns" @onclick="ToggleSidebar">
@@ -614,6 +508,7 @@
                     </div>
                 </div>
             </div>
+
         </nav>
 
     }
@@ -649,7 +544,7 @@
         }
 
         string[] menus = {
-    "Home", "ManageCases", "Users", "Client", "Forms",
+    "Home", "ManageCases", "Users", "Client", "Drafting",
     "Reporting", "Accounting", "Maintenance",
     "Process", "Transfer", "FormsPrint","NYCEFEmail"
 };
@@ -691,7 +586,7 @@
             case "Client":
                 nav.NavigateTo("/clients");
                 break;
-            case "Forms":
+            case "Drafting":
                 nav.NavigateTo("/manage-forms");
                 break;
             case "Reporting":
