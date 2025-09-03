@@ -159,6 +159,7 @@ namespace EvictionFiler.Application.Services
 					Phone = client.Phone,
 					CellPhone = client.CellPhone,
 					Fax = client.Fax,
+					CreatedBy = client.CreatedBy,
 				};
 
 				await _clientRepo.AddAsync(newclient);

@@ -35,6 +35,8 @@ namespace EvictionFiler.Domain.Entities
 		public string? CellPhone { get; set; }
 		[MaxLength(50)]
 		public string? Fax { get; set; } 
+
+	
 		public ICollection<LandLord>? LandLords { get; set; }
 	}
 }

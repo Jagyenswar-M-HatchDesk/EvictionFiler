@@ -27,7 +27,7 @@ namespace EvictionFiler.Server.Services
 
             try
             {
-                var result = await _sessionStorage.GetAsync<string>("jwt_token");  // JS interop (must be after render!)
+                var result = await _sessionStorage.GetAsync<string>("jwt_token");  
                 if (result.Success && result.Value is string token)
                 {
                     var handler = new JwtSecurityTokenHandler();
@@ -46,6 +46,7 @@ namespace EvictionFiler.Server.Services
         }
 
 
+
         public async Task SetTokenAsync(string token)
         {
             await _sessionStorage.SetAsync("jwt_token", token);
@@ -53,10 +54,12 @@ namespace EvictionFiler.Server.Services
             var handler = new JwtSecurityTokenHandler();
             var jwt = handler.ReadJwtToken(token);
             var identity = new ClaimsIdentity(jwt.Claims, "jwt");
+
             _cachedAuthState = new AuthenticationState(new ClaimsPrincipal(identity));
 
             NotifyAuthenticationStateChanged(Task.FromResult(_cachedAuthState));
         }
+
 
 
         public async Task ClearTokenAsync()

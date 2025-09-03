@@ -10,6 +10,13 @@
 @using EvictionFiler.Client.SpinnerService
 @using EvictionFiler.Domain.Entities.Master
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Authorization;
+@using System.Security.Claims
+
+
+@using EvictionFiler.Client.Jwt
+@inject JwtAuthStateProviders _authStateProvider
+
 @inject SpinnerService spinnerservice
 
 @inject IClientService _clientService
@@ -25,6 +32,9 @@
 @inject ITenancyTypeRepository TenancyTypeRepository
 @inject ILandlordTypeRepository LandlordTypeRepository
 @inject IDateRentRepository  DateRentRepository
+
+
+
 
 @rendermode InteractiveAuto
 @inject NavigationManager Navigation
@@ -1711,7 +1721,7 @@ aria-labelledby="createUserLabel">
 
 
 
-
+    private Guid? userId;
 
 
 
@@ -1720,6 +1730,33 @@ aria-labelledby="createUserLabel">
         spinnerservice.Show();
         if (createClient == null)
             return;
+
+        // var userId = await _authStateProvider.GetAuthenticationStateAsync();
+        // if (!string.IsNullOrEmpty(userId) && Guid.TryParse(userId, out Guid userGuid))
+        // {
+        //     createClient.CreatedBy = userGuid;
+        // }
+        // else
+        // {
+        //     // unauthenticated user
+        //     createClient.CreatedBy = Guid.Empty;
+        // }
+
+        var authState = await _authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userGuid))
+        {
+            createClient.CreatedBy = userGuid;
+        }
+        else
+        {
+            // unauthenticated user
+            createClient.CreatedBy = Guid.Empty;
+        }
+
 
         // Assign LandLords to Client
         createClient.editLandLords = savelandlordList;

@@ -2,6 +2,7 @@
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +18,129 @@ namespace EvictionFiler.Infrastructure.Repositories
             _context = context;
         }
 
+        public async Task<int> GetTotalCasesCountAsync()
+        {
+            return await _context.LegalCases.CountAsync();
+        }
 
-      
+        public async Task<List<LegalCase>> GetTodayCasesAsync()
+        {
+
+            var today = DateTime.Today;
+            var query = _context.LegalCases
+        .AsNoTracking()
+        .Where(c => c.CreatedOn.Date == today);
+
+
+            var items = await query
+                .OrderByDescending(c => c.CreatedOn)
+
+                .Select(c => new LegalCase
+                {
+                    Id = c.Id,
+                    Casecode = c.Casecode,
+                    CreatedOn = c.CreatedOn,
+                    ReasonHoldover = c.ReasonHoldover,
+                    CaseType = c.CaseType != null ? new CaseType
+                    {
+                        Name = c.CaseType.Name
+                    } : new CaseType(),
+                    Clients = c.Clients != null ? new Client
+                    {
+                        FirstName = c.Clients.FirstName,
+                        LastName = c.Clients.LastName,
+                        ClientCode = c.Clients.ClientCode
+                    } : new Client(),
+                    LandLords = c.LandLords != null ? new LandLord
+                    {
+                        FirstName = c.LandLords.FirstName,
+                        LastName = c.LandLords.LastName,
+                        LandLordCode = c.LandLords.LandLordCode
+                    } : new LandLord(),
+                    Buildings = c.Buildings != null ? new Building
+                    {
+                        BuildingCode = c.Buildings.BuildingCode
+                    } : new Building(),
+                    RegulationStatus = c.RegulationStatus != null ? new RegulationStatus
+                    {
+                        Name = c.RegulationStatus.Name,
+
+                    } : new RegulationStatus(),
+
+                    LandlordType = c.LandlordType != null ? new LandlordType
+                    {
+                        Name = c.LandlordType.Name,
+
+                    } : new LandlordType(),
+                    Tenants = c.Tenants != null ? new Tenant
+                    {
+                        TenantCode = c.Tenants.TenantCode,
+                        FirstName = c.Tenants.FirstName,
+                        LastName = c.Tenants.LastName
+                    } : new Tenant()
+                })
+                .ToListAsync();
+            return items;
+
+        }
+
+        public async Task<List<LegalCase>> GetAllCasesAsync()
+        {
+            var query = _context.LegalCases
+                .AsNoTracking();
+
+
+            var items = await query
+                .OrderByDescending(c => c.CreatedOn)
+              
+                .Select(c => new LegalCase
+                {
+                    Id = c.Id,
+                    Casecode = c.Casecode,
+                    CreatedOn = c.CreatedOn,
+                    ReasonHoldover = c.ReasonHoldover,
+                    CaseType = c.CaseType != null ? new CaseType
+                    {
+                        Name = c.CaseType.Name
+                    } : new CaseType(),
+                    Clients = c.Clients != null ? new Client
+                    {
+                        FirstName = c.Clients.FirstName,
+                        LastName = c.Clients.LastName,
+                        ClientCode = c.Clients.ClientCode
+                    } : new Client(),
+                    LandLords = c.LandLords != null ? new LandLord
+                    {
+                        FirstName = c.LandLords.FirstName,
+                        LastName = c.LandLords.LastName,
+                        LandLordCode = c.LandLords.LandLordCode
+                    } : new LandLord(),
+                    Buildings = c.Buildings != null ? new Building
+                    {
+                        BuildingCode = c.Buildings.BuildingCode
+                    } : new Building(),
+                    RegulationStatus = c.RegulationStatus != null ? new RegulationStatus
+                    {
+                        Name = c.RegulationStatus.Name,
+                       
+                    } : new RegulationStatus(),
+
+                    LandlordType = c.LandlordType != null ? new LandlordType
+                    {
+                        Name = c.LandlordType.Name,
+
+                    } : new LandlordType(),
+                    Tenants = c.Tenants != null ? new Tenant
+                       {
+                           TenantCode = c.Tenants.TenantCode,
+                           FirstName = c.Tenants.FirstName,
+                           LastName = c.Tenants.LastName
+                       } : new Tenant()
+                })
+                .ToListAsync();
+            return items;
+           
+        }
 
         public async Task<PaginationDto<LegalCase>> GetAllCasesAsync(int pageNumber, int pageSize, CaseFilterDto filters)
         {

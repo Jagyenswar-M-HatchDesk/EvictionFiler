@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using EvictionFiler.Application.DTOs.ApartmentDto;
+﻿using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.LegalCaseDto;
@@ -11,6 +10,9 @@ using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using PdfSharpCore;
+using PdfSharpCore.Pdf.Filters;
+using System.Linq.Expressions;
 
 namespace EvictionFiler.Application.Services
 {
@@ -27,7 +29,12 @@ namespace EvictionFiler.Application.Services
 
         }
 
-		public async Task<bool> AddLegalCasesAsync(CreateToEditLegalCaseModel legalCase)
+        public async Task<int> GetTotalCasesCountAsync()
+        {
+            return await _repository.GetTotalCasesCountAsync();
+        }
+
+        public async Task<bool> AddLegalCasesAsync(CreateToEditLegalCaseModel legalCase)
 		{
             var addoccupants = new List<AdditionalOccupants>();
 			var legalCases = new LegalCase
@@ -107,8 +114,19 @@ namespace EvictionFiler.Application.Services
 			return await _repository.GetAllCasesAsync(pageNumber , pageSize , Filters);
 		}
 
+        public async Task<List<LegalCase>>GetAllAsync()
+        {
+            return await _repository.GetAllCasesAsync();
 
-		public async Task<CreateToEditLegalCaseModel> GetByIdAsync(Guid id)
+        }
+
+        public async Task<List<LegalCase>> GetTodayCasesAsync()
+        {
+            return await _repository.GetTodayCasesAsync();
+
+        }
+
+        public async Task<CreateToEditLegalCaseModel> GetByIdAsync(Guid id)
 		{
 			var legalCaseEntity = await _repository.GetAllQuerable(
 		predicate: c => c.Id == id,

@@ -13,8 +13,10 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 		public Guid ClientId { get; set; }
 		public Guid? BuildingId { get; set; }
 		public Guid? LandLordId { get; set; }
-		public Guid? TenantId { get; set; }
-		public Guid? CaseTypeId { get; set; }
+        public string LandLordName { get; set; }
+        public Guid? TenantId { get; set; }
+        public string? TenantName { get; set; }
+        public Guid? CaseTypeId { get; set; }
         public string? CaseTypeName { get; set; }
         public string? Casecode { get; set; }
 		[Required(ErrorMessage = "Please select Reason Holdover.")]
@@ -42,11 +44,15 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 		
 		public Guid? TenancyTypeId { get; set; }
 
-		
-		public Guid? RegulationStatusId { get; set; }
-		
-		public Guid? LandlordTypeId { get; set; }
-		public string? ReasonDescription { get; set; }
+        public string? TenancyTypeName { get; set; }
+        public Guid? RegulationStatusId { get; set; }
+
+        public string? RegulationStatusName { get; set; }
+
+        public Guid? LandlordTypeId { get; set; }
+
+        public string? LandlordTypeName { get; set; }
+        public string? ReasonDescription { get; set; }
 
 		public string? ExplainDescription { get; set; }
 

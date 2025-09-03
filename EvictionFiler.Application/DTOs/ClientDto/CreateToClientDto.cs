@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Domain.Entities.Base.Base;
 
 namespace EvictionFiler.Application.DTOs.ClientDto
 {
-    public class CreateToClientDto 
+    public class CreateToClientDto : DeletableBaseEntity
     {
 		public string ClientCode { get; set; } = string.Empty;
 		[Required(ErrorMessage ="First Name is Required")]

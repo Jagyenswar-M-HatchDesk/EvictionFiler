@@ -1,17 +1,35 @@
 ﻿@page "/dashboard"
+
+@using ChartJs.Blazor
+@using ChartJs.Blazor.BarChart
+@using ChartJs.Blazor.Common
+@using ChartJs.Blazor.Common.Axes
+@using ChartJs.Blazor.Common.Axes.Ticks
+@using ChartJs.Blazor.Common.Enums
+@using ChartJs.Blazor.LineChart
+@using ChartJs.Blazor.Util
 @using EvictionFiler.Application.DTOs.DashboardDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
 @using EvictionFiler.Application.DTOs.PaginationDto
 @using EvictionFiler.Application.Interfaces.IRepository
+@using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Client.SpinnerService
 @inject SpinnerService spinnerservice
 @using EvictionFiler.Client.Components.Layout
 @using EvictionFiler.Domain.Entities
+
+@using ChartJs.Blazor.BarChart
+@using ChartJs.Blazor.Common
+@using ChartJs.Blazor.Common.Axes
+@using ChartJs.Blazor.Common.Axes.Ticks
+@using ChartJs.Blazor.Util
+
+@inject ILegalCaseService _service
 @inject IDashBoardRepository DashBoardRepository;
 
     <style >
     td {
-        font-size: 13px !important;
+        font-size: 11px !important;
     }
     .status-active {
         background-color: rgba(25,135,84,1);
@@ -150,6 +168,32 @@
         padding: 2px 7px;
         border-radius: 1rem;
         font-size: 12px;
+    }
+
+    .dashboard-card {
+        border-radius: 10px;
+        transition: 0.3s ease;
+        font-size: 13px; /* Content font size */
+    }
+
+        .dashboard-card:hover {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-card h5 {
+            font-size: 14px; /* Title font size */
+            margin-bottom: 0;
+            font-weight:bold;
+            color: #020336;
+        }
+
+    .circle {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        font-weight: bold;
     }
 </style>
 
@@ -346,6 +390,336 @@
         </div>
     </div>
 </div>
+
+
+        <div class="container-fluid my-4">
+            <div class="row text-center">
+
+                <!-- Total Cases -->
+                <div class="col-md-3 col-6">
+                    <div class="circle  text-white d-flex align-items-center justify-content-center mx-auto mb-2" style="background-color:#020336">
+                        <h4 class="mb-0">120</h4>
+                    </div>
+                    <h6 class="fw-bold">Total Cases</h6>
+                </div>
+
+                <!-- Active Cases -->
+                <div class="col-md-3 col-6">
+                    <div class="circle bg-success text-white d-flex align-items-center justify-content-center mx-auto mb-2">
+                        <h4 class="mb-0">85</h4>
+                    </div>
+                    <h6 class="fw-bold">Active Cases</h6>
+                </div>
+
+                <!-- Pending Cases -->
+                <div class="col-md-3 col-6">
+                    <div class="circle bg-warning text-white d-flex align-items-center justify-content-center mx-auto mb-2">
+                        <h4 class="mb-0">25</h4>
+                    </div>
+                    <h6 class="fw-bold">Pending Cases</h6>
+                </div>
+
+                <!-- Completed Cases -->
+                <div class="col-md-3 col-6">
+                    <div class="circle bg-info text-white d-flex align-items-center justify-content-center mx-auto mb-2">
+                        <h4 class="mb-0">60</h4>
+                    </div>
+                    <h6 class="fw-bold">Completed Cases</h6>
+                </div>
+            </div>
+        </div>
+
+        <div class="row  g-4 mt-2">
+
+            <!-- Card 1 -->
+            <div class="col">
+                <div class="card dashboard-card p-3 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5>📅 Today's Hearings</h5>
+                        <span class="badge bg-primary">3</span>
+                    </div>
+                    <div class="content flex-grow-1" style="min-height: 100px;">
+                        <ul class="mb-2 ps-3 text-muted">
+                            <li>Hearing 1 - 10:00 AM</li>
+                            <li>Hearing 2 - 12:30 PM</li>
+                            <li>Hearing 3 - 03:00 PM</li>
+                        </ul>
+                    </div>
+
+                    <a href="#" class="text-decoration-none text-primary">View All Hearings</a>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="col">
+                <div class="card dashboard-card p-3 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5>⏰ Deadlines</h5>
+                        <span class="badge bg-danger">2</span>
+                    </div>
+                    <div class="content flex-grow-1" style="min-height: 100px;">
+                    <ul class="mb-2 ps-3">
+                        <li class="text-warning">Task 1 - Due Today</li>
+                        <li class="text-danger">Task 2 - Overdue</li>
+                    </ul>
+                    </div>
+                    <a href="#" class="text-decoration-none text-primary">View Deadlines</a>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="col">
+                <div class="card dashboard-card p-3 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5>🗂️ Cases This Week</h5>
+                        <span class="badge bg-success">5</span>
+                    </div>
+                    <div class="content flex-grow-1" style="min-height: 100px;">
+                    <p class="text-muted mb-2">Filed since Monday</p>
+                     <p class="text-muted mb-2">Filed after Thursday</p>
+                      <p class="text-muted mb-2">Filed before Wednesday</p>
+                        <p class="text-muted mb-2">Filed before Friday</p>
+                    </div>
+                    <a href="#" class="text-decoration-none text-primary">View Cases</a>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="col">
+                <div class="card dashboard-card p-3 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5>📝 Approvals</h5>
+                        <span class="badge bg-warning text-dark">4</span>
+                    </div>
+                    <div class="content flex-grow-1" style="max-height: 130px;">
+                        <p class="text-muted mb-2">Awaiting landlord/lawyer review</p>
+                        <p class="text-muted mb-2">Client has submitted documents for approval.</p>
+                      
+
+                    </div>
+
+                    <a href="#" class="text-decoration-none text-primary">Review Documents</a>
+                </div>
+            </div>
+
+            <!-- Card 5 -->
+      @*       <div class="col">
+                <div class="card dashboard-card p-3 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5>💰 Balance Alerts</h5>
+                        <span class="badge bg-danger">₹15,000</span>
+                    </div>
+                    <p class="text-muted mb-2">2 unpaid invoices</p>
+                    <a href="#" class="text-decoration-none text-primary">View Financials</a>
+                </div>
+            </div> *@
+
+        </div>
+
+
+<div class="row mt-2">
+    <div class="col-md-9">
+        <RadzenChart Style="height:450px;">
+    <!-- X-Axis (Months) -->
+    <RadzenCategoryAxis Padding="30">
+        <RadzenAxisTitle Text="Months" />
+        <Categories>
+            <RadzenCategoryValue Text="Oct 1" />
+            <RadzenCategoryValue Text="Oct 2" />
+            <RadzenCategoryValue Text="Oct 3" />
+            <RadzenCategoryValue Text="Oct 4" />
+            <RadzenCategoryValue Text="Oct 5" />
+        </Categories>
+    </RadzenCategoryAxis>
+
+    <!-- Y-Axis (Cases) -->
+    <RadzenValueAxis Min="0" Max="20" Step="5">
+        <RadzenAxisTitle Text="Cases" />
+        @* <RadzenGridLines Visible="true" /> *@
+    </RadzenValueAxis>
+
+    <!-- Series -->
+    <RadzenColumnSeries Data="@nonPayment" Title="NonPayment" CategoryProperty="Day" ValueProperty="Count" />
+    <RadzenColumnSeries Data="@holdover" Title="Holdover" CategoryProperty="Day" ValueProperty="Count" />
+    <RadzenColumnSeries Data="@otherType" Title="OtherType" CategoryProperty="Day" ValueProperty="Count" />
+</RadzenChart>
+</div>
+<div class="col-md-3">
+ <div class="card h-100">
+                        <div class="card-header bg-white border-0">
+                            <h6 class="fw-bold mb-0">Last Activity</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li class="d-flex align-items-center mb-3">
+                                    <img src="https://i.pravatar.cc/40?img=31" class="rounded-circle me-3" />
+                                    <div>
+                                        <span class="fw-bold">Alex Johnson</span> served Summons<br />
+                                        <small class="text-muted">12m ago</small>
+                                    </div>
+                                </li>
+                                <li class="d-flex align-items-center mb-3">
+                                    <img src="https://i.pravatar.cc/40?img=32" class="rounded-circle me-3" />
+                                    <div>
+                                        <span class="fw-bold">Maria Lopez</span> logged Affidavit<br />
+                                        <small class="text-muted">18m ago</small>
+                                    </div>
+                                </li>
+                                <li class="d-flex align-items-center">
+                                    <img src="https://i.pravatar.cc/40?img=33" class="rounded-circle me-3" />
+                                    <div>
+                                        <span class="fw-bold">David Kim</span> updated defendant status<br />
+                                        <small class="text-muted">20m ago</small>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+             
+</div>
+</div>
+
+
+
+        @* Alerts Dashboard Panel *@
+        <div class="container-fluid my-4">
+            
+
+            <div class="row g-4">
+                <!-- Overdue Notices -->
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon bg-danger text-white rounded-circle p-3 me-3">
+                                    <i class="bi bi-exclamation-circle fs-5"></i>
+                                </div>
+                                <h5 class="card-title fw-bold mb-0" style="font-size:14px">Overdue Notices</h5>
+                            </div>
+                            <p class="text-muted flex-grow-1">
+                                Automatic alerts for missed deadlines.
+                            </p>
+                            <small class="text-secondary">
+                                e.g., "Predicate Notice response window expired — action needed"
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NYSCEF Auto-Synced Alerts -->
+                <div class="col-md-4">
+                    <div class="card   h-100">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon bg-warning text-white rounded-circle p-3 me-3">
+                                    <i class="bi bi-bell fs-5"></i>
+                                </div>
+                                <h5 class="card-title fw-bold mb-0" style="font-size:14px">NYSCEF Auto-Synced Alerts</h5>
+                            </div>
+                            <p class="text-muted flex-grow-1">
+                                Real-time notifications for court filings.
+                            </p>
+                            <small class="text-secondary">
+                                e.g., "Opposing counsel filed Answer — see attached"
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Case Transfer Notifications -->
+                <div class="col-md-4">
+                    <div class="card   h-100">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon bg-info text-white rounded-circle p-3 me-3">
+                                    <i class="bi bi-arrow-repeat fs-5"></i>
+                                </div>
+                                <h5 class="card-title fw-bold mb-0" style="font-size:14px">Case Transfer Notifications</h5>
+                            </div>
+                            <p class="text-muted flex-grow-1">
+                                Instant updates for case reassignments.
+                            </p>
+                            <small class="text-secondary">
+                                e.g., "Per diem coverage or reassignment alerts"
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        @* Collaboration & Communication Shortcuts (Activity Style) *@
+        <div class="container-fluid my-4">
+            <div class="row g-4 mt-1">
+
+                <!-- Inbox Preview -->
+                <div class="col-md-4">
+                    <div class="card  h-100">
+                        <div class="card-header  fw-bold">
+                            📥 Inbox Preview (NYCEF Sync)
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <strong>Court Notice</strong> – Motion filed
+                                    <br /><small class="text-muted">3m ago</small>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Opposing Counsel</strong> filed Answer
+                                    <br /><small class="text-muted">6m ago</small>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Court Clerk</strong> uploaded Order
+                                    <br /><small class="text-muted">10m ago</small>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Internal Messages / Case Notes -->
+                <div class="col-md-4">
+                    <div class="card  h-100">
+                        <div class="card-header bg-white border-0">
+                            <h6 class="fw-bold mb-0">💬 Internal Messages / Case Notes</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li class="d-flex align-items-center mb-3">
+                                    <img src="https://i.pravatar.cc/40?img=21" class="rounded-circle me-3" />
+                                    <div>
+                                        <span class="fw-bold">John Doe</span> added case note<br />
+                                        <small class="text-muted">5m ago</small>
+                                    </div>
+                                </li>
+                                <li class="d-flex align-items-center mb-3">
+                                    <img src="https://i.pravatar.cc/40?img=22" class="rounded-circle me-3" />
+                                    <div>
+                                        <span class="fw-bold">Team Lead</span> assigned new task<br />
+                                        <small class="text-muted">9m ago</small>
+                                    </div>
+                                </li>
+                                <li class="d-flex align-items-center">
+                                    <img src="https://i.pravatar.cc/40?img=23" class="rounded-circle me-3" />
+                                    <div>
+                                        <span class="fw-bold">Jane Smith</span> drafted response<br />
+                                        <small class="text-muted">15m ago</small>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+              
+
+            </div>
+        </div>
+
+
+
+
     @if (searchResults != null && searchResults.Items.Any())
     {
         <div class="row mt-3 d-flex justify-content-start">
@@ -388,7 +762,7 @@
     }
 
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+        
 
     </body>
 </div>
@@ -428,16 +802,9 @@
 @code {
     private string searchText;
     private bool isSearched = false;
-
-    private string searchcasecode = string.Empty;
-    private string searchTermClient = string.Empty;
-    private string searchTermTenant = string.Empty;
-    private string searchTermLandLord = string.Empty;
-    private string searchTermCaseType = string.Empty;
     private string searchTermStatus = string.Empty;
-    private string searchTermDept = string.Empty;
     private string searchTermDate = string.Empty;
-    private string searchTermResonHoldover = string.Empty;
+
 
     private PaginationDto<LegalCase> searchResults;
     private int currentPage = 1;
@@ -463,6 +830,15 @@
     private string selectedLandlord = string.Empty;
     private bool landlordSuggestionsChecked = false;
     private List<string> landlordSuggestions = new List<string>();
+
+    private List<List<LegalCase>> legalcaseDto = new();
+    private List<LegalCase> TodaylegalcaseDto = new();
+
+    private int ActiveIndex = 0;
+    private int totalCases = 0;
+
+    private bool IsPrevDisabled => ActiveIndex == 0;
+    private bool IsNextDisabled => ActiveIndex == legalcaseDto.Count - 1;
 
     private async Task Search()
     {
@@ -510,6 +886,7 @@
 
         spinnerservice.Hide();
     }
+
     private async Task OnClientInput(ChangeEventArgs e)
     {
         selectedClient = e.Value?.ToString();
@@ -624,4 +1001,65 @@
         reasonholdoverSuggestions.Clear();
         reasonholdoverSuggestionsChecked = false;
     }
+
+
+    class CaseData
+    {
+        public string Day { get; set; }
+        public int Count { get; set; }
+    }
+
+
+    List<CaseData> nonPayment = new()
+    {
+        new() { Day="Oct 1", Count=12 },
+        new() { Day="Oct 2", Count=19 },
+        new() { Day="Oct 3", Count=3 },
+        new() { Day="Oct 4", Count=5 },
+        new() { Day="Oct 5", Count=2 }
+    };
+
+    List<CaseData> holdover = new()
+    {
+        new() { Day="Oct 1", Count=7 },
+        new() { Day="Oct 2", Count=11 },
+        new() { Day="Oct 3", Count=5 },
+        new() { Day="Oct 4", Count=8 },
+        new() { Day="Oct 5", Count=3 }
+    };
+
+    List<CaseData> otherType = new()
+    {
+        new() { Day="Oct 1", Count=4 },
+        new() { Day="Oct 2", Count=6 },
+        new() { Day="Oct 3", Count=8 },
+        new() { Day="Oct 4", Count=2 },
+        new() { Day="Oct 5", Count=9 }
+    };
+
+
+
+    private async Task<List<LegalCase>> GetAllCases()
+    {
+        return await _service.GetAllAsync();
+    }
+
+    private void NextSlide()
+    {
+        if (ActiveIndex < legalcaseDto.Count - 1)
+        {
+            ActiveIndex++;
+        }
+    }
+
+    private void PrevSlide()
+    {
+        if (ActiveIndex > 0)
+        {
+            ActiveIndex--;
+        }
+   }
+
+
+
 }

@@ -1,4 +1,5 @@
 using BlazorDownloadFile;
+using Blazored.SessionStorage;
 using EvictionFiler.Application;
 using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.Interfaces.IRepository;
@@ -8,6 +9,7 @@ using EvictionFiler.Application.Interfaces.IServices.Master;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Application.Services;
 using EvictionFiler.Application.Services.Master;
+using EvictionFiler.Client.Jwt;
 using EvictionFiler.Client.SpinnerService;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure;
@@ -50,8 +52,6 @@ builder.Services.AddRadzenComponents();
 
 
 
-
-builder.Services.AddSyncfusionBlazor();
 builder.Services.AddDbContext<MainDbContext>(
 	options => options.UseSqlServer(
 		builder.Configuration.GetConnectionString("Default"),
@@ -102,6 +102,7 @@ builder.Services.AddScoped<JwtAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
     provider.GetRequiredService<JwtAuthStateProvider>());
 builder.Services.AddScoped<IUserservices , UserService>();
+builder.Services.AddScoped<ICaseFormService, CaseFormService>();
 builder.Services.AddScoped<ILegalCaseService, LegalCaseService>();
 builder.Services.AddScoped<IClientService, ClientServices>();
 builder.Services.AddScoped<ITenantService, TenantService>();
@@ -121,10 +122,10 @@ builder.Services.AddScoped<IStateService, StateService>();
 builder.Services.AddScoped<ITenancyTypeService, TenancyTypeService>();
 builder.Services.AddScoped<IUnitIllegalService  , UnitIllegalService>();
 builder.Services.AddScoped<NavigationDataService>();
-
+builder.Services.AddScoped<JwtAuthStateProviders>();
 builder.Services.AddScoped<IUnitOfWork , UnitOfWork>();
 builder.Services.AddAuthorizationCore();
-
+builder.Services.AddBlazoredSessionStorage();
 
 builder.Services.AddAuthentication(options =>
 {
