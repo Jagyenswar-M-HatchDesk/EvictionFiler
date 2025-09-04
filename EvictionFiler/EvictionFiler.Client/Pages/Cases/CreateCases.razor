@@ -32,6 +32,12 @@
 @inject SpinnerService spinnerservice
 @using Blazored.Typeahead
 @using EvictionFiler.Domain.Entities
+@using Microsoft.AspNetCore.Components.Authorization;
+@using System.Security.Claims
+@inject JwtAuthStateProviders _authStateProvider
+
+
+@using EvictionFiler.Client.Jwt
 
 @rendermode InteractiveAuto
 <style>
@@ -2023,6 +2029,22 @@ private async Task HandleBuildingInput(ChangeEventArgs e)
     {
         spinnerservice.Show();
         var result = false;
+
+
+        var authState = await _authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userGuid))
+        {
+            legalcaseDto.CreatedBy = userGuid;
+        }
+        else
+        {
+            // unauthenticated user
+            legalcaseDto.CreatedBy = Guid.Empty;
+        }
 
         if (legalcaseDto == null || legalcaseDto.Id == Guid.Empty)
         {

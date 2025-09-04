@@ -1,13 +1,5 @@
 ﻿@page "/dashboard"
 
-@using ChartJs.Blazor
-@using ChartJs.Blazor.BarChart
-@using ChartJs.Blazor.Common
-@using ChartJs.Blazor.Common.Axes
-@using ChartJs.Blazor.Common.Axes.Ticks
-@using ChartJs.Blazor.Common.Enums
-@using ChartJs.Blazor.LineChart
-@using ChartJs.Blazor.Util
 @using EvictionFiler.Application.DTOs.DashboardDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
 @using EvictionFiler.Application.DTOs.PaginationDto
@@ -18,11 +10,8 @@
 @using EvictionFiler.Client.Components.Layout
 @using EvictionFiler.Domain.Entities
 
-@using ChartJs.Blazor.BarChart
-@using ChartJs.Blazor.Common
-@using ChartJs.Blazor.Common.Axes
-@using ChartJs.Blazor.Common.Axes.Ticks
-@using ChartJs.Blazor.Util
+
+@using System.Globalization
 
 @inject ILegalCaseService _service
 @inject IDashBoardRepository DashBoardRepository;
@@ -518,7 +507,9 @@
 
 
 <div class="row mt-2">
-    <div class="col-md-9">
+           <div class="col-md-9">
+                <div class="card shadow-sm p-3">
+                    <h4>Case Pipeline</h4>
         <RadzenChart Style="height:450px;">
     <!-- X-Axis (Months) -->
     <RadzenCategoryAxis Padding="30">
@@ -544,7 +535,8 @@
     <RadzenColumnSeries Data="@otherType" Title="OtherType" CategoryProperty="Day" ValueProperty="Count" />
 </RadzenChart>
 </div>
-<div class="col-md-3">
+</div>
+          <div class="col-md-3">
  <div class="card h-100">
                         <div class="card-header bg-white border-0">
                             <h6 class="fw-bold mb-0">Last Activity</h6>
@@ -576,13 +568,179 @@
                         </div>
                     </div>
              
+                </div>
+ </div>
+<div class="row mt-2">
+   <div class="col-md-4">
+    <div class="card shadow-sm p-3">
+                    <h4>Calender HeatMap</h4>
+        <RadzenChart Style="height:350px" Palette="@(new string[] { "#4caf50", "#ffa500", "#ff4d4d" })">
+            <!-- X-Axis -->
+            <RadzenCategoryAxis Padding="10">
+                <RadzenAxisTitle Text="Days" />
+                <Categories>
+                    @foreach (var item in calendarData)
+                    {
+                        <RadzenCategoryValue Text="@item.Day" />
+                    }
+                </Categories>
+            </RadzenCategoryAxis>
+
+            <!-- Y-Axis -->
+            <RadzenValueAxis Min="0" Max="10" Step="2">
+                <RadzenAxisTitle Text="Deadlines" />
+            </RadzenValueAxis>
+
+            <!-- LOW Priority (Green) -->
+            <RadzenColumnSeries TItem="CalendarItem"
+                                Data="@calendarData.Where(x => x.Count < 5).ToList()"
+                                CategoryProperty="Day"
+                                ValueProperty="Count"
+                                Title="Low" />
+
+            <!-- MEDIUM Priority (Orange) -->
+            <RadzenColumnSeries TItem="CalendarItem"
+                                Data="@calendarData.Where(x => x.Count >= 5 && x.Count < 8).ToList()"
+                                CategoryProperty="Day"
+                                ValueProperty="Count"
+                                Title="Medium" />
+
+            <!-- HIGH Priority (Red) -->
+            <RadzenColumnSeries TItem="CalendarItem"
+                                Data="@calendarData.Where(x => x.Count >= 8).ToList()"
+                                CategoryProperty="Day"
+                                ValueProperty="Count"
+                                Title="High" />
+        </RadzenChart>
+    </div>
 </div>
+     <div class=" col-md-8">
+                <div class="card shadow-sm p-3">
+                                <h4>Financial Chart</h4>
+                    <RadzenStack class="rz-p-0 rz-p-md-6 rz-p-lg-12" Style="height:350px">
+
+                        <RadzenRow>
+                            <RadzenColumn Size="12">
+                                <RadzenChart>
+                                    <RadzenColumnSeries Data="@collected" CategoryProperty="Month" Title="Collected" LineType="LineType.Dashed" ValueProperty="Revenue">
+                                        <RadzenSeriesDataLabels Visible="@showDataLabels" />
+                                    </RadzenColumnSeries>
+                                    <RadzenColumnSeries Data="@boiled" CategoryProperty="Month" Title="Boiled" ValueProperty="Revenue">
+                                        <RadzenSeriesDataLabels Visible="@showDataLabels" />
+                                    </RadzenColumnSeries>
+                                    <RadzenColumnOptions Radius="5" Width="20" />
+                                    <RadzenCategoryAxis Padding="20" />
+                                    <RadzenValueAxis Formatter="@FormatAsUSD">
+                                        <RadzenGridLines Visible="true" />
+                                        <RadzenAxisTitle Text="Revenue in USD" />
+                                    </RadzenValueAxis>
+                                </RadzenChart>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenStack>
+
 </div>
 
 
+</div>
+                          
+                </div>
 
-        @* Alerts Dashboard Panel *@
+        @* Collaboration & Communication Shortcuts (Activity Style) *@
         <div class="container-fluid my-4">
+            <div class="row g-4 mt-1">
+
+                <!-- Inbox Preview -->
+                <div class="col-md-4">
+                    <div class="card  h-100">
+                        <div class="card-header  fw-bold">
+                            📥 Inbox Preview (NYCEF Sync)
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <strong>Court Notice</strong> – Motion filed
+                                    <br /><small class="text-muted">3m ago</small>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Opposing Counsel</strong> filed Answer
+                                    <br /><small class="text-muted">6m ago</small>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Court Clerk</strong> uploaded Order
+                                    <br /><small class="text-muted">10m ago</small>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Internal Messages / Case Notes -->
+                <div class="col-md-4">
+                    <div class="card  h-100">
+                        <div class="card-header bg-white border-0">
+                            <h6 class="fw-bold mb-0">💬 Internal Messages / Case Notes</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li class="d-flex align-items-center mb-3">
+                                    <img src="https://i.pravatar.cc/40?img=21" class="rounded-circle me-3" />
+                                    <div>
+                                        <span class="fw-bold">John Doe</span> added case note<br />
+                                        <small class="text-muted">5m ago</small>
+                                    </div>
+                                </li>
+                                <li class="d-flex align-items-center mb-3">
+                                    <img src="https://i.pravatar.cc/40?img=22" class="rounded-circle me-3" />
+                                    <div>
+                                        <span class="fw-bold">Team Lead</span> assigned new task<br />
+                                        <small class="text-muted">9m ago</small>
+                                    </div>
+                                </li>
+                                <li class="d-flex align-items-center">
+                                    <img src="https://i.pravatar.cc/40?img=23" class="rounded-circle me-3" />
+                                    <div>
+                                        <span class="fw-bold">Jane Smith</span> drafted response<br />
+                                        <small class="text-muted">15m ago</small>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="card task-card h-100">
+                        <div class="card-body">
+                            <!-- Title -->
+                            <h5 class="card-title fw-bold mb-3">
+                                <i class="fas fa-tasks text-primary"></i> Task Completion (This Week)
+                            </h5>
+
+                            <!-- Progress Bar -->
+                            <div class="progress" style="height: 30px; border-radius: 8px; background-color: #f1f3f5;">
+                                <div class="progress-bar text-white fw-bold"
+                                     role="progressbar"
+                                     style="width:@taskCompletion%; background-color:@GetProgressColor(); border-radius: 8px;"
+                                     aria-valuenow="@taskCompletion" aria-valuemin="0" aria-valuemax="100">
+                                    @($"{taskCompletion}%")
+                                </div>
+                            </div>
+
+                            <!-- Summary -->
+                            <div class="mt-3 d-flex justify-content-between">
+                                <span class="fw-semibold text-secondary">Completed:</span>
+                                <span class="fw-bold">@completedTasksThisWeek / @totalTasksThisWeek</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    @* Alerts Dashboard Panel *@
+    <div class="container-fluid my-4">
             
 
             <div class="row g-4">
@@ -649,73 +807,7 @@
         </div>
 
 
-        @* Collaboration & Communication Shortcuts (Activity Style) *@
-        <div class="container-fluid my-4">
-            <div class="row g-4 mt-1">
-
-                <!-- Inbox Preview -->
-                <div class="col-md-4">
-                    <div class="card  h-100">
-                        <div class="card-header  fw-bold">
-                            📥 Inbox Preview (NYCEF Sync)
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item">
-                                    <strong>Court Notice</strong> – Motion filed
-                                    <br /><small class="text-muted">3m ago</small>
-                                </li>
-                                <li class="list-group-item">
-                                    <strong>Opposing Counsel</strong> filed Answer
-                                    <br /><small class="text-muted">6m ago</small>
-                                </li>
-                                <li class="list-group-item">
-                                    <strong>Court Clerk</strong> uploaded Order
-                                    <br /><small class="text-muted">10m ago</small>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Internal Messages / Case Notes -->
-                <div class="col-md-4">
-                    <div class="card  h-100">
-                        <div class="card-header bg-white border-0">
-                            <h6 class="fw-bold mb-0">💬 Internal Messages / Case Notes</h6>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled">
-                                <li class="d-flex align-items-center mb-3">
-                                    <img src="https://i.pravatar.cc/40?img=21" class="rounded-circle me-3" />
-                                    <div>
-                                        <span class="fw-bold">John Doe</span> added case note<br />
-                                        <small class="text-muted">5m ago</small>
-                                    </div>
-                                </li>
-                                <li class="d-flex align-items-center mb-3">
-                                    <img src="https://i.pravatar.cc/40?img=22" class="rounded-circle me-3" />
-                                    <div>
-                                        <span class="fw-bold">Team Lead</span> assigned new task<br />
-                                        <small class="text-muted">9m ago</small>
-                                    </div>
-                                </li>
-                                <li class="d-flex align-items-center">
-                                    <img src="https://i.pravatar.cc/40?img=23" class="rounded-circle me-3" />
-                                    <div>
-                                        <span class="fw-bold">Jane Smith</span> drafted response<br />
-                                        <small class="text-muted">15m ago</small>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-              
-
-            </div>
-        </div>
+   
 
 
 
@@ -1002,6 +1094,21 @@
         reasonholdoverSuggestionsChecked = false;
     }
 
+    int totalTasksThisWeek = 25;
+    int completedTasksThisWeek = 18;
+
+    // Dynamic percentage
+    double taskCompletion => totalTasksThisWeek == 0
+    ? 0
+    : Math.Round((double)completedTasksThisWeek / totalTasksThisWeek * 100, 0);
+
+    // Dynamic color based on percentage
+    private string GetProgressColor()
+    {
+        if (taskCompletion >= 80) return "#28a745";   // Green - High
+        else if (taskCompletion >= 50) return "#ff6b35"; // Orange - Medium
+        return "#dc3545";  // Red - Low
+    }
 
     class CaseData
     {
@@ -1037,7 +1144,35 @@
         new() { Day="Oct 5", Count=9 }
     };
 
+    public class CalendarItem
+    {
+        public string Day { get; set; }
+        public int Count { get; set; }
+    }
 
+    List<CalendarItem> calendarData = new()
+    {
+        new CalendarItem{ Day="Mon", Count=4},
+        new CalendarItem{ Day="Tue", Count=7},
+        new CalendarItem{ Day="Wed", Count=9},
+        new CalendarItem{ Day="Thu", Count=5},
+        new CalendarItem{ Day="Fri", Count=3}
+    };
+
+    public class FinancialItem
+    {
+        public string Month { get; set; }
+        public decimal Billed { get; set; }
+        public decimal Collected { get; set; }
+    }
+
+    List<FinancialItem> financialData = new List<FinancialItem>
+    {
+        new FinancialItem{ Month="Jan", Billed=80000, Collected=60000},
+        new FinancialItem{ Month="Feb", Billed=90000, Collected=75000},
+        new FinancialItem{ Month="Mar", Billed=70000, Collected=50000},
+        new FinancialItem{ Month="Apr", Billed=95000, Collected=85000},
+    };
 
     private async Task<List<LegalCase>> GetAllCases()
     {
@@ -1060,6 +1195,73 @@
         }
    }
 
+
+    bool showDataLabels = false;
+
+    class DataItem
+    {
+        public string Month { get; set; }
+        public double Revenue { get; set; }
+    }
+
+    string FormatAsUSD(object value)
+    {
+        return ((double)value).ToString("C0", CultureInfo.CreateSpecificCulture("en-US"));
+    }
+
+    List<SeriesColorRange> fillRange = new List<SeriesColorRange>()
+                                        {
+                                        new SeriesColorRange() {Min = 0, Max = 275000, Color = "red"},
+                                        new SeriesColorRange() {Min = 275000, Max = 324000, Color = "orange"},
+                                        new SeriesColorRange() {Min = 324000, Max = 10000000, Color = "#06cd06"},
+                                        };
+
+    DataItem[] boiled = new DataItem[] {
+                                        new DataItem
+                                        {
+                                        Month = "Jan",
+                                        Revenue = 20000
+                                        },
+                                        new DataItem
+                                        {
+                                        Month = "Feb",
+                                        Revenue = 40000
+                                        },
+                                        new DataItem
+                                        {
+                                        Month = "March",
+                                        Revenue = 60000
+                                        },
+                                        new DataItem
+                                        {
+                                        Month = "April",
+                                        Revenue = 80000
+                                        },
+                                        };
+
+    DataItem[] collected = new DataItem[] {
+                                        new DataItem
+                                        {
+                                        Month = "Jan",
+                                        Revenue = 70000
+                                        },
+                                        new DataItem
+                                        {
+                                        Month = "Feb",
+                                        Revenue = 90000
+                                        },
+                                        new DataItem
+                                        {
+                                        Month = "March",
+                                        Revenue = 110000
+                                        },
+                                        new DataItem
+                                        {
+                                        Month = "April",
+                                        Revenue = 50000
+                                        },
+
+                                        };
 
 
 }

@@ -1,11 +1,12 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
 using EvictionFiler.Application.DTOs.TenantDto;
+using EvictionFiler.Domain.Entities.Base.Base;
 
 
 namespace EvictionFiler.Application.DTOs.ApartmentDto
 {
-	public class CreateToBuildingDto
+	public class CreateToBuildingDto : DeletableBaseEntity
 	{
 
 		public string BuildingCode { get; set; } = string.Empty;

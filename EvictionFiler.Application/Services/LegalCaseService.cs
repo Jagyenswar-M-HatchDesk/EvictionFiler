@@ -74,7 +74,10 @@ namespace EvictionFiler.Application.Services
 				OralEnd = legalCase.OralEnd,
 				WrittenLease = legalCase.WrittenLease,
 				RenewalStatusId = legalCase.RenewalStatusId,
-				DateTenantMoved = legalCase.DateTenantMoved
+				DateTenantMoved = legalCase.DateTenantMoved,
+				CreatedBy = legalCase.CreatedBy,
+				
+			
 			};
 
                 if (legalCase.AdditionalOccupants != null)
@@ -87,6 +90,9 @@ namespace EvictionFiler.Application.Services
                         Name = o.Name,
                         Relation = o.Relation,
                         LegalCaseId = legalCase.Id,
+						CreatedOn = DateTime.Now,
+						CreatedBy = legalCase.CreatedBy,
+
                     };
 
                     addoccupants.Add(additionaloccu);

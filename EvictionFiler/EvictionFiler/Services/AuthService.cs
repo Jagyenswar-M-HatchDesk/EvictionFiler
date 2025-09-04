@@ -1,19 +1,22 @@
 ﻿
+using Blazored.SessionStorage;
+using EvictionFiler.Application.DTOs.UserDto;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Domain.Entities;
-using EvictionFiler.Application.DTOs.UserDto;
 
 namespace EvictionFiler.Server.Services
 {
     public class AuthService
     {
         private readonly IUserservices _userService;
+        private readonly ISessionStorageService _sessionStorage;
         private readonly JwtAuthStateProvider _authProvider;
 
-        public AuthService(IUserservices userService, JwtAuthStateProvider authProvider)
+        public AuthService(IUserservices userService, JwtAuthStateProvider authProvider, ISessionStorageService sessionStorage)
         {
             _userService = userService;
             _authProvider = authProvider;
+            _sessionStorage =sessionStorage;
         }
 
         public async Task<bool> LoginAsync(LoginViewModel model)
@@ -21,9 +24,10 @@ namespace EvictionFiler.Server.Services
             var token = await _userService.LoginAsync(model.Username, model.Password);
             if (token is null) return false;
 
-            await _authProvider.SetTokenAsync(token);
+            await _sessionStorage.SetItemAsync("jwt_token", token);
             return true;
         }
+
 
         public Task LogoutAsync() => _authProvider.ClearTokenAsync();
 

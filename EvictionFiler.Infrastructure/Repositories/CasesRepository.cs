@@ -40,6 +40,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     Id = c.Id,
                     Casecode = c.Casecode,
                     CreatedOn = c.CreatedOn,
+                    CreatedBy = c.CreatedBy,
                     ReasonHoldover = c.ReasonHoldover,
                     CaseType = c.CaseType != null ? new CaseType
                     {
@@ -98,6 +99,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     Id = c.Id,
                     Casecode = c.Casecode,
                     CreatedOn = c.CreatedOn,
+                    CreatedBy = c.CreatedBy,
                     ReasonHoldover = c.ReasonHoldover,
                     CaseType = c.CaseType != null ? new CaseType
                     {
@@ -226,6 +228,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     Casecode = c.Casecode,
                     CreatedOn = c.CreatedOn,
                     ReasonHoldover = c.ReasonHoldover,
+                    CreatedBy = c.CreatedBy,
                     Clients = c.Clients != null ? new Client
                     {
                         FirstName = c.Clients.FirstName,

@@ -86,8 +86,10 @@ namespace EvictionFiler.Application.Services
 			Fax = client.Fax ?? "",
 			Phone = client.Phone ?? "",
 			CellPhone = client.CellPhone ?? "",
-			Status = client.IsActive 
-		})
+			Status = client.IsActive ,
+            CreatedBy = client.CreatedBy,
+            CreatedOn = client.CreatedOn,
+        })
 		.ToList();
 
 			return new PaginationDto<EditToClientDto>
@@ -118,8 +120,10 @@ namespace EvictionFiler.Application.Services
 				City = client.City,
 				StateId = client.StateId,
 				StateName = client.State?.Name,
-				ZipCode = client.ZipCode
-			};
+				ZipCode = client.ZipCode,
+                CreatedBy = client.CreatedBy,
+                CreatedOn = client.CreatedOn,
+            };
 		}
 
 
@@ -160,6 +164,7 @@ namespace EvictionFiler.Application.Services
 					CellPhone = client.CellPhone,
 					Fax = client.Fax,
 					CreatedBy = client.CreatedBy,
+					CreatedOn = DateTime.Now
 				};
 
 				await _clientRepo.AddAsync(newclient);
@@ -203,7 +208,8 @@ namespace EvictionFiler.Application.Services
 						DateOfRefreeDeed = l.DateOfRefreeDeed,
 						TypeOfOwnerId = l.TypeOwnerId,
 						CreatedOn = l.CreatedOn,
-					};
+                        CreatedBy = l.CreatedBy,
+                    };
 
 					landlords.Add(landlord);
 
@@ -230,7 +236,8 @@ namespace EvictionFiler.Application.Services
 								BuildingUnits = b.BuildingUnits,
 								LandlordId = landlord.Id,
 								CreatedOn = landlord.CreatedOn,
-							};
+                                CreatedBy = landlord.CreatedBy,
+                            };
 
 							buildings.Add(building);
 
@@ -271,8 +278,9 @@ namespace EvictionFiler.Application.Services
 										IsUnitIllegalId = t.IsUnitIllegalId,
 										BuildinId = building.Id,
 										CreatedOn = building.CreatedOn,
-										
-									};
+                                        CreatedBy = building.CreatedBy,
+
+                                    };
 										if (t.AdditioalTenants != null)
 									    {
 										    foreach (var o in t.AdditioalTenants)
@@ -283,6 +291,8 @@ namespace EvictionFiler.Application.Services
 											       	FirstName = o.FirstName,
 											       	LastName = o.LastName,
 											       	TenantId = tenant.Id,
+													CreatedOn = o.CreatedOn,
+													CreatedBy = o.CreatedBy,
 											       };
 
                                             addtenants.Add(additionaltenants);
@@ -341,8 +351,11 @@ namespace EvictionFiler.Application.Services
 			existingClient.Phone = client.Phone;
 			existingClient.CellPhone = client.CellPhone;
 			existingClient.Fax = client.Fax;
+    
+            existingClient.CreatedOn = client.CreatedOn;
 
-			_clientRepo.UpdateAsync(existingClient);
+
+            _clientRepo.UpdateAsync(existingClient);
 			await _unitOfWork.SaveChangesAsync();
 
 			var landlordsToAdd = new List<LandLord>();
@@ -386,6 +399,7 @@ namespace EvictionFiler.Application.Services
 					ContactPersonName = l.ContactPersonName,
 					TypeOfOwnerId = l.TypeOwnerId,
 					LandlordTypeId = l.LandlordTypeId,
+				
 				};
 
 				if (isNewLandlord)
