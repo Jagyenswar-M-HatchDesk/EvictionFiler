@@ -6,7 +6,11 @@
 @using EvictionFiler.Application.DTOs.PaginationDto
 @using EvictionFiler.Application.DTOs.TenantDto
 @using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Client.Jwt
 @using EvictionFiler.Domain.Entities
+@using Microsoft.AspNetCore.Components.Authorization;
+@using System.Security.Claims
+@inject JwtAuthStateProviders _authStateProvider
 @inject ILegalCaseService _service
 @inject IClientService _clientservice
 @using EvictionFiler.Client.SpinnerService
@@ -244,7 +248,12 @@
                         <th>Client </th>
                         <th>LandLord </th>
                         <th>Tenant </th>
-                        <th>Reason Holdover</th> 
+                        <th>Reason Holdover</th>
+                          @if (isAdmin)
+                                {
+
+                        <th>Created By</th>
+                                }
                         <th>Last Action Date</th>
                         <th>Status</th>
 
@@ -269,18 +278,28 @@
                                 <td>
                                     @($"{cas?.Tenants?.TenantCode ?? ""} - {cas?.Tenants?.FirstName ?? ""} {cas?.Tenants?.LastName ?? ""}")
                                 </td>
-                                <td>@(cas?.ReasonHoldover?.Name ?? "-")</td> 
+                                <td>@(cas?.ReasonHoldover?.Name ?? "-")</td>
+                                @if (isAdmin)
+                                {
 
+                                 <td>@(cas?.CreatedByName ?? "-")</td> 
+                                  }
                                 <td>@( cas?.CreatedOn.ToString("MM/dd/yyyy"))</td>
                             <td>
-                                    @(cas.IsActive == true ? "Active" : cas.IsActive == false ? "Inactive" : "Not Set")
-                            </td>
+                                @(cas.IsActive == true
+                                                            ? "Active"
+                                                            : cas.IsDeleted == true
+                                                            ? "InActive"
+                                                            : "Not Set")
+                        </td>
+
+
 
                                 <td class="sticky">
                                     <i class="fa-solid fa-pen-to-square text-navy me-2" style="cursor:pointer"
                                     @onclick="@(() => EditCase(cas.Id))"
                                     title="Edit"></i>
-                                    <i class="fa-solid fa-trash-can text-navy  me-2" title="Delete" style="cursor:pointer"></i>
+                                    <i class="fa-solid fa-trash-can text-navy  me-2" title="Delete" style="cursor:pointer" @onclick="@(() => DeleteCase(cas.Id, isAdmin))"></i>
                                     <i class="fa-solid  fa-circle-info text-navy" title="Info" style="cursor:pointer" @onclick="@(() => CaseDetails(cas.Id))"></i>
                                 </td>
 
@@ -396,7 +415,7 @@
     private string searchTermDept = string.Empty;
     private string searchTermDate = string.Empty;
     private string searchTermResonHoldover = string.Empty;
- 
+
     private string showClient = string.Empty;
     private bool ViewSearch = false;
 
@@ -412,6 +431,8 @@
     private string searchTerm = "";
     bool isCollapsed = false;
     bool isSettingsMode = false;
+    private string? loggedInUserId;
+    private bool isAdmin = false;
     private void EditCase(Guid caseId)
     {
         navManager.NavigateTo($"/EditCase/{caseId}");
@@ -419,10 +440,10 @@
 
     private  void CaseDetails(Guid caseId)
     {
-    
-       
+
+
         navManager.NavigateTo($"/CaseDetails/{caseId}");
-       
+
     }
 
 
@@ -440,16 +461,26 @@
 
             navManager.NavigateTo("/cases", forceLoad: true);
         }
+
+        var authState = await _authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+        }
+
         await Task.Delay(500);
 
         await GetAllCases();
         spinnerservice.Hide();
     }
 
+  
 
     private async Task GetAllCases()
     {
-
         var filters = new CaseFilterDto
         {
             CaseCode = searchcasecode,
@@ -460,43 +491,45 @@
             ActionDate = searchTermDate,
             Status = searchTermStatus
         };
-        pagedcases = await _service.GetAllAsync(currentPage, pageSize, filters);
+       
+        pagedcases = await _service.GetAllAsync(currentPage, pageSize, filters, loggedInUserId,
+                isAdmin);
 
-     
+
     }
 
-private async Task OnSearchChanged(ChangeEventArgs e, string field)
-{
-    var value = e.Value?.ToString() ?? string.Empty;
-
-    switch (field)
+    private async Task OnSearchChanged(ChangeEventArgs e, string field)
     {
-        case "CaseCode":
-            searchcasecode = value;
-            break;
-        case "Client":
-            searchTermClient = value;
-            break;
-        case "Tenant":
-            searchTermTenant = value;
-            break;
-        case "Landlord":
-            searchTermLandLord = value;
-            break;
-        case "ReasonHoldover":
-            searchTermResonHoldover = value;
-            break;
-        case "ActionDate":
-            searchTermDate = value;
-            break;
-        case "Status":
-            searchTermStatus = value;
-            break;
-    }
+        var value = e.Value?.ToString() ?? string.Empty;
 
-    currentPage = 1; // new search ke time page reset ho jaye
-    await GetAllCases();
-}
+        switch (field)
+        {
+            case "CaseCode":
+                searchcasecode = value;
+                break;
+            case "Client":
+                searchTermClient = value;
+                break;
+            case "Tenant":
+                searchTermTenant = value;
+                break;
+            case "Landlord":
+                searchTermLandLord = value;
+                break;
+            case "ReasonHoldover":
+                searchTermResonHoldover = value;
+                break;
+            case "ActionDate":
+                searchTermDate = value;
+                break;
+            case "Status":
+                searchTermStatus = value;
+                break;
+        }
+
+        currentPage = 1; // new search ke time page reset ho jaye
+        await GetAllCases();
+    }
 
 
 
@@ -514,7 +547,7 @@ private async Task OnSearchChanged(ChangeEventArgs e, string field)
         navManager.NavigateTo("/case");
     }
 
-    
+
 
     private bool StatusMatches(LegalCase c, string status)
     {
@@ -532,16 +565,42 @@ private async Task OnSearchChanged(ChangeEventArgs e, string field)
     private async Task SelectClient(CreateToClientDto client)
     {
 
-       
+
         showClient = $"{client.FirstName} {client.LastName} - ({client.ClientCode})";
         ViewSearch = false;
-    
+
     }
 
     private async Task SelectClientmodal()
     {
-        AllClients = await _clientservice.GetAllClientsAsync(currentPage, pageSize, searchTerm);
+        AllClients = await _clientservice.GetAllClientsAsync(currentPage, pageSize, searchTerm, loggedInUserId , isAdmin);
         await clientModal.Show(AllClients.Items);
+    }
+
+    private async Task DeleteCase(Guid id , bool isAdmin)
+    {
+        spinnerservice.Show();
+
+        bool isDeleted = await _service.DeleteAsync(id , isAdmin);
+        if (isDeleted)
+        {
+            var filters = new CaseFilterDto
+            {
+                CaseCode = searchcasecode,
+                Client = searchTermClient,
+                Tenant = searchTermTenant,
+                LandLord = searchTermLandLord,
+                ReasonHoldover = searchTermResonHoldover,
+                ActionDate = searchTermDate,
+                Status = searchTermStatus
+            };
+
+
+            pagedcases = await _service.GetAllAsync(currentPage, pageSize, filters, loggedInUserId,
+             isAdmin);
+            StateHasChanged();
+        }
+        spinnerservice.Hide();
     }
 }
 

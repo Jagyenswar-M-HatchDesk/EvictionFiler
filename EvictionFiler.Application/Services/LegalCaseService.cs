@@ -34,6 +34,11 @@ namespace EvictionFiler.Application.Services
             return await _repository.GetTotalCasesCountAsync();
         }
 
+        public async Task<int> GetActiveCasesCountAsync()
+        {
+            return await _repository.GetActiveCasesCountAsync();
+        }
+
         public async Task<bool> AddLegalCasesAsync(CreateToEditLegalCaseModel legalCase)
 		{
             var addoccupants = new List<AdditionalOccupants>();
@@ -115,9 +120,9 @@ namespace EvictionFiler.Application.Services
 			return false;
 		}
 
-		public async Task<PaginationDto<LegalCase>> GetAllAsync(int pageNumber, int pageSize ,CaseFilterDto Filters)
+		public async Task<PaginationDto<LegalCase>> GetAllAsync(int pageNumber, int pageSize ,CaseFilterDto Filters , string userId , bool isAdmin)
 		{
-			return await _repository.GetAllCasesAsync(pageNumber , pageSize , Filters);
+			return await _repository.GetAllCasesAsync(pageNumber , pageSize , Filters , userId , isAdmin);
 		}
 
         public async Task<List<LegalCase>>GetAllAsync()
@@ -321,14 +326,25 @@ namespace EvictionFiler.Application.Services
         }
 
 
-        public async Task DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(Guid id , bool isAdmin)
 		{
-			var legalCase = await _repository.GetAsync(id);
-			if (legalCase != null)
+            var cases = await _repository.GetAsync(id);
+			if (isAdmin)
 			{
-				await _repository.DeleteAsync(legalCase.Id);
-				await _unitOfWork.SaveChangesAsync();
-			}
-		}
+                await _repository.DeleteAsync(cases.Id);
+
+            }
+            else
+			{
+
+                cases.IsDeleted = true;
+                cases.IsActive = false;
+            }
+
+            var deleterecordes = await _unitOfWork.SaveChangesAsync();
+            if (deleterecordes > 0)
+                return true;
+            return false;
+        }
 	}
 }

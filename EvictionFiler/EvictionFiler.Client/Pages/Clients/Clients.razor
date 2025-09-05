@@ -5,7 +5,11 @@
 @using EvictionFiler.Application.DTOs.PaginationDto
 @using EvictionFiler.Application.DTOs.TenantDto
 @using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Client.Jwt
 @using EvictionFiler.Client.SpinnerService
+@using Microsoft.AspNetCore.Components.Authorization;
+@using System.Security.Claims
+@inject JwtAuthStateProviders _authStateProvider
 @inject SpinnerService Spinnerservice
  @inject IClientService clientservice 
  @inject ILandlordSevice landLordService 
@@ -132,6 +136,10 @@
                         <th>Phone</th>
                         <th>Fax</th>
                         <th>Address</th>
+                             @if (isAdmin)
+                                {
+                        <th>CreatedBy </th>
+                                }
                         <th >Status</th>
                         <th class="sticky">Action</th>
                     </tr>
@@ -162,14 +170,24 @@
                                     }
                                     @fullAddress
                                 </td>
-                                <td>
-                                   
-                                    @(client.Status == true ? "Active" : client.Status == false ? "Inactive" : "Not Set")
+                                  @if (isAdmin)
+                                {
+
+                                 <td>@(client?.CreatedByName ?? "-")</td> 
+                                  }
+
+                                     <td>
+                            @(client.IsActive == true
+                                                            ? "Active"
+                                                        : client.IsDeleted == true
+                                                            ? "InActive"
+                                                            : "Not Set")
                                 </td>
+
 
                                 <td class="sticky">
                                     <i class="fa-solid fa-pen-to-square text-navy me-3 " @onclick="() => ShowAddEditClient(client.Id)" style="cursor: pointer;" title="Edit"></i>
-                                    <i class="fa-solid fa-trash-can text-danger " @onclick=" ()=>DeleteClient(client.Id)" style="cursor: pointer;" title="Delete"></i>
+                                    <i class="fa-solid fa-trash-can text-danger " @onclick=" ()=>DeleteClient(client.Id ,isAdmin)" style="cursor: pointer;" title="Delete"></i>
                                 </td>
                             </tr>
                         }
@@ -271,6 +289,9 @@
     private int pageSize = 10;
     private string searchTerm = "";
 
+    private string? loggedInUserId;
+    private bool isAdmin = false;
+
     protected override async Task OnInitializedAsync()
     {
         Spinnerservice.Show();
@@ -302,6 +323,17 @@
 
             navManager.NavigateTo("/clients", forceLoad: false);
         }
+
+        var authState = await _authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+        }
+
+
         await Task.Delay(1000);
         await LoadClients();
         //isLoading = false;
@@ -311,7 +343,16 @@
 
     private async Task LoadClients()
     {
-        pagedClients = await clientservice.GetAllClientsAsync(currentPage, pageSize, searchTerm);
+        if (!string.IsNullOrEmpty(loggedInUserId))
+        {
+            pagedClients = await clientservice.GetAllClientsAsync(
+                currentPage,
+                pageSize,
+                searchTerm,
+                loggedInUserId,
+                isAdmin
+            );
+        }
     }
 
     private async Task OnPageChanged(int newPage)
@@ -459,16 +500,18 @@
     }
 
 
-    public async Task DeleteClient(Guid id)
+    public async Task DeleteClient(Guid id ,bool isAdmin)
     {
-        bool isDeleted = await clientservice.DeleteClientAsync(id);
+        Spinnerservice.Show();
+        bool isDeleted = await clientservice.DeleteClientAsync(id, isAdmin);
 
         if (isDeleted)
         {
         
-            pagedClients = await clientservice.GetAllClientsAsync(currentPage, pageSize , searchTerm);
+            pagedClients = await clientservice.GetAllClientsAsync(currentPage, pageSize, searchTerm, loggedInUserId, isAdmin);
             StateHasChanged();
         }
+        Spinnerservice.Hide();
     }
 
 

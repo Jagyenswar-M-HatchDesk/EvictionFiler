@@ -11,11 +11,12 @@ namespace EvictionFiler.Application.Interfaces.IRepository
 	{
 
         //Task<PaginationDto<LegalCase>> GetAllCasesAsync(int pageNumber, int pageSize , string searchTerm);
-        Task<PaginationDto<LegalCase>> GetAllCasesAsync(int pageNumber, int pageSize, CaseFilterDto filters);
+        Task<PaginationDto<LegalCase>> GetAllCasesAsync(int pageNumber, int pageSize, CaseFilterDto filters, string userId, bool isAdmin);
         Task<List<LegalCase>> GetAllCasesAsync();
         Task<string> GenerateCaseCodeAsync();
         Task<List<LegalCase>> GetTodayCasesAsync();
         Task<int> GetTotalCasesCountAsync();
+        Task<int> GetActiveCasesCountAsync();
 
 
     }

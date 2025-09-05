@@ -1,5 +1,6 @@
 ﻿@rendermode InteractiveServer
 @inject NavigationManager nav
+@using System.Security.Claims
 
 @using EvictionFiler.Server
 @using EvictionFiler.Server.Services
@@ -104,18 +105,21 @@
                            @onclick="@(() => SetActive("Audit"))">Audit</a>
                     </div> *@
                     }
-                  
 
+
+                @if (userRole == "Admin")
+                {
                     <!-- MANAGE -->
                     <div class="nav flex-column ">
                         <a title="User" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Users") || (isCollapsed && IsSubmenuActive("Users")) ? "active" : "")"
-                           @onclick="@(() => ToggleMenu("Users"))">
+                        @onclick="@(() => ToggleMenu("Users"))">
                             <i class="fa-solid fa-user menu-icon"></i>
 
                             <span class="hide-on-collapse menu-label" >Users</span>
                         </a>
-                       
+
                     </div>
+                }
 
                     <div class="nav flex-column ">
                         <a  title="Client" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Client") || (isCollapsed && IsSubmenuActive("Client")) ? "active" : "")"
@@ -453,9 +457,10 @@
                     </div>
                 }
 
-
-                <div class="nav flex-column "
-                     @onmouseover="@(() => HoveredMenu = "Settings")"
+                @if (userRole == "Admin")
+                {
+                    <div class="nav flex-column "
+                    @onmouseover="@(() => HoveredMenu = "Settings")"
                      @onmouseout="@(() => HoveredMenu = null)">
                     <a title="Manage Forms" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Settings") || (isCollapsed && IsSubmenuActive("Forms")) ? "active" : "")"
                        @onclick="@(() => ToggleMenu("Settings"))">
@@ -466,6 +471,7 @@
                     </a>
 
                 </div>
+                
 
                 @if (!isCollapsed && IsExpanded("Settings"))
                 {
@@ -480,7 +486,8 @@
                             </a>
                         }
                     </div>
-                }
+                    }
+                
                 else if (isCollapsed && HoveredMenu == "Settings")
                 {
                     <div class="flyout-menu submenu-container">
@@ -494,6 +501,7 @@
                             </a>
                         }
                     </div>
+                }
                 }
 
             </div>
@@ -531,17 +539,13 @@
                     </div>
                 }
 
-                <!-- Help Link -->
-                <a href="NotImplemented" class="sidebar-link text-decoration-none p-2">
-                    <i class="fa-solid fa-circle-question menu-icon"></i>
-                    <span class="hide-on-collapse menu-label">Help/FAQ</span>
-                </a>
+            
 
                 <!-- Settings & Collapse Button -->
                 <div class="sidebar-bottom d-flex flex-column position-relative">
                     <a class="sidebar-link text-decoration-none p-2" @onclick="ToggleSettingsMode">
-                        <i class="fa-solid fa-gears"></i>
-                        <span class="hide-on-collapse menu-label">Settings</span>
+                        <i class="fa-solid fa-circle-question menu-icon"></i>
+                        <span class="hide-on-collapse menu-label">Help/FAQ</span>
                     </a>
                     <div class="toggle-btns" @onclick="ToggleSidebar">
                         <i class="fas fa-angles-left"></i>
@@ -558,6 +562,7 @@
 @code {
     private bool showProfileOptions = false;
     Dictionary<string, bool> expandedMenus = new();
+    private string userRole = "";
    
     public string Name { get; set; }
 
@@ -574,8 +579,16 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
+        
+
         if (user.Identity?.IsAuthenticated == true)
         {
+
+            var roleClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+            if (roleClaim != null)
+            {
+                userRole = roleClaim.Value;
+            }
             Name = user.Identity.Name ?? "User";
         }
         else

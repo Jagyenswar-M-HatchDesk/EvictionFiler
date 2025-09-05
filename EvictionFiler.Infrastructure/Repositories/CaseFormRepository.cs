@@ -6,9 +6,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using HtmlRendererCore.PdfSharp;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
-using PdfSharpCore;
-using PdfSharpCore.Pdf;
+
 
 using PuppeteerSharp;
 using PuppeteerSharp.Media;

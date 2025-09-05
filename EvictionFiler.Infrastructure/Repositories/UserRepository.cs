@@ -43,29 +43,29 @@ namespace EvictionFiler.Infrastructure.Repositories
         {
             try
             {
-                var serverPrefix = _config.GetConnectionString("SqlServer");
-                var dbName = $"{model.Role}_{model.Email.Split('@')[0]}";
-                var connectionString = $"{serverPrefix};Database={dbName};MultipleActiveResultSets=True;";
+                //var serverPrefix = _config.GetConnectionString("SqlServer");
+                //var dbName = $"{model.Role}_{model.Email.Split('@')[0]}";
+                //var connectionString = $"{serverPrefix};Database={dbName};MultipleActiveResultSets=True;";
 
-                var database = new UserDatabase
-                {
-                    Id = Guid.NewGuid(),
-                    DatabaseName = dbName,
-                    ConnectionString = connectionString,
-                    CreatedOn = DateTime.UtcNow,
-                    UpdatedOn = DateTime.UtcNow,
-                };
-                await _db.UserDatabases.AddAsync(database);
-                await _db.SaveChangesAsync();
+                //var database = new UserDatabase
+                //{
+                //    Id = Guid.NewGuid(),
+                //    DatabaseName = dbName,
+                //    ConnectionString = connectionString,
+                //    CreatedOn = DateTime.UtcNow,
+                //    UpdatedOn = DateTime.UtcNow,
+                //};
+                //await _db.UserDatabases.AddAsync(database);
+                //await _db.SaveChangesAsync();
 
-                var options = new DbContextOptionsBuilder<TenantDbContext>()
-                    .UseSqlServer(connectionString)
-                    .EnableSensitiveDataLogging()
-                    .LogTo(Console.WriteLine)
-                    .Options;
+                //var options = new DbContextOptionsBuilder<TenantDbContext>()
+                //    .UseSqlServer(connectionString)
+                //    .EnableSensitiveDataLogging()
+                //    .LogTo(Console.WriteLine)
+                //    .Options;
 
-                using var tenantDb = new TenantDbContext(options);
-                await tenantDb.Database.MigrateAsync();
+                //using var tenantDb = new TenantDbContext(options);
+                //await tenantDb.Database.MigrateAsync();
 
                 // Ensure role exists in main DB
                 var role = await _roleManager.FindByNameAsync(model.Role);
@@ -85,7 +85,6 @@ namespace EvictionFiler.Infrastructure.Repositories
                     CreatedOn = DateTime.UtcNow,
                     UpdatedOn = DateTime.UtcNow,
                     RoleId = role.Id,
-                    TenantId = database.Id,
                     IsActive = true,
                    
                 };

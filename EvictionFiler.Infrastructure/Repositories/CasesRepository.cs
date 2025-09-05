@@ -1,6 +1,7 @@
 ﻿using EvictionFiler.Application.DTOs.LegalCaseDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository;
+using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
@@ -12,15 +13,24 @@ namespace EvictionFiler.Infrastructure.Repositories
     public class CasesRepository : Repository<LegalCase>, ICasesRepository
 	{
         private readonly MainDbContext _context;
+        private readonly IUserRepository _userRepo;
 
-        public CasesRepository(MainDbContext context) : base(context)
+        public CasesRepository(MainDbContext context , IUserRepository userRepo) : base(context)
 		{
             _context = context;
+            _userRepo = userRepo;
         }
 
         public async Task<int> GetTotalCasesCountAsync()
         {
             return await _context.LegalCases.CountAsync();
+        }
+
+        public async Task<int> GetActiveCasesCountAsync()
+        {
+            return await _context.LegalCases
+               .Where(c=>c.IsActive)
+                .CountAsync();
         }
 
         public async Task<List<LegalCase>> GetTodayCasesAsync()
@@ -144,10 +154,29 @@ namespace EvictionFiler.Infrastructure.Repositories
            
         }
 
-        public async Task<PaginationDto<LegalCase>> GetAllCasesAsync(int pageNumber, int pageSize, CaseFilterDto filters)
+        public async Task<PaginationDto<LegalCase>> GetAllCasesAsync(int pageNumber, int pageSize, CaseFilterDto filters, string userId,bool isAdmin)
         {
             var query = _context.LegalCases
                 .AsNoTracking();
+            var users = await _userRepo.GetAllUser();
+            var userDict = users.ToDictionary(u => u.Id, u => $"{u.FirstName} {u.MiddleName} {u.LastName}");
+
+            if (!isAdmin)
+            {
+                query = query.Where(c => c.IsActive == true && c.IsDeleted == false);
+
+                // ✅ Non-admin → Sirf apne hi clients dekhe
+                if (!string.IsNullOrWhiteSpace(userId))
+                {
+                    var userGuid = Guid.Parse(userId);
+                    query = query.Where(c => c.CreatedBy == userGuid);
+                }
+            }
+            else
+            {
+                // ✅ Admin → Saare clients dikhenge, deleted + inactive bhi
+                query = query.OrderByDescending(c => c.CreatedOn);
+            }
 
             // ✅ CaseCode filter
             if (!string.IsNullOrWhiteSpace(filters.CaseCode))
@@ -227,8 +256,14 @@ namespace EvictionFiler.Infrastructure.Repositories
                     Id = c.Id,
                     Casecode = c.Casecode,
                     CreatedOn = c.CreatedOn,
+                    IsActive = c.IsActive,
+                    IsDeleted = c.IsDeleted,
+
                     ReasonHoldover = c.ReasonHoldover,
                     CreatedBy = c.CreatedBy,
+                    CreatedByName = userDict.ContainsKey(c.CreatedBy)
+                            ? userDict[c.CreatedBy]
+                            : "Admin",
                     Clients = c.Clients != null ? new Client
                     {
                         FirstName = c.Clients.FirstName,

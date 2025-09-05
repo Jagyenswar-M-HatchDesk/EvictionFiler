@@ -8,11 +8,11 @@ namespace EvictionFiler.Application.Interfaces.IServices
     {
 		Task<bool> Create(EditToClientDto dto);
 		//Task<List<EditToClientDto>> GetAllClientsAsync();
-		Task<PaginationDto<EditToClientDto>> GetAllClientsAsync(int pageNumber, int pageSize , string searchTerm);
+		Task<PaginationDto<EditToClientDto>> GetAllClientsAsync(int pageNumber, int pageSize , string searchTerm , string userId, bool isAdmin);
 		Task<bool> UpdateClientAsync(EditToClientDto dto);
 
 		Task<EditToClientDto?> GetClientByIdAsync(Guid? id);
-		Task<bool> DeleteClientAsync(Guid id);
+		Task<bool> DeleteClientAsync(Guid id , bool isAdmin);
 		Task<List<CreateToClientDto>> SearchClient(string searchTerm);
 
 

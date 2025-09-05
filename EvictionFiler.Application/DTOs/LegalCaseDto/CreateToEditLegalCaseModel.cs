@@ -8,23 +8,23 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvictionFiler.Application.DTOs.LegalCaseDto
 {
-	public class CreateToEditLegalCaseModel  : DeletableBaseEntity
+	public class CreateToEditLegalCaseModel : DeletableBaseEntity
 	{
 		public Guid Id { get; set; }
 		public Guid ClientId { get; set; }
 		public Guid? BuildingId { get; set; }
 		public Guid? LandLordId { get; set; }
-        public string LandLordName { get; set; }
-        public Guid? TenantId { get; set; }
-        public string? TenantName { get; set; }
-        public Guid? CaseTypeId { get; set; }
-        public string? CaseTypeName { get; set; }
-        public string? Casecode { get; set; }
+		public string LandLordName { get; set; }
+		public Guid? TenantId { get; set; }
+		public string? TenantName { get; set; }
+		public Guid? CaseTypeId { get; set; }
+		public string? CaseTypeName { get; set; }
+		public string? Casecode { get; set; }
 		[Required(ErrorMessage = "Please select Reason Holdover.")]
 		public Guid? ReasonHoldoverId { get; set; }
 		public string? ReasonHoldoverName { get; set; }
 
-	
+
 		public Guid? IsUnitIllegalId { get; set; }
 		public bool? TenantRecord { get; set; }
 		public bool? RenewalOffer { get; set; }
@@ -42,22 +42,22 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 		public double? TotalRentOwed { get; set; }
 		public bool? IsERAPPaymentReceived { get; set; }
 		public DateOnly? ERAPPaymentReceivedDate { get; set; }
-		
+
 		public Guid? TenancyTypeId { get; set; }
 
-        public string? TenancyTypeName { get; set; }
-        public Guid? RegulationStatusId { get; set; }
+		public string? TenancyTypeName { get; set; }
+		public Guid? RegulationStatusId { get; set; }
 
-        public string? RegulationStatusName { get; set; }
+		public string? RegulationStatusName { get; set; }
 
-        public Guid? LandlordTypeId { get; set; }
+		public Guid? LandlordTypeId { get; set; }
 
-        public string? LandlordTypeName { get; set; }
-        public string? ReasonDescription { get; set; }
+		public string? LandlordTypeName { get; set; }
+		public string? ReasonDescription { get; set; }
 
 		public string? ExplainDescription { get; set; }
 
-		public CreateToTenantDto ? tenants { get; set; }
+		public CreateToTenantDto? tenants { get; set; }
 
 		public string? Attrney { get; set; }
 		[MaxLength(100)]
@@ -69,18 +69,20 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 		public string? ExplainTenancyReceiveDescription { get; set; }
 		public Guid? SelectedTenantId { get; set; }
 		public DateTime CreatedOn { get; set; }
-        public bool Status { get; set; }
-        public List<EditToBuildingDto> OtherPropertiesBuildings { get; set; } = new();
+		public bool Status { get; set; }
+		public List<EditToBuildingDto> OtherPropertiesBuildings { get; set; } = new();
 
-        public bool? WrittenLease { get; set; }
-        public DateOnly? DateTenantMoved { get; set; }
+		public bool? WrittenLease { get; set; }
+		public DateOnly? DateTenantMoved { get; set; }
 
-        public DateOnly? OralStart { get; set; }
+		public DateOnly? OralStart { get; set; }
 
-        public DateOnly? OralEnd { get; set; }
-        public Guid? RenewalStatusId { get; set; }
+		public DateOnly? OralEnd { get; set; }
+		public Guid? RenewalStatusId { get; set; }
 
-        public List<AdditionalOccupantDto>? AdditionalOccupants { get; set; }
+		public List<AdditionalOccupantDto>? AdditionalOccupants { get; set; }
+
+		public string ? CreatedByName {get;set;}
 
     }
 }

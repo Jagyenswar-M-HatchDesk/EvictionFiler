@@ -18,14 +18,15 @@ namespace EvictionFiler.Application.Services
 		private readonly ILandLordRepository _landlordrepo;
 		private readonly IBuildingRepository _buildingrepo;
 		private readonly ITenantRepository _tenantRepo;
-		private readonly IAdditionalTenantsRepository _additionalTenantsRepo;
+        private readonly IUserRepository _userRepo;
+        private readonly IAdditionalTenantsRepository _additionalTenantsRepo;
 		
 		
 		public ClientServices(
 	   IClientRepository clientRepo, IUnitOfWork unitOfWork,
 		ILandLordRepository landLordRepo,
 		IBuildingRepository buildingrepo,
-		ITenantRepository tenantRepo , IAdditionalTenantsRepository additionalTenantsRepo)
+		ITenantRepository tenantRepo , IAdditionalTenantsRepository additionalTenantsRepo,   IUserRepository userRepo)
 		{
 			_clientRepo = clientRepo;
 			_unitOfWork = unitOfWork;
@@ -33,17 +34,42 @@ namespace EvictionFiler.Application.Services
 			_buildingrepo = buildingrepo;
 			_tenantRepo = tenantRepo;
             _additionalTenantsRepo = additionalTenantsRepo;
+			_userRepo = userRepo;
 			
 		}
 
-		public async Task<PaginationDto<EditToClientDto>> GetAllClientsAsync(int pageNumber, int pageSize , string searchTerm)
-		{
+        public async Task<PaginationDto<EditToClientDto>> GetAllClientsAsync(
+    int pageNumber,
+    int pageSize,
+    string searchTerm,
+    string userId,
+    bool isAdmin)
+        {
+            var query = await _clientRepo.GetAllAsync(includes: u => u.State!);
+            var users = await _userRepo.GetAllUser();
+            var userDict = users.ToDictionary(u => u.Id, u => $"{u.FirstName} {u.MiddleName} {u.LastName}");
 
-			var query = await _clientRepo.GetAllAsync(includes: u => u.State!);
+            if (!isAdmin)
+            {
+                query = query.Where(c => c.IsActive == true && c.IsDeleted == false);
 
-			if (!string.IsNullOrWhiteSpace(searchTerm))
-			{
-				var lowerSearch = searchTerm.ToLower();
+                // ✅ Non-admin → Sirf apne hi clients dekhe
+                if (!string.IsNullOrWhiteSpace(userId))
+                {
+                    var userGuid = Guid.Parse(userId);
+                    query = query.Where(c => c.CreatedBy == userGuid);
+                }
+            }
+            else
+            {
+                // ✅ Admin → Saare clients dikhenge, deleted + inactive bhi
+                query = query.OrderByDescending(c => c.CreatedOn);
+            }
+
+            // Search filter
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var lowerSearch = searchTerm.ToLower();
                 query = query.Where(client =>
                        (client.ClientCode ?? "").ToLower().Contains(lowerSearch) ||
                        (client.FirstName ?? "").ToLower().Contains(lowerSearch) ||
@@ -55,52 +81,55 @@ namespace EvictionFiler.Application.Services
                        (client.Address1 ?? "").ToLower().Contains(lowerSearch) ||
                        (client.Address2 ?? "").ToLower().Contains(lowerSearch) ||
                        (client.City ?? "").ToLower().Contains(lowerSearch) ||
-                        (client.ZipCode ?? "").ToLower().Contains(lowerSearch) ||
+                       (client.ZipCode ?? "").ToLower().Contains(lowerSearch) ||
                        ((client.State != null ? client.State.Name : "") ?? "").ToLower().Contains(lowerSearch) ||
-                     ((client.IsActive ? "active" : "inactive").ToLower().Contains(lowerSearch))
-
-                 );
-
+                       ((client.IsActive ? "active" : "inactive").ToLower().Contains(lowerSearch))
+                );
             }
-
 
             var totalCount = query.Count();
 
-			var clients = query
-		.OrderBy(c => c.Id) 
-		.Skip((pageNumber - 1) * pageSize) 
-		.Take(pageSize) 
-		.Select(client => new EditToClientDto
-		{
-			Id = client.Id,
-			ClientCode = client.ClientCode ?? "",
-			FirstName = client.FirstName ?? "",
-			LastName = client.LastName ?? "",
-			Email = client.Email ?? "",
-			Address1 = client.Address1 ?? "",
-			Address2 = client.Address2 ?? "",
-			City = client.City ?? "",
-			StateName = client.State != null ? client.State.Name : "Unknown",
-			StateId = client.StateId,
-			ZipCode = client.ZipCode,
-			Fax = client.Fax ?? "",
-			Phone = client.Phone ?? "",
-			CellPhone = client.CellPhone ?? "",
-			Status = client.IsActive ,
-            CreatedBy = client.CreatedBy,
-            CreatedOn = client.CreatedOn,
-        })
-		.ToList();
+            var clients = query
+                .OrderBy(c => c.Id)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(client => new EditToClientDto
+                {
+                    Id = client.Id,
+                    ClientCode = client.ClientCode ?? "",
+                    FirstName = client.FirstName ?? "",
+                    LastName = client.LastName ?? "",
+                    Email = client.Email ?? "",
+                    Address1 = client.Address1 ?? "",
+                    Address2 = client.Address2 ?? "",
+                    City = client.City ?? "",
+                    StateName = client.State != null ? client.State.Name : "Unknown",
+                    StateId = client.StateId,
+                    ZipCode = client.ZipCode,
+                    Fax = client.Fax ?? "",
+                    Phone = client.Phone ?? "",
+                    CellPhone = client.CellPhone ?? "",
+                    Status = client.IsActive,
+                    CreatedBy = client.CreatedBy,
+                    CreatedOn = client.CreatedOn,
+					IsActive = client.IsActive,
+					IsDeleted = client.IsDeleted,
+                    CreatedByName = userDict.ContainsKey(client.CreatedBy)
+                            ? userDict[client.CreatedBy]
+                            : "Admin",
+                })
+                .ToList();
 
-			return new PaginationDto<EditToClientDto>
-			{
-				Items = clients,
-				TotalCount = totalCount,
-				PageSize = pageSize,
-				CurrentPage = pageNumber
-			};
-		}
-		public async Task<EditToClientDto?> GetClientByIdAsync(Guid? id)
+            return new PaginationDto<EditToClientDto>
+            {
+                Items = clients,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = pageNumber
+            };
+        }
+
+        public async Task<EditToClientDto?> GetClientByIdAsync(Guid? id)
 		{
 			var client = await _clientRepo.GetAsync(id);
 
@@ -127,16 +156,67 @@ namespace EvictionFiler.Application.Services
 		}
 
 
-		public async Task<bool> DeleteClientAsync(Guid id)
-		{
-			var client = await _clientRepo.DeleteAsync(id);
-			var deleterecordes = await _unitOfWork.SaveChangesAsync();
-			if (deleterecordes > 0)
-				return true;
-			return false;
-		}
+        public async Task<bool> DeleteClientAsync(Guid id, bool isAdmin)
+        {
+            var client = await _clientRepo.GetAsync(id);
+            if (client == null)
+                return false;
 
-		public async Task<List<CreateToClientDto>> SearchClient(string searchTerm)
+            if (isAdmin)
+            {
+                // ✅ Get all landlords for this client
+                var landlords = await _landlordrepo.GetAllAsync(l => l.ClientId == id);
+
+                foreach (var landlord in landlords.ToList())
+                {
+                    // ✅ Get all buildings for this landlord
+                    var buildings = await _buildingrepo.GetAllAsync(b => b.LandlordId == landlord.Id);
+
+                    foreach (var building in buildings.ToList())
+                    {
+                        // ✅ Get all tenants for this building
+                        var tenants = await _tenantRepo.GetAllAsync(t => t.BuildinId == building.Id);
+
+                        foreach (var tenant in tenants.ToList())
+                        {
+                            // ✅ Get all additional tenants for this tenant
+                            var additionalTenants = await _additionalTenantsRepo.GetAllAsync(a => a.TenantId == tenant.Id);
+
+                            // ✅ Delete additional tenants first
+                            foreach (var additional in additionalTenants.ToList())
+                            {
+                                await _additionalTenantsRepo.DeleteAsync(additional.Id);
+                            }
+
+                            // ✅ Delete tenant after deleting additional tenants
+                            await _tenantRepo.DeleteAsync(tenant.Id);
+                        }
+
+                        // ✅ Delete building after tenants deleted
+                        await _buildingrepo.DeleteAsync(building.Id);
+                    }
+
+                    // ✅ Finally delete landlord after buildings deleted
+                    await _landlordrepo.DeleteAsync(landlord.Id);
+                }
+
+                // ✅ Finally delete the client
+                await _clientRepo.DeleteAsync(client.Id);
+            }
+            else
+            {
+                // ✅ Soft delete for normal user
+                client.IsDeleted = true;
+                client.IsActive = false;
+            }
+
+            var deletedRecords = await _unitOfWork.SaveChangesAsync();
+            return deletedRecords > 0;
+        }
+
+
+
+        public async Task<List<CreateToClientDto>> SearchClient(string searchTerm)
 		{
 			var newtenant = await _clientRepo.SearchClient(searchTerm);
 			return newtenant;

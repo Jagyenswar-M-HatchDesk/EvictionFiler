@@ -23,6 +23,8 @@ namespace EvictionFiler.Application.DTOs.ClientDto
 		public string? Fax { get; set; }
 		public bool Status { get; set; }
 		public List<CreateToLandLordDto> LandLords { get; set; } = new();
+
+		public string ? CreatedByName { get; set; }
 	
 
 	}
