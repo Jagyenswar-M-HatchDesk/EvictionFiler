@@ -5,12 +5,14 @@
 @using EvictionFiler.Application.DTOs.PaginationDto
 @using EvictionFiler.Application.Interfaces.IRepository
 @using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Client.Jwt
 @using EvictionFiler.Client.SpinnerService
 @inject SpinnerService spinnerservice
 @using EvictionFiler.Client.Components.Layout
 @using EvictionFiler.Domain.Entities
-
-
+@using Microsoft.AspNetCore.Components.Authorization;
+@using System.Security.Claims
+@inject JwtAuthStateProviders _authStateProvider
 @using System.Globalization
 
 @inject ILegalCaseService _service
@@ -930,12 +932,21 @@
     private int activeCases = 0;
     private bool IsPrevDisabled => ActiveIndex == 0;
     private bool IsNextDisabled => ActiveIndex == legalcaseDto.Count - 1;
-
+    private string? loggedInUserId;
+    private bool isAdmin = false;
 
     protected override async Task OnInitializedAsync()
     {
-        totalCases = await _service.GetTotalCasesCountAsync();
-        activeCases = await _service.GetActiveCasesCountAsync();
+        var authState = await _authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+        }
+        totalCases = await _service.GetTotalCasesCountAsync(loggedInUserId , isAdmin);
+        activeCases = await _service.GetActiveCasesCountAsync(loggedInUserId, isAdmin);
     }
 
     private async Task Search()

@@ -15,8 +15,8 @@ namespace EvictionFiler.Application.Interfaces.IRepository
         Task<List<LegalCase>> GetAllCasesAsync();
         Task<string> GenerateCaseCodeAsync();
         Task<List<LegalCase>> GetTodayCasesAsync();
-        Task<int> GetTotalCasesCountAsync();
-        Task<int> GetActiveCasesCountAsync();
+        Task<int> GetTotalCasesCountAsync(string userId, bool isAdmin);
+        Task<int> GetActiveCasesCountAsync(string userId, bool isAdmin);
 
 
     }

@@ -29,14 +29,14 @@ namespace EvictionFiler.Application.Services
 
         }
 
-        public async Task<int> GetTotalCasesCountAsync()
+        public async Task<int> GetTotalCasesCountAsync(string userId ,bool isAdmin)
         {
-            return await _repository.GetTotalCasesCountAsync();
-        }
+            return await _repository.GetTotalCasesCountAsync(userId , isAdmin);
+        } 
 
-        public async Task<int> GetActiveCasesCountAsync()
+        public async Task<int> GetActiveCasesCountAsync(string userId, bool isAdmin)
         {
-            return await _repository.GetActiveCasesCountAsync();
+            return await _repository.GetActiveCasesCountAsync(userId, isAdmin);
         }
 
         public async Task<bool> AddLegalCasesAsync(CreateToEditLegalCaseModel legalCase)

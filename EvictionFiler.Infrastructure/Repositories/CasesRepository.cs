@@ -21,17 +21,40 @@ namespace EvictionFiler.Infrastructure.Repositories
             _userRepo = userRepo;
         }
 
-        public async Task<int> GetTotalCasesCountAsync()
+        public async Task<int> GetTotalCasesCountAsync(string userId , bool isAdmin)
         {
-            return await _context.LegalCases.CountAsync();
+            if (isAdmin)
+            {
+                
+                return await _context.LegalCases.CountAsync();
+            }
+            else
+            {
+              
+                var userGuid = Guid.Parse(userId);
+                return await _context.LegalCases
+                                     .Where(c => c.CreatedBy == userGuid) 
+                                     .CountAsync();
+            }
+        }
+        public async Task<int> GetActiveCasesCountAsync(string userId, bool isAdmin)
+        {
+            if (isAdmin)
+            {
+               
+                return await _context.LegalCases
+                                     .Where(c => c.IsActive)
+                                     .CountAsync();
+            }
+            else
+            {
+                var userGuid = Guid.Parse(userId);
+                return await _context.LegalCases
+                                     .Where(c => c.IsActive && c.CreatedBy == userGuid) 
+                                     .CountAsync();
+            }
         }
 
-        public async Task<int> GetActiveCasesCountAsync()
-        {
-            return await _context.LegalCases
-               .Where(c=>c.IsActive)
-                .CountAsync();
-        }
 
         public async Task<List<LegalCase>> GetTodayCasesAsync()
         {
