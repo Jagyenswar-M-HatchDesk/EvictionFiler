@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.OccupantDto;
 using EvictionFiler.Domain.Entities.Base.Base;
@@ -60,6 +61,7 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public List<AddtionalTenantDto>? AdditioalTenants { get; set; }
 		public EditToBuildingDto? Building { get; set; }
 		public EditToLandlordDto? Landlord { get; set; }
+        public EditToClientDto? Client { get; set; }
         public DateOnly? MoveInDate { get; set; }
         public string? CompletedAddress { get; set; }
 
