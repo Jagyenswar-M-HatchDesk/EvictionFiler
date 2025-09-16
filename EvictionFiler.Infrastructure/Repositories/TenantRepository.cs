@@ -18,7 +18,29 @@ namespace EvictionFiler.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-		public async Task<string?> GetLasttenantCodeAsync()
+        public async Task<string> GenerateTenantCodeAsync()
+        {
+            var lastCase = await _dbContext.Tenants
+                .OrderByDescending(c => c.TenantCode)
+                .Select(c => c.TenantCode)
+                .FirstOrDefaultAsync();
+
+            int nextNumber = 1;
+
+            if (!string.IsNullOrEmpty(lastCase) && lastCase.StartsWith("TT"))
+            {
+                string numberPart = lastCase.Substring(2);
+                if (int.TryParse(numberPart, out int parsedNumber))
+                {
+                    nextNumber = parsedNumber + 1;
+                }
+            }
+
+            string newCode = "TT" + nextNumber.ToString("D10");
+            return newCode;
+        }
+
+        public async Task<string?> GetLasttenantCodeAsync()
 		{
 			return await _dbContext.Tenants
 				.OrderByDescending(l => l.TenantCode)

@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Application.DTOs.ApartmentDto;
+﻿
+using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.BuildingDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
@@ -19,7 +20,29 @@ namespace EvictionFiler.Infrastructure.Repositories
             _context = context;
         }
 
-		public async Task<string?> GetLastBuildingCodeAsync()
+        public async Task<string> GenerateBuildingCodeAsync()
+        {
+            var lastCase = await _context.Buildings
+                .OrderByDescending(c => c.BuildingCode)
+                .Select(c => c.BuildingCode)
+                .FirstOrDefaultAsync();
+
+            int nextNumber = 1;
+
+            if (!string.IsNullOrEmpty(lastCase) && lastCase.StartsWith("BB"))
+            {
+                string numberPart = lastCase.Substring(2);
+                if (int.TryParse(numberPart, out int parsedNumber))
+                {
+                    nextNumber = parsedNumber + 1;
+                }
+            }
+
+            string newCode = "BB" + nextNumber.ToString("D10");
+            return newCode;
+        }
+
+        public async Task<string?> GetLastBuildingCodeAsync()
 		{
 			return await _context.Buildings
 				.OrderByDescending(l => l.BuildingCode)

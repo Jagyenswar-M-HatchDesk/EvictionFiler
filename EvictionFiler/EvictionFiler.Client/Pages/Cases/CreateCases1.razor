@@ -1,0 +1,646 @@
+﻿
+
+
+@page "/createcase1/{ClientId}"
+@page "/intake"
+@using System.ComponentModel.DataAnnotations
+@using System.Linq.Expressions
+@using EvictionFiler.Application.DTOs.ApartmentDto
+@using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Application.DTOs.LegalCaseDto
+@using EvictionFiler.Application.DTOs.TenantDto
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Client.Components.Cases
+@using EvictionFiler.Domain.Entities.Master
+@inject IClientRoleRepository ClientRoleRepository
+@inject ICaseTypeRepository CaseTypeRepository
+@inject ICaseSubTypeRepository CaseSubTypeRepository
+@inject IRegulationStatusRepository RegulationStatusRepository
+@inject IReasonHoldoverRepository ReasonHoldoverRepository
+@inject ILandlordTypeRepository LandlordTypeRepository
+@inject IRenewalStatusRepository RenewalStatusRepository
+@inject IUnitIllegalRepository UnitIllegalRepository
+@inject ITenancyTypeRepository TenancyTypeRepository
+@inject IDateRentRepository DateRentRepository
+@inject ILandlordSevice _landlordService
+@inject IBuildingService _buildingService
+@inject ILegalCaseService _legalCaseService
+@inject ITenantService _tenantService
+@inject IClientService _clientService
+@using EvictionFiler.Client.SpinnerService
+@inject IJSRuntime JS
+@inject NavigationManager nav
+@inject SpinnerService spinnerservice
+<!--
+  EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
+  • Single self‑contained .razor component
+  • Stepper, progress bar, per‑step validation
+  • Clean Bootstrap 5 cards & grid
+  • Review screen and JS alert on submit (replace with API call)
+-->
+
+<div class="container-fluid py-3 border-bottom bg-white sticky-top">
+    <div class="d-flex justify-content-between align-items-center">
+      
+        <div class="d-flex align-items-center gap-5">
+            @for (var i = 0; i < Steps.Count; i++)
+            {
+                var cls = i < (int)CurrentStep ? "bg-primary" : i == (int)CurrentStep ? "bg-info" : "bg-secondary";
+                <div class="d-flex align-items-center gap-2">
+                    <span class="rounded-circle d-inline-block @cls" style="width:14px; height:14px; border: 1px solid #333;"></span>
+                    <span>@Steps[i]</span>
+                </div>
+            }
+        </div>
+
+    </div>
+    <div class="progress mt-3" style="height:6px;">
+        <div class="progress-bar bg-primary" role="progressbar" style="width:@Progress%"></div>
+    </div>
+</div>
+
+<div class="container my-4">
+    <EditForm EditContext="_editContext" >
+        <DataAnnotationsValidator />
+       @*  <ValidationSummary class="mb-3" /> *@
+       
+
+      @if (CurrentStep == Step.Landlord)
+{
+    <div class="row">  
+        <div class="col-8">
+            <div class="card mb-3">
+                <div class="card-header fw-bold">Landlord Information</div>
+                <div class="card-body row">
+                    <div class="col-md-6">
+                        <label class="form-label">Full Name *</label>
+                        <InputText class="form-control" @bind-Value="legalcaseDto.landlords.FirstName" />
+                                <ValidationMessage For="() => legalcaseDto.landlords.FirstName" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Phone *</label>
+                                <InputText class="form-control" @bind-Value="legalcaseDto.landlords.Phone" />
+                                <ValidationMessage For="() => legalcaseDto.landlords.Phone" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email *</label>
+                                <InputText type="email" class="form-control" @bind-Value="legalcaseDto.landlords.Email" />
+                                <ValidationMessage For="() => legalcaseDto.landlords.Email" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Role *</label>
+                                <InputSelect class="form-select" @bind-Value="legalcaseDto.landlords.LandlordTypeId">
+                                    <option value="">-- Select Type --</option>
+                                    @foreach (var l in LandLordTypeList)
+                                    {
+                                        <option value="@l.Id">@l.Name</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="() => legalcaseDto.landlords.LandlordTypeId" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <CasesSummary />
+            <TipsSummary />
+        </div>
+    </div> 
+}
+
+
+        @* BUILDING *@
+       
+        
+        @if (CurrentStep == Step.Building)
+        {
+            <div class="row">
+                <div class="col-8">
+                    <div class="card mb-3">
+                        <div class="card-header fw-bold">Building Information</div>
+                        <div class="card-body row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">MDR Number *</label>
+                                <InputText class="form-control" @bind-Value="legalcaseDto.buildings.MDRNumber" />
+                                <ValidationMessage For="() => legalcaseDto.buildings.MDRNumber" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Number of Units *</label>
+                                <InputText class="form-control" @bind-Value="legalcaseDto.buildings.BuildingUnits" />
+                                <ValidationMessage For="() => legalcaseDto.buildings.BuildingUnits" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Building Address *</label>
+                                <InputText class="form-control" @bind-Value="legalcaseDto.buildings.Address1" />
+                                <ValidationMessage For="() => legalcaseDto.buildings.Address1" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Rent Regulation *</label>
+                                <InputSelect class="form-select" @bind-Value="legalcaseDto.buildings.RegulationStatusId">
+                                    <option value="">-- Select Type --</option>
+                                    @foreach (var l in RegulationList)
+                                    {
+                                        <option value="@l.Id">@l.Name</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="() => legalcaseDto.buildings.RegulationStatusId" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <CasesSummary />
+                    <TipsSummary />
+                </div>
+            </div>
+          
+
+        }
+
+        @* TENANT *@
+        @if (CurrentStep == Step.Tenant)
+        {
+            <div class="row">
+                <div class="col-8">
+                    <div class="card mb-3">
+                        <div class="card-header fw-bold">Tenant Information</div>
+                        <div class="card-body row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Tenant Name *</label>
+                                <InputText class="form-control" @bind-Value="legalcaseDto.tenants.FirstName" />
+                                <ValidationMessage For="() => legalcaseDto.tenants.FirstName" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Unit / Apt *</label>
+                                <InputText class="form-control" @bind-Value="legalcaseDto.tenants.UnitOrApartmentNumber" />
+                                <ValidationMessage For="() => legalcaseDto.tenants.UnitOrApartmentNumber" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Is the Unit Illegal? *</label>
+                                <div class="row row-cols-2 row-cols-md-4 g-2">
+                                    <InputRadioGroup @bind-Value="legalcaseDto.tenants.IsUnitIllegalId" class="d-flex flex-wrap gap-3">
+                                        @foreach (var option in IsUnitIllegalList)
+                                        {
+                                            <div class="form-check form-check-inline">
+                                                <InputRadio class="form-check-input" Value="@option.Id" />
+                                                <label class="form-check-label ms-1">@option.Name</label>
+                                            </div>
+                                        }
+                                    </InputRadioGroup>
+                                </div>
+                               
+                            </div>
+                            <div class="my-4">
+                                <div class="row mb-2">
+                                    <div class="col-4 fw-semibold">Tenant of record?</div>
+                                    <div class="col-4 fw-semibold">Still in possession?</div>
+                                    <div class="col-4 fw-semibold">Other Occupants?</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-4 d-flex gap-3 align-items-center">
+                                        <InputRadioGroup @bind-Value="legalcaseDto.tenants.TenantRecord">
+                                            <div class="form-check">
+                                                <InputRadio class="form-check-input" Value="true" />
+                                                <label class="form-check-label">Yes</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <InputRadio class="form-check-input" Value="false" />
+                                                <label class="form-check-label">No</label>
+                                            </div>
+                                        </InputRadioGroup>
+                                    </div>
+
+                                    <div class="col-4 d-flex gap-3 align-items-center">
+                                        <InputRadioGroup @bind-Value="legalcaseDto.tenants.HasPossession">
+                                            <div class="form-check">
+                                                <InputRadio class="form-check-input" Value="true" />
+                                                <label class="form-check-label">Yes</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <InputRadio class="form-check-input" Value="false" />
+                                                <label class="form-check-label">No</label>
+                                            </div>
+                                        </InputRadioGroup>
+                                    </div>
+
+                                    <div class="col-4 d-flex gap-3 align-items-center">
+                                        <InputRadioGroup @bind-Value="legalcaseDto.tenants.OtherOccupants">
+                                            <div class="form-check">
+                                                <InputRadio class="form-check-input" Value="true" />
+                                                <label class="form-check-label">Yes</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <InputRadio class="form-check-input" Value="false" />
+                                                <label class="form-check-label">No</label>
+                                            </div>
+                                        </InputRadioGroup>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <CasesSummary />
+                    <TipsSummary />
+                </div>
+            </div>
+          
+        }
+
+        @* RENT *@
+        @if (CurrentStep == Step.Rent)
+        {
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card mb-3">
+                        <div class="card-header fw-bold">Rent</div>
+                        <div class="card-body">
+                            <div class="row g-3">
+
+                                <!-- Written Lease -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Written Lease?</label>
+                                    <div>
+                                        <InputRadioGroup @bind-Value="legalcaseDto.WrittenLease">
+                                            <div class="form-check">
+                                                <InputRadio class="form-check-input" Value="true" />
+                                                <label class="form-check-label">Yes</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <InputRadio class="form-check-input" Value="false" />
+                                                <label class="form-check-label">No</label>
+                                            </div>
+                                        </InputRadioGroup>
+                                    </div>
+                                </div>
+
+                                <!-- Oral Start -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Oral Start</label>
+                                    <InputDate class="form-control" @bind-Value="legalcaseDto.OralStart" />
+                                </div>
+
+                                <!-- Oral End -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Oral End</label>
+                                    <InputDate class="form-control" @bind-Value="legalcaseDto.OralEnd" />
+                                </div>
+
+                                <!-- Date Tenant Moved -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Date Tenant Moved</label>
+                                    <InputDate class="form-control" @bind-Value="legalcaseDto.DateTenantMoved" />
+                                </div>
+
+                                <!-- Rent Due Day -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Rent Due Day *</label>
+                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId">
+                                        <option value="">-- Select Type --</option>
+                                        @foreach (var l in DateRentList)
+                                        {
+                                            <option value="@l.Id">@l.Name</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+
+                                <!-- Monthly Rent -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Monthly Rent ($) *</label>
+                                    <InputNumber class="form-control" @bind-Value="legalcaseDto.MonthlyRent" />
+                                </div>
+
+                                <!-- Tenant's Share -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Tenant's Share ($)</label>
+                                    <InputNumber class="form-control" @bind-Value="legalcaseDto.TenantShare" />
+                                </div>
+
+                                <!-- Total Rent Owed -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Total Rent Owed ($)</label>
+                                    <InputNumber class="form-control" @bind-Value="legalcaseDto.TotalRentOwed" />
+                                </div>
+
+                                <!-- ERAP Payment Received -->
+                                <div class="col-md-6">
+                                    <label class="form-label">ERAP Payment Received?</label>
+                                    <InputRadioGroup @bind-Value="legalcaseDto.IsERAPPaymentReceived">
+                                        <div class="form-check">
+                                            <InputRadio class="form-check-input" Value="true" />
+                                            <label class="form-check-label">Yes</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <InputRadio class="form-check-input" Value="false" />
+                                            <label class="form-check-label">No</label>
+                                        </div>
+                                    </InputRadioGroup>
+                                </div>
+
+                                <!-- Tenancy Type -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Tenancy Type</label>
+                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.TenancyTypeId">
+                                        <option value="">-- Select Type --</option>
+                                        @foreach (var l in TenancyTypeList)
+                                        {
+                                            <option value="@l.Id">@l.Name</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <CasesSummary />
+                    <TipsSummary />
+                </div>
+            </div>
+
+           
+        }
+
+        @* CASE *@
+        @if (CurrentStep == Step.Case)
+        {
+            <div class="row">
+                <div class="col-8">
+                    <div class="card mb-3">
+                        <div class="card-header fw-bold">Case Details</div>
+                        <div class="card-body">
+                            <label class="form-label">Case Type *</label>
+                            <InputSelect class="form-select" @bind-Value="legalcaseDto.CaseTypeId">
+                                <option value="">-- Select Type --</option>
+                                @foreach (var l in CaseTypeList)
+                                {
+                                    <option value="@l.Id">@l.Name</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="() => legalcaseDto.CaseTypeId" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <CasesSummary />
+                    <TipsSummary />
+                </div>
+            </div>
+          
+        }
+
+        @* REVIEW *@
+        @if (CurrentStep == Step.Review)
+        {
+            <div class="row">
+                <div class="col-8">
+                    <div class="card mb-3">
+                        <div class="card-header fw-bold">Review & Submit</div>
+                        <div class="card-body small">
+                            <p class="text-muted">Please review all details before submitting.</p>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <h6>Landlord</h6>
+                                    <dl class="row mb-0">
+                                        <dt class="col-5">Name</dt>
+                                        <dd class="col-7">@legalcaseDto.landlords.FirstName</dd>
+                                        <dt class="col-5">Phone</dt>
+                                        <dd class="col-7">@legalcaseDto.landlords.Phone</dd>
+                                        <dt class="col-5">Email</dt>
+                                        <dd class="col-7">@legalcaseDto.landlords.Email</dd>
+                                        <dt class="col-5">Role</dt>
+                                        <dd class="col-7">@legalcaseDto.landlords.LandlordTypeName</dd>
+                                    </dl>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Building</h6>
+                                    <dl class="row mb-0">
+                                        <dt class="col-5">MDR</dt>
+                                        <dd class="col-7">@legalcaseDto.buildings.MDRNumber</dd>
+                                        <dt class="col-5"># Units</dt>
+                                        <dd class="col-7">@legalcaseDto.buildings.BuildingUnits</dd>
+                                        <dt class="col-5">Address</dt>
+                                        <dd class="col-7">@legalcaseDto.buildings.Address1</dd>
+                                        <dt class="col-5">Regulation</dt>
+                                        <dd class="col-7">@legalcaseDto.buildings.RegulationStatusName</dd>
+                                    </dl>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Tenant</h6>
+                                    <dl class="row mb-0">
+                                        <dt class="col-5">Name</dt>
+                                        <dd class="col-7">@legalcaseDto.tenants.FirstName</dd>
+                                        <dt class="col-5">Unit</dt>
+                                        <dd class="col-7">@legalcaseDto.tenants.UnitOrApartmentNumber</dd>
+                                        <dt class="col-5">Illegal</dt>
+                                        <dd class="col-7">@string.Join(", ", legalcaseDto.tenants.IsUnitIllegalName)</dd>
+                                    </dl>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Rent</h6>
+                                    <dl class="row mb-0">
+                                        <dt class="col-5">Monthly</dt>
+                                        <dd class="col-7">@legalcaseDto.MonthlyRent?.ToString("C")</dd>
+                                        <dt class="col-5">Total Owed</dt>
+                                        <dd class="col-7">@legalcaseDto.TotalRentOwed?.ToString("C")</dd>
+                                        <dt class="col-5">ERAP</dt>
+                                        <dd class="col-7">@legalcaseDto.IsERAPPaymentReceived</dd>
+                                    </dl>
+                                </div>
+                                <div class="col-md-12">
+                                    <h6>Case</h6>
+                                    <dl class="row mb-0">
+                                        <dt class="col-2">Type</dt>
+                                        <dd class="col-10">@legalcaseDto.CaseTypeName</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <CasesSummary />
+                    <TipsSummary />
+                </div>
+            </div>
+           
+        }
+
+        <div class="d-flex justify-content-between border-top pt-3 mt-3">
+            <button type="button" class="btn btn-outline-secondary" @onclick="Prev" disabled="@(CurrentStep == Step.Landlord)">← Back</button>
+            @if (CurrentStep != Step.Review)
+            {
+                <button type="button" class="btn btn-primary" @onclick="Next" >Next →</button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-success" @onclick="SubmitAsync">Submit</button>
+            }
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public string ClientId { get; set; }
+    private readonly List<string> Steps = new() { "Landlord", "Building", "Tenant", "Rent", "Case", "Review" };
+    private readonly string[] CaseTypes = new[] { "Nonpayment", "Holdover", "HP Proceeding", "Illegal Sublet", "Nuisance" };
+
+    private CreateToEditLegalCaseModel legalcaseDto = new CreateToEditLegalCaseModel();
+    private Step CurrentStep { get; set; } = Step.Landlord;
+    private EditContext _editContext;
+    private ValidationMessageStore _messages;
+    public List<IsUnitIllegal> IsUnitIllegalList = new();
+    private List<RegulationStatus> RegulationList = new();
+    private List<LandlordType> LandLordTypeList = new();
+    private List<CaseType> CaseTypeList = new();
+    private List<TenancyType> TenancyTypeList = new();
+    private List<DateRent> DateRentList = new();
+    protected override async Task OnInitializedAsync()
+    {
+
+        legalcaseDto = new CreateToEditLegalCaseModel();
+        _editContext = new EditContext(legalcaseDto);
+        _messages = new ValidationMessageStore(_editContext);
+
+        legalcaseDto.landlords = new CreateToLandLordDto();    // ✔️ Yeh bhi zaroori hai
+        legalcaseDto.buildings = new CreateToBuildingDto();
+        legalcaseDto.tenants = new CreateToTenantDto();
+        LandLordTypeList = await LandlordTypeRepository.GetAllLandLordType();
+        IsUnitIllegalList = await UnitIllegalRepository.GetAllUnitIllegal();
+        RegulationList = await RegulationStatusRepository.GetAllRegulationStatus();
+        TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
+        CaseTypeList = await CaseTypeRepository.GetAllCaseType();
+        DateRentList = await DateRentRepository.GetAllDateRent();
+        legalcaseDto.ClientId = Guid.Parse(ClientId);
+        var holdoverCase = CaseTypeList.FirstOrDefault(x => x.Name == "Holdover");
+        if (holdoverCase != null)
+        {
+            legalcaseDto.CaseTypeId = holdoverCase.Id;
+        }
+    }
+
+
+    private string Progress => (((int)CurrentStep + 1) * 100.0 / Steps.Count).ToString("0");
+
+
+    // private void Next()
+    // {
+    //     var isValid = _editContext.Validate();
+
+    //     if (isValid)
+    //     {
+    //         CurrentStep++;
+    //     }
+    //     else
+    //     {
+    //         // 🔁 Notify Blazor that validation messages have updated
+    //         StateHasChanged();
+    //     }
+    // }
+
+    private async Task Next()
+    {
+        if (!ValidateCurrentStep()) return;
+        if (CurrentStep < Step.Review) CurrentStep++;
+    }
+  
+
+    private bool ValidateCurrentStep()
+    {
+        _messages.Clear();
+
+        switch (CurrentStep)
+        {
+            case Step.Landlord:
+                Require(() => legalcaseDto.landlords.FirstName, nameof(legalcaseDto.landlords.FirstName), "Full name is required");
+                Require(() => legalcaseDto.landlords.Phone, nameof(legalcaseDto.landlords.Phone), "Phone is required");
+                Require(() => legalcaseDto.landlords.Email, nameof(legalcaseDto.landlords.Email), "Email is required");
+                Require(() => legalcaseDto.landlords.LandlordTypeId, nameof(legalcaseDto.landlords.LandlordTypeId), "Role is required");
+                break;
+            case Step.Building:
+                Require(() => legalcaseDto.buildings.MDRNumber, nameof(legalcaseDto.buildings.MDRNumber), "MDR is required");
+                Require(() => legalcaseDto.buildings.BuildingUnits, nameof(legalcaseDto.buildings.BuildingUnits), "Units required");
+                Require(() => legalcaseDto.buildings.Address1, nameof(legalcaseDto.buildings.Address1), "Address required");
+                Require(() => legalcaseDto.buildings.RegulationStatusId, nameof(legalcaseDto.buildings.RegulationStatusId), "Select regulation");
+                break;
+            // case Step.Tenant:
+            //     Require(() => legalcaseDto.tenants.FirstName, nameof(legalcaseDto.tenants.FirstName), "Tenant name required");
+            //     Require(() => legalcaseDto.tenants.UnitOrApartmentNumber, nameof(legalcaseDto.tenants.UnitOrApartmentNumber), "Unit required");
+
+            case Step.Rent:
+                Require(() => legalcaseDto.MonthlyRent, nameof(legalcaseDto.MonthlyRent), "Monthly rent required");
+                Require(() => legalcaseDto.TotalRentOwed, nameof(legalcaseDto.TotalRentOwed), "Total owed required");
+                break;
+            case Step.Case:
+                Require(() => legalcaseDto.CaseTypeId, nameof(legalcaseDto.CaseTypeId), "Case type required");
+                break;
+        }
+
+        _editContext.NotifyValidationStateChanged();
+        return !_editContext.GetValidationMessages().Any();
+    }
+
+    private bool ValidateAll()
+    {
+        var previous = CurrentStep;
+        var ok = true;
+        foreach (Step s in Enum.GetValues(typeof(Step)))
+        {
+            CurrentStep = s;
+            ok &= ValidateCurrentStep();
+        }
+        CurrentStep = previous;
+        return ok;
+    }
+
+    private void Require<T>(Expression<Func<T>> accessor, string fieldName, string message)
+    {
+        var value = accessor.Compile().Invoke();
+        var isEmpty = value == null || (value is string str && string.IsNullOrWhiteSpace(str));
+        if (isEmpty)
+        {
+            _messages.Add(new FieldIdentifier(legalcaseDto, fieldName), message);
+        }
+    }
+
+
+  
+   
+
+    private void Prev()
+    {
+        if (CurrentStep > Step.Landlord) CurrentStep--;
+    }
+
+    private async Task SubmitAsync()
+    {
+        spinnerservice.Show();
+        var result = false;
+
+        if (legalcaseDto == null || legalcaseDto.Id == Guid.Empty)
+        {
+            legalcaseDto.CaseTypeName = CaseTypeList.FirstOrDefault(x => x.Id == legalcaseDto.CaseTypeId)?.Name;
+            legalcaseDto.landlords.LandlordTypeName = LandLordTypeList.FirstOrDefault(x => x.Id == legalcaseDto.landlords.LandlordTypeId)?.Name;
+            legalcaseDto.buildings.RegulationStatusName = RegulationList.FirstOrDefault(x => x.Id == legalcaseDto.buildings.RegulationStatusId)?.Name;
+            legalcaseDto.tenants.IsUnitIllegalName = IsUnitIllegalList.FirstOrDefault(x => x.Id == legalcaseDto.tenants.IsUnitIllegalId)?.Name;
+            legalcaseDto.TenancyTypeName = TenancyTypeList.FirstOrDefault(x => x.Id == legalcaseDto.TenancyTypeId)?.Name;
+            result = await _legalCaseService.CreateCasesAsync(legalcaseDto);
+           
+        }
+        if (result)
+        {
+            nav.NavigateTo("/cases?success=true");
+        }
+       
+    }
+
+ 
+
+  
+
+    private enum Step { Landlord = 0, Building = 1, Tenant = 2, Rent = 3, Case = 4, Review = 5 }
+}

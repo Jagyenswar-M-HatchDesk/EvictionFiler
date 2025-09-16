@@ -13,7 +13,9 @@ namespace EvictionFiler.Application.Interfaces.IRepository
 		Task<List<EditToTenantDto>> SearchTenantAsync(string query, Guid BuildingId);
 		Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? clientId);
         Task<List<Language>> GetAllLanguage();
-		
+        Task<string> GenerateTenantCodeAsync();
 
-	}
+
+
+    }
 }

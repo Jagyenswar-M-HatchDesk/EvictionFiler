@@ -18,8 +18,29 @@ namespace EvictionFiler.Infrastructure.Repositories
         {
             _mainDbContext = mainDbContext;
         }
+        public async Task<string> GenerateLandlordCodeAsync()
+        {
+            var lastCase = await _mainDbContext.LandLords
+                .OrderByDescending(c => c.LandLordCode)
+                .Select(c => c.LandLordCode)
+                .FirstOrDefaultAsync();
 
-		public async Task<string?> GetLastLandLordCodeAsync()
+            int nextNumber = 1;
+
+            if (!string.IsNullOrEmpty(lastCase) && lastCase.StartsWith("LL"))
+            {
+                string numberPart = lastCase.Substring(2);
+                if (int.TryParse(numberPart, out int parsedNumber))
+                {
+                    nextNumber = parsedNumber + 1;
+                }
+            }
+
+            string newCode = "LL" + nextNumber.ToString("D10");
+            return newCode;
+        }
+
+        public async Task<string?> GetLastLandLordCodeAsync()
 		{
 			return await _mainDbContext.LandLords
 				.OrderByDescending(l => l.LandLordCode)

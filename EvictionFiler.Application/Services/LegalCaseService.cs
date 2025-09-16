@@ -19,15 +19,101 @@ namespace EvictionFiler.Application.Services
 	public class LegalCaseService : ILegalCaseService
 	{
 		private readonly ICasesRepository _repository;
-		private readonly IAdditionalOccupantsRepository _additionalOccupantsRepo;
+    
+        private readonly ILandLordRepository _landlordrepo;
+        private readonly IBuildingRepository _buildingrepo;
+        private readonly ITenantRepository _tenantRepo;
+        private readonly IAdditionalOccupantsRepository _additionalOccupantsRepo;
 		private readonly IUnitOfWork _unitOfWork;
-		public LegalCaseService(ICasesRepository repository , IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
+		public LegalCaseService(ICasesRepository repository, ITenantRepository tenantRepo, ILandLordRepository landlordrepo, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
 		{
 			_repository = repository;
+            _tenantRepo = tenantRepo;
+            _landlordrepo = landlordrepo;
+            _buildingrepo = buildingrepo;
 			_unitOfWork = unitOfWork;
 			_additionalOccupantsRepo = additionalOccupantsRepo;
 
         }
+
+        public async Task<bool> CreateCasesAsync(CreateToEditLegalCaseModel legalCase)
+        {
+            // 1. Save Landlord
+            var landlord = new LandLord
+            {
+                Id = Guid.NewGuid(),
+                LandLordCode = await _landlordrepo.GenerateLandlordCodeAsync(),
+                FirstName = legalCase.landlords.FirstName,
+                Phone = legalCase.landlords.Phone,
+                Email = legalCase.landlords.Email,
+                LandlordTypeId = legalCase.landlords.LandlordTypeId
+            };
+            await _landlordrepo.AddAsync(landlord);
+            await _unitOfWork.SaveChangesAsync();
+
+            // 2. Save Building
+            var building = new Building
+            {
+                Id = Guid.NewGuid(),
+                BuildingCode = await _buildingrepo.GenerateBuildingCodeAsync(),
+                MDRNumber = legalCase.buildings.MDRNumber,
+                BuildingUnits = legalCase.buildings.BuildingUnits ,
+                Address1 = legalCase.buildings.Address1,
+                RegulationStatusId = legalCase.buildings.RegulationStatusId
+            };
+            await _buildingrepo.AddAsync(building);
+            await _unitOfWork.SaveChangesAsync();
+
+            // 3. Save Tenant
+            var tenant = new Tenant
+            {
+                Id = Guid.NewGuid(),
+                TenantCode = await _tenantRepo.GenerateTenantCodeAsync(),
+                FirstName = legalCase.tenants.FirstName,
+                UnitOrApartmentNumber = legalCase.tenants.UnitOrApartmentNumber,
+                IsUnitIllegalId = legalCase.tenants.IsUnitIllegalId,
+              
+                TenantRecord = legalCase.tenants.TenantRecord,
+                HasPossession = legalCase.tenants.HasPossession,
+                OtherOccupants = legalCase.tenants.OtherOccupants
+            };
+            await _tenantRepo.AddAsync(tenant);
+            await _unitOfWork.SaveChangesAsync();
+
+            // 4. Save Legal Case with foreign keys
+            var legalCases = new LegalCase
+            {
+                Id = Guid.NewGuid(),
+                Casecode = await _repository.GenerateCaseCodeAsync(),
+                ClientId = legalCase.ClientId,
+                CaseTypeId = legalCase.CaseTypeId,
+                IsERAPPaymentReceived = legalCase.IsERAPPaymentReceived,
+                ERAPPaymentReceivedDate = legalCase.ERAPPaymentReceivedDate,
+                MonthlyRent = legalCase.MonthlyRent,
+                TotalRentOwed = legalCase.TotalRentOwed,
+                TenantShare = legalCase.TenantShare,
+                RentDueEachMonthOrWeekId = legalCase.RentDueEachMonthOrWeekId,
+                OralStart = legalCase.OralStart,
+                OralEnd = legalCase.OralEnd,
+                WrittenLease = legalCase.WrittenLease,
+                DateTenantMoved = legalCase.DateTenantMoved,
+                CreatedBy = legalCase.CreatedBy,
+                CreatedOn = DateTime.Now,
+                TenancyTypeId = legalCase.TenancyTypeId,
+                // Foreign keys
+                LandLordId = landlord.Id,
+                LandlordTypeId = landlord.LandlordTypeId,
+             
+                BuildingId = building.Id,
+                TenantId = tenant.Id
+            };
+
+            await _repository.AddAsync(legalCases);
+            var result = await _unitOfWork.SaveChangesAsync();
+
+            return result != null;
+        }
+
 
         public async Task<int> GetTotalCasesCountAsync(string userId ,bool isAdmin)
         {

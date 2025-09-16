@@ -10,10 +10,11 @@ namespace EvictionFiler.Application.DTOs.LandLordDto
 		[Required(ErrorMessage = "First Name is Required")]
 		public string FirstName { get; set; } = string.Empty;
 		public string? LastName { get; set; } = string.Empty;
-		[Required(ErrorMessage = "Type Owner is Required")]
+		//[Required(ErrorMessage = "Type Owner is Required")]
 		public Guid? TypeOwnerId { get; set; }
 		public string? TypeOwnerName { get; set; }
-		public string? Phone { get; set; } = string.Empty;
+        [Required(ErrorMessage = "	Phone is Required")]
+        public string? Phone { get; set; } = string.Empty;
 		[Required(ErrorMessage = "	Email is Required")]
 		public string Email { get; set; } = string.Empty;
 		public string? EINorSSN { get; set; } = string.Empty;
@@ -26,7 +27,7 @@ namespace EvictionFiler.Application.DTOs.LandLordDto
 		public string Zipcode { get; set; } = string.Empty;
 		public Guid? ClientId { get; set; }
 		public DateOnly DateOfRefreeDeed { get; set; }  = DateOnly.FromDateTime(DateTime.Today);
-		[Required(ErrorMessage = "	Landlord Type is Required")]
+		[Required(ErrorMessage = "Role is Required")]
 		public Guid? LandlordTypeId { get; set; }
 		public string? LandlordTypeName { get; set; }
 		public string ? OtherLandlordTypeDescription { get; set; }

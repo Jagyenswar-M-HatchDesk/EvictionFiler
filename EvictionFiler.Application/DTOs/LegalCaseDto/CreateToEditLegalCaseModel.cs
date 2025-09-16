@@ -1,4 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.OccupantDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Domain.Entities.Base.Base;
@@ -58,8 +59,11 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 		public string? ExplainDescription { get; set; }
 
 		public CreateToTenantDto? tenants { get; set; }
+        public CreateToBuildingDto? buildings { get; set; }
+        [Required]
+        public CreateToLandLordDto? landlords { get; set; }
 
-		public string? Attrney { get; set; }
+        public string? Attrney { get; set; }
 		[MaxLength(100)]
 		public string? AttrneyContactInfo { get; set; }
 		[MaxLength(50)]
