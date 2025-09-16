@@ -1,24 +1,163 @@
-﻿<div class="p-3 border rounded-4 shadow bg-white mb-3">
+﻿@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Domain.Entities.Master
+@using EvictionFiler.Domian.Enums
+
+<div class="p-3 border rounded-4 shadow bg-white mb-3">
     <h6 class="fw-bold text-muted">Live Summary</h6>
+
     <div class="d-flex flex-column mt-3 text-secondary small">
-        <div class="d-flex justify-content-between">
-            <span>Landlord</span><span>LL</span>
-        </div>
-        <div class="d-flex justify-content-between">
-            <span>Phone</span><span>555-555-5555</span>
-        </div>
-        <div class="d-flex justify-content-between">
-            <span>Tenant</span><span>xxx</span>
-        </div>
-        <div class="d-flex justify-content-between">
-            <span>Case</span><span>Holdover</span>
-        </div>
-        <div class="d-flex justify-content-between">
-            <span>Monthly Rent</span><span>333</span>
-        </div>
+
+        @if (CurrentStep == Step.Landlord)
+        {
+            <div class="d-flex justify-content-between">
+                <span>Landlord</span><span>@(string.IsNullOrWhiteSpace(LegalCase.FullName) ? "-" : LegalCase.FullName)</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Phone</span><span>@(string.IsNullOrWhiteSpace(LegalCase.Phone) ? "-" : LegalCase.Phone)</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Email</span><span>@(string.IsNullOrWhiteSpace(LegalCase.Email) ? "-" : LegalCase.Email)</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Role</span>
+                <span>@(LandLordTypeList.FirstOrDefault(x => x.Id == LegalCase.LandLordTypeId)?.Name??"-")</span>
+            </div>
+        }
+
+        @if (CurrentStep == Step.Building)
+        {
+            <div class="d-flex justify-content-between">
+                <span>MDR</span>
+                <span>@(string.IsNullOrWhiteSpace(LegalCase.Mdr) ? "-" : LegalCase.Mdr)</span>
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Units</span>
+                <span>@(string.IsNullOrWhiteSpace(LegalCase.Units) ? "-" : LegalCase.Units)</span>
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>BuildingAddress</span>
+                <span>@(string.IsNullOrWhiteSpace(LegalCase.BuildingAddress) ? "-" : LegalCase.BuildingAddress)</span>
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Regulation</span>
+                <span>@(RegulationList.FirstOrDefault(x => x.Id == LegalCase.RegulationStatusId)?.Name ?? "-")</span>
+            </div>
+        }
+
+        @if (CurrentStep == Step.Tenant)
+        {
+            <div class="d-flex justify-content-between">
+                <span>TenantName</span>
+                <span>@(string.IsNullOrWhiteSpace(LegalCase.TenantName) ? "-" : LegalCase.TenantName)</span>
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>UnitNumber</span>
+                <span>@(string.IsNullOrWhiteSpace(LegalCase.UnitNumber) ? "-" : LegalCase.UnitNumber)</span>
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Tenant Record</span>
+                <span>@(LegalCase.TenantRecord.HasValue ? (LegalCase.TenantRecord.Value ? "Yes" : "No") : "-")</span>
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>HasPossession</span>
+                <span>@(LegalCase.HasPossession.HasValue ? (LegalCase.HasPossession.Value ? "Yes" : "No") : "-")</span>
+
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Other Occupants</span>
+                <span>@(LegalCase.OtherOccupants.HasValue ? (LegalCase.OtherOccupants.Value ? "Yes" : "No") : "-")</span>
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>IsUnitIlligal</span>
+                <span>@(IsUnitIllegalList.FirstOrDefault(x => x.Id == LegalCase.IsUnitIlligalId)?.Name ?? "-")</span>
+            </div>
+        }
+
+        @if (CurrentStep == Step.Rent)
+        {
+            <div class="d-flex justify-content-between">
+                <span>Written Lease</span>
+                <span>@(LegalCase.WrittenLease.HasValue ? (LegalCase.WrittenLease.Value ? "Yes" : "No") : "-")</span>
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Date Tenant Moved</span>
+                <span>@(LegalCase.OralStart.HasValue? LegalCase.OralStart.Value.ToString("MM/dd/yyyy") : "-")</span>
+
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Date Tenant Moved</span>
+                <span>@(LegalCase.OralEnd.HasValue? LegalCase.OralEnd.Value.ToString("MM/dd/yyyy") : "-")</span>
+
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Date Tenant Moved</span>
+                <span>@(LegalCase.DateTenantMoved.HasValue? LegalCase.DateTenantMoved.Value.ToString("MM/dd/yyyy") : "-")</span>
+
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Monthly Rent</span>
+                <span>@(LegalCase.MonthlyRent.HasValue? LegalCase.MonthlyRent.Value.ToString("F2") : "-")</span>
+
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Tenant Share</span>
+                <span>@(LegalCase.TenantShare.HasValue? LegalCase.TenantShare.Value.ToString("F2") : "-")</span>
+
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Total Rent</span>
+                <span>@(LegalCase.TotalOwed.HasValue? LegalCase.TotalOwed.Value.ToString("F2") : "-")</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Tenancy Type</span>
+                <span>@TenancyTypeList.FirstOrDefault(x => x.Id == LegalCase.TenancyTypeId)?.Name</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Erp Payemnt Received</span>
+                <span>@(LegalCase.IsERAPPaymentReceived.HasValue ? (LegalCase.IsERAPPaymentReceived.Value ? "Yes" : "No") : "-")</span>
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>IsUnitIlligal</span>
+                <span>@DateRentList.FirstOrDefault(x => x.Id == LegalCase.RentDueEachMonthOrWeekId)?.Name</span>
+            </div>
+        }
+
+        @if (CurrentStep == Step.Case)
+        {
+           
+            <div class="d-flex justify-content-between">
+                <span>Case Type</span>
+                <span>@(CaseTypeList.FirstOrDefault(x => x.Id == LegalCase.CaseTypeId)?.Name ?? "-")</span>
+
+            </div>
+        }
+
     </div>
 </div>
 
 @code {
 
+    [Parameter] public IntakeModel LegalCase { get; set; }
+    [Parameter] public List<LandlordType> LandLordTypeList { get; set; } = new();
+    [Parameter] public List<RegulationStatus> RegulationList { get; set; } = new();
+    [Parameter] public List<IsUnitIllegal> IsUnitIllegalList { get; set; } = new();
+    [Parameter] public List<DateRent> DateRentList { get; set; } = new();
+    [Parameter] public List<TenancyType> TenancyTypeList { get; set; } = new();
+    [Parameter] public List<CaseType> CaseTypeList { get; set; } = new();
+    [Parameter] public Step CurrentStep { get; set; }
 }

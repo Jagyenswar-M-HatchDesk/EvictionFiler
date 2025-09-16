@@ -28,11 +28,11 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 
 		public Guid? IsUnitIllegalId { get; set; }
 		public bool? TenantRecord { get; set; }
-		public bool? RenewalOffer { get; set; }
 		public bool? HasPossession { get; set; }
 		public bool? OtherOccupants { get; set; }
 		public Guid? RentDueEachMonthOrWeekId { get; set; }
 		public double? MonthlyRent { get; set; }
+		public bool? RenewalOffer { get; set; }
 		public double? TenantShare { get; set; }
 
 		[MaxLength(250)]

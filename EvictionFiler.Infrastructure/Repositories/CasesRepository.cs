@@ -251,6 +251,8 @@ namespace EvictionFiler.Infrastructure.Repositories
                     )
                 );
             }
+            if (!string.IsNullOrWhiteSpace(filters.CaseType))
+                query = query.Where(x => (x.CaseType.Name ?? "").ToLower().StartsWith(filters.CaseType.ToLower()));
 
             if (!string.IsNullOrWhiteSpace(filters.ReasonHoldover))
                 query = query.Where(x => (x.ReasonHoldover.Name ?? "").ToLower().StartsWith(filters.ReasonHoldover.ToLower()));
@@ -279,9 +281,9 @@ namespace EvictionFiler.Infrastructure.Repositories
                     Id = c.Id,
                     Casecode = c.Casecode,
                     CreatedOn = c.CreatedOn,
-                    IsActive = c.IsActive,
+                    IsActive = c.IsActive,  
                     IsDeleted = c.IsDeleted,
-
+                    CaseType = c.CaseType,
                     ReasonHoldover = c.ReasonHoldover,
                     CreatedBy = c.CreatedBy,
                     CreatedByName = userDict.ContainsKey(c.CreatedBy)

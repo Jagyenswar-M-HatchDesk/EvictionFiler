@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.LegalCaseDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Domain.Entities;
@@ -22,7 +23,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<bool> DeleteAsync(Guid id, bool isAdmin);
         Task<List<LegalCase>> GetTodayCasesAsync();
         Task<int> GetActiveCasesCountAsync(string userId, bool isAdmin);
-        Task<bool> CreateCasesAsync(CreateToEditLegalCaseModel legalCase);
+        Task<bool> CreateCasesAsync(IntakeModel legalCase);
 
 
     }
