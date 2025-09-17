@@ -224,6 +224,70 @@ namespace EvictionFiler.Application.Services
 
         }
 
+        public async Task<IntakeModel> GetCaseByIdAsync(Guid caseId)
+        {
+            var caseEntity = await _repository.GetAllQuerable(
+    predicate: c => c.Id == caseId,
+    (Expression<Func<LegalCase, object>>)(c => c.Clients),
+    c => c.Buildings,
+    c => c.CaseType,
+    c => c.LandLords,
+    c => c.Tenants,
+    c => c.RegulationStatus,
+    c => c.TenancyType,
+    c => c.RenewalStatus,
+    c => c.ReasonHoldover,
+    c => c.Buildings.State,
+    c => c.Addoccupants,
+    c => c.Buildings.Landlord.State,
+    c => c.Buildings.Landlord.LandlordType
+)
+.FirstOrDefaultAsync();
+
+            if (caseEntity == null)
+                return null;
+
+            var intakeModel = new IntakeModel
+            {
+                Id = caseEntity.Id,
+                ClientId = caseEntity.Clients.Id,
+                CaseTypeId = caseEntity.CaseType.Id,
+                IsERAPPaymentReceived = caseEntity.IsERAPPaymentReceived,
+                MonthlyRent = caseEntity.MonthlyRent,
+                TotalOwed = caseEntity.TotalRentOwed,
+                TenantShare = caseEntity.TenantShare,
+                RentDueEachMonthOrWeekId = caseEntity.RentDueEachMonthOrWeekId,
+                OralStart = caseEntity.OralStart,
+                OralEnd = caseEntity.OralEnd,
+                WrittenLease = caseEntity.WrittenLease,
+                DateTenantMoved = caseEntity.DateTenantMoved,
+                TenancyTypeId = caseEntity.TenancyTypeId,
+
+                // Landlord
+                FullName = caseEntity.LandLords?.FirstName,
+                Phone = caseEntity.LandLords?.Phone,
+                Email = caseEntity.LandLords?.Email,
+                LandLordTypeId = caseEntity.LandLords?.LandlordTypeId ?? Guid.Empty,
+
+                // Building
+                Mdr = caseEntity.Buildings?.MDRNumber,
+                Units = caseEntity.Buildings?.BuildingUnits,
+                BuildingAddress = caseEntity.Buildings?.Address1,
+                RegulationStatusId = caseEntity.Buildings?.RegulationStatusId ?? Guid.Empty,
+
+                // Tenant
+                TenantName = caseEntity.Tenants?.FirstName,
+                UnitNumber = caseEntity.Tenants?.UnitOrApartmentNumber,
+                IsUnitIlligalId = caseEntity.Tenants?.IsUnitIllegalId ?? Guid.Empty,
+                TenantRecord = caseEntity.Tenants?.TenantRecord,
+                HasPossession = caseEntity.Tenants?.HasPossession,
+                OtherOccupants = caseEntity.Tenants?.OtherOccupants
+            };
+
+            return intakeModel;
+        }
+
+
         public async Task<CreateToEditLegalCaseModel> GetByIdAsync(Guid id)
 		{
 			var legalCaseEntity = await _repository.GetAllQuerable(
@@ -339,7 +403,62 @@ namespace EvictionFiler.Application.Services
 			return dto; 
 		}
 
-   
+
+        public async Task<bool> UpdateCaseAsync(IntakeModel legalCase)
+        {
+            var existingCase = await _repository.GetAsync(legalCase.Id);
+            if (existingCase == null) return false;
+
+            var landlord = await _landlordrepo.GetAsync(existingCase.LandLordId);
+            var building = await _buildingrepo.GetAsync(existingCase.BuildingId);
+            var tenant = await _tenantRepo.GetAsync(existingCase.TenantId);
+
+            // Update landlord
+            landlord.FirstName = legalCase.FullName;
+            landlord.Phone = legalCase.Phone;
+            landlord.Email = legalCase.Email;
+            landlord.LandlordTypeId = legalCase.LandLordTypeId;
+             _landlordrepo.UpdateAsync(landlord);
+            await _unitOfWork.SaveChangesAsync();
+
+            // Update building
+            building.MDRNumber = legalCase.Mdr;
+            building.BuildingUnits = legalCase.Units;
+            building.Address1 = legalCase.BuildingAddress;
+            building.RegulationStatusId = legalCase.RegulationStatusId;
+             _buildingrepo.UpdateAsync(building);
+            await _unitOfWork.SaveChangesAsync();
+
+            // Update tenant
+            tenant.FirstName = legalCase.TenantName;
+            tenant.UnitOrApartmentNumber = legalCase.UnitNumber;
+            tenant.IsUnitIllegalId = legalCase.IsUnitIlligalId;
+            tenant.TenantRecord = legalCase.TenantRecord;
+            tenant.HasPossession = legalCase.HasPossession;
+            tenant.OtherOccupants = legalCase.OtherOccupants;
+             _tenantRepo.UpdateAsync(tenant);
+            await _unitOfWork.SaveChangesAsync();
+
+            // Update legal case
+            existingCase.ClientId = legalCase.ClientId;
+            existingCase.CaseTypeId = legalCase.CaseTypeId;
+            existingCase.IsERAPPaymentReceived = legalCase.IsERAPPaymentReceived;
+            existingCase.MonthlyRent = legalCase.MonthlyRent;
+            existingCase.TotalRentOwed = legalCase.TotalOwed;
+            existingCase.TenantShare = legalCase.TenantShare;
+            existingCase.RentDueEachMonthOrWeekId = legalCase.RentDueEachMonthOrWeekId;
+            existingCase.OralStart = legalCase.OralStart;
+            existingCase.OralEnd = legalCase.OralEnd;
+            existingCase.WrittenLease = legalCase.WrittenLease;
+            existingCase.DateTenantMoved = legalCase.DateTenantMoved;
+            existingCase.TenancyTypeId = legalCase.TenancyTypeId;
+
+             _repository.UpdateAsync(existingCase);
+            var result = await _unitOfWork.SaveChangesAsync();
+
+            return result != null;
+        }
+
 
         public async Task<bool> UpdateAsync(CreateToEditLegalCaseModel legalCase)
         {

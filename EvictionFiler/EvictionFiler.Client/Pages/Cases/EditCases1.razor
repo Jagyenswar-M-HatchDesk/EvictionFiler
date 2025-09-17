@@ -1,7 +1,4 @@
-﻿
-
-
-@page "/createcase1/{ClientId}"
+﻿@page "/EditCase1/{caseId:guid}"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Linq.Expressions
@@ -21,6 +18,7 @@
 @inject IRegulationStatusRepository RegulationStatusRepository
 @inject IReasonHoldoverRepository ReasonHoldoverRepository
 @inject ILandlordTypeRepository LandlordTypeRepository
+@inject ILegalCaseService _legalCaseService
 @inject IRenewalStatusRepository RenewalStatusRepository
 @inject IUnitIllegalRepository UnitIllegalRepository
 @inject ITenancyTypeRepository TenancyTypeRepository
@@ -52,11 +50,11 @@
 
 <div class="container-fluid py-3 border-bottom bg-white sticky-top">
     <div class="d-flex justify-content-between align-items-center">
-      
-        <div class="d-flex align-items-center" style="gap:90px">
+
+        <div class="d-flex align-items-center " style="gap:90px">
             @for (var i = 0; i < Steps.Count; i++)
             {
-                var cls = i < (int)CurrentStep ? "#1F365D" : i == (int)CurrentStep ? "bg-info" : "bg-secondary";
+                var cls = i < (int)CurrentStep ? "bg-primary" : i == (int)CurrentStep ? "bg-info" : "bg-secondary";
                 <div class="d-flex align-items-center gap-2">
                     <span class="rounded-circle d-inline-block @cls" style="width:14px; height:14px; border: 1px solid #333;"></span>
                     <span>@Steps[i]</span>
@@ -66,39 +64,39 @@
 
     </div>
     <div class="progress mt-3" style="height:6px;">
-        <div class="progress-bar" role="progressbar" style="width:@Progress% ;  background-color:#1F365D !important"></div>
+        <div class="progress-bar " role="progressbar" style="width:@Progress%;background-color:#1F365D !important" ></div>
     </div>
 </div>
 
 <div class="container my-4">
-    <EditForm EditContext="_editContext" >
+    <EditForm EditContext="_editContext">
         <DataAnnotationsValidator />
-       @*  <ValidationSummary class="mb-3" /> *@
-       
+        @*  <ValidationSummary class="mb-3" /> *@
 
-      @if (CurrentStep == Step.Landlord)
-{
-    <div class="row">  
-        <div class="col-8">
-            <div class="card mb-3">
-                <div class="card-header fw-bold">Landlord Information</div>
-                <div class="card-body row">
-                    <div class="col-md-6">
-                         <label class="form-label  required-label">Full Name </label>
-                        <InputText class="form-control" @bind-Value="legalcaseDto.FullName" placeholder="Enter Full Name"/>
-                         <ValidationMessage For="() => legalcaseDto.FullName" />
-                    </div>
-                    <div class="col-md-6">
+
+        @if (CurrentStep == Step.Landlord)
+        {
+            <div class="row">
+                <div class="col-8">
+                    <div class="card mb-3">
+                        <div class="card-header fw-bold">Landlord Information</div>
+                        <div class="card-body row">
+                            <div class="col-md-6">
+                                <label class="form-label  required-label">Full Name </label>
+                                <InputText class="form-control" @bind-Value="legalcaseDto.FullName" placeholder="Enter Full Name" />
+                                <ValidationMessage For="() => legalcaseDto.FullName" />
+                            </div>
+                            <div class="col-md-6">
                                 <label class="form-label  required-label">Phone </label>
                                 <InputText class="form-control" @bind-Value="legalcaseDto.Phone" placeholder="Enter Phone" />
                                 <ValidationMessage For="() => legalcaseDto.Phone" />
-                    </div>
-                    <div class="col-md-6 mt-2">
+                            </div>
+                            <div class="col-md-6 mt-2">
                                 <label class="form-label  required-label">Email </label>
                                 <InputText type="email" class="form-control" @bind-Value="legalcaseDto.Email" placeholder="Enter Email" />
                                 <ValidationMessage For="() => legalcaseDto.Email" />
-                    </div>
-                    <div class="col-md-6 mt-2">
+                            </div>
+                            <div class="col-md-6 mt-2">
                                 <label class="form-label  required-label">Role </label>
                                 <InputSelect class="form-select" @bind-Value="legalcaseDto.LandLordTypeId">
                                     <option value="">-- Select Type --</option>
@@ -108,22 +106,22 @@
                                     }
                                 </InputSelect>
                                 <ValidationMessage For="() => legalcaseDto.LandLordTypeId" />
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-4">
+                <div class="col-4">
                     <CasesSummary LegalCase="legalcaseDto" LandLordTypeList="LandLordTypeList" />
 
-            <TipsSummary />
-        </div>
-    </div> 
-}
+                    <TipsSummary />
+                </div>
+            </div>
+        }
 
 
         @* BUILDING *@
-       
-        
+
+
         @if (CurrentStep == Step.Building)
         {
             <div class="row">
@@ -164,13 +162,13 @@
                     <CasesSummary LegalCase="legalcaseDto"
                                   LandLordTypeList="LandLordTypeList"
                                   RegulationList="RegulationList"
-                                   CurrentStep="CurrentStep"/>
+                                  CurrentStep="CurrentStep" />
 
 
                     <TipsSummary />
                 </div>
             </div>
-          
+
 
         }
 
@@ -196,7 +194,7 @@
                             <div class="col-12">
                                 <div class="row">
                                     <div class="col-12">
-                                         <label class="form-label required-label">Is the Unit Illegal?</label>
+                                        <label class="form-label required-label">Is the Unit Illegal?</label>
                                     </div>
                                     <div class="col-12">
                                         <InputRadioGroup @bind-Value="legalcaseDto.IsUnitIlligalId" class="d-flex flex-wrap gap-4">
@@ -210,7 +208,7 @@
                                         </InputRadioGroup>
                                     </div>
                                 </div>
-                              
+
                                 <ValidationMessage For="() => legalcaseDto.IsUnitIlligalId" />
                             </div>
 
@@ -266,16 +264,15 @@
                 </div>
                 <div class="col-4">
                     <CasesSummary LegalCase="legalcaseDto"
-                                
                                   IsUnitIllegalList="IsUnitIllegalList"
                                   CurrentStep="CurrentStep" />
 
 
-                  
+
                     <TipsSummary />
                 </div>
             </div>
-          
+
         }
 
         @* RENT *@
@@ -317,7 +314,7 @@
                                     <InputDate class="form-control" @bind-Value="legalcaseDto.OralEnd" />
                                 </div>
 
-                                </div>
+                            </div>
                             <div class="row g-2 mt-2">
                                 <!-- Date Tenant Moved -->
                                 <div class="col-md-4">
@@ -341,24 +338,24 @@
                                 <!-- Monthly Rent -->
                                 <div class="col-md-4">
                                     <label class="form-label  required-label">Monthly Rent ($) </label>
-                                    <InputNumber class="form-control" @bind-Value="legalcaseDto.MonthlyRent"  placeholder="Enter Monthly Rent"/>
+                                    <InputNumber class="form-control" @bind-Value="legalcaseDto.MonthlyRent" placeholder="Enter Monthly Rent" />
                                     <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
                                 </div>
-                                </div>
-                             <div class="row g-2 mt-2">
+                            </div>
+                            <div class="row g-2 mt-2">
 
                                 <!-- Tenant's Share -->
                                 <div class="col-md-4">
                                     <label class="form-label">Tenant's Share ($)</label>
                                     <InputNumber class="form-control" @bind-Value="legalcaseDto.TenantShare" placeholder="Enter Total Share" />
-                                    
+
                                 </div>
 
                                 <!-- Total Rent Owed -->
                                 <div class="col-md-4">
                                     <label class="form-label">Total Rent Owed ($)</label>
                                     <InputNumber class="form-control" @bind-Value="legalcaseDto.TotalOwed" placeholder="Enter Total Rent" />
-                                 
+
                                 </div>
                                 <!-- Tenancy Type -->
                                 <div class="col-md-4">
@@ -372,31 +369,31 @@
                                     </InputSelect>
                                     <ValidationMessage For="() => legalcaseDto.TenancyTypeId" />
                                 </div>
-                                    </div>
+                            </div>
                             <div class="row g-2 mt-2">
-                            
-                            <div class="col-md-6">
-                                        <label class="form-label">ERAP Payment Received?</label>
-                                        <div class="d-flex justify-content-start align-items-center  gap-2">
-                                            <InputRadioGroup @bind-Value="legalcaseDto.IsERAPPaymentReceived">
-                                                <div class="form-check d-flex justify-content-center gap-2">
-                                                    <InputRadio class="form-check-input" Value="true" />
-                                                    <label class="form-check-label">Yes</label>
-                                                </div>
-                                                <div class="form-check  d-flex justify-content-center gap-2">
-                                                    <InputRadio class="form-check-input " Value="false" />
-                                                    <label class="form-check-label">No</label>
-                                                </div>
-                                            </InputRadioGroup>
-                                        </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">ERAP Payment Received?</label>
+                                    <div class="d-flex justify-content-start align-items-center  gap-2">
+                                        <InputRadioGroup @bind-Value="legalcaseDto.IsERAPPaymentReceived">
+                                            <div class="form-check d-flex justify-content-center gap-2">
+                                                <InputRadio class="form-check-input" Value="true" />
+                                                <label class="form-check-label">Yes</label>
+                                            </div>
+                                            <div class="form-check  d-flex justify-content-center gap-2">
+                                                <InputRadio class="form-check-input " Value="false" />
+                                                <label class="form-check-label">No</label>
+                                            </div>
+                                        </InputRadioGroup>
                                     </div>
-                               
                                 </div>
 
                             </div>
+
                         </div>
                     </div>
-              
+                </div>
+
 
                 <div class="col-md-4">
                     <CasesSummary LegalCase="legalcaseDto"
@@ -407,7 +404,7 @@
                 </div>
             </div>
 
-           
+
         }
 
         @* CASE *@
@@ -433,12 +430,11 @@
                 <div class="col-4">
                     <CasesSummary LegalCase="legalcaseDto"
                                   CaseTypeList="CaseTypeList"
-                                 
                                   CurrentStep="CurrentStep" />
                     <TipsSummary />
                 </div>
             </div>
-          
+
         }
 
         @* REVIEW *@
@@ -510,19 +506,19 @@
                         </div>
                     </div>
                 </div>
-              @*   <div class="col-4">
+                @*   <div class="col-4">
                     <CasesSummary />
                     <TipsSummary />
                 </div> *@
             </div>
-           
+
         }
 
         <div class="d-flex justify-content-between border-top pt-3 mt-3">
             <button type="button" class="btn btn-outline-secondary" @onclick="Prev" disabled="@(CurrentStep == Step.Landlord)">← Back</button>
             @if (CurrentStep != Step.Review)
             {
-                <button type="button" class="btn" style="background-color:#1F365D !important; color:white" @onclick="Next">Next →</button>
+                <button type="button" class="btn " style="background-color:#1F365D !important; color:white" @onclick="Next">Next →</button>
             }
             else
             {
@@ -533,8 +529,9 @@
 </div>
 
 @code {
- 
 
+    [Parameter]
+    public Guid caseId { get; set; }
     [Parameter] public string ClientId { get; set; }
     private readonly List<string> Steps = new() { "Landlord", "Building", "Tenant", "Rent", "Case", "Review" };
     private readonly string[] CaseTypes = new[] { "Nonpayment", "Holdover", "HP Proceeding", "Illegal Sublet", "Nuisance" };
@@ -550,9 +547,11 @@
     private List<CaseType> CaseTypeList = new();
     private List<TenancyType> TenancyTypeList = new();
     private List<DateRent> DateRentList = new();
+    [Parameter] public Guid? CurrentCaseId { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-
+        spinnerservice.Show();
         legalcaseDto = new IntakeModel();
         _editContext = new EditContext(legalcaseDto);
         _messages = new ValidationMessageStore(_editContext);
@@ -564,19 +563,59 @@
         TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
         DateRentList = await DateRentRepository.GetAllDateRent();
-        legalcaseDto.ClientId = Guid.Parse(ClientId);
+  
+       
+        await Task.Delay(500);
+        await LoadDataAsync();
 
-        var holdoverCase = CaseTypeList.FirstOrDefault(x => x.Name == "Holdover");
-        if (holdoverCase != null)
-        {
-            legalcaseDto.CaseTypeId = holdoverCase.Id;
-        }
+        spinnerservice.Hide();
     }
 
 
     private string Progress => (((int)CurrentStep + 1) * 100.0 / Steps.Count).ToString("0");
 
+    private async Task LoadDataAsync()
+    {
 
+        CaseTypeList = await CaseTypeRepository.GetAllCaseType() ?? new List<CaseType>();
+
+
+        if (caseId != Guid.Empty)
+        {
+
+            legalcaseDto = await _legalCaseService.GetCaseByIdAsync(caseId);
+          
+            _editContext = new EditContext(legalcaseDto); 
+            _messages = new ValidationMessageStore(_editContext);
+
+           
+            CurrentCaseId = caseId;
+
+
+        }
+        else
+        {
+
+            legalcaseDto = new IntakeModel();
+           
+
+            // Default case type Holdover set kar do
+            var holdoverCase = CaseTypeList.FirstOrDefault(x => x.Name == "Holdover");
+            if (holdoverCase != null)
+            {
+                legalcaseDto.CaseTypeId = holdoverCase.Id;
+            }
+           
+            _editContext = new EditContext(legalcaseDto); 
+            _messages = new ValidationMessageStore(_editContext); 
+
+
+            // CurrentCaseId ko null rakhna hi better hai is case me
+            CurrentCaseId = null;
+        }
+
+      
+    }
 
     private async Task Next()
     {
@@ -619,7 +658,7 @@
                 Require(() => legalcaseDto.RentDueEachMonthOrWeekId, nameof(legalcaseDto.RentDueEachMonthOrWeekId), "rent due  required");
                 Require(() => legalcaseDto.TenancyTypeId, nameof(legalcaseDto.TenancyTypeId), "Tenancy type  required");
                 break;
-               
+
             case Step.Case:
                 Require(() => legalcaseDto.CaseTypeId, nameof(legalcaseDto.CaseTypeId), "Case type required");
                 break;
@@ -662,20 +701,20 @@
         spinnerservice.Show();
         var result = false;
 
-        if (legalcaseDto == null || legalcaseDto.Id == Guid.Empty)
+        if (legalcaseDto != null || legalcaseDto.Id != Guid.Empty)
         {
-        
-            result = await _legalCaseService.CreateCasesAsync(legalcaseDto);
-           
+
+            result = await _legalCaseService.UpdateCaseAsync(legalcaseDto);
+
         }
         if (result)
         {
             nav.NavigateTo("/cases?success=true");
         }
-       
+
     }
 
     // private enum Step { Landlord = 0, Building = 1, Tenant = 2, Rent = 3, Case = 4, Review = 5 }
 }
 
-    
+

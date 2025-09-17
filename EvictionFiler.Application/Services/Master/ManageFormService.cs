@@ -68,7 +68,7 @@ namespace EvictionFiler.Application.Services.Master
             Name = x.Name,
             CaseType = x.CaseType,
             CaseTypeId = x.CaseTypeId,
-            CaseTypeName = x.CaseType != null ? x.CaseType.Name : "Unknown",
+            CaseTypeName = x.CaseType != null ? x.CaseType.Name : "-",
             HTML = x.HTML,
             CreatedOn = x.CreatedOn,
             Id = x.Id,

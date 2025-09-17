@@ -24,6 +24,8 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<List<LegalCase>> GetTodayCasesAsync();
         Task<int> GetActiveCasesCountAsync(string userId, bool isAdmin);
         Task<bool> CreateCasesAsync(IntakeModel legalCase);
+        Task<IntakeModel> GetCaseByIdAsync(Guid caseId);
+        Task<bool> UpdateCaseAsync(IntakeModel legalCase);
 
 
     }

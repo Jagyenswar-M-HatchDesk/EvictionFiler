@@ -13,7 +13,9 @@ namespace EvictionFiler.Domain.Entities.Master
 	{
 		[MaxLength(500)]
 		public string Name { get; set; } = string.Empty;
-		[MaxLength(500)]
+        [MaxLength(500)]
+        public string Category { get; set; } = string.Empty;
+        [MaxLength(500)]
 		public Guid? CaseTypeId { get; set; }
 		[ForeignKey("CaseTypeId")]
 		public CaseType? CaseType { get; set; }
