@@ -6,6 +6,7 @@
 @using EvictionFiler.Application.Interfaces.IRepository
 @using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
 @using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Client.Jwt
 @using EvictionFiler.Client.SpinnerService
 @inject SpinnerService Spinnerservice
 @using EvictionFiler.Domain.Entities.Master
@@ -23,6 +24,9 @@
 @inject ILanguageRepository LanguageRepository
 @inject ILandlordTypeRepository LandlordTypeRepository
 @inject IDateRentRepository DateRentRepository
+@using Microsoft.AspNetCore.Components.Authorization;
+@using System.Security.Claims
+@inject JwtAuthStateProviders _authStateProvider
 @rendermode InteractiveAuto
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
@@ -1838,6 +1842,21 @@ aria-labelledby="createUserLabel">
         Spinnerservice.Show();
         if (editClient == null || editClient.Id == Guid.Empty)
             return;
+
+            var authState = await _authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userGuid))
+        {
+            editClient.UpdatedBy = userGuid;
+        }
+        else
+        {
+            // unauthenticated user
+            editClient.UpdatedBy = Guid.Empty;
+        }
 
         // 👇 Attach landlords, buildings, and tenants to client DTO
         editClient.editLandLords = Landlords;

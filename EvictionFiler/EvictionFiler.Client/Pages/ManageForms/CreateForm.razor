@@ -11,6 +11,7 @@
 @using Syncfusion.Blazor.RichTextEditor
 
 @inject ICaseTypeRepository CaseTypeRepository
+@inject ICategoryRepository CategoryRepository
 @inject IManageFormService ManageFormService
 @inject SpinnerService spinnerservice
 @inject NavigationManager Navigation
@@ -63,7 +64,7 @@
             <DataAnnotationsValidator />
 
             <div class="row mb-3">
-                <div class="col-md-6">
+                <div class="col-md-5">
                     <label class="form-label color-text required-label">Form type</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
@@ -72,10 +73,10 @@
                     <ValidationMessage For="@(() => createForm.Name)" />
                 </div>
 
-                <div class="mb-4 col-md-6">
+                <div class="mb-4 col-md-3">
                     <label class="form-label color-text">Case type</label>
                     <select class="form-select" @bind="createForm.CaseTypeId">
-                        <option value="">--  Select Case Type --</option>
+                        <option value="">--  Select Type --</option>
                         @foreach (var caseType in CaseTypeList)
                         {
                             <option value="@caseType.Id">@caseType.Name</option>
@@ -84,6 +85,19 @@
                     @* <ValidationMessage For="@(() => createForm.CaseTypeId)" /> *@
 
                     
+                </div>
+                <div class="mb-4 col-md-4">
+                    <label class="form-label color-text required-label">Category</label>
+                    <select class="form-select" @bind="createForm.CategoryId">
+                        <option value="">--  Select Category --</option>
+                        @foreach (var category in CategoryList)
+                        {
+                            <option value="@category.Id">@category.Name</option>
+                        }
+                    </select>
+                    <ValidationMessage For="@(() => createForm.CategoryId)" />
+
+
                 </div>
             </div>
 
@@ -138,11 +152,15 @@
     [Parameter] public EventCallback OnClose { get; set; }
 
     private List<CaseType> CaseTypeList = new();
+    private List<Category> CategoryList = new();
     private bool IsPreviewVisible { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
     {
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
+        CategoryList = await CategoryRepository.GetAllCategory();
+          
+
         // var defaultCaseType = CaseTypeList.FirstOrDefault(c => c.Name == "Common");
         // if (defaultCaseType != null)
         // {
@@ -166,7 +184,7 @@
         var isSaved = await ManageFormService.CreateForm(createForm);
         if (isSaved)
         {
-            Navigation.NavigateTo("/manage-forms?success=true", true);
+            Navigation.NavigateTo("/Drafting/Manage-Forms?success=true", true);
         }
     }
 

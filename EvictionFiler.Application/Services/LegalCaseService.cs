@@ -47,7 +47,11 @@ namespace EvictionFiler.Application.Services
                 FirstName = legalCase.FullName,
                 Phone = legalCase.Phone,
                 Email = legalCase.Email,
-                LandlordTypeId = legalCase.LandLordTypeId
+                LandlordTypeId = legalCase.LandLordTypeId,
+                CreatedBy = legalCase.CreatedBy,
+                CreatedOn = DateTime.Now,
+               
+               
             };
             await _landlordrepo.AddAsync(landlord);
             await _unitOfWork.SaveChangesAsync();
@@ -60,7 +64,9 @@ namespace EvictionFiler.Application.Services
                 MDRNumber = legalCase.Mdr,
                 BuildingUnits = legalCase.Units,
                 Address1 = legalCase.BuildingAddress,
-                RegulationStatusId = legalCase.RegulationStatusId
+                RegulationStatusId = legalCase.RegulationStatusId,
+                CreatedBy = legalCase.CreatedBy,
+                CreatedOn = DateTime.Now,
             };
             await _buildingrepo.AddAsync(building);
             await _unitOfWork.SaveChangesAsync();
@@ -76,7 +82,9 @@ namespace EvictionFiler.Application.Services
               
                 TenantRecord = legalCase.TenantRecord,
                 HasPossession = legalCase.HasPossession,
-                OtherOccupants = legalCase.OtherOccupants
+                OtherOccupants = legalCase.OtherOccupants,
+                CreatedBy = legalCase.CreatedBy,
+                CreatedOn = DateTime.Now,
             };
             await _tenantRepo.AddAsync(tenant);
             await _unitOfWork.SaveChangesAsync();
@@ -104,7 +112,8 @@ namespace EvictionFiler.Application.Services
                 // Foreign keys
                 LandLordId = landlord.Id,
                 LandlordTypeId = landlord.LandlordTypeId,
-             
+                CreatedBy = legalCase.CreatedBy,
+               
                 BuildingId = building.Id,
                 TenantId = tenant.Id
             };
@@ -403,7 +412,7 @@ namespace EvictionFiler.Application.Services
 			return dto; 
 		}
 
-
+        // new update 
         public async Task<bool> UpdateCaseAsync(IntakeModel legalCase)
         {
             var existingCase = await _repository.GetAsync(legalCase.Id);
@@ -418,6 +427,7 @@ namespace EvictionFiler.Application.Services
             landlord.Phone = legalCase.Phone;
             landlord.Email = legalCase.Email;
             landlord.LandlordTypeId = legalCase.LandLordTypeId;
+            landlord.UpdatedBy = legalCase.UpdatedBy;
              _landlordrepo.UpdateAsync(landlord);
             await _unitOfWork.SaveChangesAsync();
 
@@ -426,7 +436,8 @@ namespace EvictionFiler.Application.Services
             building.BuildingUnits = legalCase.Units;
             building.Address1 = legalCase.BuildingAddress;
             building.RegulationStatusId = legalCase.RegulationStatusId;
-             _buildingrepo.UpdateAsync(building);
+            building.UpdatedBy = legalCase.UpdatedBy;
+            _buildingrepo.UpdateAsync(building);
             await _unitOfWork.SaveChangesAsync();
 
             // Update tenant
@@ -436,7 +447,8 @@ namespace EvictionFiler.Application.Services
             tenant.TenantRecord = legalCase.TenantRecord;
             tenant.HasPossession = legalCase.HasPossession;
             tenant.OtherOccupants = legalCase.OtherOccupants;
-             _tenantRepo.UpdateAsync(tenant);
+            tenant.UpdatedBy = legalCase.UpdatedBy;
+            _tenantRepo.UpdateAsync(tenant);
             await _unitOfWork.SaveChangesAsync();
 
             // Update legal case
@@ -452,8 +464,9 @@ namespace EvictionFiler.Application.Services
             existingCase.WrittenLease = legalCase.WrittenLease;
             existingCase.DateTenantMoved = legalCase.DateTenantMoved;
             existingCase.TenancyTypeId = legalCase.TenancyTypeId;
+            existingCase.UpdatedBy = legalCase.UpdatedBy;
 
-             _repository.UpdateAsync(existingCase);
+            _repository.UpdateAsync(existingCase);
             var result = await _unitOfWork.SaveChangesAsync();
 
             return result != null;

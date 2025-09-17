@@ -8,30 +8,31 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
-using EvictionFiler.Application.DTOs.MasterDtos.LanguageDto;
+using EvictionFiler.Application.DTOs.MasterDtos.CategoryDto;
+using EvictionFiler.Application.DTOs.MasterDtos.CategoryDto;
 
 namespace EvictionFiler.Application.Services.Master
 {
-    public class LanguageService : ILanguageService
+    public class CategoryService : ICategoryService
     {
-        private readonly ILanguageRepository _repo;
+        private readonly ICategoryRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
-        public LanguageService(ILanguageRepository repository, IUnitOfWork unitOfWork)
+        public CategoryService(ICategoryRepository repository, IUnitOfWork unitOfWork)
         {
-            _repo = repository;
+            _repository = repository;
             _unitOfWork = unitOfWork;
         }
 
-        public async  Task<bool> Create(EditToLanguageDto dto)
+        public async  Task<bool> Create(EditToCategoryDto dto)
         {
-            var forms = new Language
+            var forms = new Category
             {
 
                 Name = dto.Name,
                 CreatedOn = DateTime.Now,
 
             };
-            await _repo.AddAsync(forms);
+            await _repository.AddAsync(forms);
 
             var result = await _unitOfWork.SaveChangesAsync();
 
@@ -42,18 +43,18 @@ namespace EvictionFiler.Application.Services.Master
             return false;
         }
 
-        public async Task<bool> DeleteLanguageAsync(Guid id)
+        public async Task<bool> DeleteCategoryAsync(Guid id)
         {
-            var form = await _repo.DeleteAsync(id);
+            var form = await _repository.DeleteAsync(id);
             var deleterecordes = await _unitOfWork.SaveChangesAsync();
             if (deleterecordes > 0)
                 return true;
             return false;
         }
 
-        public async Task<PaginationDto<EditToLanguageDto>> GetAllLanguageAsync(int pageNumber, int pageSize, string searchTerm)
+        public async Task<PaginationDto<EditToCategoryDto>> GetAllCategoryAsync(int pageNumber, int pageSize, string searchTerm)
         {
-            var query = await _repo.GetAllAsync();
+            var query = await _repository.GetAllAsync();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
@@ -72,7 +73,7 @@ namespace EvictionFiler.Application.Services.Master
         .OrderBy(c => c.Id)
         .Skip((pageNumber - 1) * pageSize)
         .Take(pageSize)
-        .Select(x => new EditToLanguageDto
+        .Select(x => new EditToCategoryDto
         {
             Id = x.Id,
             Name = x.Name,
@@ -84,7 +85,7 @@ namespace EvictionFiler.Application.Services.Master
         })
         .ToList();
 
-            return new PaginationDto<EditToLanguageDto>
+            return new PaginationDto<EditToCategoryDto>
             {
                 Items = forms,
                 TotalCount = totalCount,
@@ -93,12 +94,12 @@ namespace EvictionFiler.Application.Services.Master
             };
         }
 
-        public async Task<EditToLanguageDto?> GetLanguageByIdAsync(Guid? id)
+        public async Task<EditToCategoryDto?> GetCategoryByIdAsync(Guid? id)
         {
-            var form = await _repo.GetAsync(id);
+            var form = await _repository.GetAsync(id);
 
             if (form == null) return null;
-            return new EditToLanguageDto
+            return new EditToCategoryDto
             {
                 Id = form.Id,
                 Name = form.Name,
@@ -112,9 +113,9 @@ namespace EvictionFiler.Application.Services.Master
 
      
 
-        public async  Task<bool> UpdateLanguageAsync(EditToLanguageDto dto)
+        public async  Task<bool> UpdateCategoryAsync(EditToCategoryDto dto)
         {
-            var existing = await _repo.GetAsync(dto.Id);
+            var existing = await _repository.GetAsync(dto.Id);
             if (existing == null) return false;
 
             // Pehle existing legal case fields update karo (already hai)
@@ -122,7 +123,7 @@ namespace EvictionFiler.Application.Services.Master
             existing.CreatedOn = DateTime.Now;
 
             // Save changes
-            _repo.UpdateAsync(existing);
+            _repository.UpdateAsync(existing);
             await _unitOfWork.SaveChangesAsync();
 
             return true;

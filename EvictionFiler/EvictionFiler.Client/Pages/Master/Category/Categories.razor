@@ -1,19 +1,22 @@
-﻿@page "/Drafting/Manage-Forms"
+﻿@page "/Settings/category"
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.FormTypeDto
+
+@using EvictionFiler.Application.DTOs.MasterDtos.CategoryDto
 @using EvictionFiler.Application.DTOs.PaginationDto
 @using EvictionFiler.Application.DTOs.UserDto
 @using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Application.Interfaces.IServices.Master
 @using EvictionFiler.Client.Pages.User
 @using EvictionFiler.Domain.Entities
 @inject IUserservices _userService
 @using EvictionFiler.Client.SpinnerService
 @inject SpinnerService Spinnerservice
 @inject NavigationManager navManager
-@inject IManageFormService ManageFormService
+@inject ICategoryService CategoryService
 
 
-<PageTitle>Manage Forms</PageTitle>
+<PageTitle>Category</PageTitle>
 
 <!-- Bootstrap CSS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
@@ -150,13 +153,13 @@
 
         <!-- Title Row -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="m-0">Manage Forms</h5>
+            <h5 class="m-0">Manage Category</h5>
         </div>
 
         <!-- Search Filters -->
         <div class="g-2 mb-3 d-flex justify-content-between align-items-center">
             <!-- Four default search boxes -->
-            <button class="btn btn-primary" @onclick="ShowCreateform">Add New</button>
+            <button class="btn btn-primary" @onclick="ShowCreateCategory">Add New</button>
             <div class="position-relative w-50">
                 <input class="form-control border border-primary text-navy" placeholder="Search.." @bind="searchTerm" @bind:event="oninput" />
                 <button class="search-btn" type="button">
@@ -172,28 +175,27 @@
                 <thead class="table-light">
                     <tr>
                         <th>Sl no</th>
-                        <th>Form Type</th>
-                        <th>Case Type</th>
-                        <th>Category</th>
+                        <th>Name</th>
+                       
                         <th>Created Date</th>
                         <th class="sticky">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (pagedforms != null && pagedforms.Items.Any())
+                    @if (pagedCategory != null && pagedCategory.Items.Any())
                     {
                         int index = 1;
-                        @foreach (var form in pagedforms.Items)
+                        @foreach (var form in pagedCategory.Items)
                         {
                             <tr>
                                 <td>@index</td>
                                 <td>@form.Name</td>
-                                <td>@form.CaseTypeName</td>
-                                <td>@form.CategoryName</td>
+                             
                                 <td>@form.CreatedOn.ToString("dd/MM/yyyy")</td>
                                 <td class="sticky">
-                                    <i class="fa-solid fa-pen-to-square text-navy me-3 " @onclick="() => ShowAddEditForm(form.Id)" style="cursor: pointer;" title="Edit"></i>
-                                    <i class="fa-solid fa-trash-can text-danger " @onclick=" ()=>DeleteForm(form.Id.Value)" style="cursor: pointer;" title="Delete"></i>
+                                    <i class="fa-solid fa-pen-to-square text-navy me-3 " @onclick="async () => await ShowAddEditCategory(form.Id)"
+                                       style="cursor: pointer;" title="Edit"></i>
+                                    <i class="fa-solid fa-trash-can text-danger " @onclick=" ()=>DeleteCategory(form.Id)" style="cursor: pointer;" title="Delete"></i>
                                 </td>
                             </tr>
                             index++;
@@ -210,27 +212,27 @@
         </div>
 
         <!-- Pagination -->
-        @if (pagedforms != null && pagedforms.TotalCount > 0)
+        @if (pagedCategory != null && pagedCategory.TotalCount > 0)
         {
             <div class="d-flex justify-content-between mt-3">
                 <small>
                     Showing @(((currentPage - 1) * pageSize) + 1)
-                    to @(Math.Min(currentPage * pageSize, pagedforms.TotalCount))
-                    of @pagedforms.TotalCount entries
+                    to @(Math.Min(currentPage * pageSize, pagedCategory.TotalCount))
+                    of @pagedCategory.TotalCount entries
                 </small>
                 <nav>
                     <ul class="pagination mb-0">
                         <li class="page-item @(currentPage == 1 ? "disabled" : "")">
                             <button class="page-link" @onclick="() => ChangePage(currentPage - 1)">←</button>
                         </li>
-                        @for (int i = 1; i <= Math.Ceiling((double)pagedforms.TotalCount / pageSize); i++)
+                        @for (int i = 1; i <= Math.Ceiling((double)pagedCategory.TotalCount / pageSize); i++)
                         {
                             var pageNumber = i;
                             <li class="page-item @(pageNumber == currentPage ? "active" : "")">
                                 <button class="page-link" @onclick="() => ChangePage(pageNumber)">@pageNumber</button>
                             </li>
                         }
-                        <li class="page-item @(currentPage == Math.Ceiling((double)pagedforms.TotalCount / pageSize) ? "disabled" : "")">
+                        <li class="page-item @(currentPage == Math.Ceiling((double)pagedCategory.TotalCount / pageSize) ? "disabled" : "")">
                             <button class="page-link" @onclick="() => ChangePage(currentPage + 1)">→</button>
                         </li>
                     </ul>
@@ -242,29 +244,29 @@
     </div>
 
 
-       @if (_showCreateForm)
+    @if (_showCreateCategory)
     {
-        <CreateForm createForm="FormDto" OnClose="HandleCloseCreateform" />
+        <CreateCategory createCategory="CategoryDto" OnClose="HandleCloseCreateCategory" />
     }
 
-    @if (_showEditForm)
+    @if (_showEditCategory)
     {
-        <EditForms editForm="FormDto" OnClose="HandleCloseEditForm" />
+        <EditCategory editCategory="CategoryDto" OnClose="HandleCloseEditCategory" />
     }
 </body>
 
 
 @code {
 
-    private bool _showCreateForm = false;
-    private bool _showEditForm = false;
-    private Guid? formIdForEdit;
-    private FormAddEditViewModelDto FormDto = new();
+    private bool _showCreateCategory = false;
+    private bool _showEditCategory = false;
+    private Guid? CategoryIdForEdit;
+    private EditToCategoryDto CategoryDto = new();
     private string successMessage;
     private int currentPage = 1;
     private int pageSize = 10;
     private string searchTerm = "";
-    private PaginationDto<FormAddEditViewModelDto> pagedforms;
+    private PaginationDto<EditToCategoryDto> pagedCategory;
 
     protected override async Task OnInitializedAsync()
     {
@@ -275,97 +277,94 @@
 
         if (query.TryGetValue("success", out var isSuccess) && isSuccess == "true")
         {
-            successMessage = "Form  submitted successfully!";
+            successMessage = "Category  submitted successfully!";
             StateHasChanged();
 
             await Task.Delay(2000);
             successMessage = string.Empty;
             StateHasChanged();
 
-            navManager.NavigateTo("/Drafting/Manage-Forms", forceLoad: false);
+            navManager.NavigateTo("/Settings/category", forceLoad: false);
         }
 
         // ✅ Edit success message
         else if (query.TryGetValue("edit", out var isEdit) && isEdit == "true")
         {
-            successMessage = "Form updated successfully!";
+            successMessage = "Catgory updated successfully!";
             StateHasChanged();
 
             await Task.Delay(2000);
             successMessage = string.Empty;
             StateHasChanged();
 
-            navManager.NavigateTo("/Drafting/Manage-Forms", forceLoad: false);
+            navManager.NavigateTo("/Settings/category", forceLoad: false);
         }
         await Task.Delay(1000);
-        await LoadForms();
+        await LoadCategorys();
         Spinnerservice.Hide();
     }
 
-    private async Task LoadForms()
+    private async Task LoadCategorys()
     {
-        pagedforms = await ManageFormService.GetAllFormAsync(currentPage, pageSize, searchTerm);
+        pagedCategory = await CategoryService.GetAllCategoryAsync(currentPage, pageSize, searchTerm);
     }
 
 
-    private void ShowCreateform()
+    private void ShowCreateCategory()
     {
-        FormDto = new FormAddEditViewModelDto();
-        _showCreateForm = true;
+        CategoryDto = new EditToCategoryDto();
+        _showCreateCategory = true;
     }
 
 
-    private void HandleCloseCreateform()
+    private void HandleCloseCreateCategory()
     {
-        _showCreateForm = false;
+        _showCreateCategory = false;
     }
 
-    private void HandleCloseEditForm()
+    private void HandleCloseEditCategory()
     {
-        _showEditForm = false;
+        _showEditCategory = false;
     }
 
 
     private async Task ChangePage(int page)
     {
-        if (page >= 1 && page <= Math.Ceiling((double)pagedforms.TotalCount / pageSize))
+        if (page >= 1 && page <= Math.Ceiling((double)pagedCategory.TotalCount / pageSize))
         {
             currentPage = page;
-            await LoadForms();
+            await LoadCategorys();
         }
     }
 
-    private async Task ShowAddEditForm(Guid? formId = null)
+    private async Task ShowAddEditCategory(Guid? CategoryId = null)
     {
-        formIdForEdit = formId;
+        
+        CategoryIdForEdit = CategoryId;
 
-        var form = await ManageFormService.GetFormByIdAsync(formId);
+        var form = await CategoryService.GetCategoryByIdAsync(CategoryId);
 
         if (form != null)
         {
-            FormDto = new FormAddEditViewModelDto
+            CategoryDto = new EditToCategoryDto
                 {
-                    Id = form.Id,
-                    HTML = form.HTML,
-                    CaseTypeId = form.CaseTypeId,
-                    CategoryId= form.CategoryId,
+                    Id = form.Id, 
                     Name = form.Name,
-
 
                 };
 
-            _showEditForm = true;
+            _showEditCategory = true;
         }
     }
   
-        public async Task DeleteForm(Guid id)
+   public async Task DeleteCategory(Guid id)
     {
-        bool isDeleted = await ManageFormService.DeleteFormAsync(id);
+        bool isDeleted = await CategoryService.DeleteCategoryAsync(id);
 
         if (isDeleted)
         {
         
-            pagedforms = await ManageFormService.GetAllFormAsync(currentPage, pageSize , searchTerm);
+            pagedCategory = await CategoryService.GetAllCategoryAsync(currentPage, pageSize , searchTerm);
             StateHasChanged();
         }
     }

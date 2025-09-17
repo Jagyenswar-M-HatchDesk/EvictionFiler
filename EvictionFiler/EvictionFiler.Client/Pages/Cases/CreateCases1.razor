@@ -14,6 +14,7 @@
 @using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Client.Components.Cases
+@using EvictionFiler.Client.Jwt
 @using EvictionFiler.Domain.Entities.Master
 @inject IClientRoleRepository ClientRoleRepository
 @inject ICaseTypeRepository CaseTypeRepository
@@ -35,6 +36,9 @@
 @inject IJSRuntime JS
 @inject NavigationManager nav
 @inject SpinnerService spinnerservice
+@using Microsoft.AspNetCore.Components.Authorization;
+@using System.Security.Claims
+@inject JwtAuthStateProviders _authStateProvider
 <!--
   EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
   • Single self‑contained .razor component
@@ -661,6 +665,20 @@
     {
         spinnerservice.Show();
         var result = false;
+        var authState = await _authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userGuid))
+        {
+            legalcaseDto.CreatedBy = userGuid;
+        }
+        else
+        {
+            // unauthenticated user
+            legalcaseDto.CreatedBy = Guid.Empty;
+        }
 
         if (legalcaseDto == null || legalcaseDto.Id == Guid.Empty)
         {
@@ -670,7 +688,7 @@
         }
         if (result)
         {
-            nav.NavigateTo("/cases?success=true");
+            nav.NavigateTo("/ManageCases/Manage-Cases?success=true");
         }
        
     }

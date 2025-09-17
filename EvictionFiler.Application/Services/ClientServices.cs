@@ -431,6 +431,7 @@ namespace EvictionFiler.Application.Services
 			existingClient.Phone = client.Phone;
 			existingClient.CellPhone = client.CellPhone;
 			existingClient.Fax = client.Fax;
+			existingClient.UpdatedBy = client.UpdatedBy;
     
             existingClient.CreatedOn = client.CreatedOn;
 
