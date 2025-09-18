@@ -26,20 +26,6 @@ namespace EvictionFiler.Application.Services.Master
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<FormAddEditViewModelDto>> GetAllFormAsync()
-        {
-            var forms = await _repository.GetAllForm();
-            var result = forms.Select(x => new FormAddEditViewModelDto
-            {
-                Name = x.Name,
-                CaseType = x.CaseType,
-                CaseTypeId = x.CaseTypeId,
-                HTML = x.HTML,
-                Id = x.Id,
-                
-            }).ToList();
-            return result;
-        }
 
         public async Task<PaginationDto<FormAddEditViewModelDto>> GetAllFormAsync(int pageNumber, int pageSize, string searchTerm)
         {
@@ -55,7 +41,8 @@ namespace EvictionFiler.Application.Services.Master
                 var lowerSearch = searchTerm.ToLower();
                 query = query.Where(form =>
                        (form.CaseType.Name ?? "").ToLower().Contains(lowerSearch) ||
-                      (form.Name ?? "").ToLower().Contains(lowerSearch)
+                      (form.Category.Name ?? "").ToLower().Contains(lowerSearch) ||
+                       (form.Name ?? "").ToLower().Contains(lowerSearch) 
 
                  );
 
@@ -158,6 +145,497 @@ namespace EvictionFiler.Application.Services.Master
             await _unitOfWork.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<PaginationDto<FormAddEditViewModelDto>> GetAllAffidavaitAsync(int pageNumber, int pageSize, string searchTerm)
+        {
+            var query = _repository.GetAllQuerable
+                (
+                    x => x.IsDeleted != true && x.Category != null && x.Category.Name.ToLower() == "affidavits of service",
+                    x => x.CaseType,
+                    x => x.Category
+               );
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var lowerSearch = searchTerm.ToLower();
+                query = query.Where(form =>
+                (form.Name ?? "").ToLower().StartsWith(lowerSearch) ||
+                       (form.CaseType.Name ?? "").ToLower().StartsWith(lowerSearch) 
+                      
+
+                 );
+
+            }
+
+
+            var totalCount = query.Count();
+
+            var forms = query
+        .OrderBy(c => c.Id)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .Select(x => new FormAddEditViewModelDto
+        {
+            Name = x.Name,
+            CaseType = x.CaseType,
+            CaseTypeId = x.CaseTypeId,
+            CaseTypeName = x.CaseType != null ? x.CaseType.Name : "Common",
+            CategoryName = x.Category != null ? x.Category.Name : "-",
+            HTML = x.HTML,
+            CreatedOn = x.CreatedOn,
+            Id = x.Id,
+        })
+        .ToList();
+
+            return new PaginationDto<FormAddEditViewModelDto>
+            {
+                Items = forms,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = pageNumber
+            };
+        }
+
+        public async Task<PaginationDto<FormAddEditViewModelDto>> GetAllAppealsAsync(int pageNumber, int pageSize, string searchTerm)
+        {
+            var query = _repository.GetAllQuerable
+                (
+                    x => x.IsDeleted != true && x.Category != null && x.Category.Name.ToLower() == "appeals",
+                    x => x.CaseType,
+                    x => x.Category
+               );
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var lowerSearch = searchTerm.ToLower();
+                query = query.Where(form =>
+                       (form.CaseType.Name ?? "").ToLower().Contains(lowerSearch) ||
+                      (form.Name ?? "").ToLower().Contains(lowerSearch)
+
+                 );
+
+            }
+
+
+            var totalCount = query.Count();
+
+            var forms = query
+        .OrderBy(c => c.Id)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .Select(x => new FormAddEditViewModelDto
+        {
+            Name = x.Name,
+            CaseType = x.CaseType,
+            CaseTypeId = x.CaseTypeId,
+            CaseTypeName = x.CaseType != null ? x.CaseType.Name : "Common",
+            CategoryName = x.Category != null ? x.Category.Name : "-",
+            HTML = x.HTML,
+            CreatedOn = x.CreatedOn,
+            Id = x.Id,
+        })
+        .ToList();
+
+            return new PaginationDto<FormAddEditViewModelDto>
+            {
+                Items = forms,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = pageNumber
+            };
+        }
+
+        public async Task<PaginationDto<FormAddEditViewModelDto>> GetAllHoldoverAsync(int pageNumber, int pageSize, string searchTerm)
+        {
+            var query = _repository.GetAllQuerable
+                (
+                    x => x.IsDeleted != true && x.Category != null && x.Category.Name.ToLower() == "hold over",
+                    x => x.CaseType,
+                    x => x.Category
+               );
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var lowerSearch = searchTerm.ToLower();
+                query = query.Where(form =>
+                       (form.CaseType.Name ?? "").ToLower().Contains(lowerSearch) ||
+                      (form.Name ?? "").ToLower().Contains(lowerSearch)
+
+                 );
+
+            }
+
+
+            var totalCount = query.Count();
+
+            var forms = query
+        .OrderBy(c => c.Id)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .Select(x => new FormAddEditViewModelDto
+        {
+            Name = x.Name,
+            CaseType = x.CaseType,
+            CaseTypeId = x.CaseTypeId,
+            CaseTypeName = x.CaseType != null ? x.CaseType.Name : "Common",
+            CategoryName = x.Category != null ? x.Category.Name : "-",
+            HTML = x.HTML,
+            CreatedOn = x.CreatedOn,
+            Id = x.Id,
+        })
+        .ToList();
+
+            return new PaginationDto<FormAddEditViewModelDto>
+            {
+                Items = forms,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = pageNumber
+            };
+        }
+
+        public async Task<PaginationDto<FormAddEditViewModelDto>> GetAllMotionAsync(int pageNumber, int pageSize, string searchTerm)
+        {
+            var query = _repository.GetAllQuerable
+                (
+                    x => x.IsDeleted != true && x.Category != null && x.Category.Name.ToLower() == "motions and orders to show cause ",
+                    x => x.CaseType,
+                    x => x.Category
+               );
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var lowerSearch = searchTerm.ToLower();
+                query = query.Where(form =>
+                       (form.CaseType.Name ?? "").ToLower().Contains(lowerSearch) ||
+                      (form.Name ?? "").ToLower().Contains(lowerSearch)
+
+                 );
+
+            }
+
+
+            var totalCount = query.Count();
+
+            var forms = query
+        .OrderBy(c => c.Id)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .Select(x => new FormAddEditViewModelDto
+        {
+            Name = x.Name,
+            CaseType = x.CaseType,
+            CaseTypeId = x.CaseTypeId,
+            CaseTypeName = x.CaseType != null ? x.CaseType.Name : "Common",
+            CategoryName = x.Category != null ? x.Category.Name : "-",
+            HTML = x.HTML,
+            CreatedOn = x.CreatedOn,
+            Id = x.Id,
+        })
+        .ToList();
+
+            return new PaginationDto<FormAddEditViewModelDto>
+            {
+                Items = forms,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = pageNumber
+            };
+        }
+
+        public async Task<PaginationDto<FormAddEditViewModelDto>> GetAllNonMilitaryAsync(int pageNumber, int pageSize, string searchTerm)
+        {
+            var query = _repository.GetAllQuerable
+                (
+                    x => x.IsDeleted != true && x.Category != null && x.Category.Name.ToLower() == "non-Military affidavit of investigation",
+                    x => x.CaseType,
+                    x => x.Category
+               );
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var lowerSearch = searchTerm.ToLower();
+                query = query.Where(form =>
+                       (form.CaseType.Name ?? "").ToLower().Contains(lowerSearch) ||
+                      (form.Name ?? "").ToLower().Contains(lowerSearch)
+
+                 );
+
+            }
+
+
+            var totalCount = query.Count();
+
+            var forms = query
+        .OrderBy(c => c.Id)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .Select(x => new FormAddEditViewModelDto
+        {
+            Name = x.Name,
+            CaseType = x.CaseType,
+            CaseTypeId = x.CaseTypeId,
+            CaseTypeName = x.CaseType != null ? x.CaseType.Name : "Common",
+            CategoryName = x.Category != null ? x.Category.Name : "-",
+            HTML = x.HTML,
+            CreatedOn = x.CreatedOn,
+            Id = x.Id,
+        })
+        .ToList();
+
+            return new PaginationDto<FormAddEditViewModelDto>
+            {
+                Items = forms,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = pageNumber
+            };
+        }
+
+        public async Task<PaginationDto<FormAddEditViewModelDto>> GetAllNonPaymentAsync(int pageNumber, int pageSize, string searchTerm)
+        {
+            var query = _repository.GetAllQuerable
+                (
+                    x => x.IsDeleted != true && x.Category != null && x.Category.Name.ToLower() == "non-payment",
+                    x => x.CaseType,
+                    x => x.Category
+               );
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var lowerSearch = searchTerm.ToLower();
+                query = query.Where(form =>
+                       (form.CaseType.Name ?? "").ToLower().Contains(lowerSearch) ||
+                      (form.Name ?? "").ToLower().Contains(lowerSearch)
+
+                 );
+
+            }
+
+
+            var totalCount = query.Count();
+
+            var forms = query
+        .OrderBy(c => c.Id)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .Select(x => new FormAddEditViewModelDto
+        {
+            Name = x.Name,
+            CaseType = x.CaseType,
+            CaseTypeId = x.CaseTypeId,
+            CaseTypeName = x.CaseType != null ? x.CaseType.Name : "Common",
+            CategoryName = x.Category != null ? x.Category.Name : "-",
+            HTML = x.HTML,
+            CreatedOn = x.CreatedOn,
+            Id = x.Id,
+        })
+        .ToList();
+
+            return new PaginationDto<FormAddEditViewModelDto>
+            {
+                Items = forms,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = pageNumber
+            };
+        }
+
+        public async Task<PaginationDto<FormAddEditViewModelDto>> GetAllNoticeOfEntryAsync(int pageNumber, int pageSize, string searchTerm)
+        {
+            var query = _repository.GetAllQuerable
+                (
+                    x => x.IsDeleted != true && x.Category != null && x.Category.Name.ToLower() == "notice of entry",
+                    x => x.CaseType,
+                    x => x.Category
+               );
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var lowerSearch = searchTerm.ToLower();
+                query = query.Where(form =>
+                       (form.CaseType.Name ?? "").ToLower().Contains(lowerSearch) ||
+                      (form.Name ?? "").ToLower().Contains(lowerSearch)
+
+                 );
+
+            }
+
+
+            var totalCount = query.Count();
+
+            var forms = query
+        .OrderBy(c => c.Id)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .Select(x => new FormAddEditViewModelDto
+        {
+            Name = x.Name,
+            CaseType = x.CaseType,
+            CaseTypeId = x.CaseTypeId,
+            CaseTypeName = x.CaseType != null ? x.CaseType.Name : "Common",
+            CategoryName = x.Category != null ? x.Category.Name : "-",
+            HTML = x.HTML,
+            CreatedOn = x.CreatedOn,
+            Id = x.Id,
+        })
+        .ToList();
+
+            return new PaginationDto<FormAddEditViewModelDto>
+            {
+                Items = forms,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = pageNumber
+            };
+        }
+
+        public async Task<PaginationDto<FormAddEditViewModelDto>> GetAllStipulationsAsync(int pageNumber, int pageSize, string searchTerm)
+        {
+            var query = _repository.GetAllQuerable
+                (
+                    x => x.IsDeleted != true && x.Category != null && x.Category.Name.ToLower() == "stipulations",
+                    x => x.CaseType,
+                    x => x.Category
+               );
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var lowerSearch = searchTerm.ToLower();
+                query = query.Where(form =>
+                       (form.CaseType.Name ?? "").ToLower().Contains(lowerSearch) ||
+                      (form.Name ?? "").ToLower().Contains(lowerSearch)
+
+                 );
+
+            }
+
+
+            var totalCount = query.Count();
+
+            var forms = query
+        .OrderBy(c => c.Id)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .Select(x => new FormAddEditViewModelDto
+        {
+            Name = x.Name,
+            CaseType = x.CaseType,
+            CaseTypeId = x.CaseTypeId,
+            CaseTypeName = x.CaseType != null ? x.CaseType.Name : "Common",
+            CategoryName = x.Category != null ? x.Category.Name : "-",
+            HTML = x.HTML,
+            CreatedOn = x.CreatedOn,
+            Id = x.Id,
+        })
+        .ToList();
+
+            return new PaginationDto<FormAddEditViewModelDto>
+            {
+                Items = forms,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = pageNumber
+            };
+        }
+
+        public async Task<PaginationDto<FormAddEditViewModelDto>> GetAllTenantAsync(int pageNumber, int pageSize, string searchTerm)
+        {
+            var query = _repository.GetAllQuerable
+                (
+                    x => x.IsDeleted != true && x.Category != null && x.Category.Name.ToLower() == "tenants",
+                    x => x.CaseType,
+                    x => x.Category
+               );
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var lowerSearch = searchTerm.ToLower();
+                query = query.Where(form =>
+                       (form.CaseType.Name ?? "").ToLower().Contains(lowerSearch) ||
+                      (form.Name ?? "").ToLower().Contains(lowerSearch)
+
+                 );
+
+            }
+
+
+            var totalCount = query.Count();
+
+            var forms = query
+        .OrderBy(c => c.Id)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .Select(x => new FormAddEditViewModelDto
+        {
+            Name = x.Name,
+            CaseType = x.CaseType,
+            CaseTypeId = x.CaseTypeId,
+            CaseTypeName = x.CaseType != null ? x.CaseType.Name : "Common",
+            CategoryName = x.Category != null ? x.Category.Name : "-",
+            HTML = x.HTML,
+            CreatedOn = x.CreatedOn,
+            Id = x.Id,
+        })
+        .ToList();
+
+            return new PaginationDto<FormAddEditViewModelDto>
+            {
+                Items = forms,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = pageNumber
+            };
+        }
+
+        public async Task<PaginationDto<FormAddEditViewModelDto>> GetAllWarrantsAsync(int pageNumber, int pageSize, string searchTerm)
+        {
+            var query = _repository.GetAllQuerable
+                (
+                    x => x.IsDeleted != true && x.Category != null && x.Category.Name.ToLower() == "warrants",
+                    x => x.CaseType,
+                    x => x.Category
+               );
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var lowerSearch = searchTerm.ToLower();
+                query = query.Where(form =>
+                       (form.CaseType.Name ?? "").ToLower().Contains(lowerSearch) ||
+                      (form.Name ?? "").ToLower().Contains(lowerSearch)
+
+                 );
+
+            }
+
+
+            var totalCount = query.Count();
+
+            var forms = query
+        .OrderBy(c => c.Id)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .Select(x => new FormAddEditViewModelDto
+        {
+            Name = x.Name,
+            CaseType = x.CaseType,
+            CaseTypeId = x.CaseTypeId,
+            CaseTypeName = x.CaseType != null ? x.CaseType.Name : "Common",
+            CategoryName = x.Category != null ? x.Category.Name : "-",
+            HTML = x.HTML,
+            CreatedOn = x.CreatedOn,
+            Id = x.Id,
+        })
+        .ToList();
+
+            return new PaginationDto<FormAddEditViewModelDto>
+            {
+                Items = forms,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = pageNumber
+            };
         }
 
 

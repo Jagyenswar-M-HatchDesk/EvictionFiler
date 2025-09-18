@@ -1,4 +1,4 @@
-﻿@page "/Drafting/Manage-Forms"
+﻿@page "/Drafting/affidavits-of-service"
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.FormTypeDto
 @using EvictionFiler.Application.DTOs.PaginationDto
@@ -13,7 +13,7 @@
 @inject IManageFormService ManageFormService
 
 
-<PageTitle>Manage Forms</PageTitle>
+<PageTitle>Affidavits of Service Form</PageTitle>
 
 <!-- Bootstrap CSS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
@@ -146,18 +146,19 @@
 
 <body class="p-1">
 
-    <div class="container p-4 rounded shadow-sm" >
+    <div class="container p-4 rounded shadow-sm" style="height:95vh">
 
         <!-- Title Row -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="m-0">Manage Forms</h5>
-        </div>
+       
 
         <!-- Search Filters -->
         <div class="g-2 mb-3 d-flex justify-content-between align-items-center">
             <!-- Four default search boxes -->
-            <button class="btn btn-primary" @onclick="ShowCreateform">Add New</button>
-            <div class="position-relative w-50">
+            @* <button class="btn btn-primary" @onclick="ShowCreateform">Add New</button> *@
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="m-0 fw-bold">Affidavits of Service Forms</h5>
+            </div>
+            <div class="position-relative w-25">
                 <input class="form-control border border-primary text-navy" placeholder="Search.." @bind="searchTerm" @oninput="OnSearchChanged" />
                 <button class="search-btn" type="button">
                     <i class="fa fa-search"></i>
@@ -167,34 +168,29 @@
         </div>
 
         <!-- Data Table -->
-        <div style="max-height: 500px; overflow-y: auto; overflow-x: auto;">
+        <div style="max-height: 700px; overflow-y: auto; overflow-x: auto;">
             <table class="table table-bordered mt-4" style="min-width: 800px;">
                 <thead class="table-light">
                     <tr>
-                        <th>Sl no</th>
+                        <th class="text-center">Sl no</th>
                         <th>Form Type</th>
                         <th>Case Type</th>
-                        <th>Category</th>
                         <th>Created Date</th>
-                        <th class="sticky">Actions</th>
+                        @* <th class="sticky">Actions</th> *@
                     </tr>
                 </thead>
                 <tbody>
                     @if (pagedforms != null && pagedforms.Items.Any())
                     {
-                        int index = ((currentPage - 1) * pageSize) + 1;
+                        int index = 1;
                         @foreach (var form in pagedforms.Items)
                         {
                             <tr>
                                 <td class="text-center">@index</td>
                                 <td>@form.Name</td>
                                 <td>@form.CaseTypeName</td>
-                                <td>@form.CategoryName</td>
                                 <td>@form.CreatedOn.ToString("dd/MM/yyyy")</td>
-                                <td class="sticky">
-                                    <i class="fa-solid fa-pen-to-square text-navy me-3 " @onclick="() => ShowAddEditForm(form.Id)" style="cursor: pointer;" title="Edit"></i>
-                                    <i class="fa-solid fa-trash-can text-danger " @onclick=" ()=>DeleteForm(form.Id.Value)" style="cursor: pointer;" title="Delete"></i>
-                                </td>
+                               
                             </tr>
                             index++;
                         }
@@ -205,6 +201,7 @@
                             <td colspan="4" class="text-muted text-center">No notices generated yet.</td>
                         </tr>
                     } 
+            
                 </tbody>
             </table>
         </div>
@@ -241,24 +238,10 @@
 
     </div>
 
-
-       @if (_showCreateForm)
-    {
-        <CreateForm createForm="FormDto" OnClose="HandleCloseCreateform" />
-    }
-
-    @if (_showEditForm)
-    {
-        <EditForms editForm="FormDto" OnClose="HandleCloseEditForm" />
-    }
 </body>
 
 
 @code {
-
-    private bool _showCreateForm = false;
-    private bool _showEditForm = false;
-    private Guid? formIdForEdit;
     private FormAddEditViewModelDto FormDto = new();
     private string successMessage;
     private int currentPage = 1;
@@ -269,34 +252,7 @@
     protected override async Task OnInitializedAsync()
     {
         Spinnerservice.Show();
-        //isLoading = true;
-        var uri = new Uri(navManager.Uri);
-        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-
-        if (query.TryGetValue("success", out var isSuccess) && isSuccess == "true")
-        {
-            successMessage = "Form  submitted successfully!";
-            StateHasChanged();
-
-            await Task.Delay(2000);
-            successMessage = string.Empty;
-            StateHasChanged();
-
-            navManager.NavigateTo("/Drafting/Manage-Forms", forceLoad: false);
-        }
-
-        // ✅ Edit success message
-        else if (query.TryGetValue("edit", out var isEdit) && isEdit == "true")
-        {
-            successMessage = "Form updated successfully!";
-            StateHasChanged();
-
-            await Task.Delay(2000);
-            successMessage = string.Empty;
-            StateHasChanged();
-
-            navManager.NavigateTo("/Drafting/Manage-Forms", forceLoad: false);
-        }
+      
         await Task.Delay(1000);
         await LoadForms();
         Spinnerservice.Hide();
@@ -304,25 +260,14 @@
 
     private async Task LoadForms()
     {
-        pagedforms = await ManageFormService.GetAllFormAsync(currentPage, pageSize, searchTerm);
+        pagedforms = await ManageFormService.GetAllAffidavaitAsync(currentPage, pageSize, searchTerm);
     }
 
-
-    private void ShowCreateform()
+    private async Task OnSearchChanged(ChangeEventArgs e)
     {
-        FormDto = new FormAddEditViewModelDto();
-        _showCreateForm = true;
-    }
-
-
-    private void HandleCloseCreateform()
-    {
-        _showCreateForm = false;
-    }
-
-    private void HandleCloseEditForm()
-    {
-        _showEditForm = false;
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+        currentPage = 1;
+        await LoadForms();
     }
 
 
@@ -334,50 +279,6 @@
             await LoadForms();
         }
     }
-
-    private async Task OnSearchChanged(ChangeEventArgs e)
-    {
-        searchTerm = e.Value?.ToString() ?? string.Empty;
-        currentPage = 1;
-        await LoadForms();
-    }
-
-    private async Task ShowAddEditForm(Guid? formId = null)
-    {
-        formIdForEdit = formId;
-
-        var form = await ManageFormService.GetFormByIdAsync(formId);
-
-        if (form != null)
-        {
-            FormDto = new FormAddEditViewModelDto
-                {
-                    Id = form.Id,
-                    HTML = form.HTML,
-                    CaseTypeId = form.CaseTypeId,
-                    CategoryId= form.CategoryId,
-                    Name = form.Name,
-
-
-                };
-
-            _showEditForm = true;
-        }
-    }
-  
-        public async Task DeleteForm(Guid id)
-    {
-        bool isDeleted = await ManageFormService.DeleteFormAsync(id);
-
-        if (isDeleted)
-        {
-        
-            pagedforms = await ManageFormService.GetAllFormAsync(currentPage, pageSize , searchTerm);
-            StateHasChanged();
-        }
-    }
-    
-
 
 }
 
