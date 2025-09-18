@@ -12,10 +12,11 @@ namespace EvictionFiler.Application.DTOs
     {
         public Guid Id { get; set; }
         [Required] public Guid ClientId { get; set; }
+        public string Casecode { get; set; }
         [Required] public string FullName { get; set; }
         [Required] public string Phone { get; set; }
         [Required, EmailAddress] public string Email { get; set; }
-        [Required] public Guid ?LandLordTypeId { get; set; }
+        [Required] public Guid? LandLordTypeId { get; set; }
         [Required] public string LandLordTypeName { get; set; }
 
         [Required] public string Mdr { get; set; }
@@ -50,5 +51,20 @@ namespace EvictionFiler.Application.DTOs
 
         [Required] public Guid CaseTypeId { get; set; }
         [Required] public string CaseTypeName { get; set; }
+
+        // FOR Client 
+        public string ClientCode { get; set; } = string.Empty;
+        [Required(ErrorMessage = "First Name is Required")]
+        public string FirstName { get; set; } = string.Empty;
+        public string? LastName { get; set; }
+        [Required(ErrorMessage = "Email is Required")]
+        public string ClientEmail { get; set; } = string.Empty;
+        public string Address1 { get; set; } = string.Empty;
+        public string? Address2 { get; set; }
+        public string? City { get; set; } = string.Empty;
+        public Guid? StateId { get; set; }
+        public string? StateName { get; set; }
+        public string? ZipCode { get; set; } = string.Empty;
+        public string? ClientPhone { get; set; }
     }
 }

@@ -2,7 +2,7 @@
 using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
-using EvictionFiler.Application.DTOs.LegalCaseDto;
+
 using EvictionFiler.Application.DTOs.OccupantDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.DTOs.TenantDto;
@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using PdfSharpCore;
 using PdfSharpCore.Pdf.Filters;
 using System.Linq.Expressions;
+using EvictionFiler.Application.DTOs.LegalCaseDto;
 
 namespace EvictionFiler.Application.Services
 {
@@ -258,7 +259,9 @@ namespace EvictionFiler.Application.Services
 
             var intakeModel = new IntakeModel
             {
+                 // for Case
                 Id = caseEntity.Id,
+                Casecode = caseEntity.Casecode,
                 ClientId = caseEntity.Clients.Id,
                 CaseTypeId = caseEntity.CaseType.Id,
                 IsERAPPaymentReceived = caseEntity.IsERAPPaymentReceived,
@@ -272,6 +275,17 @@ namespace EvictionFiler.Application.Services
                 DateTenantMoved = caseEntity.DateTenantMoved,
                 TenancyTypeId = caseEntity.TenancyTypeId,
 
+                //for Client
+                ClientCode  = caseEntity.Clients.ClientCode,
+                FirstName = caseEntity.Clients.FirstName,
+                LastName = caseEntity.Clients.LastName,
+                Address1 = caseEntity.Clients.Address1,
+                Address2 = caseEntity.Clients.Address2,
+                StateName = caseEntity.Clients.State.Name,
+                ZipCode = caseEntity.Clients.ZipCode,
+                ClientEmail = caseEntity.Clients.Email,
+                ClientPhone = caseEntity.Clients.Phone,
+
                 // Landlord
                 FullName = caseEntity.LandLords?.FirstName,
                 Phone = caseEntity.LandLords?.Phone,
@@ -283,6 +297,7 @@ namespace EvictionFiler.Application.Services
                 Units = caseEntity.Buildings?.BuildingUnits,
                 BuildingAddress = caseEntity.Buildings?.Address1,
                 RegulationStatusId = caseEntity.Buildings?.RegulationStatusId ?? Guid.Empty,
+                //RegulationStatusName = caseEntity.Buildings.RegulationStatus.Name,
 
                 // Tenant
                 TenantName = caseEntity.Tenants?.FirstName,
@@ -299,7 +314,7 @@ namespace EvictionFiler.Application.Services
 
         public async Task<CreateToEditLegalCaseModel> GetByIdAsync(Guid id)
 		{
-			var legalCaseEntity = await _repository.GetAllQuerable(
+			var legalcaseEntity = await _repository.GetAllQuerable(
 		predicate: c => c.Id == id,
 		(Expression<Func<LegalCase, object>>)(c => c.Clients),
 		c =>c.Buildings,
@@ -317,48 +332,48 @@ namespace EvictionFiler.Application.Services
 	)
 	.FirstOrDefaultAsync();
 
-			if (legalCaseEntity == null)
+			if (legalcaseEntity == null)
 				return null;
 
 			var dto = new CreateToEditLegalCaseModel
 			{
-				Id = legalCaseEntity.Id,
+				Id = legalcaseEntity.Id,
 				
-				ClientId = legalCaseEntity.Clients.Id,
-				BuildingId = legalCaseEntity.Buildings?.Id,
-				LandLordId = legalCaseEntity.LandLordId,
-				TenantId = legalCaseEntity.Tenants?.Id,
-				ExplainDescription = legalCaseEntity.ExplainDescription,
-				ReasonHoldoverId = legalCaseEntity.ReasonHoldoverId,
-				ERAPPaymentReceivedDate = legalCaseEntity.ERAPPaymentReceivedDate,
-				IsERAPPaymentReceived = legalCaseEntity.IsERAPPaymentReceived,
-				HasPossession = legalCaseEntity.HasPossession,
-				IsUnitIllegalId = legalCaseEntity.IsUnitIllegalId,
-				LandlordTypeId = legalCaseEntity.LandlordTypeId,
-				LastMonthWeekRentPaid = legalCaseEntity.LastMonthWeekRentPaid,
-				MonthlyRent = legalCaseEntity.MonthlyRent,
-				OtherOccupants = legalCaseEntity.OtherOccupants,
-				RegulationStatusId = legalCaseEntity.RegulationStatusId,
-				RenewalOffer = legalCaseEntity.RenewalOffer,
-				RentDueEachMonthOrWeekId = legalCaseEntity.RentDueEachMonthOrWeekId,
-				SocialServices = legalCaseEntity.SocialServices,
-				TenancyTypeId = legalCaseEntity.TenancyTypeId,
-				TenantRecord = legalCaseEntity.TenantRecord,
-				TenantShare = legalCaseEntity.TenantShare,
-				CaseTypeId = legalCaseEntity.CaseTypeId,
-				Attrney = legalCaseEntity.Attrney,
-				AttrneyContactInfo = legalCaseEntity.AttrneyContactInfo,
-				Firm = legalCaseEntity.Firm,
-				tenantReceive = legalCaseEntity.tenantReceive,
-				ExplainTenancyReceiveDescription = legalCaseEntity.ExplainTenancyReceiveDescription,
-				TotalRentOwed = legalCaseEntity.TotalRentOwed,
-				OralEnd = legalCaseEntity.OralEnd,
-				OralStart = legalCaseEntity.OralStart,
-				WrittenLease = legalCaseEntity.WrittenLease,
-				RenewalStatusId = legalCaseEntity.RenewalStatusId,
-				DateTenantMoved = legalCaseEntity.DateTenantMoved,
-				Casecode = legalCaseEntity.Casecode,
-				AdditionalOccupants = legalCaseEntity.Addoccupants
+				ClientId = legalcaseEntity.Clients.Id,
+				BuildingId = legalcaseEntity.Buildings?.Id,
+				LandLordId = legalcaseEntity.LandLordId,
+				TenantId = legalcaseEntity.Tenants?.Id,
+				ExplainDescription = legalcaseEntity.ExplainDescription,
+				ReasonHoldoverId = legalcaseEntity.ReasonHoldoverId,
+				ERAPPaymentReceivedDate = legalcaseEntity.ERAPPaymentReceivedDate,
+				IsERAPPaymentReceived = legalcaseEntity.IsERAPPaymentReceived,
+				HasPossession = legalcaseEntity.HasPossession,
+				IsUnitIllegalId = legalcaseEntity.IsUnitIllegalId,
+				LandlordTypeId = legalcaseEntity.LandlordTypeId,
+				LastMonthWeekRentPaid = legalcaseEntity.LastMonthWeekRentPaid,
+				MonthlyRent = legalcaseEntity.MonthlyRent,
+				OtherOccupants = legalcaseEntity.OtherOccupants,
+				RegulationStatusId = legalcaseEntity.RegulationStatusId,
+				RenewalOffer = legalcaseEntity.RenewalOffer,
+				RentDueEachMonthOrWeekId = legalcaseEntity.RentDueEachMonthOrWeekId,
+				SocialServices = legalcaseEntity.SocialServices,
+				TenancyTypeId = legalcaseEntity.TenancyTypeId,
+				TenantRecord = legalcaseEntity.TenantRecord,
+				TenantShare = legalcaseEntity.TenantShare,
+				CaseTypeId = legalcaseEntity.CaseTypeId,
+				Attrney = legalcaseEntity.Attrney,
+				AttrneyContactInfo = legalcaseEntity.AttrneyContactInfo,
+				Firm = legalcaseEntity.Firm,
+				tenantReceive = legalcaseEntity.tenantReceive,
+				ExplainTenancyReceiveDescription = legalcaseEntity.ExplainTenancyReceiveDescription,
+				TotalRentOwed = legalcaseEntity.TotalRentOwed,
+				OralEnd = legalcaseEntity.OralEnd,
+				OralStart = legalcaseEntity.OralStart,
+				WrittenLease = legalcaseEntity.WrittenLease,
+				RenewalStatusId = legalcaseEntity.RenewalStatusId,
+				DateTenantMoved = legalcaseEntity.DateTenantMoved,
+				Casecode = legalcaseEntity.Casecode,
+				AdditionalOccupants = legalcaseEntity.Addoccupants
 				.Select(o => new AdditionalOccupantDto
 				{
 					Id = o.Id,
@@ -370,41 +385,41 @@ namespace EvictionFiler.Application.Services
 
 
 
-				tenants = legalCaseEntity.Tenants == null ? null : new CreateToTenantDto
+				tenants = legalcaseEntity.Tenants == null ? null : new CreateToTenantDto
 				{
-					FirstName = legalCaseEntity.Tenants.FirstName,
-					LastName = legalCaseEntity.Tenants.LastName,
-					BuildingId = legalCaseEntity.Tenants.BuildinId,
-					UnitOrApartmentNumber = legalCaseEntity.Tenants.UnitOrApartmentNumber,
+					FirstName = legalcaseEntity.Tenants.FirstName,
+					LastName = legalcaseEntity.Tenants.LastName,
+					BuildingId = legalcaseEntity.Tenants.BuildinId,
+					UnitOrApartmentNumber = legalcaseEntity.Tenants.UnitOrApartmentNumber,
 
-					Building = legalCaseEntity.Tenants.Building == null ? null : new EditToBuildingDto
+					Building = legalcaseEntity.Tenants.Building == null ? null : new EditToBuildingDto
 					{
-						Id = legalCaseEntity.Tenants.Building.Id,
-						Address1 = legalCaseEntity.Tenants.Building.Address1,
-						Address2 = legalCaseEntity.Tenants.Building.Address2,
-						Zipcode = legalCaseEntity.Tenants.Building.Zipcode,
-						City = legalCaseEntity.Tenants.Building.City,
-						StateId = legalCaseEntity.Tenants.Building.StateId,
-						MDRNumber = legalCaseEntity.Tenants.Building.MDRNumber,
-						BuildingUnits = legalCaseEntity.Tenants.Building.BuildingUnits,
-						RegulationStatusId = legalCaseEntity.Tenants.Building.RegulationStatusId,
+						Id = legalcaseEntity.Tenants.Building.Id,
+						Address1 = legalcaseEntity.Tenants.Building.Address1,
+						Address2 = legalcaseEntity.Tenants.Building.Address2,
+						Zipcode = legalcaseEntity.Tenants.Building.Zipcode,
+						City = legalcaseEntity.Tenants.Building.City,
+						StateId = legalcaseEntity.Tenants.Building.StateId,
+						MDRNumber = legalcaseEntity.Tenants.Building.MDRNumber,
+						BuildingUnits = legalcaseEntity.Tenants.Building.BuildingUnits,
+						RegulationStatusId = legalcaseEntity.Tenants.Building.RegulationStatusId,
 
-                        RegulationStatusName = legalCaseEntity.Tenants.Building.RegulationStatus.Name
+                        RegulationStatusName = legalcaseEntity.Tenants.Building.RegulationStatus.Name
                     },
 
-					Landlord = legalCaseEntity.Tenants.Building.Landlord == null ? null : new EditToLandlordDto
+					Landlord = legalcaseEntity.Tenants.Building.Landlord == null ? null : new EditToLandlordDto
 					{
-						Id = legalCaseEntity.Tenants.Building.Landlord.Id,
-						FirstName = legalCaseEntity.Tenants.Building.Landlord.FirstName,
-						LastName = legalCaseEntity.Tenants.Building.Landlord.LastName,
-						Address1 = legalCaseEntity.Tenants.Building.Landlord.Address1,
-						Address2 = legalCaseEntity.Tenants.Building.Landlord.Address2,
-						Zipcode = legalCaseEntity.Tenants.Building.Landlord.Zipcode,
-						City = legalCaseEntity.Tenants.Building.Landlord.City,
-						StateId = legalCaseEntity.Tenants.Building.Landlord.StateId,
-						Phone = legalCaseEntity.Tenants.Building.Landlord.Phone,
-						Email = legalCaseEntity.Tenants.Building.Landlord.Email,
-						LandlordTypeId = legalCaseEntity.Tenants.Building.Landlord.LandlordTypeId
+						Id = legalcaseEntity.Tenants.Building.Landlord.Id,
+						FirstName = legalcaseEntity.Tenants.Building.Landlord.FirstName,
+						LastName = legalcaseEntity.Tenants.Building.Landlord.LastName,
+						Address1 = legalcaseEntity.Tenants.Building.Landlord.Address1,
+						Address2 = legalcaseEntity.Tenants.Building.Landlord.Address2,
+						Zipcode = legalcaseEntity.Tenants.Building.Landlord.Zipcode,
+						City = legalcaseEntity.Tenants.Building.Landlord.City,
+						StateId = legalcaseEntity.Tenants.Building.Landlord.StateId,
+						Phone = legalcaseEntity.Tenants.Building.Landlord.Phone,
+						Email = legalcaseEntity.Tenants.Building.Landlord.Email,
+						LandlordTypeId = legalcaseEntity.Tenants.Building.Landlord.LandlordTypeId
 					}
 				}
 			};
