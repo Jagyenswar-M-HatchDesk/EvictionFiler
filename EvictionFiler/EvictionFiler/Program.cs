@@ -8,6 +8,7 @@ using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IServices.Master;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Application.Services;
+using EvictionFiler.Application.Services.Helper;
 using EvictionFiler.Application.Services.Master;
 using EvictionFiler.Client.Jwt;
 using EvictionFiler.Client.SpinnerService;
@@ -124,6 +125,8 @@ builder.Services.AddScoped<IStateService, StateService>();
 builder.Services.AddScoped<ITenancyTypeService, TenancyTypeService>();
 builder.Services.AddScoped<IUnitIllegalService  , UnitIllegalService>();
 builder.Services.AddScoped<NavigationDataService>();
+builder.Services.AddSingleton<SuccessMessageService>();
+
 builder.Services.AddScoped<JwtAuthStateProviders>();
 builder.Services.AddScoped<IUnitOfWork , UnitOfWork>();
 builder.Services.AddAuthorizationCore();

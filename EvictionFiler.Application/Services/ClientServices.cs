@@ -1,5 +1,5 @@
-﻿using System.Net;
-using EvictionFiler.Application.DTOs.ClientDto;
+﻿using EvictionFiler.Application.DTOs.ClientDto;
+using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
@@ -7,6 +7,7 @@ using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 
 namespace EvictionFiler.Application.Services
@@ -37,6 +38,43 @@ namespace EvictionFiler.Application.Services
 			_userRepo = userRepo;
 			
 		}
+
+        public async Task<List<EditToClientDto>> GetAllClient(string userId, bool isAdmin)
+        {
+            
+            var query = _clientRepo.GetAllQuerable(x => x.IsDeleted != true, x => x.State);
+
+            // ✅ Agar Admin nahi hai to sirf apne hi clients dikhaye
+            if (!isAdmin && Guid.TryParse(userId, out Guid userGuid))
+            {
+                query = query.Where(x => x.CreatedBy == userGuid);
+            }
+
+            var landlords = await query.ToListAsync();
+
+            var result = landlords.Select(client => new EditToClientDto
+            {
+                Id = client.Id,
+                FirstName = client.FirstName,
+                LastName = client.LastName,
+                Email = client.Email,
+                Fax = client.Fax,
+                Phone = client.Phone,
+                CellPhone = client.CellPhone,
+                ClientCode = client.ClientCode,
+                Address1 = client.Address1,
+                Address2 = client.Address2,
+                City = client.City,
+                StateId = client.StateId,
+                StateName = client.State?.Name,
+                ZipCode = client.ZipCode,
+                CreatedBy = client.CreatedBy,
+                CreatedOn = client.CreatedOn,
+            }).ToList();
+
+            return result;
+        }
+
 
         public async Task<PaginationDto<EditToClientDto>> GetAllClientsAsync(
     int pageNumber,

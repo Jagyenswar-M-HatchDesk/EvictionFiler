@@ -8,11 +8,12 @@ namespace EvictionFiler.Domian.Enums
 {
     public enum Step
     {
-        Landlord = 0,
-        Building = 1,
-        Tenant = 2,
-        Rent = 3,
-        Case = 4,
-        Review = 5
+        Client = 0,
+        Landlord = 1,
+        Building = 2,
+        Tenant = 3,
+        Rent = 4,
+        Case = 5,
+        Review = 6
     }
 }

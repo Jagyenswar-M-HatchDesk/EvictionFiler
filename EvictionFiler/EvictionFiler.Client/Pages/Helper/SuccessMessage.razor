@@ -1,0 +1,40 @@
+﻿@using EvictionFiler.Application.Services.Helper
+
+@inject SuccessMessageService MessageService
+
+@if (!string.IsNullOrEmpty(CurrentMessage))
+{
+    <div class="alert alert-success mt-3">
+        @CurrentMessage
+    </div>
+}
+
+@code {
+    private string CurrentMessage;
+
+    protected override void OnInitialized()
+    {
+        MessageService.OnMessageShow += Show;
+    }
+
+    private void Show(string message)
+    {
+        CurrentMessage = message;
+        StateHasChanged();
+
+        // Automatically clear after 2 sec
+        _ = ClearMessage();
+    }
+
+    private async Task ClearMessage()
+    {
+        await Task.Delay(2000);
+        CurrentMessage = string.Empty;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        MessageService.OnMessageShow -= Show;
+    }
+}

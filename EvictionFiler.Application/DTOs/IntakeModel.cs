@@ -11,27 +11,30 @@ namespace EvictionFiler.Application.DTOs
     public class IntakeModel : DeletableBaseEntity
     {
         public Guid Id { get; set; }
-        [Required] public Guid ClientId { get; set; }
+        [Required(ErrorMessage = "Client is required")]
+        public Guid? ClientId { get; set; }
+
+         public string ClientName { get; set; }
         public string Casecode { get; set; }
-        [Required] public string FullName { get; set; }
-        [Required] public string Phone { get; set; }
+        public string FullName { get; set; }
+        public string Phone { get; set; }
         [Required, EmailAddress] public string Email { get; set; }
-        [Required] public Guid? LandLordTypeId { get; set; }
-        [Required] public string LandLordTypeName { get; set; }
+       public Guid? LandLordTypeId { get; set; }
+        public string LandLordTypeName { get; set; }
 
-        [Required] public string Mdr { get; set; }
-        [Required] public string? Units { get; set; }
-        [Required] public string BuildingAddress { get; set; }
-        [Required] public Guid? RegulationStatusId { get; set; }
-        [Required] public string RegulationStatusName { get; set; }
+        public string Mdr { get; set; }
+        public string? Units { get; set; }
+        public string BuildingAddress { get; set; }
+        public Guid? RegulationStatusId { get; set; }
+        public string RegulationStatusName { get; set; }
 
-        [Required] public string TenantName { get; set; }
-        [Required] public string UnitNumber { get; set; }
+        public string TenantName { get; set; }
+        public string UnitNumber { get; set; }
         public bool? TenantRecord { get; set; }
         public bool? HasPossession { get; set; }
         public bool? OtherOccupants { get; set; }
-        [Required] public Guid IsUnitIlligalId { get; set; }
-        [Required] public string IsUnitIlligalName { get; set; }
+        public Guid IsUnitIlligalId { get; set; }
+        public string IsUnitIlligalName { get; set; }
 
         public Guid? TenancyTypeId { get; set; }
 
@@ -45,19 +48,19 @@ namespace EvictionFiler.Application.DTOs
 
         public DateOnly? OralEnd { get; set; }
 
-        [Required] public double? MonthlyRent { get; set; }
-        [Required] public double? TotalOwed { get; set; }
+        public double? MonthlyRent { get; set; }
+        public double? TotalOwed { get; set; }
         public string Erap { get; set; } = "No";
 
-        [Required] public Guid CaseTypeId { get; set; }
-        [Required] public string CaseTypeName { get; set; }
+        public Guid CaseTypeId { get; set; }
+        public string CaseTypeName { get; set; }
 
         // FOR Client 
         public string ClientCode { get; set; } = string.Empty;
-        [Required(ErrorMessage = "First Name is Required")]
+        
         public string FirstName { get; set; } = string.Empty;
         public string? LastName { get; set; }
-        [Required(ErrorMessage = "Email is Required")]
+
         public string ClientEmail { get; set; } = string.Empty;
         public string Address1 { get; set; } = string.Empty;
         public string? Address2 { get; set; }

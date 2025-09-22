@@ -145,19 +145,25 @@
 
 
 <body class="p-1">
-
+    <nav aria-label="breadcrumb" class="mt-2">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+            <li class="breadcrumb-item " >Drafting Library</li>
+            <li class="breadcrumb-item active" aria-current="page">Affidavits</li>
+        </ol>
+    </nav>
     <div class="container p-4 rounded shadow-sm" style="height:95vh">
 
         <!-- Title Row -->
-       
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="m-0 fw-bold">Affidavits of Service Forms</h5>
+        </div>
 
         <!-- Search Filters -->
         <div class="g-2 mb-3 d-flex justify-content-between align-items-center">
             <!-- Four default search boxes -->
-            @* <button class="btn btn-primary" @onclick="ShowCreateform">Add New</button> *@
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="m-0 fw-bold">Affidavits of Service Forms</h5>
-            </div>
+             <button class="btn btn-primary" @onclick="ShowCreateform">Add New</button>
+           
             <div class="position-relative w-25">
                 <input class="form-control border border-primary text-navy" placeholder="Search.." @bind="searchTerm" @oninput="OnSearchChanged" />
                 <button class="search-btn" type="button">
@@ -176,7 +182,7 @@
                         <th>Form Type</th>
                         <th>Case Type</th>
                         <th>Created Date</th>
-                        @* <th class="sticky">Actions</th> *@
+                         <th class="sticky">Actions</th> 
                     </tr>
                 </thead>
                 <tbody>
@@ -190,7 +196,10 @@
                                 <td>@form.Name</td>
                                 <td>@form.CaseTypeName</td>
                                 <td>@form.CreatedOn.ToString("dd/MM/yyyy")</td>
-                               
+                                <td class="sticky">
+                                    <i class="fa-solid fa-pen-to-square text-navy me-3 " @onclick="() => ShowAddEditForm(form.Id)" style="cursor: pointer;" title="Edit"></i>
+                                    <i class="fa-solid fa-trash-can text-danger " @onclick=" ()=>DeleteForm(form.Id.Value)" style="cursor: pointer;" title="Delete"></i>
+                                </td>
                             </tr>
                             index++;
                         }
@@ -238,10 +247,23 @@
 
     </div>
 
+    @if (_showCreateForm)
+    {
+        <CreateAffidavitForm createForm="FormDto" OnClose="HandleCloseCreateform" />
+    }
+
+    @if (_showEditForm)
+    {
+        <EditAffidavitForms editForm="FormDto" OnClose="HandleCloseEditForm" />
+    }
+
 </body>
 
 
 @code {
+    private bool _showCreateForm = false; 
+    private bool _showEditForm = false;
+    private Guid? formIdForEdit;
     private FormAddEditViewModelDto FormDto = new();
     private string successMessage;
     private int currentPage = 1;
@@ -252,7 +274,43 @@
     protected override async Task OnInitializedAsync()
     {
         Spinnerservice.Show();
-      
+        var uri = new Uri(navManager.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.TryGetValue("success", out var isSuccess) && isSuccess == "true")
+        {
+            successMessage = "affidavits form  submitted successfully!";
+            StateHasChanged();
+
+            await Task.Delay(2000);
+            successMessage = string.Empty;
+            StateHasChanged();
+
+            navManager.NavigateTo("/Drafting/affidavits-of-service", forceLoad: false);
+        }
+
+        // ✅ Edit success message
+        else if (query.TryGetValue("edit", out var isEdit) && isEdit == "true")
+        {
+            successMessage = "affidavits form  updated successfully!";
+            StateHasChanged();
+
+            await Task.Delay(2000);
+            successMessage = string.Empty;
+            StateHasChanged();
+
+            navManager.NavigateTo("/Drafting/affidavits-of-service", forceLoad: false);
+        } 
+        else if (query.TryGetValue("delete", out var isDeleted) && isDeleted == "true")
+        {
+            successMessage = "affidavits form  deleted successfully!";
+            StateHasChanged();
+
+            await Task.Delay(2000);
+            successMessage = string.Empty;
+            StateHasChanged();
+            navManager.NavigateTo("/Drafting/affidavits-of-service", forceLoad: false);
+        }
         await Task.Delay(1000);
         await LoadForms();
         Spinnerservice.Hide();
@@ -261,6 +319,23 @@
     private async Task LoadForms()
     {
         pagedforms = await ManageFormService.GetAllAffidavaitAsync(currentPage, pageSize, searchTerm);
+    }
+
+    private void ShowCreateform()
+    {
+        FormDto = new FormAddEditViewModelDto();
+        _showCreateForm = true;
+    }
+
+
+    private void HandleCloseCreateform()
+    {
+        _showCreateForm = false;
+    }
+
+    private void HandleCloseEditForm()
+    {
+        _showEditForm = false;
     }
 
     private async Task OnSearchChanged(ChangeEventArgs e)
@@ -279,6 +354,49 @@
             await LoadForms();
         }
     }
+
+    private async Task ShowAddEditForm(Guid? formId = null)
+    {
+        formIdForEdit = formId;
+
+        var form = await ManageFormService.GetFormByIdAsync(formId);
+
+        if (form != null)
+        {
+            FormDto = new FormAddEditViewModelDto
+            {
+                Id = form.Id,
+                HTML = form.HTML,
+                CaseTypeId = form.CaseTypeId,
+                CategoryId = form.CategoryId,
+                Name = form.Name,
+
+
+            };
+
+            _showEditForm = true;
+        }
+    }
+
+    public async Task DeleteForm(Guid id)
+    {
+        Spinnerservice.Show();
+        bool isDeleted = await ManageFormService.DeleteFormAsync(id);
+
+        if (isDeleted)
+        {
+            successMessage = "affidavits form deleted successfully!";
+            StateHasChanged();
+
+            await Task.Delay(2000);
+            successMessage = string.Empty;
+            StateHasChanged();
+
+            pagedforms = await ManageFormService.GetAllAffidavaitAsync(currentPage, pageSize, searchTerm);
+        }
+        Spinnerservice.Hide();
+    }
+
 
 }
 

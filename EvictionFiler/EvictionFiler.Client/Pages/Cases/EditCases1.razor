@@ -4,6 +4,7 @@
 @using System.Linq.Expressions
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ApartmentDto
+@using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
 @using EvictionFiler.Application.DTOs.TenantDto
@@ -80,6 +81,35 @@
         <DataAnnotationsValidator />
         @*  <ValidationSummary class="mb-3" /> *@
 
+        @* Client *@
+        @if (CurrentStep == Step.Client)
+        {
+            <div class="row">
+                <div class="col-8">
+                    <div class="card mb-3">
+                        <div class="card-header fw-bold">Client Details</div>
+                        <div class="card-body">
+                            <label class="form-label required-label">Client</label>
+                            <InputSelect class="form-select" @bind-Value="legalcaseDto.ClientId" disabled="@IsDisabled">
+                                <option value="">-- Select Client --</option>
+                                @foreach (var l in ClientList)
+                                {
+                                    <option value="@l.Id">@l.FirstName @l.LastName / @l.ClientCode</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="() => legalcaseDto.ClientId" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <CasesSummary LegalCase="legalcaseDto"
+                                  ClientList="ClientList"
+                                  CurrentStep="CurrentStep" />
+                    <TipsSummary />
+                </div>
+            </div>
+
+        }
 
         @if (CurrentStep == Step.Landlord)
         {
@@ -118,7 +148,7 @@
                     </div>
                 </div>
                 <div class="col-4">
-                    <CasesSummary LegalCase="legalcaseDto" LandLordTypeList="LandLordTypeList" />
+                    <CasesSummary LegalCase="legalcaseDto" LandLordTypeList="LandLordTypeList" CurrentStep="CurrentStep"/>
 
                     <TipsSummary />
                 </div>
@@ -454,6 +484,13 @@
                         <div class="card-body small">
                             <p class="text-muted">Please review all details before submitting.</p>
                             <div class="row g-3">
+                                <div class="col-md-12">
+                                    <h6>Client</h6>
+                                    <dl class="row mb-0">
+                                        <dt class="col-2">Name</dt>
+                                        <dd class="col-10">@legalcaseDto.ClientName</dd>
+                                    </dl>
+                                </div>
                                 <div class="col-md-6">
                                     <h6>Landlord</h6>
                                     <dl class="row mb-0">
@@ -522,7 +559,7 @@
         }
 
         <div class="d-flex justify-content-between border-top pt-3 mt-3">
-            <button type="button" class="btn btn-outline-secondary" @onclick="Prev" disabled="@(CurrentStep == Step.Landlord)">← Back</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="Prev" disabled="@(CurrentStep == Step.Client)">← Back</button>
             @if (CurrentStep != Step.Review)
             {
                 <button type="button" class="btn " style="background-color:#1F365D !important; color:white" @onclick="Next">Next →</button>
@@ -539,8 +576,9 @@
 
     [Parameter]
     public Guid caseId { get; set; }
-    [Parameter] public string ClientId { get; set; }
-    private readonly List<string> Steps = new() { "Landlord", "Building", "Tenant", "Rent", "Case", "Review" };
+    bool IsDisabled = true;
+    // [Parameter] public string ClientId { get; set; }
+    private readonly List<string> Steps = new() { "Client" , "Landlord", "Building", "Tenant", "Rent", "Case", "Review" };
     private readonly string[] CaseTypes = new[] { "Nonpayment", "Holdover", "HP Proceeding", "Illegal Sublet", "Nuisance" };
 
     private IntakeModel legalcaseDto = new IntakeModel();
@@ -554,7 +592,10 @@
     private List<CaseType> CaseTypeList = new();
     private List<TenancyType> TenancyTypeList = new();
     private List<DateRent> DateRentList = new();
+    private List<EditToClientDto> ClientList = new();
     [Parameter] public Guid? CurrentCaseId { get; set; }
+    private string? loggedInUserId;
+    private bool isAdmin = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -570,7 +611,7 @@
         TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
         DateRentList = await DateRentRepository.GetAllDateRent();
-  
+        ClientList = await _clientService.GetAllClient(loggedInUserId , isAdmin);
        
         await Task.Delay(500);
         await LoadDataAsync();
@@ -585,7 +626,7 @@
     {
 
         CaseTypeList = await CaseTypeRepository.GetAllCaseType() ?? new List<CaseType>();
-
+        ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin) ?? new List<EditToClientDto>();
 
         if (caseId != Guid.Empty)
         {
@@ -627,6 +668,10 @@
     private async Task Next()
     {
         if (!ValidateCurrentStep()) return;
+        var client = ClientList.FirstOrDefault(x => x.Id == legalcaseDto.ClientId);
+        legalcaseDto.ClientName = client != null
+            ? $"{client.FirstName} {client.LastName}".Trim()
+            : "-";
         legalcaseDto.CaseTypeName = CaseTypeList.FirstOrDefault(x => x.Id == legalcaseDto.CaseTypeId)?.Name;
         legalcaseDto.LandLordTypeName = LandLordTypeList.FirstOrDefault(x => x.Id == legalcaseDto.LandLordTypeId)?.Name;
         legalcaseDto.RegulationStatusName = RegulationList.FirstOrDefault(x => x.Id == legalcaseDto.RegulationStatusId)?.Name;
@@ -642,6 +687,10 @@
 
         switch (CurrentStep)
         {
+            case Step.Client:
+                Require(() => legalcaseDto.ClientId, nameof(legalcaseDto.ClientId), "Client is required");
+
+                break;
             case Step.Landlord:
                 Require(() => legalcaseDto.FullName, nameof(legalcaseDto.FullName), "Full name is required");
                 Require(() => legalcaseDto.Phone, nameof(legalcaseDto.Phone), "Phone is required");
@@ -661,7 +710,6 @@
                 break;
             case Step.Rent:
                 Require(() => legalcaseDto.MonthlyRent, nameof(legalcaseDto.MonthlyRent), "Monthly rent required");
-                Require(() => legalcaseDto.TotalOwed, nameof(legalcaseDto.TotalOwed), "Total owed required");
                 Require(() => legalcaseDto.RentDueEachMonthOrWeekId, nameof(legalcaseDto.RentDueEachMonthOrWeekId), "rent due  required");
                 Require(() => legalcaseDto.TenancyTypeId, nameof(legalcaseDto.TenancyTypeId), "Tenancy type  required");
                 break;
@@ -700,7 +748,7 @@
 
     private void Prev()
     {
-        if (CurrentStep > Step.Landlord) CurrentStep--;
+        if (CurrentStep > Step.Client) CurrentStep--;
     }
 
     private async Task SubmitAsync()

@@ -1,6 +1,7 @@
 ﻿using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Domain.Entities.Master;
+using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Interfaces.IServices
 {
@@ -14,8 +15,10 @@ namespace EvictionFiler.Application.Interfaces.IServices
 		Task<EditToClientDto?> GetClientByIdAsync(Guid? id);
 		Task<bool> DeleteClientAsync(Guid id , bool isAdmin);
 		Task<List<CreateToClientDto>> SearchClient(string searchTerm);
+		Task<List<EditToClientDto>> GetAllClient(string userId, bool isAdmin);
 
 
 
-	}
+
+    }
 }
