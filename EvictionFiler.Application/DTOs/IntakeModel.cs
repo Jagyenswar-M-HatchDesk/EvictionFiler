@@ -13,8 +13,8 @@ namespace EvictionFiler.Application.DTOs
         public Guid Id { get; set; }
         [Required(ErrorMessage = "Client is required")]
         public Guid? ClientId { get; set; }
-
-         public string ClientName { get; set; }
+        public string Status { get; set; }
+        public string ClientName { get; set; }
         public string Casecode { get; set; }
         public string FullName { get; set; }
         public string Phone { get; set; }

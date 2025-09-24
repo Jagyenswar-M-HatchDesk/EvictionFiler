@@ -27,7 +27,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
       
 
-        public async Task<bool> GenerateNoticeAsync(Guid legalCaseId, Guid formTypeId)
+        public async Task<bool> GenerateNoticeAsync(Guid legalCaseId, Guid formTypeId, Guid createdBy)
         {
             try
             {
@@ -148,7 +148,9 @@ namespace EvictionFiler.Infrastructure.Repositories
                     HTML = filledHtml,
                     File = fileUrl,
                     CreatedOn = DateTime.UtcNow,
-                    IsDeleted = false
+                    IsDeleted = false,
+                    CreatedBy = createdBy,
+                   
                 };
 
                 _context.CaseForms.Add(caseForm);

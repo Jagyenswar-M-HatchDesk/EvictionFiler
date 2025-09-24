@@ -1872,7 +1872,8 @@
     private List<DateRent> DateRentList = new();
     private List<GenrateNoticeModel> caseFormDto = new();
 
-
+    private string? loggedInUserId;
+    private bool isAdmin = false;
 
 
     private Guid? SelectedTenantId;
@@ -1882,7 +1883,7 @@
     
 private async Task LoadCaseForms()
 {
-        caseFormDto = await _CaseFormService.GetCaseFormsByCaseId(CurrentCaseId.Value);
+        caseFormDto = await _CaseFormService.GetCaseFormsByCaseId(CurrentCaseId.Value , loggedInUserId , isAdmin);
 }
 
 
@@ -1975,7 +1976,8 @@ private async Task LoadCaseForms()
         {
             var success = await CaseFormRepository.GenerateNoticeAsync(
                 CurrentCaseId.Value,
-                noticeModel.FormTypeId.Value
+                noticeModel.FormTypeId.Value,
+                 Guid.Parse(loggedInUserId)
             );
 
             if (success)

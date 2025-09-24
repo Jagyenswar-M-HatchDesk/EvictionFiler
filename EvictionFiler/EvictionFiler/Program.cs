@@ -1,5 +1,6 @@
 using BlazorDownloadFile;
 using Blazored.SessionStorage;
+using Blazored.Toast;
 using EvictionFiler.Application;
 using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.Interfaces.IRepository;
@@ -126,6 +127,7 @@ builder.Services.AddScoped<ITenancyTypeService, TenancyTypeService>();
 builder.Services.AddScoped<IUnitIllegalService  , UnitIllegalService>();
 builder.Services.AddScoped<NavigationDataService>();
 builder.Services.AddSingleton<SuccessMessageService>();
+builder.Services.AddBlazoredToast();
 
 builder.Services.AddScoped<JwtAuthStateProviders>();
 builder.Services.AddScoped<IUnitOfWork , UnitOfWork>();

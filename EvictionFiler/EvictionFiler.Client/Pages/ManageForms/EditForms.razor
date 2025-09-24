@@ -58,8 +58,9 @@
     </div>
 
     <div class="offcanvas-body">
-        <EditForm Model="@editForm" OnValidSubmit="SubmitFormAsync">
+        <EditForm Model="@editForm"  OnValidSubmit="SubmitFormAsync">
             <DataAnnotationsValidator />
+            <ValidationSummary />
 
             <div class="row mb-3">
                 <div class="col-md-5">
@@ -100,13 +101,19 @@
             <div class="row mb-3">
                 <div class="col-md-12">
                     <label class="form-label color-text">HTML</label>
-                    <RadzenHtmlEditor @bind-Value="@editForm.HTML" style="height: 450px;" />
+                    @* <RadzenHtmlEditor @bind-Value="@editForm.HTML" style="height: 450px;" /> *@
+                    <RadzenHtmlEditor @ref="htmlEditor"
+                                      Value="@htmlContent"
+                                      style="height: 450px;" />
+
+
+
                 </div>
             </div>
 
             <div class="d-flex justify-content-between">
                 <button type="button" class="btn btn-secondary btn-lg" @onclick="ShowPreview">Preview</button>
-                <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+                <button class="btn btn-primary btn-lg">Submit</button>
             </div>
         </EditForm>
     </div>
@@ -123,10 +130,10 @@
                     <button type="button" class="btn-close" @onclick="ClosePreview"></button>
                 </div>
                 <div class="modal-body">
-                    @if (!string.IsNullOrWhiteSpace(editForm.HTML))
+                    @if (!string.IsNullOrWhiteSpace(htmlContent))
                     {
                         <div style="border:1px solid #ddd; padding:15px; border-radius:5px;">
-                            @((MarkupString)editForm.HTML)
+                            @((MarkupString)htmlContent)
                         </div>
                     }
                     else
@@ -150,11 +157,16 @@
   
     private List<Category> CategoryList = new();
     private bool IsPreviewVisible { get; set; } = false;
+    private string htmlContent;
+    private RadzenHtmlEditor htmlEditor;
+
 
     protected override async Task OnInitializedAsync()
     {
+   
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
         CategoryList = await CategoryRepository.GetAllCategory();
+        htmlContent = editForm.HTML;
     }
 
     public async Task HideAsync()
@@ -165,6 +177,8 @@
 
     private async Task SubmitFormAsync()
     {
+         Console.WriteLine("SubmitFormAsync HIT");
+    Console.WriteLine("HTML value: " + editForm.HTML);
         spinnerservice.Show();
         if (editForm == null)
             return;
@@ -175,14 +189,30 @@
             Navigation.NavigateTo("/Drafting/Manage-Forms?edit=true", true);
         }
     }
-
     private void ShowPreview()
     {
+        // Editor ke current content ko forcefully lo
+        htmlContent = htmlEditor.Value;
+
+        // Model me bhi update karo
+        editForm.HTML = htmlContent;
+
+        // Ab preview modal show karo
         IsPreviewVisible = true;
+        StateHasChanged();
     }
+
 
     private void ClosePreview()
     {
         IsPreviewVisible = false;
     }
+
+    private void OnHtmlChange(string value)
+    {
+        htmlContent = value;       // local var update
+        editForm.HTML = value;     // actual model update
+        StateHasChanged();         // force refresh
+    }
+
 }

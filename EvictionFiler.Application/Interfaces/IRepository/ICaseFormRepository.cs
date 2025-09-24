@@ -10,7 +10,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
 {
 	public interface ICaseFormRepository :  IRepository<CaseForms>
 	{
-		Task<bool> GenerateNoticeAsync(Guid legalCaseId, Guid formTypeId);
+		Task<bool> GenerateNoticeAsync(Guid legalCaseId, Guid formTypeId, Guid createdBy);
 		Task<byte[]> GetPdfBytesAsync(Guid id);
 
 	}

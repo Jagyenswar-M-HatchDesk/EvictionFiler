@@ -234,7 +234,7 @@ namespace EvictionFiler.Application.Services
 
         }
 
-        public async Task<IntakeModel> GetCaseByIdAsync(Guid caseId)
+        public async Task<IntakeModel> GetCaseByIdAsync(Guid caseId  )
         {
             var caseEntity = await _repository.GetAllQuerable(
     predicate: c => c.Id == caseId,
@@ -264,6 +264,7 @@ namespace EvictionFiler.Application.Services
                 Casecode = caseEntity.Casecode,
                 ClientId = caseEntity.Clients.Id,
                 CaseTypeId = caseEntity.CaseType.Id,
+                CaseTypeName = caseEntity.CaseType.Name,
                 IsERAPPaymentReceived = caseEntity.IsERAPPaymentReceived,
                 MonthlyRent = caseEntity.MonthlyRent,
                 TotalOwed = caseEntity.TotalRentOwed,
@@ -273,10 +274,13 @@ namespace EvictionFiler.Application.Services
                 OralEnd = caseEntity.OralEnd,
                 WrittenLease = caseEntity.WrittenLease,
                 DateTenantMoved = caseEntity.DateTenantMoved,
+                CreatedOn = caseEntity.CreatedOn,
                 TenancyTypeId = caseEntity.TenancyTypeId,
+                Status = caseEntity.IsActive? "Active" : "Inactive",
+
 
                 //for Client
-                ClientCode  = caseEntity.Clients.ClientCode,
+                ClientCode = caseEntity.Clients.ClientCode,
                 FirstName = caseEntity.Clients.FirstName,
                 LastName = caseEntity.Clients.LastName,
                 Address1 = caseEntity.Clients.Address1,
