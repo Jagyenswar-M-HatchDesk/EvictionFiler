@@ -1,0 +1,472 @@
+﻿@* @page "/createcase2/{ClientId}" *@
+@page "/createcase2/{clientId}/{caseTypeId}"
+
+<style>
+  /* ====== Design tokens ====== */
+  :root {
+    --bg: #f6f7fb;
+    --card: #ffffff;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --primary: #1d4ed8;
+    --primary-600: #1e40af;
+    --border: #e2e8f0;
+    --radius: 14px;
+    --gap: 16px;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    color: var(--ink); background: radial-gradient(60% 100% at 50% 0%, #eef2ff 0%, var(--bg) 60%);
+  }
+  .container { max-width: 1120px; margin: 0 auto; padding: 24px 16px; }
+
+  /* Header */
+  .header {
+    position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px);
+    background: rgba(255,255,255,.9); border-bottom: 1px solid var(--border);
+  }
+  .header-inner { display:flex; align-items:center; justify-content:space-between; gap:16px; padding: 12px 16px; max-width:1120px; margin:0 auto; }
+  .brand { display:flex; align-items:center; gap:12px; }
+  .logo { width:38px; height:38px; border-radius:12px; background:#0f172a; color:#fff; display:grid; place-items:center; font-weight:800; letter-spacing:.5px; }
+  .brand h1 { margin:0; font-size:16px; }
+  .brand small { color: var(--muted); }
+  .actions { display:flex; gap:8px; flex-wrap:wrap; }
+  .btn { appearance:none; border:1px solid var(--border); background:#fff; color:var(--ink); border-radius:10px; padding:10px 12px; font-weight:600; cursor:pointer; }
+  .btn.primary { background: var(--primary); color:#fff; border-color: transparent; }
+  .btn.primary:hover { background: var(--primary-600); }
+  .btn.ghost { background: transparent; }
+
+  /* Grid + Card */
+  .grid { display:grid; gap: 20px; }
+  @@media (min-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
+  .card { background: var(--card); border:1px solid var(--border); border-radius: var(--radius); box-shadow: 0 1px 0 rgba(2,6,23,.04); }
+  .card h2 { margin:0; font-size: 16px; }
+  .card .head { padding: 14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .card .body { padding: 16px; }
+
+  /* Form */
+  form { margin-top: 16px; }
+  .row { display:grid; gap: 12px; }
+  @@media (min-width: 700px) {
+    .row.two   { grid-template-columns: 1fr 1fr; }
+    .row.three { grid-template-columns: repeat(3, 1fr); }
+    .row.four  { grid-template-columns: repeat(4, 1fr); }
+  }
+  label { display:block; font-size:12px; font-weight:700; letter-spacing:.02em; text-transform:uppercase; color:#334155; margin: 2px 0 6px; }
+  input[type="text"], input[type="email"], input[type="date"], input[type="number"], select, textarea {
+    width:100%; border:1px solid var(--border); border-radius:10px; padding:10px 12px; font:inherit; color:var(--ink); background:#fff;
+  }
+  textarea { min-height: 96px; resize: vertical; }
+  .inline { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .check { display:flex; align-items:center; gap:8px; }
+  .check input { width:16px; height:16px; }
+
+  /* Footer actions */
+  .footer { position:sticky; bottom:0; z-index:15; background:rgba(255,255,255,.92); backdrop-filter: blur(8px); border-top:1px solid var(--border); }
+  .footer-inner { max-width:1120px; margin:0 auto; padding: 12px 16px; display:flex; gap:12px; justify-content:space-between; }
+  .stack { display:flex; gap:8px; flex-wrap:wrap; }
+  .stack .btn { min-width: 120px; }
+
+  /* Print */
+  @@page { size: Letter; margin: 16mm; }
+  @@media print {
+    .header, .footer, .d-print-none { display:none !important; }
+    body { background:#fff; }
+    .card { page-break-inside: avoid; box-shadow:none; }
+  }
+</style>
+<body>
+  <!-- Header -->
+  <div class="header d-print-none">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="logo">EF</div>
+        <div>
+          <h1>Create Case – Nonpayment</h1>
+          <small>NYC Summary Proceeding</small>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" onclick="window.print()">🖨️ Print PDF</button>
+        <button class="btn primary">Save Case</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <form>
+      <!-- Section 1: Landlord / Petitioner -->
+      <section class="card">
+        <div class="head"><h2>1) Landlord / Petitioner</h2></div>
+        <div class="body">
+          <div class="row two">
+            <div>
+              <label>Full Legal Name</label>
+              <input type="text" placeholder="e.g., Jane Smith or ABC LLC" />
+            </div>
+            <div>
+              <label>Contact Person</label>
+              <input type="text" />
+            </div>
+            <div>
+              <label>Mailing Address</label>
+              <input type="text" placeholder="Street, City, State, ZIP" />
+            </div>
+            <div>
+              <label>Phone</label>
+              <input type="text" placeholder="(555) 555-5555" />
+            </div>
+            <div>
+              <label>Email</label>
+              <input type="email" placeholder="name@example.com" />
+            </div>
+            <div>
+              <label>Type of Owner</label>
+              <select>
+                <option value="">Select…</option>
+                <option>Corporation</option>
+                <option>LLC</option>
+                <option>Individual</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label>Attorney (Name & Firm)</label>
+              <input type="text" />
+            </div>
+            <div>
+              <label>Attorney Contact</label>
+              <input type="text" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Tenant / Respondent -->
+      <section class="card">
+        <div class="head"><h2>2) Tenant / Respondent</h2></div>
+        <div class="body">
+          <div class="row two">
+            <div>
+              <label>Full Legal Name(s)</label>
+              <input type="text" />
+            </div>
+            <div>
+              <label>Additional Occupants</label>
+              <input type="text" />
+            </div>
+            <div>
+              <label>Mailing Address of Unit</label>
+              <input type="text" />
+            </div>
+            <div>
+              <label>Apartment / Unit #</label>
+              <input type="text" />
+            </div>
+            <div>
+              <label>Tenant Phone</label>
+              <input type="text" />
+            </div>
+            <div>
+              <label>Tenant Email</label>
+              <input type="email" />
+            </div>
+          </div>
+          <div class="row three">
+            <div>
+              <label>Rent‑Regulated Tenancy?</label>
+              <select>
+                <option value="">Select…</option>
+                <option>Yes</option>
+                <option>No</option>
+                <option>Not Sure</option>
+              </select>
+            </div>
+            <div>
+              <label>Regulation Type</label>
+              <select>
+                <option value="">Select…</option>
+                <option>Rent Stabilized</option>
+                <option>Rent Controlled</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label>Registration #</label>
+              <input type="text" />
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Rental Assistance (Section 8 / SCRIE/DRIE / other)</label>
+              <input type="text" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Property Information -->
+      <section class="card">
+        <div class="head"><h2>3) Property Information</h2></div>
+        <div class="body">
+          <div class="row two">
+            <div>
+              <label>Building Address</label>
+              <input type="text" />
+            </div>
+            <div>
+              <label># of Residential Units</label>
+              <input type="number" />
+            </div>
+            <div>
+              <label>MDR Number</label>
+              <input type="text" />
+            </div>
+            <div>
+              <label>Other NYC Properties</label>
+              <input type="text" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Lease & Occupancy -->
+      <section class="card">
+        <div class="head"><h2>4) Lease & Occupancy</h2></div>
+        <div class="body">
+          <div class="row three">
+            <div>
+              <label>Lease Start</label>
+              <input type="date" />
+            </div>
+            <div>
+              <label>Lease End</label>
+              <input type="date" />
+            </div>
+            <div>
+              <label>Monthly Rent</label>
+              <input type="number" />
+            </div>
+            <div>
+              <label>Date of Last Payment</label>
+              <input type="date" />
+            </div>
+            <div>
+              <label>Total Rent Due</label>
+              <input type="number" />
+            </div>
+            <div>
+              <label>Written Lease?</label>
+              <select>
+                <option value="">Select…</option>
+                <option>Yes</option>
+                <option>No</option>
+              </select>
+            </div>
+          </div>
+          <div class="row two">
+            <div>
+              <label>Tenancy Type</label>
+              <select>
+                <option value="">Select…</option>
+                <option>Lease</option>
+                <option>Month‑to‑Month</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: Good Cause & Legal Considerations -->
+      <section class="card">
+        <div class="head"><h2>5) Good Cause & Legal</h2></div>
+        <div class="body">
+          <div class="row two">
+            <div>
+              <label>Building Exempt from Good Cause?</label>
+              <input type="text" placeholder="e.g., New construction, small landlord, etc." />
+            </div>
+            <div>
+              <label>Good Cause Exemption Notice Served?</label>
+              <select>
+                <option value="">Select…</option>
+                <option>Yes</option>
+                <option>No</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>If not exempt, reason for eviction</label>
+              <input type="text" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: Nonpayment & Predicate Notices -->
+      <section class="card">
+        <div class="head"><h2>6) Nonpayment & Predicate Notices</h2></div>
+        <div class="body">
+          <div class="row two">
+            <div>
+              <label>Notice to Serve (5/14/30‑Day etc.)</label>
+              <input type="text" />
+            </div>
+            <div>
+              <label>Proof of Service for prior notices?</label>
+              <select>
+                <option value="">Select…</option>
+                <option>Yes</option>
+                <option>No</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Unpaid Rent – months & amounts</label>
+              <textarea placeholder="e.g., Jan 2025 – $1,500; Feb 2025 – $1,500"></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 7: Service of Notices -->
+      <section class="card">
+        <div class="head"><h2>7) Service of Notices</h2></div>
+        <div class="body">
+          <div class="row three">
+            <div>
+              <label>Who will serve?</label>
+              <select>
+                <option value="">Select…</option>
+                <option>Landlord</option>
+                <option>Process Server</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label>Preferred Method</label>
+              <select>
+                <option value="">Select…</option>
+                <option>Personal</option>
+                <option>Mail</option>
+                <option>Posting + Mail</option>
+              </select>
+            </div>
+            <div>
+              <label>Service Date(s)</label>
+              <input type="text" placeholder="MM/DD/YYYY; MM/DD/YYYY" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 8: Petition & Notice of Petition -->
+      <section class="card">
+        <div class="head"><h2>8) Petition & Notice of Petition</h2></div>
+      <div class="body">
+        <div class="row two">
+          <div>
+            <label>Court to draft NoP & Petition?</label>
+            <select>
+              <option value="">Select…</option>
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+          </div>
+          <div>
+            <label>Filing Method</label>
+            <select>
+              <option value="">Select…</option>
+              <option>Electronic</option>
+              <option>In Person</option>
+            </select>
+          </div>
+          <div>
+            <label>Preferred Filing Date</label>
+            <input type="date" />
+          </div>
+          <div>
+            <label>Affidavit of service for predicate notices filed?</label>
+            <select>
+              <option value="">Select…</option>
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      </section>
+
+      <!-- Section 9: Documents & Remarks -->
+      <section class="card">
+        <div class="head"><h2>9) Documents & Remarks</h2></div>
+        <div class="body">
+          <div class="row four">
+            <label class="check"><input type="checkbox"/> Lease attached</label>
+            <label class="check"><input type="checkbox"/> Ledger attached</label>
+            <label class="check"><input type="checkbox"/> Notices proof attached</label>
+            <label class="check"><input type="checkbox"/> Registration/Rent history attached</label>
+          </div>
+          <div class="row">
+            <div>
+              <label>Good Cause Exemption Notice attached</label>
+              <select>
+                <option value="">Select…</option>
+                <option>Yes</option>
+                <option>No</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Additional comments</label>
+              <textarea></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 10: Signature & Attestation -->
+      <section class="card">
+        <div class="head"><h2>10) Signature & Attestation</h2></div>
+        <div class="body">
+          <div class="row three">
+            <div>
+              <label>Signature Name</label>
+              <input type="text" />
+            </div>
+            <div>
+              <label>Date</label>
+              <input type="date" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </form>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="footer d-print-none">
+    <div class="footer-inner">
+      <div class="stack">
+        <a href="#" class="btn ghost">← Back</a>
+      </div>
+      <div class="stack">
+        <button class="btn" onclick="window.print()">🖨️ Print</button>
+        <button class="btn primary">Create Case</button>
+      </div>
+    </div>
+  </div>
+</body>
+
+
+@code {
+    [Parameter] public string clientId { get; set; }
+    [Parameter] public string caseTypeId { get; set; }
+}

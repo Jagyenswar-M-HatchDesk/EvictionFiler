@@ -1,10 +1,13 @@
 ﻿@using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
 @using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Domain.Entities.Master
 
 @inject IClientService _clientService
 @inject NavigationManager nav
 @inject NavigationDataService _dataservice
+@inject ICaseTypeRepository CaseTypeRepository
 @inject IJSRuntime JS
 
 <div class="offcanvas offcanvas-end show border-start shadow bg-white"
@@ -58,9 +61,16 @@ aria-labelledby="createUserLabel">
                     else
                     {
                         <div class="modal-header mt-4">
-                            <h5 class="modal-title">Case Name</h5>
+                            <h5 class="modal-title">Case Type</h5>
                         </div>
-                        <input class="form-control mb-2" placeholder="Enter Case Name" @bind-value="_dataservice.CaseName" />
+@*                         <input class="form-control mb-2" placeholder="Enter Case Name" @bind-value="_dataservice.CaseName" /> *@
+                        <InputSelect class="form-select" @bind-Value="legalcaseDto.CaseTypeId">
+                            <option value="">-- Select Type --</option>
+                            @foreach (var l in CaseTypeList)
+                            {
+                                <option value="@l.Id">@l.Name</option>
+                            }
+                        </InputSelect>
                     }
 
                 </div>
@@ -85,7 +95,7 @@ aria-labelledby="createUserLabel">
 
 @code {
     // [Parameter] public EventCallback<Guid> OnClientSelected { get; set; }
-
+    private IntakeModel legalcaseDto = new IntakeModel();
     private List<EditToClientDto> AllClients = new();
     private List<EditToClientDto> FilteredClients = new();
     private EditToClientDto SelectedClient = new();
@@ -93,6 +103,7 @@ aria-labelledby="createUserLabel">
     private bool IsVisible = false;
     private bool IsVisibleClient = false;
     private string activeTab = string.Empty;
+    private List<CaseType> CaseTypeList = new();
 
     public async Task Show(List<EditToClientDto> clients)
     {
@@ -101,6 +112,13 @@ aria-labelledby="createUserLabel">
         FilteredClients = AllClients;
 
         StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+       
+        CaseTypeList = await CaseTypeRepository.GetAllCaseType();
+       
     }
 
     private void OnInputChanged(ChangeEventArgs e)
@@ -133,11 +151,13 @@ aria-labelledby="createUserLabel">
         StateHasChanged();
     }
 
+
+
     // private async Task SubmitClientAsync()
     // {
     //     if (SelectedClient.Id != Guid.Empty)
     //     {
-    //         nav.NavigateTo($"/createcase/{SelectedClient.Id}");
+    //         nav.NavigateTo($"/createcase1/{SelectedClient.Id}");
     //     }
     //     else
     //     {
@@ -148,14 +168,13 @@ aria-labelledby="createUserLabel">
 
     private async Task SubmitClientAsync()
     {
-        if (SelectedClient.Id != Guid.Empty)
+        if (SelectedClient.Id != Guid.Empty && legalcaseDto.CaseTypeId != Guid.Empty)
         {
-            nav.NavigateTo($"/createcase1/{SelectedClient.Id}");
+            nav.NavigateTo($"/createcase2/{SelectedClient.Id}?caseTypeId={legalcaseDto.CaseTypeId}");
         }
         else
         {
-            // error message show karo ya logging
-            await JS.InvokeVoidAsync("alert", "Please select a valid client.");
+            await JS.InvokeVoidAsync("alert", "Please select a valid client and case type.");
         }
     }
 
