@@ -26,7 +26,9 @@ namespace EvictionFiler.Application.DTOs.LandLordDto
 		public string? StateName { get; set; }
 		public string Zipcode { get; set; } = string.Empty;
 		public Guid? ClientId { get; set; }
-		public DateOnly DateOfRefreeDeed { get; set; }  = DateOnly.FromDateTime(DateTime.Today);
+        public string AttorneyOfRecord { get; set; } = string.Empty;
+        public string? LawFirm { get; set; } = string.Empty;
+        public DateOnly DateOfRefreeDeed { get; set; }  = DateOnly.FromDateTime(DateTime.Today);
 		[Required(ErrorMessage = "Role is Required")]
 		public Guid? LandlordTypeId { get; set; }
 		public string? LandlordTypeName { get; set; }

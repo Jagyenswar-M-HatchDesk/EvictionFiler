@@ -14,6 +14,8 @@
 @using EvictionFiler.Client.Components.Cases
 @using EvictionFiler.Client.Jwt
 @using EvictionFiler.Domain.Entities.Master
+@using Blazored.Typeahead
+
 @inject IClientRoleRepository ClientRoleRepository
 @inject ICaseTypeRepository CaseTypeRepository
 @inject ICaseSubTypeRepository CaseSubTypeRepository
@@ -48,16 +50,118 @@
 -->
 
 <style>
-    .required-label::after {
-        content: " *";
-        color: red;
+    .required-label::after { content: " *"; color: red; }
+    :root { --bg: #f7f9fc; --card: #ffffff; --ink: #0f172a; --muted: #64748b; --line: #e2e8f0; --brand: #4f46e5; --brand-2: #4338ca; --ok: #059669; --warn: #b45309; --danger: #b91c1c; --radius: 16px; --shadow: 0 6px 24px rgba(2, 6, 23, .08); }
+
+    * { box-sizing: border-box }
+
+    html,
+    body { height: 100% }
+
+    body { margin: 0; font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; background: radial-gradient(70% 120% at 50% -10%, #eef2ff 0%, var(--bg) 60%); color: var(--ink) }
+
+    .wrap { max-width: 1200px; margin: auto; padding: 24px }
+
+    header.top { position: sticky; top: 0; z-index: 10; background: rgba(255, 255, 255, .9); backdrop-filter: saturate(180%) blur(6px); border-bottom: 1px solid var(--line) }
+
+        header.top .bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; max-width: 1200px; margin: auto }
+
+    .brand { display: flex; gap: 12px; align-items: center }
+
+    .logo { width: 40px; height: 40px; border-radius: 14px; background: #0f172a; color: #fff; display: grid; place-items: center; font-weight: 700 }
+
+    .secure { display: inline-flex; gap: 8px; align-items: center; border-radius: 999px; padding: 6px 10px; border: 1px solid #d1fae5; background: #ecfdf5; color: #065f46; font-size: 12px }
+
+    .stepper { padding: 0 24px 14px; max-width: 1200px; margin: auto }
+
+    .track { height: 6px; background: #e5e7eb; border-radius: 999px; overflow: hidden }
+
+    .meter { height: 100%; background: linear-gradient(90deg, var(--brand), var(--brand-2)); width: 40% }
+
+    .steps { display: flex; gap: 12px; flex-wrap: wrap; margin: 8px 0 }
+
+    .chip { display: flex; gap: 8px; align-items: center; color: #475569 }
+
+    .dot { width: 10px; height: 10px; border-radius: 999px; background: #cbd5e1 }
+
+        .dot.active { background: #818cf8 }
+
+        .dot.done { background: #4f46e5 }
+
+    .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px }
+
+    @@media (max-width:1024px) {
+        .grid { grid-template-columns: 1fr }
+    }
+
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow) }
+
+        .card > header { padding: 18px 20px; border-bottom: 1px solid var(--line); display: flex; gap: 12px; align-items: flex-start }
+
+    .k { width: 28px; height: 28px; border-radius: 12px; background: #0f172a; color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 700 }
+
+    .card .body { padding: 20px }
+
+    .fields { display: grid; gap: 16px }
+
+    .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+
+    .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+
+    @@media (max-width:820px) {
+        .cols-2, .cols-3 { grid-template-columns: 1fr }
+    }
+
+    label.lbl { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: #475569; margin-bottom: 6px }
+
+    input.txt,
+    select.sel { width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 12px; background: #fff; color: #0f172a; outline: none }
+
+        input.txt:focus,
+        select.sel:focus { border-color: #6366f1; box-shadow: 0 0 0 6px #eef2ff }
+
+    .hint { font-size: 12px; color: #64748b; margin-top: 4px }
+
+    .pill { display: inline-block; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 12px; background: #fff; font-size: 13px }
+
+    .aside.card { position: sticky; top: 106px; height: fit-content }
+
+    .kv { display: flex; justify-content: space-between; gap: 12px }
+
+        .kv .k { background: none; color: #64748b; width: auto; height: auto; border-radius: 0; font-weight: 600 }
+
+    .actions { position: sticky; bottom: 0; z-index: 10; background: rgba(255, 255, 255, .9); border-top: 1px solid var(--line) }
+
+        .actions .row { max-width: 1200px; margin: auto; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center }
+
+    .btn { padding: 10px 16px; border-radius: 12px; border: 1px solid #cbd5e1; background: #fff; color: #0f172a }
+
+        .btn.primary { background: var(--brand); border-color: transparent; color: #fff }
+
+        .btn.danger { background: #fee2e2; border-color: #fecaca; color: #991b1b }
+
+    .list { display: flex; flex-direction: column; gap: 8px }
+
+        .list .row { display: flex; gap: 8px }
+
+    .iconbtn { border: 1px solid #cbd5e1; background: #fff; border-radius: 10px; padding: 8px 10px; cursor: pointer }
+
+    .pre { white-space: pre-wrap; background: #0b1020; color: #e2e8f0; border-radius: 12px; padding: 14px; overflow: auto; max-height: 360px }
+
+    @@media (max-width:560px) {
+        .logo { width: 36px; height: 36px }
+
+        .brand h1 { font-size: 16px }
+
+        .secure { display: none }
     }
 </style>
+
 
 <div class="container-fluid py-3 border-bottom bg-white sticky-top">
     <div class="d-flex justify-content-between align-items-center">
 
-        <div class="d-flex align-items-center" style="gap:90px">
+        <div class="d-flex align-items-center" style="gap:55px">
             @for (var i = 0; i < Steps.Count; i++)
             {
                 var bgColor = i <= (int)CurrentStep ? "#1F365D" : "#6c757d"; // secondary color fallback
@@ -80,35 +184,145 @@
 <div class="container my-4">
     <EditForm EditContext="_editContext">
         <DataAnnotationsValidator />
-        @* Client *@
-        @if (CurrentStep == Step.Client)
+
+        @* Case Info *@
+        @if (CurrentStep == Step.CaseAndclient)
         {
+
             <div class="row">
                 <div class="col-8">
                     <div class="card mb-3">
-                        <div class="card-header fw-bold">Client Details</div>
+                        <div class="card-header fw-bold">Case Information</div>
                         <div class="card-body">
-                            <label class="form-label required-label">Client</label>
-                            <InputSelect class="form-select" @bind-Value="legalcaseDto.ClientId">
-                                <option value="">-- Select Client --</option>
-                                @foreach (var l in ClientList)
+                            <div class="row">
+                                <!-- Case Type Dropdown -->
+                                <div class="col-6">
+                                    <label class="form-label required-label">Case Type</label>
+                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.CaseTypeId">
+                                        <option value="">-- Select type --</option>
+                                        @foreach (var l in CaseTypeList)
+                                        {
+                                            <option value="@l.Id">@l.Name</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="() => legalcaseDto.CaseTypeId" />
+                                </div>
+
+                            <div class="col-6">
+                             <label class="form-label required-label">Client</label>
+
+                                    <input type="text" class="form-control"
+                                           placeholder="Type client name or code..."
+                                           @bind="searchText"
+                                           @oninput="OnSearchInput" />
+
+                                    @if (selectedClient != null)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-3 p-0 border-0 bg-transparent"
+                                                style="z-index: 10;"
+                                                @onclick="ClearSelectedClient"
+                                                title="Clear">
+                                            <span style="font-size: 1.2rem;">✖</span>
+                                        </button>
+                                    }
+
+                                          @if(filteredClients?.Any() == true)
+{
+    <ul class="dropdown-menu show">
+        @foreach(var c in filteredClients)
+        {
+            <li class="dropdown-item" @onclick="() => SelectClient(c)">
+                @c.FirstName @c.LastName / @c.ClientCode
+            </li>
+        }
+    </ul>
+}
+    <ValidationMessage For="() => legalcaseDto.ClientId" />
+</div>
+
+                                @if (selectedClient != null)
                                 {
-                                    <option value="@l.Id">@l.FirstName @l.LastName/ @l.ClientCode</option>
+                                    <!-- Existing client card -->
+                                    <hr class="mt-3" />
+                                    <div class="card mt-3 p-3 ">
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label class="form-label">Client Name</label>
+                                                <InputText class="form-control" @bind-Value="legalcaseDto.ClientName" />
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label">Client Type</label>
+                                                <InputText class="form-control" @bind-Value="legalcaseDto.ClientType" />
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label">Email</label>
+                                                <InputText class="form-control" @bind-Value="legalcaseDto.ClientEmail" />
+                                            </div>
+
+                                            <div class="col-4 mt-3">
+                                                <label class="form-label">Phone</label>
+                                                <InputText class="form-control" @bind-Value="legalcaseDto.ClientPhone" />
+                                            </div>
+                                            <div class="col-4 mt-3">
+                                                <label class="form-label">Reference #</label>
+                                                <InputText class="form-control" @bind-Value="legalcaseDto.FullName" />
+                                            </div>
+                                        </div>
+                                    </div>
                                 }
-                            </InputSelect>
-                            <ValidationMessage For="() => legalcaseDto.ClientId" />
+                                <!-- New client -->
+                                @if (selectedClient == null && !string.IsNullOrWhiteSpace(searchText))
+                                {
+                                <hr />
+                                <div class="card mt-3 p-3 ">
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <label class="form-label">Client Name</label>
+                                            <InputText class="form-control" @bind-Value="newClient.FirstName" />
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label">Last Name</label>
+                                            <InputText class="form-control" @bind-Value="newClient.LastName" />
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label">Client Code</label>
+                                            <InputText class="form-control" @bind-Value="newClient.ClientType" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt-3">
+                                        <div class="col-4">
+                                            <label class="form-label">Email</label>
+                                            <InputText class="form-control" @bind-Value="newClient.Email" />
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label">Phone</label>
+                                            <InputText class="form-control" @bind-Value="newClient.Phone" />
+                                        </div>
+                                    </div>
+                                </div>
+                                }
+                            </div>
+
+                           
                         </div>
                     </div>
                 </div>
+
+                <!-- Right side summary -->
                 <div class="col-4">
                     <CasesSummary LegalCase="legalcaseDto"
                                   ClientList="ClientList"
+                                  CaseTypeList="CaseTypeList"
                                   CurrentStep="CurrentStep" />
                     <TipsSummary />
                 </div>
             </div>
 
+
         }
+
 
         @if (CurrentStep == Step.Landlord)
         {
@@ -116,32 +330,40 @@
                 <div class="col-8">
                     <div class="card mb-3">
                         <div class="card-header fw-bold">Landlord Information</div>
-                        <div class="card-body row">
-                            <div class="col-md-6">
-                                <label class="form-label  required-label">Full Name </label>
-                                <InputText class="form-control" @bind-Value="legalcaseDto.FullName" placeholder="Enter Full Name" />
-                                <ValidationMessage For="() => legalcaseDto.FullName" />
+                        <div class="card-body ">
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <label class="form-label  required-label">Landlord / Owner Name </label>
+                                    <input type="text" class="form-control"
+                                           placeholder="Type client name or code..."
+                                           @bind="searchlandlordText"
+                                           @oninput="OnSearchLandlordInput" />
+                                    <ValidationMessage For="() => legalcaseDto.FullName" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label  required-label">Contact Person </label>
+                                    <InputText class="form-control" @bind-Value="legalcaseDto.ContactPersonName" placeholder="Enter Contact Person" />
+                                    <ValidationMessage For="() => legalcaseDto.ContactPersonName" />
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label  required-label">Phone </label>
-                                <InputText class="form-control" @bind-Value="legalcaseDto.Phone" placeholder="Enter Phone" />
-                                <ValidationMessage For="() => legalcaseDto.Phone" />
+                            <div class="row mt-4">
+                                <div class="col-md-6 mt-2">
+                                    <label class="form-label  required-label">Landlord Address </label>
+                                    <InputText type="email" class="form-control" @bind-Value="legalcaseDto.LandlordAddress" placeholder="Enter Address" />
+                                    <ValidationMessage For="() => legalcaseDto.LandlordAddress" />
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <label class="form-label  required-label">Attorney Of Record </label>
+                                    <InputText class="form-control" @bind-Value="legalcaseDto.AttorneyOfRecord" placeholder="Enter Attorney" />
+                                    <ValidationMessage For="() => legalcaseDto.AttorneyOfRecord" />
+                                </div>
                             </div>
-                            <div class="col-md-6 mt-2">
-                                <label class="form-label  required-label">Email </label>
-                                <InputText type="email" class="form-control" @bind-Value="legalcaseDto.Email" placeholder="Enter Email" />
-                                <ValidationMessage For="() => legalcaseDto.Email" />
-                            </div>
-                            <div class="col-md-6 mt-2">
-                                <label class="form-label  required-label">Role </label>
-                                <InputSelect class="form-select" @bind-Value="legalcaseDto.LandLordTypeId">
-                                    <option value="">-- Select Type --</option>
-                                    @foreach (var l in LandLordTypeList)
-                                    {
-                                        <option value="@l.Id">@l.Name</option>
-                                    }
-                                </InputSelect>
-                                <ValidationMessage For="() => legalcaseDto.LandLordTypeId" />
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <label class="form-label  required-label">Law Firm </label>
+                                    <InputText class="form-control" @bind-Value="legalcaseDto.LawFirm" placeholder="Enter Firm" />
+                                    <ValidationMessage For="() => legalcaseDto.LawFirm" />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -153,11 +375,7 @@
                 </div>
             </div>
         }
-
-
         @* BUILDING *@
-
-
         @if (CurrentStep == Step.Building)
         {
             <div class="row">
@@ -165,32 +383,56 @@
                     <div class="card mb-3">
                         <div class="card-header fw-bold ">Building Information</div>
                         <div class="card-body row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label  required-label">MDR Number </label>
-                                <InputText class="form-control" @bind-Value="legalcaseDto.Mdr" placeholder="Enter MDR Number" />
-                                <ValidationMessage For="() => legalcaseDto.Mdr" />
+                            <div class="row mt-4">
+                                <div class="col-6">
+                                    <label class="form-label  required-label">Street Address *</label>
+                                    <InputText class="form-control" @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter Address" />
+                                    <ValidationMessage For="() => legalcaseDto.BuildingAddress" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-label">Unit / Apt </label>
+                                    <InputText class="form-control" @bind-Value="legalcaseDto.Units" placeholder="Enter Units" />
+                                    <ValidationMessage For="() => legalcaseDto.Units" />
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label required-label">Number of Units </label>
-                                <InputText class="form-control" @bind-Value="legalcaseDto.Units" placeholder="Enter Units" />
-                                <ValidationMessage For="() => legalcaseDto.Units" />
+
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <label class="form-label  required-label">Borough / City </label>
+                                    <InputText class="form-control" @bind-Value="legalcaseDto.Mdr" placeholder="Enter Borough / City" />
+                                    <ValidationMessage For="() => legalcaseDto.Mdr" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label  required-label">MDR Number </label>
+                                    <InputText class="form-control" @bind-Value="legalcaseDto.Mdr" placeholder="Enter MDR Number" />
+                                    <ValidationMessage For="() => legalcaseDto.Mdr" />
+                                </div>
                             </div>
-                            <div class="col-6">
-                                <label class="form-label  required-label">Building Address *</label>
-                                <InputText class="form-control" @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter Address" />
-                                <ValidationMessage For="() => legalcaseDto.BuildingAddress" />
+
+
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <label class="form-label required-label">Unit / Apt </label>
+                                    <InputText class="form-control" @bind-Value="legalcaseDto.Units" placeholder="Enter Units" />
+                                    <ValidationMessage For="() => legalcaseDto.Units" />
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label  required-label">Rent Regulation *</label>
+                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.RegulationStatusId">
+                                        <option value="">-- Select Type --</option>
+                                        @foreach (var l in RegulationList)
+                                        {
+                                            <option value="@l.Id">@l.Name</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="() => legalcaseDto.RegulationStatusId" />
+                                </div>
                             </div>
-                            <div class="col-6">
-                                <label class="form-label  required-label">Rent Regulation *</label>
-                                <InputSelect class="form-select" @bind-Value="legalcaseDto.RegulationStatusId">
-                                    <option value="">-- Select Type --</option>
-                                    @foreach (var l in RegulationList)
-                                    {
-                                        <option value="@l.Id">@l.Name</option>
-                                    }
-                                </InputSelect>
-                                <ValidationMessage For="() => legalcaseDto.RegulationStatusId" />
-                            </div>
+
+
+
+
+
                         </div>
                     </div>
                 </div>
@@ -211,92 +453,57 @@
         @* TENANT *@
         @if (CurrentStep == Step.Tenant)
         {
+
             <div class="row">
-                <div class="col-8">
-                    <div class="card mb-3">
-                        <div class="card-header fw-bold">Tenant Information</div>
-                        <div class="card-body row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label  required-label">Tenant Name </label>
-                                <InputText class="form-control" @bind-Value="legalcaseDto.TenantName"
-                                           placeholder="Enter Full Name" />
-                                <ValidationMessage For="() => legalcaseDto.TenantName" />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label  required-label">Unit / Apt </label>
-                                <InputText class="form-control" @bind-Value="legalcaseDto.UnitNumber" placeholder="Enter Units" />
-                                <ValidationMessage For="() => legalcaseDto.UnitNumber" />
-                            </div>
-                            <div class="col-12">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <label class="form-label required-label">Is the Unit Illegal?</label>
-                                    </div>
-                                    <div class="col-12">
-                                        <InputRadioGroup @bind-Value="legalcaseDto.IsUnitIlligalId" class="d-flex flex-wrap gap-4">
-                                            @foreach (var option in IsUnitIllegalList)
-                                            {
-                                                <div class="form-check form-check-inline">
-                                                    <InputRadio class="form-check-input" Value="@option.Id" />
-                                                    <label class="form-check-label ms-1">@option.Name</label>
-                                                </div>
-                                            }
-                                        </InputRadioGroup>
-                                    </div>
-                                </div>
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <div style="font-weight:700">Tenant / Occupant</div>
+                            <div class="hint">Add multiple tenants and undertenants</div>
+                        </div>
 
-                                <ValidationMessage For="() => legalcaseDto.IsUnitIlligalId" />
-                            </div>
-
-                            <div class="my-4">
-                                <div class="row mb-2">
-                                    <div class="col-4 fw-semibold">Tenant of record?</div>
-                                    <div class="col-4 fw-semibold">Still in possession?</div>
-                                    <div class="col-4 fw-semibold">Other Occupants?</div>
-                                </div>
-                                <div class="row mb-3">
-                                    <div class="col-4 d-flex gap-3 align-items-center">
-                                        <InputRadioGroup @bind-Value="legalcaseDto.TenantRecord">
-                                            <div class="form-check">
-                                                <InputRadio class="form-check-input" Value="true" />
-                                                <label class="form-check-label">Yes</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <InputRadio class="form-check-input" Value="false" />
-                                                <label class="form-check-label">No</label>
-                                            </div>
-                                        </InputRadioGroup>
-                                    </div>
-
-                                    <div class="col-4 d-flex gap-3 align-items-center">
-                                        <InputRadioGroup @bind-Value="legalcaseDto.HasPossession">
-                                            <div class="form-check">
-                                                <InputRadio class="form-check-input" Value="true" />
-                                                <label class="form-check-label">Yes</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <InputRadio class="form-check-input" Value="false" />
-                                                <label class="form-check-label">No</label>
-                                            </div>
-                                        </InputRadioGroup>
-                                    </div>
-
-                                    <div class="col-4 d-flex gap-3 align-items-center">
-                                        <InputRadioGroup @bind-Value="legalcaseDto.OtherOccupants">
-                                            <div class="form-check">
-                                                <InputRadio class="form-check-input" Value="true" />
-                                                <label class="form-check-label">Yes</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <InputRadio class="form-check-input" Value="false" />
-                                                <label class="form-check-label">No</label>
-                                            </div>
-                                        </InputRadioGroup>
-                                    </div>
+                        <div class="card-body">
+                            <!-- Unit / Apt -->
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label required-label">Unit / Apt # (confirm)</label>
+                                    <InputText class="form-control" @bind-Value="UnitNo" placeholder="Enter Unit / Apt" />
                                 </div>
                             </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <label class="lbl">Tenants</label>
+
+                                    @foreach (var tenant in Tenants)
+                                    {
+                                        <input class="form-control mb-2" placeholder="Tenant Name" value="@tenant" />
+                                    }
+
+                                    <button class="btn btn-sm btn-primary mt-2" @onclick="AddTenant">＋ Add Tenant</button>
+                                </div>
+
+                                <div class="col-12 mt-3">
+                                    <label class="lbl">Undertenants / Other Occupants</label>
+
+                                    @foreach (var under in Undertenants)
+                                    {
+                                        <input class="form-control mb-2" placeholder="Undertenant Name" value="@under" />
+                                    }
+
+                                    <button class="btn btn-sm btn-primary mt-2" @onclick="AddUnder">＋ Add Undertenant/Occupant</button>
+                                </div>
+                            </div>
+
+
+
+
+
                         </div>
                     </div>
+
+
+
                 </div>
                 <div class="col-4">
                     <CasesSummary LegalCase="legalcaseDto"
@@ -308,16 +515,18 @@
                     <TipsSummary />
                 </div>
             </div>
-
         }
 
-        @* RENT *@
-        @if (CurrentStep == Step.Rent)
+        @* Term *@
+        @if (CurrentStep == Step.Terms)
         {
             <div class="row">
                 <div class="col-md-8">
                     <div class="card mb-3">
-                        <div class="card-header fw-bold">Rent</div>
+                        <div class="card-header">
+                            <div style="font-weight:700">Terms</div>
+                            <div class="hint">Move‑in date controls 30/60/90. Tenancy type only controls special 10‑day.</div>
+                        </div>
                         <div class="card-body">
                             <div class="row g-2">
 
@@ -340,61 +549,13 @@
 
                                 <!-- Oral Start -->
                                 <div class="col-md-4">
-                                    <label class="form-label">Oral Start</label>
+                                    <label class="form-label">Oral Aggrement</label>
                                     <InputDate class="form-control" @bind-Value="legalcaseDto.OralStart" />
                                 </div>
 
                                 <!-- Oral End -->
                                 <div class="col-md-4">
-                                    <label class="form-label">Oral End</label>
-                                    <InputDate class="form-control" @bind-Value="legalcaseDto.OralEnd" />
-                                </div>
-
-                            </div>
-                            <div class="row g-2 mt-2">
-                                <!-- Date Tenant Moved -->
-                                <div class="col-md-4">
-                                    <label class="form-label">Date Tenant Moved</label>
-                                    <InputDate class="form-control" @bind-Value="legalcaseDto.DateTenantMoved" />
-                                </div>
-
-                                <!-- Rent Due Day -->
-                                <div class="col-md-4">
-                                    <label class="form-label  required-label">Rent Due Day </label>
-                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId">
-                                        <option value="">-- Select Type --</option>
-                                        @foreach (var l in DateRentList)
-                                        {
-                                            <option value="@l.Id">@l.Name</option>
-                                        }
-                                    </InputSelect>
-                                    <ValidationMessage For="() => legalcaseDto.RentDueEachMonthOrWeekId" />
-                                </div>
-
-                                <!-- Monthly Rent -->
-                                <div class="col-md-4">
-                                    <label class="form-label  required-label">Monthly Rent ($) </label>
-                                    <InputNumber class="form-control" @bind-Value="legalcaseDto.MonthlyRent" placeholder="Enter Monthly Rent" />
-                                    <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
-                                </div>
-                            </div>
-                            <div class="row g-2 mt-2">
-
-                                <!-- Tenant's Share -->
-                                <div class="col-md-4">
-                                    <label class="form-label">Tenant's Share ($)</label>
-                                    <InputNumber class="form-control" @bind-Value="legalcaseDto.TenantShare" placeholder="Enter Total Share" />
-
-                                </div>
-
-                                <!-- Total Rent Owed -->
-                                <div class="col-md-4">
-                                    <label class="form-label">Total Rent Owed ($)</label>
-                                    <InputNumber class="form-control" @bind-Value="legalcaseDto.TotalOwed" placeholder="Enter Total Rent" />
-
-                                </div>
-                                <!-- Tenancy Type -->
-                                <div class="col-md-4">
+                                    <label class="form-label">Program</label>
                                     <label class="form-label required-label">Tenancy Type</label>
                                     <InputSelect class="form-select" @bind-Value="legalcaseDto.TenancyTypeId">
                                         <option value="">-- Select Type --</option>
@@ -405,26 +566,29 @@
                                     </InputSelect>
                                     <ValidationMessage For="() => legalcaseDto.TenancyTypeId" />
                                 </div>
+
                             </div>
                             <div class="row g-2 mt-2">
-
-                                <div class="col-md-6">
-                                    <label class="form-label">ERAP Payment Received?</label>
-                                    <div class="d-flex justify-content-start align-items-center  gap-2">
-                                        <InputRadioGroup @bind-Value="legalcaseDto.IsERAPPaymentReceived">
-                                            <div class="form-check d-flex justify-content-center gap-2">
-                                                <InputRadio class="form-check-input" Value="true" />
-                                                <label class="form-check-label">Yes</label>
-                                            </div>
-                                            <div class="form-check  d-flex justify-content-center gap-2">
-                                                <InputRadio class="form-check-input " Value="false" />
-                                                <label class="form-check-label">No</label>
-                                            </div>
-                                        </InputRadioGroup>
-                                    </div>
+                                <!-- Date Tenant Moved -->
+                                <div class="col-md-4">
+                                    <label class="form-label">Good Cause Applies?</label>
+                                    <InputDate class="form-control" @bind-Value="legalcaseDto.DateTenantMoved" />
                                 </div>
 
+                                <!-- Rent Due Day -->
+                                <div class="col-md-4">
+                                    <label class="form-label  required-label">Move In Date</label>
+                                    <InputDate class="form-control" @bind-Value="legalcaseDto.OralStart" />
+                                </div>
+
+                                <!-- Monthly Rent -->
+                                <div class="col-md-4">
+                                    <label class="form-label  required-label">Lease End (If any) </label>
+                                    <InputNumber class="form-control" @bind-Value="legalcaseDto.MonthlyRent" placeholder="Enter Monthly Rent" />
+                                    <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
+                                </div>
                             </div>
+
 
                         </div>
                     </div>
@@ -447,25 +611,68 @@
         @if (CurrentStep == Step.Case)
         {
             <div class="row">
-                <div class="col-8">
+                <div class="col-md-8">
                     <div class="card mb-3">
-                        <div class="card-header fw-bold">Case Details</div>
+                        <div class="card-header">
+                            <div style="font-weight:700">Case</div>
+                            <div class="hint">Pick the holdover scenario.</div>
+                        </div>
                         <div class="card-body">
-                            <label class="form-label required-label">Case Type </label>
-                            <InputSelect class="form-select" @bind-Value="legalcaseDto.CaseTypeId">
-                                <option value="">-- Select Type --</option>
-                                @foreach (var l in CaseTypeList)
-                                {
-                                    <option value="@l.Id">@l.Name</option>
-                                }
-                            </InputSelect>
-                            <ValidationMessage For="() => legalcaseDto.CaseTypeId" />
+                            <div class="row g-2">
+                                <!-- Tenancy Type -->
+                                <div class="col-md-4">
+                                    <label class="form-label required-label">Tenancy Type</label>
+                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.TenancyTypeId">
+                                        <option value="">-- Select Type --</option>
+                                        @foreach (var l in TenancyTypeList)
+                                        {
+                                            <option value="@l.Id">@l.Name</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="() => legalcaseDto.TenancyTypeId" />
+                                </div>
+
+
+
+                                <!-- Oral Start -->
+                                <div class="col-md-4">
+                                    <label class="form-label">Date Notice Served</label>
+                                    <InputDate class="form-control" @bind-Value="legalcaseDto.OralStart" />
+                                </div>
+
+                                <!-- Oral End -->
+                                <div class="col-md-4">
+                                    <label class="form-label">Calculated Notice Length</label>
+                                    <InputText class="form-control" @bind-Value="legalcaseDto.FullName" />
+                                </div>
+
+                            </div>
+                            <div class="row g-2 mt-2">
+                                <!-- Expiration Date -->
+                                <div class="col-md-4">
+                                    <label class="form-label">Expiration Date (Auto)</label>
+                                    <InputDate class="form-control" @bind-Value="legalcaseDto.DateTenantMoved" />
+                                </div>
+
+                                <!-- Predicate -->
+                                <div class="col-md-4">
+                                    <label class="form-label  required-label">Predicate Notice (Auto) </label>
+                                    <InputText class="form-control" @bind-Value="legalcaseDto.FullName" />
+                                </div>
+
+
+                            </div>
+
+
                         </div>
                     </div>
                 </div>
-                <div class="col-4">
+
+
+                <div class="col-md-4">
                     <CasesSummary LegalCase="legalcaseDto"
-                                  CaseTypeList="CaseTypeList"
+                                  TenancyTypeList="TenancyTypeList"
+                                  DateRentList="DateRentList"
                                   CurrentStep="CurrentStep" />
                     <TipsSummary />
                 </div>
@@ -473,93 +680,133 @@
 
         }
 
-        @* REVIEW *@
-        @if (CurrentStep == Step.Review)
+        @* RENT *@
+       
+ @if (CurrentStep == Step.Rent)
         {
             <div class="row">
-                <div class="col-12">
+                <div class="col-md-8">
                     <div class="card mb-3">
-                        <div class="card-header fw-bold">Review & Submit</div>
-                        <div class="card-body small">
-                            <p class="text-muted">Please review all details before submitting.</p>
-                            <div class="row g-3">
-                                <div class="col-md-12">
-                                    <h6>Client</h6>
-                                    <dl class="row mb-0">
-                                        <dt class="col-2">Name</dt>
-                                        <dd class="col-10">@legalcaseDto.ClientName</dd>
-                                    </dl>
+                        <div class="card-header fw-bold">Rent</div>
+                        <div class="card-body">
+                            <div class="row g-2">
+
+                                <!-- Rent Due Day -->
+                                <div class="col-md-4">
+                                    <label class="form-label  required-label">Rent Due Day </label>
+                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId">
+                                        <option value="">-- Select Type --</option>
+                                        @foreach (var l in DateRentList)
+                                        {
+                                            <option value="@l.Id">@l.Name</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="() => legalcaseDto.RentDueEachMonthOrWeekId" />
                                 </div>
-                                <div class="col-md-6">
-                                    <h6>Landlord</h6>
-                                    <dl class="row mb-0">
-                                        <dt class="col-5">Name</dt>
-                                        <dd class="col-7">@legalcaseDto.FullName</dd>
-                                        <dt class="col-5">Phone</dt>
-                                        <dd class="col-7">@legalcaseDto.Phone</dd>
-                                        <dt class="col-5">Email</dt>
-                                        <dd class="col-7">@legalcaseDto.Email</dd>
-                                        <dt class="col-5">Role</dt>
-                                        <dd class="col-7">@legalcaseDto.LandLordTypeName</dd>
-                                    </dl>
+
+                                <!-- Monthly Rent -->
+                                <div class="col-md-4">
+                                    <label class="form-label  required-label">Monthly Rent ($) </label>
+                                    <InputNumber class="form-control" @bind-Value="legalcaseDto.MonthlyRent" placeholder="Enter Monthly Rent" />
+                                    <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
                                 </div>
-                                <div class="col-md-6">
-                                    <h6>Building</h6>
-                                    <dl class="row mb-0">
-                                        <dt class="col-5">MDR</dt>
-                                        <dd class="col-7">@legalcaseDto.Mdr</dd>
-                                        <dt class="col-5"># Units</dt>
-                                        <dd class="col-7">@legalcaseDto.Units</dd>
-                                        <dt class="col-5">Address</dt>
-                                        <dd class="col-7">@legalcaseDto.BuildingAddress</dd>
-                                        <dt class="col-5">Regulation</dt>
-                                        <dd class="col-7">@legalcaseDto.RegulationStatusName</dd>
-                                    </dl>
+
+                                <!-- Tenant's Share -->
+                                <div class="col-md-4">
+                                    <label class="form-label">Tenant's Share ($)</label>
+                                    <InputNumber class="form-control" @bind-Value="legalcaseDto.TenantShare" placeholder="Enter Total Share" />
+
                                 </div>
-                                <div class="col-md-6">
-                                    <h6>Tenant</h6>
-                                    <dl class="row mb-0">
-                                        <dt class="col-5">Name</dt>
-                                        <dd class="col-7">@legalcaseDto.TenantName</dd>
-                                        <dt class="col-5">Unit</dt>
-                                        <dd class="col-7">@legalcaseDto.UnitNumber</dd>
-                                        <dt class="col-5">Illegal</dt>
-                                        <dd class="col-7">@string.Join(", ", legalcaseDto.IsUnitIlligalName)</dd>
-                                    </dl>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6>Rent</h6>
-                                    <dl class="row mb-0">
-                                        <dt class="col-5">Monthly</dt>
-                                        <dd class="col-7">@legalcaseDto.MonthlyRent?.ToString("C")</dd>
-                                        <dt class="col-5">Total Owed</dt>
-                                        <dd class="col-7">@legalcaseDto.TotalOwed?.ToString("C")</dd>
-                                        <dt class="col-5">ERAP</dt>
-                                        <dd class="col-7">@legalcaseDto.IsERAPPaymentReceived</dd>
-                                    </dl>
-                                </div>
-                                <div class="col-md-12">
-                                    <h6>Case</h6>
-                                    <dl class="row mb-0">
-                                        <dt class="col-2">Type</dt>
-                                        <dd class="col-10">@legalcaseDto.CaseTypeName</dd>
-                                    </dl>
-                                </div>
+
+
                             </div>
+
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-4">
+                                    <label class="form-label">Social Services</label>
+                                    <InputText class="form-control" @bind-Value="legalcaseDto.ClientName" placeholder="Enter Total Rent" />
+
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Last Month / Week Rent Paid ($)</label>
+                                    <InputNumber class="form-control" @bind-Value="legalcaseDto.TotalOwed" placeholder="Enter Total Rent" />
+
+                                </div>
+                                <!-- Total Rent Owed -->
+                                <div class="col-md-4">
+                                    <label class="form-label">Total Rent Owed ($)</label>
+                                    <InputNumber class="form-control" @bind-Value="legalcaseDto.TotalOwed" placeholder="Enter Total Rent" />
+
+                                </div>
+
+                            </div>
+
+
                         </div>
                     </div>
                 </div>
-                @*   <div class="col-4">
-                    <CasesSummary />
+
+
+                <div class="col-md-4">
+                    <CasesSummary LegalCase="legalcaseDto"
+                                  TenancyTypeList="TenancyTypeList"
+                                  DateRentList="DateRentList"
+                                  CurrentStep="CurrentStep" />
                     <TipsSummary />
-                </div> *@
+                </div>
             </div>
+
+
+        }
+
+        @* Notice *@
+        @if (CurrentStep == Step.Notice)
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    <section class="card">
+                        <header>
+                            <div class="k">8</div>
+                            <div>
+                                <div style="font-weight:700">Notice Selector</div>
+                                <div class="hint">Auto-selected predicate & merge preview</div>
+                            </div>
+                        </header>
+                        <div class="body">
+                            <div class="fields cols-2">
+                                <div>
+                                    <div class="pill">Selected: <strong id="selLabel">—</strong></div>
+                                    <p class="hint" style="margin-top:8px">
+                                        Move‑in → 30/60/90. Tenancy type → only special 10‑day. Expiration
+                                        aligns to rent due day (default 1st).
+                                    </p>
+                                </div>
+                                <div>
+                                    <div class="pill">Export</div>
+                                    <p class="hint" style="margin-top:8px">
+                                        On submit, send <code>predicate</code> + <code>merge</code> to your
+                                        doc engine.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="pre"><pre>@System.Text.Json.JsonSerializer.Serialize(MergeData, new System.Text.Json.JsonSerializerOptions { WriteIndented = true })</pre></div>
+
+
+                        </div>
+                    </section>
+                </div>
+
+
+
+            </div>
+
 
         }
 
         <div class="d-flex justify-content-between border-top pt-3 mt-3">
-            <button type="button" class="btn btn-outline-secondary" @onclick="Prev" disabled="@(CurrentStep == Step.Client)">← Back</button>
-            @if (CurrentStep != Step.Review)
+            <button type="button" class="btn btn-outline-secondary" @onclick="Prev" disabled="@(CurrentStep == Step.CaseAndclient)">← Back</button>
+            @if (CurrentStep != Step.Notice)
             {
                 <button type="button" class="btn" style="background-color:#1F365D !important; color:white" @onclick="Next">Next →</button>
             }
@@ -569,11 +816,21 @@
             }
         </div>
     </EditForm>
+
 </div>
 
 @code {
+    private readonly List<string> Steps = new() { "Case & Client", "Landlord", "Building", "Tenant", "Terms", "Rent", "Case", "Notice" };
+    private string ClientName { get; set; } = "";
+    private string Tenancy { get; set; } = "";
+    private DateTime? MovedIn { get; set; }
+    private string RentDueDate { get; set; } = "1";
 
-    private readonly List<string> Steps = new() { "Client", "Landlord", "Building", "Tenant", "Rent", "Case", "Review" };
+
+    // Merge preview
+    private NoticeMergeModel MergeData { get; set; } = new NoticeMergeModel();
+
+
 
 
     private IntakeModel legalcaseDto = new IntakeModel();
@@ -587,6 +844,7 @@
     private List<TenancyType> TenancyTypeList = new();
     private List<DateRent> DateRentList = new();
     private List<EditToClientDto> ClientList = new();
+    private List<EditToLandlordDto> LandlordList = new();
     private string? loggedInUserId;
     private bool isAdmin = false;
     private int currentPage = 1;
@@ -618,13 +876,24 @@
             isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
         }
         ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
+        LandlordList = await _landlordService.GetAllLandLordsAsync();
 
-        var holdoverCase = CaseTypeList.FirstOrDefault(x => x.Name == "Holdover");
-        if (holdoverCase != null)
-        {
-            legalcaseDto.CaseTypeId = holdoverCase.Id;
-        }
+
     }
+
+
+    public string UnitNumber { get; set; }
+
+    public List<string> Tenants { get; set; } = new();
+    public List<string> Undertenants { get; set; } = new() { "John Doe", "Jane Doe" };
+
+    public string UnitNo { get; set; } = "";
+
+
+
+    void AddTenant() => Tenants.Add(string.Empty);
+    void AddUnder() => Undertenants.Add(string.Empty);
+
 
 
     private string Progress => (((int)CurrentStep + 1) * 100.0 / Steps.Count).ToString("0");
@@ -634,18 +903,48 @@
     private async Task Next()
     {
         if (!ValidateCurrentStep()) return;
-        var client = ClientList.FirstOrDefault(x => x.Id == legalcaseDto.ClientId);
-        legalcaseDto.ClientName = client != null
-            ? $"{client.FirstName} {client.LastName}".Trim()
-            : "-";
+        // var client = ClientList.FirstOrDefault(x => x.Id == legalcaseDto.ClientId);
+        // legalcaseDto.ClientName = client != null
+        //     ? $"{client.FirstName} {client.LastName}".Trim()
+        //     : "-";
         legalcaseDto.CaseTypeName = CaseTypeList.FirstOrDefault(x => x.Id == legalcaseDto.CaseTypeId)?.Name;
         legalcaseDto.LandLordTypeName = LandLordTypeList.FirstOrDefault(x => x.Id == legalcaseDto.LandLordTypeId)?.Name;
         legalcaseDto.RegulationStatusName = RegulationList.FirstOrDefault(x => x.Id == legalcaseDto.RegulationStatusId)?.Name;
         legalcaseDto.IsUnitIlligalName = IsUnitIllegalList.FirstOrDefault(x => x.Id == legalcaseDto.IsUnitIlligalId)?.Name;
         legalcaseDto.TenancyTypeName = TenancyTypeList.FirstOrDefault(x => x.Id == legalcaseDto.TenancyTypeId)?.Name;
-        if (CurrentStep < Step.Review) CurrentStep++;
+
+        var days = CalcNoticeDays(Tenancy, MovedIn);
+        var dueDay = ParseDueDay(RentDueDate);
+
+        MergeData = new NoticeMergeModel
+        {
+            ClientName = ClientName,
+            Tenancy = Tenancy,
+            MovedIn = MovedIn,
+            Days = days,
+            Expire = CalcExpireAligned(MovedIn, days, dueDay),
+            Template = PickPredicateNotice(Tenancy),
+            // Tenants = Tenants.Where(t => !string.IsNullOrWhiteSpace(t)).ToList(),
+            // Undertenants = Undertenants.Where(t => !string.IsNullOrWhiteSpace(t)).ToList()
+        };
+        if (CurrentStep < Step.Notice) CurrentStep++;
     }
 
+    private void OnClientChanged()
+    {
+        var client = ClientList.FirstOrDefault(x => x.Id == legalcaseDto.ClientId);
+        if (client != null)
+        {
+            legalcaseDto.ClientName = $"{client.FirstName} {client.LastName}".Trim();
+            legalcaseDto.ClientEmail = client.Email;
+            legalcaseDto.ClientPhone = client.Phone;
+            legalcaseDto.Address1 = client.Address1;
+            legalcaseDto.Address2 = client.Address2;
+            legalcaseDto.City = client.City;
+            legalcaseDto.StateId = client.StateId;
+            legalcaseDto.ZipCode = client.ZipCode;
+        }
+    }
 
     private bool ValidateCurrentStep()
     {
@@ -653,15 +952,24 @@
 
         switch (CurrentStep)
         {
-            case Step.Client:
+            case Step.CaseAndclient:
+                Require(() => legalcaseDto.CaseTypeId, nameof(legalcaseDto.CaseTypeId), "Case type required");
                 Require(() => legalcaseDto.ClientId, nameof(legalcaseDto.ClientId), "Client is required");
 
                 break;
+            // case Step.Client:
+            //     Require(() => legalcaseDto.ClientName, nameof(legalcaseDto.ClientName), "Client Name is required");
+            //     Require(() => legalcaseDto.ClientPhone, nameof(legalcaseDto.ClientPhone), "Phone is required");
+            //     Require(() => legalcaseDto.ClientEmail, nameof(legalcaseDto.ClientEmail), "Email is required");
+
+
+            //     break;
             case Step.Landlord:
                 Require(() => legalcaseDto.FullName, nameof(legalcaseDto.FullName), "Full name is required");
-                Require(() => legalcaseDto.Phone, nameof(legalcaseDto.Phone), "Phone is required");
-                Require(() => legalcaseDto.Email, nameof(legalcaseDto.Email), "Email is required");
-                Require(() => legalcaseDto.LandLordTypeId, nameof(legalcaseDto.LandLordTypeId), "Role is required");
+                Require(() => legalcaseDto.ContactPersonName, nameof(legalcaseDto.ContactPersonName), "Contact Person is required");
+                Require(() => legalcaseDto.LandlordAddress, nameof(legalcaseDto.LandlordAddress), "Address is required");
+                Require(() => legalcaseDto.AttorneyOfRecord, nameof(legalcaseDto.AttorneyOfRecord), "Attorney is required");
+                Require(() => legalcaseDto.LawFirm, nameof(legalcaseDto.LawFirm), "Firm is required");
                 break;
             case Step.Building:
                 Require(() => legalcaseDto.Mdr, nameof(legalcaseDto.Mdr), "MDR is required");
@@ -680,9 +988,9 @@
                 Require(() => legalcaseDto.TenancyTypeId, nameof(legalcaseDto.TenancyTypeId), "Tenancy type  required");
                 break;
 
-            case Step.Case:
-                Require(() => legalcaseDto.CaseTypeId, nameof(legalcaseDto.CaseTypeId), "Case type required");
-                break;
+                // case Step.Case:
+                //     Require(() => legalcaseDto.CaseTypeId, nameof(legalcaseDto.CaseTypeId), "Case type required");
+                //     break;
         }
 
         _editContext.NotifyValidationStateChanged();
@@ -714,7 +1022,7 @@
 
     private void Prev()
     {
-        if (CurrentStep > Step.Client) CurrentStep--;
+        if (CurrentStep > Step.CaseAndclient) CurrentStep--;
     }
 
     private async Task SubmitAsync()
@@ -748,6 +1056,196 @@
         }
 
     }
+
+    // Helper functions
+    private int DiffYears(DateTime? from, DateTime? to)
+    {
+        if (!from.HasValue || !to.HasValue) return 0;
+        return (int)((to.Value - from.Value).TotalDays / 365);
+    }
+
+    private int CalcNoticeDays(string tenancyType, DateTime? movedIn)
+    {
+        if (new[] { "squatter", "licensee", "referee" }.Contains(tenancyType)) return 10;
+        var yrs = DiffYears(movedIn, DateTime.Today);
+        if (yrs < 1) return 30;
+        if (yrs < 2) return 60;
+        return 90;
+    }
+
+    private int ParseDueDay(string str)
+    {
+        if (string.IsNullOrWhiteSpace(str)) return 1;
+        if (int.TryParse(str, out var d)) return Math.Clamp(d, 1, 31);
+        return 1;
+    }
+
+    private string CalcExpireAligned(DateTime? servedISO, int days, int dueDay)
+    {
+        if (!servedISO.HasValue || days == 0) return "";
+        var target = servedISO.Value.AddDays(days);
+        if (dueDay == 1)
+            return new DateTime(target.Year, target.Month, DateTime.DaysInMonth(target.Year, target.Month)).ToString("yyyy-MM-dd");
+        else
+            return new DateTime(target.Year, target.Month, dueDay - 1).ToString("yyyy-MM-dd");
+    }
+
+    private string PickPredicateNotice(string tenancy)
+    {
+        return tenancy switch
+        {
+            "licensee" => "10 Days Notice - Tenant Of Record Vacated (Licensee)",
+            "referee" => "10 Days Notice - Referee Deed / Prior Owner",
+            "squatter" => "10 Days Notice - Squatter / Intruder",
+            "month" => $"{CalcNoticeDays(tenancy, MovedIn)} Days Notice - Month to Month",
+            _ => ""
+        };
+    }
+
+    public class NoticeMergeModel
+    {
+        public string ClientName { get; set; }
+        public string ClientType { get; set; }
+        public string ClientEmail { get; set; }
+        public string ClientPhone { get; set; }
+        public string ClientRef { get; set; }
+        public string LandlordName { get; set; }
+        public string Contact { get; set; }
+        public string LandlordAddress { get; set; }
+        public string LandlordAttorney { get; set; }
+        public string LandlordLawFirm { get; set; }
+        public List<string> Tenants { get; set; } = new();
+        public List<string> Undertenants { get; set; } = new();
+        public string Addr { get; set; }
+        public string Unit { get; set; }
+        public string Borough { get; set; }
+        public string Program { get; set; }
+        public string Gce { get; set; }
+        public string Written { get; set; }
+        public string Oral { get; set; }
+        public DateTime? MovedIn { get; set; }
+        public DateTime? LeaseEnd { get; set; }
+        public string RentDueDate { get; set; }
+        public decimal? MonthlyRent { get; set; }
+        public string TenantShare { get; set; }
+        public string SocialServices { get; set; }
+        public string LastPaid { get; set; }
+        public string TotalOwed { get; set; }
+        public string Tenancy { get; set; }
+        public string Served { get; set; }
+        public int? Days { get; set; }
+        public string Expire { get; set; }
+        public string Template { get; set; }
+    }
+
+    public NoticeMergeModel BuildMerge(NoticeMergeModel model)
+    {
+        var noticeServed = string.IsNullOrEmpty(model.Served) ? (DateTime?)null : DateTime.Parse(model.Served);
+        var days = CalcNoticeDays(model.Tenancy, model.MovedIn);
+
+        var dueDay = ParseDueDay(model.RentDueDate);
+        model.Days = days;
+        model.Expire = CalcExpireAligned(string.IsNullOrEmpty(model.Served) ? null : DateTime.Parse(model.Served), days, dueDay);
+        model.Template = PickPredicateNotice(model.Tenancy);
+
+        model.Tenants = model.Tenants.Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
+        model.Undertenants = model.Undertenants.Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
+
+        return model;
+    }
+
+    private bool IsNewClient = false;
+    private EditToClientDto selectedClient;
+    private string searchText;
+    private EditToClientDto newClient = new();
+    private List<EditToClientDto> filteredClients = new();
+
+    private bool IsNewLandlord = false;
+    private EditToLandlordDto selectedlandlord;
+    private string searchlandlordText;
+    private EditToLandlordDto newLandlord = new();
+    private List<EditToLandlordDto> filteredLandlords = new();
+ 
+
+    private void OnSearchLandlordInput(ChangeEventArgs e)
+    {
+        searchlandlordText = e.Value.ToString();
+        filteredLandlords = LandlordList
+            .Where(c => c.FirstName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+                     || c.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+                     || c.LandLordCode.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    private void SelectLandlord(EditToLandlordDto landlord)
+    {
+        selectedlandlord = landlord;
+        searchlandlordText = $"{landlord.FirstName} {landlord.LastName}";
+        filteredLandlords.Clear();
+
+        // Fill card
+        legalcaseDto.LandlordId = landlord.Id;
+        legalcaseDto.landlordName = $"{landlord.FirstName} {landlord.LastName}";
+        legalcaseDto.ContactPersonName = landlord.ContactPersonName;
+        legalcaseDto.LandlordAddress = landlord.Address1;
+        legalcaseDto.AttorneyOfRecord = landlord.AttorneyOfRecord;
+        legalcaseDto.LawFirm = landlord.LawFirm;
+        
+    }
+
+    private void ClearSelectedLandlord()
+    {
+        selectedlandlord = null;
+        searchlandlordText = string.Empty;
+    }
+
+
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        searchText = e.Value.ToString();
+        filteredClients = ClientList
+            .Where(c => c.FirstName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+                     || c.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+                     || c.ClientCode.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+
+
+    private void SelectClient(EditToClientDto client)
+    {
+        selectedClient = client;
+        searchText = $"{client.FirstName} {client.LastName}";
+        filteredClients.Clear();
+
+        // Fill card
+        legalcaseDto.ClientId = client.Id;
+        legalcaseDto.ClientName = $"{client.FirstName} {client.LastName}";
+        legalcaseDto.ClientEmail = client.Email;
+        legalcaseDto.ClientPhone = client.Phone;
+        legalcaseDto.Address1 = client.Address1;
+        legalcaseDto.Address2 = client.Address2;
+        legalcaseDto.City = client.City;
+        legalcaseDto.StateId = client.StateId;
+        legalcaseDto.ZipCode = client.ZipCode;
+    }
+
+
+  
+
+    private void ClearSelectedClient()
+    {
+        selectedClient = null;
+        searchText = string.Empty;
+    }
+
+
+   
+
+
+
+
+
 
     // private enum Step { Landlord = 0, Building = 1, Tenant = 2, Rent = 3, Case = 4, Review = 5 }
 }

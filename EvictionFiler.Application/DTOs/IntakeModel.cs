@@ -11,12 +11,22 @@ namespace EvictionFiler.Application.DTOs
     public class IntakeModel : DeletableBaseEntity
     {
         public Guid Id { get; set; }
-        [Required(ErrorMessage = "Client is required")]
+        //[Required(ErrorMessage = "Client is required")]
         public Guid? ClientId { get; set; }
+
+        public string Selectedclient { get; set; }
         public string Status { get; set; }
         public string ClientName { get; set; }
         public string Casecode { get; set; }
         public string FullName { get; set; }
+
+        public Guid ?LandlordId { get; set; }
+        public string LandlordAddress { get; set; } = string.Empty;
+
+        public string landlordName { get; set; }
+        public string AttorneyOfRecord { get; set; } = string.Empty;
+        public string? LawFirm { get; set; } = string.Empty;
+        public string? ContactPersonName { get; set; } = string.Empty;
         public string Phone { get; set; }
         [Required, EmailAddress] public string Email { get; set; }
        public Guid? LandLordTypeId { get; set; }
@@ -52,6 +62,7 @@ namespace EvictionFiler.Application.DTOs
         public double? TotalOwed { get; set; }
         public string Erap { get; set; } = "No";
 
+        [Required(ErrorMessage = "Type is required")]
         public Guid CaseTypeId { get; set; }
         public string CaseTypeName { get; set; }
 
@@ -62,6 +73,8 @@ namespace EvictionFiler.Application.DTOs
         public string? LastName { get; set; }
 
         public string ClientEmail { get; set; } = string.Empty;
+
+        public string ClientType { get; set; } = string.Empty;
         public string Address1 { get; set; } = string.Empty;
         public string? Address2 { get; set; }
         public string? City { get; set; } = string.Empty;

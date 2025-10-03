@@ -76,14 +76,14 @@ namespace EvictionFiler.Application.Services
 		}
 
 
-		public async Task<List<CreateToLandLordDto>> GetAllLandLordsAsync()
+		public async Task<List<EditToLandlordDto>> GetAllLandLordsAsync()
 		{
 			var landlords = await _landLordRepository
 				.GetAllQuerable(x => x.IsDeleted != true, x => x.State, x => x.TypeOfOwner)
 				.ToListAsync();
 
-			var result = landlords.Select(dto => new CreateToLandLordDto
-			{
+			var result = landlords.Select(dto => new EditToLandlordDto
+            {
 			
 				LandLordCode = dto.LandLordCode,
 				FirstName = dto.FirstName,
