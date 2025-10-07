@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Application.Interfaces.IRepository.Base;
+﻿using EvictionFiler.Application.DTOs.TenantDto;
+using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -10,5 +11,6 @@ namespace EvictionFiler.Application.Interfaces.IRepository
 {
     public interface IAdditionalTenantsRepository : IRepository<AdditioanlTenants>
     {
+        Task AddAdditionalTenant(List<AddtionalTenantDto> tenant);
     }
 }
