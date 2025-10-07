@@ -1,0 +1,470 @@
+﻿@page "/Calander"
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Domain.Entities.Master
+@using System.ComponentModel.DataAnnotations
+@using System.Linq.Expressions
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.ApartmentDto
+@using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Application.DTOs.LegalCaseDto
+@using EvictionFiler.Application.DTOs.PaginationDto
+@using EvictionFiler.Application.DTOs.TenantDto
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Client.Components.Cases
+@using EvictionFiler.Client.Jwt
+@using EvictionFiler.Domain.Entities.Master
+@using Blazored.Typeahead
+
+@inject IClientRoleRepository ClientRoleRepository
+@inject ICaseTypeRepository CaseTypeRepository
+@inject ICaseSubTypeRepository CaseSubTypeRepository
+@inject IRegulationStatusRepository RegulationStatusRepository
+@inject IReasonHoldoverRepository ReasonHoldoverRepository
+@inject ILandlordTypeRepository LandlordTypeRepository
+@inject IRenewalStatusRepository RenewalStatusRepository
+@inject IUnitIllegalRepository UnitIllegalRepository
+@inject ITenancyTypeRepository TenancyTypeRepository
+@inject IDateRentRepository DateRentRepository
+@inject ILandlordSevice _landlordService
+@inject IBuildingService _buildingService
+@inject ILegalCaseService _legalCaseService
+@inject ITenantService _tenantService
+@inject IClientService _clientService
+@using EvictionFiler.Client.SpinnerService
+@using EvictionFiler.Domian.Enums
+@inject IJSRuntime JS
+@inject NavigationManager nav
+@inject SpinnerService spinnerservice
+@using Microsoft.AspNetCore.Components.Authorization;
+@using EvictionFiler.Domain.Entities
+
+@using System.Security.Claims
+@inject JwtAuthStateProviders _authStateProvider
+
+    <style>
+        /* ===== EvictionFiler Light Theme (cards + rounded + blue/yellow accents) ===== */
+        :root { --bg: #f5f7fb; --card: #ffffff; --ink: #0e1726; --muted: #5c6a82; --line: #e5eaf3; --chip: #f1f4fa; --accent: #2463eb; /* blue */ --accent-2: #0ea5e9; /* teal-blue */ --accent-ink: #0b1a34; --warn: #f5b500; /* golden */ --good: #16a34a; --shadow: 0 2px 10px rgba(8, 15, 35, .06); --radius: 16px; }
+
+        * { box-sizing: border-box }
+
+        html,
+        body { height: 100% }
+
+        body { margin: 0; background: var(--bg); color: var(--ink); font: 500 15px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
+
+        .wrap { max-width: 1280px; margin: auto; padding: 22px }
+
+        /* Top bar */
+        header { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin: 4px 0 16px }
+
+        .brand { display: flex; align-items: center; gap: 12px }
+
+        .logo { width: 34px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, #0b3a91, #2b6be6) }
+
+        h1 { font-size: 20px; margin: 0 }
+
+        .sub { color: var(--muted) }
+
+        /* Card */
+        .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow) }
+
+        .card-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); background: #fbfdff; border-top-left-radius: var(--radius); border-top-right-radius: var(--radius); color: #3b4a66 }
+
+        .card-body { padding: 14px }
+
+        /* Filters */
+        .panel .filters { display: grid; grid-template-columns: repeat(6, minmax(170px, 1fr)); gap: 12px }
+
+        .control label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 2px 0 6px }
+
+        .control input,
+        .control select { width: 100%; background: #fff; color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; outline: none; box-shadow: 0 1px 0 rgba(10, 20, 40, .02); }
+
+            .control input:focus,
+            .control select:focus { border-color: #cdd7ee; box-shadow: 0 0 0 3px rgba(36, 99, 235, .08) }
+
+        /* Buttons */
+        .bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px }
+
+        .btn { background: var(--accent); color: #fff; border: 0; border-radius: 12px; padding: 10px 14px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(36, 99, 235, .22) }
+
+            .btn.secondary { background: #fff; color: var(--accent-ink); border: 1px solid var(--line); box-shadow: none }
+
+            .btn.ghost { background: var(--chip); color: var(--accent-ink); border: 1px dashed var(--line); box-shadow: none }
+
+        .badge { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line); padding: 8px 10px; border-radius: 12px; color: var(--muted) }
+
+        /* Stats */
+        .stats { display: flex; gap: 12px; flex-wrap: wrap }
+
+        .stat { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; color: var(--muted); box-shadow: var(--shadow) }
+
+            .stat b { color: var(--ink) }
+
+        /* Table */
+        .table-wrap { overflow: auto; max-height: 70vh }
+
+        .table { width: 100%; border-collapse: separate; border-spacing: 0 }
+
+            .table thead th { position: sticky; top: 0; background: #fbfdff; color: #7383a1; text-align: left; padding: 12px; border-bottom: 1px solid var(--line); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+
+            .table tbody td { padding: 12px; border-bottom: 1px solid var(--line); vertical-align: top }
+
+        .caption { font-weight: 700 }
+
+        .label { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; background: #fff5d6; color: #8a6400; border: 1px solid #ffe9a3 }
+
+            .label.holdover { background: #e8f0ff; color: #153e91; border-color: #d7e5ff }
+
+            .label.np { background: #e6fbff; color: #055d66; border-color: #c8f5ff }
+
+        /* Responsive */
+        @@media (max-width:1100px) { .panel .filters
+        { grid-template-columns: repeat(3, minmax(170px, 1fr)) }
+        }
+
+        @@media (max-width:640px) { .panel .filters
+        { grid-template-columns: 1fr }
+
+        .table .hide-sm { display: none }
+        }
+
+        /* Print */
+        @@media print { body
+        { background: #fff; color: #000 }
+
+        header,
+        .panel .bar .btn.secondary,
+        .panel .bar .btn.ghost { display: none !important }
+
+        .wrap { max-width: none; padding: 0 }
+
+        .card { border: 0; box-shadow: none }
+
+        .table thead th { background: #fff; color: #000; border-color: #ccc }
+
+        .table tbody td { border-color: #ddd }
+
+        .label { border-color: #ccc; background: #fff; color: #000 }
+        }
+
+        /* Optional strict 5 rows per page */
+        @@media print { body .per5 .table tbody tr
+        { page-break-inside: avoid }
+
+        body.per5 .table tbody tr:nth-child(5n) { page-break-after: always }
+        }
+    </style>
+
+    <div class="wrap">
+        <header>
+            <div class="brand">
+                <div class="logo"></div>
+                <h1>EvictionFiler • Court Calendars</h1>
+            </div>
+            <div class="sub">Generate, filter, and print housing court calendars</div>
+        </header>
+
+        <!-- Filters -->
+    <section class="card panel p-3">
+        <div class="card-head mb-3 d-flex gap-2">
+            <div class="badge ">Case Search & Filters</div>
+            <div class="badge">New Action</div>
+        </div>
+        <div class="card-body">
+            <form>
+                <div class="row g-3">
+                    <div class="col-md-2">
+                        <label for="f-county" class="form-label">County</label>
+                        <select id="f-county" class="form-select">
+                            <option value="">All</option>
+                            <option>Bronx</option>
+                            <option>Brooklyn</option>
+                            <option>Manhattan</option>
+                            <option>Queens</option>
+                            <option>Staten Island</option>
+                            <option>Nassau</option>
+                            <option>Suffolk</option>
+                            <option>Westchester</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="f-from" class="form-label">Date From</label>
+                        <input type="date" id="f-from" class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="f-to" class="form-label">Date To</label>
+                        <input type="date" id="f-to" class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="f-part" class="form-label">Court Part</label>
+                        <select id="f-part" class="form-select">
+                            <option value="">All</option>
+                            <option>Part A</option>
+                            <option>Part B</option>
+                            <option>Part C</option>
+                            <option>Part D</option>
+                            <option>Part E</option>
+                            <option>SPP</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="f-room" class="form-label">Room</label>
+                        <input id="f-room" placeholder="406" class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="f-type" class="form-label">Case Type</label>
+                        <InputSelect class="form-select" @bind-Value="legalcaseDto.CaseTypeId">
+                            <option value="">-- Select type --</option>
+                            @foreach (var l in CaseTypeList)
+                            {
+                                <option value="@l.Id">@l.Name</option>
+                            }
+                        </InputSelect>
+                    </div>
+                   
+                </div>
+                <div class="row mt-2 g-3">
+                  <div class="col-12">
+                      <div class="row">
+                            <div class="col-md-2">
+                                <label for="f-judge" class="form-label">Judge</label>
+                                <input id="f-judge" placeholder="Judge name" class="form-control">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="f-status" class="form-label">Status</label>
+                                <select id="f-status" class="form-select">
+                                    <option value="">All</option>
+                                    <option>Upcoming</option>
+                                    <option>Adjourned</option>
+                                    <option>Resolved</option>
+                                    <option>Pending</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="f-q" class="form-label">Search</label>
+                                <input id="f-q" placeholder="Caption / Index # / Address" class="form-control">
+                            </div>
+
+                            <div class="col-md-5 d-flex align-items-center">
+                                <div class="control">
+                                    <label>5 Rows per printed page</label>
+                                    <div class="switch"><input id="f-per5" type="checkbox"><span class="sub">Strict page breaks</span></div>
+                                </div>
+                            </div>
+                      </div>
+
+                  </div>
+              </div>
+
+                <div class="mt-4 d-flex gap-2 flex-wrap align-items-center bar">
+                    <button type="button" class="btn btn-primary" id="btnGenerate">Generate</button>
+                    <button type="reset" class="btn secondary" id="btnReset">Reset</button>
+                    <button type="button" class="btn secondary" id="btnPrint">Print</button>
+                    <button type="button" class="btn secondary" id="btnExport">Export CSV</button>
+                    <span class="ms-auto text-muted" id="countInfo">0 results</span>
+                </div>
+            </form>
+        </div>
+    </section>
+
+
+        <!-- Results -->
+        <section class="card" style="margin-top:14px">
+            <div class="card-head">
+                <div class="stats">
+                    <div class="stat"><span>Hearings Today:</span> <b id="statToday">0</b></div>
+                    <div class="stat"><span>This Week:</span> <b id="statWeek">0</b></div>
+                    <div class="stat"><span>Selected Range:</span> <b id="statRange">0</b></div>
+                </div>
+                <div class="sub" id="printMeta"></div>
+            </div>
+            <div class="card-body table-wrap">
+                <table class="table" id="table">
+                    <thead>
+                        <tr>
+                            <th>County</th>
+                            <th class="hide-sm">Date</th>
+                            <th>Court Part</th>
+                            <th>Room</th>
+                            <th>Caption</th>
+                            <th>Index #</th>
+                            <th>Time</th>
+                            <th>Case Type</th>
+                            <th class="hide-sm">Judge</th>
+                            <th>Last Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody">
+                    
+                    @foreach (var c in cases)
+                    {
+                        <tr>
+                            <td>@c.County</td>
+                            <td>@c.Date.ToString("yyyy-MM-dd")</td>
+                            <td>@c.Part</td>
+                            <td>@c.Room</td>
+                            <td>@c.Caption</td>
+                            <td>@c.Index</td>
+                            <td>@c.Time</td>
+                            <td>@c.Type</td>
+                            <td>@c.Judge</td>
+                            <td>@c.LastAction</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+       
+
+
+          const els = {
+            county: id('f-county'), from: id('f-from'), to: id('f-to'),
+            part: id('f-part'), room: id('f-room'), type: id('f-type'),
+            judge: id('f-judge'), status: id('f-status'), q: id('f-q'),
+            per5: id('f-per5'), tbody: id('tbody'), count: id('countInfo'),
+            statToday: id('statToday'), statWeek: id('statWeek'),
+            statRange: id('statRange'), printMeta: id('printMeta')
+          };
+          function id(x) { return document.getElementById(x) }
+          function fmt(d) { const x = new Date(d); return x.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' }) }
+          function within(d, a, b) { const x = new Date(d); if (a && x < new Date(a)) return false; if (b && x > new Date(b)) return false; return true }
+          function matches(r) {
+            if (els.county.value && r.county !== els.county.value) return false;
+            if (els.part.value && r.part !== els.part.value) return false;
+            if (els.type.value && r.type !== els.type.value) return false;
+            if (els.status.value && r.status !== els.status.value) return false;
+            if (els.room.value && !String(r.room).toLowerCase().includes(els.room.value.toLowerCase())) return false;
+            if (els.judge.value && !String(r.judge).toLowerCase().includes(els.judge.value.toLowerCase())) return false;
+            if (!within(r.date, els.from.value, els.to.value)) return false;
+            const q = els.q.value.trim().toLowerCase();
+            if (q) {
+              const hay = [r.caption, r.index, r.county, r.part, r.room].join(' ').toLowerCase();
+              if (!hay.includes(q)) return false;
+            }
+            return true;
+          }
+          function render(rows) {
+            els.tbody.innerHTML = rows.map(r => `
+          <tr>
+            <td>${r.county}</td>
+            <td class="hide-sm">${fmt(r.date)}</td>
+            <td>${r.part}</td>
+            <td>${r.room}</td>
+            <td><div class="caption">${r.caption}</div></td>
+            <td>${r.index}</td>
+            <td>${r.time}</td>
+            <td><span class="label ${r.type === 'Holdover' ? 'holdover' : r.type === 'Non Payment' ? 'np' : ''}">${r.type}</span></td>
+            <td class="hide-sm">${r.judge || ''}</td>
+            <td>${r.last_action || ''}</td>
+          </tr>
+        `).join('');
+            // counts
+            els.count.textContent = `${rows.length} result${rows.length === 1 ? '' : 's'}`;
+            const todayISO = new Date().toISOString().slice(0, 10);
+            const startOfWeek = (() => { const d = new Date(); const day = d.getDay(); const diff = d.getDate() - day + (day === 0 ? -6 : 1); return new Date(d.setDate(diff)); })();
+            const weekRows = rows.filter(r => new Date(r.date) >= startOfWeek);
+            const rangeRows = rows.filter(r => within(r.date, els.from.value, els.to.value));
+            els.statToday.textContent = rows.filter(r => r.date === todayISO).length;
+            els.statWeek.textContent = weekRows.length;
+            els.statRange.textContent = rangeRows.length || rows.length;
+            // print meta
+            const rangeTxt = els.from.value || els.to.value ? `${els.from.value || '…'} → ${els.to.value || '…'}` : 'All Dates';
+            const countyTxt = els.county.value || 'All Counties';
+            const partTxt = els.part.value || 'All Parts';
+            els.printMeta.textContent = `${countyTxt} • ${partTxt} • ${rangeTxt}`;
+          }
+          function generate()
+          { const rows = CASES.filter(matches).sort((a, b) => (a.date + b.time).localeCompare(b.date + b.time)); render(rows); }
+          function resetFilters() {
+            ['county', 'from', 'to', 'part', 'room', 'type', 'judge', 'status', 'q'].forEach(k => els[k].value = '');
+            els.per5.checked = false; document.body.classList.remove('per5');
+            render(CASES);
+          }
+          function exportCSV() {
+            const rows = [...document.querySelectorAll('#tbody tr')].map(tr => [...tr.children].map(td => td.innerText));
+            const header = ["County", "Date", "Court Part", "Room", "Caption", "Index #", "Time", "Case Type", "Judge", "Last Action"];
+            const csv = [header].concat(rows).map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `CourtCalendar_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+          }
+          id('btnGenerate').onclick = generate;
+          id('btnReset').onclick = resetFilters;
+          id('btnPrint').onclick = () => { document.body.classList.toggle('per5', els.per5.checked); window.print(); };
+          id('btnExport').onclick = exportCSV;
+          ['county', 'from', 'to', 'part', 'room', 'type', 'judge', 'status', 'q'].forEach(idv => id('f-' + idv)?.addEventListener('input', generate));
+          id('f-per5').addEventListener('change', e => document.body.classList.toggle('per5', e.target.checked));
+          render(CASES);
+    </script>
+
+@code {
+
+    private IntakeModel legalcaseDto = new IntakeModel();
+   
+    private EditContext _editContext;
+    private ValidationMessageStore _messages;  
+    private List<CaseType> CaseTypeList = new();
+    private string? loggedInUserId;
+    private bool isAdmin = false;
+ 
+     
+    protected override async Task OnInitializedAsync()
+    {
+        legalcaseDto = new IntakeModel();
+        _editContext = new EditContext(legalcaseDto);
+        _messages = new ValidationMessageStore(_editContext);
+
+
+        CaseTypeList = await CaseTypeRepository.GetAllCaseType();
+        // legalcaseDto.ClientId = Guid.Parse(ClientId);
+
+        var authState = await _authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+        }
+    }
+
+
+    public class CourtCase
+    {
+        public string County { get; set; }
+        public DateTime Date { get; set; }
+        public string Part { get; set; }
+        public string Room { get; set; }
+        public string Caption { get; set; }
+        public string Index { get; set; }
+        public string Time { get; set; }
+        public string Type { get; set; }
+        public string Judge { get; set; }
+        public string Status { get; set; }
+        public string LastAction { get; set; }
+    }
+
+    List<CourtCase> cases = new List<CourtCase>
+    {
+        new CourtCase { County = "Queens", Date = DateTime.Parse("2025-09-26"), Part = "Part D", Room = "406", Caption = "Alejandro Sanchez v. Victoria “Doe”", Index = "LT-310359-25/QU", Time = "09:30", Type = "Holdover", Judge = "Hon. David J. Bryan", Status = "Upcoming", LastAction = "Adjourned for documents" },
+        new CourtCase { County = "Queens", Date = DateTime.Parse("2025-09-26"), Part = "Part D", Room = "406", Caption = "Li Ying Zheng v. Dynell Fontaine", Index = "LT-310377-25/QU", Time = "09:30", Type = "Holdover", Judge = "Hon. David J. Bryan", Status = "Upcoming", LastAction = "Stipulation—repair access" },
+        new CourtCase { County = "Queens", Date = DateTime.Parse("2025-09-26"), Part = "Part D", Room = "406", Caption = "Allahu Akbar Mgmt v. Kabir Ahasan", Index = "LT-310387-25/QU", Time = "09:30", Type = "Non Payment", Judge = "Hon. David J. Bryan", Status = "Adjourned", LastAction = "Answer filed" },
+        new CourtCase { County = "Queens", Date = DateTime.Parse("2025-09-26"), Part = "Part D", Room = "406", Caption = "43 Gardens Realty LLC v. St Clair", Index = "LT-310696-25/QU", Time = "09:30", Type = "Holdover", Judge = "Hon. David J. Bryan", Status = "Upcoming", LastAction = "Motion to dismiss submitted" },
+        new CourtCase { County = "Queens", Date = DateTime.Parse("2025-09-26"), Part = "Part D", Room = "406", Caption = "James Charles v. Gail Cockrel", Index = "LT-311220-25/QU", Time = "09:30", Type = "Per Diem", Judge = "Hon. David J. Bryan", Status = "Upcoming", LastAction = "Conference scheduled" },
+        new CourtCase { County = "Brooklyn", Date = DateTime.Parse("2025-09-29"), Part = "Part E", Room = "302", Caption = "Victoria ‘Doe’ (Deli) v. Max Cuatlatl", Index = "LT-311999-25/BK", Time = "14:00", Type = "Commercial Nonpayment", Judge = "Hon. Smith", Status = "Pending", LastAction = "Service proof filed" }
+    };
+
+
+}
+
+
+
+
