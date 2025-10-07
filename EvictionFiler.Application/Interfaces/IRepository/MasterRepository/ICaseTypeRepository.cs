@@ -12,7 +12,10 @@ namespace EvictionFiler.Application.Interfaces.IRepository.MasterRepository
     {
 
 		Task<List<CaseType>> GetAllCaseType();
-		//Task<List<CaseSubType>> GetSubTypesByCaseTypeIdAsync(Guid caseTypeId);
+        //Task<List<CourtPart>> GetAllCourtPart();
+        //Task<List<CaseStatus>> GetAllCaseStatus();
+        //Task<List<County>> GetAllCounty();
+        
 
-	}
+    }
 }

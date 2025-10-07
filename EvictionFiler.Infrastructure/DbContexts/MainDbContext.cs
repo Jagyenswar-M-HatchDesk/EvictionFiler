@@ -11,11 +11,17 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public MainDbContext(DbContextOptions<MainDbContext> options) : base(options) { }
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
+        public DbSet<Calander> Calanders { get; set; }
         public DbSet<UserDatabase> UserDatabases { get; set; }
         public DbSet<Tenant> Tenants { get; set; }
         public DbSet<Client> Clients { get; set; }
         public DbSet<LandLord> LandLords { get; set; }
 		public DbSet<CaseType> MstCaseTypes { get; set; }
+
+        public DbSet<CourtPart> MstCourtPart { get; set; }
+        public DbSet<CaseStatus> MstCaseStatus { get; set; }
+
+        public DbSet<County> MstCounties { get; set; }
         public DbSet<Category> MstCategories { get; set; }
         public DbSet<LandlordType> MstLandlordTypes { get; set; }
 		public DbSet<CaseSubType>MstCaseSubTypes { get; set; }
