@@ -15,17 +15,17 @@ using PuppeteerSharp.Media;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
-	public class CaseFormRepository:Repository<CaseForms>, ICaseFormRepository
+    public class CaseFormRepository : Repository<CaseForms>, ICaseFormRepository
     {
         private readonly MainDbContext _context;
 
-	public CaseFormRepository(MainDbContext context) : base(context)
-	{
-		_context = context;
-	}
+        public CaseFormRepository(MainDbContext context) : base(context)
+        {
+            _context = context;
+        }
 
 
-      
+
 
         public async Task<bool> GenerateNoticeAsync(Guid legalCaseId, Guid formTypeId, Guid createdBy)
         {
@@ -58,7 +58,8 @@ namespace EvictionFiler.Infrastructure.Repositories
                                              PropertyAddress = building.Address1 + " " + building.Address2 + " " +
                                                                building.City + " " + building.State.Name + " " + building.Zipcode,
                                              NumberofRoom = building.BuildingUnits.ToString(),
-                                             TenantIds = lc.TenantId // <-- List of tenant IDs from LegalCase
+                                             TenantIds = lc.TenantId, // <-- List of tenant IDs from LegalCase,
+                                             LeaseEnd = lc.LeaseEnd
                                          }).FirstOrDefaultAsync();
 
                 if (caseDetails == null)
@@ -66,7 +67,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
                 // 3. Parse TenantIds
                 List<Guid> tenantIds = new List<Guid>();
-               
+
 
                 if (caseDetails.TenantIds.HasValue)  // since it's Guid?
                 {
@@ -83,6 +84,30 @@ namespace EvictionFiler.Infrastructure.Repositories
                         ApartmentNumber = t.UnitOrApartmentNumber
                     })
                     .ToListAsync();
+
+                var additionalTenants = await _context.AdditioanlTenants.Where(e => tenantIds.Contains(e.TenantId.Value)).Select(t => new
+                {
+                    FullName = t.FirstName + " " + t.LastName,
+                    ApartmentNumber = " "
+
+                }).ToListAsync();
+
+                if (additionalTenants.Count > 0)
+                {
+                    tenants.AddRange(additionalTenants);
+                }
+
+                var additionaloccupants = await _context.AdditionalOccupants.Where(e => e.LegalCaseId == legalCaseId).Select(t => new
+                {
+                    FullName = t.Name + " ",
+                    ApartmentNumber = " "
+
+                }).ToListAsync();
+
+                if (additionaloccupants.Count > 0)
+                {
+                    tenants.AddRange(additionaloccupants);
+                }
 
                 // 5. Get first tenant details for top section
                 string firstTenantName = tenants.Count > 0 ? tenants[0].FullName : "";
@@ -105,11 +130,18 @@ namespace EvictionFiler.Infrastructure.Repositories
                 for (int i = 0; i < 12; i++)
                 {
                     string tenantValue = i < tenants.Count ? tenants[i].FullName : "";
-                    filledHtml = filledHtml.Replace($"{{{{Tenant{i + 1}}}}}", tenantValue);
+                    filledHtml = filledHtml.Replace($"{{{{TenantName{i + 1}}}}}", tenantValue);
                 }
 
-               
-              
+                filledHtml = filledHtml.Replace("{{lease_expired_date}}", caseDetails.LeaseEnd?.ToString("dd/MM/yyyy") ?? "");
+                if (caseDetails.LeaseEnd != null)
+                {
+                    Console.WriteLine("Checkbox is ticked");
+                    filledHtml = filledHtml.Replace("{{lease_expired}}", "chceked");
+                }
+
+
+
                 // 9. Generate PDF
                 await new BrowserFetcher().DownloadAsync();
                 await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
@@ -150,7 +182,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     CreatedOn = DateTime.UtcNow,
                     IsDeleted = false,
                     CreatedBy = createdBy,
-                   
+
                 };
 
                 _context.CaseForms.Add(caseForm);
@@ -165,52 +197,52 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 
         private DateTime CalculateNoticeDate(string formName)
-		{
-			int noticeDays = 0;
+        {
+            int noticeDays = 0;
 
-			if (string.IsNullOrEmpty(formName))
-				return DateTime.Now;
+            if (string.IsNullOrEmpty(formName))
+                return DateTime.Now;
 
-			if (formName.ToLower().Contains("90 days"))
-				noticeDays = 90;
-			else if (formName.ToLower().Contains("5 days"))
-				noticeDays = 5;
-			else if (formName.ToLower().Contains("30 days"))
-				noticeDays = 30;
-		
+            if (formName.ToLower().Contains("90 days"))
+                noticeDays = 90;
+            else if (formName.ToLower().Contains("5 days"))
+                noticeDays = 5;
+            else if (formName.ToLower().Contains("30 days"))
+                noticeDays = 30;
 
-			return DateTime.Now.AddDays(noticeDays);
-		}
 
-		public async Task<byte[]?> GetPdfBytesAsync(Guid id)
-		{
-			var caseForm = await _context.CaseForms
-				.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted != true);
+            return DateTime.Now.AddDays(noticeDays);
+        }
 
-			if (caseForm == null || string.IsNullOrWhiteSpace(caseForm.HTML))
-				return null;
+        public async Task<byte[]?> GetPdfBytesAsync(Guid id)
+        {
+            var caseForm = await _context.CaseForms
+                .FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted != true);
 
-			await new BrowserFetcher().DownloadAsync();
-			await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
-			{
-				Headless = true,
-				Args = new[] { "--no-sandbox" }
-			});
+            if (caseForm == null || string.IsNullOrWhiteSpace(caseForm.HTML))
+                return null;
 
-			
-			var page = await browser.NewPageAsync();
-			await page.SetContentAsync(caseForm.HTML, new NavigationOptions
-			{
-				WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
-			});
+            await new BrowserFetcher().DownloadAsync();
+            await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+            {
+                Headless = true,
+                Args = new[] { "--no-sandbox" }
+            });
 
-			var pdfBytes = await page.PdfDataAsync(new PdfOptions
-			{
-				Format = PaperFormat.A4,
-				PrintBackground = true
-			});
 
-			return pdfBytes;
-		}
-	}
+            var page = await browser.NewPageAsync();
+            await page.SetContentAsync(caseForm.HTML, new NavigationOptions
+            {
+                WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
+            });
+
+            var pdfBytes = await page.PdfDataAsync(new PdfOptions
+            {
+                Format = PaperFormat.A4,
+                PrintBackground = true
+            });
+
+            return pdfBytes;
+        }
+    }
 }

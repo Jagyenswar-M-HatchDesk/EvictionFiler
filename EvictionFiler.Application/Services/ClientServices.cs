@@ -70,6 +70,8 @@ namespace EvictionFiler.Application.Services
                 ZipCode = client.ZipCode,
                 CreatedBy = client.CreatedBy,
                 CreatedOn = client.CreatedOn,
+				ClientTypeId = client.ClientTypeId,
+				Reference = client.Reference,
             }).ToList();
 
             return result;
@@ -218,13 +220,13 @@ namespace EvictionFiler.Application.Services
                         foreach (var tenant in tenants.ToList())
                         {
                             // ✅ Get all additional tenants for this tenant
-                            var additionalTenants = await _additionalTenantsRepo.GetAllAsync(a => a.TenantId == tenant.Id);
+                            //var additionalTenants = await _additionalTenantsRepo.GetAllAsync(a => a.LegalCaseId == tenant.Id);
 
                             // ✅ Delete additional tenants first
-                            foreach (var additional in additionalTenants.ToList())
-                            {
-                                await _additionalTenantsRepo.DeleteAsync(additional.Id);
-                            }
+                            //foreach (var additional in additionalTenants.ToList())
+                            //{
+                            //    await _additionalTenantsRepo.DeleteAsync(additional.Id);
+                            //}
 
                             // ✅ Delete tenant after deleting additional tenants
                             await _tenantRepo.DeleteAsync(tenant.Id);
@@ -440,7 +442,79 @@ namespace EvictionFiler.Application.Services
 			}
 		}
 
-		public async Task<bool> UpdateClientAsync(EditToClientDto client)
+		public async Task<Guid> CreateOnlyClient(CreateToClientDto client)
+		{
+			try
+			{
+				var clientCode = await _clientRepo.GenerateClientCodeAsync();
+
+				var newclient = new Client
+				{
+					Id = Guid.NewGuid(),
+					ClientCode = clientCode,
+					FirstName = client.FirstName,
+					LastName = client.LastName,
+					Email = client.Email,
+					Address1 = client.Address1,
+					Address2 = client.Address2,
+					City = client.City,
+					StateId = client.StateId,
+					ZipCode = client.ZipCode,
+					Phone = client.Phone,
+					CellPhone = client.CellPhone,
+					Fax = client.Fax,
+					CreatedBy = client.CreatedBy,
+					CreatedOn = DateTime.Now
+				};
+
+				await _clientRepo.AddAsync(newclient);
+				await _unitOfWork.SaveChangesAsync();
+
+				return newclient.Id;
+			}
+			catch (Exception ex)
+			{
+				throw new Exception();
+
+			};
+		}
+
+		public async Task<bool> UpdateClientformCase(EditToClientDto client)
+		{
+			var existingClient = await _clientRepo.GetClientWithAllDetailsAsync(client.Id);
+			if (existingClient == null) return false;
+			//List<Guid> landlordIds = existingClient.LandLords.Select(e => e.Id).ToList();
+			//List<Guid> existingBuildingIds = new List<Guid>();
+			//List<Guid> existingTenantsIds = new List<Guid>();
+			//foreach (var l in existingClient.LandLords)
+			//{
+			//	var BuildingIds = l.Buildings.Select(e => e.Id).ToList();
+			//	existingBuildingIds.AddRange(BuildingIds);
+			//	foreach (var j in l.Buildings)
+			//	{
+			//		var TenantsIds = j.Tenants.Select(e => e.Id).ToList();
+			//		existingTenantsIds.AddRange(TenantsIds);
+			//	}
+			//}
+			// 1. Update Client basic info
+			if(existingClient.FirstName != client.FirstName)existingClient.FirstName = client.FirstName;
+            if (existingClient.LastName != client.LastName) existingClient.LastName = client.LastName;
+            if (existingClient.Email != client.Email) existingClient.Email = client.Email;
+			if (existingClient.Phone != client.Phone) existingClient.Phone = client.Phone;
+            if (existingClient.Reference != client.Reference) existingClient.Reference = client.Reference;
+            if (existingClient.ClientTypeId != client.ClientTypeId) existingClient.ClientTypeId = client.ClientTypeId;
+
+
+
+            var updateclient = _clientRepo.UpdateAsync(existingClient);
+			if(updateclient == null) return false;
+
+			await _unitOfWork.SaveChangesAsync();
+			return true;
+		}
+		
+
+        public async Task<bool> UpdateClientAsync(EditToClientDto client)
 		{
 			var existingClient = await _clientRepo.GetClientWithAllDetailsAsync(client.Id);
 			if (existingClient == null) return false;

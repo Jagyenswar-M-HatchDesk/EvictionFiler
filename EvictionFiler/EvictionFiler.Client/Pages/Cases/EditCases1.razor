@@ -72,7 +72,7 @@
 
     </div>
     <div class="progress mt-3" style="height:6px;">
-        <div class="progress-bar " role="progressbar" style="width:@Progress%;background-color:#1F365D !important" ></div>
+        <div class="progress-bar " role="progressbar" style="width:@Progress%;background-color:#1F365D !important"></div>
     </div>
 </div>
 
@@ -82,7 +82,7 @@
         @*  <ValidationSummary class="mb-3" /> *@
 
         @* Client *@
-      @*   @if (CurrentStep == Step.Client)
+        @*   @if (CurrentStep == Step.Client)
         {
             <div class="row">
                 <div class="col-8">
@@ -148,7 +148,7 @@
                     </div>
                 </div>
                 <div class="col-4">
-                    <CasesSummary LegalCase="legalcaseDto" LandLordTypeList="LandLordTypeList" CurrentStep="CurrentStep"/>
+                    <CasesSummary LegalCase="legalcaseDto" LandLordTypeList="LandLordTypeList" CurrentStep="CurrentStep" />
 
                     <TipsSummary />
                 </div>
@@ -234,7 +234,7 @@
                                         <label class="form-label required-label">Is the Unit Illegal?</label>
                                     </div>
                                     <div class="col-12">
-                                        <InputRadioGroup @bind-Value="legalcaseDto.IsUnitIlligalId" class="d-flex flex-wrap gap-4">
+                                        <InputRadioGroup @bind-Value="legalcaseDto.IsUnitIllegalId" class="d-flex flex-wrap gap-4">
                                             @foreach (var option in IsUnitIllegalList)
                                             {
                                                 <div class="form-check form-check-inline">
@@ -246,7 +246,7 @@
                                     </div>
                                 </div>
 
-                                <ValidationMessage For="() => legalcaseDto.IsUnitIlligalId" />
+                                <ValidationMessage For="() => legalcaseDto.IsUnitIllegalId" />
                             </div>
 
                             <div class="my-4">
@@ -475,7 +475,7 @@
         }
 
         @* REVIEW *@
-    @*     @if (CurrentStep == Step.Review)
+        @*     @if (CurrentStep == Step.Review)
         {
             <div class="row">
                 <div class="col-12">
@@ -554,9 +554,9 @@
                     <CasesSummary />
                     <TipsSummary />
                 </div> *@
-         @*    </div> *@
+        @*    </div> *@
 
-      
+
 
         <div class="d-flex justify-content-between border-top pt-3 mt-3">
             <button type="button" class="btn btn-outline-secondary" @onclick="Prev" disabled="@(CurrentStep == Step.CaseAndclient)">← Back</button>
@@ -578,7 +578,7 @@
     public Guid caseId { get; set; }
     bool IsDisabled = true;
     // [Parameter] public string ClientId { get; set; }
-    private readonly List<string> Steps = new() { "Client" , "Landlord", "Building", "Tenant", "Rent", "Case", "Review" };
+    private readonly List<string> Steps = new() { "Client", "Landlord", "Building", "Tenant", "Rent", "Case", "Review" };
     private readonly string[] CaseTypes = new[] { "Nonpayment", "Holdover", "HP Proceeding", "Illegal Sublet", "Nuisance" };
 
     private IntakeModel legalcaseDto = new IntakeModel();
@@ -611,8 +611,8 @@
         TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
         DateRentList = await DateRentRepository.GetAllDateRent();
-        ClientList = await _clientService.GetAllClient(loggedInUserId , isAdmin);
-       
+        ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
+
         await Task.Delay(500);
         await LoadDataAsync();
 
@@ -632,11 +632,11 @@
         {
 
             legalcaseDto = await _legalCaseService.GetCaseByIdAsync(caseId);
-          
-            _editContext = new EditContext(legalcaseDto); 
+
+            _editContext = new EditContext(legalcaseDto);
             _messages = new ValidationMessageStore(_editContext);
 
-           
+
             CurrentCaseId = caseId;
 
 
@@ -645,7 +645,7 @@
         {
 
             legalcaseDto = new IntakeModel();
-           
+
 
             // Default case type Holdover set kar do
             var holdoverCase = CaseTypeList.FirstOrDefault(x => x.Name == "Holdover");
@@ -653,16 +653,16 @@
             {
                 legalcaseDto.CaseTypeId = holdoverCase.Id;
             }
-           
-            _editContext = new EditContext(legalcaseDto); 
-            _messages = new ValidationMessageStore(_editContext); 
+
+            _editContext = new EditContext(legalcaseDto);
+            _messages = new ValidationMessageStore(_editContext);
 
 
             // CurrentCaseId ko null rakhna hi better hai is case me
             CurrentCaseId = null;
         }
 
-      
+
     }
 
     private async Task Next()
@@ -675,7 +675,7 @@
         legalcaseDto.CaseTypeName = CaseTypeList.FirstOrDefault(x => x.Id == legalcaseDto.CaseTypeId)?.Name;
         legalcaseDto.LandLordTypeName = LandLordTypeList.FirstOrDefault(x => x.Id == legalcaseDto.LandLordTypeId)?.Name;
         legalcaseDto.RegulationStatusName = RegulationList.FirstOrDefault(x => x.Id == legalcaseDto.RegulationStatusId)?.Name;
-        legalcaseDto.IsUnitIlligalName = IsUnitIllegalList.FirstOrDefault(x => x.Id == legalcaseDto.IsUnitIlligalId)?.Name;
+        legalcaseDto.IsUnitIllegalName = IsUnitIllegalList.FirstOrDefault(x => x.Id == legalcaseDto.IsUnitIllegalId)?.Name;
         legalcaseDto.TenancyTypeName = TenancyTypeList.FirstOrDefault(x => x.Id == legalcaseDto.TenancyTypeId)?.Name;
         if (CurrentStep < Step.Notice) CurrentStep++;
     }
@@ -706,7 +706,7 @@
             case Step.Tenant:
                 Require(() => legalcaseDto.TenantName, nameof(legalcaseDto.TenantName), "Tenant name required");
                 Require(() => legalcaseDto.UnitNumber, nameof(legalcaseDto.UnitNumber), "Unit required");
-                Require(() => legalcaseDto.IsUnitIlligalId, nameof(legalcaseDto.IsUnitIlligalId), "Select at least on option");
+                Require(() => legalcaseDto.IsUnitIllegalId, nameof(legalcaseDto.IsUnitIllegalId), "Select at least on option");
                 break;
             case Step.Rent:
                 Require(() => legalcaseDto.MonthlyRent, nameof(legalcaseDto.MonthlyRent), "Monthly rent required");

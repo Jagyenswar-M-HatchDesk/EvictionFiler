@@ -9,7 +9,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 		Task<List<CreateToBuildingDto>> GetAll();
 		Task<bool> AddApartmentAsync(List<CreateToBuildingDto> dto);
 		Task<CreateToBuildingDto> GetByIdAsync(Guid id);
-		Task<List<EditToBuildingDto>> SearchBuildingByCode(string code, Guid landlordId , Guid excludeBuildingId);
+		Task<List<EditToBuildingDto>> SearchBuildingByCode(string code, Guid landlordId, Guid excludeBuildingId);
 		Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id);
 		Task<List<EditToBuildingDto>> GetBuildingsByLandlordIdAsync(Guid clientId);
 		Task<bool> UpdateBuildingAsync(List<EditToBuildingDto> buildings);
@@ -17,6 +17,12 @@ namespace EvictionFiler.Application.Interfaces.IServices
 		Task<EditToBuildingDto> GetBuildingByIdAsync(Guid buildingId);
 
 
+		Task<Guid?> AddOnlyApartmentfromCase(CreateToBuildingDto appartment);
+		Task<bool> UpdateonlyBuildingfromCase(EditToBuildingDto appartment);
 
-	}
+
+
+
+
+    }
 }

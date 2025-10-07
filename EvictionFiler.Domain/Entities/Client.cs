@@ -5,13 +5,13 @@ using EvictionFiler.Domain.Entities.Master;
 
 namespace EvictionFiler.Domain.Entities
 {
-    public class Client : DeletableBaseEntity
+	public class Client : DeletableBaseEntity
 	{
 		[Required]
-        public string ClientCode { get; set; } = string.Empty;
+		public string ClientCode { get; set; } = string.Empty;
 		[MaxLength(100)]
 		[Required]
-		public string FirstName { get; set; } = string.Empty ;
+		public string FirstName { get; set; } = string.Empty;
 
 		[MaxLength(100)]
 		public string? LastName { get; set; }
@@ -23,20 +23,26 @@ namespace EvictionFiler.Domain.Entities
 		[MaxLength(500)]
 		public string? Address2 { get; set; }
 		[MaxLength(100)]
-        public string? City { get; set; } = string.Empty;
+		public string? City { get; set; } = string.Empty;
 		public Guid? StateId { get; set; }
 		[ForeignKey("StateId")]
 		public State State { get; set; } = new State();
 		[MaxLength(50)]
-		public string? ZipCode { get; set; } =string.Empty;
+		public string? ZipCode { get; set; } = string.Empty;
 		[MaxLength(50)]
 		public string? Phone { get; set; }
 		[MaxLength(50)]
 		public string? CellPhone { get; set; }
 		[MaxLength(50)]
-		public string? Fax { get; set; } 
+		public string? Fax { get; set; }
 
-	
+
 		public ICollection<LandLord>? LandLords { get; set; }
-	}
+
+		public Guid? ClientTypeId { get; set; }
+		[ForeignKey("ClientTypeId")]
+		public ClientRole ClientType { get; set; } = new ClientRole();
+
+        public string? Reference { get; set; }
+    }
 }

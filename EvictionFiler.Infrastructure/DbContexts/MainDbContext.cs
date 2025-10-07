@@ -36,6 +36,7 @@ namespace EvictionFiler.Infrastructure.DbContexts
 		public DbSet<IsUnitIllegal> MstIsUnitIllegal{ get; set; }
 		public DbSet<RegulationStatus> MstRegulationStatus { get; set; }
 		public DbSet<State> MstStates { get; set; }
+		public DbSet<CaseProgram> MstCaseProgram { get; set; }
 
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)

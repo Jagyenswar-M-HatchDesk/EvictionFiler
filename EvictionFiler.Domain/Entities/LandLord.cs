@@ -45,6 +45,8 @@ namespace EvictionFiler.Domain.Entities
 		public Client? Client { get; set; } 
 
 		public ICollection<Building>? Buildings { get; set; }
+        public string AttorneyOfRecord { get; set; } = string.Empty;
+        public string? LawFirm { get; set; } = string.Empty;
 
-	}
+    }
 }
