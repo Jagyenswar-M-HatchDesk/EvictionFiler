@@ -222,12 +222,14 @@ namespace EvictionFiler.Application.Services
             if (entity != null)
             {
 
-                entity.ApartmentCode = appartment.ApartmentCode;
-                entity.City = appartment.City;
-                entity.Address1 = appartment.Address1;
-                entity.MDRNumber = appartment.MDRNumber;
-                entity.RegulationStatusId = appartment.RegulationStatusId;
-                entity.BuildingUnits = appartment.BuildingUnits;
+                if(entity.ApartmentCode != appartment.ApartmentCode) entity.ApartmentCode = appartment.ApartmentCode;
+                if(entity.City != appartment.City) entity.City = appartment.City;
+                if (entity.Address1 != appartment.Address1)  entity.Address1 = appartment.Address1;
+                if (entity.Address2 != appartment.Address2) entity.Address2 = appartment.Address2;
+                if (entity.StateId != appartment.StateId) entity.StateId = appartment.StateId;
+                if (entity.MDRNumber != appartment.MDRNumber) entity.MDRNumber = appartment.MDRNumber;
+                if (entity.RegulationStatusId != appartment.RegulationStatusId)  entity.RegulationStatusId = appartment.RegulationStatusId;
+                if (entity.BuildingUnits != appartment.BuildingUnits) entity.BuildingUnits = appartment.BuildingUnits;
 
                 _repository.UpdateAsync(entity);
                 await _unitOfWork.SaveChangesAsync();

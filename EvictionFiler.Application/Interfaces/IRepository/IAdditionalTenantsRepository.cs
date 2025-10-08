@@ -12,5 +12,6 @@ namespace EvictionFiler.Application.Interfaces.IRepository
     public interface IAdditionalTenantsRepository : IRepository<AdditioanlTenants>
     {
         Task AddAdditionalTenant(List<AddtionalTenantDto> tenant);
+        Task<List<AdditioanlTenants>> GetAdditionalTenants(Guid? Id);
     }
 }

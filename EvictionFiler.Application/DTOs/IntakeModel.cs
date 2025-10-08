@@ -71,7 +71,7 @@ namespace EvictionFiler.Application.DTOs
         public string? Borough { get; set; }
 
         public bool? OralAgreeMent { get; set; }
-        public bool? GoodCauseApplies { get; set; } = null;
+        public bool? GoodCauseApplies { get; set; } = false;
 
         public int? CalculatedNoticeLength { get; set; } 
         public double? MonthlyRent { get; set; }

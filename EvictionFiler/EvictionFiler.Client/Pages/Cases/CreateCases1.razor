@@ -36,6 +36,7 @@
 @inject ICaseProgramRepository _caseprogram
 @inject IAdditionalTenantService _additionalTenant
 @inject IAdditionalOccupantsService _additionalOccupant
+@inject IStateRepository _stateRepository
 
 @using EvictionFiler.Client.SpinnerService
 @using EvictionFiler.Domian.Enums
@@ -773,8 +774,9 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <input class="form-control mb-2"
                                             placeholder="Tenant Name"
                                             @bind-value="Tenants[tenant.i]"
-                                            @bind-value:after="OnchangeAdditionalTenant" />
+                                            @onblur="() => OnchangeAdditionalTenant(tenant.i)" />
                                         }
+
                                     }
 
                                     <button class="btn btn-sm btn-primary mt-2" @onclick="AddTenant">＋ Add Tenant</button>
@@ -788,9 +790,9 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         @foreach (var undertenant in Undertenants.Select((t, i) => new { t, i }))
                                         {
                                             <input class="form-control mb-2"
-                                            placeholder="Undertenant Name"
+                                            placeholder="Other Occupant Name"
                                             @bind-value="Undertenants[undertenant.i]"
-                                            @bind-value:after="OnchangeAdditionalOccupants" />
+                                            @onblur="() => OnchangeAdditionalOccupants(undertenant.i)" />
                                         }
                                     }
 
@@ -899,7 +901,6 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                 <div class="col-md-4">
                                     <label class="form-label">Good Cause Applies?</label>
                                     <InputSelect class="form-select" @bind-Value="legalcaseDto.GoodCauseApplies">
-                                        <option value="null">-- Select --</option>
                                         <option value="false">No (Exempt)</option>
                                         <option value="true">Yes (Owner ≥ 10)</option>
                                     </InputSelect>
@@ -929,6 +930,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                     <CasesSummary LegalCase="legalcaseDto"
                     TenancyTypeList="TenancyTypeList"
                     DateRentList="DateRentList"
+                    CaseProgramList="CaseProgramList"
                     CurrentStep="CurrentStep" />
                     <TipsSummary />
                 </div>
@@ -1060,7 +1062,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                 <div class="col-md-4">
                                     <label class="form-label">Last Month / Week Rent Paid </label>
-                                    <InputText class="form-control" type="month" @bind-Value="legalcaseDto.LastRentPaid" placeholder="Enter Last Paid Rent Month" />
+                                    <InputText class="form-control" type="month" @bind-Value="LastrentPaid" placeholder="Enter Last Paid Rent Month" @bind-Value:after="FormatLastRentPaid" />
 
                                 </div>
                                 <!-- Total Rent Owed -->
@@ -1171,6 +1173,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     public List<IsUnitIllegal> IsUnitIllegalList = new();
     private List<RegulationStatus> RegulationList = new();
     private List<LandlordType> LandLordTypeList = new();
+    private List<State> StateList = new();
     private List<ClientRole> ClientTypeList = new();
     private List<CaseType> CaseTypeList = new();
     private List<TenancyType> TenancyTypeList = new();
@@ -1183,12 +1186,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     private List<EditToTenantDto> filteredTenantList = new();
     private List<AddtionalTenantDto> AdditionalTenantList = new();
     private List<AdditionalOccupantDto> AdditionalOccupantsList = new();
+    private List<AdditioanlTenants> AdditionalTenantfromDbList = new();
     private string? loggedInUserId;
     private bool isAdmin = false;
     private bool? canbool = null;
     private int currentPage = 1;
     private int pageSize = 10;
     private string searchTerm = "";
+    private string LastrentPaid = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -1203,6 +1208,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
         DateRentList = await DateRentRepository.GetAllDateRent();
+        StateList = await _stateRepository.GetAllState();
 
         ClientTypeList = await ClientRoleRepository.GetAllClientRole();
         CaseProgramList = await _caseprogram.GetAllCaseProgram();
@@ -1232,50 +1238,116 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
     public string UnitNo { get; set; } = "";
 
+    public void FormatLastRentPaid()
+    {
+        var formatted = DateTime.ParseExact(LastrentPaid, "yyyy-MM", null)
+                        .ToString("MMMM yyyy");
+
+        legalcaseDto.LastRentPaid = formatted;
+
+    }
 
 
     void AddTenant()
     {
         Tenants.Add(string.Empty);
     }
-    void OnchangeAdditionalTenant()
+    void OnchangeAdditionalTenant(int index)
     {
-        var additional = new AddtionalTenantDto()
-            {
-                FirstName = Tenants.Skip(Tenants.Count - 1).FirstOrDefault(),
-                TenantId = TenantList.Select(e => e.Id).FirstOrDefault(),
-                CreatedOn = DateTime.Now,
-                IsActive = true,
-                IsDeleted = true,
-                IsVisible = true
-            };
+        var name = Tenants[index];
 
-        AdditionalTenantList.Add(additional);
-
-        if (legalcaseDto.TenantName == null)
+        // If cleared, remove from AdditionalTenantList
+        if (string.IsNullOrWhiteSpace(name))
         {
-            legalcaseDto.TenantName = AdditionalTenantList.Select(a => a.FirstName).FirstOrDefault() ?? "";
+            var existing = AdditionalTenantList.ElementAtOrDefault(index);
+            if (existing != null)
+            {
+                AdditionalTenantList.RemoveAt(index);
+            }
+            return;
         }
 
+        // Update or add
+        if (index < AdditionalTenantList.Count)
+        {
+            AdditionalTenantList[index].FirstName = name;
+        }
+        else
+        {
+            var additional = new AddtionalTenantDto()
+                {
+                    FirstName = name,
+                    TenantId = TenantList.Select(e => e.Id).FirstOrDefault(),
+                    CreatedOn = DateTime.Now,
+                    IsActive = true,
+                    IsDeleted = false, // better to keep false
+                    IsVisible = true
+                };
 
+            AdditionalTenantList.Add(additional);
+        }
+
+        // Update legalcaseDto
+        if (legalcaseDto.TenantName == null)
+        {
+            legalcaseDto.TenantName = AdditionalTenantList.FirstOrDefault()?.FirstName ?? "";
+        }
     }
+
 
     void AddUnder()
     {
         Undertenants.Add(string.Empty);
     }
 
-    void OnchangeAdditionalOccupants()
-    {
-        var additional = new AdditionalOccupantDto()
-            {
-                Name = Undertenants.Skip(Undertenants.Count - 1).FirstOrDefault() ?? "",
-                CreatedOn = DateTime.Now,
-                IsActive = true,
-                IsDeleted = true,
-            };
+    // void OnchangeAdditionalOccupants()
+    // {
+    //     var additional = new AdditionalOccupantDto()
+    //         {
+    //             Name = Undertenants.Skip(Undertenants.Count - 1).FirstOrDefault() ?? "",
+    //             CreatedOn = DateTime.Now,
+    //             IsActive = true,
+    //             IsDeleted = true,
+    //         };
 
-        AdditionalOccupantsList.Add(additional);
+    //     AdditionalOccupantsList.Add(additional);
+
+    // }
+
+    void OnchangeAdditionalOccupants(int index)
+    {
+        var name = Tenants[index];
+
+        // If cleared, remove from AdditionalTenantList
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            var existing = AdditionalOccupantsList.ElementAtOrDefault(index);
+            if (existing != null)
+            {
+                AdditionalOccupantsList.RemoveAt(index);
+            }
+            return;
+        }
+
+        // Update or add
+        if (index < AdditionalOccupantsList.Count)
+        {
+            AdditionalOccupantsList[index].Name = name;
+        }
+        else
+        {
+            var additional = new AdditionalOccupantDto()
+                {
+                    Name = name,
+                    CreatedOn = DateTime.Now,
+                    IsActive = true,
+                    IsDeleted = false, // better to keep false
+                    IsVisible = true
+                };
+
+            AdditionalOccupantsList.Add(additional);
+        }
+
 
     }
 
@@ -1600,11 +1672,15 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         {
             if (selectedbuilding != null && HasBuildingChanged(selectedbuilding, legalcaseDto))
             {
+                var completeAddress = legalcaseDto.BuildingAddress.Split(',');
                 var updateBuilding = new EditToBuildingDto()
                     {
                         Id = legalcaseDto.BuildingId.Value,
-                        Address1 = legalcaseDto.BuildingAddress,
+                        Address1 = completeAddress[0],
+                        Address2 = completeAddress[1],
                         City = legalcaseDto.Borough,
+                        StateId = StateList.Where(e => e.Name.Contains(completeAddress[3])).Select(a => a.Id).FirstOrDefault(),
+                        Zipcode = completeAddress[4],
                         BuildingUnits = legalcaseDto.Units,
                         ApartmentCode = legalcaseDto.UnitOrApartmentNumber,
                         MDRNumber = legalcaseDto.Mdr,
@@ -1643,17 +1719,17 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 }
                 await _additionalOccupant.AddAdditionalOccupantsAsync(AdditionalOccupantsList);
             }
-           
+
             nav.NavigateTo("/ManageCases/Manage-Cases?success=true");
-            
+
         }
 
 
     }
     private bool HasClientChanged(EditToClientDto existing, IntakeModel dto)
     {
-        return existing.FirstName != dto.ClientName
-            || existing.LastName != dto.FullName
+        return !dto.ClientName.Contains(existing.FirstName)
+            || !dto.ClientName.Contains(existing.LastName!)
             || existing.Email != dto.ClientEmail
             || existing.Phone != dto.ClientPhone
             || existing.ClientTypeId != dto.ClientTypeId;
@@ -1661,7 +1737,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
     private bool HasLandlordChanged(EditToLandlordDto existing, IntakeModel dto)
     {
-        return existing.FirstName != dto.landlordName
+        return !dto.landlordName.Contains(existing.FirstName)
+            || !dto.landlordName.Contains(existing.LastName!)
             || existing.Address1 != dto.LandlordAddress
             || existing.AttorneyOfRecord != dto.AttorneyOfRecord
             || existing.LawFirm != dto.LawFirm;
@@ -1670,7 +1747,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     private bool HasBuildingChanged(EditToBuildingDto existing, IntakeModel dto)
     {
         return existing.City != dto.City
-            || existing.Address1 != dto.LandlordAddress
+            || !dto.BuildingAddress.Contains(existing.CompletedAddress)
             || existing.ApartmentCode != dto.UnitOrApartmentNumber
             || existing.MDRNumber != dto.Mdr
             || existing.RegulationStatusId != dto.RegulationStatusId
@@ -1943,19 +2020,22 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         legalcaseDto.RegulationStatusId = building.RegulationStatusId;
 
         TenantList = await _tenantService.GetTenantsByClientIdAsync(building.Id);
-        filteredTenantList = TenantList
-            .Where(c => c.UnitOrApartmentNumber.Contains(legalcaseDto.UnitOrApartmentNumber, StringComparison.OrdinalIgnoreCase)
-                        // || c.LastName.Contains(searchlandlordText, StringComparison.OrdinalIgnoreCase)
-                        // || c.LandLordCode.Contains(searchlandlordText, StringComparison.OrdinalIgnoreCase)
-                        ).ToList();
+        filteredTenantList = TenantList;
 
-        Tenants = filteredTenantList.Select(e => e.FirstName).ToList();
+
+        Tenants = filteredTenantList.Select(e => $"{e.FirstName} {e.LastName }").ToList();
 
 
         legalcaseDto.TenantName = Tenants.FirstOrDefault() ?? "";
-        legalcaseDto.TenantId = TenantList.Select(e => e.Id).FirstOrDefault();
-        legalcaseDto.UnitNumber = TenantList.Select(e => e.UnitOrApartmentNumber).FirstOrDefault() ?? "abc";
+        legalcaseDto.TenantId = filteredTenantList.Select(e => e.Id).FirstOrDefault();
+        legalcaseDto.TenantRecord = filteredTenantList.Select(e => e.TenantRecord).FirstOrDefault();
+        legalcaseDto.HasPossession = filteredTenantList.Select(e => e.HasPossession).FirstOrDefault();
+        legalcaseDto.UnitNumber = filteredTenantList.Select(e => e.UnitOrApartmentNumber).FirstOrDefault() ?? "abc";
         legalcaseDto.IsUnitIllegalId = TenantList.Select(e => e.IsUnitIllegalId).FirstOrDefault();
+
+        AdditionalTenantfromDbList = await _additionalTenant.GetAllAdditionalTenantsAsync(legalcaseDto.TenantId);
+
+        Tenants.AddRange(AdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}").ToList());
 
     }
 

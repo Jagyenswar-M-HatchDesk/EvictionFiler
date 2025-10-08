@@ -22,5 +22,11 @@ namespace EvictionFiler.Application.Services
         {
             await _additionalTenantsRepository.AddAdditionalTenant(tenant);
         }
+
+        public async Task<List<AdditioanlTenants>> GetAllAdditionalTenantsAsync(Guid? Id)
+        {
+            var additional = await _additionalTenantsRepository.GetAdditionalTenants(Id);
+            return additional;
+        }
     }
 }
