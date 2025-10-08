@@ -37,13 +37,14 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 		public List<CreateToTenantDto>? Tenants { get; set; }
 
         public string CompletedAddress
-        {
-            get
-            {
-                var parts = new List<string> { Address1, Address2, City, StateName, Zipcode };
-                return string.Join(", ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
-            }
-        }
+		{
+			get
+			{
+				var parts = new List<string> { Address1, Address2, City, StateName, Zipcode };
+				return string.Join(", ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+			}
+			
+		}
 
-    }
+	}
 }

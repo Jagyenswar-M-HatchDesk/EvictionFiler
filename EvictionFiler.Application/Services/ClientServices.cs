@@ -284,7 +284,8 @@ namespace EvictionFiler.Application.Services
 					CellPhone = client.CellPhone,
 					Fax = client.Fax,
 					CreatedBy = client.CreatedBy,
-					CreatedOn = DateTime.Now
+					CreatedOn = DateTime.Now,
+					ClientTypeId = client.ClientTypeId,
 				};
 
 				await _clientRepo.AddAsync(newclient);

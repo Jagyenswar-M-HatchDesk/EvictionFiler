@@ -3,6 +3,7 @@ using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task AddAdditionalTenant(List<AddtionalTenantDto> tenant)
         {
-           try
+            try
             {
                 var newtenant = tenant.Select(e => new AdditioanlTenants()
                 {
@@ -43,7 +44,23 @@ namespace EvictionFiler.Infrastructure.Repositories
             {
                 throw new Exception();
             }
-            
+
+        }
+
+        public async Task<List<AdditioanlTenants>> GetAdditionalTenants(Guid? Id)
+        {
+            try
+            {
+                var tenants = await _context.AdditioanlTenants.Where(e => e.TenantId == Id).ToListAsync();
+                if(tenants .Count > 0) return tenants;
+
+                return new List<AdditioanlTenants>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+            }
+
         }
     }
 }
