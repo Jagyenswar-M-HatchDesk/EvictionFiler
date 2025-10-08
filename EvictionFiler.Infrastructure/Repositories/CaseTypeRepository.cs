@@ -15,12 +15,24 @@ namespace EvictionFiler.Infrastructure.Repositories
 			_context = context;
 		}
 
-		
-		public async Task<List<CaseType>> GetAllCaseType()
+        public async Task<List<CaseStatus>> GetAllCaseStatus()
+        {
+            return await _context.MstCaseStatus.ToListAsync();
+        }
+
+        public async Task<List<CaseType>> GetAllCaseType()
 		{
 			return await _context.MstCaseTypes.ToListAsync();
 		}
 
-		
-	}
+        public async Task<List<County>> GetAllCounty()
+        {
+            return await _context.MstCounties.ToListAsync();
+        }
+
+        public async Task<List<CourtPart>> GetAllCourtPart()
+        {
+            return await _context.MstCourtPart.ToListAsync();
+        }
+    }
 }
