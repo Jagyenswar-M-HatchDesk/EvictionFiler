@@ -36,6 +36,6 @@ namespace EvictionFiler.Domain.Entities
         [ForeignKey("CaseTypeId")]
         public CaseType CaseType { get; set; } = new CaseType();
 
-        public string LastAction { get; set; }
+        public string? LastAction { get; set; }
     }
 }
