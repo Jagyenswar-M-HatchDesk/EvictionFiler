@@ -1,5 +1,6 @@
 ﻿@page "/Calander"
 @using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.CalanderDto
 @using EvictionFiler.Domain.Entities.Master
 @using System.ComponentModel.DataAnnotations
 @using System.Linq.Expressions
@@ -17,25 +18,14 @@
 @using EvictionFiler.Domain.Entities.Master
 @using Blazored.Typeahead
 
-@inject IClientRoleRepository ClientRoleRepository
+
 @inject ICaseTypeRepository CaseTypeRepository
-@inject ICaseSubTypeRepository CaseSubTypeRepository
-@inject IRegulationStatusRepository RegulationStatusRepository
-@inject IReasonHoldoverRepository ReasonHoldoverRepository
-@inject ILandlordTypeRepository LandlordTypeRepository
-@inject IRenewalStatusRepository RenewalStatusRepository
-@inject IUnitIllegalRepository UnitIllegalRepository
-@inject ITenancyTypeRepository TenancyTypeRepository
-@inject IDateRentRepository DateRentRepository
-@inject ILandlordSevice _landlordService
-@inject IBuildingService _buildingService
-@inject ILegalCaseService _legalCaseService
-@inject ITenantService _tenantService
-@inject IClientService _clientService
+@inject ICalanderService CalanderService
+
 @using EvictionFiler.Client.SpinnerService
 @using EvictionFiler.Domian.Enums
 @inject IJSRuntime JS
-@inject NavigationManager nav
+@inject NavigationManager Navigation
 @inject SpinnerService spinnerservice
 @using Microsoft.AspNetCore.Components.Authorization;
 @using EvictionFiler.Domain.Entities
@@ -162,7 +152,7 @@
         <header>
             <div class="brand">
                 <div class="logo"></div>
-                <h1>EvictionFiler • Court Calendars</h1>
+                <h1>HousingCourtFiler • Court Calendars</h1>
             </div>
             <div class="sub">Generate, filter, and print housing court calendars</div>
         </header>
@@ -174,50 +164,44 @@
             <div class="badge">New Action</div>
         </div>
         <div class="card-body">
-            <form>
+            <EditForm EditContext="_editContext">
                 <div class="row g-3">
                     <div class="col-md-2">
                         <label for="f-county" class="form-label">County</label>
-                        <select id="f-county" class="form-select">
-                            <option value="">All</option>
-                            <option>Bronx</option>
-                            <option>Brooklyn</option>
-                            <option>Manhattan</option>
-                            <option>Queens</option>
-                            <option>Staten Island</option>
-                            <option>Nassau</option>
-                            <option>Suffolk</option>
-                            <option>Westchester</option>
-                        </select>
+                        <InputSelect class="form-select" @bind-Value="calanderDto.CountyId">
+                            <option value="">-- Select type --</option>
+                            @foreach (var l in CountyList)
+                            {
+                                <option value="@l.Id">@l.Name</option>
+                            }
+                        </InputSelect>
                     </div>
                     <div class="col-md-2">
-                        <label for="f-from" class="form-label">Date From</label>
-                        <input type="date" id="f-from" class="form-control">
+                        <label for="f-from" class="form-label" >Date From</label>
+                        <InputDate  id="f-from" class="form-control" @bind-Value="calanderDto.DateFrom" />
                     </div>
                     <div class="col-md-2">
                         <label for="f-to" class="form-label">Date To</label>
-                        <input type="date" id="f-to" class="form-control">
+                        <InputDate id="f-from" class="form-control" @bind-Value="calanderDto.DateTo" />
                     </div>
                     <div class="col-md-2">
                         <label for="f-part" class="form-label">Court Part</label>
-                        <select id="f-part" class="form-select">
-                            <option value="">All</option>
-                            <option>Part A</option>
-                            <option>Part B</option>
-                            <option>Part C</option>
-                            <option>Part D</option>
-                            <option>Part E</option>
-                            <option>SPP</option>
-                        </select>
+                        <InputSelect class="form-select" @bind-Value="calanderDto.CourtPartId">
+                            <option value="">-- Select type --</option>
+                            @foreach (var l in CourtPartList)
+                            {
+                                <option value="@l.Id">@l.Name</option>
+                            }
+                        </InputSelect>
                     </div>
 
                     <div class="col-md-2">
                         <label for="f-room" class="form-label">Room</label>
-                        <input id="f-room" placeholder="406" class="form-control">
+                        <InputText id="f-from" class="form-control" @bind-Value="calanderDto.Room" />
                     </div>
                     <div class="col-md-2">
                         <label for="f-type" class="form-label">Case Type</label>
-                        <InputSelect class="form-select" @bind-Value="legalcaseDto.CaseTypeId">
+                        <InputSelect class="form-select" @bind-Value="calanderDto.CaseTypeId">
                             <option value="">-- Select type --</option>
                             @foreach (var l in CaseTypeList)
                             {
@@ -232,22 +216,22 @@
                       <div class="row">
                             <div class="col-md-2">
                                 <label for="f-judge" class="form-label">Judge</label>
-                                <input id="f-judge" placeholder="Judge name" class="form-control">
+                                <InputText id="f-from" class="form-control" @bind-Value="calanderDto.Judge" />
                             </div>
                             <div class="col-md-2">
                                 <label for="f-status" class="form-label">Status</label>
-                                <select id="f-status" class="form-select">
-                                    <option value="">All</option>
-                                    <option>Upcoming</option>
-                                    <option>Adjourned</option>
-                                    <option>Resolved</option>
-                                    <option>Pending</option>
-                                </select>
+                                <InputSelect class="form-select" @bind-Value="calanderDto.CaseStatusId">
+                                    <option value="">-- Select type --</option>
+                                    @foreach (var l in CaseStatusList)
+                                    {
+                                        <option value="@l.Id">@l.Name</option>
+                                    }
+                                </InputSelect>
                             </div>
 
                             <div class="col-md-3">
                                 <label for="f-q" class="form-label">Search</label>
-                                <input id="f-q" placeholder="Caption / Index # / Address" class="form-control">
+                                <InputText id="f-from" class="form-control" @bind-Value="calanderDto.Caption" />
                             </div>
 
                             <div class="col-md-5 d-flex align-items-center">
@@ -262,13 +246,13 @@
               </div>
 
                 <div class="mt-4 d-flex gap-2 flex-wrap align-items-center bar">
-                    <button type="button" class="btn btn-primary" id="btnGenerate">Generate</button>
+                    <button type="button" class="btn btn-primary" id="btnGenerate" @onclick="SubmitAsync">Generate</button>
                     <button type="reset" class="btn secondary" id="btnReset">Reset</button>
                     <button type="button" class="btn secondary" id="btnPrint">Print</button>
                     <button type="button" class="btn secondary" id="btnExport">Export CSV</button>
                     <span class="ms-auto text-muted" id="countInfo">0 results</span>
                 </div>
-            </form>
+            </EditForm>
         </div>
     </section>
 
@@ -299,132 +283,68 @@
                             <th>Last Action</th>
                         </tr>
                     </thead>
-                    <tbody id="tbody">
-                    
-                    @foreach (var c in cases)
+                <tbody id="tbody">
+                    @if (CourtCases != null && CourtCases.Any())
                     {
-                        <tr>
-                            <td>@c.County</td>
-                            <td>@c.Date.ToString("yyyy-MM-dd")</td>
-                            <td>@c.Part</td>
-                            <td>@c.Room</td>
-                            <td>@c.Caption</td>
-                            <td>@c.Index</td>
-                            <td>@c.Time</td>
-                            <td>@c.Type</td>
-                            <td>@c.Judge</td>
-                            <td>@c.LastAction</td>
-                        </tr>
+                        foreach (var c in CourtCases)
+                        {
+                            <tr>
+                                <td>@c.CountyName</td>
+                                <td>@(c.DateFrom.ToString("yyyy-MM-dd") ?? "")</td>
+                                <td>@c.CountyId</td>
+                                <td>@c.Room</td>
+                                <td>@c.Caption</td>
+                                <td>LT-310359-25/QU</td>
+                                <td>09:30</td>
+                                <td>@c.CaseTypeName</td>
+                                <td>@c.Judge</td>
+                                <td>@c.CaseStatusName</td>
+                            </tr>
+                        }
                     }
-                    </tbody>
+                    else
+                    {
+                        <tr><td colspan="10" class="text-center">No data available</td></tr>
+                    }
+                </tbody>
+
                 </table>
             </div>
         </section>
     </div>
 
-    <script>
-       
-
-
-          const els = {
-            county: id('f-county'), from: id('f-from'), to: id('f-to'),
-            part: id('f-part'), room: id('f-room'), type: id('f-type'),
-            judge: id('f-judge'), status: id('f-status'), q: id('f-q'),
-            per5: id('f-per5'), tbody: id('tbody'), count: id('countInfo'),
-            statToday: id('statToday'), statWeek: id('statWeek'),
-            statRange: id('statRange'), printMeta: id('printMeta')
-          };
-          function id(x) { return document.getElementById(x) }
-          function fmt(d) { const x = new Date(d); return x.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' }) }
-          function within(d, a, b) { const x = new Date(d); if (a && x < new Date(a)) return false; if (b && x > new Date(b)) return false; return true }
-          function matches(r) {
-            if (els.county.value && r.county !== els.county.value) return false;
-            if (els.part.value && r.part !== els.part.value) return false;
-            if (els.type.value && r.type !== els.type.value) return false;
-            if (els.status.value && r.status !== els.status.value) return false;
-            if (els.room.value && !String(r.room).toLowerCase().includes(els.room.value.toLowerCase())) return false;
-            if (els.judge.value && !String(r.judge).toLowerCase().includes(els.judge.value.toLowerCase())) return false;
-            if (!within(r.date, els.from.value, els.to.value)) return false;
-            const q = els.q.value.trim().toLowerCase();
-            if (q) {
-              const hay = [r.caption, r.index, r.county, r.part, r.room].join(' ').toLowerCase();
-              if (!hay.includes(q)) return false;
-            }
-            return true;
-          }
-          function render(rows) {
-            els.tbody.innerHTML = rows.map(r => `
-          <tr>
-            <td>${r.county}</td>
-            <td class="hide-sm">${fmt(r.date)}</td>
-            <td>${r.part}</td>
-            <td>${r.room}</td>
-            <td><div class="caption">${r.caption}</div></td>
-            <td>${r.index}</td>
-            <td>${r.time}</td>
-            <td><span class="label ${r.type === 'Holdover' ? 'holdover' : r.type === 'Non Payment' ? 'np' : ''}">${r.type}</span></td>
-            <td class="hide-sm">${r.judge || ''}</td>
-            <td>${r.last_action || ''}</td>
-          </tr>
-        `).join('');
-            // counts
-            els.count.textContent = `${rows.length} result${rows.length === 1 ? '' : 's'}`;
-            const todayISO = new Date().toISOString().slice(0, 10);
-            const startOfWeek = (() => { const d = new Date(); const day = d.getDay(); const diff = d.getDate() - day + (day === 0 ? -6 : 1); return new Date(d.setDate(diff)); })();
-            const weekRows = rows.filter(r => new Date(r.date) >= startOfWeek);
-            const rangeRows = rows.filter(r => within(r.date, els.from.value, els.to.value));
-            els.statToday.textContent = rows.filter(r => r.date === todayISO).length;
-            els.statWeek.textContent = weekRows.length;
-            els.statRange.textContent = rangeRows.length || rows.length;
-            // print meta
-            const rangeTxt = els.from.value || els.to.value ? `${els.from.value || '…'} → ${els.to.value || '…'}` : 'All Dates';
-            const countyTxt = els.county.value || 'All Counties';
-            const partTxt = els.part.value || 'All Parts';
-            els.printMeta.textContent = `${countyTxt} • ${partTxt} • ${rangeTxt}`;
-          }
-          function generate()
-          { const rows = CASES.filter(matches).sort((a, b) => (a.date + b.time).localeCompare(b.date + b.time)); render(rows); }
-          function resetFilters() {
-            ['county', 'from', 'to', 'part', 'room', 'type', 'judge', 'status', 'q'].forEach(k => els[k].value = '');
-            els.per5.checked = false; document.body.classList.remove('per5');
-            render(CASES);
-          }
-          function exportCSV() {
-            const rows = [...document.querySelectorAll('#tbody tr')].map(tr => [...tr.children].map(td => td.innerText));
-            const header = ["County", "Date", "Court Part", "Room", "Caption", "Index #", "Time", "Case Type", "Judge", "Last Action"];
-            const csv = [header].concat(rows).map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `CourtCalendar_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
-          }
-          id('btnGenerate').onclick = generate;
-          id('btnReset').onclick = resetFilters;
-          id('btnPrint').onclick = () => { document.body.classList.toggle('per5', els.per5.checked); window.print(); };
-          id('btnExport').onclick = exportCSV;
-          ['county', 'from', 'to', 'part', 'room', 'type', 'judge', 'status', 'q'].forEach(idv => id('f-' + idv)?.addEventListener('input', generate));
-          id('f-per5').addEventListener('change', e => document.body.classList.toggle('per5', e.target.checked));
-          render(CASES);
-    </script>
+    
 
 @code {
 
-    private IntakeModel legalcaseDto = new IntakeModel();
-   
+    private CalanderDto calanderDto = new CalanderDto();
+
     private EditContext _editContext;
     private ValidationMessageStore _messages;  
     private List<CaseType> CaseTypeList = new();
+    private List<CourtPart> CourtPartList = new();
+    private List<County> CountyList = new();
+    private List<CaseStatus> CaseStatusList = new();
     private string? loggedInUserId;
     private bool isAdmin = false;
- 
-     
+
+    private List<CalanderDto> CourtCases { get; set; }
+
+
     protected override async Task OnInitializedAsync()
     {
-        legalcaseDto = new IntakeModel();
-        _editContext = new EditContext(legalcaseDto);
+        calanderDto = new CalanderDto();
+        _editContext = new EditContext(calanderDto);
         _messages = new ValidationMessageStore(_editContext);
 
 
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
+        CaseStatusList = await CaseTypeRepository.GetAllCaseStatus();
+        CountyList = await CaseTypeRepository.GetAllCounty();
+        CourtPartList = await CaseTypeRepository.GetAllCourtPart();
         // legalcaseDto.ClientId = Guid.Parse(ClientId);
+
+        CourtCases = await CalanderService.GetAllCalanderAsync();
 
         var authState = await _authStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
@@ -436,31 +356,35 @@
         }
     }
 
-
-    public class CourtCase
+    private async Task SubmitAsync()
     {
-        public string County { get; set; }
-        public DateTime Date { get; set; }
-        public string Part { get; set; }
-        public string Room { get; set; }
-        public string Caption { get; set; }
-        public string Index { get; set; }
-        public string Time { get; set; }
-        public string Type { get; set; }
-        public string Judge { get; set; }
-        public string Status { get; set; }
-        public string LastAction { get; set; }
+        spinnerservice.Show();
+        if (calanderDto == null)
+            return;
+
+
+        var authState = await _authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userGuid))
+        {
+            calanderDto.CreatedBy = userGuid;
+        }
+        else
+        {
+            // unauthenticated user
+            calanderDto.CreatedBy = Guid.Empty;
+        }
+
+        // Save the full nested object
+        var isSaved = await CalanderService.GenrateCalander(calanderDto);
+        if (isSaved)
+        {
+            Navigation.NavigateTo("/Calander", true);
+        }
     }
-
-    List<CourtCase> cases = new List<CourtCase>
-    {
-        new CourtCase { County = "Queens", Date = DateTime.Parse("2025-09-26"), Part = "Part D", Room = "406", Caption = "Alejandro Sanchez v. Victoria “Doe”", Index = "LT-310359-25/QU", Time = "09:30", Type = "Holdover", Judge = "Hon. David J. Bryan", Status = "Upcoming", LastAction = "Adjourned for documents" },
-        new CourtCase { County = "Queens", Date = DateTime.Parse("2025-09-26"), Part = "Part D", Room = "406", Caption = "Li Ying Zheng v. Dynell Fontaine", Index = "LT-310377-25/QU", Time = "09:30", Type = "Holdover", Judge = "Hon. David J. Bryan", Status = "Upcoming", LastAction = "Stipulation—repair access" },
-        new CourtCase { County = "Queens", Date = DateTime.Parse("2025-09-26"), Part = "Part D", Room = "406", Caption = "Allahu Akbar Mgmt v. Kabir Ahasan", Index = "LT-310387-25/QU", Time = "09:30", Type = "Non Payment", Judge = "Hon. David J. Bryan", Status = "Adjourned", LastAction = "Answer filed" },
-        new CourtCase { County = "Queens", Date = DateTime.Parse("2025-09-26"), Part = "Part D", Room = "406", Caption = "43 Gardens Realty LLC v. St Clair", Index = "LT-310696-25/QU", Time = "09:30", Type = "Holdover", Judge = "Hon. David J. Bryan", Status = "Upcoming", LastAction = "Motion to dismiss submitted" },
-        new CourtCase { County = "Queens", Date = DateTime.Parse("2025-09-26"), Part = "Part D", Room = "406", Caption = "James Charles v. Gail Cockrel", Index = "LT-311220-25/QU", Time = "09:30", Type = "Per Diem", Judge = "Hon. David J. Bryan", Status = "Upcoming", LastAction = "Conference scheduled" },
-        new CourtCase { County = "Brooklyn", Date = DateTime.Parse("2025-09-29"), Part = "Part E", Room = "302", Caption = "Victoria ‘Doe’ (Deli) v. Max Cuatlatl", Index = "LT-311999-25/BK", Time = "14:00", Type = "Commercial Nonpayment", Judge = "Hon. Smith", Status = "Pending", LastAction = "Service proof filed" }
-    };
 
 
 }
