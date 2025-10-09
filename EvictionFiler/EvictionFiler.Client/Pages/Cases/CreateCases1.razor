@@ -1,4 +1,4 @@
-﻿@page "/createcase1"
+﻿@page "/case/create"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Linq.Expressions
@@ -1255,7 +1255,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     void OnchangeAdditionalTenant(int index)
     {
         var name = Tenants[index];
-
+        var splittedname = name.Split(' ');
         // If cleared, remove from AdditionalTenantList
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -1276,7 +1276,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         {
             var additional = new AddtionalTenantDto()
                 {
-                    FirstName = name,
+                    FirstName = splittedname[0],
+                    LastName = splittedname[1],
                     TenantId = TenantList.Select(e => e.Id).FirstOrDefault(),
                     CreatedOn = DateTime.Now,
                     IsActive = true,
@@ -1290,7 +1291,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         // Update legalcaseDto
         if (legalcaseDto.TenantName == null)
         {
-            legalcaseDto.TenantName = AdditionalTenantList.FirstOrDefault()?.FirstName ?? "";
+            legalcaseDto.TenantName = AdditionalTenantList.Select(e => $"{e.FirstName} {e.LastName}").FirstOrDefault() ?? "";
         }
     }
 
@@ -1316,7 +1317,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
     void OnchangeAdditionalOccupants(int index)
     {
-        var name = Tenants[index];
+        var name = Undertenants[index];
 
         // If cleared, remove from AdditionalTenantList
         if (string.IsNullOrWhiteSpace(name))
@@ -1561,166 +1562,208 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
     private async Task SubmitAsync()
     {
-        spinnerservice.Show();
-        var authState = await _authStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-        if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userGuid))
+        try
         {
-            legalcaseDto.CreatedBy = userGuid;
-        }
-        else
-        {
-            // unauthenticated user
-            legalcaseDto.CreatedBy = Guid.Empty;
-        }
-        // 1. Handle Client
-        if (selectedClient == null)
-        {
-            // create new client
-            var nameparts = legalcaseDto.ClientName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            newClient = new CreateToClientDto()
-                {
-                    FirstName = nameparts[0],
-                    LastName = nameparts[1],
-                    Email = legalcaseDto.ClientEmail,
-                    Phone = legalcaseDto.ClientPhone,
-                    ClientTypeId = legalcaseDto.ClientTypeId,
-                    CreatedBy = legalcaseDto.CreatedBy
+            spinnerservice.Show();
+            var authState = await _authStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
 
-                };
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-
-            var clientId = await _clientService.CreateOnlyClient(newClient);
-            legalcaseDto.ClientId = clientId;
-        }
-        else
-        {
-            // check if changed -> update
-            if (selectedClient != null && HasClientChanged(selectedClient, legalcaseDto))
+            if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userGuid))
             {
+                legalcaseDto.CreatedBy = userGuid;
+            }
+            else
+            {
+                // unauthenticated user
+                legalcaseDto.CreatedBy = Guid.Empty;
+            }
+            // 1. Handle Client
+            if (selectedClient == null)
+            {
+                // create new client
                 var nameparts = legalcaseDto.ClientName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                var updateclient = new EditToClientDto
+                newClient = new CreateToClientDto()
                     {
-                        Id = legalcaseDto.ClientId ?? Guid.Empty,
                         FirstName = nameparts[0],
                         LastName = nameparts[1],
                         Email = legalcaseDto.ClientEmail,
                         Phone = legalcaseDto.ClientPhone,
                         ClientTypeId = legalcaseDto.ClientTypeId,
-                        Reference = legalcaseDto.Reference
+                        CreatedBy = legalcaseDto.CreatedBy
 
                     };
-                await _clientService.UpdateClientformCase(updateclient);
+
+
+                var clientId = await _clientService.CreateOnlyClient(newClient);
+                legalcaseDto.ClientId = clientId;
             }
-        }
-
-        // 2. Handle Landlord
-        if (selectedlandlord == null)
-        {
-            var nameparts = searchlandlordText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            newLandlord = new CreateToLandLordDto()
-                {
-
-                    FirstName = nameparts[0],
-                    LastName = nameparts[1],
-                    Address1 = legalcaseDto.LandlordAddress,
-                    LawFirm = legalcaseDto.LawFirm,
-                    ContactPersonName = legalcaseDto.ContactPersonName,
-                    AttorneyOfRecord = legalcaseDto.AttorneyOfRecord,
-                    ClientId = legalcaseDto.ClientId
-                };
-            var landlordId = await _landlordService.AddOnlyLandLordfromCase(newLandlord);
-            legalcaseDto.LandlordId = landlordId;
-        }
-        else
-        {
-            if (selectedlandlord != null && HasLandlordChanged(selectedlandlord, legalcaseDto))
+            else
             {
-                var updateLandLord = new EditToLandlordDto()
+                // check if changed -> update
+                if (selectedClient != null && HasClientChanged(selectedClient, legalcaseDto))
+                {
+                    var nameparts = legalcaseDto.ClientName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    var updateclient = new EditToClientDto
+                        {
+                            Id = legalcaseDto.ClientId ?? Guid.Empty,
+                            FirstName = nameparts[0],
+                            LastName = nameparts[1],
+                            Email = legalcaseDto.ClientEmail,
+                            Phone = legalcaseDto.ClientPhone,
+                            ClientTypeId = legalcaseDto.ClientTypeId,
+                            Reference = legalcaseDto.Reference
+
+                        };
+                    await _clientService.UpdateClientformCase(updateclient);
+                }
+            }
+
+            // 2. Handle Landlord
+            if (selectedlandlord == null)
+            {
+                var nameparts = searchlandlordText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                newLandlord = new CreateToLandLordDto()
                     {
-                        Id = legalcaseDto.LandlordId.Value,
+
+                        FirstName = nameparts[0],
+                        LastName = nameparts[1],
                         Address1 = legalcaseDto.LandlordAddress,
-                        AttorneyOfRecord = legalcaseDto.AttorneyOfRecord,
                         LawFirm = legalcaseDto.LawFirm,
-                        ContactPersonName = legalcaseDto.ContactPersonName
+                        ContactPersonName = legalcaseDto.ContactPersonName,
+                        AttorneyOfRecord = legalcaseDto.AttorneyOfRecord,
+                        ClientId = legalcaseDto.ClientId
                     };
-                await _landlordService.UpdateLandLordsfromCase(updateLandLord);
+                var landlordId = await _landlordService.AddOnlyLandLordfromCase(newLandlord);
+                legalcaseDto.LandlordId = landlordId;
             }
-        }
-
-        // 2. Handle Building
-        if (selectedbuilding == null)
-        {
-            newBuilding = new CreateToBuildingDto()
-                {
-
-                    Address1 = legalcaseDto.BuildingAddress,
-                    City = legalcaseDto.City,
-                    BuildingUnits = legalcaseDto.Units,
-                    ApartmentCode = legalcaseDto.UnitOrApartmentNumber,
-                    MDRNumber = legalcaseDto.Mdr,
-                    RegulationStatusId = legalcaseDto.RegulationStatusId,
-                    LandlordId = legalcaseDto.LandlordId
-                };
-            var buildingId = await _buildingService.AddOnlyApartmentfromCase(newBuilding);
-            legalcaseDto.BuildingId = buildingId;
-        }
-        else
-        {
-            if (selectedbuilding != null && HasBuildingChanged(selectedbuilding, legalcaseDto))
+            else
             {
-                var completeAddress = legalcaseDto.BuildingAddress.Split(',');
-                var updateBuilding = new EditToBuildingDto()
+                if (selectedlandlord != null && HasLandlordChanged(selectedlandlord, legalcaseDto))
+                {
+                    var updateLandLord = new EditToLandlordDto()
+                        {
+                            Id = legalcaseDto.LandlordId.Value,
+                            Address1 = legalcaseDto.LandlordAddress,
+                            AttorneyOfRecord = legalcaseDto.AttorneyOfRecord,
+                            LawFirm = legalcaseDto.LawFirm,
+                            ContactPersonName = legalcaseDto.ContactPersonName
+                        };
+                    await _landlordService.UpdateLandLordsfromCase(updateLandLord);
+                }
+            }
+
+            // 2. Handle Building
+            if (selectedbuilding == null)
+            {
+                newBuilding = new CreateToBuildingDto()
                     {
-                        Id = legalcaseDto.BuildingId.Value,
-                        Address1 = completeAddress[0],
-                        Address2 = completeAddress[1],
-                        City = legalcaseDto.Borough,
-                        StateId = StateList.Where(e => e.Name.Contains(completeAddress[3])).Select(a => a.Id).FirstOrDefault(),
-                        Zipcode = completeAddress[4],
+
+                        Address1 = legalcaseDto.BuildingAddress,
+                        City = legalcaseDto.City,
                         BuildingUnits = legalcaseDto.Units,
                         ApartmentCode = legalcaseDto.UnitOrApartmentNumber,
                         MDRNumber = legalcaseDto.Mdr,
                         RegulationStatusId = legalcaseDto.RegulationStatusId,
+                        LandlordId = legalcaseDto.LandlordId
                     };
-                await _buildingService.UpdateonlyBuildingfromCase(updateBuilding);
+                var buildingId = await _buildingService.AddOnlyApartmentfromCase(newBuilding);
+                legalcaseDto.BuildingId = buildingId;
             }
-        }
-
-        if (TenantList.Count > 0)
-        {
-            legalcaseDto.TenantId = TenantList.Select(e => e.Id).FirstOrDefault();
-        }
-
-        if (AdditionalTenantList.Count > 0)
-        {
-            await _additionalTenant.AddAdditionalTenantAsync(AdditionalTenantList);
-        }
-
-        if (legalcaseDto != null || legalcaseDto.Id == Guid.Empty)
-        {
-
-
-            var result = await _legalCaseService.CreateCasesAsync(legalcaseDto);
-
-            if(!result.HasValue)
+            else
             {
-                return;
-            }
-
-            if (AdditionalOccupantsList.Count > 0)
-            {
-                foreach(var occupant in AdditionalOccupantsList)
+                if (selectedbuilding != null && HasBuildingChanged(selectedbuilding, legalcaseDto))
                 {
-                    occupant.LegalCaseId = result;
+                    var completeAddress = legalcaseDto.BuildingAddress.Split(',');
+                    var updateBuilding = new EditToBuildingDto()
+                        {
+                            Id = legalcaseDto.BuildingId.Value,
+                            Address1 = completeAddress[0],
+                            Address2 = completeAddress[1],
+                            City = legalcaseDto.Borough,
+                            StateId = StateList.Where(e => e.Name.Contains(completeAddress[3])).Select(a => a.Id).FirstOrDefault(),
+                            Zipcode = completeAddress[4],
+                            BuildingUnits = legalcaseDto.Units,
+                            ApartmentCode = legalcaseDto.UnitOrApartmentNumber,
+                            MDRNumber = legalcaseDto.Mdr,
+                            RegulationStatusId = legalcaseDto.RegulationStatusId,
+                        };
+                    await _buildingService.UpdateonlyBuildingfromCase(updateBuilding);
                 }
-                await _additionalOccupant.AddAdditionalOccupantsAsync(AdditionalOccupantsList);
             }
 
-            nav.NavigateTo("/ManageCases/Manage-Cases?success=true");
+            if (TenantList.Count > 0)
+            {
+                legalcaseDto.TenantId = TenantList.Select(e => e.Id).FirstOrDefault();
+            }
+            else
+            {
+                var newTenant = AdditionalTenantList.Select(e => new CreateToTenantDto()
+                    {
+                        FirstName = e.FirstName,
+                        LastName = e.LastName,
+                        BuildingId = legalcaseDto.BuildingId,
+                        MoveInDate = legalcaseDto.DateTenantMoved,
+                        MonthlyRent = legalcaseDto.MonthlyRent,
+                        TenantShare = legalcaseDto.TenantShare,
+                        RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                        TotalRentOwed = legalcaseDto.TotalOwed,
+                        TenancyTypeId = legalcaseDto.TenancyTypeId,
+                        SocialServices = legalcaseDto.SocialService
+                    }).FirstOrDefault();
+                var tenantId = await _tenantService.AddTenantfromCase(newTenant);
+                IsNewTenant = true;
+                legalcaseDto.TenantId = tenantId;
+
+            }
+            if (AdditionalTenantList.Count > 0)
+            {
+                if(IsNewTenant)
+                {
+                    AdditionalTenantList = AdditionalTenantList.Skip(1).ToList();
+                }
+
+                foreach(var t in AdditionalTenantList)
+                {
+                    t.TenantId = legalcaseDto.TenantId;
+                }
+
+                await _additionalTenant.AddAdditionalTenantAsync(AdditionalTenantList);
+            }
+
+
+            if (legalcaseDto != null || legalcaseDto.Id == Guid.Empty)
+            {
+
+
+                var result = await _legalCaseService.CreateCasesAsync(legalcaseDto);
+
+                if (!result.HasValue)
+                {
+                    return;
+                }
+                if (AdditionalTenantList.Count > 0)
+                {
+                    await _additionalTenant.AddAdditionalTenantAsync(AdditionalTenantList);
+                }
+
+                if (AdditionalOccupantsList.Count > 0)
+                {
+                    foreach (var occupant in AdditionalOccupantsList)
+                    {
+                        occupant.LegalCaseId = result;
+                    }
+                    await _additionalOccupant.AddAdditionalOccupantsAsync(AdditionalOccupantsList);
+                }
+
+                nav.NavigateTo("/ManageCases/Manage-Cases?success=true");
+
+            }
+        }
+        catch(Exception ex)
+        {
+            throw new Exception();
 
         }
 
@@ -1939,6 +1982,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     private List<EditToBuildingDto> filteredBuildings = new();
     private string searchBuildingText;
 
+    private bool IsNewTenant = false;
     private EditToTenantDto selectedtenant;
     private List<EditToTenantDto> filteredTenant = new();
     private string searchTenantText;
@@ -2022,20 +2066,38 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         TenantList = await _tenantService.GetTenantsByClientIdAsync(building.Id);
         filteredTenantList = TenantList;
 
+        if(filteredTenantList.Count > 0)
+        {
+            Tenants = filteredTenantList.Select(e => $"{e.FirstName} {e.LastName}").ToList();
+        }
 
-        Tenants = filteredTenantList.Select(e => $"{e.FirstName} {e.LastName }").ToList();
+        var firstTenant = filteredTenantList.FirstOrDefault();
 
-
-        legalcaseDto.TenantName = Tenants.FirstOrDefault() ?? "";
-        legalcaseDto.TenantId = filteredTenantList.Select(e => e.Id).FirstOrDefault();
-        legalcaseDto.TenantRecord = filteredTenantList.Select(e => e.TenantRecord).FirstOrDefault();
-        legalcaseDto.HasPossession = filteredTenantList.Select(e => e.HasPossession).FirstOrDefault();
-        legalcaseDto.UnitNumber = filteredTenantList.Select(e => e.UnitOrApartmentNumber).FirstOrDefault() ?? "abc";
-        legalcaseDto.IsUnitIllegalId = TenantList.Select(e => e.IsUnitIllegalId).FirstOrDefault();
+        if(firstTenant != null)
+        {
+            legalcaseDto.TenantName = firstTenant.FirstName + " " + firstTenant.LastName;
+            legalcaseDto.TenantId = firstTenant.Id;
+            legalcaseDto.TenantRecord = firstTenant.TenantRecord;
+            legalcaseDto.HasPossession = firstTenant.HasPossession;
+            legalcaseDto.UnitNumber = firstTenant.UnitOrApartmentNumber!;
+            legalcaseDto.IsUnitIllegalId = firstTenant.IsUnitIllegalId;
+            legalcaseDto.DateTenantMoved = firstTenant.MoveInDate;
+            legalcaseDto.MonthlyRent = firstTenant.MonthlyRent;
+            legalcaseDto.TenantShare = firstTenant.TenantShare;
+            legalcaseDto.RentDueEachMonthOrWeekId = firstTenant.RentDueEachMonthOrWeekId;
+            legalcaseDto.TotalOwed = firstTenant.TotalRentOwed;
+            legalcaseDto.TenancyTypeId = firstTenant.TenancyTypeId;
+            legalcaseDto.SocialService = firstTenant.SocialServices;
+        }
+        
 
         AdditionalTenantfromDbList = await _additionalTenant.GetAllAdditionalTenantsAsync(legalcaseDto.TenantId);
+        if(AdditionalTenantfromDbList.Count > 0)
+        {
+            Tenants.AddRange(AdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}").ToList());
 
-        Tenants.AddRange(AdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}").ToList());
+        }
+
 
     }
 

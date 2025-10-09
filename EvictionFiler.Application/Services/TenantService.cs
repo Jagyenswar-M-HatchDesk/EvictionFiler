@@ -85,7 +85,71 @@ namespace EvictionFiler.Application.Services
 			return result > 0;
 		}
 
-		public async Task<List<CreateToTenantDto>> SearchTenantbyCode(string code)
+
+        public async Task<Guid?> AddTenantfromCase(CreateToTenantDto t)
+        {
+            //var newtenant = new List<Tenant>();
+
+            var lastCode = await _repo.GetLasttenantCodeAsync();
+
+            int nextNumber = 1;
+            if (!string.IsNullOrEmpty(lastCode) && lastCode.Length > 2)
+            {
+                var numericPart = lastCode.Substring(2);
+                if (int.TryParse(numericPart, out int lastNumber))
+                {
+                    nextNumber = lastNumber + 1;
+                }
+            }
+
+            
+                var code = $"TT{nextNumber.ToString().PadLeft(10, '0')}";
+                nextNumber++; // ✅ increment locally
+
+			var tenant = new Tenant
+			{
+
+				TenantCode = code,
+				FirstName = t.FirstName,
+				LastName = t.LastName,
+				SSN = t.SSN,
+				Phone = t.Phone,
+				Email = t.Email,
+				LanguageId = t.LanguageId,
+
+				HasPossession = t.HasPossession,
+				HasRegulatedTenancy = t.HasRegulatedTenancy,
+				//Name_Relation = t.Name_Relation,
+				OtherOccupants = t.OtherOccupants,
+
+				TenantRecord = t.TenantRecord,
+				HasPriorCase = t.HasPriorCase,
+				TenancyTypeId = t.TenancyTypeId,
+				RenewalOffer = t.RenewalOffer,
+				//RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
+				SocialServices = t.SocialServices,
+				MonthlyRent = t.MonthlyRent,
+
+				TenantShare = t.TenantShare,
+				ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
+				UnitOrApartmentNumber = t.UnitOrApartmentNumber,
+
+				IsUnitIllegalId = t.IsUnitIllegalId,
+				BuildinId = t.BuildingId,
+
+			};
+                //newtenant.Add(tenant);
+            
+
+            var addedtenant = await _repo.AddAsync(tenant);
+            var result = await _unitOfWork.SaveChangesAsync();
+
+            if( result > 0) return addedtenant.Id;
+
+			return null;
+        }
+
+        public async Task<List<CreateToTenantDto>> SearchTenantbyCode(string code)
 		{
 			var newtenant = await _repo.SearchTenantByCode(code);
 			return newtenant;

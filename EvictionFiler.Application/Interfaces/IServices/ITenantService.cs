@@ -20,6 +20,6 @@ namespace EvictionFiler.Application.Interfaces.IServices
 		Task<List<CreateToTenantDto>> GetAll();
 		Task<string> GetLastTenantCode();
 
-
+		Task<Guid?> AddTenantfromCase(CreateToTenantDto t);
     }
 }

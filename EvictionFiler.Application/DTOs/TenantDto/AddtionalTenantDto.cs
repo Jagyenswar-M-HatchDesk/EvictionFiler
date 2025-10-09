@@ -14,6 +14,7 @@ namespace EvictionFiler.Application.DTOs.TenantDto
         public string? LastName { get; set; }
 
         public Guid? TenantId { get; set; }
+        public Guid? LegalCaseId { get; set; }
         public bool IsVisible { get; set; } = false;
     }
 }
