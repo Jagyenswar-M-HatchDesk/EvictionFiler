@@ -6,12 +6,12 @@ using EvictionFiler.Domain.Entities.Master;
 namespace EvictionFiler.Application.Interfaces.IRepository
 {
     public interface ITenantRepository : IRepository<Tenant>
-	{
+    {
 
         Task<string?> GetLasttenantCodeAsync();
-		Task<List<CreateToTenantDto>> SearchTenantByCode(string code); 
-		Task<List<EditToTenantDto>> SearchTenantAsync(string query, Guid BuildingId);
-		Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? clientId);
+        Task<List<CreateToTenantDto>> SearchTenantByCode(string code);
+        Task<List<EditToTenantDto>> SearchTenantAsync(string query, Guid BuildingId);
+        Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? clientId);
         Task<List<Language>> GetAllLanguage();
         Task<string> GenerateTenantCodeAsync();
 
