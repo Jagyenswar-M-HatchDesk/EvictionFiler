@@ -55,12 +55,14 @@ builder.Services.AddRadzenComponents();
 
 
 builder.Services.AddDbContext<MainDbContext>(
-	options => options.UseSqlServer(
-		builder.Configuration.GetConnectionString("Default"),
-		sqlOptions => sqlOptions.MigrationsAssembly("EvictionFiler.Infrastructure")
-	)
+    options => options.UseSqlServer(
+        builder.Configuration.GetConnectionString("Default"),
+        sqlOptions => sqlOptions.MigrationsAssembly("EvictionFiler.Infrastructure")
+    )
 
 );
+
+
 builder.Services.AddScoped<DialogService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<TooltipService>();
@@ -178,7 +180,12 @@ await app.ConfigureDataContext();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseStaticFiles();
-
+app.MapBlazorHub(options =>
+{
+    options.Transports =
+        Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets |
+        Microsoft.AspNetCore.Http.Connections.HttpTransportType.LongPolling;
+});
 
 
 using var scope = app.Services.CreateScope();
