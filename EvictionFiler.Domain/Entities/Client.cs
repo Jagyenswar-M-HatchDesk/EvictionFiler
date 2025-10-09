@@ -26,7 +26,7 @@ namespace EvictionFiler.Domain.Entities
 		public string? City { get; set; } = string.Empty;
 		public Guid? StateId { get; set; }
 		[ForeignKey("StateId")]
-		public State State { get; set; } = new State();
+		public State State { get; set; }
 		[MaxLength(50)]
 		public string? ZipCode { get; set; } = string.Empty;
 		[MaxLength(50)]
@@ -41,7 +41,7 @@ namespace EvictionFiler.Domain.Entities
 
 		public Guid? ClientTypeId { get; set; }
 		[ForeignKey("ClientTypeId")]
-		public ClientRole ClientType { get; set; } = new ClientRole();
+		public ClientRole ClientType { get; set; }
 
         public string? Reference { get; set; }
     }

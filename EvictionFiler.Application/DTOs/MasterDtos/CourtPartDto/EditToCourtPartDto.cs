@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EvictionFiler.Application.DTOs.MasterDtos.CaseTypeDto
+namespace EvictionFiler.Application.DTOs.MasterDtos.CourtPartDto
 {
     public class EditToCourtPartDto : CreateToCourtPartDto
     {

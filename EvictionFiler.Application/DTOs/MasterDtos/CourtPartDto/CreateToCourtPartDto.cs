@@ -6,11 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EvictionFiler.Application.DTOs.MasterDtos.CaseTypeDto
+namespace EvictionFiler.Application.DTOs.MasterDtos.CourtPartDto
 {
     public class CreateToCourtPartDto : DeletableBaseEntity
     {
-        [Required(ErrorMessage = "  Casetype Name is required")]
+        [Required(ErrorMessage = "  Court-Part Name is required")]
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
     }

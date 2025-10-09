@@ -14,11 +14,11 @@ namespace EvictionFiler.Application.Interfaces.IServices.Master
 {
     public interface ICaseTypeService
     {
-        Task<bool> Create(EditToCaseTypeDto dto);
-        Task<PaginationDto<EditToCaseTypeDto>> GetAllCaseTypeAsync(int pageNumber, int pageSize, string searchTerm);
-        Task<bool> UpdateCaseTypeAsync(EditToCaseTypeDto dto);
+        Task<bool> Create(EditToCourtPartDto dto);
+        Task<PaginationDto<EditToCourtPartDto>> GetAllCaseTypeAsync(int pageNumber, int pageSize, string searchTerm);
+        Task<bool> UpdateCaseTypeAsync(EditToCourtPartDto dto);
 
-        Task<EditToCaseTypeDto?> GetCaseTypeByIdAsync(Guid? id);
+        Task<EditToCourtPartDto?> GetCaseTypeByIdAsync(Guid? id);
         Task<bool> DeleteCaseTypeAsync(Guid id);
         
     }

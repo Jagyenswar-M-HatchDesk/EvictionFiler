@@ -23,7 +23,7 @@ namespace EvictionFiler.Application.Services.Master
             _unitOfWork = unitOfWork;
         }
 
-        public async  Task<bool> Create(EditToCaseTypeDto dto)
+        public async  Task<bool> Create(EditToCourtPartDto dto)
         {
             var forms = new CaseType
             {
@@ -52,7 +52,7 @@ namespace EvictionFiler.Application.Services.Master
             return false;
         }
 
-        public async Task<PaginationDto<EditToCaseTypeDto>> GetAllCaseTypeAsync(int pageNumber, int pageSize, string searchTerm)
+        public async Task<PaginationDto<EditToCourtPartDto>> GetAllCaseTypeAsync(int pageNumber, int pageSize, string searchTerm)
         {
             var query = await _repository.GetAllAsync();
 
@@ -73,7 +73,7 @@ namespace EvictionFiler.Application.Services.Master
         .OrderBy(c => c.Id)
         .Skip((pageNumber - 1) * pageSize)
         .Take(pageSize)
-        .Select(x => new EditToCaseTypeDto
+        .Select(x => new EditToCourtPartDto
         {
             Id= x.Id,
             Name = x.Name,
@@ -85,7 +85,7 @@ namespace EvictionFiler.Application.Services.Master
         })
         .ToList();
 
-            return new PaginationDto<EditToCaseTypeDto>
+            return new PaginationDto<EditToCourtPartDto>
             {
                 Items = forms,
                 TotalCount = totalCount,
@@ -94,12 +94,12 @@ namespace EvictionFiler.Application.Services.Master
             };
         }
 
-        public async Task<EditToCaseTypeDto?> GetCaseTypeByIdAsync(Guid? id)
+        public async Task<EditToCourtPartDto?> GetCaseTypeByIdAsync(Guid? id)
         {
             var form = await _repository.GetAsync(id);
 
             if (form == null) return null;
-            return new EditToCaseTypeDto
+            return new EditToCourtPartDto
             {
                 Id = form.Id,
                 Name = form.Name,
@@ -113,7 +113,7 @@ namespace EvictionFiler.Application.Services.Master
 
      
 
-        public async  Task<bool> UpdateCaseTypeAsync(EditToCaseTypeDto dto)
+        public async  Task<bool> UpdateCaseTypeAsync(EditToCourtPartDto dto)
         {
             var existing = await _repository.GetAsync(dto.Id);
             if (existing == null) return false;

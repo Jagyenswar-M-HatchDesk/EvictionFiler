@@ -22,19 +22,19 @@ namespace EvictionFiler.Domain.Entities
 
         public Guid? CountyId { get; set; }
         [ForeignKey("CountyId")]
-        public County County { get; set; } = new County();
+        public County County { get; set; } 
 
         public Guid? CourtPartId { get; set; }
         [ForeignKey("CourtPartId")]
-        public CourtPart CourtPart { get; set; } = new CourtPart();
+        public CourtPart CourtPart { get; set; } 
 
         public Guid? CaseStatusId { get; set; }
         [ForeignKey("CaseStatusId")]
-        public CaseStatus CaseStatus { get; set; } = new CaseStatus();
+        public CaseStatus CaseStatus { get; set; }
 
         public Guid? CaseTypeId { get; set; }
         [ForeignKey("CaseTypeId")]
-        public CaseType CaseType { get; set; } = new CaseType();
+        public CaseType CaseType { get; set; } 
 
         public string? LastAction { get; set; }
     }
