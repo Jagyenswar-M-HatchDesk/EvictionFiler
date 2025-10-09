@@ -180,12 +180,12 @@ await app.ConfigureDataContext();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseStaticFiles();
-app.MapBlazorHub(options =>
-{
-    options.Transports =
-        Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets |
-        Microsoft.AspNetCore.Http.Connections.HttpTransportType.LongPolling;
-});
+//app.MapBlazorHub(options =>
+//{
+//    options.Transports =
+//        Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets |
+//        Microsoft.AspNetCore.Http.Connections.HttpTransportType.LongPolling;
+//});
 
 
 using var scope = app.Services.CreateScope();
