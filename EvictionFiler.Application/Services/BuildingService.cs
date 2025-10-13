@@ -114,7 +114,7 @@ namespace EvictionFiler.Application.Services
 
             var newapartment = new Building
             {
-                BuildingCode = appartment.BuildingCode,
+                BuildingCode = code,
                 ApartmentCode = appartment.ApartmentCode,
                 City = appartment.City,
                 StateId = appartment.StateId,
