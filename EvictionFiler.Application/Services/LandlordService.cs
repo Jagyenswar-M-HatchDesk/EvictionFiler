@@ -153,6 +153,8 @@ namespace EvictionFiler.Application.Services
                 IsDeleted = false,
                 UpdatedBy = null,
                 UpdatedOn = DateTime.Now,
+                LawFirm = dto.LawFirm,
+                AttorneyOfRecord = dto.AttorneyOfRecord
             };
 
 

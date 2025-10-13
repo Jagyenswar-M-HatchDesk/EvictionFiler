@@ -136,6 +136,8 @@ namespace EvictionFiler.Application.Services
 
 				IsUnitIllegalId = t.IsUnitIllegalId,
 				BuildinId = t.BuildingId,
+				MoveInDate = t.MoveInDate,
+				RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId
 
 			};
                 //newtenant.Add(tenant);
