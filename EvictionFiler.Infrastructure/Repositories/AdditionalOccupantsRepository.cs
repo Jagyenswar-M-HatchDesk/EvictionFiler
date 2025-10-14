@@ -43,9 +43,37 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         }
 
+        public async Task<bool> UpdateAdditionalOccupant(AdditionalOccupantDto occupant)
+        {
+            try
+            {
+                var existing = await GetAllOccupantsById(occupant.Id);
+                if (existing == null) return false;
+
+                existing.Name = occupant.Name;
+
+                _context.AdditionalOccupants.Update(existing);
+                var result =await _context.SaveChangesAsync();
+                if (result > 0) return true;
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+            }
+
+        }
+
         public async Task<List<AdditionalOccupants>> GetAllOccupantsByCaseId(Guid legalcaseId)
         {
             var occupants = await _context.AdditionalOccupants.Where(e => e.LegalCaseId == legalcaseId).ToListAsync();
+            return occupants;
+        }
+
+        public async Task<AdditionalOccupants> GetAllOccupantsById(Guid Id)
+        {
+            var occupants = await _context.AdditionalOccupants.Where(e => e.Id == Id).FirstOrDefaultAsync();
             return occupants;
         }
 

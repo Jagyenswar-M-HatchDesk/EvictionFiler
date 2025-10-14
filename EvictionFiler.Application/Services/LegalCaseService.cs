@@ -314,7 +314,7 @@ namespace EvictionFiler.Application.Services
                 Buildingcode = caseEntity.Buildings.BuildingCode,
                 Mdr = caseEntity.Buildings?.MDRNumber,
                 UnitOrApartmentNumber = caseEntity.Buildings.ApartmentCode,
-                ApartmentNumber = caseEntity.Buildings.ApartmentCode,
+                //ApartmentNumber = caseEntity.Buildings.ApartmentCode,
                 Borough = caseEntity.Buildings?.City,
                 Units = caseEntity.Buildings?.BuildingUnits,
                 BuildingAddress = caseEntity.Buildings?.Address1,
@@ -324,7 +324,7 @@ namespace EvictionFiler.Application.Services
                 // Tenant
                 TenantId = caseEntity.TenantId,
                 TenantName = $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}",
-                UnitNumber = caseEntity.Tenants?.UnitOrApartmentNumber,
+                ApartmentNumber = caseEntity.Tenants?.UnitOrApartmentNumber,
 
                 WrittenLease = caseEntity.WrittenLease,
                 OralAgreeMent = caseEntity.OralAgreeMent,
@@ -469,63 +469,66 @@ namespace EvictionFiler.Application.Services
         }
 
         // new update 
-        public async Task<bool> UpdateCaseAsync(IntakeModel legalCase)
+        public async Task<Guid?> UpdateCaseAsync(IntakeModel legalCase)
         {
-            var existingCase = await _repository.GetAsync(legalCase.Id);
-            if (existingCase == null) return false;
+            try
+            {
+                var existingCase = await _repository.GetAsync(legalCase.Id);
+                if (existingCase == null) return null;
 
-            var landlord = await _landlordrepo.GetAsync(existingCase.LandLordId);
-            var building = await _buildingrepo.GetAsync(existingCase.BuildingId);
-            var tenant = await _tenantRepo.GetAsync(existingCase.TenantId);
+                //var landlord = await _landlordrepo.GetAsync(existingCase.LandLordId);
+                //var building = await _buildingrepo.GetAsync(existingCase.BuildingId);
+                //var tenant = await _tenantRepo.GetAsync(existingCase.TenantId);
 
-            // Update landlord
-            landlord.FirstName = legalCase.FullName;
-            landlord.Phone = legalCase.Phone;
-            landlord.Email = legalCase.Email;
-            landlord.LandlordTypeId = legalCase.LandLordTypeId;
-            landlord.UpdatedBy = legalCase.UpdatedBy;
-            _landlordrepo.UpdateAsync(landlord);
-            await _unitOfWork.SaveChangesAsync();
+                existingCase.ClientId = legalCase.ClientId;
+                existingCase.CaseTypeId = legalCase.CaseTypeId;
+                existingCase.IsERAPPaymentReceived = legalCase.IsERAPPaymentReceived;
 
-            // Update building
-            building.MDRNumber = legalCase.Mdr;
-            building.BuildingUnits = legalCase.Units;
-            building.Address1 = legalCase.BuildingAddress;
-            building.RegulationStatusId = legalCase.RegulationStatusId;
-            building.UpdatedBy = legalCase.UpdatedBy;
-            _buildingrepo.UpdateAsync(building);
-            await _unitOfWork.SaveChangesAsync();
+                existingCase.MonthlyRent = legalCase.MonthlyRent;
+                existingCase.TotalRentOwed = legalCase.TotalOwed;
+                existingCase.TenantShare = legalCase.TenantShare;
+                existingCase.RentDueEachMonthOrWeekId = legalCase.RentDueEachMonthOrWeekId;
+                existingCase.OralStart = legalCase.OralStart;
+                existingCase.OralEnd = legalCase.OralEnd;
+                existingCase.WrittenLease = legalCase.WrittenLease;
+                existingCase.DateTenantMoved = legalCase.DateTenantMoved;
+                //CreatedBy = legalCase.CreatedBy,
+                existingCase.CreatedOn = DateTime.Now;
+                existingCase.TenancyTypeId = legalCase.TenancyTypeId;
+                // Foreign keys
+                existingCase.LandLordId = legalCase.LandlordId;
+                //existingCase.LandlordTypeId = legalCase.LandLordTypeId;
+                existingCase.CreatedBy = legalCase.CreatedBy;
 
-            // Update tenant
-            tenant.FirstName = legalCase.TenantName;
-            tenant.UnitOrApartmentNumber = legalCase.UnitNumber;
-            tenant.IsUnitIllegalId = legalCase.IsUnitIllegalId;
-            tenant.TenantRecord = legalCase.TenantRecord;
-            tenant.HasPossession = legalCase.HasPossession;
-            tenant.OtherOccupants = legalCase.OtherOccupants;
-            tenant.UpdatedBy = legalCase.UpdatedBy;
-            _tenantRepo.UpdateAsync(tenant);
-            await _unitOfWork.SaveChangesAsync();
+                existingCase.BuildingId = legalCase.BuildingId;
+                existingCase.TenantId = legalCase.TenantId;
 
-            // Update legal case
-            existingCase.ClientId = legalCase.ClientId;
-            existingCase.CaseTypeId = legalCase.CaseTypeId;
-            existingCase.IsERAPPaymentReceived = legalCase.IsERAPPaymentReceived;
-            existingCase.MonthlyRent = legalCase.MonthlyRent;
-            existingCase.TotalRentOwed = legalCase.TotalOwed;
-            existingCase.TenantShare = legalCase.TenantShare;
-            existingCase.RentDueEachMonthOrWeekId = legalCase.RentDueEachMonthOrWeekId;
-            existingCase.OralStart = legalCase.OralStart;
-            existingCase.OralEnd = legalCase.OralEnd;
-            existingCase.WrittenLease = legalCase.WrittenLease;
-            existingCase.DateTenantMoved = legalCase.DateTenantMoved;
-            existingCase.TenancyTypeId = legalCase.TenancyTypeId;
-            existingCase.UpdatedBy = legalCase.UpdatedBy;
+                existingCase.UnitOrApartmentNumber = legalCase.UnitOrApartmentNumber;
+                existingCase.LeaseEnd = legalCase.LeaseEnd;
+                existingCase.DateNoticeServed = legalCase.DateNoticeServed;
+                existingCase.ExpirationDate = legalCase.ExpirationDate;
+                existingCase.PredicateNotice = legalCase.PredicateNotice;
+                existingCase.SocialService = legalCase.SocialService;
+                existingCase.LastRentPaid = legalCase.LastRentPaid;
+                existingCase.Reference = legalCase.Reference;
+                existingCase.OralAgreeMent = legalCase.OralAgreeMent;
+                existingCase.GoodCauseApplies = legalCase.GoodCauseApplies;
+                existingCase.CalculatedNoticeLength = legalCase.CalculatedNoticeLength;
+                existingCase.CaseProgramId = legalCase.CaseProgramId;
 
-            _repository.UpdateAsync(existingCase);
-            var result = await _unitOfWork.SaveChangesAsync();
+                var updated = _repository.UpdateAsync(existingCase);
+                var result = await _unitOfWork.SaveChangesAsync();
 
-            return result != null;
+                if (result > 0) return updated.Id;
+
+                return null;
+            }
+            catch(Exception ex)
+            {
+                throw new Exception();
+            }
+
+
         }
 
 

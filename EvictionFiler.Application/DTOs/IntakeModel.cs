@@ -82,7 +82,7 @@ namespace EvictionFiler.Application.DTOs
         public double? TotalOwed { get; set; }
         public string Erap { get; set; } = "No";
 
-        [Required(ErrorMessage = "Type is required")]
+        //[Required(ErrorMessage = "Type is required")]
         public Guid? CaseTypeId { get; set; }
         public string CaseTypeName { get; set; }
         public Guid? CaseProgramId { get; set; }

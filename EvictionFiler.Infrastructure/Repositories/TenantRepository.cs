@@ -112,16 +112,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 		public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? buildingId)
 		{
-			var apartmentIds = await _dbContext.Buildings
-			.Where(a => a.Id == buildingId && (a.IsDeleted == false || a.IsDeleted == null))
-			.Select(a => a.Id)
-			.ToListAsync();
-
-
-			// Step 3: Get all tenants linked to these apartments
+			
 			var tenants = await _dbContext.Tenants
 		.Include(a => a.Language).Include(e => e.IsUnitIllegal).Include(e => e.TenancyType).Include(e => e.AddTenants)
-		.Where(t => t.BuildinId.HasValue && apartmentIds.Contains(t.BuildinId.Value) && t.IsDeleted != true)
+		.Where(t => t.BuildinId == buildingId && t.IsDeleted != true)
 		.Select(dto => new EditToTenantDto
 		{
 			Id = dto.Id,
