@@ -12,6 +12,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
     {
         Task AddAdditionalTenantAsync(List<AddtionalTenantDto> tenant);
         Task<List<AdditioanlTenants>> GetAllAdditionalTenantsAsync(Guid? Id);
+        Task<bool> UpdateAdditionalTenantAsync(AddtionalTenantDto tenant);
 
     }
 }

@@ -46,15 +46,57 @@ namespace EvictionFiler.Infrastructure.Repositories
             }
 
         }
+        public async Task<bool> UpdateAdditionalTenant(AddtionalTenantDto tenant)
+        {
+            try
+            {
+                var existing = await GetAdditionalTenantsById(tenant.Id);
+                if (existing == null) return false;
+
+                existing.FirstName = tenant.FirstName;
+                existing.LastName = tenant.LastName;
+                existing.IsActive = tenant.IsActive;
+                existing.TenantId = tenant.TenantId;
+                existing.IsDeleted = tenant.IsDeleted;
+
+                _context.AdditioanlTenants.Update(existing);
+                var result = _context.SaveChanges();
+
+                if (result > 0) return true;
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+            }
+
+        }
 
         public async Task<List<AdditioanlTenants>> GetAdditionalTenants(Guid? Id)
         {
             try
             {
                 var tenants = await _context.AdditioanlTenants.Where(e => e.TenantId == Id).ToListAsync();
-                if(tenants .Count > 0) return tenants;
+                if (tenants.Count > 0) return tenants;
 
                 return new List<AdditioanlTenants>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+            }
+
+        }
+
+        public async Task<AdditioanlTenants> GetAdditionalTenantsById(Guid? Id)
+        {
+            try
+            {
+                var tenant = await _context.AdditioanlTenants.Where(e => e.Id == Id).FirstOrDefaultAsync();
+                if (tenant != null) return tenant;
+
+                return new AdditioanlTenants();
             }
             catch (Exception ex)
             {

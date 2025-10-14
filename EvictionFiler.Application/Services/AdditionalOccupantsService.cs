@@ -30,5 +30,11 @@ namespace EvictionFiler.Application.Services
             var occupants = await _additionalOccupantsRepository.GetAllOccupantsByCaseId(legalCaseId);
             return occupants;
         }
+
+        public async Task<bool> UpdateAdditionalOccupantsAsync(AdditionalOccupantDto occupant)
+        {
+
+            return await _additionalOccupantsRepository.UpdateAdditionalOccupant(occupant);
+        }
     }
 }

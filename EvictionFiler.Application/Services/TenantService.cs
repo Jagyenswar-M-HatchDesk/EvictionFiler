@@ -13,77 +13,77 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EvictionFiler.Application.Services
 {
-	public class TenantService : ITenantService
-	{
-		private readonly ITenantRepository _repo;
-		private readonly IUnitOfWork _unitOfWork;
+    public class TenantService : ITenantService
+    {
+        private readonly ITenantRepository _repo;
+        private readonly IUnitOfWork _unitOfWork;
 
-		public TenantService(ITenantRepository services, IUnitOfWork unitOfWork)
-		{
-			_repo = services;
-			_unitOfWork = unitOfWork;
-		}
-		public async Task<bool> AddTenantAsync(List<CreateToTenantDto> dtoList)
-		{
-			var newtenant = new List<Tenant>();
+        public TenantService(ITenantRepository services, IUnitOfWork unitOfWork)
+        {
+            _repo = services;
+            _unitOfWork = unitOfWork;
+        }
+        public async Task<bool> AddTenantAsync(List<CreateToTenantDto> dtoList)
+        {
+            var newtenant = new List<Tenant>();
 
-			var lastCode = await _repo.GetLasttenantCodeAsync();
+            var lastCode = await _repo.GetLasttenantCodeAsync();
 
-			int nextNumber = 1;
-			if (!string.IsNullOrEmpty(lastCode) && lastCode.Length > 2)
-			{
-				var numericPart = lastCode.Substring(2);
-				if (int.TryParse(numericPart, out int lastNumber))
-				{
-					nextNumber = lastNumber + 1;
-				}
-			}
+            int nextNumber = 1;
+            if (!string.IsNullOrEmpty(lastCode) && lastCode.Length > 2)
+            {
+                var numericPart = lastCode.Substring(2);
+                if (int.TryParse(numericPart, out int lastNumber))
+                {
+                    nextNumber = lastNumber + 1;
+                }
+            }
 
-			foreach (var t in dtoList)
-			{
-				var code = $"TT{nextNumber.ToString().PadLeft(10, '0')}";
-				nextNumber++; // ✅ increment locally
+            foreach (var t in dtoList)
+            {
+                var code = $"TT{nextNumber.ToString().PadLeft(10, '0')}";
+                nextNumber++; // ✅ increment locally
 
-				var tenant = new Tenant
-				{
+                var tenant = new Tenant
+                {
 
-					TenantCode = code,
-					FirstName = t.FirstName,
-					LastName = t.LastName,
-					SSN = t.SSN,
-					Phone = t.Phone,
-					Email = t.Email,
-					LanguageId = t.LanguageId,
-				
-					HasPossession = t.HasPossession,
-					HasRegulatedTenancy = t.HasRegulatedTenancy,
-					//Name_Relation = t.Name_Relation,
-					OtherOccupants = t.OtherOccupants,
-				
-					TenantRecord = t.TenantRecord,
-					HasPriorCase = t.HasPriorCase,
-					TenancyTypeId = t.TenancyTypeId,
-					RenewalOffer = t.RenewalOffer,
-					//RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
-					SocialServices = t.SocialServices,
-					MonthlyRent = t.MonthlyRent,
-				
-					TenantShare = t.TenantShare,
-					ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
-					UnitOrApartmentNumber = t.UnitOrApartmentNumber,
-				
-					IsUnitIllegalId = t.IsUnitIllegalId,
-					BuildinId = t.BuildingId,
-				};
+                    TenantCode = code,
+                    FirstName = t.FirstName,
+                    LastName = t.LastName,
+                    SSN = t.SSN,
+                    Phone = t.Phone,
+                    Email = t.Email,
+                    LanguageId = t.LanguageId,
 
-				newtenant.Add(tenant);
-			}
+                    HasPossession = t.HasPossession,
+                    HasRegulatedTenancy = t.HasRegulatedTenancy,
+                    //Name_Relation = t.Name_Relation,
+                    OtherOccupants = t.OtherOccupants,
 
-			await _repo.AddRangeAsync(newtenant);
-			var result = await _unitOfWork.SaveChangesAsync();
+                    TenantRecord = t.TenantRecord,
+                    HasPriorCase = t.HasPriorCase,
+                    TenancyTypeId = t.TenancyTypeId,
+                    RenewalOffer = t.RenewalOffer,
+                    //RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
+                    SocialServices = t.SocialServices,
+                    MonthlyRent = t.MonthlyRent,
 
-			return result > 0;
-		}
+                    TenantShare = t.TenantShare,
+                    ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
+                    UnitOrApartmentNumber = t.UnitOrApartmentNumber,
+
+                    IsUnitIllegalId = t.IsUnitIllegalId,
+                    BuildinId = t.BuildingId,
+                };
+
+                newtenant.Add(tenant);
+            }
+
+            await _repo.AddRangeAsync(newtenant);
+            var result = await _unitOfWork.SaveChangesAsync();
+
+            return result > 0;
+        }
 
 
         public async Task<Guid?> AddTenantfromCase(CreateToTenantDto t)
@@ -102,261 +102,258 @@ namespace EvictionFiler.Application.Services
                 }
             }
 
-            
-                var code = $"TT{nextNumber.ToString().PadLeft(10, '0')}";
-                nextNumber++; // ✅ increment locally
 
-			var tenant = new Tenant
-			{
+            var code = $"TT{nextNumber.ToString().PadLeft(10, '0')}";
+            nextNumber++; // ✅ increment locally
 
-				TenantCode = code,
-				FirstName = t.FirstName,
-				LastName = t.LastName,
-				SSN = t.SSN,
-				Phone = t.Phone,
-				Email = t.Email,
-				LanguageId = t.LanguageId,
+            var tenant = new Tenant
+            {
 
-				HasPossession = t.HasPossession,
-				HasRegulatedTenancy = t.HasRegulatedTenancy,
-				//Name_Relation = t.Name_Relation,
-				OtherOccupants = t.OtherOccupants,
+                TenantCode = code,
+                FirstName = t.FirstName,
+                LastName = t.LastName,
+                SSN = t.SSN,
+                Phone = t.Phone,
+                Email = t.Email,
+                LanguageId = t.LanguageId,
 
-				TenantRecord = t.TenantRecord,
-				HasPriorCase = t.HasPriorCase,
-				TenancyTypeId = t.TenancyTypeId,
-				RenewalOffer = t.RenewalOffer,
-				//RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
-				SocialServices = t.SocialServices,
-				MonthlyRent = t.MonthlyRent,
+                HasPossession = t.HasPossession,
+                HasRegulatedTenancy = t.HasRegulatedTenancy,
+                //Name_Relation = t.Name_Relation,
+                OtherOccupants = t.OtherOccupants,
 
-				TenantShare = t.TenantShare,
-				ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
-				UnitOrApartmentNumber = t.UnitOrApartmentNumber,
+                TenantRecord = t.TenantRecord,
+                HasPriorCase = t.HasPriorCase,
+                TenancyTypeId = t.TenancyTypeId,
+                RenewalOffer = t.RenewalOffer,
+                //RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
+                SocialServices = t.SocialServices,
+                MonthlyRent = t.MonthlyRent,
 
-				IsUnitIllegalId = t.IsUnitIllegalId,
-				BuildinId = t.BuildingId,
-				MoveInDate = t.MoveInDate,
-				RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId
+                TenantShare = t.TenantShare,
+                ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
+                UnitOrApartmentNumber = t.UnitOrApartmentNumber,
 
-			};
-                //newtenant.Add(tenant);
-            
+                IsUnitIllegalId = t.IsUnitIllegalId,
+                BuildinId = t.BuildingId,
+                MoveInDate = t.MoveInDate,
+                RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId
+
+            };
+            //newtenant.Add(tenant);
+
 
             var addedtenant = await _repo.AddAsync(tenant);
             var result = await _unitOfWork.SaveChangesAsync();
 
-            if( result > 0) return addedtenant.Id;
+            if (result > 0) return addedtenant.Id;
 
-			return null;
+            return null;
         }
 
         public async Task<List<CreateToTenantDto>> SearchTenantbyCode(string code)
-		{
-			var newtenant = await _repo.SearchTenantByCode(code);
-			return newtenant;
-		}
+        {
+            var newtenant = await _repo.SearchTenantByCode(code);
+            return newtenant;
+        }
 
-		public async Task<List<EditToTenantDto>> SearchTenantsAsync(string query, Guid clientId)
-		{
-			return await _repo.SearchTenantAsync(query, clientId);
-		}
+        public async Task<List<EditToTenantDto>> SearchTenantsAsync(string query, Guid clientId)
+        {
+            return await _repo.SearchTenantAsync(query, clientId);
+        }
 
-		public async Task<EditToTenantDto> GetByIdAsync(Guid id)
-		{
-			var t = await _repo
-				.GetAllQuerable(
-					x => x.Id == id,
-					x => x.IsUnitIllegal,
-				    
-					x => x.Building, 
-					x => x.Building.State,
-					x => x.Building.PremiseType,
-					
-					x => x.Building.RegulationStatus,
-					x => x.TenancyType,
-					x => x.Building.Landlord,
-					x => x.Building.Landlord.State, 
-					x => x.Building.Landlord.LandlordType,
-					x => x.Building.Landlord.TypeOfOwner
-				)
-				.FirstOrDefaultAsync();
+        public async Task<EditToTenantDto> GetByIdAsync(Guid id)
+        {
+            var t = await _repo
+                .GetAllQuerable(
+                    x => x.Id == id,
+                    x => x.IsUnitIllegal,
 
-			if (t == null)
-				return null;
+                    x => x.Building,
+                    x => x.Building.State,
+                    x => x.Building.PremiseType,
 
-			return new EditToTenantDto
-			{
-				Id = t.Id,
-				TenantCode = t.TenantCode,
-				FirstName = t.FirstName,
-				LastName = t.LastName,
-				SSN = t.SSN,
-				Phone = t.Phone,
-				Email = t.Email,
-				LanguageId = t.LanguageId,
-			
-				HasPossession = t.HasPossession,
-				HasRegulatedTenancy = t.HasRegulatedTenancy,
-				//Name_Relation = t.Name_Relation,
-				OtherOccupants = t.OtherOccupants,
-			
-				TenantRecord = t.TenantRecord,
-				HasPriorCase = t.HasPriorCase,
-				TenancyTypeId = t.TenancyTypeId,
-				TenancyTypeName = t.TenancyType?.Name,
-				RenewalOffer = t.RenewalOffer,
-				RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId,
-				SocialServices = t.SocialServices,
-				MonthlyRent = t.MonthlyRent,
-		
-				TenantShare = t.TenantShare,
-				ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
-				UnitOrApartmentNumber = t.UnitOrApartmentNumber,
-				
-				IsUnitIllegalId = t.IsUnitIllegalId,
-				IsUnitIllegalName = t.IsUnitIllegal?.Name,
-				BuildingId = t.BuildinId,
-			
+                    x => x.Building.RegulationStatus,
+                    x => x.TenancyType,
+                    x => x.Building.Landlord,
+                    x => x.Building.Landlord.State,
+                    x => x.Building.Landlord.LandlordType,
+                    x => x.Building.Landlord.TypeOfOwner
+                )
+                .FirstOrDefaultAsync();
 
-				Building = new EditToBuildingDto
-				{
-					Id = t.Building.Id,
-					BuildingCode = t.Building.BuildingCode,
-					ApartmentCode = t.Building.ApartmentCode,
-					PremiseTypeId = t.Building.PremiseTypeId,
-					PremiseTypeName = t.Building.PremiseType.Name,
-					RegulationStatusId = t.Building.RegulationStatusId,
-					PetitionerInterest = t.Building.PetitionerInterest,
-					LandlordId = t.Building.LandlordId,
-					Address1 = t.Building.Address1,
-					Address2 = t.Building.Address2,
-					StateId = t.Building.StateId,
-					StateName = t.Building.State?.Name,
-					City = t.Building.City,
-					Zipcode = t.Building.Zipcode,
-					MDRNumber = t.Building.MDRNumber,
-					BuildingUnits = t.Building.BuildingUnits,
-					RegulationStatusName = t.Building.RegulationStatus?.Name,
-				},
+            if (t == null)
+                return null;
 
-				Landlord = new EditToLandlordDto
-				{
-					Id = t.Building.Landlord.Id,
-					LandLordCode = t.Building.Landlord.LandLordCode,
-					FirstName = t.Building.Landlord.FirstName,
-					LastName = t.Building.Landlord.LastName,
-					TypeOwnerId = t.Building.Landlord.TypeOfOwnerId,
-					TypeOwnerName = t.Building.Landlord.TypeOfOwner.Name,
-					Email = t.Building.Landlord.Email,
-					ContactPersonName = t.Building.Landlord.ContactPersonName,
-					EINorSSN = t.Building.Landlord.EINorSSN,
-					Address1 = t.Building.Landlord.Address1,
-					Address2 = t.Building.Landlord.Address2,
-					StateId = t.Building.Landlord.StateId,
-					StateName = t.Building.Landlord.State?.Name,
-					City = t.Building.Landlord.City,
-					Zipcode = t.Building.Landlord.Zipcode,
-					Phone = t.Building.Landlord.Phone,
-					ClientId = t.Building.Landlord.ClientId,
-					LandlordTypeId = t.Building.Landlord.LandlordTypeId,
-					LandlordTypeName = t.Building.Landlord.LandlordType?.Name,
-					DateOfRefreeDeed = t.Building.Landlord.DateOfRefreeDeed,
-				},
-			};
-		}
+            return new EditToTenantDto
+            {
+                Id = t.Id,
+                TenantCode = t.TenantCode,
+                FirstName = t.FirstName,
+                LastName = t.LastName,
+                SSN = t.SSN,
+                Phone = t.Phone,
+                Email = t.Email,
+                LanguageId = t.LanguageId,
 
-		public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? clientId)
-		{
-			var tenants = await _repo.GetTenantsByClientIdAsync(clientId);
-			return tenants;
+                HasPossession = t.HasPossession,
+                HasRegulatedTenancy = t.HasRegulatedTenancy,
+                //Name_Relation = t.Name_Relation,
+                OtherOccupants = t.OtherOccupants,
+
+                TenantRecord = t.TenantRecord,
+                HasPriorCase = t.HasPriorCase,
+                TenancyTypeId = t.TenancyTypeId,
+                TenancyTypeName = t.TenancyType?.Name,
+                RenewalOffer = t.RenewalOffer,
+                RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId,
+                SocialServices = t.SocialServices,
+                MonthlyRent = t.MonthlyRent,
+
+                TenantShare = t.TenantShare,
+                ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
+                UnitOrApartmentNumber = t.UnitOrApartmentNumber,
+
+                IsUnitIllegalId = t.IsUnitIllegalId,
+                IsUnitIllegalName = t.IsUnitIllegal?.Name,
+                BuildingId = t.BuildinId,
 
 
-		}
-		public async Task<bool> UpdateTenantAsync(List<EditToTenantDto> dtoList)
+                Building = new EditToBuildingDto
+                {
+                    Id = t.Building.Id,
+                    BuildingCode = t.Building.BuildingCode,
+                    ApartmentCode = t.Building.ApartmentCode,
+                    PremiseTypeId = t.Building.PremiseTypeId,
+                    PremiseTypeName = t.Building.PremiseType.Name,
+                    RegulationStatusId = t.Building.RegulationStatusId,
+                    PetitionerInterest = t.Building.PetitionerInterest,
+                    LandlordId = t.Building.LandlordId,
+                    Address1 = t.Building.Address1,
+                    Address2 = t.Building.Address2,
+                    StateId = t.Building.StateId,
+                    StateName = t.Building.State?.Name,
+                    City = t.Building.City,
+                    Zipcode = t.Building.Zipcode,
+                    MDRNumber = t.Building.MDRNumber,
+                    BuildingUnits = t.Building.BuildingUnits,
+                    RegulationStatusName = t.Building.RegulationStatus?.Name,
+                },
 
-		{
-			foreach (var t in dtoList)
-			{
-				var entity = await _repo.GetAsync(t.Id);
-				if (entity != null)
-				{
-					entity.TenantCode = t.TenantCode;
-					entity.FirstName = t.FirstName;
-					entity.LastName = t.LastName;
-					entity.SSN = t.SSN;
-					entity.Phone = t.Phone;
-					entity.Email = t.Email;
-					entity.LanguageId = t.LanguageId;
-				
-					entity.HasPossession = t.HasPossession;
-					entity.HasRegulatedTenancy = t.HasRegulatedTenancy;
-					//entity.Additionaltenants = t.Additionaltenants;
-					entity.OtherOccupants = t.OtherOccupants;
-					
-					entity.TenantRecord = t.TenantRecord;
-					entity.HasPriorCase = t.HasPriorCase;
-					entity.TenancyTypeId = t.TenancyTypeId;
-					entity.RenewalOffer = t.RenewalOffer;
-					//entity.RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek;
-					entity.SocialServices = t.SocialServices;
-					entity.MonthlyRent = t.MonthlyRent;
-				
-					entity.TenantShare = t.TenantShare;
-					entity.ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate;
-					entity.UnitOrApartmentNumber = t.UnitOrApartmentNumber;
-				
-					entity.IsUnitIllegalId = t.IsUnitIllegalId;
-					entity.BuildinId = t.BuildingId;
-				}
+                Landlord = new EditToLandlordDto
+                {
+                    Id = t.Building.Landlord.Id,
+                    LandLordCode = t.Building.Landlord.LandLordCode,
+                    FirstName = t.Building.Landlord.FirstName,
+                    LastName = t.Building.Landlord.LastName,
+                    TypeOwnerId = t.Building.Landlord.TypeOfOwnerId,
+                    TypeOwnerName = t.Building.Landlord.TypeOfOwner.Name,
+                    Email = t.Building.Landlord.Email,
+                    ContactPersonName = t.Building.Landlord.ContactPersonName,
+                    EINorSSN = t.Building.Landlord.EINorSSN,
+                    Address1 = t.Building.Landlord.Address1,
+                    Address2 = t.Building.Landlord.Address2,
+                    StateId = t.Building.Landlord.StateId,
+                    StateName = t.Building.Landlord.State?.Name,
+                    City = t.Building.Landlord.City,
+                    Zipcode = t.Building.Landlord.Zipcode,
+                    Phone = t.Building.Landlord.Phone,
+                    ClientId = t.Building.Landlord.ClientId,
+                    LandlordTypeId = t.Building.Landlord.LandlordTypeId,
+                    LandlordTypeName = t.Building.Landlord.LandlordType?.Name,
+                    DateOfRefreeDeed = t.Building.Landlord.DateOfRefreeDeed,
+                },
+            };
+        }
 
-				_repo.UpdateAsync(entity);
-				await _unitOfWork.SaveChangesAsync();
-			}
-			return true;
-		}
+        public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? clientId)
+        {
+            var tenants = await _repo.GetTenantsByClientIdAsync(clientId);
+            return tenants;
 
-		public async Task<List<CreateToTenantDto>> GetAll()
-		{
-			var query = await _repo.GetAllAsync();
-			return query.Select(t => new CreateToTenantDto
-			{
-				TenantCode = t.TenantCode,
-				FirstName = t.FirstName,
-				LastName = t.LastName,
 
-				SSN = t.SSN,
-				Phone = t.Phone,
-				Email = t.Email,
-				LanguageId = t.LanguageId,
-		
+        }
+        public async Task<bool> UpdateTenantAsync(EditToTenantDto t)
+        {
+            var entity = await _repo.GetAsync(t.Id);
+            if (entity != null)
+            {
+                entity.FirstName = t.FirstName;
+                entity.LastName = t.LastName;
+                entity.SSN = t.SSN;
+                entity.Phone = t.Phone;
+                entity.Email = t.Email;
+                entity.LanguageId = t.LanguageId;
 
-				HasPossession = t.HasPossession,
-				HasRegulatedTenancy = t.HasRegulatedTenancy,
-				//add = t.Additionaltenants,
-				OtherOccupants = t.OtherOccupants,
-			
-				TenantRecord = t.TenantRecord,
-				HasPriorCase = t.HasPriorCase,
-				TenancyTypeId = t.TenancyTypeId,
-				RenewalOffer = t.RenewalOffer,
-				//RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
-				SocialServices = t.SocialServices,
-				MonthlyRent = t.MonthlyRent,
-			
-				TenantShare = t.TenantShare,
-				ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
-				UnitOrApartmentNumber = t.UnitOrApartmentNumber,
-			
-				IsUnitIllegalId = t.IsUnitIllegalId,
-				BuildingId = t.BuildinId,
-			}).ToList();
-		}
+                entity.HasPossession = t.HasPossession;
+                entity.HasRegulatedTenancy = t.HasRegulatedTenancy;
+                //entity.Additionaltenants = t.Additionaltenants;
+                entity.OtherOccupants = t.OtherOccupants;
 
-		public async Task<string> GetLastTenantCode()
-		{
-			var lastTenantCode = await _repo.GetLasttenantCodeAsync();
-			return lastTenantCode!;
-		}
-	}
+                entity.TenantRecord = t.TenantRecord;
+                entity.HasPriorCase = t.HasPriorCase;
+                entity.TenancyTypeId = t.TenancyTypeId;
+                entity.RenewalOffer = t.RenewalOffer;
+                //entity.RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek;
+                entity.SocialServices = t.SocialServices;
+                entity.MonthlyRent = t.MonthlyRent;
+
+                entity.TenantShare = t.TenantShare;
+                entity.ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate;
+                entity.UnitOrApartmentNumber = t.UnitOrApartmentNumber;
+
+                entity.IsUnitIllegalId = t.IsUnitIllegalId;
+                entity.BuildinId = t.BuildingId;
+            }
+
+            _repo.UpdateAsync(entity);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result > 0) return true; 
+            
+            return false;
+        }
+
+        public async Task<List<CreateToTenantDto>> GetAll()
+        {
+            var query = await _repo.GetAllAsync();
+            return query.Select(t => new CreateToTenantDto
+            {
+                TenantCode = t.TenantCode,
+                FirstName = t.FirstName,
+                LastName = t.LastName,
+
+                SSN = t.SSN,
+                Phone = t.Phone,
+                Email = t.Email,
+                LanguageId = t.LanguageId,
+
+
+                HasPossession = t.HasPossession,
+                HasRegulatedTenancy = t.HasRegulatedTenancy,
+                //add = t.Additionaltenants,
+                OtherOccupants = t.OtherOccupants,
+
+                TenantRecord = t.TenantRecord,
+                HasPriorCase = t.HasPriorCase,
+                TenancyTypeId = t.TenancyTypeId,
+                RenewalOffer = t.RenewalOffer,
+                //RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
+                SocialServices = t.SocialServices,
+                MonthlyRent = t.MonthlyRent,
+
+                TenantShare = t.TenantShare,
+                ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
+                UnitOrApartmentNumber = t.UnitOrApartmentNumber,
+
+                IsUnitIllegalId = t.IsUnitIllegalId,
+                BuildingId = t.BuildinId,
+            }).ToList();
+        }
+
+        public async Task<string> GetLastTenantCode()
+        {
+            var lastTenantCode = await _repo.GetLasttenantCodeAsync();
+            return lastTenantCode!;
+        }
+    }
 }
