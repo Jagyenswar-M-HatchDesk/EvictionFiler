@@ -296,6 +296,11 @@ namespace EvictionFiler.Application.Services
                 ClientEmail = caseEntity.Clients.Email,
                 ClientPhone = caseEntity.Clients.Phone,
                 Reference = caseEntity.Reference,
+                Address1 = caseEntity.Clients.Address1,
+                Address2 = caseEntity.Clients.Address2,
+                City = caseEntity.Clients.City,
+                StateName = caseEntity.Clients.State.Name,
+                ZipCode = caseEntity.Clients.ZipCode,
 
                 // Landlord
                 LandlordId = caseEntity.LandLordId,
@@ -317,7 +322,9 @@ namespace EvictionFiler.Application.Services
                 //ApartmentNumber = caseEntity.Buildings.ApartmentCode,
                 Borough = caseEntity.Buildings?.City,
                 Units = caseEntity.Buildings?.BuildingUnits,
+                BuildingState = caseEntity.Buildings.State.Name,
                 BuildingAddress = caseEntity.Buildings?.Address1,
+                BuildingZip = caseEntity.Buildings.Zipcode,
                 RegulationStatusId = caseEntity.Buildings?.RegulationStatusId ?? Guid.Empty,
                 //RegulationStatusName = caseEntity.Buildings.RegulationStatus.Name,
 

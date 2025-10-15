@@ -41,6 +41,7 @@ namespace EvictionFiler.Application.DTOs
 
         public Guid? BuildingId { get; set; }
         public Guid? BuildingStateId { get; set; }
+        public string? BuildingState { get; set; }
         public string BuildingAddress { get; set; }
         public Guid? RegulationStatusId { get; set; }
         public string RegulationStatusName { get; set; }
