@@ -251,112 +251,120 @@ namespace EvictionFiler.Application.Services
 
         public async Task<IntakeModel> GetCaseByIdAsync(Guid caseId)
         {
-            var caseEntity = await _repository.GetAllQuerable(
-    predicate: c => c.Id == caseId,
-    (Expression<Func<LegalCase, object>>)(c => c.Clients),
-    c => c.Buildings,
-    c => c.CaseType,
-    c => c.LandLords,
-    c => c.Tenants,
-    c => c.RegulationStatus,
-    c => c.TenancyType,
-    c => c.RenewalStatus,
-    c => c.ReasonHoldover,
-    c => c.ClientRole,
-    c => c.Buildings.State,
-    c => c.Addoccupants,
-    c => c.Buildings.Landlord.State,
-    c => c.Buildings.Landlord.LandlordType
-)
-.FirstOrDefaultAsync();
-
-            if (caseEntity == null)
-                return null;
-
-            var intakeModel = new IntakeModel
+            try
             {
-                // for Case
-                Id = caseEntity.Id,
-                Casecode = caseEntity.Casecode,
-                ClientId = caseEntity.Clients.Id,
-                CaseTypeName = caseEntity.CaseType.Name,
-                IsERAPPaymentReceived = caseEntity.IsERAPPaymentReceived,
-                CaseTypeId = caseEntity.CaseTypeId,
 
-                OralStart = caseEntity.OralStart,
-                OralEnd = caseEntity.OralEnd,
-                CreatedOn = caseEntity.CreatedOn,
-                Status = caseEntity.IsActive ? "Active" : "Inactive",
+                var caseEntity = await _repository.GetAllQuerable(
+        predicate: c => c.Id == caseId,
+        (Expression<Func<LegalCase, object>>)(c => c.Clients),
+        c => c.Buildings,
+        c => c.CaseType,
+        c => c.LandLords,
+        c => c.Tenants,
+        c => c.RegulationStatus,
+        c => c.TenancyType,
+        c => c.RenewalStatus,
+        c => c.ReasonHoldover,
+        c => c.ClientRole,
+        c => c.Buildings.State,
+        c => c.Addoccupants,
+        c => c.Buildings.Landlord.State,
+        c => c.Buildings.Landlord.LandlordType
+    )
+    .FirstOrDefaultAsync();
+
+                if (caseEntity == null)
+                    return null;
+
+                var intakeModel = new IntakeModel
+                {
+                    // for Case
+                    Id = caseEntity.Id,
+                    Casecode = caseEntity.Casecode,
+                    ClientId = caseEntity.Clients.Id,
+                    CaseTypeName = caseEntity.CaseType.Name,
+                    //IsERAPPaymentReceived = caseEntity.IsERAPPaymentReceived,
+                    CaseTypeId = caseEntity.CaseTypeId,
+
+                    //OralStart = caseEntity.OralStart,
+                    //OralEnd = caseEntity.OralEnd,
+                    CreatedOn = caseEntity.CreatedOn,
+                    Status = caseEntity.IsActive ? "Active" : "Inactive",
 
 
-                //for Client
-                ClientCode = caseEntity.Clients.ClientCode,
-                ClientName = $"{caseEntity.Clients.FirstName} {caseEntity.Clients.LastName}",
-                ClientTypeId = caseEntity.Clients.ClientTypeId,
-                ClientEmail = caseEntity.Clients.Email,
-                ClientPhone = caseEntity.Clients.Phone,
-                Reference = caseEntity.Reference,
-                Address1 = caseEntity.Clients.Address1,
-                Address2 = caseEntity.Clients.Address2,
-                City = caseEntity.Clients.City,
-                StateName = caseEntity.Clients.State.Name,
-                ZipCode = caseEntity.Clients.ZipCode,
+                    //for Client
+                    ClientCode = caseEntity.Clients.ClientCode,
+                    ClientName = $"{caseEntity.Clients.FirstName} {caseEntity.Clients.LastName}",
+                    ClientTypeId = caseEntity.Clients.ClientTypeId,
+                    ClientEmail = caseEntity.Clients.Email,
+                    ClientPhone = caseEntity.Clients.Phone,
+                    Reference = caseEntity.Reference,
+                    Address1 = caseEntity.Clients.Address1,
+                    Address2 = caseEntity.Clients.Address2,
+                    City = caseEntity.Clients.City,
+                    StateName = caseEntity.Clients.State !=null ? caseEntity.Clients.State.Name : string.Empty,
+                    ZipCode = caseEntity.Clients.ZipCode,
 
-                // Landlord
-                LandlordId = caseEntity.LandLordId,
-                landlordName = $"{caseEntity.LandLords.FirstName} {caseEntity.LandLords.LastName}",
-                ContactPersonName = caseEntity.LandLords.ContactPersonName,
-                LawFirm = caseEntity.LandLords.LawFirm,
-                AttorneyOfRecord = caseEntity.LandLords.AttorneyOfRecord,
-                LandlordAddress = caseEntity.LandLords.Address1,
-                //FullName = caseEntity.LandLords?.FirstName,
-                //Phone = caseEntity.LandLords?.Phone,
-                //Email = caseEntity.LandLords?.Email,
-                LandLordTypeId = caseEntity.LandLords?.LandlordTypeId ?? Guid.Empty,
+                    // Landlord
+                    LandlordId = caseEntity.LandLordId,
+                    landlordName = $"{caseEntity.LandLords.FirstName} {caseEntity.LandLords.LastName}",
+                    ContactPersonName = caseEntity.LandLords.ContactPersonName,
+                    LawFirm = caseEntity.LandLords.LawFirm,
+                    AttorneyOfRecord = caseEntity.LandLords.AttorneyOfRecord,
+                    LandlordAddress = caseEntity.LandLords.Address1,
+                    //FullName = caseEntity.LandLords?.FirstName,
+                    //Phone = caseEntity.LandLords?.Phone,
+                    //Email = caseEntity.LandLords?.Email,
+                    //LandLordTypeId = caseEntity.LandLords?.LandlordTypeId ?? Guid.Empty,
 
-                // Building
-                BuildingId = caseEntity.BuildingId,
-                Buildingcode = caseEntity.Buildings.BuildingCode,
-                Mdr = caseEntity.Buildings?.MDRNumber,
-                UnitOrApartmentNumber = caseEntity.Buildings.ApartmentCode,
-                //ApartmentNumber = caseEntity.Buildings.ApartmentCode,
-                Borough = caseEntity.Buildings?.City,
-                Units = caseEntity.Buildings?.BuildingUnits,
-                BuildingState = caseEntity.Buildings.State.Name,
-                BuildingAddress = caseEntity.Buildings?.Address1,
-                BuildingZip = caseEntity.Buildings.Zipcode,
-                RegulationStatusId = caseEntity.Buildings?.RegulationStatusId ?? Guid.Empty,
-                //RegulationStatusName = caseEntity.Buildings.RegulationStatus.Name,
+                    // Building
+                    BuildingId = caseEntity.BuildingId,
+                    Buildingcode = caseEntity.Buildings.BuildingCode,
+                    Mdr = caseEntity.Buildings?.MDRNumber,
+                    UnitOrApartmentNumber = caseEntity.Buildings.ApartmentCode,
+                    //ApartmentNumber = caseEntity.Buildings.ApartmentCode,
+                    Borough = caseEntity.Buildings?.City,
+                    Units = caseEntity.Buildings?.BuildingUnits,
+                    BuildingState = caseEntity.Buildings.State.Name,
+                    BuildingAddress = caseEntity.Buildings?.Address1,
+                    BuildingZip = caseEntity.Buildings.Zipcode,
+                    RegulationStatusId = caseEntity.Buildings?.RegulationStatusId ?? Guid.Empty,
+                    //RegulationStatusName = caseEntity.Buildings.RegulationStatus.Name,
 
-                // Tenant
-                TenantId = caseEntity.TenantId,
-                TenantName = $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}",
-                ApartmentNumber = caseEntity.Tenants?.UnitOrApartmentNumber,
+                    // Tenant
+                    TenantId = caseEntity.TenantId,
+                    TenantName = $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}",
+                    ApartmentNumber = caseEntity.Tenants?.UnitOrApartmentNumber,
 
-                WrittenLease = caseEntity.WrittenLease,
-                OralAgreeMent = caseEntity.OralAgreeMent,
-                CaseProgramId = caseEntity.CaseProgramId,
-                GoodCauseApplies = caseEntity.GoodCauseApplies,
-                DateTenantMoved = caseEntity.DateTenantMoved,
-                LeaseEnd = caseEntity.LeaseEnd,
-                TenancyTypeId = caseEntity.TenancyTypeId,
-                DateNoticeServed = caseEntity.DateNoticeServed,
-                CalculatedNoticeLength = caseEntity.CalculatedNoticeLength,
-                ExpirationDate = caseEntity.ExpirationDate,
-                PredicateNotice = caseEntity.PredicateNotice,
-                RentDueEachMonthOrWeekId = caseEntity.RentDueEachMonthOrWeekId,
-                MonthlyRent = caseEntity.MonthlyRent,
-                TotalOwed = caseEntity.TotalRentOwed,
-                TenantShare = caseEntity.TenantShare,
-                SocialService = caseEntity.SocialService,
-                LastRentPaid = caseEntity.LastRentPaid,
-                //IsUnitIllegalId = caseEntity.Tenants?.IsUnitIllegalId ?? Guid.Empty,
-                //TenantRecord = caseEntity.Tenants?.TenantRecord,
-                //HasPossession = caseEntity.Tenants?.HasPossession,
-                //OtherOccupants = caseEntity.Tenants?.OtherOccupants
-            };
+                    WrittenLease = caseEntity.WrittenLease,
+                    OralAgreeMent = caseEntity.OralAgreeMent,
+                    CaseProgramId = caseEntity.CaseProgramId,
+                    GoodCauseApplies = caseEntity.GoodCauseApplies,
+                    DateTenantMoved = caseEntity.DateTenantMoved,
+                    LeaseEnd = caseEntity.LeaseEnd,
+                    TenancyTypeId = caseEntity.TenancyTypeId,
+                    DateNoticeServed = caseEntity.DateNoticeServed,
+                    CalculatedNoticeLength = caseEntity.CalculatedNoticeLength,
+                    ExpirationDate = caseEntity.ExpirationDate,
+                    PredicateNotice = caseEntity.PredicateNotice,
+                    RentDueEachMonthOrWeekId = caseEntity.RentDueEachMonthOrWeekId,
+                    MonthlyRent = caseEntity.MonthlyRent,
+                    TotalOwed = caseEntity.TotalRentOwed,
+                    TenantShare = caseEntity.TenantShare,
+                    SocialService = caseEntity.SocialService,
+                    LastRentPaid = caseEntity.LastRentPaid,
+                    //IsUnitIllegalId = caseEntity.Tenants?.IsUnitIllegalId ?? Guid.Empty,
+                    //TenantRecord = caseEntity.Tenants?.TenantRecord,
+                    //HasPossession = caseEntity.Tenants?.HasPossession,
+                    //OtherOccupants = caseEntity.Tenants?.OtherOccupants
+                };
 
-            return intakeModel;
+                return intakeModel;
+            }
+            catch(Exception ex)
+            {
+                throw new Exception();
+            }
         }
 
 

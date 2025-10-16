@@ -3,6 +3,7 @@
 @using Blazored.Toast.Services
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ApartmentDto
+@using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.FormTypeDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
@@ -19,12 +20,15 @@
 @using EvictionFiler.Infrastructure.Repositories
 @inject SpinnerService spinnerservice
 @inject ICaseFormRepository CaseFormRepository
+@inject IClientService _clientService
+@inject IClientRoleRepository _clientRoleRepository
 @inject IFormTypesRepository FormTypesRepository
 @inject ICaseFormService _CaseFormService
 @inject IRegulationStatusRepository _regulationStatusRepository
 @inject IStateRepository _stateRepository
 @inject IBuildingRepository _buildingRepository
-@inject IAdditionalTenantService _additionalTenantRepository
+@inject IBuildingService _buildingService
+@inject IAdditionalTenantService _additionalTenantService
 @inject ITenantService _tenantService
 @inject IToastService ToastService
 @inject IJSRuntime JS
@@ -326,7 +330,7 @@
     }
     }
 
-    /* 
+    /*
     .card {
     background: var(--card);
     border: 1px solid var(--line);
@@ -478,12 +482,12 @@
     color: #991b1b
     }
 
-    .btn.base{
+    .btn.base {
     background: #1F365D !important;
-    color:#fff;
+    color: #fff;
     }
 
-    .btn.normal{
+    .btn.normal {
     background: transparent !important;
     border: none;
     }
@@ -535,6 +539,10 @@
     .form-check-input {
     cursor: pointer;
     }  */
+
+    .btn-tenant:hover {
+    background: #1F365D !important;
+    }
 </style>
 
 
@@ -666,7 +674,7 @@
 
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="fw-semibold mb-2 d-flex align-items-center gap-2"><i class="bi bi-buildings"></i> Building</div>
-                                            <button type="button" class="btn btn-sm normal p-1" title="Edit Tenant" @onclick="ShowBuildingModal">
+                                            <button type="button" class="btn btn-sm normal p-1" title="Edit Building" @onclick="ShowBuildingModal">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
                                         </div>
@@ -873,8 +881,13 @@
 
                     <!-- Contact Info -->
                     <div class="card shadow-sm border-0">
-                        <div class="card-header bg-transparent">
-                            <div class="fw-semibold">Contact Information</div>
+                        <div class="card-header bg-transparent position-relative">
+                            <div class="d-flex justify-content-between align-items-center ">
+                                <div class="fw-semibold">Contact Information</div>
+                                <button type="button" class="btn btn-sm normal p-1" title="Edit Client" @onclick="ShowClientModal">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body small d-flex flex-column gap-2">
                             <div class="d-flex align-items-center gap-2"><i class="bi bi-envelope"></i> <span id="contactEmail">@(string.IsNullOrWhiteSpace(legalcaseDto.ClientEmail) ? "--" : legalcaseDto.ClientEmail)</span></div>
@@ -945,10 +958,14 @@
 
                             <div class="card-body">
                                 <!-- Unit / Apt -->
-                                <div class="row">
+                                <div class="row position-relative">
 
-                                    <div class="col-md-6 position-relative">
+                                    <div class="col-md-6 ">
                                         <label class="form-label  required-label">Unit / Apt # (confirm)</label>
+                                        <button type="button" class="btn-close position-absolute top-0 end-0 m-2 mt-0"
+                                        aria-label="Clear"
+                                        @onclick="OnBindTenantCancel">
+                                        </button>
                                         <input type="text" class="form-control"
                                         placeholder="Enter Unit / Apt"
                                         @bind-value="searchTenantText"
@@ -982,8 +999,9 @@
                                             }
 
                                         }
+                                        <button class="btn btn-sm btn-primary btn-tenant mt-2" @onclick="AddTenant">＋ Add Tenant</button>
 
-                                        <button class="btn btn-sm btn-primary mt-2" @onclick="AddTenant">＋ Add Tenant</button>
+
                                     </div>
 
                                     <div class="col-12 mt-3">
@@ -1000,7 +1018,8 @@
                                             }
                                         }
 
-                                        <button class="btn btn-sm btn-primary mt-2" @onclick="AddUnder">＋ Add Undertenant/Occupant</button>
+                                        <button class="btn btn-sm btn-primary btn-tenant mt-2" @onclick="AddUnder">＋ Add Undertenant/Occupant</button>
+
                                     </div>
                                 </div>
 
@@ -1017,7 +1036,7 @@
                 </div>
                 <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary base">Save</button>
+                    <button type="submit" class="btn btn-primary base" @onclick="SaveTenantChanges">Save</button>
                 </div>
             </div>
 
@@ -1034,7 +1053,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <EditForm Model="@editBuildingModel" OnValidSubmit="SaveBuildingChanges">
+                <EditForm Model="@editBuildingModel">
                     <DataAnnotationsValidator />
                     <div class="modal-body">
                         <div class="card border-0">
@@ -1071,7 +1090,7 @@
                                             <span>OR</span>
                                         </div>
                                         <div class="col-md-2 d-flex align-items-end">
-                                            <button type="button" class="btn btn-primary" @onclick="OnBindBuildingAfter">+ Add</button>
+                                            <button type="button" class="btn btn-primary base" @onclick="OnBindBuildingAfter">+ Add</button>
                                         </div>
                                     }
                                 </div>
@@ -1081,13 +1100,13 @@
                                 {
                                     <div class="border rounded-3 p-3 mt-4 position-relative">
                                         <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
-                                        aria-label="Cancel"
+                                        aria-label="Clear"
                                         @onclick="OnBindBuildingCancel">
                                         </button>
 
                                         <div class="row g-3">
                                             <div class="col-md-6">
-                                                <label class="form-label required-label">Street Address *</label>
+                                                <label class="form-label required-label">Street Address </label>
                                                 <InputText class="form-control" @bind-Value="editBuildingModel.Address1" placeholder="Enter Address" />
                                                 <ValidationMessage For="() => editBuildingModel.Address1" />
                                             </div>
@@ -1153,7 +1172,127 @@
 
                     <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary base">Save</button>
+                        <button type="submit" class="btn btn-primary base" @onclick="SaveBuildingChanges">Save</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+
+    <!-- client Edit Modal -->
+    <div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="buildingModalLabel">Edit Client Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <EditForm Model="@client">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body py-0">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- Case Type Dropdown -->
+                                    @if (!newClient)
+                                    {
+
+
+                                        <div class="col-5 position-relative">
+
+
+                                            <label class="form-label required-label">Client</label>
+
+                                            <InputText type="text" class="form-control"
+                                            placeholder="Search by client name or code..."
+                                            @bind-value="searchText"
+                                            @oninput="OnSearchInput" />
+
+                                            @if (filteredClients?.Any() == true)
+                                            {
+                                                <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
+                                                    @foreach (var c in filteredClients)
+                                                    {
+                                                        <li class="dropdown-item" @onclick="() => SelectClient(c)">
+                                                            @c.FirstName @c.LastName / @c.ClientCode
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
+                                        </div>
+                                        @if (!showClientTextbox)
+                                        {
+                                            <div class="col-3 row">
+                                                <div class="col-md-3 d-flex justify-content-center align-items-end" style="padding-bottom:10px;">
+                                                    <div>
+                                                        OR
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-9 d-flex align-items-end">
+                                                    <button type="button" class="btn" style="background-color:#1F365D !important;height:40px; color:white" @onclick="AddClient">+ ADD</button>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                    @if (showClientTextbox)
+                                    {
+
+
+
+                                        <div class="card p-3 mt-3 position-relative">
+                                            <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                                            aria-label="Clear"
+                                            @onclick="ClearSelectedClient">
+                                            </button>
+                                            <div class="row">
+                                                <div class="col-4">
+                                                    <label class="form-label">First Name</label>
+                                                    <InputText class="form-control" placeholder="Enter Name" @bind-Value="client.FirstName" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <label class="form-label">Last Name</label>
+                                                    <InputText class="form-control" placeholder="Enter Name" @bind-Value="client.LastName" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <label class="form-label">Client Type</label>
+                                                    <InputSelect class="form-select" @bind-Value="client.ClientTypeId" style="cursor:pointer;">
+                                                        <option value="">-- Select Type --</option>
+                                                        @foreach (var Own in ClientTypeList)
+                                                        {
+                                                            <option value="@Own.Id">@Own.Name</option>
+                                                        }
+                                                    </InputSelect>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-4 mt-3">
+                                                    <label class="form-label">Email</label>
+                                                    <InputText class="form-control" placeholder="Enter Email" @bind-Value="client.Email" />
+                                                </div>
+
+                                                <div class="col-4 mt-3">
+                                                    <label class="form-label">Phone</label>
+                                                    <InputText class="form-control" placeholder="Enter Number" @bind-Value="client.Phone" />
+                                                </div>
+                                                <div class="col-4 mt-3">
+                                                    <label class="form-label">Reference #</label>
+                                                    <InputText class="form-control" placeholder="Enter Reference" @bind-Value="client.Reference" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary base" @onclick="SaveClientChanges">Save</button>
                     </div>
                 </EditForm>
             </div>
@@ -1165,6 +1304,13 @@
         const modal = new bootstrap.Modal(document.getElementById(id));
         modal.show();
         };
+    </script>
+    <script>
+        function hideModal(id) {
+        var modal = bootstrap.Modal.getInstance(document.getElementById(id));
+        if (modal) modal.hide();
+        }
+
     </script>
 
 </body>
@@ -1195,7 +1341,7 @@
             loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
         }
-
+        ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
         spinnerservice.Show();
         await LoadCaseDetails();
         await LoadCaseForms();
@@ -1403,7 +1549,7 @@
         Tenants.Clear();
         TenantList = await _tenantService.GetTenantsByClientIdAsync(legalcaseDto.BuildingId!.Value);
         ViewTenant = await _tenantService.GetByIdAsync(legalcaseDto.TenantId!.Value);
-        AdditionalTenantfromDbList = await _additionalTenantRepository.GetAllAdditionalTenantsAsync(legalcaseDto.TenantId);
+        AdditionalTenantfromDbList = await _additionalTenantService.GetAllAdditionalTenantsAsync(legalcaseDto.TenantId);
         searchTenantText = ViewTenant.UnitOrApartmentNumber!;
         Tenants.Add(legalcaseDto.TenantName);
         Tenants.AddRange(AdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}"));
@@ -1411,36 +1557,75 @@
         JS.InvokeVoidAsync("showModal", "tenantModal");
     }
 
-    // private void ShowBuildingModal()
-    // {
-    //     IsNewBuilding = true;
-    //     showBuildingFields = true;
-    //     buildingEditModel = new BuildingModel
-    //         {
-    //             Mdr = legalcaseDto.Mdr,
-    //             BuildingAddress = legalcaseDto.BuildingAddress,
-    //             BuildingZip = legalcaseDto.BuildingZip
-    //         };
-    //     JS.InvokeVoidAsync("showModal", "buildingModal");
-    // }
-
-    private void SaveTenantChanges()
+    public EditToClientDto client = new EditToClientDto();
+    public List<EditToClientDto> ClientList = new List<EditToClientDto>();
+    public List<EditToClientDto> filteredClients = new List<EditToClientDto>();
+    public List<ClientRole> ClientTypeList = new List<ClientRole>();
+    public string searchText { get; set; }
+    public bool showClientTextbox = false;
+    public bool newClient = false;
+    private async void ShowClientModal()
     {
-        // legalcaseDto.TenantName = tenantEditModel.TenantName;
-        // legalcaseDto.ApartmentNumber = tenantEditModel.ApartmentNumber;
-        // legalcaseDto.BuildingAddress = tenantEditModel.BuildingAddress;
-        ToastService.ShowSuccess("Tenant details updated!");
+        // Copy current data into editable model
+
+        client = await _clientService.GetClientByIdAsync(legalcaseDto.ClientId!.Value) ?? new EditToClientDto();
+
+        ClientTypeList = await _clientRoleRepository.GetAllClientRole();
+        showClientTextbox = true;
+        searchText = $"{client.FirstName} {client.LastName}";
+        StateHasChanged();
+        JS.InvokeVoidAsync("showModal", "clientModal");
     }
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        searchText = e.Value.ToString();
+        filteredClients = ClientList
+            .Where(c => c.FirstName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+                        || c.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+                        || c.ClientCode.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+    private void SelectClient(EditToClientDto selectedclient)
+    {
+        showClientTextbox = true;
+        searchText = $"{client.FirstName} {client.LastName}";
+        filteredClients.Clear();
+        newClient = false;
+        // Fill card
+        legalcaseDto.ClientId = selectedclient.Id;
+        client.Id = selectedclient.Id;
+        client.FirstName = $"{selectedclient.FirstName}";
+        client.LastName = $"{selectedclient.LastName}";
+        client.Email = selectedclient.Email;
+        client.Phone = selectedclient.Phone;
+        client.Address1 = selectedclient.Address1;
+        client.Address2 = selectedclient.Address2;
+        client.City = selectedclient.City;
+        client.StateId = selectedclient.StateId;
+        client.ZipCode = selectedclient.ZipCode;
+        client.ClientTypeId = selectedclient.ClientTypeId;
+        client.Reference = selectedclient.Reference;
+    }
+    private void ClearSelectedClient()
+    {
+        searchText = string.Empty;
 
-    // private void SaveBuildingChanges()
-    // {
-    //     legalcaseDto.Mdr = buildingEditModel.Mdr;
-    //     legalcaseDto.BuildingAddress = buildingEditModel.BuildingAddress;
-    //     legalcaseDto.BuildingZip = buildingEditModel.BuildingZip;
-    //     ToastService.ShowSuccess("Building details updated!");
-    // }
+        newClient = false;
+        showClientTextbox = false;
+        searchText = null;
+        client = new EditToClientDto();
 
+        StateHasChanged();
+    }
+    private async void AddClient()
+    {
+        showClientTextbox = true;
+        searchText = null;
+        newClient = true;
+        client = new EditToClientDto();
+        StateHasChanged();
 
+    }
 
     private EditToBuildingDto editBuildingModel = new();
     private bool showBuildingFields = false;
@@ -1454,7 +1639,7 @@
     private List<EditToBuildingDto> BuildingList = new();
     private List<EditToTenantDto> TenantList = new();
     private List<string> Tenants = new();
-    private List<string> UnderTenants = new();
+    private List<string> UnderTenants = new() { "John Doe", "John Doe" };
     private List<AdditioanlTenants> AdditionalTenantfromDbList = new();
     private List<AddtionalTenantDto> AdditionalTenantList = new();
     private List<AdditionalOccupantDto> AdditionalOccupantsList = new();
@@ -1510,6 +1695,7 @@
         searchBuildingText = selected.BuildingCode;
         showBuildingFields = true;
         IsNewBuilding = false;
+        legalcaseDto.BuildingId = selected.Id;
     }
 
     // Toggle "Add New" section
@@ -1528,36 +1714,338 @@
         editBuildingModel = new EditToBuildingDto();
     }
 
+    private void OnBindTenantCancel()
+    {
+        Tenants.Clear();
+        searchTenantText = null;
+        legalcaseDto.TenantId = null;
+        legalcaseDto.TenantName = null;
+        AdditionalTenantfromDbList = new List<AdditioanlTenants>();
+        AdditionalTenantList = new List<AddtionalTenantDto>();
+    }
+
     // Save
     private async Task SaveBuildingChanges()
     {
         spinnerservice.Show();
 
-        // Map edited fields
-        legalcaseDto.BuildingAddress = editBuildingModel.Address1;
-        legalcaseDto.Borough = editBuildingModel.City;
-        legalcaseDto.Mdr = editBuildingModel.MDRNumber;
-        legalcaseDto.BuildingZip = editBuildingModel.Zipcode;
-        legalcaseDto.BuildingStateId = editBuildingModel.StateId;
-        legalcaseDto.Units = editBuildingModel.BuildingUnits;
-        legalcaseDto.RegulationStatusId = editBuildingModel.RegulationStatusId;
-        legalcaseDto.UnitOrApartmentNumber = editBuildingModel.ApartmentCode;
-
-        var success = await _service.UpdateCaseAsync(legalcaseDto);
-
-        if (success.HasValue)
+        var addorupdate = false;
+        if (editBuildingModel.Id == null || editBuildingModel.Id == Guid.Empty)
         {
-            ToastService.ShowSuccess("Building details updated successfully!");
-            await LoadCaseDetails();
+            var newBuilding = new CreateToBuildingDto()
+                {
+                    Address1 = editBuildingModel.Address1,
+                    //Address2 = address2,
+                    City = editBuildingModel.City,
+                    StateId = editBuildingModel.StateId,
+                    Zipcode = editBuildingModel.Zipcode,
+                    BuildingUnits = editBuildingModel.BuildingUnits,
+                    ApartmentCode = editBuildingModel.ApartmentCode,
+                    MDRNumber = editBuildingModel.MDRNumber,
+                    RegulationStatusId = editBuildingModel.RegulationStatusId,
+                    LandlordId = legalcaseDto.LandlordId
+                };
+
+            var buildingId = await _buildingService.AddOnlyApartmentfromCase(newBuilding);
+            addorupdate = true;
+            legalcaseDto.BuildingId = buildingId;
+
         }
         else
         {
-            ToastService.ShowError("Failed to update building details.");
+            if (editBuildingModel.Id != null)
+            {
+
+                var updateBuilding = new EditToBuildingDto()
+                    {
+                        Id = editBuildingModel.Id,
+                        Address1 = editBuildingModel.Address1,
+                        BuildingCode = editBuildingModel.BuildingCode,
+                        //Address2 = address2,
+                        City = editBuildingModel.City,
+                        StateId = editBuildingModel.StateId,
+                        Zipcode = editBuildingModel.Zipcode,
+                        BuildingUnits = editBuildingModel.BuildingUnits,
+                        ApartmentCode = editBuildingModel.ApartmentCode,
+                        MDRNumber = editBuildingModel.MDRNumber,
+                        RegulationStatusId = editBuildingModel.RegulationStatusId,
+                    };
+
+                await _buildingService.UpdateonlyBuildingfromCase(updateBuilding);
+                addorupdate = true;
+            }
         }
+
+        if (addorupdate)
+        {
+            legalcaseDto.BuildingAddress = editBuildingModel.Address1;
+            legalcaseDto.Borough = editBuildingModel.City;
+            legalcaseDto.Mdr = editBuildingModel.MDRNumber;
+            legalcaseDto.BuildingZip = editBuildingModel.Zipcode;
+            legalcaseDto.BuildingStateId = editBuildingModel.StateId;
+            legalcaseDto.Units = editBuildingModel.BuildingUnits;
+            legalcaseDto.RegulationStatusId = editBuildingModel.RegulationStatusId;
+            legalcaseDto.UnitOrApartmentNumber = editBuildingModel.ApartmentCode;
+
+            var success = await _service.UpdateCaseAsync(legalcaseDto);
+
+            if (success.HasValue)
+            {
+                ToastService.ShowSuccess("Building details updated successfully!");
+                await JS.InvokeVoidAsync("hideModal", "buildingModal");
+
+                await LoadCaseDetails();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to update building details.");
+            }
+        }
+        // Map edited fields
+
+
+        spinnerservice.Hide();
+    }
+    private async Task SaveClientChanges()
+    {
+        spinnerservice.Show();
+
+        var addorupdate = false;
+        if (client.Id == null || client.Id == Guid.Empty)
+        {
+            var newClient = new CreateToClientDto()
+                {
+                    Address1 = client.Address1,
+                    //Address2 = address2,
+                    City = client.City,
+                    StateId = client.StateId,
+                    ZipCode = client.ZipCode,
+                    FirstName = client.FirstName,
+                    LastName = client.LastName,
+                    Reference = client.Reference,
+                    ClientTypeId = client.ClientTypeId,
+                     Phone = client.Phone,
+                     Email = client.Email,
+                };
+
+            var clientId = await _clientService.CreateOnlyClient(newClient);
+            addorupdate = true;
+            legalcaseDto.ClientId = clientId;
+
+        }
+        else
+        {
+            if (client.Id != null)
+            {
+
+                var updateBuilding = new EditToClientDto()
+                    {
+                        Id = client.Id,
+                        Address1 = client.Address1,
+                        ClientCode = client.ClientCode,
+                        //Address2 = address2,
+                        ClientTypeId = client.ClientTypeId,
+                        City = client.City,
+                        StateId = client.StateId,
+                        ZipCode = client.ZipCode,
+                        Phone = client.Phone,
+                        Email = client.Email,
+                        Reference = client.Reference,
+                        FirstName = client.FirstName,
+                        LastName = client.LastName,
+                        
+                    };
+
+                await _clientService.UpdateClientformCase(updateBuilding);
+                addorupdate = true;
+            }
+        }
+
+        if (addorupdate)
+        {
+            legalcaseDto.ClientEmail = client.Email;
+            legalcaseDto.Reference = client.Reference;
+            legalcaseDto.ClientTypeId = client.ClientTypeId;
+            legalcaseDto.ClientPhone = client.Phone;
+            legalcaseDto.ClientName = $"{client.FirstName} {client.LastName}";
+            legalcaseDto.City = client.City;
+            legalcaseDto.Address1 = client.Address1;
+            legalcaseDto.ZipCode = client.ZipCode;
+            legalcaseDto.StateId = client.StateId;
+
+            var success = await _service.UpdateCaseAsync(legalcaseDto);
+
+            if (success.HasValue)
+            {
+                ToastService.ShowSuccess("Client details updated successfully!");
+                await JS.InvokeVoidAsync("hideModal", "clientModal");
+
+                await LoadCaseDetails();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to update client details.");
+            }
+        }
+        // Map edited fields
+
 
         spinnerservice.Hide();
     }
 
+    private async Task SaveTenantChanges()
+    {
+        spinnerservice.Show();
+
+        var addorupdate = false;
+        if (legalcaseDto.TenantId == null && Tenants.Count > 0)
+        {
+            var mainTenantName = Tenants[0]?.Trim();
+            if (!string.IsNullOrWhiteSpace(mainTenantName))
+            {
+                var parts = mainTenantName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                var firstName = parts.Length > 0 ? parts[0] : "";
+                var lastName = parts.Length > 1 ? parts[1] : "";
+
+                var newTenant = new CreateToTenantDto()
+                    {
+                        FirstName = firstName,
+                        LastName = lastName,
+                        UnitOrApartmentNumber = legalcaseDto.ApartmentNumber,
+                        BuildingId = legalcaseDto.BuildingId,
+                        MoveInDate = legalcaseDto.DateTenantMoved,
+                        MonthlyRent = legalcaseDto.MonthlyRent,
+                        TenantShare = legalcaseDto.TenantShare,
+                        RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                        TotalRentOwed = legalcaseDto.TotalOwed,
+                        TenancyTypeId = legalcaseDto.TenancyTypeId,
+                        SocialServices = legalcaseDto.SocialService,
+                    };
+                var tenantId = await _tenantService.AddTenantfromCase(newTenant);
+
+                legalcaseDto.TenantId = tenantId;
+                addorupdate = true;
+            }
+
+        }
+        else
+        {
+            if (legalcaseDto.TenantId != null && Tenants.Count > 0)
+            {
+                var mainTenantName = Tenants[0]?.Trim();
+                if (!string.IsNullOrWhiteSpace(mainTenantName))
+                {
+                    var parts = mainTenantName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                    var firstName = parts.Length > 0 ? parts[0] : "";
+                    var lastName = parts.Length > 1 ? parts[1] : "";
+
+                    // Only update if anything actually changed
+
+                    var updateTenant = new EditToTenantDto
+                        {
+                            Id = legalcaseDto.TenantId ?? Guid.Empty,
+                            FirstName = firstName,
+                            LastName = lastName,
+                            BuildingId = legalcaseDto.BuildingId,
+                            UnitOrApartmentNumber = legalcaseDto.ApartmentNumber,
+                            MonthlyRent = legalcaseDto.MonthlyRent,
+                            TenantShare = legalcaseDto.TenantShare,
+                            RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                            TotalRentOwed = legalcaseDto.TotalOwed,
+                            TenancyTypeId = legalcaseDto.TenancyTypeId,
+                            SocialServices = legalcaseDto.SocialService,
+                            UpdatedOn = DateTime.Now,
+
+                        };
+
+                    await _tenantService.UpdateTenantAsync(updateTenant);
+                    addorupdate = true;
+
+                }
+            }
+        }
+
+        if (Tenants.Count > 1)
+        {
+            for (int i = 1; i < Tenants.Count; i++)
+            {
+                var fullName = Tenants[i]?.Trim();
+                if (string.IsNullOrWhiteSpace(fullName)) continue;
+
+                var parts = fullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                var firstName = parts.Length > 0 ? parts[0] : "";
+                var lastName = parts.Length > 1 ? parts[1] : "";
+
+                if (i - 1 < AdditionalTenantfromDbList.Count)
+                {
+                    var existingList = AdditionalTenantfromDbList.Select(e => new AddtionalTenantDto
+                        {
+                            Id = e.Id,
+                            FirstName = e.FirstName,
+                            LastName = e.LastName,
+                            TenantId = e.TenantId,
+
+                        }).ToList();
+                    var existing = existingList[i - 1];
+
+                    existing.FirstName = firstName;
+                    existing.LastName = lastName;
+                    existing.UpdatedOn = DateTime.Now;
+                    await _additionalTenantService.UpdateAdditionalTenantAsync(existing);
+
+                }
+                else
+                {
+                    // New Additional Tenant
+                    var newAdditional = new AddtionalTenantDto
+                        {
+                            TenantId = legalcaseDto.TenantId,
+                            FirstName = firstName,
+                            LastName = lastName,
+                            CreatedOn = DateTime.Now,
+                            IsActive = true,
+                            IsDeleted = false,
+                            IsVisible = true
+                        };
+
+                    await _additionalTenantService.AddAdditionalTenantAsync(new List<AddtionalTenantDto> { newAdditional });
+                }
+            }
+        }
+        if (addorupdate)
+        {
+            //     legalcaseDto.BuildingAddress = editBuildingModel.Address1;
+            //     legalcaseDto.Borough = editBuildingModel.City;
+            //     legalcaseDto.Mdr = editBuildingModel.MDRNumber;
+            //     legalcaseDto.BuildingZip = editBuildingModel.Zipcode;
+            //     legalcaseDto.BuildingStateId = editBuildingModel.StateId;
+            //     legalcaseDto.Units = editBuildingModel.BuildingUnits;
+            //     legalcaseDto.RegulationStatusId = editBuildingModel.RegulationStatusId;
+            //     legalcaseDto.UnitOrApartmentNumber = editBuildingModel.ApartmentCode;
+
+            var success = await _service.UpdateCaseAsync(legalcaseDto);
+
+            if (success.HasValue)
+            {
+                ToastService.ShowSuccess("Tenant details updated successfully!");
+                await JS.InvokeVoidAsync("hideModal", "tenantModal");
+
+                await LoadCaseDetails();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to update tenant details.");
+            }
+        }
+        else
+        {
+            ToastService.ShowError("Failed to update Legal Case details.");
+        }
+        // Map edited fields
+
+
+        spinnerservice.Hide();
+    }
     // Edit model
     private void OnSearchTenantInput(ChangeEventArgs e)
     {
@@ -1605,7 +2093,7 @@
 
 
 
-        AdditionalTenantfromDbList = await _additionalTenantRepository.GetAllAdditionalTenantsAsync(legalcaseDto.TenantId);
+        AdditionalTenantfromDbList = await _additionalTenantService.GetAllAdditionalTenantsAsync(legalcaseDto.TenantId);
         if (AdditionalTenantfromDbList.Count > 0)
         {
             Tenants.AddRange(AdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}").ToList());
