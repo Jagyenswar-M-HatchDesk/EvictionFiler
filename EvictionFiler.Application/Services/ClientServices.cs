@@ -192,6 +192,8 @@ namespace EvictionFiler.Application.Services
 				ZipCode = client.ZipCode,
                 CreatedBy = client.CreatedBy,
                 CreatedOn = client.CreatedOn,
+				ClientTypeId = client.ClientTypeId,
+				Reference = client.Reference,
             };
 		}
 

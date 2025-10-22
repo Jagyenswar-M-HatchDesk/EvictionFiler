@@ -11,7 +11,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
     public  interface IAdditionalOccupantsService
     {
         Task AddAdditionalOccupantsAsync(List<AdditionalOccupantDto> occupant);
-        Task<List<AdditionalOccupants>> GetAllAdditionalOccupantsAsync(Guid legalCaseId);
+        Task<List<AdditionalOccupantDto>> GetAllAdditionalOccupantsAsync(Guid legalCaseId);
         Task<bool> UpdateAdditionalOccupantsAsync(AdditionalOccupantDto occupant);
     }
 }
