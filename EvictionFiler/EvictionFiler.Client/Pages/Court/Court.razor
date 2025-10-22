@@ -1,0 +1,439 @@
+﻿@page "/court"
+@* @using EvictionFiler.Application.DTOs.CourtDto *@
+@using EvictionFiler.Application.DTOs.CourtDto
+@using EvictionFiler.Application.DTOs.PaginationDto
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Client.Jwt
+@using EvictionFiler.Client.SpinnerService
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+
+@inject ICourtService courtService
+@inject SpinnerService SpinnerService
+@inject JwtAuthStateProviders _authStateProvider
+@inject NavigationManager navManager
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+
+
+<style>
+    .shadow-sm {
+        box-shadow: 0 15px 20px #F2F0EC !important;
+        border: solid 1px #F2F0EC;
+    }
+
+
+    body {
+        background-color: #ffffff;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    /* body:hover {
+                background-color: #f8f9fa; /* subtle hover effect */
+    }
+
+    */
+
+    .container {
+        padding: 1rem;
+        border-radius: 0.25rem;
+        background-color: #ffffff;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    /* .container:hover {
+                background-color: #f2f2f2; /* container hover */
+    }
+
+    */
+    /* Buttons */
+    .btn.btn-navy {
+        background-color: #1F365D !important;
+        border-color: #1F365D !important;
+        color: #FFF;
+    }
+
+    .btn-navy:hover {
+        background-color: #162646;
+        border-color: #162646;
+        color: #FFF;
+    }
+
+
+
+
+    /* Pagination links */
+    .page-link {
+        color: #1F365D;
+    }
+
+        .page-link.active,
+        .page-item.active .page-link {
+            background-color: #1F365D;
+            border-color: #1F365D;
+            color: #F2F0EC;
+        }
+
+    /* Table headers */
+    table.table thead th {
+        color: #1F365D;
+        background: #F2F0EC;
+        margin-bottom: 0px !important;
+    }
+
+    /* Table hover effect (includes sticky cells) */
+    .table-hover tbody tr:hover {
+        background-color: #e6e6e6 !important; /* row hover color */
+        transition: background-color 0.2s ease-in-out;
+        cursor: pointer;
+    }
+
+        /* Sticky cells hover must match row hover */
+        .table-hover tbody tr:hover td.sticky,
+        .table-hover tbody tr:hover th.sticky {
+            background-color: #e6e6e6 !important;
+        }
+
+    /* Sticky columns */
+    th.sticky, td.sticky {
+        position: sticky;
+        right: 0;
+        background: #F2F0EC; /* default background */
+        z-index: 2;
+        text-align: center;
+        width: 80px; /* adjust width as needed */
+        max-width: 80px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    /* Make sure sticky header stays above other cells */
+    th.sticky {
+        z-index: 3;
+    }
+
+    /* Misc text colors */
+    h5, p, small {
+        color: #1F365D;
+    }
+
+    /* Advanced buttons */
+    .adv-btn {
+        color: #1F365D;
+        background: #FFF;
+    }
+
+        .adv-btn:hover {
+            color: #FFF;
+            background: #1F365D;
+        }
+
+        .adv-btn.active-adv-btn {
+            background-color: #1F365D !important;
+            color: #F2F0EC !important;
+            border-color: #1F365D !important;
+        }
+
+    /* Responsive table */
+    .table-responsive {
+        overflow-x: auto; /* Enable horizontal scroll */
+        position: relative;
+    }
+
+    table th, table td {
+        white-space: nowrap;
+    }
+
+</style>
+<body class="p-4">
+    <nav aria-label="breadcrumb" class="mt-2">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+            <li class="breadcrumb-item ">Courts</li>
+
+        </ol>
+    </nav>
+
+    @* <div class="container p-4 rounded shadow-sm bg-white"> *@
+    <!-- Header -->
+
+
+    @* <!-- Add Button + Search -->
+        <div class="g-2 mb-3 d-flex justify-content-between align-items-center">
+            <button class="btn bg-navy text-white" style="font-size:14px">
+                <i class="fa fa-plus me-1"></i> Add New
+            </button>
+            <div class="position-relative">
+                <input class="form-control border-navy  text-navy" style="border-color: #020336 ; font-size:14px" placeholder="Search.." />
+                <button class="btn position-absolute top-50 end-0 translate-middle-y text-navy" type="button">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        </div> *@
+    <div class="container p-4 rounded shadow-sm bg-white">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="m-0 fw-bold text-navy" style="font-size:14px">Manage Courts</h5>
+        </div>
+
+
+        <!-- Search Filters -->
+        <div class="g-2 mb-3 d-flex justify-content-between align-items-center">
+
+            <button class="btn btn-navy" style="background-color:#1F365D; color:#FFF; " @onclick="() => createCourtRef?.Show()"><i class="fa fa-plus me-1"></i>Add New</button>
+            <div class="position-relative ">
+                <input class="form-control border border-navy text-navy" style="border-color: #020336 ; font-size:14px" placeholder="Search.." value="@searchTerm" @oninput="OnSearchChanged" />
+                <button class="btn position-absolute top-50 end-0 translate-middle-y text-navy" type="button">
+
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+
+        </div>
+
+
+
+        <div class="table-responsive mb-3">
+            <table class="table table-hover align-middle text-center" style="font-size:14px">
+                <thead>
+                    <tr>
+                        <th>Courts</th>
+                        <th>Address</th>
+
+                        <th>Phone</th>
+
+                        <th>Notes</th>
+                        <th>Part</th>
+                        <th>Room#</th>
+                        <th>Virtual Link</th>
+                        <th>ConferenceId</th>
+                        <th>Tollfree</th>
+                        <th>Judge</th>
+
+                        <th class="sticky ">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (courts == null)
+                    {
+                        <tr><td colspan="10"><em>Loading...</em></td></tr>
+                    }
+                    else if (courts.Count == 0)
+                    {
+                        <tr><td colspan="10" class="text-muted">No courts available.</td></tr>
+                    }
+
+                    else
+                    {
+
+                        @foreach (var court in courts)
+                        {
+                            <tr>
+                                <td>@court.Court</td>
+                                <td>@court.Address</td>
+                                <td>@court.Phone</td>
+                                <td>@court.Notes</td>
+                                <td>@court.Part</td>
+                                <td>@court.RoomNo</td>
+                                <td>@court.VirtualLink</td>
+                                <td>@court.ConferenceId</td>
+                                <td>@court.CallIn</td>
+                                <td>@court.Judge</td>
+
+                                <td class="sticky">
+                                    <i class="fa-solid fa-pen-to-square text-navy me-3" @onclick="() => editCourtRef.Show(court)" style="cursor: pointer;" title="Edit"></i>
+                                    <i class="fa-solid fa-trash-can text-danger" @onclick="() => DeleteCourt(court)" style="cursor: pointer;" title="Delete"></i>
+                                </td>
+                            </tr>
+
+
+                        }
+                    }
+
+                </tbody>
+            </table>
+        </div>
+        <!-- Pagination -->
+        @if (pagedCourts != null && pagedCourts.TotalCount > 0)
+        {
+            <div class="d-flex justify-content-between mt-3">
+                <small class="text-muted">
+                    Showing @(((currentPage - 1) * pageSize) + 1)
+                    to @(Math.Min(currentPage * pageSize, pagedCourts.TotalCount))
+                    of @pagedCourts.TotalCount entries
+                </small>
+
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(currentPage - 1)">←</button>
+                        </li>
+
+                        @for (int i = 1; i <= Math.Ceiling((double)pagedCourts.TotalCount / pageSize); i++)
+                        {
+                            var pageNumber = i;
+                            <li class="page-item @(pageNumber == currentPage ? "active" : "")">
+                                <button class="page-link" @onclick="() => ChangePage(pageNumber)">@pageNumber</button>
+                            </li>
+                        }
+
+                        <li class="page-item @(currentPage == Math.Ceiling((double)pagedCourts.TotalCount / pageSize) ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(currentPage + 1)">→</button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    </div>
+
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="position-fixed top-0 end-0 p-3" style="z-index:1050">
+            <div class="toast show text-white bg-success">
+                <div class="d-flex">
+                    <div class="toast-body">@successMessage</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" @onclick="() => successMessage = string.Empty"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+
+
+    <CreateCourt @ref="createCourtRef" OnSubmit="OnCourtCreated" />
+    <EditCourt @ref="editCourtRef" OnSubmit="OnCourtEdited" />
+    <DeleteConfirmation @ref="deleteConfirmation" OnConfirm="DeleteCourtConfirmed" />
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+
+</body>
+
+@code {
+    private List<CourtDto> courts = new();
+    private string searchTerm = string.Empty;
+    private IEnumerable<CourtDto> allCourts = new List<CourtDto>();
+    private bool showModal = false;
+    private string modalTitle = "Add Court";
+    private CourtDto newCourt = new();
+    private EditCourt editCourtRef;
+    private DeleteConfirmation deleteConfirmation;
+    private CourtDto? selectedCourt;
+    private string successMessage = "";
+    private int currentPage = 1;
+    private int pageSize = 5;
+    private PaginationDto<CourtDto> pagedCourts;
+    private string loggedInUserId;
+    private bool isAdmin;
+
+
+
+
+
+
+    private IEnumerable<CourtDto> cases =>
+         string.IsNullOrWhiteSpace(searchTerm)
+             ? allCourts
+             : allCourts.Where(c =>
+                 (!string.IsNullOrWhiteSpace(c.Court) && c.Court.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                 (!string.IsNullOrWhiteSpace(c.Address) && c.Address.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                 (!string.IsNullOrWhiteSpace(c.Phone) && c.Phone.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                 (!string.IsNullOrWhiteSpace(c.Notes) && c.Notes.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+             );
+
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     courts = await courtService.GetAllCourtDataAsync();
+    //     allCourts = courts;
+    // }
+
+    protected override async Task OnInitializedAsync()
+    {
+        SpinnerService.Show();
+
+        var authState = await _authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+        }
+
+        await LoadCourts();
+
+        SpinnerService.Hide();
+    }
+
+    private async Task LoadCourts()
+    {
+        pagedCourts = await courtService.GetAllCourtsAsync(currentPage, pageSize, searchTerm, loggedInUserId, isAdmin);
+        courts = pagedCourts.Items.ToList();
+    }
+    private async Task ChangePage(int page)
+    {
+        int totalPages = (int)Math.Ceiling((double)pagedCourts.TotalCount / pageSize);
+        if (page < 1 || page > totalPages) return;
+
+        currentPage = page;
+        await LoadCourts();
+    }
+    private async Task OnSearchChanged(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+        currentPage = 1;
+        await LoadCourts();
+    }
+
+
+
+    private CreateCourt createCourtRef;
+
+    private async Task OnCourtCreated(CourtDto court)
+    {
+        // refresh the court list
+        // courts = await courtService.GetAllCourtDataAsync();
+        // allCourts = courts;
+        await LoadCourts();
+        StateHasChanged();
+    }
+    private async Task OnCourtEdited(CourtDto court)
+    {
+        // Refresh the court list after editing
+        // courts = await courtService.GetAllCourtDataAsync();
+        // allCourts = courts;
+        await LoadCourts();
+        StateHasChanged();
+    }
+
+    private void DeleteCourt(CourtDto court)
+    {
+        selectedCourt = court;
+        deleteConfirmation.Show($"Are you sure you want to delete '{court.Court}'?");
+    }
+
+    private async Task DeleteCourtConfirmed()
+    {
+        if (selectedCourt != null)
+        {
+            SpinnerService.Show();
+            await courtService.DeleteCourtAsync(selectedCourt.Id);
+            SpinnerService.Hide();
+
+            // Refresh list
+            // courts = await courtService.GetAllCourtDataAsync();
+            // allCourts = courts;
+            await LoadCourts();
+
+            selectedCourt = null;
+            StateHasChanged();
+        }
+    }
+
+
+
+}
+
