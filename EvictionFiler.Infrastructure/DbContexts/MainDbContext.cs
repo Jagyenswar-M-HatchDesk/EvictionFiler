@@ -44,9 +44,15 @@ namespace EvictionFiler.Infrastructure.DbContexts
 		public DbSet<State> MstStates { get; set; }
 		public DbSet<CaseProgram> MstCaseProgram { get; set; }
 
+        public DbSet<FeesCatalog> FeesCatalogs { get; set; }
+        public DbSet<FeesCatalogCourtAppearance> FeesCatalogCourtAppearances { get; set; }
+        public DbSet<FeesCatalogAttorneyRoster> FeesCatalogAttorneyRosters { get; set; }
 
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<FeesCatalog>()
+    .ToTable("FeesCatalog", schema: "dbo");
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Role>().HasData(
                 new Role { Id = Guid.Parse("f5ab29da-356e-42df-a3ad-d91bbf644550"), Name = "Admin" , NormalizedName= "ADMIN" },

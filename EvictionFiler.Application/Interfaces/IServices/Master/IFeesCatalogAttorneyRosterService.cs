@@ -1,0 +1,16 @@
+﻿
+using EvictionFiler.Domain.Entities.Master;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace EvictionFiler.Application.Interfaces.IServices.Master
+{
+    public interface IFeesCatalogAttorneyRosterService
+    {
+        Task<List<FeesCatalogAttorneyRoster>> GetAllAsync();
+        Task<FeesCatalogAttorneyRoster?> GetByIdAsync(int id);
+        Task AddAsync(FeesCatalogAttorneyRoster entity);
+        Task UpdateAsync(FeesCatalogAttorneyRoster entity);
+        Task DeleteAsync(int id);
+    }
+}

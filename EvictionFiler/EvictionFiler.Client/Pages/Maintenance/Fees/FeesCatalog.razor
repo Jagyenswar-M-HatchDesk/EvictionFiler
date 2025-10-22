@@ -1,0 +1,463 @@
+﻿@page "/feesCatalog"
+@using EvictionFiler.Application.Interfaces.IServices.Master
+@using DomainMaster = EvictionFiler.Domain.Entities.Master
+
+<div class="container my-4">
+    <div class="mb-4">
+        <h3>Fee Catalog Management</h3>
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body d-flex flex-wrap align-items-center justify-content-between">
+            <div class="mb-2">
+                <button class="btn btn-primary me-2 mb-2" @onclick="SaveChanges">Save Catalog</button>
+                <button class="btn btn-outline-secondary me-2 mb-2">Export JSON</button>
+                <label class="btn btn-outline-secondary mb-2" for="imp">Import JSON</label>
+                <input id="imp" type="file" accept="application/json" hidden />
+                <button class="btn btn-outline-secondary mb-2">Reset to Defaults</button>
+            </div>
+            <button class="btn btn-outline-primary mb-2">
+                Dashboard Light Theme
+            </button>
+        </div>
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="card-title mb-0">@SelectedCategory</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-secondary">Category:</span>
+                    <select class="form-select" style="width:auto;" @bind="SelectedCategory">
+                        @foreach (var category in Categories)
+                        {
+                            <option value="@category">@category</option>
+                        }
+                    </select>
+                    <button class="btn btn-success" @onclick="AddRowWithSave">Add Row</button>
+                    @if (IsLoading)
+                    {
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="table table-bordered table-hover mb-0">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            @foreach (var column in TableColumns)
+                            {
+                                <th>@column</th>
+                            }
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in FeeRows)
+                        {
+                            <tr>
+                                @foreach (var column in TableColumns)
+                                {
+                                    <td>
+                                        @{
+                                            bool isRoleDropdown = SelectedCategory == "Attorney Billing — Roster & Defaults" && column == "Role";
+                                            bool isNumberInput = (SelectedCategory == "Attorney Billing — Roster & Defaults" && (column == "Hourly Rate" || column == "Travel/Wait (opt.)"))
+                                            || (SelectedCategory == "Court Appearance & Attorney Fees by County" && (column == "Attorney Hourly" || column == "Court Appearance" || column == "Per Diem"))
+                                            || ((SelectedCategory != "Attorney Billing — Roster & Defaults" && SelectedCategory != "Court Appearance & Attorney Fees by County") && column == "Rate (USD)");
+                                            bool isUnitDropdown = (SelectedCategory != "Attorney Billing — Roster & Defaults" && SelectedCategory != "Court Appearance & Attorney Fees by County") && column == "Unit";
+                                        }
+
+                                        @if (isRoleDropdown)
+                                        {
+                                            <select class="form-select" @bind="row.Values[column]" @bind:after="() => OnRowChanged(row)">
+                                                @foreach (var r in RoleOptions)
+                                                {
+                                                    <option value="@r">@r</option>
+                                                }
+                                            </select>
+                                        }
+                                        else if (isNumberInput)
+                                        {
+                                            <input class="form-control"
+                                                   type="number"
+                                                   step="0.01"
+                                                   value="@(row.NumberValues.ContainsKey(column) ? row.NumberValues[column].ToString() : "")"
+                                                   @oninput="@(e => OnNumberInputChanged(row, column, e))"
+                                                   placeholder="@column" />
+
+                                        }
+
+
+                                        else if (isUnitDropdown)
+                                        {
+                                            <select class="form-select" @bind="row.Values[column]" @bind:after="() => OnRowChanged(row)">
+                                                <option value="">--select--</option>
+                                                @foreach (var u in Units)
+                                                {
+                                                    <option value="@u">@u</option>
+                                                }
+                                            </select>
+                                        }
+                                        else
+                                        {
+                                            <input class="form-control" @bind="row.Values[column]" @bind:after="() => OnRowChanged(row)" placeholder="@column" />
+                                        }
+                                    </td>
+                                }
+                                <td class="text-center">
+                                    <button class="btn btn-danger btn-sm" @onclick="() => RemoveRow(row)">Remove</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-container {
+        max-height: 500px;
+        overflow: auto;
+        border-radius: 8px;
+    }
+
+        .table-container table {
+            min-width: 1000px;
+        }
+
+        .table-container thead {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background-color: #f8f9fa;
+        }
+</style>
+
+@code {
+    [Inject] public IFeesCatalogService FeesCatalogService { get; set; } = default!;
+    [Inject] public IFeesCatalogCourtAppearanceService CourtService { get; set; } = default!;
+    [Inject] public IFeesCatalogAttorneyRosterService AttorneyService { get; set; } = default!;
+
+    private bool IsLoading = false;
+    private string _selectedCategory = "Holdover — Notices & Filings";
+
+    private List<DomainMaster.FeesCatalog> GeneralFees = new();
+    private List<DomainMaster.FeesCatalogCourtAppearance> CourtFees = new();
+    private List<DomainMaster.FeesCatalogAttorneyRoster> AttorneyFees = new();
+    private List<FeeRow> FeeRows = new();
+
+    private string SelectedCategory
+    {
+        get => _selectedCategory;
+        set
+        {
+            if (_selectedCategory != value)
+            {
+                _selectedCategory = value;
+                InvokeAsync(OnCategoryChanged);
+            }
+        }
+    }
+
+    private List<string> Categories = new()
+    {
+        "Holdover — Notices & Filings",
+        "Nonpayment — Predicate Notices",
+        "Warrant & Marshal Notices",
+        "Process Server",
+        "Court Appearance & Attorney Fees by County",
+        "Filing & Administrative",
+        "Attorney Billing — Roster & Defaults"
+    };
+
+    private List<string> TableColumns = new() { "Code", "Label", "Unit", "Rate (USD)" };
+    private List<string> Units = new() { "item", "hour", "flat", "page" };
+    private List<string> RoleOptions = new() { "Partner", "Associate", "Per Diem", "Of Counsel", "Paralegal" };
+
+    protected override async Task OnInitializedAsync() => await LoadDataForSelectedCategory();
+
+    private async Task OnCategoryChanged()
+    {
+        TableColumns = GetColumnsForCategory(_selectedCategory);
+        await LoadDataForSelectedCategory();
+    }
+
+    private List<string> GetColumnsForCategory(string category)
+    {
+        return category switch
+        {
+            "Court Appearance & Attorney Fees by County" => new List<string> { "County", "Attorney Hourly", "Court Appearance", "Per Diem" },
+            "Attorney Billing — Roster & Defaults" => new List<string> { "Name", "Role", "Bar #", "Email", "Hourly Rate", "Travel/Wait (opt.)" },
+            _ => new List<string> { "Code", "Label", "Unit", "Rate (USD)" }
+        };
+    }
+
+    private async Task LoadDataForSelectedCategory()
+    {
+        IsLoading = true;
+        FeeRows.Clear();
+        try
+        {
+            switch (SelectedCategory)
+            {
+                case "Attorney Billing — Roster & Defaults":
+                    AttorneyFees = await AttorneyService.GetAllAsync();
+                    FeeRows = AttorneyFees.Select(MapAttorneyFeeToFeeRow).ToList();
+                    break;
+                case "Court Appearance & Attorney Fees by County":
+                    CourtFees = await CourtService.GetAllAsync();
+                    FeeRows = CourtFees.Select(MapCourtFeeToFeeRow).ToList();
+                    break;
+                default:
+                    GeneralFees = await FeesCatalogService.GetAllAsync();
+                    FeeRows = GeneralFees.Select(MapGeneralFeeToFeeRow).ToList();
+                    break;
+            }
+            if (!FeeRows.Any()) AddBlankRow();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading data: {ex.Message}");
+            AddBlankRow();
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private FeeRow MapGeneralFeeToFeeRow(DomainMaster.FeesCatalog entity)
+        => new FeeRow
+            {
+                EntityId = entity.Id,
+                Values = new Dictionary<string, string>
+                {
+                    ["Code"] = entity.Code ?? string.Empty,
+                    ["Label"] = entity.Label ?? string.Empty,
+                    ["Unit"] = entity.Unit ?? string.Empty
+                },
+                NumberValues = new Dictionary<string, decimal> { ["Rate (USD)"] = entity.Rate }
+            };
+
+    private FeeRow MapCourtFeeToFeeRow(DomainMaster.FeesCatalogCourtAppearance entity)
+    {
+        var row = new FeeRow
+            {
+                EntityId = entity.Id,
+                Values = new Dictionary<string, string> { ["County"] = entity.County ?? string.Empty },
+                NumberValues = new Dictionary<string, decimal>
+                {
+                    ["Attorney Hourly"] = entity.AttorneyHourly,
+                    ["Court Appearance"] = entity.CourtAppearance,
+                    ["Per Diem"] = entity.PerDiem
+                }
+            };
+        foreach (var col in TableColumns)
+        {
+            if (!row.NumberValues.ContainsKey(col))
+                row.NumberValues[col] = 0;
+        }
+        return row;
+    }
+
+    private FeeRow MapAttorneyFeeToFeeRow(DomainMaster.FeesCatalogAttorneyRoster entity)
+        => new FeeRow
+            {
+                EntityId = entity.Id,
+                Values = new Dictionary<string, string>
+                {
+                    ["Name"] = entity.Name ?? string.Empty,
+                    ["Role"] = entity.Role ?? RoleOptions.First(),
+                    ["Bar #"] = entity.BarNumber ?? string.Empty,
+                    ["Email"] = entity.Email ?? string.Empty
+                },
+                NumberValues = new Dictionary<string, decimal>
+                {
+                    ["Hourly Rate"] = entity.HourlyRate,
+                    ["Travel/Wait (opt.)"] = entity.TravelWait ?? 0
+                }
+            };
+
+    private void AddBlankRow()
+    {
+        var r = new FeeRow { EntityId = 0 };
+        foreach (var col in TableColumns)
+        {
+            r.Values[col] = (SelectedCategory == "Attorney Billing — Roster & Defaults" && col == "Role")
+                ? RoleOptions.First()
+                : string.Empty;
+            if (col.Contains("Rate") || col.Contains("Fee") || col.Contains("Appearance") || col.Contains("Travel") || col.Contains("Hourly") || col.Contains("Per Diem"))
+                r.NumberValues[col] = 0;
+        }
+        FeeRows.Add(r);
+    }
+
+    private async Task AddRowWithSave()
+    {
+        if (FeeRows.Any())
+        {
+            var lastRow = FeeRows.Last();
+            await SaveRow(lastRow);
+        }
+        AddBlankRow();
+        StateHasChanged();
+    }
+
+    private async Task OnRowChanged(FeeRow row)
+        => await SaveRow(row);
+
+    private async Task SaveRow(FeeRow row)
+    {
+        int filledCount = row.Values.Count(v => !string.IsNullOrWhiteSpace(v.Value))
+                        + row.NumberValues.Count(n => n.Value > 0);
+
+        if (filledCount == 0 && row.EntityId > 0)
+        {
+            await DeleteEntityAsync(row);
+            FeeRows.Remove(row);
+            StateHasChanged();
+            return;
+        }
+
+        if (filledCount < 4) return;
+
+        try
+        {
+            switch (SelectedCategory)
+            {
+                case "Attorney Billing — Roster & Defaults":
+
+                    var att = new DomainMaster.FeesCatalogAttorneyRoster
+                        {
+                            Id = row.EntityId,
+                            Name = row.Values["Name"],
+                            Role = row.Values["Role"],
+                            BarNumber = row.Values["Bar #"],
+                            Email = row.Values["Email"],
+                            HourlyRate = row.NumberValues.ContainsKey("Hourly Rate") ? row.NumberValues["Hourly Rate"] : 0m,
+                            TravelWait = row.NumberValues.ContainsKey("Travel/Wait (opt.)") ? row.NumberValues["Travel/Wait (opt.)"] : 0m
+                        };
+
+                    if (row.EntityId == 0)
+                    {
+                        await AttorneyService.AddAsync(att);
+                        row.EntityId = att.Id;
+                    }
+                    else
+                    {
+                        await AttorneyService.UpdateAsync(att);
+                    }
+                    break;
+
+                case "Court Appearance & Attorney Fees by County":
+                    var court = new DomainMaster.FeesCatalogCourtAppearance
+                        {
+                            Id = row.EntityId,
+                            County = row.Values["County"],
+                            AttorneyHourly = row.NumberValues.GetValueOrDefault("Attorney Hourly", 0),
+                            CourtAppearance = row.NumberValues.GetValueOrDefault("Court Appearance", 0),
+                            PerDiem = row.NumberValues.GetValueOrDefault("Per Diem", 0)
+                        };
+                    if (row.EntityId == 0)
+                    {
+                        await CourtService.AddAsync(court);
+                        row.EntityId = court.Id;
+                    }
+                    else
+                    {
+                        await CourtService.UpdateAsync(court);
+                    }
+                    break;
+
+                default:
+                    var gen = new DomainMaster.FeesCatalog
+                        {
+                            Id = row.EntityId,
+                            Code = row.Values["Code"],
+                            Label = row.Values["Label"],
+                            Unit = row.Values["Unit"],
+                            Rate = row.NumberValues.GetValueOrDefault("Rate (USD)", 0)
+                        };
+                    if (row.EntityId == 0)
+                    {
+                        await FeesCatalogService.AddAsync(gen);
+                        row.EntityId = gen.Id;
+                    }
+                    else
+                    {
+                        await FeesCatalogService.UpdateAsync(gen);
+                    }
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving row: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteEntityAsync(FeeRow row)
+    {
+        try
+        {
+            switch (SelectedCategory)
+            {
+                case "Attorney Billing — Roster & Defaults":
+                    await AttorneyService.DeleteAsync(row.EntityId);
+                    break;
+                case "Court Appearance & Attorney Fees by County":
+                    await CourtService.DeleteAsync(row.EntityId);
+                    break;
+                default:
+                    await FeesCatalogService.DeleteAsync(row.EntityId);
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting row: {ex.Message}");
+        }
+    }
+
+    private async Task RemoveRow(FeeRow row)
+    {
+        if (row.EntityId > 0)
+            await DeleteEntityAsync(row);
+
+        FeeRows.Remove(row);
+        StateHasChanged();
+    }
+
+    private async Task SaveChanges()
+    {
+        foreach (var row in FeeRows)
+            await SaveRow(row);
+    }
+
+    public class FeeRow
+    {
+        public int EntityId { get; set; } = 0;
+        public Dictionary<string, string> Values { get; set; } = new();
+        public Dictionary<string, decimal> NumberValues { get; set; } = new();
+    }
+    private void OnNumberInputChanged(FeeRow row, string column, ChangeEventArgs e)
+    {
+        if (e.Value != null)
+        {
+            var text = e.Value.ToString() ?? "0";
+            if (decimal.TryParse(text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var value))
+            {
+                row.NumberValues[column] = value;
+                _ = OnRowChanged(row); // trigger auto save
+            }
+        }
+    }
+
+
+}
