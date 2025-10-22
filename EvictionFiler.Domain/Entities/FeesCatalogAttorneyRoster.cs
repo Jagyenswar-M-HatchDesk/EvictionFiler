@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvictionFiler.Domain.Entities
@@ -21,10 +22,13 @@ namespace EvictionFiler.Domain.Entities
         [Required]
         [MaxLength(100)]
         public string Email { get; set; } = string.Empty;
+
         [Required]
-        [Column(TypeName = "decimal(10, 2)")]
+        [Column(TypeName = "decimal(18, 2)")]
         public decimal HourlyRate { get; set; }
-        [Column(TypeName = "decimal(10, 2)")]
-        public decimal? TravelWait { get; set; } // NULLable in DB, so use decimal?
+
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal TravelWait { get; set; }
+
     }
 }

@@ -1,8 +1,8 @@
-﻿
-using EvictionFiler.Application.Interfaces.IRepository;
+﻿using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IServices.Master;
 using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities.Master;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -26,10 +26,19 @@ namespace EvictionFiler.Application.Services.Master
         public async Task AddAsync(FeesCatalogAttorneyRoster entity) =>
             await _repository.AddAsync(entity);
 
-        public async Task UpdateAsync(FeesCatalogAttorneyRoster entity) =>
+        //public async Task<int> AddAsync(FeesCatalogAttorneyRoster entity)
+        //{
+        //    return await _repository.AddAsync(entity);
+        //}
+
+        public async Task UpdateAsync(FeesCatalogAttorneyRoster entity)
+        {
+
             await _repository.UpdateAsync(entity);
+        }
 
         public async Task DeleteAsync(int id) =>
             await _repository.DeleteAsync(id);
     }
 }
+
