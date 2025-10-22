@@ -7,7 +7,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
 {
     public interface IFeesCatalogRepository
     {
-        Task<List<FeesCatalog>> GetAllAsync();
+        Task<List<FeesCatalog>> GetAllAsync(string Category);
         Task<FeesCatalog?> GetByIdAsync(int id);
         Task AddAsync(FeesCatalog entity);
         Task UpdateAsync(FeesCatalog entity);

@@ -9,7 +9,7 @@ namespace EvictionFiler.Application.Services.Master
         private readonly IFeesCatalogRepository _repository;
         public FeesCatalogService(IFeesCatalogRepository repository) => _repository = repository;
 
-        public Task<List<FeesCatalog>> GetAllAsync() => _repository.GetAllAsync();
+        public Task<List<FeesCatalog>> GetAllAsync(string Category) => _repository.GetAllAsync(Category);
         // Fixed: Ensure it calls the repository's GetByIdAsync
         public Task<FeesCatalog?> GetByIdAsync(int id) => _repository.GetByIdAsync(id);
         public Task AddAsync(FeesCatalog entity) => _repository.AddAsync(entity);

@@ -21,5 +21,6 @@ namespace EvictionFiler.Domain.Entities
         [Required]
         [Column(TypeName = "decimal(10, 2)")]
         public decimal Rate { get; set; }
+        public string? Category { get; set; }
     }
 }

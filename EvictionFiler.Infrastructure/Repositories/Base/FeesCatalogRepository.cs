@@ -19,8 +19,8 @@ namespace EvictionFiler.Infrastructure.Repositories
             return _context.FeesCatalogs.FindAsync(id).AsTask();
         }
 
-        public async Task<List<FeesCatalog>> GetAllAsync() =>
-            await _context.FeesCatalogs.ToListAsync();
+        public async Task<List<FeesCatalog>> GetAllAsync(string Category) =>
+            await _context.FeesCatalogs.Where(e=>e.Category == Category).ToListAsync();
 
         public async Task AddAsync(FeesCatalog entity)
         {

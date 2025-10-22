@@ -12,7 +12,7 @@
     <div class="card mb-4 shadow-sm">
         <div class="card-body d-flex flex-wrap align-items-center justify-content-between">
             <div class="mb-2">
-                <button class="btn btn-primary me-2 mb-2" @onclick="SaveChanges">Save Catalog</button>
+                <button class="btn btn-primary me-2 mb-2" @onclick="SaveChanges" style="background: #162646;">Save Catalog</button>
                 <button class="btn btn-outline-secondary me-2 mb-2">Export JSON</button>
                 <label class="btn btn-outline-secondary mb-2" for="imp">Import JSON</label>
                 <input id="imp" type="file" accept="application/json" hidden />
@@ -36,7 +36,7 @@
                             <option value="@category">@category</option>
                         }
                     </select>
-                    <button class="btn btn-success" @onclick="AddRowWithSave">Add Row</button>
+                    <button class="btn btn-success" style="background: #162646;" @onclick="AddRowWithSave">Add Row</button>
                     @if (IsLoading)
                     {
                         <div class="spinner-border spinner-border-sm text-primary" role="status">
@@ -76,7 +76,7 @@
                                         @* Role Dropdown *@
                                         @if (isRoleDropdown)
                                         {
-                                            <select class="form-select" @bind="row.Values[column]" @bind:after="() => DebounceSave(row)">
+                                            <select class="form-select" @bind="row.Values[column]" >
                                                 @foreach (var r in RoleOptions)
                                                 {
                                                     <option value="@r">@r</option>
@@ -93,14 +93,14 @@
                                                    @oninput="@(e =>
                                                    {
                                                        OnNumberInputChanged(row, column, e);
-                                                       DebounceSave(row); // 4-second debounce for number
+                                                       //DebounceSave(row); // 4-second debounce for number
                                                    })"
                                                    placeholder="@column" />
                                         }
                                         @* Unit Dropdown *@
                                         else if (isUnitDropdown)
                                         {
-                                            <select class="form-select" @bind="row.Values[column]" @bind:after="() => DebounceSave(row)">
+                                            <select class="form-select" @bind="row.Values[column]">
                                                 <option value="">--select--</option>
                                                 @foreach (var u in Units)
                                                 {
@@ -113,7 +113,6 @@
                                         {
                                             <input class="form-control"
                                                    @bind="row.Values[column]"
-                                                   @bind:after="() => DebounceSave(row)"
                                                    placeholder="@column" />
                                         }
                                     </td>
@@ -230,7 +229,7 @@
                     FeeRows = CourtFees.Select(MapCourtFeeToFeeRow).ToList();
                     break;
                 default:
-                    GeneralFees = await FeesCatalogService.GetAllAsync();
+                    GeneralFees = await FeesCatalogService.GetAllAsync(SelectedCategory);
                     FeeRows = GeneralFees.Select(MapGeneralFeeToFeeRow).ToList();
                     break;
             }
@@ -451,7 +450,8 @@
                             Code = row.Values["Code"],
                             Label = row.Values["Label"],
                             Unit = row.Values["Unit"],
-                            Rate = row.NumberValues.GetValueOrDefault("Rate (USD)", 0)
+                            Rate = row.NumberValues.GetValueOrDefault("Rate (USD)", 0),
+                            Category = SelectedCategory
                         };
                     if (row.EntityId == 0)
                     {
@@ -525,7 +525,7 @@
             if (decimal.TryParse(text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var value))
             {
                 row.NumberValues[column] = value;
-                DebounceSave(row);
+                //DebounceSave(row);
             }
         }
     }
