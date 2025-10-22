@@ -1,8 +1,7 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EvictionFiler.Domain.Entities.Master
+namespace EvictionFiler.Domain.Entities
 {
 
     [Table("FeesCatalog_CourtAppearance", Schema = "dbo")]

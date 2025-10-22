@@ -1,9 +1,8 @@
-﻿
-using EvictionFiler.Domain.Entities.Master;
+﻿using EvictionFiler.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace EvictionFiler.Application.Interfaces.IServices.Master
+namespace EvictionFiler.Application.Interfaces.IServices
 {
     public interface IFeesCatalogCourtAppearanceService
     {

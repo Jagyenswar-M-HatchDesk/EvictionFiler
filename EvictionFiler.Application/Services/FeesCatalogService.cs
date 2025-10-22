@@ -1,9 +1,6 @@
-﻿
-using EvictionFiler.Application.Interfaces.IRepository;
-using EvictionFiler.Application.Interfaces.IServices.Master;
-using EvictionFiler.Domain.Entities.Master;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using EvictionFiler.Application.Interfaces.IRepository;
+using EvictionFiler.Application.Interfaces.IServices;
+using EvictionFiler.Domain.Entities;
 
 namespace EvictionFiler.Application.Services.Master
 {

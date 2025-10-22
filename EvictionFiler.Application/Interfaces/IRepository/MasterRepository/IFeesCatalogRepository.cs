@@ -1,5 +1,5 @@
 ﻿
-using EvictionFiler.Domain.Entities.Master;
+using EvictionFiler.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

@@ -1,4 +1,6 @@
 ﻿@page "/feesCatalog"
+@using EvictionFiler.Domain.Entities
+@using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Application.Interfaces.IServices.Master
 @using DomainMaster = EvictionFiler.Domain.Entities.Master
 
@@ -146,9 +148,9 @@
     private bool IsLoading = false;
     private string _selectedCategory = "Holdover — Notices & Filings";
 
-    private List<DomainMaster.FeesCatalog> GeneralFees = new();
-    private List<DomainMaster.FeesCatalogCourtAppearance> CourtFees = new();
-    private List<DomainMaster.FeesCatalogAttorneyRoster> AttorneyFees = new();
+    private List<FeesCatalog> GeneralFees = new();
+    private List<FeesCatalogCourtAppearance> CourtFees = new();
+    private List<FeesCatalogAttorneyRoster> AttorneyFees = new();
     private List<FeeRow> FeeRows = new();
 
     private string SelectedCategory
@@ -232,7 +234,7 @@
         }
     }
 
-    private FeeRow MapGeneralFeeToFeeRow(DomainMaster.FeesCatalog entity)
+    private FeeRow MapGeneralFeeToFeeRow(FeesCatalog entity)
         => new FeeRow
             {
                 EntityId = entity.Id,
@@ -245,7 +247,7 @@
                 NumberValues = new Dictionary<string, decimal> { ["Rate (USD)"] = entity.Rate }
             };
 
-    private FeeRow MapCourtFeeToFeeRow(DomainMaster.FeesCatalogCourtAppearance entity)
+    private FeeRow MapCourtFeeToFeeRow(FeesCatalogCourtAppearance entity)
     {
         var row = new FeeRow
             {
@@ -266,7 +268,7 @@
         return row;
     }
 
-    private FeeRow MapAttorneyFeeToFeeRow(DomainMaster.FeesCatalogAttorneyRoster entity)
+    private FeeRow MapAttorneyFeeToFeeRow(FeesCatalogAttorneyRoster entity)
         => new FeeRow
             {
                 EntityId = entity.Id,
@@ -333,7 +335,7 @@
             {
                 case "Attorney Billing — Roster & Defaults":
 
-                    var att = new DomainMaster.FeesCatalogAttorneyRoster
+                    var att = new FeesCatalogAttorneyRoster
                         {
                             Id = row.EntityId,
                             Name = row.Values["Name"],
@@ -356,7 +358,7 @@
                     break;
 
                 case "Court Appearance & Attorney Fees by County":
-                    var court = new DomainMaster.FeesCatalogCourtAppearance
+                    var court = new FeesCatalogCourtAppearance
                         {
                             Id = row.EntityId,
                             County = row.Values["County"],
@@ -376,7 +378,7 @@
                     break;
 
                 default:
-                    var gen = new DomainMaster.FeesCatalog
+                    var gen = new FeesCatalog
                         {
                             Id = row.EntityId,
                             Code = row.Values["Code"],

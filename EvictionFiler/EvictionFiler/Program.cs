@@ -33,15 +33,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Repository Registrations (in EvictionFiler.Infrastructure)
-builder.Services.AddScoped<IFeesCatalogRepository, FeesCatalogRepository>();
-builder.Services.AddScoped<IFeesCatalogCourtAppearanceRepository, FeesCatalogCourtAppearanceRepository>();
-builder.Services.AddScoped<IFeesCatalogAttorneyRosterRepository, FeesCatalogAttorneyRosterRepository>();
 
-// Service Registrations (in EvictionFiler.Application)
-builder.Services.AddScoped<IFeesCatalogService, FeesCatalogService>();
-builder.Services.AddScoped<IFeesCatalogCourtAppearanceService, FeesCatalogCourtAppearanceService>();
-builder.Services.AddScoped<IFeesCatalogAttorneyRosterService, FeesCatalogAttorneyRosterService>();
 
 builder.Services.AddDbContext<MainDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -153,7 +145,16 @@ builder.Services.AddSingleton<SuccessMessageService>();
 builder.Services.AddBlazoredToast();
 
 builder.Services.AddScoped<JwtAuthStateProviders>();
-builder.Services.AddScoped<IUnitOfWork , UnitOfWork>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+// Repository Registrations (in EvictionFiler.Infrastructure)
+builder.Services.AddScoped<IFeesCatalogRepository, FeesCatalogRepository>();
+builder.Services.AddScoped<IFeesCatalogCourtAppearanceRepository, FeesCatalogCourtAppearanceRepository>();
+builder.Services.AddScoped<IFeesCatalogAttorneyRosterRepository, FeesCatalogAttorneyRosterRepository>();
+
+// Service Registrations (in EvictionFiler.Application)
+builder.Services.AddScoped<IFeesCatalogService, FeesCatalogService>();
+builder.Services.AddScoped<IFeesCatalogCourtAppearanceService, FeesCatalogCourtAppearanceService>();
+builder.Services.AddScoped<IFeesCatalogAttorneyRosterService, FeesCatalogAttorneyRosterService>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredSessionStorage();
 
