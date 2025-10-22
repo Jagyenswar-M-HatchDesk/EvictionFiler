@@ -43,9 +43,10 @@ namespace EvictionFiler.Infrastructure.DbContexts
 		public DbSet<RegulationStatus> MstRegulationStatus { get; set; }
 		public DbSet<State> MstStates { get; set; }
 		public DbSet<CaseProgram> MstCaseProgram { get; set; }
+        public DbSet<Courts> Courts { get; set; }
 
 
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Role>().HasData(

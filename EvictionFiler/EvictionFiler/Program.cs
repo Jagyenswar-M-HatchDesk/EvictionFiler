@@ -69,6 +69,9 @@ builder.Services.AddScoped<TooltipService>();
 builder.Services.AddScoped<ContextMenuService>();
 
 
+
+builder.Services.AddScoped<ICourtService, CourtService>();
+builder.Services.AddScoped<ICourtRepository, CourtRepository>();
 builder.Services.AddScoped<IUserservices, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICasesRepository, CasesRepository>();
