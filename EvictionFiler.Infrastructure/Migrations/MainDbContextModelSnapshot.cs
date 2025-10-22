@@ -532,2176 +532,2177 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("FeesCatalog_CourtAppearance", "dbo");
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Courts", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CallIn")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ConferenceId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Court")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Judge")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Part")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RoomNo")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("VirtualLink")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Courts");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.LandLord", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Address1")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Address2")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("AttorneyOfRecord")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("City")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<Guid?>("ClientId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ContactPersonName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateOnly>("DateOfRefreeDeed")
-                        .HasColumnType("date");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("EINorSSN")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LandLordCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("LandlordTypeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("LastName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("LawFirm")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Phone")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("StateId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("TypeOfOwnerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Zipcode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClientId");
-
-                    b.HasIndex("LandlordTypeId");
-
-                    b.HasIndex("StateId");
-
-                    b.HasIndex("TypeOfOwnerId");
-
-                    b.ToTable("LandLords");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.LegalCase", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Attrney")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("AttrneyContactInfo")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<Guid?>("BuildingId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("CalculatedNoticeLength")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CaseName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<Guid?>("CaseProgramId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CaseSubTypeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CaseTypeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Casecode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("ClientId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ClientRoleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateOnly?>("DateNoticeServed")
-                        .HasColumnType("date");
-
-                    b.Property<DateOnly>("DateOfRefreeDeed")
-                        .HasColumnType("date");
-
-                    b.Property<DateOnly?>("DateTenantMoved")
-                        .HasColumnType("date");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateOnly?>("ERAPPaymentReceivedDate")
-                        .HasColumnType("date");
-
-                    b.Property<DateOnly?>("ExpirationDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("ExplainDescription")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ExplainTenancyReceiveDescription")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Firm")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool?>("GoodCauseApplies")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("HasPossession")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsERAPPaymentReceived")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid?>("IsUnitIllegalId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("LandLordId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("LandlordTypeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("LastMonthWeekRentPaid")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("LastRentPaid")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateOnly?>("LeaseEnd")
-                        .HasColumnType("date");
-
-                    b.Property<string>("LegalRepresentative")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<double?>("MonthlyRent")
-                        .HasColumnType("float");
-
-                    b.Property<bool?>("OralAgreeMent")
-                        .HasColumnType("bit");
-
-                    b.Property<DateOnly?>("OralEnd")
-                        .HasColumnType("date");
-
-                    b.Property<DateOnly?>("OralStart")
-                        .HasColumnType("date");
-
-                    b.Property<bool?>("OtherOccupants")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("OtherPropertiesBuildingId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PredicateNotice")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReasonDescription")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("ReasonHoldoverId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Reference")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("RegulationStatusId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool?>("RenewalOffer")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid?>("RenewalStatusId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("RentDueEachMonthOrWeekId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("SocialService")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SocialServices")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<Guid?>("TenancyTypeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool?>("TenantRecord")
-                        .HasColumnType("bit");
-
-                    b.Property<double?>("TenantShare")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("TotalRentOwed")
-                        .HasColumnType("float");
-
-                    b.Property<string>("UnitOrApartmentNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool?>("WrittenLease")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("tenantReceive")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BuildingId");
-
-                    b.HasIndex("CaseSubTypeId");
-
-                    b.HasIndex("CaseTypeId");
-
-                    b.HasIndex("ClientId");
-
-                    b.HasIndex("ClientRoleId");
-
-                    b.HasIndex("IsUnitIllegalId");
-
-                    b.HasIndex("LandLordId");
-
-                    b.HasIndex("LandlordTypeId");
-
-                    b.HasIndex("ReasonHoldoverId");
-
-                    b.HasIndex("RegulationStatusId");
-
-                    b.HasIndex("RenewalStatusId");
-
-                    b.HasIndex("RentDueEachMonthOrWeekId");
-
-                    b.HasIndex("TenancyTypeId");
-
-                    b.HasIndex("TenantId");
-
-                    b.ToTable("LegalCases");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CaseProgram", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstCaseProgram");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CaseStatus", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstCaseStatus");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CaseSubType", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CaseTypeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CaseTypeId");
-
-                    b.ToTable("MstCaseSubTypes");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CaseType", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstCaseTypes");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.Category", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstCategories");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.ClientRole", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstClientRoles");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.County", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstCounties");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CourtPart", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstCourtPart");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.DateRent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstDateRent");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.FormTypes", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CaseTypeId")
-                        .HasMaxLength(500)
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CategoryId")
-                        .HasMaxLength(500)
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("HTML")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CaseTypeId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("MstFormTypes");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.IsUnitIllegal", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstIsUnitIllegal");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.LandlordType", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstLandlordTypes");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.Language", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstLanguages");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.PremiseType", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstPremiseTypes");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.ReasonHoldover", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstReasonHoldover");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.RegulationStatus", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstRegulationStatus");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.RenewalStatus", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstRenewalStatus");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.State", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstStates");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.TenancyType", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstTenancyTypes");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.TypeOfOwner", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MstTypeOfOwners");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Role", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedName")
-                        .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
-
-                    b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Courts", b =>
                         {
-                            Id = new Guid("f5ab29da-356e-42df-a3ad-d91bbf644550"),
-                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsActive = true,
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
-                        },
-                        new
-                        {
-                            Id = new Guid("56355bf6-e335-428a-b718-00cb79e5273d"),
-                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsActive = true,
-                            Name = "Law Firm",
-                            NormalizedName = "LAW FIRM"
-                        },
-                        new
-                        {
-                            Id = new Guid("2bb5c3bf-8dd8-4415-9090-1d428c792533"),
-                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsActive = true,
-                            Name = "Property Manager",
-                            NormalizedName = "PROPERTY MANAGER"
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Address")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("CallIn")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("ConferenceId")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("Court")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
+
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("Judge")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("Notes")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("Part")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("Phone")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("RoomNo")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<string>("VirtualLink")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.HasKey("Id");
+
+                            b.ToTable("Courts");
                         });
-                });
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Tenant", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Additionaltenants")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Address1")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Address2")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<Guid?>("BuildinId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("City")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateOnly?>("ERAPPaymentReceivedDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool?>("HasPossession")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("HasPriorCase")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("HasRegulatedTenancy")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsERAPPaymentReceived")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid?>("IsUnitIllegalId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("LanguageId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("LastName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<double?>("MonthlyRent")
-                        .HasColumnType("float");
-
-                    b.Property<DateOnly?>("MoveInDate")
-                        .HasColumnType("date");
-
-                    b.Property<bool?>("OtherOccupants")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Phone")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool?>("RenewalOffer")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid?>("RentDueEachMonthOrWeekId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("SSN")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("SocialServices")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<Guid?>("StateId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("TenancyTypeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("TenantCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool?>("TenantRecord")
-                        .HasColumnType("bit");
-
-                    b.Property<double?>("TenantShare")
-                        .HasColumnType("float");
-
-                    b.Property<string>("UnitOrApartmentNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Zipcode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BuildinId");
-
-                    b.HasIndex("IsUnitIllegalId");
-
-                    b.HasIndex("LanguageId");
-
-                    b.HasIndex("RentDueEachMonthOrWeekId");
-
-                    b.HasIndex("StateId");
-
-                    b.HasIndex("TenancyTypeId");
-
-                    b.ToTable("Tenants");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("MiddleName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("TenantId");
-
-                    b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasData(
-                        new
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.LandLord", b =>
                         {
-                            Id = new Guid("84722e9d-806c-4f49-94d7-a55de8d2d76e"),
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "12456e31-62c3-4db3-a8fc-987654321def",
-                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedOn = new DateTime(2024, 6, 19, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "admin@gmail.com",
-                            EmailConfirmed = true,
-                            FirstName = "Admin",
-                            IsActive = true,
-                            IsDeleted = false,
-                            LastName = "",
-                            LockoutEnabled = false,
-                            MiddleName = "",
-                            NormalizedEmail = "ADMIN@GMAIL.COM",
-                            NormalizedUserName = "ADMIN@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEHXHMy52Ji1wPk8MrXLQrX8XKJekP1rHPXwmwtgFmlmiCdkN7lYlOlLlaOVXJ2SKcw==",
-                            PhoneNumberConfirmed = false,
-                            RoleId = new Guid("f5ab29da-356e-42df-a3ad-d91bbf644550"),
-                            SecurityStamp = "38fef087-d2ad-4e78-9823-123456789abc",
-                            TwoFactorEnabled = false,
-                            UserName = "admin@gmail.com"
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Address1")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b.Property<string>("Address2")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b.Property<string>("AttorneyOfRecord")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("City")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b.Property<Guid?>("ClientId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("ContactPersonName")
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<DateOnly>("DateOfRefreeDeed")
+                                .HasColumnType("date");
+
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
+
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("EINorSSN")
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<string>("Email")
+                                .IsRequired()
+                                .HasMaxLength(250)
+                                .HasColumnType("nvarchar(250)");
+
+                            b.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("LandLordCode")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<Guid?>("LandlordTypeId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("LastName")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b.Property<string>("LawFirm")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("Phone")
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<Guid?>("StateId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid?>("TypeOfOwnerId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<string>("Zipcode")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.HasKey("Id");
+
+                            b.HasIndex("ClientId");
+
+                            b.HasIndex("LandlordTypeId");
+
+                            b.HasIndex("StateId");
+
+                            b.HasIndex("TypeOfOwnerId");
+
+                            b.ToTable("LandLords");
                         });
-                });
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.UserDatabase", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ConnectionString")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DatabaseName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UserDatabases");
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetRoleClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AspNetUserClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
-                {
-                    b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("LoginProvider", "ProviderKey");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AspNetUserLogins", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetUserRoles", (string)null);
-
-                    b.HasData(
-                        new
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.LegalCase", b =>
                         {
-                            UserId = new Guid("84722e9d-806c-4f49-94d7-a55de8d2d76e"),
-                            RoleId = new Guid("f5ab29da-356e-42df-a3ad-d91bbf644550")
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Attrney")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b.Property<string>("AttrneyContactInfo")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b.Property<Guid?>("BuildingId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<int?>("CalculatedNoticeLength")
+                                .HasColumnType("int");
+
+                            b.Property<string>("CaseName")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b.Property<Guid?>("CaseProgramId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid?>("CaseSubTypeId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid?>("CaseTypeId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Casecode")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<Guid?>("ClientId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid?>("ClientRoleId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<DateOnly?>("DateNoticeServed")
+                                .HasColumnType("date");
+
+                            b.Property<DateOnly>("DateOfRefreeDeed")
+                                .HasColumnType("date");
+
+                            b.Property<DateOnly?>("DateTenantMoved")
+                                .HasColumnType("date");
+
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
+
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateOnly?>("ERAPPaymentReceivedDate")
+                                .HasColumnType("date");
+
+                            b.Property<DateOnly?>("ExpirationDate")
+                                .HasColumnType("date");
+
+                            b.Property<string>("ExplainDescription")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("ExplainTenancyReceiveDescription")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("Firm")
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<bool?>("GoodCauseApplies")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("HasPossession")
+                                .HasColumnType("bit");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsERAPPaymentReceived")
+                                .HasColumnType("bit");
+
+                            b.Property<Guid?>("IsUnitIllegalId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid?>("LandLordId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid?>("LandlordTypeId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("LastMonthWeekRentPaid")
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<string>("LastRentPaid")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<DateOnly?>("LeaseEnd")
+                                .HasColumnType("date");
+
+                            b.Property<string>("LegalRepresentative")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b.Property<double?>("MonthlyRent")
+                                .HasColumnType("float");
+
+                            b.Property<bool?>("OralAgreeMent")
+                                .HasColumnType("bit");
+
+                            b.Property<DateOnly?>("OralEnd")
+                                .HasColumnType("date");
+
+                            b.Property<DateOnly?>("OralStart")
+                                .HasColumnType("date");
+
+                            b.Property<bool?>("OtherOccupants")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("OtherPropertiesBuildingId")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("PredicateNotice")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("ReasonDescription")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<Guid?>("ReasonHoldoverId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Reference")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<Guid?>("RegulationStatusId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<bool?>("RenewalOffer")
+                                .HasColumnType("bit");
+
+                            b.Property<Guid?>("RenewalStatusId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid?>("RentDueEachMonthOrWeekId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("SocialService")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("SocialServices")
+                                .HasMaxLength(250)
+                                .HasColumnType("nvarchar(250)");
+
+                            b.Property<Guid?>("TenancyTypeId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid?>("TenantId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<bool?>("TenantRecord")
+                                .HasColumnType("bit");
+
+                            b.Property<double?>("TenantShare")
+                                .HasColumnType("float");
+
+                            b.Property<double?>("TotalRentOwed")
+                                .HasColumnType("float");
+
+                            b.Property<string>("UnitOrApartmentNumber")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<bool?>("WrittenLease")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("tenantReceive")
+                                .HasColumnType("bit");
+
+                            b.HasKey("Id");
+
+                            b.HasIndex("BuildingId");
+
+                            b.HasIndex("CaseSubTypeId");
+
+                            b.HasIndex("CaseTypeId");
+
+                            b.HasIndex("ClientId");
+
+                            b.HasIndex("ClientRoleId");
+
+                            b.HasIndex("IsUnitIllegalId");
+
+                            b.HasIndex("LandLordId");
+
+                            b.HasIndex("LandlordTypeId");
+
+                            b.HasIndex("ReasonHoldoverId");
+
+                            b.HasIndex("RegulationStatusId");
+
+                            b.HasIndex("RenewalStatusId");
+
+                            b.HasIndex("RentDueEachMonthOrWeekId");
+
+                            b.HasIndex("TenancyTypeId");
+
+                            b.HasIndex("TenantId");
+
+                            b.ToTable("LegalCases");
                         });
-                });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CaseProgram", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
 
-                    b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
 
-                    b.HasKey("UserId", "LoginProvider", "Name");
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.ToTable("AspNetUserTokens", (string)null);
-                });
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.AdditioanlTenants", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.Tenant", "Tenants")
-                        .WithMany("AddTenants")
-                        .HasForeignKey("TenantId");
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
 
-                    b.Navigation("Tenants");
-                });
+                            b.Property<string>("Name")
+                                .HasColumnType("nvarchar(max)");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.AdditionalOccupants", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.LegalCase", "LegalCase")
-                        .WithMany("Addoccupants")
-                        .HasForeignKey("LegalCaseId");
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.Navigation("LegalCase");
-                });
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Building", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.LandLord", "Landlord")
-                        .WithMany("Buildings")
-                        .HasForeignKey("LandlordId");
+                            b.HasKey("Id");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.PremiseType", "PremiseType")
-                        .WithMany()
-                        .HasForeignKey("PremiseTypeId");
+                            b.ToTable("MstCaseProgram");
+                        });
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.RegulationStatus", "RegulationStatus")
-                        .WithMany()
-                        .HasForeignKey("RegulationStatusId");
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CaseStatus", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.State", "State")
-                        .WithMany()
-                        .HasForeignKey("StateId");
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.Navigation("Landlord");
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
 
-                    b.Navigation("PremiseType");
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
 
-                    b.Navigation("RegulationStatus");
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.Navigation("State");
-                });
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Calander", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.CaseStatus", "CaseStatus")
-                        .WithMany()
-                        .HasForeignKey("CaseStatusId");
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.CaseType", "CaseType")
-                        .WithMany()
-                        .HasForeignKey("CaseTypeId");
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.County", "County")
-                        .WithMany()
-                        .HasForeignKey("CountyId");
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.CourtPart", "CourtPart")
-                        .WithMany()
-                        .HasForeignKey("CourtPartId");
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.Navigation("CaseStatus");
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
 
-                    b.Navigation("CaseType");
+                            b.HasKey("Id");
 
-                    b.Navigation("County");
+                            b.ToTable("MstCaseStatus");
+                        });
 
-                    b.Navigation("CourtPart");
-                });
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CaseSubType", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseForms", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.FormTypes", "FormType")
-                        .WithMany()
-                        .HasForeignKey("FormTypeId");
+                            b.Property<Guid?>("CaseTypeId")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.LegalCase", "LegalCase")
-                        .WithMany()
-                        .HasForeignKey("LegalCaseId");
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.Navigation("FormType");
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
 
-                    b.Navigation("LegalCase");
-                });
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Client", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.ClientRole", "ClientType")
-                        .WithMany()
-                        .HasForeignKey("ClientTypeId");
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.State", "State")
-                        .WithMany()
-                        .HasForeignKey("StateId");
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
 
-                    b.Navigation("ClientType");
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
 
-                    b.Navigation("State");
-                });
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.LandLord", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.Client", "Client")
-                        .WithMany("LandLords")
-                        .HasForeignKey("ClientId");
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.LandlordType", "LandlordType")
-                        .WithMany()
-                        .HasForeignKey("LandlordTypeId");
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.State", "State")
-                        .WithMany()
-                        .HasForeignKey("StateId");
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.TypeOfOwner", "TypeOfOwner")
-                        .WithMany()
-                        .HasForeignKey("TypeOfOwnerId");
+                            b.HasKey("Id");
 
-                    b.Navigation("Client");
+                            b.HasIndex("CaseTypeId");
 
-                    b.Navigation("LandlordType");
+                            b.ToTable("MstCaseSubTypes");
+                        });
 
-                    b.Navigation("State");
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CaseType", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
 
-                    b.Navigation("TypeOfOwner");
-                });
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.LegalCase", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.Building", "Buildings")
-                        .WithMany()
-                        .HasForeignKey("BuildingId");
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.CaseSubType", "CaseSubType")
-                        .WithMany()
-                        .HasForeignKey("CaseSubTypeId");
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.CaseType", "CaseType")
-                        .WithMany()
-                        .HasForeignKey("CaseTypeId");
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Client", "Clients")
-                        .WithMany()
-                        .HasForeignKey("ClientId");
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.ClientRole", "ClientRole")
-                        .WithMany()
-                        .HasForeignKey("ClientRoleId");
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.IsUnitIllegal", "IsUnitIllegal")
-                        .WithMany()
-                        .HasForeignKey("IsUnitIllegalId");
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.LandLord", "LandLords")
-                        .WithMany()
-                        .HasForeignKey("LandLordId");
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.LandlordType", "LandlordType")
-                        .WithMany()
-                        .HasForeignKey("LandlordTypeId");
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.ReasonHoldover", "ReasonHoldover")
-                        .WithMany()
-                        .HasForeignKey("ReasonHoldoverId");
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.RegulationStatus", "RegulationStatus")
-                        .WithMany()
-                        .HasForeignKey("RegulationStatusId");
+                            b.HasKey("Id");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.RenewalStatus", "RenewalStatus")
-                        .WithMany()
-                        .HasForeignKey("RenewalStatusId");
+                            b.ToTable("MstCaseTypes");
+                        });
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.DateRent", "RentDueEachMonthOrWeek")
-                        .WithMany()
-                        .HasForeignKey("RentDueEachMonthOrWeekId");
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.Category", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.TenancyType", "TenancyType")
-                        .WithMany()
-                        .HasForeignKey("TenancyTypeId");
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Tenant", "Tenants")
-                        .WithMany()
-                        .HasForeignKey("TenantId");
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
 
-                    b.Navigation("Buildings");
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
 
-                    b.Navigation("CaseSubType");
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.Navigation("CaseType");
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
 
-                    b.Navigation("ClientRole");
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
 
-                    b.Navigation("Clients");
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
 
-                    b.Navigation("IsUnitIllegal");
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
 
-                    b.Navigation("LandLords");
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.Navigation("LandlordType");
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
 
-                    b.Navigation("ReasonHoldover");
+                            b.HasKey("Id");
 
-                    b.Navigation("RegulationStatus");
+                            b.ToTable("MstCategories");
+                        });
 
-                    b.Navigation("RenewalStatus");
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.ClientRole", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
 
-                    b.Navigation("RentDueEachMonthOrWeek");
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.Navigation("TenancyType");
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
 
-                    b.Navigation("Tenants");
-                });
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CaseSubType", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.CaseType", "CaseTypes")
-                        .WithMany()
-                        .HasForeignKey("CaseTypeId");
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.Navigation("CaseTypes");
-                });
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.FormTypes", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.CaseType", "CaseType")
-                        .WithMany()
-                        .HasForeignKey("CaseTypeId");
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId");
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
 
-                    b.Navigation("CaseType");
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
 
-                    b.Navigation("Category");
-                });
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Tenant", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.Building", "Building")
-                        .WithMany("Tenants")
-                        .HasForeignKey("BuildinId");
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.IsUnitIllegal", "IsUnitIllegal")
-                        .WithMany()
-                        .HasForeignKey("IsUnitIllegalId");
+                            b.HasKey("Id");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.Language", "Language")
-                        .WithMany()
-                        .HasForeignKey("LanguageId");
+                            b.ToTable("MstClientRoles");
+                        });
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.DateRent", "RentDueEachMonthOrWeek")
-                        .WithMany()
-                        .HasForeignKey("RentDueEachMonthOrWeekId");
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.County", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.State", "State")
-                        .WithMany()
-                        .HasForeignKey("StateId");
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.TenancyType", "TenancyType")
-                        .WithMany()
-                        .HasForeignKey("TenancyTypeId");
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
 
-                    b.Navigation("Building");
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
 
-                    b.Navigation("IsUnitIllegal");
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.Navigation("Language");
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
 
-                    b.Navigation("RentDueEachMonthOrWeek");
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
 
-                    b.Navigation("State");
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
 
-                    b.Navigation("TenancyType");
-                });
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.User", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.Role", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.UserDatabase", "Tenants")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
 
-                    b.Navigation("Role");
+                            b.HasKey("Id");
 
-                    b.Navigation("Tenants");
-                });
+                            b.ToTable("MstCounties");
+                        });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.Role", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CourtPart", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.Role", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Building", b =>
-                {
-                    b.Navigation("Tenants");
-                });
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Client", b =>
-                {
-                    b.Navigation("LandLords");
-                });
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.LandLord", b =>
-                {
-                    b.Navigation("Buildings");
-                });
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.LegalCase", b =>
-                {
-                    b.Navigation("Addoccupants");
-                });
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.Tenant", b =>
-                {
-                    b.Navigation("AddTenants");
-                });
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.HasKey("Id");
+
+                            b.ToTable("MstCourtPart");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.DateRent", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
+
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.HasKey("Id");
+
+                            b.ToTable("MstDateRent");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.FormTypes", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid?>("CaseTypeId")
+                                .HasMaxLength(500)
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid?>("CategoryId")
+                                .HasMaxLength(500)
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
+
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("HTML")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.HasKey("Id");
+
+                            b.HasIndex("CaseTypeId");
+
+                            b.HasIndex("CategoryId");
+
+                            b.ToTable("MstFormTypes");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.IsUnitIllegal", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
+
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.HasKey("Id");
+
+                            b.ToTable("MstIsUnitIllegal");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.LandlordType", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
+
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.HasKey("Id");
+
+                            b.ToTable("MstLandlordTypes");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.Language", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
+
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.HasKey("Id");
+
+                            b.ToTable("MstLanguages");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.PremiseType", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
+
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.HasKey("Id");
+
+                            b.ToTable("MstPremiseTypes");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.ReasonHoldover", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
+
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.HasKey("Id");
+
+                            b.ToTable("MstReasonHoldover");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.RegulationStatus", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
+
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.HasKey("Id");
+
+                            b.ToTable("MstRegulationStatus");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.RenewalStatus", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
+
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.HasKey("Id");
+
+                            b.ToTable("MstRenewalStatus");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.State", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
+
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.HasKey("Id");
+
+                            b.ToTable("MstStates");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.TenancyType", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
+
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.HasKey("Id");
+
+                            b.ToTable("MstTenancyTypes");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.TypeOfOwner", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
+
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Description")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.HasKey("Id");
+
+                            b.ToTable("MstTypeOfOwners");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Role", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("ConcurrencyStamp")
+                                .IsConcurrencyToken()
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("Name")
+                                .HasMaxLength(256)
+                                .HasColumnType("nvarchar(256)");
+
+                            b.Property<string>("NormalizedName")
+                                .HasMaxLength(256)
+                                .HasColumnType("nvarchar(256)");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.HasKey("Id");
+
+                            b.HasIndex("NormalizedName")
+                                .IsUnique()
+                                .HasDatabaseName("RoleNameIndex")
+                                .HasFilter("[NormalizedName] IS NOT NULL");
+
+                            b.ToTable("AspNetRoles", (string)null);
+
+                            b.HasData(
+                                new
+                                {
+                                    Id = new Guid("f5ab29da-356e-42df-a3ad-d91bbf644550"),
+                                    CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                                    IsActive = true,
+                                    Name = "Admin",
+                                    NormalizedName = "ADMIN"
+                                },
+                                new
+                                {
+                                    Id = new Guid("56355bf6-e335-428a-b718-00cb79e5273d"),
+                                    CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                                    IsActive = true,
+                                    Name = "Law Firm",
+                                    NormalizedName = "LAW FIRM"
+                                },
+                                new
+                                {
+                                    Id = new Guid("2bb5c3bf-8dd8-4415-9090-1d428c792533"),
+                                    CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                                    IsActive = true,
+                                    Name = "Property Manager",
+                                    NormalizedName = "PROPERTY MANAGER"
+                                });
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Tenant", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("Additionaltenants")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b.Property<string>("Address1")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b.Property<string>("Address2")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b.Property<Guid?>("BuildinId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("City")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<DateTime?>("DeletedAt")
+                                .HasColumnType("DateTime");
+
+                            b.Property<Guid?>("DeletedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateOnly?>("ERAPPaymentReceivedDate")
+                                .HasColumnType("date");
+
+                            b.Property<string>("Email")
+                                .IsRequired()
+                                .HasMaxLength(250)
+                                .HasColumnType("nvarchar(250)");
+
+                            b.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b.Property<bool?>("HasPossession")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("HasPriorCase")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("HasRegulatedTenancy")
+                                .HasColumnType("bit");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsERAPPaymentReceived")
+                                .HasColumnType("bit");
+
+                            b.Property<Guid?>("IsUnitIllegalId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid?>("LanguageId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("LastName")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b.Property<double?>("MonthlyRent")
+                                .HasColumnType("float");
+
+                            b.Property<DateOnly?>("MoveInDate")
+                                .HasColumnType("date");
+
+                            b.Property<bool?>("OtherOccupants")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("Phone")
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<bool?>("RenewalOffer")
+                                .HasColumnType("bit");
+
+                            b.Property<Guid?>("RentDueEachMonthOrWeekId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("SSN")
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b.Property<string>("SocialServices")
+                                .HasMaxLength(250)
+                                .HasColumnType("nvarchar(250)");
+
+                            b.Property<Guid?>("StateId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid?>("TenancyTypeId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("TenantCode")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<bool?>("TenantRecord")
+                                .HasColumnType("bit");
+
+                            b.Property<double?>("TenantShare")
+                                .HasColumnType("float");
+
+                            b.Property<string>("UnitOrApartmentNumber")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<string>("Zipcode")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.HasKey("Id");
+
+                            b.HasIndex("BuildinId");
+
+                            b.HasIndex("IsUnitIllegalId");
+
+                            b.HasIndex("LanguageId");
+
+                            b.HasIndex("RentDueEachMonthOrWeekId");
+
+                            b.HasIndex("StateId");
+
+                            b.HasIndex("TenancyTypeId");
+
+                            b.ToTable("Tenants");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.User", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<int>("AccessFailedCount")
+                                .HasColumnType("int");
+
+                            b.Property<string>("ConcurrencyStamp")
+                                .IsConcurrencyToken()
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<string>("Email")
+                                .HasMaxLength(256)
+                                .HasColumnType("nvarchar(256)");
+
+                            b.Property<bool>("EmailConfirmed")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<bool?>("IsDeleted")
+                                .HasColumnType("bit");
+
+                            b.Property<string>("LastName")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b.Property<bool>("LockoutEnabled")
+                                .HasColumnType("bit");
+
+                            b.Property<DateTimeOffset?>("LockoutEnd")
+                                .HasColumnType("datetimeoffset");
+
+                            b.Property<string>("MiddleName")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("NormalizedEmail")
+                                .HasMaxLength(256)
+                                .HasColumnType("nvarchar(256)");
+
+                            b.Property<string>("NormalizedUserName")
+                                .HasMaxLength(256)
+                                .HasColumnType("nvarchar(256)");
+
+                            b.Property<string>("PasswordHash")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("PhoneNumber")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<bool>("PhoneNumberConfirmed")
+                                .HasColumnType("bit");
+
+                            b.Property<Guid>("RoleId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("SecurityStamp")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<Guid?>("TenantId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<bool>("TwoFactorEnabled")
+                                .HasColumnType("bit");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<string>("UserName")
+                                .HasMaxLength(256)
+                                .HasColumnType("nvarchar(256)");
+
+                            b.HasKey("Id");
+
+                            b.HasIndex("NormalizedEmail")
+                                .HasDatabaseName("EmailIndex");
+
+                            b.HasIndex("NormalizedUserName")
+                                .IsUnique()
+                                .HasDatabaseName("UserNameIndex")
+                                .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                            b.HasIndex("RoleId");
+
+                            b.HasIndex("TenantId");
+
+                            b.ToTable("AspNetUsers", (string)null);
+
+                            b.HasData(
+                                new
+                                {
+                                    Id = new Guid("84722e9d-806c-4f49-94d7-a55de8d2d76e"),
+                                    AccessFailedCount = 0,
+                                    ConcurrencyStamp = "12456e31-62c3-4db3-a8fc-987654321def",
+                                    CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                                    CreatedOn = new DateTime(2024, 6, 19, 12, 0, 0, 0, DateTimeKind.Utc),
+                                    Email = "admin@gmail.com",
+                                    EmailConfirmed = true,
+                                    FirstName = "Admin",
+                                    IsActive = true,
+                                    IsDeleted = false,
+                                    LastName = "",
+                                    LockoutEnabled = false,
+                                    MiddleName = "",
+                                    NormalizedEmail = "ADMIN@GMAIL.COM",
+                                    NormalizedUserName = "ADMIN@GMAIL.COM",
+                                    PasswordHash = "AQAAAAIAAYagAAAAEHXHMy52Ji1wPk8MrXLQrX8XKJekP1rHPXwmwtgFmlmiCdkN7lYlOlLlaOVXJ2SKcw==",
+                                    PhoneNumberConfirmed = false,
+                                    RoleId = new Guid("f5ab29da-356e-42df-a3ad-d91bbf644550"),
+                                    SecurityStamp = "38fef087-d2ad-4e78-9823-123456789abc",
+                                    TwoFactorEnabled = false,
+                                    UserName = "admin@gmail.com"
+                                });
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.UserDatabase", b =>
+                        {
+                            b.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("ConnectionString")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<Guid>("CreatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.Property<string>("DatabaseName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<bool>("IsActive")
+                                .HasColumnType("bit");
+
+                            b.Property<Guid?>("UpdatedBy")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<DateTime?>("UpdatedOn")
+                                .HasColumnType("datetime2");
+
+                            b.HasKey("Id");
+
+                            b.ToTable("UserDatabases");
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                        {
+                            b.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                            b.Property<string>("ClaimType")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("ClaimValue")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<Guid>("RoleId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.HasKey("Id");
+
+                            b.HasIndex("RoleId");
+
+                            b.ToTable("AspNetRoleClaims", (string)null);
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                        {
+                            b.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                            b.Property<string>("ClaimType")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<string>("ClaimValue")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<Guid>("UserId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.HasKey("Id");
+
+                            b.HasIndex("UserId");
+
+                            b.ToTable("AspNetUserClaims", (string)null);
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                        {
+                            b.Property<string>("LoginProvider")
+                                .HasColumnType("nvarchar(450)");
+
+                            b.Property<string>("ProviderKey")
+                                .HasColumnType("nvarchar(450)");
+
+                            b.Property<string>("ProviderDisplayName")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.Property<Guid>("UserId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.HasKey("LoginProvider", "ProviderKey");
+
+                            b.HasIndex("UserId");
+
+                            b.ToTable("AspNetUserLogins", (string)null);
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                        {
+                            b.Property<Guid>("UserId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<Guid>("RoleId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.HasKey("UserId", "RoleId");
+
+                            b.HasIndex("RoleId");
+
+                            b.ToTable("AspNetUserRoles", (string)null);
+
+                            b.HasData(
+                                new
+                                {
+                                    UserId = new Guid("84722e9d-806c-4f49-94d7-a55de8d2d76e"),
+                                    RoleId = new Guid("f5ab29da-356e-42df-a3ad-d91bbf644550")
+                                });
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                        {
+                            b.Property<Guid>("UserId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b.Property<string>("LoginProvider")
+                                .HasColumnType("nvarchar(450)");
+
+                            b.Property<string>("Name")
+                                .HasColumnType("nvarchar(450)");
+
+                            b.Property<string>("Value")
+                                .HasColumnType("nvarchar(max)");
+
+                            b.HasKey("UserId", "LoginProvider", "Name");
+
+                            b.ToTable("AspNetUserTokens", (string)null);
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.AdditioanlTenants", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.Tenant", "Tenants")
+                                .WithMany("AddTenants")
+                                .HasForeignKey("TenantId");
+
+                            b.Navigation("Tenants");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.AdditionalOccupants", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.LegalCase", "LegalCase")
+                                .WithMany("Addoccupants")
+                                .HasForeignKey("LegalCaseId");
+
+                            b.Navigation("LegalCase");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Building", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.LandLord", "Landlord")
+                                .WithMany("Buildings")
+                                .HasForeignKey("LandlordId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.PremiseType", "PremiseType")
+                                .WithMany()
+                                .HasForeignKey("PremiseTypeId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.RegulationStatus", "RegulationStatus")
+                                .WithMany()
+                                .HasForeignKey("RegulationStatusId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.State", "State")
+                                .WithMany()
+                                .HasForeignKey("StateId");
+
+                            b.Navigation("Landlord");
+
+                            b.Navigation("PremiseType");
+
+                            b.Navigation("RegulationStatus");
+
+                            b.Navigation("State");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Calander", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.CaseStatus", "CaseStatus")
+                                .WithMany()
+                                .HasForeignKey("CaseStatusId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.CaseType", "CaseType")
+                                .WithMany()
+                                .HasForeignKey("CaseTypeId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.County", "County")
+                                .WithMany()
+                                .HasForeignKey("CountyId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.CourtPart", "CourtPart")
+                                .WithMany()
+                                .HasForeignKey("CourtPartId");
+
+                            b.Navigation("CaseStatus");
+
+                            b.Navigation("CaseType");
+
+                            b.Navigation("County");
+
+                            b.Navigation("CourtPart");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseForms", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.FormTypes", "FormType")
+                                .WithMany()
+                                .HasForeignKey("FormTypeId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.LegalCase", "LegalCase")
+                                .WithMany()
+                                .HasForeignKey("LegalCaseId");
+
+                            b.Navigation("FormType");
+
+                            b.Navigation("LegalCase");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Client", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.ClientRole", "ClientType")
+                                .WithMany()
+                                .HasForeignKey("ClientTypeId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.State", "State")
+                                .WithMany()
+                                .HasForeignKey("StateId");
+
+                            b.Navigation("ClientType");
+
+                            b.Navigation("State");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.LandLord", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.Client", "Client")
+                                .WithMany("LandLords")
+                                .HasForeignKey("ClientId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.LandlordType", "LandlordType")
+                                .WithMany()
+                                .HasForeignKey("LandlordTypeId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.State", "State")
+                                .WithMany()
+                                .HasForeignKey("StateId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.TypeOfOwner", "TypeOfOwner")
+                                .WithMany()
+                                .HasForeignKey("TypeOfOwnerId");
+
+                            b.Navigation("Client");
+
+                            b.Navigation("LandlordType");
+
+                            b.Navigation("State");
+
+                            b.Navigation("TypeOfOwner");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.LegalCase", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.Building", "Buildings")
+                                .WithMany()
+                                .HasForeignKey("BuildingId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.CaseSubType", "CaseSubType")
+                                .WithMany()
+                                .HasForeignKey("CaseSubTypeId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.CaseType", "CaseType")
+                                .WithMany()
+                                .HasForeignKey("CaseTypeId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Client", "Clients")
+                                .WithMany()
+                                .HasForeignKey("ClientId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.ClientRole", "ClientRole")
+                                .WithMany()
+                                .HasForeignKey("ClientRoleId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.IsUnitIllegal", "IsUnitIllegal")
+                                .WithMany()
+                                .HasForeignKey("IsUnitIllegalId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.LandLord", "LandLords")
+                                .WithMany()
+                                .HasForeignKey("LandLordId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.LandlordType", "LandlordType")
+                                .WithMany()
+                                .HasForeignKey("LandlordTypeId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.ReasonHoldover", "ReasonHoldover")
+                                .WithMany()
+                                .HasForeignKey("ReasonHoldoverId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.RegulationStatus", "RegulationStatus")
+                                .WithMany()
+                                .HasForeignKey("RegulationStatusId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.RenewalStatus", "RenewalStatus")
+                                .WithMany()
+                                .HasForeignKey("RenewalStatusId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.DateRent", "RentDueEachMonthOrWeek")
+                                .WithMany()
+                                .HasForeignKey("RentDueEachMonthOrWeekId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.TenancyType", "TenancyType")
+                                .WithMany()
+                                .HasForeignKey("TenancyTypeId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Tenant", "Tenants")
+                                .WithMany()
+                                .HasForeignKey("TenantId");
+
+                            b.Navigation("Buildings");
+
+                            b.Navigation("CaseSubType");
+
+                            b.Navigation("CaseType");
+
+                            b.Navigation("ClientRole");
+
+                            b.Navigation("Clients");
+
+                            b.Navigation("IsUnitIllegal");
+
+                            b.Navigation("LandLords");
+
+                            b.Navigation("LandlordType");
+
+                            b.Navigation("ReasonHoldover");
+
+                            b.Navigation("RegulationStatus");
+
+                            b.Navigation("RenewalStatus");
+
+                            b.Navigation("RentDueEachMonthOrWeek");
+
+                            b.Navigation("TenancyType");
+
+                            b.Navigation("Tenants");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CaseSubType", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.CaseType", "CaseTypes")
+                                .WithMany()
+                                .HasForeignKey("CaseTypeId");
+
+                            b.Navigation("CaseTypes");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.FormTypes", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.CaseType", "CaseType")
+                                .WithMany()
+                                .HasForeignKey("CaseTypeId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.Category", "Category")
+                                .WithMany()
+                                .HasForeignKey("CategoryId");
+
+                            b.Navigation("CaseType");
+
+                            b.Navigation("Category");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Tenant", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.Building", "Building")
+                                .WithMany("Tenants")
+                                .HasForeignKey("BuildinId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.IsUnitIllegal", "IsUnitIllegal")
+                                .WithMany()
+                                .HasForeignKey("IsUnitIllegalId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.Language", "Language")
+                                .WithMany()
+                                .HasForeignKey("LanguageId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.DateRent", "RentDueEachMonthOrWeek")
+                                .WithMany()
+                                .HasForeignKey("RentDueEachMonthOrWeekId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.State", "State")
+                                .WithMany()
+                                .HasForeignKey("StateId");
+
+                            b.HasOne("EvictionFiler.Domain.Entities.Master.TenancyType", "TenancyType")
+                                .WithMany()
+                                .HasForeignKey("TenancyTypeId");
+
+                            b.Navigation("Building");
+
+                            b.Navigation("IsUnitIllegal");
+
+                            b.Navigation("Language");
+
+                            b.Navigation("RentDueEachMonthOrWeek");
+
+                            b.Navigation("State");
+
+                            b.Navigation("TenancyType");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.User", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.Role", "Role")
+                                .WithMany()
+                                .HasForeignKey("RoleId")
+                                .OnDelete(DeleteBehavior.Restrict)
+                                .IsRequired();
+
+                            b.HasOne("EvictionFiler.Domain.Entities.UserDatabase", "Tenants")
+                                .WithMany()
+                                .HasForeignKey("TenantId")
+                                .OnDelete(DeleteBehavior.Restrict);
+
+                            b.Navigation("Role");
+
+                            b.Navigation("Tenants");
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.Role", null)
+                                .WithMany()
+                                .HasForeignKey("RoleId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.User", null)
+                                .WithMany()
+                                .HasForeignKey("UserId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.User", null)
+                                .WithMany()
+                                .HasForeignKey("UserId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.Role", null)
+                                .WithMany()
+                                .HasForeignKey("RoleId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+
+                            b.HasOne("EvictionFiler.Domain.Entities.User", null)
+                                .WithMany()
+                                .HasForeignKey("UserId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                        {
+                            b.HasOne("EvictionFiler.Domain.Entities.User", null)
+                                .WithMany()
+                                .HasForeignKey("UserId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Building", b =>
+                        {
+                            b.Navigation("Tenants");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Client", b =>
+                        {
+                            b.Navigation("LandLords");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.LandLord", b =>
+                        {
+                            b.Navigation("Buildings");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.LegalCase", b =>
+                        {
+                            b.Navigation("Addoccupants");
+                        });
+
+                    modelBuilder.Entity("EvictionFiler.Domain.Entities.Tenant", b =>
+                        {
+                            b.Navigation("AddTenants");
+                        });
 #pragma warning restore 612, 618
+                });
         }
     }
 }
