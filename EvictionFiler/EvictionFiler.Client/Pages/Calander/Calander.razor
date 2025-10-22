@@ -33,131 +33,131 @@
 @using System.Security.Claims
 @inject JwtAuthStateProviders _authStateProvider
 
-    <style>
-        /* ===== EvictionFiler Light Theme (cards + rounded + blue/yellow accents) ===== */
-        :root { --bg: #f5f7fb; --card: #ffffff; --ink: #0e1726; --muted: #5c6a82; --line: #e5eaf3; --chip: #f1f4fa; --accent: #2463eb; /* blue */ --accent-2: #0ea5e9; /* teal-blue */ --accent-ink: #0b1a34; --warn: #f5b500; /* golden */ --good: #16a34a; --shadow: 0 2px 10px rgba(8, 15, 35, .06); --radius: 16px; }
+<style>
+    /* ===== EvictionFiler Light Theme (cards + rounded + blue/yellow accents) ===== */
+    :root { --bg: #f5f7fb; --card: #ffffff; --ink: #0e1726; --muted: #5c6a82; --line: #e5eaf3; --chip: #f1f4fa; --accent: #2463eb; /* blue */ --accent-2: #0ea5e9; /* teal-blue */ --accent-ink: #0b1a34; --warn: #f5b500; /* golden */ --good: #16a34a; --shadow: 0 2px 10px rgba(8, 15, 35, .06); --radius: 16px; }
 
-        * { box-sizing: border-box }
+    * { box-sizing: border-box }
 
-        html,
-        body { height: 100% }
+    html,
+    body { height: 100% }
 
-        body { margin: 0; background: var(--bg); color: var(--ink); font: 500 15px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 500 15px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
 
-        .wrap { max-width: 1280px; margin: auto; padding: 22px }
+    .wrap { max-width: 1280px; margin: auto; padding: 22px }
 
-        /* Top bar */
-        header { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin: 4px 0 16px }
+    /* Top bar */
+    header { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin: 4px 0 16px }
 
-        .brand { display: flex; align-items: center; gap: 12px }
+    .brand { display: flex; align-items: center; gap: 12px }
 
-        .logo { width: 34px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, #0b3a91, #2b6be6) }
+    .logo { width: 34px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, #0b3a91, #2b6be6) }
 
-        h1 { font-size: 20px; margin: 0 }
+    h1 { font-size: 20px; margin: 0 }
 
-        .sub { color: var(--muted) }
+    .sub { color: var(--muted) }
 
-        /* Card */
-        .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow) }
+    /* Card */
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow) }
 
-        .card-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); background: #fbfdff; border-top-left-radius: var(--radius); border-top-right-radius: var(--radius); color: #3b4a66 }
+    .card-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); background: #fbfdff; border-top-left-radius: var(--radius); border-top-right-radius: var(--radius); color: #3b4a66 }
 
-        .card-body { padding: 14px }
+    .card-body { padding: 14px }
 
-        /* Filters */
-        .panel .filters { display: grid; grid-template-columns: repeat(6, minmax(170px, 1fr)); gap: 12px }
+    /* Filters */
+    .panel .filters { display: grid; grid-template-columns: repeat(6, minmax(170px, 1fr)); gap: 12px }
 
-        .control label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 2px 0 6px }
+    .control label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 2px 0 6px }
 
-        .control input,
-        .control select { width: 100%; background: #fff; color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; outline: none; box-shadow: 0 1px 0 rgba(10, 20, 40, .02); }
+    .control input,
+    .control select { width: 100%; background: #fff; color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; outline: none; box-shadow: 0 1px 0 rgba(10, 20, 40, .02); }
 
-            .control input:focus,
-            .control select:focus { border-color: #cdd7ee; box-shadow: 0 0 0 3px rgba(36, 99, 235, .08) }
+    .control input:focus,
+    .control select:focus { border-color: #cdd7ee; box-shadow: 0 0 0 3px rgba(36, 99, 235, .08) }
 
-        /* Buttons */
-        .bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px }
+    /* Buttons */
+    .bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px }
 
-        .btn { background: var(--accent); color: #fff; border: 0; border-radius: 12px; padding: 10px 14px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(36, 99, 235, .22) }
+    .btn { background: var(--accent); color: #fff; border: 0; border-radius: 12px; padding: 10px 14px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(36, 99, 235, .22) }
 
-            .btn.secondary { background: #fff; color: var(--accent-ink); border: 1px solid var(--line); box-shadow: none }
+    .btn.secondary { background: #fff; color: var(--accent-ink); border: 1px solid var(--line); box-shadow: none }
 
-            .btn.ghost { background: var(--chip); color: var(--accent-ink); border: 1px dashed var(--line); box-shadow: none }
+    .btn.ghost { background: var(--chip); color: var(--accent-ink); border: 1px dashed var(--line); box-shadow: none }
 
-        .badge { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line); padding: 8px 10px; border-radius: 12px; color: var(--muted) }
+    .badge { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line); padding: 8px 10px; border-radius: 12px; color: var(--muted) }
 
-        /* Stats */
-        .stats { display: flex; gap: 12px; flex-wrap: wrap }
+    /* Stats */
+    .stats { display: flex; gap: 12px; flex-wrap: wrap }
 
-        .stat { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; color: var(--muted); box-shadow: var(--shadow) }
+    .stat { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; color: var(--muted); box-shadow: var(--shadow) }
 
-            .stat b { color: var(--ink) }
+    .stat b { color: var(--ink) }
 
-        /* Table */
-        .table-wrap { overflow: auto; max-height: 70vh }
+    /* Table */
+    .table-wrap { overflow: auto; max-height: 70vh }
 
-        .table { width: 100%; border-collapse: separate; border-spacing: 0 }
+    .table { width: 100%; border-collapse: separate; border-spacing: 0 }
 
-            .table thead th { position: sticky; top: 0; background: #fbfdff; color: #7383a1; text-align: left; padding: 12px; border-bottom: 1px solid var(--line); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+    .table thead th { position: sticky; top: 0; background: #fbfdff; color: #7383a1; text-align: left; padding: 12px; border-bottom: 1px solid var(--line); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
 
-            .table tbody td { padding: 12px; border-bottom: 1px solid var(--line); vertical-align: top }
+    .table tbody td { padding: 12px; border-bottom: 1px solid var(--line); vertical-align: top }
 
-        .caption { font-weight: 700 }
+    .caption { font-weight: 700 }
 
-        .label { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; background: #fff5d6; color: #8a6400; border: 1px solid #ffe9a3 }
+    .label { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; background: #fff5d6; color: #8a6400; border: 1px solid #ffe9a3 }
 
-            .label.holdover { background: #e8f0ff; color: #153e91; border-color: #d7e5ff }
+    .label.holdover { background: #e8f0ff; color: #153e91; border-color: #d7e5ff }
 
-            .label.np { background: #e6fbff; color: #055d66; border-color: #c8f5ff }
+    .label.np { background: #e6fbff; color: #055d66; border-color: #c8f5ff }
 
-        /* Responsive */
-        @@media (max-width:1100px) { .panel .filters
-        { grid-template-columns: repeat(3, minmax(170px, 1fr)) }
-        }
+    /* Responsive */
+    @@media (max-width:1100px) { .panel .filters
+    { grid-template-columns: repeat(3, minmax(170px, 1fr)) }
+    }
 
-        @@media (max-width:640px) { .panel .filters
-        { grid-template-columns: 1fr }
+    @@media (max-width:640px) { .panel .filters
+    { grid-template-columns: 1fr }
 
-        .table .hide-sm { display: none }
-        }
+    .table .hide-sm { display: none }
+    }
 
-        /* Print */
-        @@media print { body
-        { background: #fff; color: #000 }
+    /* Print */
+    @@media print { body
+    { background: #fff; color: #000 }
 
-        header,
-        .panel .bar .btn.secondary,
-        .panel .bar .btn.ghost { display: none !important }
+    header,
+    .panel .bar .btn.secondary,
+    .panel .bar .btn.ghost { display: none !important }
 
-        .wrap { max-width: none; padding: 0 }
+    .wrap { max-width: none; padding: 0 }
 
-        .card { border: 0; box-shadow: none }
+    .card { border: 0; box-shadow: none }
 
-        .table thead th { background: #fff; color: #000; border-color: #ccc }
+    .table thead th { background: #fff; color: #000; border-color: #ccc }
 
-        .table tbody td { border-color: #ddd }
+    .table tbody td { border-color: #ddd }
 
-        .label { border-color: #ccc; background: #fff; color: #000 }
-        }
+    .label { border-color: #ccc; background: #fff; color: #000 }
+    }
 
-        /* Optional strict 5 rows per page */
-        @@media print { body .per5 .table tbody tr
-        { page-break-inside: avoid }
+    /* Optional strict 5 rows per page */
+    @@media print { body .per5 .table tbody tr
+    { page-break-inside: avoid }
 
-        body.per5 .table tbody tr:nth-child(5n) { page-break-after: always }
-        }
-    </style>
+    body.per5 .table tbody tr:nth-child(5n) { page-break-after: always }
+    }
+</style>
 
-    <div class="wrap">
-        <header>
-            <div class="brand">
-                <div class="logo"></div>
-                <h1>HousingCourtFiler • Court Calendars</h1>
-            </div>
-            <div class="sub">Generate, filter, and print housing court calendars</div>
-        </header>
+<div class="wrap">
+    <header>
+        <div class="brand">
+            <div class="logo"></div>
+            <h1>HousingCourtFiler • Court Calendars</h1>
+        </div>
+        <div class="sub">Generate, filter, and print housing court calendars</div>
+    </header>
 
-        <!-- Filters -->
+    <!-- Filters -->
     <section class="card panel p-3">
         <div class="card-head mb-3 d-flex gap-2">
             <div class="badge ">Case Search & Filters</div>
@@ -197,7 +197,7 @@
 
                     <div class="col-md-2">
                         <label for="f-room" class="form-label">Room</label>
-                        <InputText id="f-from" class="form-control" @bind-Value="calanderDto.Room" />
+                        <InputText id="f-from" class="form-control" placeholder="Enter Room" @bind-Value="calanderDto.Room" />
                     </div>
                     <div class="col-md-2">
                         <label for="f-type" class="form-label">Case Type</label>
@@ -209,14 +209,14 @@
                             }
                         </InputSelect>
                     </div>
-                   
+
                 </div>
                 <div class="row mt-2 g-3">
-                  <div class="col-12">
-                      <div class="row">
+                    <div class="col-12">
+                        <div class="row">
                             <div class="col-md-2">
                                 <label for="f-judge" class="form-label">Judge</label>
-                                <InputText id="f-from" class="form-control" @bind-Value="calanderDto.Judge" />
+                                <InputText id="f-from" class="form-control" placeholder="Enter Judge" @bind-Value="calanderDto.Judge" />
                             </div>
                             <div class="col-md-2">
                                 <label for="f-status" class="form-label">Status</label>
@@ -240,10 +240,10 @@
                                     <div class="switch"><input id="f-per5" type="checkbox"><span class="sub">Strict page breaks</span></div>
                                 </div>
                             </div>
-                      </div>
+                        </div>
 
-                  </div>
-              </div>
+                    </div>
+                </div>
 
                 <div class="mt-4 d-flex gap-2 flex-wrap align-items-center bar">
                     <button type="button" class="btn btn-primary" id="btnGenerate" @onclick="SubmitAsync">Generate</button>
@@ -257,32 +257,32 @@
     </section>
 
 
-        <!-- Results -->
-        <section class="card" style="margin-top:14px">
-            <div class="card-head">
-                <div class="stats">
-                    <div class="stat"><span>Hearings Today:</span> <b id="statToday">0</b></div>
-                    <div class="stat"><span>This Week:</span> <b id="statWeek">0</b></div>
-                    <div class="stat"><span>Selected Range:</span> <b id="statRange">0</b></div>
-                </div>
-                <div class="sub" id="printMeta"></div>
+    <!-- Results -->
+    <section class="card" style="margin-top:14px">
+        <div class="card-head">
+            <div class="stats">
+                <div class="stat"><span>Hearings Today:</span> <b id="statToday">0</b></div>
+                <div class="stat"><span>This Week:</span> <b id="statWeek">0</b></div>
+                <div class="stat"><span>Selected Range:</span> <b id="statRange">0</b></div>
             </div>
-            <div class="card-body table-wrap">
-                <table class="table" id="table">
-                    <thead>
-                        <tr>
-                            <th>County</th>
-                            <th class="hide-sm">Date</th>
-                            <th>Court Part</th>
-                            <th>Room</th>
-                            <th>Caption</th>
-                            <th>Index #</th>
-                            <th>Time</th>
-                            <th>Case Type</th>
-                            <th class="hide-sm">Judge</th>
-                            <th>Last Action</th>
-                        </tr>
-                    </thead>
+            <div class="sub" id="printMeta"></div>
+        </div>
+        <div class="card-body table-wrap">
+            <table class="table" id="table">
+                <thead>
+                    <tr>
+                        <th>County</th>
+                        <th class="hide-sm">Date</th>
+                        <th>Court Part</th>
+                        <th>Room</th>
+                        <th>Caption</th>
+                        <th>Index #</th>
+                        <th>Time</th>
+                        <th>Case Type</th>
+                        <th class="hide-sm">Judge</th>
+                        <th>Last Action</th>
+                    </tr>
+                </thead>
                 <tbody id="tbody">
                     @if (CourtCases != null && CourtCases.Any())
                     {
@@ -308,12 +308,12 @@
                     }
                 </tbody>
 
-                </table>
-            </div>
-        </section>
-    </div>
+            </table>
+        </div>
+    </section>
+</div>
 
-    
+
 
 @code {
 
@@ -334,6 +334,8 @@
     protected override async Task OnInitializedAsync()
     {
         calanderDto = new CalanderDto();
+        calanderDto.DateFrom = DateTime.Now;
+        calanderDto.DateTo = DateTime.Now;
         _editContext = new EditContext(calanderDto);
         _messages = new ValidationMessageStore(_editContext);
 
