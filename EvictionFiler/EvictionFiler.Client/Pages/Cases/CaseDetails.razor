@@ -3,9 +3,11 @@
 @using Blazored.Toast.Services
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ApartmentDto
+@using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.FormTypeDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
+@using EvictionFiler.Application.DTOs.OccupantDto
 @using EvictionFiler.Application.DTOs.TenantDto
 @using EvictionFiler.Application.Interfaces.IRepository
 @using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
@@ -18,8 +20,16 @@
 @using EvictionFiler.Infrastructure.Repositories
 @inject SpinnerService spinnerservice
 @inject ICaseFormRepository CaseFormRepository
+@inject IClientService _clientService
+@inject IClientRoleRepository _clientRoleRepository
 @inject IFormTypesRepository FormTypesRepository
 @inject ICaseFormService _CaseFormService
+@inject IRegulationStatusRepository _regulationStatusRepository
+@inject IStateRepository _stateRepository
+@inject IBuildingRepository _buildingRepository
+@inject IBuildingService _buildingService
+@inject IAdditionalTenantService _additionalTenantService
+@inject ITenantService _tenantService
 @inject IToastService ToastService
 @inject IJSRuntime JS
 @using Microsoft.AspNetCore.Components.Authorization;
@@ -30,95 +40,95 @@
 
 <style>
     :root {
-        /* default palette (indigo/teal) */
-        --brand-primary: #4f46e5; /* indigo-600 */
-        --brand-primary-600: #4f46e5;
-        --brand-primary-700: #4338ca;
-        --brand-primary-50: #eef2ff;
-        --brand-primary-text: #3730a3;
-        --brand-accent: #10b981; /* emerald-500 */
-        --brand-accent-100: #d1fae5;
-        --brand-accent-text: #065f46;
+    /* default palette (indigo/teal) */
+    --brand-primary: #4f46e5; /* indigo-600 */
+    --brand-primary-600: #4f46e5;
+    --brand-primary-700: #4338ca;
+    --brand-primary-50: #eef2ff;
+    --brand-primary-text: #3730a3;
+    --brand-accent: #10b981; /* emerald-500 */
+    --brand-accent-100: #d1fae5;
+    --brand-accent-text: #065f46;
     }
     /* Optional alt theme examples; swap by changing data-theme */
     html[data-theme="sky-rose"] {
-        --brand-primary: #0284c7;
-        --brand-primary-600: #0284c7;
-        --brand-primary-700: #0369a1;
-        --brand-primary-50: #e0f2fe;
-        --brand-primary-text: #075985;
-        --brand-accent: #e11d48;
-        --brand-accent-100: #ffe4e6;
-        --brand-accent-text: #881337;
+    --brand-primary: #0284c7;
+    --brand-primary-600: #0284c7;
+    --brand-primary-700: #0369a1;
+    --brand-primary-50: #e0f2fe;
+    --brand-primary-text: #075985;
+    --brand-accent: #e11d48;
+    --brand-accent-100: #ffe4e6;
+    --brand-accent-text: #881337;
     }
 
     html[data-theme="midalta"] {
-        /* Replace with your brand hexes */
-        --brand-primary: #0B3B6E;
-        --brand-primary-600: #0B3B6E;
-        --brand-primary-700: #0a2f57;
-        --brand-primary-50: #E6EEF7;
-        --brand-primary-text: #0B3B6E;
-        --brand-accent: #14B8A6;
-        --brand-accent-100: #CCFBF1;
-        --brand-accent-text: #0F766E;
+    /* Replace with your brand hexes */
+    --brand-primary: #0B3B6E;
+    --brand-primary-600: #0B3B6E;
+    --brand-primary-700: #0a2f57;
+    --brand-primary-50: #E6EEF7;
+    --brand-primary-text: #0B3B6E;
+    --brand-accent: #14B8A6;
+    --brand-accent-100: #CCFBF1;
+    --brand-accent-text: #0F766E;
     }
 
     .sticky-blur {
-        backdrop-filter: saturate(180%) blur(6px);
+    backdrop-filter: saturate(180%) blur(6px);
     }
 
     .bg-brand-primary {
-        background-color: var(--brand-primary) !important;
+    background-color: var(--brand-primary) !important;
     }
 
     .bg-brand-primary-50 {
-        background-color: var(--brand-primary-50) !important;
+    background-color: var(--brand-primary-50) !important;
     }
 
     .text-brand-primary {
-        color: var(--brand-primary-text) !important;
+    color: var(--brand-primary-text) !important;
     }
 
     .bg-brand-accent {
-        background-color: var(--brand-accent) !important;
+    background-color: var(--brand-accent) !important;
     }
 
     .bg-brand-accent-100 {
-        background-color: var(--brand-accent-100) !important;
+    background-color: var(--brand-accent-100) !important;
     }
 
     .text-brand-accent {
-        color: var(--brand-accent-text) !important;
+    color: var(--brand-accent-text) !important;
     }
 
     /* Simple timeline */
     .timeline {
-        position: relative;
-        border-left: 2px solid var(--bs-border-color);
-        margin-left: .75rem;
-        padding-left: 1.5rem;
+    position: relative;
+    border-left: 2px solid var(--bs-border-color);
+    margin-left: .75rem;
+    padding-left: 1.5rem;
     }
 
-        .timeline .dot {
-            position: absolute;
-            left: -10px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: var(--bs-secondary-bg);
-            border: 2px solid var(--bs-border-color);
-            box-shadow: 0 0 0 2px #fff;
-        }
+    .timeline .dot {
+    position: absolute;
+    left: -10px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--bs-secondary-bg);
+    border: 2px solid var(--bs-border-color);
+    box-shadow: 0 0 0 2px #fff;
+    }
 
-        .timeline .item {
-            position: relative;
-            padding-bottom: 1rem;
-        }
+    .timeline .item {
+    position: relative;
+    padding-bottom: 1rem;
+    }
 
-            .timeline .item .dot {
-                top: .25rem;
-            }
+    .timeline .item .dot {
+    top: .25rem;
+    }
 
 
 
@@ -126,200 +136,420 @@
 
     /* Tokens */
     :root {
-        --ef-radius: 14px;
-        --ef-gap: 1rem;
-        --ef-gap-sm: .75rem;
-        --ef-gap-xs: .5rem;
+    --ef-radius: 14px;
+    --ef-gap: 1rem;
+    --ef-gap-sm: .75rem;
+    --ef-gap-xs: .5rem;
     }
 
     /* General polish */
     .container {
-        max-width: 1100px; /* keeps content readable on desktop */
+    max-width: 1100px; /* keeps content readable on desktop */
     }
 
     .card {
-        border-radius: var(--ef-radius);
+    border-radius: var(--ef-radius);
     }
 
     .card-header {
-        border-top-left-radius: var(--ef-radius);
-        border-top-right-radius: var(--ef-radius);
+    border-top-left-radius: var(--ef-radius);
+    border-top-right-radius: var(--ef-radius);
     }
 
     /* Sticky header spacing on mobile so content doesn't hide under it */
     .sticky-top {
-        backdrop-filter: saturate(120%) blur(6px);
-        border-bottom: 1px solid rgba(0,0,0,.06);
+    backdrop-filter: saturate(120%) blur(6px);
+    border-bottom: 1px solid rgba(0,0,0,.06);
     }
 
     /* Stepper dots */
     .step-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 999px;
-        display: inline-block;
-        background: #cbd5e1; /* inactive */
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    display: inline-block;
+    background: #cbd5e1; /* inactive */
     }
 
-        .step-dot.active {
-            background: #60a5fa;
-        }
-        /* info */
-        .step-dot.done {
-            background: #0d6efd;
-        }
+    .step-dot.active {
+    background: #60a5fa;
+    }
+    /* info */
+    .step-dot.done {
+    background: #0d6efd;
+    }
     /* primary */
 
     /* Minor tweaks for Bootstrap form controls on touch */
     .form-control, .form-select, .btn {
-        border-radius: 12px;
+    border-radius: 12px;
     }
 
     .form-control, .form-select {
-        min-height: 44px; /* good touch target */
+    min-height: 44px; /* good touch target */
     }
 
     .btn {
-        min-height: 42px;
+    min-height: 42px;
     }
 
     /* Review JSON block */
     details > pre {
-        background: #0f172a;
-        color: #e2e8f0;
-        border-radius: 12px;
-        padding: 12px;
-        overflow: auto;
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    overflow: auto;
     }
 
     /* Footer action bar */
     @@media (min-width: 0px) {
-        /* On small screens make actions stick and fill width cleanly */
-        .ef-actions {
-            position: sticky;
-            bottom: 0;
-            z-index: 10;
-            background: rgba(255,255,255,.94);
-            backdrop-filter: blur(6px);
-            border-top: 1px solid rgba(0,0,0,.06);
-            padding: .75rem .5rem;
-        }
+    /* On small screens make actions stick and fill width cleanly */
+    .ef-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    background: rgba(255,255,255,.94);
+    backdrop-filter: blur(6px);
+    border-top: 1px solid rgba(0,0,0,.06);
+    padding: .75rem .5rem;
+    }
     }
 
     /* ---------- Mobile-first layout ---------- */
     @@media (max-width: 575.98px) {
-        /* Tighten container padding */
-        .container, .container-fluid {
-            padding-left: .75rem !important;
-            padding-right: .75rem !important;
-        }
-        /* Header stack */
-        .sticky-top .d-flex.justify-content-between {
-            flex-direction: column;
-            align-items: flex-start !important;
-            gap: .5rem;
-        }
-        /* Stepper dots wrap nicely */
-        .sticky-top .d-flex.align-items-center.gap-2 {
-            flex-wrap: wrap;
-            gap: .4rem !important;
-        }
-        /* Card body spacing */
-        .card-body.row.g-3 {
-            row-gap: var(--ef-gap-sm) !important;
-        }
-        /* Form labels slightly smaller to reduce wrapping */
-        .form-label {
-            font-size: .9rem;
-            margin-bottom: .25rem;
-        }
-        /* Inputs extend full width */
-        .form-control, .form-select {
-            font-size: 1rem;
-        }
-        /* Buttons fill width in footer and stack */
-        .ef-actions .btn {
-            width: 100%;
-        }
+    /* Tighten container padding */
+    .container, .container-fluid {
+    padding-left: .75rem !important;
+    padding-right: .75rem !important;
+    }
+    /* Header stack */
+    .sticky-top .d-flex.justify-content-between {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: .5rem;
+    }
+    /* Stepper dots wrap nicely */
+    .sticky-top .d-flex.align-items-center.gap-2 {
+    flex-wrap: wrap;
+    gap: .4rem !important;
+    }
+    /* Card body spacing */
+    .card-body.row.g-3 {
+    row-gap: var(--ef-gap-sm) !important;
+    }
+    /* Form labels slightly smaller to reduce wrapping */
+    .form-label {
+    font-size: .9rem;
+    margin-bottom: .25rem;
+    }
+    /* Inputs extend full width */
+    .form-control, .form-select {
+    font-size: 1rem;
+    }
+    /* Buttons fill width in footer and stack */
+    .ef-actions .btn {
+    width: 100%;
+    }
 
-            .ef-actions .btn + .btn {
-                margin-top: .5rem;
-            }
-        /* Turn 2-column sections into single column */
-        .row.g-3 > [class*="col-md-6"] {
-            width: 100%;
-            flex: 0 0 100%;
-            max-width: 100%;
-        }
-        /* Download PDF button: keep visible but compact */
-        .card-header .btn.btn-sm {
-            padding: .25rem .5rem;
-            font-size: .8rem;
-        }
+    .ef-actions .btn + .btn {
+    margin-top: .5rem;
+    }
+    /* Turn 2-column sections into single column */
+    .row.g-3 > [class*="col-md-6"] {
+    width: 100%;
+    flex: 0 0 100%;
+    max-width: 100%;
+    }
+    /* Download PDF button: keep visible but compact */
+    .card-header .btn.btn-sm {
+    padding: .25rem .5rem;
+    font-size: .8rem;
+    }
     }
 
     /* ---------- Small tablets ---------- */
     @@media (min-width: 576px) and (max-width: 767.98px) {
-        .card-body.row.g-3 {
-            row-gap: var(--ef-gap-sm) !important;
-        }
+    .card-body.row.g-3 {
+    row-gap: var(--ef-gap-sm) !important;
+    }
 
-        .form-control, .form-select {
-            font-size: 1rem;
-        }
+    .form-control, .form-select {
+    font-size: 1rem;
+    }
     }
 
     /* ---------- Tablets / small laptops ---------- */
     @@media (min-width: 768px) and (max-width: 991.98px) {
-        .card-body.row.g-3 {
-            row-gap: var(--ef-gap) !important;
-        }
+    .card-body.row.g-3 {
+    row-gap: var(--ef-gap) !important;
+    }
     }
 
     /* ---------- Large screens ---------- */
     @@media (min-width: 992px) {
-        .card-body.row.g-3 {
-            row-gap: var(--ef-gap) !important;
-        }
+    .card-body.row.g-3 {
+    row-gap: var(--ef-gap) !important;
+    }
     }
 
     /* Accessibility: clear focus states even on mobile */
     :focus-visible {
-        outline: 3px solid rgba(13,110,253,.35);
-        outline-offset: 2px;
-        border-radius: 10px;
+    outline: 3px solid rgba(13,110,253,.35);
+    outline-offset: 2px;
+    border-radius: 10px;
     }
 
     /* Reduce animations if user prefers */
     @@media (prefers-reduced-motion: reduce) {
-        * {
-            animation: none !important;
-            transition: none !important;
-            scroll-behavior: auto !important;
-        }
+    * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+    }
     }
 
     /* Print (nice PDF from browser too) */
     @@media print {
-        .sticky-top, .ef-actions, details {
-            display: none !important;
-        }
-
-        .card {
-            box-shadow: none !important;
-            border: 1px solid #ddd;
-        }
-
-        .card-header {
-            background: #f8f9fa !important;
-        }
-
-        body {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
+    .sticky-top, .ef-actions, details {
+    display: none !important;
     }
 
+    .card {
+    box-shadow: none !important;
+    border: 1px solid #ddd;
+    }
+
+    .card-header {
+    background: #f8f9fa !important;
+    }
+
+    body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    }
+    }
+
+    /*
+    .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow)
+    }
+
+    .card > header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start
+    }
+
+    .k {
+    width: 28px;
+    height: 28px;
+    border-radius: 12px;
+    background: #0f172a;
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 700
+    }
+
+    .card .body {
+    padding: 20px
+    }
+
+    .fields {
+    display: grid;
+    gap: 16px
+    }
+
+    .cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+
+    .cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+    }
+
+    @@media (max-width:820px) {
+    .cols-2, .cols-3 {
+    grid-template-columns: 1fr
+    }
+    }
+
+    label.lbl {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 6px
+    }
+
+    input.txt,
+    select.sel {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    background: #fff;
+    color: #0f172a;
+    outline: none
+    }
+
+    input.txt:focus,
+    select.sel:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 6px #eef2ff
+    }
+
+    .hint {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px
+    }
+
+    .pill {
+    display: inline-block;
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    background: #fff;
+    font-size: 13px
+    }
+
+    .aside.card {
+    position: sticky;
+    top: 106px;
+    height: fit-content
+    }
+
+    .kv {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px
+    }
+
+    .kv .k {
+    background: none;
+    color: #64748b;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    font-weight: 600
+    }
+
+    .actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    background: rgba(255, 255, 255, .9);
+    border-top: 1px solid var(--line)
+    }
+
+    .actions .row {
+    max-width: 1200px;
+    margin: auto;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center
+    }
+    */
+
+    .btn {
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #0f172a
+    }
+
+    .btn.primary {
+    background: var(--brand);
+    border-color: transparent;
+    color: #fff
+    }
+
+    .btn.danger {
+    background: #fee2e2;
+    border-color: #fecaca;
+    color: #991b1b
+    }
+
+    .btn.base {
+    background: #1F365D !important;
+    color: #fff;
+    }
+
+    .btn.normal {
+    background: transparent !important;
+    border: none;
+    }
+
+    .list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px
+    }
+
+    .list .row {
+    display: flex;
+    gap: 8px
+    }
+
+    .iconbtn {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    border-radius: 10px;
+    padding: 8px 10px;
+    cursor: pointer
+    }
+    /*
+    .pre {
+    white-space: pre-wrap;
+    background: #0b1020;
+    color: #e2e8f0;
+    border-radius: 12px;
+    padding: 14px;
+    overflow: auto;
+    max-height: 360px
+    }
+
+    @@media (max-width:560px) {
+    .logo {
+    width: 36px;
+    height: 36px
+    }
+
+    .brand h1 {
+    font-size: 16px
+    }
+
+    .secure {
+    display: none
+    }
+    }
+
+    .form-check-input {
+    cursor: pointer;
+    }  */
+
+    .btn-tenant:hover {
+    background: #1F365D !important;
+    }
+</style>
+<style>
+    #activityTable th,
+    #activityTable td {
+        white-space: nowrap !important;
+        vertical-align: middle !important;
+    }
 </style>
 
 
@@ -345,7 +575,7 @@
                     <span id="statusBadge" class="badge bg-success">@(string.IsNullOrWhiteSpace(legalcaseDto.Status) ? "--" : legalcaseDto.Status)</span>
                     <span id="substatusBadge" class="badge text-brand-primary bg-brand-primary-50 border">@(string.IsNullOrWhiteSpace(legalcaseDto.CaseTypeName) ? "--" : legalcaseDto.CaseTypeName)</span>
                     <button class="btn btn-outline-secondary" @onclick="BackTocases">View Previous Cases</button>
-                    <button class="btn bg-brand-primary text-white">New Action</button>
+                    <button class="btn bg-brand-primary base text-white">New Action</button>
                 </div>
             </div>
         </header>
@@ -361,7 +591,7 @@
                             </div>
                             <div>
                                 <div class="text-secondary text-uppercase small">Monthly Rent</div>
-                                <div class="fw-semibold" id="monthlyRent">$@(legalcaseDto.MonthlyRent == null ? "--" : $"${legalcaseDto.MonthlyRent.Value:N2}")</div>
+                                <div class="fw-semibold" id="monthlyRent">$@(legalcaseDto.MonthlyRent == null ? "--" : $"{legalcaseDto.MonthlyRent.Value:N2}")</div>
                             </div>
                         </div>
                     </div>
@@ -416,21 +646,27 @@
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <div class="border rounded-3 p-3 h-100">
-                                        <div class="fw-semibold mb-2">Tenant</div>
+                                    <div class="border rounded-3 p-3 h-100 position-relative">
+
+                                        <div class="d-flex justify-content-between align-items-center ">
+                                            <div class="fw-semibold">Tenant</div>
+                                            <button type="button" class="btn btn-sm normal p-1" title="Edit Tenant" @onclick="ShowTenantModal">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                        </div>
                                         <div class="text-secondary small">
                                             <div><span class="text-body">Name:</span> <span id="tenantName2">@(string.IsNullOrWhiteSpace(legalcaseDto.TenantName) ? "--" : legalcaseDto.TenantName)</span></div>
-                                            <div><span class="text-body">Apartment:</span> <span id="tenantApt">@(string.IsNullOrWhiteSpace(legalcaseDto.UnitNumber) ? "--" : legalcaseDto.UnitNumber)</span></div>
+                                            <div><span class="text-body">Apartment:</span> <span id="tenantApt">@(string.IsNullOrWhiteSpace(legalcaseDto.ApartmentNumber) ? "--" : legalcaseDto.ApartmentNumber)</span></div>
                                             <div>
                                                 <span class="text-body">Address:</span> <span id="tenantAddr">
                                                     @{
                                                         var partBuilding = new List<string>();
 
-                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.Address1)) partBuilding.Add(legalcaseDto.Address1);
-                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.Address2)) partBuilding.Add(legalcaseDto.Address2);
-                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.City)) partBuilding.Add(legalcaseDto.City);
-                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.StateName)) partBuilding.Add(legalcaseDto.StateName);
-                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.ZipCode)) partBuilding.Add(legalcaseDto.ZipCode);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingAddress)) partBuilding.Add(legalcaseDto.BuildingAddress);
+                                                        // if (!string.IsNullOrWhiteSpace(legalcaseDto.Address2)) partBuilding.Add(legalcaseDto.Address2);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.Borough)) partBuilding.Add(legalcaseDto.Borough);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingState)) partBuilding.Add(legalcaseDto.BuildingState);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingZip)) partBuilding.Add(legalcaseDto.BuildingZip);
 
                                                         var fullBuildingAddress = partBuilding.Any() ? string.Join(", ", partBuilding) : "--";
                                                     }
@@ -441,8 +677,15 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="border rounded-3 p-3 h-100">
-                                        <div class="fw-semibold mb-2 d-flex align-items-center gap-2"><i class="bi bi-buildings"></i> Building</div>
+                                    <div class="border rounded-3 p-3 h-100 position-relative">
+
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="fw-semibold mb-2 d-flex align-items-center gap-2"><i class="bi bi-buildings"></i> Building</div>
+                                            <button type="button" class="btn btn-sm normal p-1" title="Edit Building" @onclick="ShowBuildingModal">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                        </div>
+
                                         <div class="text-secondary small">
                                             <div><span class="text-body">Key:</span> <span id="bKey">--</span></div>
                                             <div><span class="text-body">MDR:</span> <span id="bMdr">@(string.IsNullOrWhiteSpace(legalcaseDto.Mdr) ? "--" : legalcaseDto.Mdr)</span></div>
@@ -451,11 +694,11 @@
                                                     @{
                                                         var partlandlord = new List<string>();
 
-                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.Address1)) partlandlord.Add(legalcaseDto.Address1);
-                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.Address2)) partlandlord.Add(legalcaseDto.Address2);
-                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.City)) partlandlord.Add(legalcaseDto.City);
-                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.StateName)) partlandlord.Add(legalcaseDto.StateName);
-                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.ZipCode)) partlandlord.Add(legalcaseDto.ZipCode);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingAddress)) partlandlord.Add(legalcaseDto.BuildingAddress);
+                                                        // if (!string.IsNullOrWhiteSpace(legalcaseDto.Address2)) partlandlord.Add(legalcaseDto.Address2);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.Borough)) partlandlord.Add(legalcaseDto.Borough);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingState)) partlandlord.Add(legalcaseDto.BuildingState);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingZip)) partlandlord.Add(legalcaseDto.BuildingZip);
 
                                                         var fulllandlordAddress = partlandlord.Any() ? string.Join(", ", partlandlord) : "--";
                                                     }
@@ -507,11 +750,12 @@
                             <!-- Activity -->
                             <div class="tab-pane fade show active" id="activity" role="tabpanel" aria-labelledby="activity-tab">
                                 <div class="table-responsive">
-                                    <table class="table align-middle" id="activityTable" style="width:700px">
+
+                                    <table class="table table-hover align-middle text-center" id="activityTable" style="width:700px">
                                         <thead class="table-light">
                                             <tr>
                                                 <th scope="col">ID</th>
-                                                <th scope="col">Form Type</th>
+                                                <th scope="col">Forms</th>
                                                 @if (isAdmin)
                                                 {
 
@@ -566,33 +810,33 @@
                                 <div class="timeline" id="timelineList">
                                     <div class="item" data-status="completed">
                                         <span class="dot bg-success"></span>
-                                        <div class="text-secondary small">09/01/2025</div>
-                                        <div class="fw-semibold">Case Created</div>
-                                        <div class="text-secondary small">Initial intake and file opened</div>
+                                        <div class="text-secondary small mx-2">09/01/2025</div>
+                                        <div class="fw-semibold mx-2">Case Created</div>
+                                        <div class="text-secondary small mx-2">Initial intake and file opened</div>
                                     </div>
                                     <div class="item" data-status="completed">
                                         <span class="dot bg-success"></span>
-                                        <div class="text-secondary small">09/05/2025</div>
-                                        <div class="fw-semibold">Notice Served</div>
-                                        <div class="text-secondary small">Written Demand to Terminate (move out)</div>
+                                        <div class="text-secondary small mx-2">09/05/2025</div>
+                                        <div class="fw-semibold mx-2">Notice Served</div>
+                                        <div class="text-secondary small mx-2">Written Demand to Terminate (move out)</div>
                                     </div>
                                     <div class="item" data-status="current">
                                         <span class="dot bg-brand-primary"></span>
-                                        <div class="text-secondary small">10/01/2025</div>
-                                        <div class="fw-semibold">Hearing Scheduled</div>
-                                        <div class="text-secondary small">Awaiting confirmation from court</div>
+                                        <div class="text-secondary small mx-2">10/01/2025</div>
+                                        <div class="fw-semibold mx-2">Hearing Scheduled</div>
+                                        <div class="text-secondary small mx-2">Awaiting confirmation from court</div>
                                     </div>
                                     <div class="item" data-status="upcoming">
                                         <span class="dot"></span>
-                                        <div class="text-secondary small">--</div>
-                                        <div class="fw-semibold">Judgment</div>
-                                        <div class="text-secondary small">Pending hearing</div>
+                                        <div class="text-secondary small mx-2">--</div>
+                                        <div class="fw-semibold mx-2">Judgment</div>
+                                        <div class="text-secondary small mx-2">Pending hearing</div>
                                     </div>
                                     <div class="item" data-status="upcoming">
                                         <span class="dot"></span>
-                                        <div class="text-secondary small">--</div>
-                                        <div class="fw-semibold">Warrant/Enforcement</div>
-                                        <div class="text-secondary small">To be requested if applicable</div>
+                                        <div class="text-secondary small mx-2">--</div>
+                                        <div class="fw-semibold mx-2">Warrant/Enforcement</div>
+                                        <div class="text-secondary small mx-2">To be requested if applicable</div>
                                     </div>
                                 </div>
                             </div>
@@ -645,8 +889,13 @@
 
                     <!-- Contact Info -->
                     <div class="card shadow-sm border-0">
-                        <div class="card-header bg-transparent">
-                            <div class="fw-semibold">Contact Information</div>
+                        <div class="card-header bg-transparent position-relative">
+                            <div class="d-flex justify-content-between align-items-center ">
+                                <div class="fw-semibold">Contact Information</div>
+                                <button type="button" class="btn btn-sm normal p-1" title="Edit Client" @onclick="ShowClientModal">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body small d-flex flex-column gap-2">
                             <div class="d-flex align-items-center gap-2"><i class="bi bi-envelope"></i> <span id="contactEmail">@(string.IsNullOrWhiteSpace(legalcaseDto.ClientEmail) ? "--" : legalcaseDto.ClientEmail)</span></div>
@@ -695,13 +944,383 @@
 
     <script>
         window.showBootstrapTab = function (tabId) {
-          var triggerEl = document.querySelector(tabId);
-          if (triggerEl) {
-            var tab = bootstrap.Tab.getOrCreateInstance(triggerEl);
-            tab.show();
-          }
+        var triggerEl = document.querySelector(tabId);
+        if (triggerEl) {
+        var tab = bootstrap.Tab.getOrCreateInstance(triggerEl);
+        tab.show();
+        }
         };
     </script>
+
+    <!-- Tenant Edit Modal -->
+    <div class="modal fade" id="tenantModal" tabindex="-1" aria-labelledby="tenantModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 800px !important;">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tenantModalLabel">Edit Tenant Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body row ">
+                    <div class="col-12">
+                        <div class="card">
+
+                            <div class="card-body">
+                                <!-- Unit / Apt -->
+                                <div class="row position-relative">
+
+                                    <div class="col-md-6 ">
+                                        <label class="form-label  required-label">Unit / Apt # (confirm)</label>
+                                        <button type="button" class="btn-close position-absolute top-0 end-0 m-2 mt-0"
+                                        aria-label="Clear"
+                                        @onclick="OnBindTenantCancel">
+                                        </button>
+                                        <input type="text" class="form-control"
+                                        placeholder="Enter Unit / Apt"
+                                        @bind-value="searchTenantText"
+                                        @oninput="OnSearchTenantInput" @onblur="SelectTenant" />
+                                        @if (filteredTenant?.Any() == true)
+                                        {
+                                            <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
+                                                @foreach (var c in filteredTenant)
+                                                {
+                                                    <li class="dropdown-item" @onclick="() => SelectedTenant(c)">
+                                                        @c.UnitOrApartmentNumber / @c.FirstName @c.LastName
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <label class="lbl">Tenants</label>
+                                        @if (Tenants.Count > 0)
+                                        {
+
+                                            @foreach (var tenant in Tenants.Select((t, i) => new { t, i }))
+                                            {
+                                                <input class="form-control mb-2"
+                                                placeholder="Tenant Name"
+                                                @bind-value="Tenants[tenant.i]"
+                                                @onblur="() => OnchangeAdditionalTenant(tenant.i)" />
+                                            }
+
+                                        }
+                                        <button class="btn btn-sm btn-primary btn-tenant mt-2" @onclick="AddTenant">＋ Add Tenant</button>
+
+
+                                    </div>
+
+                                    <div class="col-12 mt-3">
+                                        <label class="lbl">Undertenants / Other Occupants</label>
+                                        @if (UnderTenants.Count > 0)
+                                        {
+
+                                            @foreach (var undertenant in UnderTenants.Select((t, i) => new { t, i }))
+                                            {
+                                                <input class="form-control mb-2"
+                                                placeholder="Other Occupant Name"
+                                                @bind-value="UnderTenants[undertenant.i]"
+                                                @onblur="() => OnchangeAdditionalOccupants(undertenant.i)" />
+                                            }
+                                        }
+
+                                        <button class="btn btn-sm btn-primary btn-tenant mt-2" @onclick="AddUnder">＋ Add Undertenant/Occupant</button>
+
+                                    </div>
+                                </div>
+
+
+
+
+
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                </div>
+                <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary base" @onclick="SaveTenantChanges">Save</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Building Edit Modal -->
+    <div class="modal fade" id="buildingModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="buildingModalLabel">Edit Building Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <EditForm Model="@editBuildingModel">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        <div class="card border-0">
+                            <div class="card-body p-0">
+
+                                <!-- Search + Add Section -->
+                                <div class="row mt-2">
+                                    @if (!IsNewBuilding)
+                                    {
+                                        <div class="col-md-6 position-relative">
+                                            <label class="form-label  required-label">Building</label>
+                                            <input type="text" class="form-control"
+                                            placeholder="Search by Building Address or code..."
+                                            @bind-value="searchBuildingText"
+                                            @oninput="OnSearchBuildingInput" />
+                                            @if (filteredBuildings?.Any() == true)
+                                            {
+                                                <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
+                                                    @foreach (var c in filteredBuildings)
+                                                    {
+                                                        <li class="dropdown-item" @onclick="() => SelectBuilding(c)">
+                                                            @c.ApartmentCode @c.City / @c.BuildingCode
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
+                                            <ValidationMessage For="() => legalcaseDto.BuildingId" />
+                                        </div>
+                                    }
+
+                                    @if (!showBuildingFields)
+                                    {
+                                        <div class="col-md-1 d-flex justify-content-center align-items-end pb-2">
+                                            <span>OR</span>
+                                        </div>
+                                        <div class="col-md-2 d-flex align-items-end">
+                                            <button type="button" class="btn btn-primary base" @onclick="OnBindBuildingAfter">+ Add</button>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Add/Edit Fields -->
+                                @if (showBuildingFields)
+                                {
+                                    <div class="border rounded-3 p-3 mt-4 position-relative">
+                                        <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                                        aria-label="Clear"
+                                        @onclick="OnBindBuildingCancel">
+                                        </button>
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Street Address </label>
+                                                <InputText class="form-control" @bind-Value="editBuildingModel.Address1" placeholder="Enter Address" />
+                                                <ValidationMessage For="() => editBuildingModel.Address1" />
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Unit / Apt</label>
+                                                <InputText class="form-control" @bind-Value="editBuildingModel.ApartmentCode" placeholder="Enter Unit" />
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Borough / City</label>
+                                                <InputText class="form-control" @bind-Value="editBuildingModel.City" placeholder="Enter Borough / City" />
+                                                <ValidationMessage For="() => editBuildingModel.City" />
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">MDR Number</label>
+                                                <InputText class="form-control" @bind-Value="editBuildingModel.MDRNumber" placeholder="Enter MDR Number" />
+                                            </div>
+                                            @if (IsNewBuilding)
+                                            {
+                                                <div class="col-md-6">
+                                                    <label class="form-label required-label">State</label>
+                                                    <InputSelect class="form-select" @bind-Value="editBuildingModel.StateId">
+                                                        <option value="">-- Select State --</option>
+                                                        @foreach (var s in StateList)
+                                                        {
+                                                            <option value="@s.Id">@s.Name</option>
+                                                        }
+                                                    </InputSelect>
+                                                    <ValidationMessage For="() => editBuildingModel.StateId" />
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label class="form-label required-label">Zip Code</label>
+                                                    <InputText class="form-control" @bind-Value="editBuildingModel.Zipcode" placeholder="Enter Zipcode" />
+                                                </div>
+                                            }
+
+
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Units</label>
+                                                <InputText class="form-control" @bind-Value="editBuildingModel.BuildingUnits" placeholder="Enter Units" />
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Rent Regulation</label>
+                                                <InputSelect class="form-select" @bind-Value="editBuildingModel.RegulationStatusId">
+                                                    <option value="">-- Select Type --</option>
+                                                    @foreach (var l in RegulationList)
+                                                    {
+                                                        <option value="@l.Id">@l.Name</option>
+                                                    }
+                                                </InputSelect>
+                                                <ValidationMessage For="() => editBuildingModel.RegulationStatusId" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary base" @onclick="SaveBuildingChanges">Save</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+
+    <!-- client Edit Modal -->
+    <div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="buildingModalLabel">Edit Client Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <EditForm Model="@client">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body py-0">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- Case Type Dropdown -->
+                                    @if (!newClient)
+                                    {
+
+
+                                        <div class="col-5 position-relative">
+
+
+                                            <label class="form-label required-label">Client</label>
+
+                                            <InputText type="text" class="form-control"
+                                            placeholder="Search by client name or code..."
+                                            @bind-value="searchText"
+                                            @oninput="OnSearchInput" />
+
+                                            @if (filteredClients?.Any() == true)
+                                            {
+                                                <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
+                                                    @foreach (var c in filteredClients)
+                                                    {
+                                                        <li class="dropdown-item" @onclick="() => SelectClient(c)">
+                                                            @c.FirstName @c.LastName / @c.ClientCode
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
+                                        </div>
+                                        @if (!showClientTextbox)
+                                        {
+                                            <div class="col-3 row">
+                                                <div class="col-md-3 d-flex justify-content-center align-items-end" style="padding-bottom:10px;">
+                                                    <div>
+                                                        OR
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-9 d-flex align-items-end">
+                                                    <button type="button" class="btn" style="background-color:#1F365D !important;height:40px; color:white" @onclick="AddClient">+ ADD</button>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                    @if (showClientTextbox)
+                                    {
+
+
+
+                                        <div class="card p-3 mt-3 position-relative">
+                                            <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                                            aria-label="Clear"
+                                            @onclick="ClearSelectedClient">
+                                            </button>
+                                            <div class="row">
+                                                <div class="col-4">
+                                                    <label class="form-label">First Name</label>
+                                                    <InputText class="form-control" placeholder="Enter Name" @bind-Value="client.FirstName" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <label class="form-label">Last Name</label>
+                                                    <InputText class="form-control" placeholder="Enter Name" @bind-Value="client.LastName" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <label class="form-label">Client Type</label>
+                                                    <InputSelect class="form-select" @bind-Value="client.ClientTypeId" style="cursor:pointer;">
+                                                        <option value="">-- Select Type --</option>
+                                                        @foreach (var Own in ClientTypeList)
+                                                        {
+                                                            <option value="@Own.Id">@Own.Name</option>
+                                                        }
+                                                    </InputSelect>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-4 mt-3">
+                                                    <label class="form-label">Email</label>
+                                                    <InputText class="form-control" placeholder="Enter Email" @bind-Value="client.Email" />
+                                                </div>
+
+                                                <div class="col-4 mt-3">
+                                                    <label class="form-label">Phone</label>
+                                                    <InputText class="form-control" placeholder="Enter Number" @bind-Value="client.Phone" />
+                                                </div>
+                                                <div class="col-4 mt-3">
+                                                    <label class="form-label">Reference #</label>
+                                                    <InputText class="form-control" placeholder="Enter Reference" @bind-Value="client.Reference" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary base" @onclick="SaveClientChanges">Save</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.showModal = (id) => {
+        const modal = new bootstrap.Modal(document.getElementById(id));
+        modal.show();
+        };
+    </script>
+    <script>
+        function hideModal(id) {
+        var modal = bootstrap.Modal.getInstance(document.getElementById(id));
+        if (modal) modal.hide();
+        }
+
+    </script>
+
 </body>
 
 
@@ -730,7 +1349,7 @@
             loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
         }
-
+        ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
         spinnerservice.Show();
         await LoadCaseDetails();
         await LoadCaseForms();
@@ -744,8 +1363,6 @@
         CurrentCaseId = caseId;
         if (legalcaseDto != null)
         {
-
-
 
             legalcaseDto = new IntakeModel
                 {
@@ -775,29 +1392,56 @@
                     Address2 = legalcaseDto.Address2,
                     StateName = legalcaseDto.StateName,
                     ZipCode = legalcaseDto.ZipCode,
-                    ClientEmail = legalcaseDto.Email,
-                    ClientPhone = legalcaseDto.Phone,
+                    ClientEmail = legalcaseDto.ClientEmail,
+                    ClientPhone = legalcaseDto.ClientPhone,
 
                     // Landlord
                     FullName = legalcaseDto.FullName,
                     Phone = legalcaseDto.Phone,
                     Email = legalcaseDto.Email,
                     LandLordTypeId = legalcaseDto.LandLordTypeId ?? Guid.Empty,
+                    LandlordId = legalcaseDto.LandlordId,
 
                     // Building
+                    BuildingId = legalcaseDto.BuildingId,
                     Mdr = legalcaseDto.Mdr,
                     Units = legalcaseDto.Units,
                     BuildingAddress = legalcaseDto.BuildingAddress,
                     RegulationStatusId = legalcaseDto.RegulationStatusId ?? Guid.Empty,
+                    Borough = legalcaseDto.Borough,
+                    BuildingState = legalcaseDto.BuildingState,
+                    BuildingZip = legalcaseDto.BuildingZip,
+
                     // RegulationStatusName = legalcaseDto.RegulationStatusName,
 
                     // Tenant
+                    TenantId = legalcaseDto.TenantId,
                     TenantName = legalcaseDto.TenantName,
                     UnitNumber = legalcaseDto.UnitNumber,
                     IsUnitIllegalId = legalcaseDto.IsUnitIllegalId,
                     TenantRecord = legalcaseDto.TenantRecord,
                     HasPossession = legalcaseDto.HasPossession,
-                    OtherOccupants = legalcaseDto.OtherOccupants
+                    OtherOccupants = legalcaseDto.OtherOccupants,
+                    ApartmentNumber = legalcaseDto.ApartmentNumber,
+
+                    //WrittenLease = legalcaseDto.WrittenLease,
+                    OralAgreeMent = legalcaseDto.OralAgreeMent,
+                    CaseProgramId = legalcaseDto.CaseProgramId,
+                    GoodCauseApplies = legalcaseDto.GoodCauseApplies,
+                    //DateTenantMoved = legalcaseDto.DateTenantMoved,
+                    LeaseEnd = legalcaseDto.LeaseEnd,
+                    //TenancyTypeId = legalcaseDto.TenancyTypeId,
+                    DateNoticeServed = legalcaseDto.DateNoticeServed,
+                    CalculatedNoticeLength = legalcaseDto.CalculatedNoticeLength,
+                    ExpirationDate = legalcaseDto.ExpirationDate,
+                    PredicateNotice = legalcaseDto.PredicateNotice,
+                    //RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                    //MonthlyRent = legalcaseDto.MonthlyRent,
+                    //TotalOwed = legalcaseDto.TotalOwed,
+                    //TenantShare = legalcaseDto.TenantShare,
+                    SocialService = legalcaseDto.SocialService,
+                    LastRentPaid = legalcaseDto.LastRentPaid,
+
                 };
 
         };
@@ -922,4 +1566,674 @@
         }
         spinnerservice.Hide();
     }
+
+    //private TenantModel tenantEditModel = new();
+    //private BuildingModel buildingEditModel = new();
+
+    private async void ShowTenantModal()
+    {
+        // Copy current data into editable model
+        Tenants.Clear();
+        TenantList = await _tenantService.GetTenantsByClientIdAsync(legalcaseDto.BuildingId!.Value);
+        ViewTenant = await _tenantService.GetByIdAsync(legalcaseDto.TenantId!.Value);
+        AdditionalTenantfromDbList = await _additionalTenantService.GetAllAdditionalTenantsAsync(legalcaseDto.TenantId);
+        searchTenantText = ViewTenant.UnitOrApartmentNumber!;
+        Tenants.Add(legalcaseDto.TenantName);
+        Tenants.AddRange(AdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}"));
+        StateHasChanged();
+        JS.InvokeVoidAsync("showModal", "tenantModal");
+    }
+
+    public EditToClientDto client = new EditToClientDto();
+    public List<EditToClientDto> ClientList = new List<EditToClientDto>();
+    public List<EditToClientDto> filteredClients = new List<EditToClientDto>();
+    public List<ClientRole> ClientTypeList = new List<ClientRole>();
+    public string searchText { get; set; }
+    public bool showClientTextbox = false;
+    public bool newClient = false;
+    private async void ShowClientModal()
+    {
+        // Copy current data into editable model
+
+        client = await _clientService.GetClientByIdAsync(legalcaseDto.ClientId!.Value) ?? new EditToClientDto();
+
+        ClientTypeList = await _clientRoleRepository.GetAllClientRole();
+        showClientTextbox = true;
+        searchText = $"{client.FirstName} {client.LastName}";
+        StateHasChanged();
+        JS.InvokeVoidAsync("showModal", "clientModal");
+    }
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        searchText = e.Value.ToString();
+        filteredClients = ClientList
+            .Where(c => c.FirstName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+                        || c.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+                        || c.ClientCode.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+    private void SelectClient(EditToClientDto selectedclient)
+    {
+        showClientTextbox = true;
+        searchText = $"{client.FirstName} {client.LastName}";
+        filteredClients.Clear();
+        newClient = false;
+        // Fill card
+        legalcaseDto.ClientId = selectedclient.Id;
+        client.Id = selectedclient.Id;
+        client.FirstName = $"{selectedclient.FirstName}";
+        client.LastName = $"{selectedclient.LastName}";
+        client.Email = selectedclient.Email;
+        client.Phone = selectedclient.Phone;
+        client.Address1 = selectedclient.Address1;
+        client.Address2 = selectedclient.Address2;
+        client.City = selectedclient.City;
+        client.StateId = selectedclient.StateId;
+        client.ZipCode = selectedclient.ZipCode;
+        client.ClientTypeId = selectedclient.ClientTypeId;
+        client.Reference = selectedclient.Reference;
+    }
+    private void ClearSelectedClient()
+    {
+        searchText = string.Empty;
+
+        newClient = false;
+        showClientTextbox = false;
+        searchText = null;
+        client = new EditToClientDto();
+
+        StateHasChanged();
+    }
+    private async void AddClient()
+    {
+        showClientTextbox = true;
+        searchText = null;
+        newClient = true;
+        client = new EditToClientDto();
+        StateHasChanged();
+
+    }
+
+    private EditToBuildingDto editBuildingModel = new();
+    private bool showBuildingFields = false;
+    private bool IsNewBuilding = false;
+    private string searchBuildingText;
+    private string searchTenantText;
+    private List<EditToBuildingDto> filteredBuildings = new();
+    private List<EditToTenantDto> filteredTenant = new();
+    private List<State> StateList = new();
+    private List<RegulationStatus> RegulationList = new();
+    private List<EditToBuildingDto> BuildingList = new();
+    private List<EditToTenantDto> TenantList = new();
+    private List<string> Tenants = new();
+    private List<string> UnderTenants = new() { "John Doe", "John Doe" };
+    private List<AdditioanlTenants> AdditionalTenantfromDbList = new();
+    private List<AddtionalTenantDto> AdditionalTenantList = new();
+    private List<AdditionalOccupantDto> AdditionalOccupantsList = new();
+    public EditToTenantDto selectedTenant = new EditToTenantDto();
+    public EditToTenantDto ViewTenant = new EditToTenantDto();
+
+    private async Task ShowBuildingModal()
+    {
+        RegulationList = await _regulationStatusRepository.GetAllRegulationStatus();
+        StateList = await _stateRepository.GetAllState();
+        //IsNewBuilding = true;
+        // Prefill edit model from case
+        editBuildingModel = await _buildingRepository.GetBuildingByIdAsync(legalcaseDto.BuildingId!.Value);
+        BuildingList = await _buildingRepository.GetBuildingsByLandlordIdAsync(legalcaseDto.LandlordId!.Value);
+        searchBuildingText = editBuildingModel.BuildingCode;
+        showBuildingFields = true;
+        await JS.InvokeVoidAsync("showModal", "buildingModal");
+    }
+
+    // Search handler
+    private async Task OnSearchBuildingInput(ChangeEventArgs e)
+    {
+        searchBuildingText = e.Value?.ToString() ?? "";
+        if (!string.IsNullOrWhiteSpace(searchBuildingText))
+        {
+            filteredBuildings = BuildingList
+                .Where(c => c.BuildingCode.Contains(searchBuildingText, StringComparison.OrdinalIgnoreCase)
+                            || c.City.Contains(searchBuildingText, StringComparison.OrdinalIgnoreCase)
+                            || c.Zipcode.Contains(searchBuildingText, StringComparison.OrdinalIgnoreCase)
+                            || c.CompletedAddress.Contains(searchBuildingText, StringComparison.OrdinalIgnoreCase)
+                            || c.StateName.Contains(searchBuildingText, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+        else
+        {
+            filteredBuildings.Clear();
+        }
+    }
+
+    // Select building from list
+    private void SelectBuilding(EditToBuildingDto selected)
+    {
+        editBuildingModel.Id = selected.Id;
+        editBuildingModel.Address1 = selected.Address1;
+        editBuildingModel.City = selected.City;
+        editBuildingModel.MDRNumber = selected.MDRNumber;
+        editBuildingModel.Zipcode = selected.Zipcode;
+        editBuildingModel.ApartmentCode = selected.ApartmentCode;
+        editBuildingModel.BuildingUnits = selected.BuildingUnits;
+        editBuildingModel.RegulationStatusId = selected.RegulationStatusId;
+
+        filteredBuildings.Clear();
+        searchBuildingText = selected.BuildingCode;
+        showBuildingFields = true;
+        IsNewBuilding = false;
+        legalcaseDto.BuildingId = selected.Id;
+    }
+
+    // Toggle "Add New" section
+    private void OnBindBuildingAfter()
+    {
+        showBuildingFields = true;
+        IsNewBuilding = true;
+    }
+
+    // Cancel "Add New"
+    private void OnBindBuildingCancel()
+    {
+        showBuildingFields = false;
+        IsNewBuilding = false;
+        searchBuildingText = null;
+        editBuildingModel = new EditToBuildingDto();
+    }
+
+    private void OnBindTenantCancel()
+    {
+        Tenants.Clear();
+        searchTenantText = null;
+        legalcaseDto.TenantId = null;
+        legalcaseDto.TenantName = null;
+        AdditionalTenantfromDbList = new List<AdditioanlTenants>();
+        AdditionalTenantList = new List<AddtionalTenantDto>();
+    }
+
+    // Save
+    private async Task SaveBuildingChanges()
+    {
+        spinnerservice.Show();
+
+        var addorupdate = false;
+        if (editBuildingModel.Id == null || editBuildingModel.Id == Guid.Empty)
+        {
+            var newBuilding = new CreateToBuildingDto()
+                {
+                    Address1 = editBuildingModel.Address1,
+                    //Address2 = address2,
+                    City = editBuildingModel.City,
+                    StateId = editBuildingModel.StateId,
+                    Zipcode = editBuildingModel.Zipcode,
+                    BuildingUnits = editBuildingModel.BuildingUnits,
+                    ApartmentCode = editBuildingModel.ApartmentCode,
+                    MDRNumber = editBuildingModel.MDRNumber,
+                    RegulationStatusId = editBuildingModel.RegulationStatusId,
+                    LandlordId = legalcaseDto.LandlordId
+                };
+
+            var buildingId = await _buildingService.AddOnlyApartmentfromCase(newBuilding);
+            addorupdate = true;
+            legalcaseDto.BuildingId = buildingId;
+
+        }
+        else
+        {
+            if (editBuildingModel.Id != null)
+            {
+
+                var updateBuilding = new EditToBuildingDto()
+                    {
+                        Id = editBuildingModel.Id,
+                        Address1 = editBuildingModel.Address1,
+                        BuildingCode = editBuildingModel.BuildingCode,
+                        //Address2 = address2,
+                        City = editBuildingModel.City,
+                        StateId = editBuildingModel.StateId,
+                        Zipcode = editBuildingModel.Zipcode,
+                        BuildingUnits = editBuildingModel.BuildingUnits,
+                        ApartmentCode = editBuildingModel.ApartmentCode,
+                        MDRNumber = editBuildingModel.MDRNumber,
+                        RegulationStatusId = editBuildingModel.RegulationStatusId,
+                    };
+
+                await _buildingService.UpdateonlyBuildingfromCase(updateBuilding);
+                addorupdate = true;
+            }
+        }
+
+        if (addorupdate)
+        {
+            legalcaseDto.BuildingAddress = editBuildingModel.Address1;
+            legalcaseDto.Borough = editBuildingModel.City;
+            legalcaseDto.Mdr = editBuildingModel.MDRNumber;
+            legalcaseDto.BuildingZip = editBuildingModel.Zipcode;
+            legalcaseDto.BuildingStateId = editBuildingModel.StateId;
+            legalcaseDto.Units = editBuildingModel.BuildingUnits;
+            legalcaseDto.RegulationStatusId = editBuildingModel.RegulationStatusId;
+            legalcaseDto.UnitOrApartmentNumber = editBuildingModel.ApartmentCode;
+
+            var success = await _service.UpdateCaseAsync(legalcaseDto);
+
+            if (success.HasValue)
+            {
+                ToastService.ShowSuccess("Building details updated successfully!");
+                await JS.InvokeVoidAsync("hideModal", "buildingModal");
+
+                await LoadCaseDetails();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to update building details.");
+            }
+        }
+        // Map edited fields
+
+
+        spinnerservice.Hide();
+    }
+    private async Task SaveClientChanges()
+    {
+        spinnerservice.Show();
+
+        var addorupdate = false;
+        if (client.Id == null || client.Id == Guid.Empty)
+        {
+            var newClient = new CreateToClientDto()
+                {
+                    Address1 = client.Address1,
+                    //Address2 = address2,
+                    City = client.City,
+                    StateId = client.StateId,
+                    ZipCode = client.ZipCode,
+                    FirstName = client.FirstName,
+                    LastName = client.LastName,
+                    Reference = client.Reference,
+                    ClientTypeId = client.ClientTypeId,
+                     Phone = client.Phone,
+                     Email = client.Email,
+                };
+
+            var clientId = await _clientService.CreateOnlyClient(newClient);
+            addorupdate = true;
+            legalcaseDto.ClientId = clientId;
+
+        }
+        else
+        {
+            if (client.Id != null)
+            {
+
+                var updateBuilding = new EditToClientDto()
+                    {
+                        Id = client.Id,
+                        Address1 = client.Address1,
+                        ClientCode = client.ClientCode,
+                        //Address2 = address2,
+                        ClientTypeId = client.ClientTypeId,
+                        City = client.City,
+                        StateId = client.StateId,
+                        ZipCode = client.ZipCode,
+                        Phone = client.Phone,
+                        Email = client.Email,
+                        Reference = client.Reference,
+                        FirstName = client.FirstName,
+                        LastName = client.LastName,
+                        
+                    };
+
+                await _clientService.UpdateClientformCase(updateBuilding);
+                addorupdate = true;
+            }
+        }
+
+        if (addorupdate)
+        {
+            legalcaseDto.ClientEmail = client.Email;
+            legalcaseDto.Reference = client.Reference;
+            legalcaseDto.ClientTypeId = client.ClientTypeId;
+            legalcaseDto.ClientPhone = client.Phone;
+            legalcaseDto.ClientName = $"{client.FirstName} {client.LastName}";
+            legalcaseDto.City = client.City;
+            legalcaseDto.Address1 = client.Address1;
+            legalcaseDto.ZipCode = client.ZipCode;
+            legalcaseDto.StateId = client.StateId;
+
+            var success = await _service.UpdateCaseAsync(legalcaseDto);
+
+            if (success.HasValue)
+            {
+                ToastService.ShowSuccess("Client details updated successfully!");
+                await JS.InvokeVoidAsync("hideModal", "clientModal");
+
+                await LoadCaseDetails();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to update client details.");
+            }
+        }
+        // Map edited fields
+
+
+        spinnerservice.Hide();
+    }
+
+    private async Task SaveTenantChanges()
+    {
+        spinnerservice.Show();
+
+        var addorupdate = false;
+        if (legalcaseDto.TenantId == null && Tenants.Count > 0)
+        {
+            var mainTenantName = Tenants[0]?.Trim();
+            if (!string.IsNullOrWhiteSpace(mainTenantName))
+            {
+                var parts = mainTenantName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                var firstName = parts.Length > 0 ? parts[0] : "";
+                var lastName = parts.Length > 1 ? parts[1] : "";
+
+                var newTenant = new CreateToTenantDto()
+                    {
+                        FirstName = firstName,
+                        LastName = lastName,
+                        UnitOrApartmentNumber = legalcaseDto.ApartmentNumber,
+                        BuildingId = legalcaseDto.BuildingId,
+                        MoveInDate = legalcaseDto.DateTenantMoved,
+                        MonthlyRent = legalcaseDto.MonthlyRent,
+                        TenantShare = legalcaseDto.TenantShare,
+                        RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                        TotalRentOwed = legalcaseDto.TotalOwed,
+                        TenancyTypeId = legalcaseDto.TenancyTypeId,
+                        SocialServices = legalcaseDto.SocialService,
+                    };
+                var tenantId = await _tenantService.AddTenantfromCase(newTenant);
+
+                legalcaseDto.TenantId = tenantId;
+                addorupdate = true;
+            }
+
+        }
+        else
+        {
+            if (legalcaseDto.TenantId != null && Tenants.Count > 0)
+            {
+                var mainTenantName = Tenants[0]?.Trim();
+                if (!string.IsNullOrWhiteSpace(mainTenantName))
+                {
+                    var parts = mainTenantName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                    var firstName = parts.Length > 0 ? parts[0] : "";
+                    var lastName = parts.Length > 1 ? parts[1] : "";
+
+                    // Only update if anything actually changed
+
+                    var updateTenant = new EditToTenantDto
+                        {
+                            Id = legalcaseDto.TenantId ?? Guid.Empty,
+                            FirstName = firstName,
+                            LastName = lastName,
+                            BuildingId = legalcaseDto.BuildingId,
+                            UnitOrApartmentNumber = legalcaseDto.ApartmentNumber,
+                            MonthlyRent = legalcaseDto.MonthlyRent,
+                            TenantShare = legalcaseDto.TenantShare,
+                            RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                            TotalRentOwed = legalcaseDto.TotalOwed,
+                            TenancyTypeId = legalcaseDto.TenancyTypeId,
+                            SocialServices = legalcaseDto.SocialService,
+                            UpdatedOn = DateTime.Now,
+
+                        };
+
+                    await _tenantService.UpdateTenantAsync(updateTenant);
+                    addorupdate = true;
+
+                }
+            }
+        }
+
+        if (Tenants.Count > 1)
+        {
+            for (int i = 1; i < Tenants.Count; i++)
+            {
+                var fullName = Tenants[i]?.Trim();
+                if (string.IsNullOrWhiteSpace(fullName)) continue;
+
+                var parts = fullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                var firstName = parts.Length > 0 ? parts[0] : "";
+                var lastName = parts.Length > 1 ? parts[1] : "";
+
+                if (i - 1 < AdditionalTenantfromDbList.Count)
+                {
+                    var existingList = AdditionalTenantfromDbList.Select(e => new AddtionalTenantDto
+                        {
+                            Id = e.Id,
+                            FirstName = e.FirstName,
+                            LastName = e.LastName,
+                            TenantId = e.TenantId,
+
+                        }).ToList();
+                    var existing = existingList[i - 1];
+
+                    existing.FirstName = firstName;
+                    existing.LastName = lastName;
+                    existing.UpdatedOn = DateTime.Now;
+                    await _additionalTenantService.UpdateAdditionalTenantAsync(existing);
+
+                }
+                else
+                {
+                    // New Additional Tenant
+                    var newAdditional = new AddtionalTenantDto
+                        {
+                            TenantId = legalcaseDto.TenantId,
+                            FirstName = firstName,
+                            LastName = lastName,
+                            CreatedOn = DateTime.Now,
+                            IsActive = true,
+                            IsDeleted = false,
+                            IsVisible = true
+                        };
+
+                    await _additionalTenantService.AddAdditionalTenantAsync(new List<AddtionalTenantDto> { newAdditional });
+                }
+            }
+        }
+        if (addorupdate)
+        {
+            //     legalcaseDto.BuildingAddress = editBuildingModel.Address1;
+            //     legalcaseDto.Borough = editBuildingModel.City;
+            //     legalcaseDto.Mdr = editBuildingModel.MDRNumber;
+            //     legalcaseDto.BuildingZip = editBuildingModel.Zipcode;
+            //     legalcaseDto.BuildingStateId = editBuildingModel.StateId;
+            //     legalcaseDto.Units = editBuildingModel.BuildingUnits;
+            //     legalcaseDto.RegulationStatusId = editBuildingModel.RegulationStatusId;
+            //     legalcaseDto.UnitOrApartmentNumber = editBuildingModel.ApartmentCode;
+
+            var success = await _service.UpdateCaseAsync(legalcaseDto);
+
+            if (success.HasValue)
+            {
+                ToastService.ShowSuccess("Tenant details updated successfully!");
+                await JS.InvokeVoidAsync("hideModal", "tenantModal");
+
+                await LoadCaseDetails();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to update tenant details.");
+            }
+        }
+        else
+        {
+            ToastService.ShowError("Failed to update Legal Case details.");
+        }
+        // Map edited fields
+
+
+        spinnerservice.Hide();
+    }
+    // Edit model
+    private void OnSearchTenantInput(ChangeEventArgs e)
+    {
+        searchTenantText = e.Value.ToString();
+        filteredTenant = TenantList
+            .Where(c => c.UnitOrApartmentNumber.Contains(searchTenantText, StringComparison.OrdinalIgnoreCase)
+                        || c.FirstName.Contains(searchTenantText, StringComparison.OrdinalIgnoreCase)
+                        || c.LastName.Contains(searchTenantText, StringComparison.OrdinalIgnoreCase)
+                        )
+            .ToList();
+    }
+
+    private void SelectTenant()
+    {
+        legalcaseDto.ApartmentNumber = searchTenantText;
+    }
+
+    private async void SelectedTenant(EditToTenantDto tenant)
+    {
+        // if (filteredTenant.Count > 0)
+        // {
+        //     Tenants = filteredTenant.Select(e => $"{e.FirstName} {e.LastName}").ToList();
+        // }
+        Tenants.Clear();
+        selectedTenant = tenant;
+        Tenants.Add($"{tenant.FirstName} {tenant.LastName}");
+
+        //var firstTenant = filteredTenant.FirstOrDefault();
+
+        searchTenantText = tenant.UnitOrApartmentNumber!;
+        legalcaseDto.ApartmentNumber = tenant.UnitOrApartmentNumber;
+        legalcaseDto.TenantName = tenant.FirstName + " " + tenant.LastName;
+        legalcaseDto.TenantId = tenant.Id;
+        legalcaseDto.TenantRecord = tenant.TenantRecord;
+        legalcaseDto.HasPossession = tenant.HasPossession;
+        legalcaseDto.UnitNumber = tenant.UnitOrApartmentNumber!;
+        legalcaseDto.IsUnitIllegalId = tenant.IsUnitIllegalId;
+        legalcaseDto.DateTenantMoved = tenant.MoveInDate;
+        legalcaseDto.MonthlyRent = tenant.MonthlyRent;
+        legalcaseDto.TenantShare = tenant.TenantShare;
+        legalcaseDto.RentDueEachMonthOrWeekId = tenant.RentDueEachMonthOrWeekId;
+        legalcaseDto.TotalOwed = tenant.TotalRentOwed;
+        legalcaseDto.TenancyTypeId = tenant.TenancyTypeId;
+        legalcaseDto.SocialService = tenant.SocialServices;
+
+
+
+        AdditionalTenantfromDbList = await _additionalTenantService.GetAllAdditionalTenantsAsync(legalcaseDto.TenantId);
+        if (AdditionalTenantfromDbList.Count > 0)
+        {
+            Tenants.AddRange(AdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}").ToList());
+
+        }
+        filteredTenant = null;
+
+        StateHasChanged();
+
+
+    }
+
+    void OnchangeAdditionalTenant(int index)
+    {
+        if (index > 0)
+        {
+            var name = Tenants[index];
+            var splittedname = name.Split(' ');
+            // If cleared, remove from AdditionalTenantList
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                var existing = AdditionalTenantList.ElementAtOrDefault(index - 1);
+                if (existing != null)
+                {
+                    AdditionalTenantList.RemoveAt(index - 1);
+                }
+                return;
+            }
+
+            // Update or add
+            if (index - 1 < AdditionalTenantList.Count)
+            {
+                AdditionalTenantList[index - 1].FirstName = splittedname[0];
+                AdditionalTenantList[index - 1].LastName = splittedname[1];
+            }
+            else
+            {
+                var additional = new AddtionalTenantDto()
+                    {
+                        FirstName = splittedname[0],
+                        LastName = splittedname[1],
+                        TenantId = TenantList.Select(e => e.Id).FirstOrDefault(),
+                        CreatedOn = DateTime.Now,
+                        IsActive = true,
+                        IsDeleted = false, // better to keep false
+                        IsVisible = true
+                    };
+
+                AdditionalTenantList.Add(additional);
+            }
+
+            // Update legalcaseDto
+            if (legalcaseDto.TenantName == null)
+            {
+                legalcaseDto.TenantName = AdditionalTenantList.Select(e => $"{e.FirstName} {e.LastName}").FirstOrDefault() ?? "";
+            }
+        }
+        else
+        {
+            var name = Tenants[index];
+            var splittedname = name.Split(' ');
+            legalcaseDto.TenantName = name;
+
+        }
+
+    }
+    void AddTenant()
+    {
+        Tenants.Add(string.Empty);
+    }
+
+    void AddUnder()
+    {
+        UnderTenants.Add(string.Empty);
+    }
+
+
+
+    void OnchangeAdditionalOccupants(int index)
+    {
+        var name = UnderTenants[index];
+
+        // If cleared, remove from AdditionalTenantList
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            var existing = AdditionalOccupantsList.ElementAtOrDefault(index);
+            if (existing != null)
+            {
+                AdditionalOccupantsList.RemoveAt(index);
+            }
+            return;
+        }
+
+        // Update or add
+        if (index < AdditionalOccupantsList.Count)
+        {
+            AdditionalOccupantsList[index].Name = name;
+        }
+        else
+        {
+            var additional = new AdditionalOccupantDto()
+                {
+                    Name = name,
+                    CreatedOn = DateTime.Now,
+                    IsActive = true,
+                    IsDeleted = false, // better to keep false
+                    IsVisible = true
+                };
+
+            AdditionalOccupantsList.Add(additional);
+        }
+
+
+    }
+
 }

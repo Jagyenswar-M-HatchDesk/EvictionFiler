@@ -41,6 +41,7 @@ namespace EvictionFiler.Application.DTOs
 
         public Guid? BuildingId { get; set; }
         public Guid? BuildingStateId { get; set; }
+        public string? BuildingState { get; set; }
         public string BuildingAddress { get; set; }
         public Guid? RegulationStatusId { get; set; }
         public string RegulationStatusName { get; set; }
@@ -93,10 +94,10 @@ namespace EvictionFiler.Application.DTOs
         public string FirstName { get; set; } = string.Empty;
         public string? LastName { get; set; }
 
-        public string ClientEmail { get; set; } = string.Empty;
+        public string? ClientEmail { get; set; } = string.Empty;
 
         public Guid? ClientTypeId { get; set; } 
-        public string Address1 { get; set; } = string.Empty;
+        public string? Address1 { get; set; } = string.Empty;
         public string? Address2 { get; set; }
         public string? City { get; set; } = string.Empty;
         public Guid? StateId { get; set; }

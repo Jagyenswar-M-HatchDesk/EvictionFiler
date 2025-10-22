@@ -43,6 +43,7 @@ namespace EvictionFiler.Infrastructure.DbContexts
 		public DbSet<RegulationStatus> MstRegulationStatus { get; set; }
 		public DbSet<State> MstStates { get; set; }
 		public DbSet<CaseProgram> MstCaseProgram { get; set; }
+        public DbSet<Courts> Courts { get; set; }
 
         public DbSet<FeesCatalog> FeesCatalogs { get; set; }
         public DbSet<FeesCatalogCourtAppearance> FeesCatalogCourtAppearances { get; set; }

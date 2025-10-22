@@ -25,10 +25,15 @@ namespace EvictionFiler.Application.Services
             await _additionalOccupantsRepository.AddAdditionalOccupant(occupant);
         }
 
-        public async Task<List<AdditionalOccupants>> GetAllAdditionalOccupantsAsync(Guid legalCaseId)
+        public async Task<List<AdditionalOccupantDto>> GetAllAdditionalOccupantsAsync(Guid legalCaseId)
         {
             var occupants = await _additionalOccupantsRepository.GetAllOccupantsByCaseId(legalCaseId);
-            return occupants;
+            return occupants.Select(e => new AdditionalOccupantDto
+            {
+                Id = e.Id,
+                LegalCaseId = legalCaseId,
+                Name = e.Name
+            }).ToList();
         }
 
         public async Task<bool> UpdateAdditionalOccupantsAsync(AdditionalOccupantDto occupant)

@@ -175,6 +175,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     margin: 8px 0
     }
 
+    .btn-tenant:hover {
+    background: #1F365D !important;
+    }
+
     .chip {
     display: flex;
     gap: 8px;
@@ -404,7 +408,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     }
 
     .form-check-input{
-        cursor:pointer;
+    cursor:pointer;
     }
 </style>
 
@@ -449,7 +453,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                 <!-- Case Type Dropdown -->
                                 <div class="col-4">
                                     <label class="form-label required-label">Case Type</label>
-                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.CaseTypeId" style="cursor:pointer;">
+                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.CaseTypeId"  style="cursor:pointer;">
                                         <option  value="">-- Select type --</option>
                                         @foreach (var l in CaseTypeList)
                                         {
@@ -459,7 +463,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <ValidationMessage For="() => legalcaseDto.CaseTypeId" />
                                 </div>
 
-                                <div class="col-5 position-relative">
+                                <div class="col-5 position-relative" @onfocusout="HideClientDropDown">
 
 
                                     <label class="form-label required-label">Client</label>
@@ -511,7 +515,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                 {
                                     <hr class="mt-3" />
 
-                                    <button type="button" class="btn-close position-absolute top-3 end-0 m-2" style="top:145px !important; right:10px !important;"
+                                    @* <button type="button" class="btn-close position-absolute top-3 end-0 m-2" style="top:145px !important; right:10px !important;"
                                     aria-label="Clear"
                                     @onclick="ClearSelectedClient">
                                     </button>
@@ -523,9 +527,13 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         @onclick="ClearSelectedClient"
                                         title="Clear">
                                         </button>
-                                    }
+                                    } *@
 
-                                    <div class=@(selectedClient !=null ? "card p-3": " ")>
+                                    <div class=@(selectedClient !=null ? "card p-3 position-relative": " position-relative")>
+                                        <button type="button" class="btn-close position-absolute top-3 end-0 m-2 mt-0" 
+                                                aria-label="Clear"
+                                                @onclick="ClearSelectedClient">
+                                        </button>
                                         <div class="row">
                                             <div class="col-4">
                                                 <label class="form-label">Client Name</label>
@@ -557,39 +565,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         </div>
                                     </div>
                                 }
-                                <!-- Existing client card -->
-                                <!-- New client -->
-                                @* @if (selectedClient == null && !string.IsNullOrWhiteSpace(searchText))
-								{
-									<hr />
-									<div class="card mt-3 p-3 ">
-										<div class="row">
-											<div class="col-4">
-												<label class="form-label">Client Name</label>
-												<InputText class="form-control" @bind-Value="newClient.FirstName" />
-											</div>
-											<div class="col-4">
-												<label class="form-label">Last Name</label>
-												<InputText class="form-control" @bind-Value="newClient.LastName" />
-											</div>
-											<div class="col-4">
-												<label class="form-label">Client Code</label>next
-												<InputText class="form-control" @bind-Value="newClient.ClientType" />
-											</div>
-										</div>
 
-										<div class="row mt-3">
-											<div class="col-4">
-												<label class="form-label">Email</label>
-												<InputText class="form-control" @bind-Value="newClient.Email" />
-											</div>
-											<div class="col-4">
-												<label class="form-label">Phone</label>
-												<InputText class="form-control" @bind-Value="newClient.Phone" />
-											</div>
-										</div>
-									</div>
-								} *@
                             </div>
 
 
@@ -618,16 +594,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                     <div class="card mb-3">
                         <div class="card-header fw-bold">Landlord Information</div>
                         <div class="card-body ">
-                            @if (showLandlordfields)
-                            {
-                                <button type="button" class="btn-close position-absolute top-3 end-0 m-2"
-                                aria-label="Close"
-                                @onclick="CancelLandlords">
-                                </button>
-                            }
+                            
 
                             <div class="row mt-2 ">
-                                <div class="col-md-6 position-relative">
+                                <div class="col-md-6 position-relative" @onfocusout="HideLandlordsDropDown">
                                     <label class="form-label  required-label">Landlord / Owner Name </label>
                                     @if (showLandlordfields && selectedlandlord == null)
                                     {
@@ -677,7 +647,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                             </div>
                             @if (showLandlordfields)
                             {
-                                <div class=@(selectedlandlord !=null ? "card mt-3 p-3": "mt-3 ")>
+                                <div class=@(selectedlandlord !=null ? "card mt-3 p-3 position-relative": "mt-3 position-relative")>
+                                    @if (showLandlordfields)
+                                    {
+                                        <button type="button" class="btn-close position-absolute top-3 end-0 m-2"
+                                                aria-label="Close"
+                                                @onclick="CancelLandlords">
+                                        </button>
+                                    }
                                     <div class="row mt-3">
                                         <div class="col-md-6">
                                             <label class="form-label  required-label">Contact Person </label>
@@ -725,18 +702,18 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                     <div class="card mb-3">
                         <div class="card-header fw-bold ">Building Information</div>
                         <div class="card-body row ">
-                            @if (showBuildingfields)
+                            @* @if (showBuildingfields)
                             {
                                 <button type="button" class="btn-close position-absolute top-3 end-0 m-2"
                                 aria-label="Close"
                                 @onclick="OnBindBuldingCancel">
                                 </button>
-                            }
+                            } *@
 
                             <div class="row mt-2">
                                 @if (!IsNewBuilding)
                                 {
-                                    <div class="col-md-6 position-relative">
+                                    <div class="col-md-6 position-relative" @onfocusout="HideBuildingDropdown">
                                         <label class="form-label  required-label">Building</label>
                                         <input type="text" class="form-control"
                                         placeholder="Search by Building Address or code..."
@@ -774,7 +751,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                             @if (showBuildingfields)
                             {
-                                <div class=@(selectedbuilding !=null ? "card mt-3 p-3": "mt-3 ")>
+                                <div class=@(selectedbuilding !=null ? "card mt-3 p-3 position-relative": "mt-3 position-relative")>
+                                    @if (showBuildingfields)
+                                    {
+                                        <button type="button" class="btn-close position-absolute top-3 end-0 m-2"
+                                                aria-label="Close"
+                                                @onclick="OnBindBuldingCancel">
+                                        </button>
+                                    }
                                     <div class="row mt-3">
                                         <div class="col-6">
                                             <label class="form-label  required-label">Street Address *</label>
@@ -875,7 +859,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                             <!-- Unit / Apt -->
                             <div class="row">
 
-                                <div class="col-md-6 position-relative">
+                                <div class="col-md-6 position-relative" @onfocusout="HideTenantDropDown">
                                     <label class="form-label  required-label">Unit / Apt # (confirm)</label>
                                     <InputText type="text" class="form-control"
                                     placeholder="Enter Unit / Apt"
@@ -905,14 +889,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         @foreach (var tenant in Tenants.Select((t, i) => new { t, i }))
                                         {
                                             <input class="form-control mb-2"
-                                            placeholder="Tenant Name"
+                                            placeholder="Tenant Full Name"
                                             @bind-value="Tenants[tenant.i]"
                                             @onblur="() => OnchangeAdditionalTenant(tenant.i)" />
                                         }
 
                                     }
 
-                                    <button class="btn btn-sm btn-primary mt-2" @onclick="AddTenant">＋ Add Tenant</button>
+                                    <button class="btn btn-sm btn-primary btn-tenant mt-2" @onclick="AddTenant">＋ Add Tenant</button>
                                 </div>
 
                                 <div class="col-12 mt-3">
@@ -923,13 +907,13 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         @foreach (var undertenant in Undertenants.Select((t, i) => new { t, i }))
                                         {
                                             <input class="form-control mb-2"
-                                            placeholder="Other Occupant Name"
+                                            placeholder="Other Occupant Full Name"
                                             @bind-value="Undertenants[undertenant.i]"
                                             @onblur="() => OnchangeAdditionalOccupants(undertenant.i)" />
                                         }
                                     }
 
-                                    <button class="btn btn-sm btn-primary mt-2" @onclick="AddUnder">＋ Add Undertenant/Occupant</button>
+                                    <button class="btn btn-sm btn-primary btn-tenant mt-2" @onclick="AddUnder">＋ Add Undertenant/Occupant</button>
                                 </div>
                             </div>
 
@@ -1340,7 +1324,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
         ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
 
-        spinnerservice.Hide();
+
 
 
         LandLordTypeList = await LandlordTypeRepository.GetAllLandLordType();
@@ -1365,9 +1349,28 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
             isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
         }
         LandlordList = await _landlordService.GetAllLandLordsAsync();
+        //_editContext.OnFieldChanged += HandleFieldChanged;
+
+        spinnerservice.Hide();
 
     }
 
+    private void HandleCaseTypeChange(ChangeEventArgs e)
+    {
+        if (Guid.TryParse(e.Value?.ToString(), out var id))
+            legalcaseDto.CaseTypeId = id;
+        else
+            legalcaseDto.CaseTypeId = null;
+
+        _editContext.NotifyFieldChanged(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.CaseTypeId)));
+        _editContext.NotifyValidationStateChanged();
+    }
+    private void HandleFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        // Only update validation for the field that changed
+        _editContext.NotifyFieldChanged(e.FieldIdentifier);
+        _editContext.NotifyValidationStateChanged();
+    }
 
     public string UnitNumber { get; set; }
 
@@ -1408,14 +1411,15 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         // Update or add
         if (index < AdditionalTenantList.Count)
         {
-            AdditionalTenantList[index].FirstName = name;
+            AdditionalTenantList[index].FirstName = splittedname.Count() > 0 ? splittedname[0] : string.Empty;
+            AdditionalTenantList[index].LastName = splittedname.Count() > 1 ? splittedname[splittedname.Count() - 1] : string.Empty;
         }
         else
         {
             var additional = new AddtionalTenantDto()
                 {
-                    FirstName = splittedname[0],
-                    LastName = splittedname[1],
+                    FirstName = splittedname.Count() > 0 ? splittedname[0] : string.Empty,
+                    LastName = splittedname.Count() > 1 ? splittedname[splittedname.Count() - 1] : string.Empty,
                     TenantId = TenantList.Select(e => e.Id).FirstOrDefault(),
                     CreatedOn = DateTime.Now,
                     IsActive = true,
@@ -1639,7 +1643,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 break;
             case Step.Building:
                 Require(() => legalcaseDto.Mdr, nameof(legalcaseDto.Mdr), "MDR is required");
-                // Require(() => legalcaseDto.BuildingId, nameof(legalcaseDto.BuildingId), "Select Building");
+                Require(() => legalcaseDto.BuildingId, nameof(legalcaseDto.BuildingId), "Select Building");
                 Require(() => legalcaseDto.Units, nameof(legalcaseDto.Units), "Units required");
                 Require(() => legalcaseDto.BuildingAddress, nameof(legalcaseDto.BuildingAddress), "Address required");
                 Require(() => legalcaseDto.RegulationStatusId, nameof(legalcaseDto.RegulationStatusId), "Select regulation");
@@ -2033,6 +2037,39 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
         }
 
+    }
+
+    async Task HideBuildingDropdown(FocusEventArgs e)
+    {
+        // Small delay to allow click on dropdown item to register before hiding
+        await Task.Delay(200);
+        filteredBuildings.Clear();
+        StateHasChanged();
+    }
+
+
+    async Task HideTenantDropDown(FocusEventArgs e)
+    {
+        // Small delay to allow click on dropdown item to register before hiding
+        await Task.Delay(200);
+        filteredTenant.Clear();
+        StateHasChanged();
+    }
+
+    async Task HideClientDropDown(FocusEventArgs e)
+    {
+        // Small delay to allow click on dropdown item to register before hiding
+        await Task.Delay(200);
+        filteredClients.Clear();
+        StateHasChanged();
+    }
+
+    async Task HideLandlordsDropDown(FocusEventArgs e)
+    {
+        // Small delay to allow click on dropdown item to register before hiding
+        await Task.Delay(200);
+        filteredLandlords.Clear();
+        StateHasChanged();
     }
 
     private int ParseDueDay(string str)

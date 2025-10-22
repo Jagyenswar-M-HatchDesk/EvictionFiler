@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251022105916_AddCourtsTable")]
+    partial class AddCourtsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -434,104 +437,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.ToTable("Clients");
                 });
 
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.FeesCatalog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Category")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Label")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<decimal>("Rate")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<string>("Unit")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("FeesCatalog", "dbo");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.FeesCatalogAttorneyRoster", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BarNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal>("HourlyRate")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal>("TravelWait")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("FeesCatalog_AttorneyRoster", "dbo");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.FeesCatalogCourtAppearance", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("AttorneyHourly")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<string>("County")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal>("CourtAppearance")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<decimal>("PerDiem")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("FeesCatalog_CourtAppearance", "dbo");
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Courts", b =>
                 {
                     b.Property<Guid>("Id")
