@@ -9,6 +9,7 @@ namespace EvictionFiler.Domain.Entities
 	{
 		public string? HTML { get; set; }
 		public string? File { get; set; }
+		public int? BillAmount { get; set; }
 		public Guid? LegalCaseId { get; set; }
 		[ForeignKey("LegalCaseId")]
 		public LegalCase? LegalCase { get; set; }

@@ -2,11 +2,6 @@
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Services
 {
@@ -135,9 +130,9 @@ namespace EvictionFiler.Application.Services
         //        };
         //    }
 
-        public async Task AddCourtAsync(CourtDto courtInfosDto)
+        public async Task<Guid?> AddCourtAsync(CourtDto courtInfosDto)
         {
-            await _courtRepository.AddCourtAsync(courtInfosDto);
+            return await _courtRepository.AddCourtAsync(courtInfosDto);
 
 
 

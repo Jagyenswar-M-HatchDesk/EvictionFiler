@@ -12,7 +12,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
     public interface ICourtRepository
     {
         Task<List<Courts>> GetAllCourtDataAsync();
-        public Task AddCourtAsync(CourtDto courtInfosDto);
+        public Task<Guid?> AddCourtAsync(CourtDto courtInfosDto);
         public Task<Courts> GetCourtByIdAsync(Guid id);
         public Task UpdateCourtAsync(CourtDto dto);
         public Task DeleteCourtAsync(Guid id);
