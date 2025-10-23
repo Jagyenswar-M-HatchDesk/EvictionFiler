@@ -12,7 +12,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
     {
         Task<List<CourtDto>> GetAllCourtDataAsync();
 
-        public Task AddCourtAsync(CourtDto courtInfosDto);
+        public Task<Guid?> AddCourtAsync(CourtDto courtInfosDto);
         public Task<CourtDto> GetCourtByIdAsync(Guid id);
         public Task UpdateCourtAsync(CourtDto dto);
         public Task DeleteCourtAsync(Guid id);

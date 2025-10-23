@@ -302,7 +302,7 @@ namespace EvictionFiler.Application.Services
                     Address1 = caseEntity.Clients.Address1,
                     Address2 = caseEntity.Clients.Address2,
                     City = caseEntity.Clients.City,
-                    StateName = caseEntity.Clients.State !=null ? caseEntity.Clients.State.Name : string.Empty,
+                    StateName = caseEntity.Clients.State != null ? caseEntity.Clients.State.Name : string.Empty,
                     ZipCode = caseEntity.Clients.ZipCode,
 
                     // Landlord
@@ -357,6 +357,17 @@ namespace EvictionFiler.Application.Services
                     //TenantRecord = caseEntity.Tenants?.TenantRecord,
                     //HasPossession = caseEntity.Tenants?.HasPossession,
                     //OtherOccupants = caseEntity.Tenants?.OtherOccupants
+
+                    CourtId = caseEntity.CourtId,
+                    Court = caseEntity.Courts.Court,
+                    CourtAddress = caseEntity.Courts.Address,
+                    CourtConferenceId = caseEntity.Courts.ConferenceId,
+                    CourtCallIn = caseEntity.Courts.CallIn,
+                    CourtNotes = caseEntity.Courts.Notes,
+                    CourtPart = caseEntity.Courts.Part,
+                    CourtPhone = caseEntity.Courts.Phone,
+                    CourtRoomNo = caseEntity.Courts.RoomNo,
+                    CourtVirtualLink = caseEntity.Courts.VirtualLink,
                 };
 
                 return intakeModel;
@@ -530,6 +541,8 @@ namespace EvictionFiler.Application.Services
                 existingCase.GoodCauseApplies = legalCase.GoodCauseApplies;
                 existingCase.CalculatedNoticeLength = legalCase.CalculatedNoticeLength;
                 existingCase.CaseProgramId = legalCase.CaseProgramId;
+
+                existingCase.CourtId = legalCase.CourtId;
 
                 var updated = _repository.UpdateAsync(existingCase);
                 var result = await _unitOfWork.SaveChangesAsync();

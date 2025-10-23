@@ -4,6 +4,7 @@
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.DTOs.CourtDto
 @using EvictionFiler.Application.DTOs.FormTypeDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
@@ -30,6 +31,7 @@
 @inject IBuildingService _buildingService
 @inject IAdditionalTenantService _additionalTenantService
 @inject ITenantService _tenantService
+@inject ICourtService _courtService
 @inject IToastService ToastService
 @inject IJSRuntime JS
 @using Microsoft.AspNetCore.Components.Authorization;
@@ -547,8 +549,8 @@
 <style>
     #activityTable th,
     #activityTable td {
-        white-space: nowrap !important;
-        vertical-align: middle !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
     }
 </style>
 
@@ -714,16 +716,19 @@
 
                     <!-- Court Info -->
                     <div class="card shadow-sm border-0">
-                        <div class="card-header bg-transparent">
-                            <div class="fw-semibold d-flex align-items-center gap-2"><i class="bi bi-hammer"></i> Court Information</div>
+                        <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                            <div class="fw-semibold  gap-2"><i class="bi bi-hammer"></i> Court Information</div>
+                            <button type="button" class="btn btn-sm normal p-1" title="Edit Court" @onclick="ShowCourtModal">
+                                <i class="bi bi-pencil"></i>
+                            </button>
                         </div>
                         <div class="card-body">
                             <div class="row g-3 small" id="courtGrid">
                                 <!-- Populated from DATA.court below if desired; default static boxes: -->
-                                <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Court</div><div class="fw-medium">--</div></div></div>
-                                <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Room #</div><div class="fw-medium">--</div></div></div>
-                                <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Part</div><div class="fw-medium">--</div></div></div>
-                                <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Judge</div><div class="fw-medium">--</div></div></div>
+                                <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Court</div><div class="fw-medium">@(string.IsNullOrWhiteSpace(legalcaseDto.Court) ? "--" : legalcaseDto.Court)</div></div></div>
+                                <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Room #</div><div class="fw-medium">@(string.IsNullOrWhiteSpace(legalcaseDto.CourtRoomNo) ? "--" : legalcaseDto.CourtRoomNo)</div></div></div>
+                                <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Part</div><div class="fw-medium">@(string.IsNullOrWhiteSpace(legalcaseDto.CourtPart) ? "--" : legalcaseDto.CourtPart)</div></div></div>
+                                <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Judge</div><div class="fw-medium">@(string.IsNullOrWhiteSpace(legalcaseDto.Judge) ? "--" : legalcaseDto.Judge)</div></div></div>
                                 <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Index No.</div><div class="fw-medium">--</div></div></div>
                                 <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Marshal</div><div class="fw-medium">--</div></div></div>
                                 <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Docket No.</div><div class="fw-medium">--</div></div></div>
@@ -1307,6 +1312,116 @@
         </div>
     </div>
 
+    <div class="modal fade" id="courtModal" tabindex="-1" aria-labelledby="courtModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="buildingModalLabel">Edit Court Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <EditForm Model="@court">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        <div class="card border-0">
+                            <div class="card-body p-0">
+
+                                <!-- Search + Add Section -->
+                                <div class="row mt-2">
+                                    @if (!IsNewBuilding)
+                                    {
+                                        <div class="col-md-6 position-relative">
+                                            <label class="form-label  required-label">Court</label>
+                                            <input type="text" class="form-control"
+                                            placeholder="Search by court Address / Name / Part / Room"
+                                            @bind-value="searchCourtText"
+                                            @oninput="OnSearchCourtInput" />
+                                            @if (filteredCourts?.Any() == true)
+                                            {
+                                                <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
+                                                    @foreach (var c in filteredCourts)
+                                                    {
+                                                        <li class="dropdown-item" @onclick="() => SelectCourt(c)">
+                                                            @c.Part @c.RoomNo / @c.Court
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
+
+                                        </div>
+                                    }
+
+                                    @if (!showCourtFields)
+                                    {
+                                        <div class="col-md-1 d-flex justify-content-center align-items-end pb-2">
+                                            <span>OR</span>
+                                        </div>
+                                        <div class="col-md-2 d-flex align-items-end">
+                                            <button type="button" class="btn btn-primary base" @onclick="OnBindCourtAfter">+ Add</button>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Add/Edit Fields -->
+                                @if (showCourtFields)
+                                {
+                                    <div class="border rounded-3 p-3 mt-4 position-relative">
+                                        <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                                        aria-label="Clear"
+                                        @onclick="OnBindCourtCancel">
+                                        </button>
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Court </label>
+                                                <InputText class="form-control" @bind-Value="court.Court" placeholder="Enter Court" />
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Room No.</label>
+                                                <InputText class="form-control" @bind-Value="court.RoomNo" placeholder="Enter Room No." />
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Part</label>
+                                                <InputText class="form-control" @bind-Value="court.Part" placeholder="Enter Part" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Index</label>
+                                                <input class="form-control" placeholder="Enter Index" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Judge</label>
+                                                <InputText class="form-control" @bind-Value="court.Judge" placeholder="Enter Judge" />
+                                            </div>
+
+
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Marshal</label>
+                                                <input class="form-control" placeholder="Enter Marshal" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Docket No.</label>
+                                                <input class="form-control" placeholder="Enter Docket No." />
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary base" @onclick="SaveCourtChanges">Save</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         window.showModal = (id) => {
         const modal = new bootstrap.Modal(document.getElementById(id));
@@ -1350,6 +1465,7 @@
             isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
         }
         ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
+        courts = await _courtService.GetAllCourtDataAsync();
         spinnerservice.Show();
         await LoadCaseDetails();
         await LoadCaseForms();
@@ -1442,9 +1558,22 @@
                     SocialService = legalcaseDto.SocialService,
                     LastRentPaid = legalcaseDto.LastRentPaid,
 
+                    CourtId = legalcaseDto.CourtId,
+                    Court = legalcaseDto.Court,
+                    CourtAddress = legalcaseDto.CourtAddress,
+                    CourtConferenceId = legalcaseDto.CourtConferenceId,
+                    CourtCallIn = legalcaseDto.CourtCallIn,
+                    CourtNotes = legalcaseDto.CourtNotes,
+                    CourtPart = legalcaseDto.CourtPart,
+                    CourtPhone = legalcaseDto.CourtPhone,
+                    CourtRoomNo = legalcaseDto.CourtRoomNo,
+                    CourtVirtualLink = legalcaseDto.CourtVirtualLink,
+
                 };
 
         };
+
+
     }
 
     public async Task EditCaseDetail(Guid id)
@@ -1656,8 +1785,10 @@
 
     private EditToBuildingDto editBuildingModel = new();
     private bool showBuildingFields = false;
+    private bool showCourtFields = false;
     private bool IsNewBuilding = false;
     private string searchBuildingText;
+    private string searchCourtText;
     private string searchTenantText;
     private List<EditToBuildingDto> filteredBuildings = new();
     private List<EditToTenantDto> filteredTenant = new();
@@ -1672,6 +1803,10 @@
     private List<AdditionalOccupantDto> AdditionalOccupantsList = new();
     public EditToTenantDto selectedTenant = new EditToTenantDto();
     public EditToTenantDto ViewTenant = new EditToTenantDto();
+    public CourtDto court = new CourtDto();
+    public List<CourtDto> courts = new List<CourtDto>();
+    public List<CourtDto> filteredCourts = new List<CourtDto>();
+
 
     private async Task ShowBuildingModal()
     {
@@ -1684,6 +1819,22 @@
         searchBuildingText = editBuildingModel.BuildingCode;
         showBuildingFields = true;
         await JS.InvokeVoidAsync("showModal", "buildingModal");
+    }
+    private async Task ShowCourtModal()
+    {
+        if(legalcaseDto.CourtId == Guid.Empty)
+        {
+            showCourtFields = false;
+            searchCourtText = "";
+        }
+        else
+        {
+            court = await _courtService.GetCourtByIdAsync(legalcaseDto.CourtId.Value);
+            searchCourtText = court.Court ?? court.RoomNo;
+            showCourtFields = true;
+        }
+
+        await JS.InvokeVoidAsync("showModal", "courtModal");
     }
 
     // Search handler
@@ -1705,6 +1856,24 @@
             filteredBuildings.Clear();
         }
     }
+    private async Task OnSearchCourtInput(ChangeEventArgs e)
+    {
+        searchCourtText = e.Value?.ToString() ?? "";
+        if (!string.IsNullOrWhiteSpace(searchCourtText))
+        {
+            filteredCourts = courts
+                .Where(c => c.Judge.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase)
+                            || c.RoomNo.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase)
+                            || c.Part.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase)
+                            || c.Court.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase)
+                            || c.Address.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+        else
+        {
+            filteredCourts.Clear();
+        }
+    }
 
     // Select building from list
     private void SelectBuilding(EditToBuildingDto selected)
@@ -1724,12 +1893,25 @@
         IsNewBuilding = false;
         legalcaseDto.BuildingId = selected.Id;
     }
+    private void SelectCourt(CourtDto selected)
+    {
+        court = selected;
+        filteredCourts.Clear();
+        searchCourtText = selected.Court ?? selected.RoomNo;
+        showCourtFields = true;
 
+        legalcaseDto.CourtId = selected.Id;
+    }
     // Toggle "Add New" section
     private void OnBindBuildingAfter()
     {
         showBuildingFields = true;
         IsNewBuilding = true;
+    }
+    private void OnBindCourtAfter()
+    {
+        showCourtFields = true;
+
     }
 
     // Cancel "Add New"
@@ -1739,6 +1921,12 @@
         IsNewBuilding = false;
         searchBuildingText = null;
         editBuildingModel = new EditToBuildingDto();
+    }
+    private void OnBindCourtCancel()
+    {
+        showCourtFields = false;
+        searchCourtText = null;
+        court = new CourtDto();
     }
 
     private void OnBindTenantCancel()
@@ -2067,6 +2255,80 @@
         else
         {
             ToastService.ShowError("Failed to update Legal Case details.");
+        }
+        // Map edited fields
+
+
+        spinnerservice.Hide();
+    }
+
+    private async Task SaveCourtChanges()
+    {
+        spinnerservice.Show();
+
+        var addorupdate = false;
+        if (court.Id == null || court.Id == Guid.Empty)
+        {
+            var newCourt = new CourtDto()
+                {
+                    Address = court.Address,
+                    Part = court.Part,
+                    RoomNo = court.RoomNo,
+                    Judge = court.Judge,
+                    Court = court.Court,
+                    ConferenceId = court.ConferenceId,
+                    CallIn = court.CallIn,
+                    Phone = court.Phone,
+                    VirtualLink = court.VirtualLink,
+                    Notes = court.Notes
+                };
+
+            var CourtId = await _courtService.AddCourtAsync(newCourt);
+            addorupdate = true;
+            legalcaseDto.CourtId = CourtId;
+
+        }
+        else
+        {
+            if (editBuildingModel.Id != null)
+            {
+
+                var updateCourt = new CourtDto()
+                    {
+                        Address = court.Address,
+                        Part = court.Part,
+                        RoomNo = court.RoomNo,
+                        Judge = court.Judge,
+                        Court = court.Court,
+                        ConferenceId = court.ConferenceId,
+                        CallIn = court.CallIn,
+                        Phone = court.Phone,
+                        VirtualLink = court.VirtualLink,
+                        Notes = court.Notes
+                    };
+
+                await _courtService.UpdateCourtAsync(updateCourt);
+                addorupdate = true;
+            }
+        }
+
+        if (addorupdate)
+        {
+            
+
+            var success = await _service.UpdateCaseAsync(legalcaseDto);
+
+            if (success.HasValue)
+            {
+                ToastService.ShowSuccess("Court details updated successfully!");
+                await JS.InvokeVoidAsync("hideModal", "courtModal");
+
+                await LoadCaseDetails();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to update Court details.");
+            }
         }
         // Map edited fields
 

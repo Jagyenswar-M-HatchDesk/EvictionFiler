@@ -13,6 +13,7 @@ namespace EvictionFiler.Application.DTOs
         public Guid Id { get; set; }
         //[Required(ErrorMessage = "Client is required")]
         public Guid? ClientId { get; set; }
+        public Guid? CourtId { get; set; }
 
         public string Selectedclient { get; set; }
         public string Status { get; set; }
@@ -78,7 +79,7 @@ namespace EvictionFiler.Application.DTOs
         public bool? OralAgreeMent { get; set; }
         public bool? GoodCauseApplies { get; set; } = false;
 
-        public int? CalculatedNoticeLength { get; set; } 
+        public int? CalculatedNoticeLength { get; set; }
         public double? MonthlyRent { get; set; }
         public double? TotalOwed { get; set; }
         public string Erap { get; set; } = "No";
@@ -96,7 +97,7 @@ namespace EvictionFiler.Application.DTOs
 
         public string? ClientEmail { get; set; } = string.Empty;
 
-        public Guid? ClientTypeId { get; set; } 
+        public Guid? ClientTypeId { get; set; }
         public string? Address1 { get; set; } = string.Empty;
         public string? Address2 { get; set; }
         public string? City { get; set; } = string.Empty;
@@ -104,5 +105,18 @@ namespace EvictionFiler.Application.DTOs
         public string? StateName { get; set; }
         public string? ZipCode { get; set; } = string.Empty;
         public string? ClientPhone { get; set; }
+
+        public string Court { get; set; } = string.Empty;
+        
+        public string CourtAddress { get; set; } = string.Empty;
+        public string CourtPhone { get; set; } = string.Empty;
+
+        public string CourtNotes { get; set; } = string.Empty;
+        public string CourtPart { get; set; } = string.Empty;
+        public string CourtRoomNo { get; set; } = string.Empty;
+        public string CourtVirtualLink { get; set; } = string.Empty;
+        public string CourtCallIn { get; set; } = string.Empty;
+        public string CourtConferenceId { get; set; } = string.Empty;
+        public string Judge { get; set; } = string.Empty;
     }
 }

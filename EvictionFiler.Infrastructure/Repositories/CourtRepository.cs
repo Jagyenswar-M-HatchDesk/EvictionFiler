@@ -54,7 +54,7 @@ namespace EvictionFiler.Infrastructure.Repositories
             };
         }
 
-        public async Task AddCourtAsync(CourtDto courtInfosDto)
+        public async Task<Guid?> AddCourtAsync(CourtDto courtInfosDto)
         {
             var entity = new Courts
             {
@@ -71,8 +71,11 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Part = courtInfosDto.Part,
             };
 
-            await _mainDbContext.Courts.AddAsync(entity);
-            await _mainDbContext.SaveChangesAsync();
+           var court = _mainDbContext.Courts.Add(entity);
+            var result = await _mainDbContext.SaveChangesAsync();
+            if (result > 0) return entity.Id;
+
+            return null;
         }
         public async Task<Courts> GetCourtByIdAsync(Guid id)
         {

@@ -110,21 +110,25 @@ namespace EvictionFiler.Domain.Entities
 		[NotMapped]
 		public string? CreatedByName { get; set; }
 
-        public string? UnitOrApartmentNumber { get; set; }
+		public string? UnitOrApartmentNumber { get; set; }
 
 
-        public DateOnly? LeaseEnd { get; set; }
-        public DateOnly? DateNoticeServed { get; set; }
-        public DateOnly? ExpirationDate { get; set; }
-        public string? PredicateNotice { get; set; }
-        public string? SocialService { get; set; }
-        public string? LastRentPaid { get; set; }
-        public string? Reference { get; set; }
+		public DateOnly? LeaseEnd { get; set; }
+		public DateOnly? DateNoticeServed { get; set; }
+		public DateOnly? ExpirationDate { get; set; }
+		public string? PredicateNotice { get; set; }
+		public string? SocialService { get; set; }
+		public string? LastRentPaid { get; set; }
+		public string? Reference { get; set; }
 
-        public bool? OralAgreeMent { get; set; }
-        public bool? GoodCauseApplies { get; set; } = null;
+		public bool? OralAgreeMent { get; set; }
+		public bool? GoodCauseApplies { get; set; } = null;
 
-        public int? CalculatedNoticeLength { get; set; }
-        public Guid? CaseProgramId { get; set; }
+		public int? CalculatedNoticeLength { get; set; }
+		public Guid? CaseProgramId { get; set; }
+
+        public Guid? CourtId { get; set; }
+        [ForeignKey("CourtId")]
+        public Courts? Courts { get; set; }
     }
 }
