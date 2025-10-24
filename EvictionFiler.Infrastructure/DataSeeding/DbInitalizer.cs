@@ -31,7 +31,10 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				await SeedReasonHolder(context);
 				await SeedTenancyTypes(context);
 				await SeedIsUnitIlligal(context);
-				await context.SaveChangesAsync();
+				await SeedCaseprograms(context);
+				await SeedClientRoles(context);
+
+                await context.SaveChangesAsync();
 			}
 			catch (Exception ex)
 			{
@@ -51,6 +54,30 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				}
 			}
 		}
+
+		private static async Task SeedCaseprograms(MainDbContext context)
+		{
+			var casetypes = InitialDataGenerator.GetCasePrograms();
+			foreach (var type in casetypes)
+			{
+				if (context.MstCaseProgram.FirstOrDefault(d => d.Name == type.Name) == null)
+				{
+					await context.MstCaseProgram.AddAsync(type);
+				}
+			}
+		}
+
+        private static async Task SeedClientRoles(MainDbContext context)
+        {
+            var casetypes = InitialDataGenerator.GetClientRoles();
+            foreach (var type in casetypes)
+            {
+                if (context.MstClientRoles.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstClientRoles.AddAsync(type);
+                }
+            }
+        }
 
         private static async Task SeedDateRent(MainDbContext context)
         {

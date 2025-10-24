@@ -27,9 +27,32 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             {
                 new CaseType() { Name = "Holdover", CreatedOn = now },
                 new CaseType() { Name = "NonPayment", CreatedOn = now },
+                new CaseType() { Name = "HPD", CreatedOn = now },
+                new CaseType() { Name = "Per Diem", CreatedOn = now },
             };
         }
 
+        public static IEnumerable<ClientRole> GetClientRoles()
+        {
+            var now = DateTime.UtcNow;
+            return new List<ClientRole>
+            {
+                new ClientRole() { Name = "Attorney", Description="Represents the legal counsel for the landlord or client", CreatedOn = now, CreatedBy=Guid.Parse("84722E9D-806C-4F49-94D7-A55DE8D2D76E") },
+                new ClientRole() { Name = "Managing Agent", Description="Represents the property management agent handling the case", CreatedOn = now, CreatedBy=Guid.Parse("84722E9D-806C-4F49-94D7-A55DE8D2D76E") },
+                new ClientRole() { Name = "Owner/Landlord", Description="Represents the property owner or landlord", CreatedOn = now, CreatedBy=Guid.Parse("84722E9D-806C-4F49-94D7-A55DE8D2D76E") },
+            };
+        }
+
+
+        public static IEnumerable<CaseProgram> GetCasePrograms()
+        {
+            var now = DateTime.UtcNow;
+            return new List<CaseProgram>
+            {
+                new CaseProgram() { Name = "Section 8",  CreatedOn = now, CreatedBy=Guid.Parse("84722E9D-806C-4F49-94D7-A55DE8D2D76E") },
+                new CaseProgram() { Name = "City FHEPS", CreatedOn = now, CreatedBy=Guid.Parse("84722E9D-806C-4F49-94D7-A55DE8D2D76E") },
+            };
+        }
         public static IEnumerable<RenewalStatus> GetRenewalStatus()
         {
             var now = DateTime.UtcNow;

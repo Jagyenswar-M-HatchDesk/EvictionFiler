@@ -14,7 +14,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
         // Task AddAsync(FeesCatalogAttorneyRoster entity);
         Task<int> AddAsync(FeesCatalogAttorneyRoster entity);
 
-        Task UpdateAsync(FeesCatalogAttorneyRoster entity);
+        Task<bool> UpdateAsync(FeesCatalogAttorneyRoster entity);
         Task DeleteAsync(int id);
     }
 }

@@ -1,9 +1,12 @@
 ﻿@page "/maintenance/feesCatalog"
+@using Blazored.Toast.Services
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Application.Interfaces.IServices.Master
 @using DomainMaster = EvictionFiler.Domain.Entities.Master
 @using EvictionFiler.Domain.Entities
 @using EvictionFiler.Client.SpinnerService
+@inject IToastService ToastService
+
 
 @inject SpinnerService SpinnerService
 
@@ -79,7 +82,7 @@
                                         @* Role Dropdown *@
                                         @if (isRoleDropdown)
                                         {
-                                            <select class="form-select" @bind="row.Values[column]" >
+                                            <select class="form-select" @bind="row.Values[column]">
                                                 @foreach (var r in RoleOptions)
                                                 {
                                                     <option value="@r">@r</option>
@@ -197,10 +200,11 @@
     private List<string> Units = new() { "item", "hour", "flat", "page" };
     private List<string> RoleOptions = new() { "Partner", "Associate", "Per Diem", "Of Counsel", "Paralegal" };
 
-    protected override async Task OnInitializedAsync() { 
+    protected override async Task OnInitializedAsync()
+    {
         SpinnerService.Show();
         await Task.Delay(200);
-        
+
         await LoadDataForSelectedCategory();
         SpinnerService.Hide();
     }
@@ -324,27 +328,27 @@
     }
 
     private async Task AddRowWithSave()
-{
-    try
     {
-        SpinnerService.Show(); 
-
-        if (FeeRows.Any())
+        try
         {
-            var lastRow = FeeRows.Last();
-            await SaveRow(lastRow);
+            SpinnerService.Show();
+
+            if (FeeRows.Any())
+            {
+                var lastRow = FeeRows.Last();
+                await SaveRow(lastRow);
+            }
+
+            await Task.Delay(200);
+
+            AddBlankRow();
+            StateHasChanged();
         }
-
-        await Task.Delay(200); 
-
-        AddBlankRow();
-        StateHasChanged();
+        finally
+        {
+            SpinnerService.Hide();
+        }
     }
-    finally
-    {
-        SpinnerService.Hide(); 
-    }
-}
 
     private async Task OnRowChanged(FeeRow row)
         => await SaveRow(row);
@@ -391,125 +395,176 @@
     }
 
 
-private async Task SaveRow(FeeRow row)
-{
-    int filledCount = row.Values.Count(v => !string.IsNullOrWhiteSpace(v.Value))
-                    + row.NumberValues.Count(n => n.Value > 0);
-
-    // If row is empty and exists in DB, delete it
-    if (filledCount == 0 && row.EntityId > 0)
+    private async Task SaveRow(FeeRow row)
     {
-        await DeleteEntityAsync(row);
-        FeeRows.Remove(row);
-        StateHasChanged();
-        return;
-    }
+        int filledCount = row.Values.Count(v => !string.IsNullOrWhiteSpace(v.Value))
+                        + row.NumberValues.Count(n => n.Value > 0);
 
-    // Skip saving rows with insufficient data
-    if (filledCount < 4) return;
-
-    try
-    {
-        switch (SelectedCategory)
+        // If row is empty and exists in DB, delete it
+        if (filledCount == 0 && row.EntityId > 0)
         {
-            case "Attorney Billing — Roster & Defaults":
-                if (row.EntityId == 0)
-                {
-                    // Add new
-                    var att = new FeesCatalogAttorneyRoster
-                    {
-                        Name = row.Values["Name"],
-                        Role = row.Values["Role"],
-                        BarNumber = row.Values["Bar #"],
-                        Email = row.Values["Email"],
-                        HourlyRate = row.NumberValues.GetValueOrDefault("Hourly Rate", 0m),
-                        TravelWait = row.NumberValues.GetValueOrDefault("Travel/Wait (opt.)", 0m)
-                    };
-                    await AttorneyService.AddAsync(att);
-                    row.EntityId = att.Id;
-                }
-                else
-                {
-                    // Update existing: fetch tracked instance first
-                    var existing = AttorneyFees.FirstOrDefault(f => f.Id == row.EntityId);
-                    if (existing != null)
-                    {
-                        existing.Name = row.Values["Name"];
-                        existing.Role = row.Values["Role"];
-                        existing.BarNumber = row.Values["Bar #"];
-                        existing.Email = row.Values["Email"];
-                        existing.HourlyRate = row.NumberValues.GetValueOrDefault("Hourly Rate", 0m);
-                        existing.TravelWait = row.NumberValues.GetValueOrDefault("Travel/Wait (opt.)", 0m);
+            await DeleteEntityAsync(row);
+            FeeRows.Remove(row);
+            StateHasChanged();
+            return;
+        }
 
-                        await AttorneyService.UpdateAsync(existing);
+        // Skip saving rows with insufficient data
+        if (filledCount < 4) return;
+
+        try
+        {
+            switch (SelectedCategory)
+            {
+                case "Attorney Billing — Roster & Defaults":
+                    if (row.EntityId == 0)
+                    {
+                        // Add new
+                        var att = new FeesCatalogAttorneyRoster
+                            {
+                                Name = row.Values["Name"],
+                                Role = row.Values["Role"],
+                                BarNumber = row.Values["Bar #"],
+                                Email = row.Values["Email"],
+                                HourlyRate = row.NumberValues.GetValueOrDefault("Hourly Rate", 0m),
+                                TravelWait = row.NumberValues.GetValueOrDefault("Travel/Wait (opt.)", 0m)
+                            };
+                        var newatt = await AttorneyService.AddAsync(att);
+                        if (newatt.HasValue)
+                        {
+                            ToastService.ShowSuccess("Attorney details created successfully!");
+                            row.EntityId = att.Id;
+
+                        }
+                        else
+                        {
+                            ToastService.ShowError("Failed to create Attorney Record!");
+
+                        }
                     }
-                }
-                break;
-
-            case "Court Appearance & Attorney Fees by County":
-                if (row.EntityId == 0)
-                {
-                    var court = new FeesCatalogCourtAppearance
+                    else
                     {
-                        County = row.Values["County"],
-                        AttorneyHourly = row.NumberValues.GetValueOrDefault("Attorney Hourly", 0m),
-                        CourtAppearance = row.NumberValues.GetValueOrDefault("Court Appearance", 0m),
-                        PerDiem = row.NumberValues.GetValueOrDefault("Per Diem", 0m)
-                    };
-                    await CourtService.AddAsync(court);
-                    row.EntityId = court.Id;
-                }
-                else
-                {
-                    var existing = CourtFees.FirstOrDefault(f => f.Id == row.EntityId);
-                    if (existing != null)
-                    {
-                        existing.County = row.Values["County"];
-                        existing.AttorneyHourly = row.NumberValues.GetValueOrDefault("Attorney Hourly", 0m);
-                        existing.CourtAppearance = row.NumberValues.GetValueOrDefault("Court Appearance", 0m);
-                        existing.PerDiem = row.NumberValues.GetValueOrDefault("Per Diem", 0m);
+                        // Update existing: fetch tracked instance first
+                        var existing = AttorneyFees.FirstOrDefault(f => f.Id == row.EntityId);
+                        if (existing != null)
+                        {
+                            existing.Name = row.Values["Name"];
+                            existing.Role = row.Values["Role"];
+                            existing.BarNumber = row.Values["Bar #"];
+                            existing.Email = row.Values["Email"];
+                            existing.HourlyRate = row.NumberValues.GetValueOrDefault("Hourly Rate", 0m);
+                            existing.TravelWait = row.NumberValues.GetValueOrDefault("Travel/Wait (opt.)", 0m);
 
-                        await CourtService.UpdateAsync(existing);
+                            var update =await AttorneyService.UpdateAsync(existing);
+                            if(update)
+                            {
+                                ToastService.ShowSuccess("Attorney details updated successfully!");
+                            }
+                            else
+                            {
+                                ToastService.ShowError("Failed to update Attorney Record!");
+                            }
+
+                        }
                     }
-                }
-                break;
+                    break;
 
-            default: // General Fees
-                if (row.EntityId == 0)
-                {
-                    var gen = new FeesCatalog
+                case "Court Appearance & Attorney Fees by County":
+                    if (row.EntityId == 0)
                     {
-                        Code = row.Values["Code"],
-                        Label = row.Values["Label"],
-                        Unit = row.Values["Unit"],
-                        Rate = row.NumberValues.GetValueOrDefault("Rate (USD)", 0m),
-                        Category = SelectedCategory
-                    };
-                    await FeesCatalogService.AddAsync(gen);
-                    row.EntityId = gen.Id;
-                }
-                else
-                {
-                    var existing = GeneralFees.FirstOrDefault(f => f.Id == row.EntityId);
-                    if (existing != null)
-                    {
-                        existing.Code = row.Values["Code"];
-                        existing.Label = row.Values["Label"];
-                        existing.Unit = row.Values["Unit"];
-                        existing.Rate = row.NumberValues.GetValueOrDefault("Rate (USD)", 0m);
-                        existing.Category = SelectedCategory;
-
-                        await FeesCatalogService.UpdateAsync(existing);
+                        var court = new FeesCatalogCourtAppearance
+                            {
+                                County = row.Values["County"],
+                                AttorneyHourly = row.NumberValues.GetValueOrDefault("Attorney Hourly", 0m),
+                                CourtAppearance = row.NumberValues.GetValueOrDefault("Court Appearance", 0m),
+                                PerDiem = row.NumberValues.GetValueOrDefault("Per Diem", 0m)
+                            };
+                        var newcourt = await CourtService.AddAsync(court);
+                        if(newcourt.HasValue)
+                        {
+                            ToastService.ShowSuccess("Court Appearance details created successfully!");
+                            row.EntityId = court.Id;
+                        }
+                        else
+                        {
+                            ToastService.ShowError("Failed to create Court Appreance Record!");
+                        }
                     }
-                }
-                break;
+                    else
+                    {
+                        var existing = CourtFees.FirstOrDefault(f => f.Id == row.EntityId);
+                        if (existing != null)
+                        {
+                            existing.County = row.Values["County"];
+                            existing.AttorneyHourly = row.NumberValues.GetValueOrDefault("Attorney Hourly", 0m);
+                            existing.CourtAppearance = row.NumberValues.GetValueOrDefault("Court Appearance", 0m);
+                            existing.PerDiem = row.NumberValues.GetValueOrDefault("Per Diem", 0m);
+
+                            var update =await CourtService.UpdateAsync(existing);
+                            if(update)
+                            {
+                                ToastService.ShowSuccess("Court Appreance details updated successfully!");
+                            }
+                            else
+                            {
+                                ToastService.ShowError("Failed to update Court Appreance Record!");
+                            }
+                        }
+                    }
+                    break;
+
+                default: // General Fees
+                    if (row.EntityId == 0)
+                    {
+                        var gen = new FeesCatalog
+                            {
+                                Code = row.Values["Code"],
+                                Label = row.Values["Label"],
+                                Unit = row.Values["Unit"],
+                                Rate = row.NumberValues.GetValueOrDefault("Rate (USD)", 0m),
+                                Category = SelectedCategory
+                            };
+                        var newgen =await FeesCatalogService.AddAsync(gen);
+                        if(newgen.HasValue)
+                        {
+                            ToastService.ShowSuccess("Fees details created successfully!");
+                            row.EntityId = gen.Id;
+                        }
+                        else{
+                            ToastService.ShowError("Failed to create Fees Record!");
+                        }
+                        
+                    }
+                    else
+                    {
+                        var existing = GeneralFees.FirstOrDefault(f => f.Id == row.EntityId);
+                        if (existing != null)
+                        {
+                            existing.Code = row.Values["Code"];
+                            existing.Label = row.Values["Label"];
+                            existing.Unit = row.Values["Unit"];
+                            existing.Rate = row.NumberValues.GetValueOrDefault("Rate (USD)", 0m);
+                            existing.Category = SelectedCategory;
+
+                            var update =await FeesCatalogService.UpdateAsync(existing);
+                            if (update)
+                            {
+                                ToastService.ShowSuccess("Fees details updated successfully!");
+                            }
+                            else
+                            {
+                                ToastService.ShowError("Failed to update Fees Record!");
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving row: {ex.Message}");
         }
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error saving row: {ex.Message}");
-    }
-}
 
 
     private async Task DeleteEntityAsync(FeeRow row)
@@ -535,43 +590,43 @@ private async Task SaveRow(FeeRow row)
         }
     }
 
-   private async Task RemoveRow(FeeRow row)
+    private async Task RemoveRow(FeeRow row)
     {
-    try
-      {
-        SpinnerService.Show(); 
-        await Task.Delay(200); 
+        try
+        {
+            SpinnerService.Show();
+            await Task.Delay(200);
 
-        if (row.EntityId > 0)
-            await DeleteEntityAsync(row);
+            if (row.EntityId > 0)
+                await DeleteEntityAsync(row);
 
-        FeeRows.Remove(row);
-        StateHasChanged();
-    }
-    finally
-    {
-        SpinnerService.Hide(); 
-    }
+            FeeRows.Remove(row);
+            StateHasChanged();
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
     }
 
 
     private async Task SaveChanges()
-{
-    try
     {
-        SpinnerService.Show(); 
-        await Task.Delay(200); 
-
-        foreach (var row in FeeRows)
+        try
         {
-            await SaveRow(row);
+            SpinnerService.Show();
+            await Task.Delay(200);
+
+            foreach (var row in FeeRows)
+            {
+                await SaveRow(row);
+            }
+        }
+        finally
+        {
+            SpinnerService.Hide();
         }
     }
-    finally
-    {
-        SpinnerService.Hide(); 
-    }
-}
 
 
     public class FeeRow

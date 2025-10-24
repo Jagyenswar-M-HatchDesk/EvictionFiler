@@ -24,12 +24,14 @@ namespace EvictionFiler.Application.Services.Master
         public async Task<FeesCatalogCourtAppearance?> GetByIdAsync(int id) =>
             await _repository.GetByIdAsync(id);
 
-        public async Task AddAsync(FeesCatalogCourtAppearance entity) =>
-            await _repository.AddAsync(entity);
-
-        public async Task UpdateAsync(FeesCatalogCourtAppearance entity) =>
-            await _repository.UpdateAsync(entity);
-
+        public async Task<int?> AddAsync(FeesCatalogCourtAppearance entity)
+        {
+            return await _repository.AddAsync(entity);
+        }
+        public async Task<bool> UpdateAsync(FeesCatalogCourtAppearance entity)
+        { 
+            return await _repository.UpdateAsync(entity);
+        }
         public async Task DeleteAsync(int id) =>
             await _repository.DeleteAsync(id);
     }

@@ -23,18 +23,19 @@ namespace EvictionFiler.Application.Services.Master
         public async Task<FeesCatalogAttorneyRoster?> GetByIdAsync(int id) =>
             await _repository.GetByIdAsync(id);
 
-        public async Task AddAsync(FeesCatalogAttorneyRoster entity) =>
-            await _repository.AddAsync(entity);
-
+        public async Task<int?> AddAsync(FeesCatalogAttorneyRoster entity)
+        {
+            return await _repository.AddAsync(entity);
+        }
         //public async Task<int> AddAsync(FeesCatalogAttorneyRoster entity)
         //{
         //    return await _repository.AddAsync(entity);
         //}
 
-        public async Task UpdateAsync(FeesCatalogAttorneyRoster entity)
+        public async Task<bool> UpdateAsync(FeesCatalogAttorneyRoster entity)
         {
 
-            await _repository.UpdateAsync(entity);
+            return await _repository.UpdateAsync(entity);
         }
 
         public async Task DeleteAsync(int id) =>

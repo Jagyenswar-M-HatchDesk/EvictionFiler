@@ -81,7 +81,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
             return entity.Id;
         }
-        public async Task UpdateAsync(FeesCatalogAttorneyRoster entity)
+        public async Task<bool> UpdateAsync(FeesCatalogAttorneyRoster entity)
         {
             var existing = await _context.FeesCatalogAttorneyRosters
                 .AsNoTracking()
@@ -93,6 +93,7 @@ namespace EvictionFiler.Infrastructure.Repositories
             // Attach and mark modified
             _context.Entry(entity).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task DeleteAsync(int id)

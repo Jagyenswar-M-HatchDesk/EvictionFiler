@@ -12,8 +12,8 @@ namespace EvictionFiler.Application.Services.Master
         public Task<List<FeesCatalog>> GetAllAsync(string Category) => _repository.GetAllAsync(Category);
         // Fixed: Ensure it calls the repository's GetByIdAsync
         public Task<FeesCatalog?> GetByIdAsync(int id) => _repository.GetByIdAsync(id);
-        public Task AddAsync(FeesCatalog entity) => _repository.AddAsync(entity);
-        public Task UpdateAsync(FeesCatalog entity) => _repository.UpdateAsync(entity);
+        public Task<int?> AddAsync(FeesCatalog entity) { return _repository.AddAsync(entity); }
+        public Task<bool> UpdateAsync(FeesCatalog entity) { return _repository.UpdateAsync(entity); }
         public Task DeleteAsync(int id) => _repository.DeleteAsync(id);
     }
 }

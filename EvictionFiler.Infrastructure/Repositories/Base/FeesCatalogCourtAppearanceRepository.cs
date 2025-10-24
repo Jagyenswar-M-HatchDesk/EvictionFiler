@@ -23,16 +23,18 @@ namespace EvictionFiler.Infrastructure.Repositories
         public async Task<List<FeesCatalogCourtAppearance>> GetAllAsync() =>
             await _context.FeesCatalogCourtAppearances.ToListAsync();
 
-        public async Task AddAsync(FeesCatalogCourtAppearance entity)
+        public async Task<int?> AddAsync(FeesCatalogCourtAppearance entity)
         {
             _context.FeesCatalogCourtAppearances.Add(entity);
             await _context.SaveChangesAsync();
+            return entity.Id;
         }
 
-        public async Task UpdateAsync(FeesCatalogCourtAppearance entity)
+        public async Task<bool> UpdateAsync(FeesCatalogCourtAppearance entity)
         {
             _context.FeesCatalogCourtAppearances.Update(entity);
             await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task DeleteAsync(int id)

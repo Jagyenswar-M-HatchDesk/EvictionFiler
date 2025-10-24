@@ -8,8 +8,8 @@ namespace EvictionFiler.Application.Interfaces.IServices
     {
         Task<List<FeesCatalogCourtAppearance>> GetAllAsync();
         Task<FeesCatalogCourtAppearance?> GetByIdAsync(int id);
-        Task AddAsync(FeesCatalogCourtAppearance entity);
-        Task UpdateAsync(FeesCatalogCourtAppearance entity);
+        Task<int?> AddAsync(FeesCatalogCourtAppearance entity);
+        Task<bool> UpdateAsync(FeesCatalogCourtAppearance entity);
         Task DeleteAsync(int id);
     }
 }

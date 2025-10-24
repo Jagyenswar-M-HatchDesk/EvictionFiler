@@ -10,10 +10,10 @@ namespace EvictionFiler.Application.Interfaces.IServices.Master
     {
         Task<List<FeesCatalogAttorneyRoster>> GetAllAsync();
         Task<FeesCatalogAttorneyRoster?> GetByIdAsync(int id);
-        Task AddAsync(FeesCatalogAttorneyRoster entity);
+        Task<int?> AddAsync(FeesCatalogAttorneyRoster entity);
         //  Task<int> AddAsync(FeesCatalogAttorneyRoster entity);
 
-        Task UpdateAsync(FeesCatalogAttorneyRoster entity);
+        Task<bool> UpdateAsync(FeesCatalogAttorneyRoster entity);
         Task DeleteAsync(int id);
     }
 }
