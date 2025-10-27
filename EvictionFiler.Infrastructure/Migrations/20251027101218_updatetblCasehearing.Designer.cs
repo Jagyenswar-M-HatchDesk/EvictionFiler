@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251027101218_updatetblCasehearing")]
+    partial class updatetblCasehearing
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -351,19 +354,7 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<string>("Caption")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("CaseStatusId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CaseTypeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CountyId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("CourtId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CourtPartId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("CreatedBy")
@@ -393,14 +384,8 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Judge")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid?>("LegalCaseId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("RoomNo")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
@@ -410,15 +395,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CaseStatusId");
-
-                    b.HasIndex("CaseTypeId");
-
-                    b.HasIndex("CountyId");
-
                     b.HasIndex("CourtId");
-
-                    b.HasIndex("CourtPartId");
 
                     b.HasIndex("LegalCaseId");
 
@@ -811,9 +788,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<string>("AttrneyContactInfo")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal?>("BillAmount")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid?>("BuildingId")
                         .HasColumnType("uniqueidentifier");
@@ -2514,37 +2488,13 @@ namespace EvictionFiler.Infrastructure.Migrations
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseHearing", b =>
                 {
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.CaseStatus", "CaseStatus")
-                        .WithMany()
-                        .HasForeignKey("CaseStatusId");
-
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.CaseType", "CaseTypes")
-                        .WithMany()
-                        .HasForeignKey("CaseTypeId");
-
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.County", "Counties")
-                        .WithMany()
-                        .HasForeignKey("CountyId");
-
                     b.HasOne("EvictionFiler.Domain.Entities.Courts", "Courts")
                         .WithMany()
                         .HasForeignKey("CourtId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.CourtPart", "CourtParts")
-                        .WithMany()
-                        .HasForeignKey("CourtPartId");
-
                     b.HasOne("EvictionFiler.Domain.Entities.LegalCase", "LegalCase")
                         .WithMany()
                         .HasForeignKey("LegalCaseId");
-
-                    b.Navigation("CaseStatus");
-
-                    b.Navigation("CaseTypes");
-
-                    b.Navigation("Counties");
-
-                    b.Navigation("CourtParts");
 
                     b.Navigation("Courts");
 

@@ -118,5 +118,6 @@ namespace EvictionFiler.Application.DTOs
         public string CourtCallIn { get; set; } = string.Empty;
         public string CourtConferenceId { get; set; } = string.Empty;
         public string Judge { get; set; } = string.Empty;
+        public decimal? BillAmount { get; set; } 
     }
 }

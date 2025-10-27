@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EvictionFiler.Application.DTOs.FormTypeDto;
 using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
@@ -25,11 +26,11 @@ namespace EvictionFiler.Infrastructure.Repositories
 			return await _context.MstFormTypes.ToListAsync();
 		}
 
-        public async Task<List<FormTypes>> GetFormTypesByCaseTypeAsync(Guid? caseTypeId)
+        public async Task<List<FormAddEditViewModelDto>> GetFormTypesByCaseTypeAsync(Guid? caseTypeId)
         {
             return await _context.MstFormTypes
                 .Where(f => f.CaseTypeId == caseTypeId)
-                .Select(f => new FormTypes
+                .Select(f => new FormAddEditViewModelDto
                 {
                     Id = f.Id,
                     Name = f.Name

@@ -17,10 +17,8 @@ namespace EvictionFiler.Application.DTOs.FormTypeDto
 		public string? FormTypeName { get; set; }
 		public DateTime CreatedOn { get; set; }
 
-        public string? CreatedByName { get; set; }
+		public string? CreatedByName { get; set; }
+		public int? BillAmount { get; set; }
 
-
-
-
-    }
+	}
 }

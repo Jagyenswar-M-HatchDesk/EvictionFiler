@@ -130,5 +130,8 @@ namespace EvictionFiler.Domain.Entities
         public Guid? CourtId { get; set; }
         [ForeignKey("CourtId")]
         public Courts? Courts { get; set; }
+
+        public decimal? BillAmount { get; set; }
+
     }
 }

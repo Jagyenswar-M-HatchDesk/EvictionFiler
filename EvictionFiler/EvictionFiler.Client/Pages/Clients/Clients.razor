@@ -11,8 +11,8 @@
 @using System.Security.Claims
 @inject JwtAuthStateProviders _authStateProvider
 @inject SpinnerService Spinnerservice
- @inject IClientService clientservice 
- @inject ILandlordSevice landLordService 
+ @inject IClientService clientservice
+ @inject ILandlordSevice landLordService
 @inject IBuildingService buildingService
 
 @inject ITenantService tenantService
@@ -21,87 +21,87 @@
 <PageTitle>Clients</PageTitle>
 <style>
     .status-active {
-    background-color: rgba(25,135,84,1);
-    color: #fff;
-    padding: 2px 7px;
-    border-radius: 1rem;
-    font-size: 12px;
+        background-color: rgba(25,135,84,1);
+        color: #fff;
+        padding: 2px 7px;
+        border-radius: 1rem;
+        font-size: 12px;
     }
 
     .container {
-    /* background-color: #F2F0EC; */
-    border: solid 1px #F2F0EC;
-    box-shadow: 0 15px 20px #F2F0EC !important;
+        /* background-color: #F2F0EC; */
+        border: solid 1px #F2F0EC;
+        box-shadow: 0 15px 20px #F2F0EC !important;
     }
 
     .btn-primary {
-    background-color: #1F365D;
-    border-color: #1F365D;
+        background-color: #1F365D;
+        border-color: #1F365D;
     }
 
-    .btn-primary:hover {
-    background-color: #162646;
-    border-color: #162646;
-    }
+        .btn-primary:hover {
+            background-color: #162646;
+            border-color: #162646;
+        }
 
     .page-link {
-    color: #1F365D;
+        color: #1F365D;
     }
 
-    .page-link.active,
-    .page-item.active .page-link {
-    background-color: #1F365D;
-    border-color: #1F365D;
-    color: #F2F0EC;
-    }
+        .page-link.active,
+        .page-item.active .page-link {
+            background-color: #1F365D;
+            border-color: #1F365D;
+            color: #F2F0EC;
+        }
 
     table.table thead th {
-    color: #1F365D;
-    background: #F2F0EC;
-    margin-bottom: 0px !important;
+        color: #1F365D;
+        background: #F2F0EC;
+        margin-bottom: 0px !important;
     }
 
     h5, p, small {
-    color: #1F365D;
+        color: #1F365D;
     }
 
     .adv-btn {
-    color: #1F365D;
-    background: #FFF;
+        color: #1F365D;
+        background: #FFF;
     }
 
-    .adv-btn:hover {
-    color: #FFF;
-    background: #1F365D;
-    }
+        .adv-btn:hover {
+            color: #FFF;
+            background: #1F365D;
+        }
 
-    .adv-btn.active-adv-btn {
-    background-color: #1F365D !important;
-    color: #F2F0EC !important;
-    border-color: #1F365D !important;
-    }
+        .adv-btn.active-adv-btn {
+            background-color: #1F365D !important;
+            color: #F2F0EC !important;
+            border-color: #1F365D !important;
+        }
 
 
     .table-responsive {
-    overflow-x: auto; /* Enable horizontal scroll */
-    position: relative;
+        overflow-x: auto; /* Enable horizontal scroll */
+        position: relative;
     }
 
     table th, table td {
-    white-space: nowrap;
+        white-space: nowrap;
     }
 
     th.sticky, td.sticky {
-    position: sticky;
-    right: 0;
-    background: #F2F0EC; /* Same as container background */
-    z-index: 2;
-    text-align: center;
+        position: sticky;
+        right: 0;
+        background: #F2F0EC; /* Same as container background */
+        z-index: 2;
+        text-align: center;
     }
 
     /* Make sure header sticky stays above other cells */
     th.sticky {
-    z-index: 3;
+        z-index: 3;
     }
 </style>
 
@@ -110,7 +110,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
             <li class="breadcrumb-item ">Clients</li>
-         
+
         </ol>
     </nav>
 
@@ -122,7 +122,7 @@
 
         <!-- Add Button + Search -->
         <div class="g-2 mb-3 d-flex justify-content-between align-items-center">
-            <button class="btn bg-navy text-white" style="font-size:14px" @onclick="ShowCreateClient">
+            <button class="btn bg-navy text-white" style="font-size:14px; background:#1F365D;" @onclick="ShowCreateClient">
                 <i class="fa fa-plus me-1"></i> Add New
             </button>
             <div class="position-relative">
@@ -134,7 +134,7 @@
         </div>
 
         <div class="table-responsive mb-3">
-            <table class="table table-hover align-middle text-center" style="font-size:14px" >
+            <table class="table table-hover align-middle text-center" style="font-size:14px">
                 <thead>
                     <tr>
                         <th>ClientCode</th>
@@ -143,11 +143,12 @@
                         <th>Phone</th>
                         <th>Fax</th>
                         <th>Address</th>
-                             @if (isAdmin)
-                                {
-                        <th>CreatedBy </th>
-                                }
-                        <th >Status</th>
+                        <th>Type</th>
+                        @if (isAdmin)
+                        {
+                            <th>CreatedBy </th>
+                        }
+                        <th>Status</th>
                         <th class="sticky">Action</th>
                     </tr>
                 </thead>
@@ -177,18 +178,19 @@
                                     }
                                     @fullAddress
                                 </td>
-                                  @if (isAdmin)
+                                <td>@(client.ClientTypeName)</td>
+                                @if (isAdmin)
                                 {
 
-                                 <td>@(client?.CreatedByName ?? "-")</td> 
-                                  }
+                                    <td>@(client?.CreatedByName ?? "-")</td>
+                                }
 
-                                     <td>
-                            @(client.IsActive == true
-                                                            ? "Active"
-                                                        : client.IsDeleted == true
-                                                            ? "InActive"
-                                                            : "Not Set")
+                                <td>
+                                    @(client.IsActive == true
+                                        ? "Active"
+                                        : client.IsDeleted == true
+                                        ? "InActive"
+                                        : "Not Set")
                                 </td>
 
 
@@ -207,7 +209,7 @@
                     }
                 </tbody>
             </table>
-        
+
 
         </div>
         <!-- Pagination -->
@@ -224,13 +226,13 @@
                         <li class="page-item @(currentPage == 1 ? "disabled" : "")">
                             <button class="page-link" @onclick="() => ChangePage(currentPage - 1)">←</button>
                         </li>
-                      @for (int i = 1; i <= Math.Ceiling((double)pagedClients.TotalCount / pageSize); i++)
-                          {
-                              var pageNumber = i; 
-                              <li class="page-item @(pageNumber == currentPage ? "active" : "")">
-                                  <button class="page-link" @onclick="() => ChangePage(pageNumber)">@pageNumber</button>
-                              </li>
-                          }
+                        @for (int i = 1; i <= Math.Ceiling((double)pagedClients.TotalCount / pageSize); i++)
+                        {
+                            var pageNumber = i;
+                            <li class="page-item @(pageNumber == currentPage ? "active" : "")">
+                                <button class="page-link" @onclick="() => ChangePage(pageNumber)">@pageNumber</button>
+                            </li>
+                        }
                         <li class="page-item @(currentPage == Math.Ceiling((double)pagedClients.TotalCount / pageSize) ? "disabled" : "")">
                             <button class="page-link" @onclick="() => ChangePage(currentPage + 1)">→</button>
                         </li>
@@ -250,7 +252,7 @@
                         @successMessage
                     </div>
                     <button type="button" class="btn-close btn-close-white me-2 m-auto"
-                    @onclick="() => successMessage = string.Empty"></button>
+                            @onclick="() => successMessage = string.Empty"></button>
                 </div>
             </div>
         </div>
@@ -265,13 +267,13 @@
     @if (_showEditClient)
     {
         <EditClient editClient="_editClientModel"
-        Landlords="saveEditlandlordList"
-        Buildings="saveEditBuildingList"
-        Tenants="saveEditTenantList"
-        OnClose="HandleCloseEditClient" />
+                    Landlords="saveEditlandlordList"
+                    Buildings="saveEditBuildingList"
+                    Tenants="saveEditTenantList"
+                    OnClose="HandleCloseEditClient" />
     }
 
-   
+
 
 </body>
 
@@ -371,7 +373,7 @@
     private async Task OnSearchChanged(ChangeEventArgs e)
     {
         searchTerm = e.Value?.ToString() ?? string.Empty;
-        currentPage = 1; 
+        currentPage = 1;
         await LoadClients();
     }
 
@@ -399,7 +401,7 @@
 
     private async Task LoadBuildings(Guid? clientId)
     {
-         var landlords = await landLordService.GetLandlordsByClientIdAsync(clientId);
+        var landlords = await landLordService.GetLandlordsByClientIdAsync(clientId);
         saveEditBuildingList.Clear();
 
         foreach (var landlord in landlords)
@@ -425,7 +427,7 @@
             foreach (var building in buildings)
             {
                 // 🟢 IMPORTANT: Ye method tenantService ka hona chahiye:
-                var tenants = await tenantService.GetTenantsByClientIdAsync(building.Id); 
+                var tenants = await tenantService.GetTenantsByClientIdAsync(building.Id);
 
                 if (tenants != null && tenants.Any())
                 {
@@ -435,7 +437,7 @@
         }
     }
 
-    private async Task ShowAddEditClient(Guid? clientId=null)
+    private async Task ShowAddEditClient(Guid? clientId = null)
     {
         clientIdForEdit = clientId;
 
@@ -444,29 +446,29 @@
         saveEditlandlordList = landlords;
         if (client != null)
         {
-             _editClientModel = new EditToClientDto
-            {
-                Id = client.Id,
-                FirstName = client.FirstName,
-                LastName = client.LastName,
-                Email = client.Email,
-                Fax = client.Fax,
-                Phone = client.Phone,
-                CellPhone = client.CellPhone,
-                ClientCode = client.ClientCode,
-                Address1 = client.Address1,
-                Address2 = client.Address2,
-                City = client.City,
-                StateId = client.StateId,
-                StateName = client.StateName,
-                ZipCode = client.ZipCode,
-                editLandLords = landlords,
-                
-            };
+            _editClientModel = new EditToClientDto
+                {
+                    Id = client.Id,
+                    FirstName = client.FirstName,
+                    LastName = client.LastName,
+                    Email = client.Email,
+                    Fax = client.Fax,
+                    Phone = client.Phone,
+                    CellPhone = client.CellPhone,
+                    ClientCode = client.ClientCode,
+                    Address1 = client.Address1,
+                    Address2 = client.Address2,
+                    City = client.City,
+                    StateId = client.StateId,
+                    StateName = client.StateName,
+                    ZipCode = client.ZipCode,
+                    editLandLords = landlords,
+
+                };
 
             await LoadBuildings(clientId);
             await LoadTenants(clientId);
-           
+
             _showEditClient = true;
         }
     }
@@ -507,14 +509,14 @@
     }
 
 
-    public async Task DeleteClient(Guid id ,bool isAdmin)
+    public async Task DeleteClient(Guid id, bool isAdmin)
     {
         Spinnerservice.Show();
         bool isDeleted = await clientservice.DeleteClientAsync(id, isAdmin);
 
         if (isDeleted)
         {
-        
+
             pagedClients = await clientservice.GetAllClientsAsync(currentPage, pageSize, searchTerm, loggedInUserId, isAdmin);
             StateHasChanged();
         }

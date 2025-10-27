@@ -32,6 +32,44 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             };
         }
 
+        public static IEnumerable<County> GetCounty()
+        {
+            var now = DateTime.UtcNow;
+            return new List<County>
+            {
+                new County() { Name = "New York", CreatedOn = now },
+                new County() { Name = "Kings", CreatedOn = now },
+
+            };
+        }
+
+        public static IEnumerable<CourtPart> GetCourtPart()
+        {
+            var now = DateTime.UtcNow;
+            return new List<CourtPart>
+            {
+                new CourtPart() { Name = "Intake 1", CreatedOn = now },
+                new CourtPart() { Name = "Part A", CreatedOn = now },
+                new CourtPart() { Name = "Part B", CreatedOn = now },
+                new CourtPart() { Name = "Part C", CreatedOn = now },
+
+            };
+        }
+        public static IEnumerable<CaseStatus> GetCaseStatus()
+        {
+            var now = DateTime.UtcNow;
+            return new List<CaseStatus>
+            {
+                new CaseStatus() { Name = "Open", CreatedOn = now },
+                new CaseStatus() { Name = "Active", CreatedOn = now },
+                new CaseStatus() { Name = "Settled", CreatedOn = now },
+                new CaseStatus() { Name = "Pending", CreatedOn = now },
+                new CaseStatus() { Name = "Under Review", CreatedOn = now },
+                new CaseStatus() { Name = "Continued", CreatedOn = now },
+                new CaseStatus() { Name = "Dismissed", CreatedOn = now },
+
+            };
+        }
         public static IEnumerable<ClientRole> GetClientRoles()
         {
             var now = DateTime.UtcNow;

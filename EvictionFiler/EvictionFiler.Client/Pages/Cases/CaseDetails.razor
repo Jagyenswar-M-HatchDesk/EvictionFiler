@@ -3,6 +3,7 @@
 @using Blazored.Toast.Services
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ApartmentDto
+@using EvictionFiler.Application.DTOs.CaseHearing
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.CourtDto
 @using EvictionFiler.Application.DTOs.FormTypeDto
@@ -32,6 +33,8 @@
 @inject IAdditionalTenantService _additionalTenantService
 @inject ITenantService _tenantService
 @inject ICourtService _courtService
+@inject ICaseHearingService _caseHearingService
+@inject IFeesCatalogService _feeCatalogService
 @inject IToastService ToastService
 @inject IJSRuntime JS
 @using Microsoft.AspNetCore.Components.Authorization;
@@ -853,17 +856,21 @@
                                     <button class="btn btn-secondary">Send to Process Server</button>
                                     <button class="btn btn-outline-secondary">Upload / View Documents</button>
                                     <button class="btn btn-outline-secondary">Add Notes</button>
+                                    <button class="btn btn-outline-secondary" @onclick="OpenHearingPopup">Add Hearing</button>
                                 </div>
                                 <div class="row g-2 align-items-end">
                                     <div class="col-12 col-md-4">
                                         <label for="formType" class="form-label">File a Motion</label>
-                                        <select class="form-select" @bind="noticeModel.FormTypeId">
+                                        <select class="form-select" @bind="noticeModel.FormTypeId" @bind:after="FormTypeBindAfter">
                                             <option value="">-- Select Form Type --</option>
                                             @foreach (var formType in FilteredFormTypeList)
                                             {
-                                                <option value="@formType.Id">@formType.Name</option>
+                                                <option value="@formType.Id">@formType.Name - (@formType.BillAmount)</option>
                                             }
                                         </select>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input class="form-control" @bind="BillAmount">
                                     </div>
                                     <div class="col-auto">
                                         <button class="btn btn-outline-primary" @onclick="GenerateNotice">  @(isEditMode ? "Update" : "Generate")</button>
@@ -885,7 +892,7 @@
                             <div class="row g-3 small" id="paymentsGrid">
                                 <div class="col-12 col-md-6 col-lg-3"><div class="border rounded-3 p-3"><div class="text-secondary">Account Balance</div><div class="fw-medium">--</div></div></div>
                                 <div class="col-12 col-md-6 col-lg-3"><div class="border rounded-3 p-3"><div class="text-secondary">Account Credit</div><div class="fw-medium">--</div></div></div>
-                                <div class="col-12 col-md-6 col-lg-3"><div class="border rounded-3 p-3"><div class="text-secondary">Balance on Case</div><div class="fw-medium">--</div></div></div>
+                                <div class="col-12 col-md-6 col-lg-3"><div class="border rounded-3 p-3"><div class="text-secondary">Balance on Case</div><div class="fw-medium">@(legalcaseDto.BillAmount ?? 0)</div></div></div>
                                 <div class="col-12 col-md-6 col-lg-3"><div class="border rounded-3 p-3"><div class="text-secondary">Last Payment</div><div class="fw-medium">--</div></div></div>
                                 <div class="col-12 col-md-6 col-lg-3"><div class="border rounded-3 p-3"><div class="text-secondary">Open Receivables</div><div class="fw-medium">--</div></div></div>
                             </div>
@@ -1312,7 +1319,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="courtModal" tabindex="-1" aria-labelledby="courtModalLabel" aria-hidden="true">
+    <div class="modal fade" id="courtModal" tabindex="-1" aria-labelledby="CourtModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header">
@@ -1421,6 +1428,65 @@
         </div>
     </div>
 
+    <div class="modal fade" id="hearingModal" tabindex="-1" aria-labelledby="HearingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="buildingModalLabel">Add Hearing Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <EditForm Model="@caseHearing">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        <div class="card border-0">
+                            <div class="card-body p-0">
+
+                                <!-- Search + Add Section -->
+                                <!-- Add/Edit Fields -->
+
+                                <div class="border rounded-3 p-3 mt-4 position-relative">
+
+                                    <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                                    aria-label="Clear"
+                                    @onclick="OnBindHearingCancel">
+                                    </button>
+
+                                    <div class=" g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label required-label">Date </label>
+                                            <InputDate class="form-control" @bind-Value="caseHearing.HearingDate" placeholder="Select Date" />
+                                        </div>
+
+                                        <div class="col-md-6 mt-2">
+                                            <label class="form-label required-label">Time</label>
+                                            <input type="time" class="form-control" @bind="caseHearing.HearingTime" />
+                                        </div>
+
+                                        <div class="col-md-6 mt-2">
+                                            <label class="form-label required-label">Index No.</label>
+                                            <InputText class="form-control" @bind-Value="caseHearing.IndexNo" placeholder="Enter Index no." />
+                                        </div>
+
+                                        <div class="col-md-6 mt-2">
+                                            <label class="form-label required-label">Caption</label>
+                                            <InputText class="form-control" @bind-Value="caseHearing.Caption" placeholder="Enter Caption" />
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary base" @onclick="SaveHearingChanges">Save</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
 
     <script>
         window.showModal = (id) => {
@@ -1444,10 +1510,11 @@
     [Parameter]
     public Guid caseId { get; set; }
     private IntakeModel legalcaseDto = new IntakeModel();
-    private List<FormTypes> FilteredFormTypeList = new();
+    private List<FormAddEditViewModelDto> FilteredFormTypeList = new();
     private GenrateNoticeModel noticeModel = new GenrateNoticeModel();
     [Parameter] public Guid? CurrentCaseId { get; set; }
     private List<GenrateNoticeModel> caseFormDto = new();
+    private List<FeesCatalogDto> feecatalogDto = new();
     private string? loggedInUserId;
     private bool isAdmin = false;
 
@@ -1476,6 +1543,17 @@
     {
         legalcaseDto = await _service.GetCaseByIdAsync(caseId);
         FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
+        feecatalogDto = await _feeCatalogService.GetAllAsync();
+        var feeLookup = feecatalogDto.ToDictionary(f => f.Label.ToLower(), f => f.Rate);
+
+        foreach (var form in FilteredFormTypeList)
+        {
+            if (feeLookup.TryGetValue(form.Name.ToLower(), out var rate))
+            {
+                form.BillAmount = rate;
+            }
+        }
+
         CurrentCaseId = caseId;
         if (legalcaseDto != null)
         {
@@ -1569,6 +1647,8 @@
                     CourtRoomNo = legalcaseDto.CourtRoomNo,
                     CourtVirtualLink = legalcaseDto.CourtVirtualLink,
 
+                    BillAmount = legalcaseDto.BillAmount,
+
                 };
 
         };
@@ -1597,12 +1677,37 @@
         spinnerservice.Hide();
         await JS.InvokeVoidAsync("showBootstrapTab", "#actions-tab");
     }
+    private decimal? BillAmount = null; 
 
+    private void FormTypeBindAfter()
+    {
+        var selectedForm = FilteredFormTypeList
+            .FirstOrDefault(f => f.Id == noticeModel.FormTypeId);
+
+        if (selectedForm != null)
+            BillAmount = selectedForm.BillAmount;
+        else
+            BillAmount = null;
+
+        StateHasChanged(); // ensure UI refreshes
+    }
 
 
     private async Task GenerateNotice()
     {
         spinnerservice.Show();
+
+        legalcaseDto.BillAmount = (legalcaseDto.BillAmount ?? 0) + (BillAmount ?? 0);
+
+        var successcase = await _service.UpdateCaseAsync(legalcaseDto);
+        if(!successcase.HasValue)
+        {
+            return;
+        }
+        else
+        {
+            BillAmount = null;
+        }
 
         if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty && noticeModel.FormTypeId.HasValue)
         {
@@ -1669,6 +1774,7 @@
     private async Task LoadCaseForms()
     {
         caseFormDto = await _CaseFormService.GetCaseFormsByCaseId(CurrentCaseId.Value, loggedInUserId, isAdmin);
+
     }
 
     // private void Createcase()
@@ -1804,6 +1910,7 @@
     public EditToTenantDto selectedTenant = new EditToTenantDto();
     public EditToTenantDto ViewTenant = new EditToTenantDto();
     public CourtDto court = new CourtDto();
+    public CaseHearingDto caseHearing = new CaseHearingDto();
     public List<CourtDto> courts = new List<CourtDto>();
     public List<CourtDto> filteredCourts = new List<CourtDto>();
 
@@ -1822,7 +1929,7 @@
     }
     private async Task ShowCourtModal()
     {
-        if(legalcaseDto.CourtId == Guid.Empty)
+        if (legalcaseDto.CourtId == Guid.Empty)
         {
             showCourtFields = false;
             searchCourtText = "";
@@ -1927,6 +2034,12 @@
         showCourtFields = false;
         searchCourtText = null;
         court = new CourtDto();
+    }
+    private void OnBindHearingCancel()
+    {
+        caseHearing = new CaseHearingDto();
+        caseHearing.HearingDate = DateTime.Now;
+        caseHearing.HearingTime = TimeOnly.FromTimeSpan(TimeSpan.FromHours(10));
     }
 
     private void OnBindTenantCancel()
@@ -2039,8 +2152,8 @@
                     LastName = client.LastName,
                     Reference = client.Reference,
                     ClientTypeId = client.ClientTypeId,
-                     Phone = client.Phone,
-                     Email = client.Email,
+                    Phone = client.Phone,
+                    Email = client.Email,
                 };
 
             var clientId = await _clientService.CreateOnlyClient(newClient);
@@ -2068,7 +2181,7 @@
                         Reference = client.Reference,
                         FirstName = client.FirstName,
                         LastName = client.LastName,
-                        
+
                     };
 
                 await _clientService.UpdateClientformCase(updateBuilding);
@@ -2314,7 +2427,7 @@
 
         if (addorupdate)
         {
-            
+
 
             var success = await _service.UpdateCaseAsync(legalcaseDto);
 
@@ -2333,6 +2446,40 @@
         // Map edited fields
 
 
+        spinnerservice.Hide();
+    }
+    private async Task SaveHearingChanges()
+    {
+        spinnerservice.Show();
+
+        var newHearing = new CaseHearingDto()
+            {
+                Caption = caseHearing.Caption,
+                IndexNo = caseHearing.IndexNo,
+                LegalCaseId = legalcaseDto.Id,
+                CourtId = legalcaseDto.CourtId,
+                HearingDate = caseHearing.HearingDate,
+                HearingTime = caseHearing.HearingTime,
+                // CallIn = caseHearing.CallIn,
+                // Phone = caseHearing.Phone,
+                // VirtualLink = caseHearing.VirtualLink,
+                // Notes = caseHearing.Notes
+            };
+
+        var CourtId = await _caseHearingService.AddHearing(newHearing);
+
+        if (CourtId)
+            {
+                ToastService.ShowSuccess("Hearing details Added successfully!");
+                await JS.InvokeVoidAsync("hideModal", "hearingModal");
+
+               // await LoadCaseDetails();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to create Hearing details.");
+            }
+        // Map edited fields
         spinnerservice.Hide();
     }
     // Edit model
@@ -2496,6 +2643,47 @@
         }
 
 
+    }
+    private async Task OpenHearingPopup()
+    {
+        caseHearing.HearingDate = DateTime.Now;
+        var timespan = TimeSpan.FromHours(10);
+        caseHearing.HearingTime = TimeOnly.FromTimeSpan(timespan);
+        await JS.InvokeVoidAsync("showModal", "hearingModal");
+    }
+    private async Task SaveHearingPopup()
+    {
+        spinnerservice.Show();
+
+
+
+        legalcaseDto.BuildingAddress = editBuildingModel.Address1;
+        legalcaseDto.Borough = editBuildingModel.City;
+        legalcaseDto.Mdr = editBuildingModel.MDRNumber;
+        legalcaseDto.BuildingZip = editBuildingModel.Zipcode;
+        legalcaseDto.BuildingStateId = editBuildingModel.StateId;
+        legalcaseDto.Units = editBuildingModel.BuildingUnits;
+        legalcaseDto.RegulationStatusId = editBuildingModel.RegulationStatusId;
+        legalcaseDto.UnitOrApartmentNumber = editBuildingModel.ApartmentCode;
+
+        var success = await _service.UpdateCaseAsync(legalcaseDto);
+
+        if (success.HasValue)
+        {
+            ToastService.ShowSuccess("Building details updated successfully!");
+            await JS.InvokeVoidAsync("hideModal", "buildingModal");
+
+            await LoadCaseDetails();
+        }
+        else
+        {
+            ToastService.ShowError("Failed to update building details.");
+        }
+
+        // Map edited fields
+
+
+        spinnerservice.Hide();
     }
 
 }
