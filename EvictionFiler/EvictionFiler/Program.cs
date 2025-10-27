@@ -78,6 +78,8 @@ builder.Services.AddScoped<ContextMenuService>();
 
 builder.Services.AddScoped<ICourtService, CourtService>();
 builder.Services.AddScoped<ICourtRepository, CourtRepository>();
+builder.Services.AddScoped<ICaseHearingRepository, CaseHearingRepository>();
+builder.Services.AddScoped<ICaseHearingService, CaseHearingService>();
 builder.Services.AddScoped<IUserservices, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICasesRepository, CasesRepository>();

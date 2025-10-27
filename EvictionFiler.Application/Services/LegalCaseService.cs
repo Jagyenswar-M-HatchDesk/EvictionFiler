@@ -368,6 +368,7 @@ namespace EvictionFiler.Application.Services
                     CourtPhone = caseEntity.Courts.Phone,
                     CourtRoomNo = caseEntity.Courts.RoomNo,
                     CourtVirtualLink = caseEntity.Courts.VirtualLink,
+                    BillAmount = caseEntity.BillAmount,
                 };
 
                 return intakeModel;
@@ -543,6 +544,7 @@ namespace EvictionFiler.Application.Services
                 existingCase.CaseProgramId = legalCase.CaseProgramId;
 
                 existingCase.CourtId = legalCase.CourtId;
+                existingCase.BillAmount = legalCase.BillAmount;
 
                 var updated = _repository.UpdateAsync(existingCase);
                 var result = await _unitOfWork.SaveChangesAsync();

@@ -85,7 +85,7 @@ namespace EvictionFiler.Application.Services
     string userId,
     bool isAdmin)
         {
-            var query = await _clientRepo.GetAllAsync(includes: u => u.State!);
+            var query = await _clientRepo.GetAllAsync(includes: [u => u.State!, u=>u.ClientType]);
             var users = await _userRepo.GetAllUser();
             var userDict = users.ToDictionary(u => u.Id, u => $"{u.FirstName} {u.MiddleName} {u.LastName}");
 
@@ -157,6 +157,7 @@ namespace EvictionFiler.Application.Services
                     CreatedByName = userDict.ContainsKey(client.CreatedBy)
                             ? userDict[client.CreatedBy]
                             : "Admin",
+					ClientTypeName = client.ClientType.Name,
                 })
                 .ToList();
 
