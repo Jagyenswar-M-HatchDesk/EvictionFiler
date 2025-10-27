@@ -1,909 +1,834 @@
-﻿
-  <style>
-    /* ====== Design tokens ====== */
-    :root {
-      --bg: #f6f7fb;
-      --card: #ffffff;
-      --ink: #0f172a;
-      --muted: #64748b;
-      --primary: #1d4ed8;
-      --primary-600: #1e40af;
-      --success: #22c55e;
-      --error: #dc2626;
-      --border: #e2e8f0;
-      --radius: 14px;
-    }
+﻿@page "/legalcase/create-perdiem"
 
-    * {
-      box-sizing: border-box;
-    }
+
+
+@using System.ComponentModel.DataAnnotations
+@using System.Linq.Expressions
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.ApartmentDto
+@using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Application.DTOs.LegalCaseDto
+@using EvictionFiler.Application.DTOs.OccupantDto
+@using EvictionFiler.Application.DTOs.PaginationDto
+@using EvictionFiler.Application.DTOs.TenantDto
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Application.Services
+@using EvictionFiler.Client.Components.Cases
+@using EvictionFiler.Client.Jwt
+@using EvictionFiler.Domain.Entities.Master
+@using Blazored.Typeahead
+
+@inject IClientRoleRepository ClientRoleRepository
+@inject ICaseTypeRepository CaseTypeRepository
+@inject ICaseSubTypeRepository CaseSubTypeRepository
+@inject IRegulationStatusRepository RegulationStatusRepository
+@inject IReasonHoldoverRepository ReasonHoldoverRepository
+@inject ILandlordTypeRepository LandlordTypeRepository
+@inject IRenewalStatusRepository RenewalStatusRepository
+@inject IUnitIllegalRepository UnitIllegalRepository
+@inject ITenancyTypeRepository TenancyTypeRepository
+@inject IDateRentRepository DateRentRepository
+@inject ILandlordSevice _landlordService
+@inject IBuildingService _buildingService
+@inject ILegalCaseService _legalCaseService
+@inject ITenantService _tenantService
+@inject IClientService _clientService
+@inject ICaseProgramRepository _caseprogram
+@inject IAdditionalTenantService _additionalTenant
+@inject IAdditionalOccupantsService _additionalOccupant
+@inject IStateRepository _stateRepository
+
+@using EvictionFiler.Client.SpinnerService
+@using EvictionFiler.Domian.Enums
+@inject IJSRuntime JS
+@inject NavigationManager nav
+@inject SpinnerService spinnerservice
+
+@using Microsoft.AspNetCore.Components.Authorization;
+@using EvictionFiler.Domain.Entities
+
+@using System.Security.Claims
+@inject JwtAuthStateProviders _authStateProvider
+
+<HeadContent>
+
+</HeadContent>
+
+<style>
+    .required-label::after { content: " *"; color: red; }
+
+    :root { --bg: #f7f9fc; --card: #ffffff; --ink: #0f172a; --muted: #64748b; --line: #e2e8f0; --brand: #4f46e5; --brand-2: #4338ca; --ok: #059669; --warn: #b45309; --danger: #b91c1c; --radius: 16px; --shadow: 0 6px 24px rgba(2, 6, 23, .08); }
+
+    * { box-sizing: border-box }
 
     html,
-    body {
-      height: 100%;
+    body { height: 100% }
+
+    body { margin: 0; font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; background: radial-gradient(70% 120% at 50% -10%, #eef2ff 0%, var(--bg) 60%); color: var(--ink) }
+
+    .wrap { max-width: 1200px; margin: auto; padding: 24px }
+
+    header.top { position: sticky; top: 0; z-index: 10; background: rgba(255, 255, 255, .9); backdrop-filter: saturate(180%) blur(6px); border-bottom: 1px solid var(--line) }
+
+        header.top .bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; max-width: 1200px; margin: auto }
+
+    .brand { display: flex; gap: 12px; align-items: center }
+
+    .logo { width: 40px; height: 40px; border-radius: 14px; background: #0f172a; color: #fff; display: grid; place-items: center; font-weight: 700 }
+
+    .secure { display: inline-flex; gap: 8px; align-items: center; border-radius: 999px; padding: 6px 10px; border: 1px solid #d1fae5; background: #ecfdf5; color: #065f46; font-size: 12px }
+
+    .stepper { padding: 0 24px 14px; max-width: 1200px; margin: auto }
+
+    .track { height: 6px; background: #e5e7eb; border-radius: 999px; overflow: hidden }
+
+    .meter { height: 100%; background: linear-gradient(90deg, var(--brand), var(--brand-2)); width: 40% }
+
+    .steps { display: flex; gap: 12px; flex-wrap: wrap; margin: 8px 0 }
+
+    .btn-tenant:hover { background: #1F365D !important; }
+
+    .chip { display: flex; gap: 8px; align-items: center; color: #475569 }
+
+    .dot { width: 10px; height: 10px; border-radius: 999px; background: #cbd5e1 }
+
+        .dot.active { background: #818cf8 }
+
+        .dot.done { background: #4f46e5 }
+
+    .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px }
+
+    @@media (max-width:1024px) {
+        .grid { grid-template-columns: 1fr }
     }
 
-    body {
-      margin: 0;
-      font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      color: var(--ink);
-      background: radial-gradient(60% 100% at 50% 0%, #eef2ff 0%, var(--bg) 60%);
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow) }
+
+        .card > header { padding: 18px 20px; border-bottom: 1px solid var(--line); display: flex; gap: 12px; align-items: flex-start }
+
+    .k { width: 28px; height: 28px; border-radius: 12px; background: #0f172a; color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 700 }
+
+    .card .body { padding: 20px }
+
+    .fields { display: grid; gap: 16px }
+
+    .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+
+    .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+
+    @@media (max-width:820px) {
+        .cols-2, .cols-3 { grid-template-columns: 1fr }
     }
 
-    .container {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 24px 16px;
+    label.lbl { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: #475569; margin-bottom: 6px }
+
+    input.txt,
+    select.sel { width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 12px; background: #fff; color: #0f172a; outline: none }
+
+        input.txt:focus,
+        select.sel:focus { border-color: #6366f1; box-shadow: 0 0 0 6px #eef2ff }
+
+    .hint { font-size: 12px; color: #64748b; margin-top: 4px }
+
+    .pill { display: inline-block; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 12px; background: #fff; font-size: 13px }
+
+    .aside.card { position: sticky; top: 106px; height: fit-content }
+
+    .kv { display: flex; justify-content: space-between; gap: 12px }
+
+        .kv .k { background: none; color: #64748b; width: auto; height: auto; border-radius: 0; font-weight: 600 }
+
+    .actions { position: sticky; bottom: 0; z-index: 10; background: rgba(255, 255, 255, .9); border-top: 1px solid var(--line) }
+
+        .actions .row { max-width: 1200px; margin: auto; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center }
+
+    .btn { padding: 10px 16px; border-radius: 12px; border: 1px solid #cbd5e1; background: #fff; color: #0f172a }
+
+        .btn.primary { background: var(--brand); border-color: transparent; color: #fff }
+
+        .btn.danger { background: #fee2e2; border-color: #fecaca; color: #991b1b }
+
+    .list { display: flex; flex-direction: column; gap: 8px }
+
+        .list .row { display: flex; gap: 8px }
+
+    .iconbtn { border: 1px solid #cbd5e1; background: #fff; border-radius: 10px; padding: 8px 10px; cursor: pointer }
+
+    .pre { white-space: pre-wrap; background: #0b1020; color: #e2e8f0; border-radius: 12px; padding: 14px; overflow: auto; max-height: 360px }
+
+    @@media (max-width:560px) {
+        .logo { width: 36px; height: 36px }
+
+        .brand h1 { font-size: 16px }
+
+        .secure { display: none }
     }
 
-    /* Header */
-    .header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      backdrop-filter: blur(8px);
-      background: rgba(255, 255, 255, .9);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .header-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 12px 16px;
-      max-width: 1120px;
-      margin: 0 auto;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .logo {
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
-      background: #0f172a;
-      color: #fff;
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      letter-spacing: .5px;
-    }
-
-    .brand h1 {
-      margin: 0;
-      font-size: 16px;
-    }
-
-    .brand small {
-      color: var(--muted);
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      appearance: none;
-      border: 1px solid var(--border);
-      background: #fff;
-      color: var(--ink);
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn.primary {
-      background: var(--primary);
-      color: #fff;
-      border-color: transparent;
-    }
-
-    .btn.primary:hover {
-      background: var(--primary-600);
-    }
-
-    .btn.ghost {
-      background: transparent;
-    }
-
-    .btn[disabled] {
-      opacity: .6;
-      cursor: not-allowed;
-    }
-
-    /* Card & Grid */
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: 0 1px 0 rgba(2, 6, 23, .04);
-      margin-bottom: 20px;
-    }
-
-    .card .head {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .card .head h2 {
-      margin: 0;
-      font-size: 16px;
-    }
-
-    .card .body {
-      padding: 16px;
-    }
-
-    .row {
-      display: grid;
-      gap: 12px;
-    }
-
-    @@media (min-width: 700px) {
-      .row.two {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .row.three {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .row.four {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
-
-    /* Form */
-    label {
-      display: block;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: .02em;
-      text-transform: uppercase;
-      color: #334155;
-      margin: 2px 0 6px;
-    }
-
-    .req::after {
-      content: " *";
-      color: var(--error);
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="date"],
-    input[type="time"],
-    input[type="number"],
-    select,
-    textarea {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px;
-      font: inherit;
-      color: var(--ink);
-      background: #fff;
-    }
-
-    textarea {
-      min-height: 96px;
-      resize: vertical;
-    }
-
-    .inline {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .check {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .check input {
-      width: 16px;
-      height: 16px;
-    }
-
-    .radio {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .radio label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      text-transform: none;
-      font-weight: 600;
-      color: var(--ink);
-    }
-
-    /* Validation states */
-    .field {
-      position: relative;
-    }
-
-    .error-msg {
-      color: var(--error);
-      font-size: 12px;
-      margin-top: 6px;
-      display: none;
-    }
-
-    .invalid input,
-    .invalid select,
-    .invalid textarea {
-      border-color: var(--error);
-      outline: 2px solid rgba(220, 38, 38, .12);
-    }
-
-    .invalid .error-msg {
-      display: block;
-    }
-
-    /* Footer actions */
-    .footer {
-      position: sticky;
-      bottom: 0;
-      z-index: 15;
-      background: rgba(255, 255, 255, .92);
-      backdrop-filter: blur(8px);
-      border-top: 1px solid var(--border);
-    }
-
-    .footer-inner {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 12px 16px;
-      display: flex;
-      gap: 12px;
-      justify-content: space-between;
-    }
-
-    .stack {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .stack .btn {
-      min-width: 120px;
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      z-index: 50;
-      padding: 12px 14px;
-      border-radius: 10px;
-      color: #fff;
-      box-shadow: 0 10px 18px rgba(2, 6, 23, .15);
-      display: none;
-    }
-
-    .toast.show {
-      display: block;
-    }
-
-    .toast.ok {
-      background: var(--success);
-    }
-
-    .toast.err {
-      background: var(--error);
-    }
-
-    /* Print */
-    @@page {
-      size: Letter;
-      margin: 16mm;
-    }
-
-    @@media print {
-
-      .header,
-      .footer,
-      .d-print-none,
-      .toast {
-        display: none !important;
-      }
-
-      body {
-        background: #fff;
-      }
-
-      .card {
-        page-break-inside: avoid;
-        box-shadow: none;
-      }
-    }
-  </style>
+    .form-check-input { cursor: pointer; }
+</style>
 
 
-<body>
-  <!-- Header -->
-  <div class="header d-print-none">
-    <div class="header-inner">
-      <div class="brand">
-        <div class="logo">EF</div>
-        <div>
-          <h1>Per Diem Court Appearance Intake</h1>
-          <small class="muted">Clean • Fast • Professional</small>
+<div class="container-fluid py-3 border-bottom bg-white sticky-top">
+    <div class="d-flex justify-content-between align-items-center">
+
+        <div class="d-flex align-items-center" style="gap:30px">
+            @for (var i = 0; i < Steps.Count; i++)
+            {
+                var bgColor = i <= (int)CurrentStep ? "#1F365D" : "#6c757d";
+
+                <div class="d-flex align-items-center gap-2">
+                    <span class="rounded-circle d-inline-block"
+                          style="width:14px; height:14px; border: 1px solid #333; background-color:@bgColor;"></span>
+                    <span>@Steps[i]</span>
+                </div>
+            }
         </div>
-      </div>
-      <div class="actions">
-        <button class="btn" onclick="window.print()">🖨️ Print PDF</button>
-        <button class="btn primary" id="saveBtn">Save</button>
-      </div>
+
+
     </div>
-  </div>
-
-  <div class="container">
-    <form id="perdiem-form" novalidate>
-      <!-- Attorney Assigning Case -->
-      <section class="card">
-        <div class="head">
-          <h2>Attorney Assigning Case</h2>
-        </div>
-        <div class="body">
-          <div class="row two">
-            <div class="field">
-              <label class="req">Hiring Attorney/Firm</label>
-              <input type="text" name="hiringFirm" required />
-              <div class="error-msg">Please enter the hiring attorney or firm.</div>
-            </div>
-            <div class="field">
-              <label>Contact Person</label>
-              <input type="text" name="contactPerson" />
-            </div>
-            <div class="field">
-              <label>Phone / Email</label>
-              <input type="text" name="contactPhoneEmail" placeholder="(555) 555-5555 / name@example.com" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Case Information -->
-      <section class="card">
-        <div class="head">
-          <h2>Case Information</h2>
-        </div>
-        <div class="body">
-          <div class="row">
-            <label class="req">Case Type</label>
-            <div class="radio" data-required-group="caseType">
-              <label><input type="checkbox" name="caseType" value="Residential Holdover"> Residential Holdover</label>
-              <label><input type="checkbox" name="caseType" value="Residential Nonpayment"> Residential
-                Nonpayment</label>
-              <label><input type="checkbox" name="caseType" value="HPD/Code Enforcement"> HPD/Code Enforcement</label>
-              <label><input type="checkbox" name="caseType" value="Commercial Case"> Commercial Case</label>
-              <label><input type="checkbox" name="caseType" value="Illegal Lockout"> Illegal Lockout</label>
-              <label><input type="checkbox" name="caseType" value="Post-Eviction / Restoration"> Post‑Eviction /
-                Restoration</label>
-              <label class="inline"><input type="checkbox" id="caseTypeOtherCb"> Other</label>
-              <input type="text" id="caseTypeOther" placeholder="Specify other" style="display:none;" />
-            </div>
-            <div class="error-msg" data-error-for="caseType">Select at least one case type.</div>
-          </div>
-          <div class="row two">
-            <div class="field">
-              <label class="req">Court Location</label>
-              <input type="text" name="courtLocation" required />
-              <div class="error-msg">Enter court location.</div>
-            </div>
-            <div class="field">
-              <label>Part / Room #</label>
-              <input type="text" name="partRoom" />
-            </div>
-            <div class="field">
-              <label>Index / LT Docket #</label>
-              <input type="text" name="docket" />
-            </div>
-            <div class="field">
-              <label class="req">County / Borough</label>
-              <input type="text" name="county" required />
-              <div class="error-msg">Enter county/borough.</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Party Representation -->
-      <section class="card">
-        <div class="head">
-          <h2>Party Representation</h2>
-        </div>
-        <div class="body">
-          <div class="row">
-            <label class="req">Representing</label>
-            <div class="radio" data-required-group="representing">
-              <label><input type="radio" name="representing" value="Petitioner" /> Petitioner (Landlord/Owner/Managing
-                Agent)</label>
-              <label><input type="radio" name="representing" value="Respondent" /> Respondent (Tenant/Occupant)</label>
-            </div>
-            <div class="error-msg" data-error-for="representing">Choose who you represent.</div>
-          </div>
-          <div class="row two">
-            <div class="field">
-              <label class="req">Party Name(s)</label>
-              <input type="text" name="partyNames" required />
-              <div class="error-msg">Enter party name(s).</div>
-            </div>
-            <div class="field">
-              <label>Opposing Counsel (if any)</label>
-              <input type="text" name="opposingCounsel" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Appearance Details -->
-      <section class="card">
-        <div class="head">
-          <h2>Appearance Details</h2>
-        </div>
-        <div class="body">
-          <div class="row three">
-            <div class="field">
-              <label class="req">Date of Appearance</label>
-              <input type="date" name="appearanceDate" required />
-              <div class="error-msg">Select a date.</div>
-            </div>
-            <div class="field">
-              <label class="req">Time of Appearance</label>
-              <input type="time" name="appearanceTime" required />
-              <div class="error-msg">Select a time.</div>
-            </div>
-            <div class="field">
-              <label>&nbsp;</label>
-              <div class="muted">(local court time)</div>
-            </div>
-          </div>
-          <div class="row">
-            <label class="req">Type of Appearance</label>
-            <div class="radio" data-required-group="appearanceType">
-              <label><input type="checkbox" name="appearanceType" value="First Appearance / Return Date"> First
-                Appearance / Return Date</label>
-              <label><input type="checkbox" name="appearanceType" value="Motion / OSC Hearing"> Motion / OSC
-                Hearing</label>
-              <label><input type="checkbox" name="appearanceType" value="Trial / Evidentiary Hearing"> Trial /
-                Evidentiary Hearing</label>
-              <label><input type="checkbox" name="appearanceType" value="Adjournment / Stipulation"> Adjournment /
-                Stipulation</label>
-              <label><input type="checkbox" name="appearanceType"
-                  value="Post-Eviction Motion (Restoration, ERAP, etc.)"> Post‑Eviction Motion (Restoration, ERAP,
-                etc.)</label>
-              <label><input type="checkbox" name="appearanceType" value="HPD Compliance / Inspection Hearing"> HPD
-                Compliance / Inspection Hearing</label>
-              <label class="inline"><input type="checkbox" id="apptOtherCb"> Other</label>
-              <input type="text" id="apptOther" placeholder="Specify other" style="display:none;" />
-            </div>
-            <div class="error-msg" data-error-for="appearanceType">Select at least one appearance type.</div>
-          </div>
-          <div class="row">
-            <div class="field">
-              <label>Relief / Action Requested Today</label>
-              <textarea name="relief"></textarea>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Case Background -->
-      <section class="card">
-        <div class="head">
-          <h2>Case Background (Brief)</h2>
-        </div>
-        <div class="body">
-          <div class="row">
-            <div class="field">
-              <label class="req">Key Facts to Know (bullet points)</label>
-              <textarea name="keyFacts" placeholder="• Fact 1
-• Fact 2
-• Fact 3" required></textarea>
-              <div class="error-msg">Provide at least a brief background.</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Documents Provided & Special Instructions -->
-      <section class="card">
-        <div class="head">
-          <h2>Documents & Instructions</h2>
-        </div>
-        <div class="body">
-          <div class="row four" data-required-group="docs">
-            <label class="check"><input type="checkbox" name="docs" value="Petition/Answer" /> Petition/Answer</label>
-            <label class="check"><input type="checkbox" name="docs" value="Lease / Rent Ledger" /> Lease / Rent
-              Ledger</label>
-            <label class="check"><input type="checkbox" name="docs" value="Prior Orders" /> Prior Orders</label>
-            <label class="check"><input type="checkbox" name="docs" value="Inspection Reports" /> Inspection
-              Reports</label>
-            <label class="check"><input type="checkbox" name="docs" value="Stipulations" /> Stipulations</label>
-            <label class="check inline"><input type="checkbox" id="docsOtherCb" /> Other</label>
-            <input type="text" id="docsOther" placeholder="Specify other" style="display:none;" />
-          </div>
-          <div class="error-msg" data-error-for="docs">Check at least one document or "Other".</div>
-          <div class="row">
-            <div class="field">
-              <label>Special Instructions from Hiring Attorney</label>
-              <textarea name="instructions"></textarea>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Reporting Requirements -->
-      <section class="card">
-        <div class="head">
-          <h2>Reporting Requirements</h2>
-        </div>
-        <div class="body">
-          <div class="row three">
-            <label class="check"><input type="checkbox" name="reporting" value="Written Court Report" /> Written Court
-              Report (Outcome, Next Date, Judge’s Notes)</label>
-            <label class="check"><input type="checkbox" name="reporting" value="Copy of Stipulation/Order" /> Copy of
-              Any Stipulation/Order Signed</label>
-            <label class="check"><input type="checkbox" name="reporting" value="Update Status in Platform" /> Updated
-              Case Status in Platform</label>
-          </div>
-        </div>
-      </section>
-
-      <!-- Billing -->
-      <section class="card">
-        <div class="head">
-          <h2>Billing</h2>
-        </div>
-        <div class="body">
-          <div class="row">
-            <label class="req">Rate / Compensation</label>
-            <div class="radio" id="billingRadio">
-              <label><input type="radio" name="billingMode" value="flat" checked> Flat</label>
-              <input type="number" id="flatAmount" name="flatAmount" placeholder="$" min="0" step="0.01"
-                style="width:160px;" />
-              <label><input type="radio" name="billingMode" value="hourly"> Hourly</label>
-              <input type="number" id="hourlyRate" name="hourlyRate" placeholder="$ / hr" min="0" step="0.01"
-                style="width:160px; display:none;" />
-              <input type="number" id="hourlyEstimate" name="hourlyEstimate" placeholder="est. hrs" min="0" step="0.25"
-                style="width:120px; display:none;" />
-            </div>
-            <div class="error-msg" data-error-for="billing">Enter a flat amount, or hourly rate + estimate.</div>
-          </div>
-          <div class="row two">
-            <div class="field">
-              <label>Travel / Other Expenses</label>
-              <input type="text" id="expenses" name="expenses" placeholder="Optional" />
-            </div>
-            <div class="field">
-              <label class="req">Payment Method</label>
-              <div class="radio" data-required-group="payment">
-                <label><input type="radio" name="payment" value="Direct Pay" checked> Direct Pay (check/ACH)</label>
-                <label><input type="radio" name="payment" value="Platform Invoice"> Platform Invoice
-                  (EvictionFiler.com)</label>
-              </div>
-              <div class="error-msg" data-error-for="payment">Choose a payment method.</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Acknowledgment -->
-      <section class="card">
-        <div class="head">
-          <h2>✅ Acknowledgment</h2>
-        </div>
-        <div class="body">
-          <p class="muted">I, (Per Diem Attorney), accept responsibility to appear and represent the above party in
-            accordance with instructions provided.</p>
-          <div class="row three">
-            <div class="field">
-              <label class="req">Per Diem Attorney (Name)</label>
-              <input type="text" name="ackName" required />
-              <div class="error-msg">Enter your full name.</div>
-            </div>
-            <div class="field">
-              <label class="req">Signature</label>
-              <input type="text" name="ackSignature" required placeholder="Type full name" />
-              <div class="error-msg">Provide your typed signature.</div>
-            </div>
-            <div class="field">
-              <label class="req">Date</label>
-              <input type="date" name="ackDate" required />
-              <div class="error-msg">Select date.</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="body">
-          <small class="muted">⚖️ This intake ensures per diem attorneys know who they’re covering, what’s expected in
-            court, and how they’ll get paid — and it protects the hiring attorney/firms.</small>
-        </div>
-      </section>
-
-    </form>
-  </div>
-
-  <!-- Footer Actions -->
-  <div class="footer d-print-none">
-    <div class="footer-inner">
-      <div class="stack">
-        <a href="#" class="btn ghost">← Back</a>
-      </div>
-      <div class="stack">
-        <button class="btn" onclick="window.print()">🖨️ Print</button>
-        <button class="btn primary" id="submitBtn">Submit</button>
-      </div>
+    <div class="progress mt-3" style="height:6px;">
+        <div class="progress-bar" role="progressbar" style="width:@Progress% ;  background-color:#1F365D !important"></div>
     </div>
-  </div>
+</div>
 
-  <div class="toast" id="toast"></div>
+<div class="container my-4">
+    @*  <EditForm > *@
+    @if (CurrentStep == StepPerdiem.Attorney)
+    {
 
-  <script>
-    // ====== Helpers ======
-    const qs = (s, r = document) => r.querySelector(s);
-    const qsa = (s, r = document) => [...r.querySelectorAll(s)];
+        <div class="row">
+            <!-- Left side: Attorney Assigning Case -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+                    <div class="card-header fw-bold ">
+                        Attorney Assigning Case
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <!-- Hiring Attorney / Firm -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Hiring Attorney / Firm <span class="text-danger">*</span></label>
+                                <input type="text" name="hiringFirm" class="form-control" required />
+                                <div class="invalid-feedback">
+                                    Please enter the hiring firm.
+                                </div>
+                            </div>
 
-    const form = qs('#perdiem-form');
-    const submitBtn = qs('#submitBtn');
-    const saveBtn = qs('#saveBtn');
-    const toast = qs('#toast');
+                            <!-- Contact Person -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Contact Person</label>
+                                <input type="text" name="contactPerson" class="form-control" />
+                            </div>
 
-    const STORAGE_KEY = 'ef:perdiem:draft:v2';
+                            <!-- Phone / Email -->
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">Phone / Email</label>
+                                <input type="text" name="contactPhoneEmail" class="form-control" placeholder="(555) 555-5555 / name@example.com" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    function showToast(msg, ok = true) {
-      toast.textContent = msg;
-      toast.className = `toast show ${ok ? 'ok' : 'err'}`;
-      setTimeout(() => toast.classList.remove('show'), 2800);
+            <!-- Right side summary -->
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
+
+
     }
 
-    // Toggle "Other" fields
-    const caseTypeOtherCb = qs('#caseTypeOtherCb');
-    const caseTypeOther = qs('#caseTypeOther');
-    const apptOtherCb = qs('#apptOtherCb');
-    const apptOther = qs('#apptOther');
-    const docsOtherCb = qs('#docsOtherCb');
-    const docsOther = qs('#docsOther');
 
-    [caseTypeOtherCb, apptOtherCb, docsOtherCb].forEach(cb => cb && cb.addEventListener('change', e => {
-      const map = { caseTypeOtherCb: caseTypeOther, apptOtherCb: apptOther, docsOtherCb: docsOther };
-      const input = map[e.target.id];
-      if (!input) return;
-      input.style.display = e.target.checked ? 'inline-block' : 'none';
-      if (!e.target.checked) input.value = '';
-    }));
+    @if (CurrentStep == StepPerdiem.Case)
+    {
+        <div class="row">
+            <!-- Left side: Case Information -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+                    <div class="card-header fw-bold ">
+                        Case Information
+                    </div>
 
-    // Billing mode toggle
-    const billingRadios = qsa('input[name="billingMode"]');
-    const flatAmount = qs('#flatAmount');
-    const hourlyRate = qs('#hourlyRate');
-    const hourlyEstimate = qs('#hourlyEstimate');
+                    <div class="card-body">
+                        <!-- Case Type -->
+                        <div class="row">
+                            <div class="col-12">
+                            </div><label class="form-label fw-semibold">Case Type <span class="text-danger">*</span></label>
+                        </div>
+                        <div class="row mt-1">
+                            <div class="col-4">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="caseType1" name="caseType" value="Residential Holdover">
+                                    <label class="form-check-label" for="caseType1">Residential Holdover</label>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="caseType2" name="caseType" value="Residential Nonpayment">
+                                    <label class="form-check-label" for="caseType2">Residential Nonpayment</label>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-check form-check-inline">
+                                    <input type="checkbox" class="form-check-input" id="caseTypeOtherCb" value="HPD/Code Enforcement">
+                                    <label class="form-check-label" for="caseTypeOtherCb">HPD/Code Enforcement</label>
+                                </div>
+                            </div>
 
-    function updateBillingUI() {
-      const mode = (billingRadios.find(r => r.checked) || {}).value;
-      const isHourly = mode === 'hourly';
-      hourlyRate.style.display = isHourly ? 'inline-block' : 'none';
-      hourlyEstimate.style.display = isHourly ? 'inline-block' : 'none';
-      flatAmount.style.display = isHourly ? 'none' : 'inline-block';
-    }
-    billingRadios.forEach(r => r.addEventListener('change', updateBillingUI));
-    updateBillingUI();
+                        </div>
+                        <div class="row mt-1">
+                            <div class="col-3">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="caseType1" name="caseType" value="Commercial Case">
+                                    <label class="form-check-label" for="caseType1">Commercial Case</label>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="caseType2" name="caseType" value="Illegal Lockout">
+                                    <label class="form-check-label" for="caseType2">Illegal Lockout</label>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-check form-check-inline">
+                                    <input type="checkbox" class="form-check-input" id="caseTypeOtherCb">
+                                    <label class="form-check-label" for="caseTypeOtherCb">
+                                        Post‑Eviction / Restoration
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="form-check form-check-inline">
+                                    <input type="checkbox" class="form-check-input" id="caseTypeOtherCb">
+                                    <label class="form-check-label" for="caseTypeOtherCb">Other</label>
+                                </div>
+                            </div>
 
-    // ====== Validation ======
-    function setInvalid(el, message) {
-      const field = el.closest('.field') || el.closest('[data-required-group]') || el.parentElement;
-      if (!field) return;
-      field.classList.add('invalid');
-      const msg = field.querySelector('.error-msg') || qs(`[data-error-for="${el.name || el.dataset.requiredGroup}"]`);
-      if (msg) msg.style.display = 'block';
-      if (message && msg) msg.textContent = message;
-    }
-    function clearInvalid(el) {
-      const field = el.closest('.field') || el.closest('[data-required-group]') || el.parentElement;
-      if (!field) return;
-      field.classList.remove('invalid');
-      const msg = field.querySelector('.error-msg') || qs(`[data-error-for="${el.name || el.dataset?.requiredGroup}"]`);
-      if (msg) msg.style.display = 'none';
-    }
+                        </div>
+                        <!-- Case Details -->
+                        <div class="row g-3 mt-2">
 
-    function validateGroup(name) {
-      const group = qsa(`[name="${name}"]`);
-      const checked = group.some(x => (x.type === 'checkbox' || x.type === 'radio') ? x.checked : !!x.value);
-      const errorFor = qs(`[data-error-for="${name}"]`);
-      if (!checked) { errorFor?.style && (errorFor.style.display = 'block'); return false; }
-      if (errorFor) errorFor.style.display = 'none';
-      return true;
-    }
+                            <!-- Court Location -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Court Location (Borough) <span class="text-danger">*</span></label>
+                                <input type="text" name="courtLocation" class="form-control" required />
+                                <div class="invalid-feedback">Enter borough.</div>
+                            </div>
 
-    function validateBilling() {
-      const mode = (billingRadios.find(r => r.checked) || {}).value;
-      if (mode === 'hourly') {
-        const ok = (!!hourlyRate.value && Number(hourlyRate.value) > 0) && (!!hourlyEstimate.value && Number(hourlyEstimate.value) > 0);
-        const err = qs('[data-error-for="billing"]');
-        if (!ok) { err.style.display = 'block'; return false; } else { err.style.display = 'none'; return true; }
-      } else {
-        const ok = !!flatAmount.value && Number(flatAmount.value) > 0;
-        const err = qs('[data-error-for="billing"]');
-        if (!ok) { err.style.display = 'block'; return false; } else { err.style.display = 'none'; return true; }
-      }
-    }
+                            <!-- Part / Room # -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Part / Room #</label>
+                                <input type="text" name="partRoom" class="form-control" />
+                            </div>
 
-    function validateForm() {
-      let ok = true;
-      // clear all
-      qsa('.invalid').forEach(n => n.classList.remove('invalid'));
-      qsa('.error-msg').forEach(n => n.style.display = 'none');
+                            <!-- Index / LT Docket # -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Index / LT Docket #</label>
+                                <input type="text" name="docket" class="form-control" />
+                            </div>
 
-      // required inputs
-      qsa('[required]').forEach(el => {
-        if (!el.value) { setInvalid(el); ok = false; }
-      });
+                            <!-- County / Borough -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">County / Borough <span class="text-danger">*</span></label>
+                                <input type="text" name="county" class="form-control" required />
+                                <div class="invalid-feedback">Enter county/borough.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-      // required groups
-      ok = validateGroup('caseType') && ok;
-      ok = validateGroup('representing') && ok;
-      ok = validateGroup('appearanceType') && ok;
-      ok = validateGroup('payment') && ok;
-
-      // at least one document
-      const docsChecked = qsa('[name="docs"]').some(x => x.checked) || (docsOtherCb && docsOtherCb.checked && docsOther.value.trim());
-      const docsErr = qs('[data-error-for="docs"]');
-      if (!docsChecked) { docsErr.style.display = 'block'; ok = false; } else { docsErr.style.display = 'none'; }
-
-      // billing
-      ok = validateBilling() && ok;
-
-      return ok;
-    }
-
-    // highlight fields on input
-    form.addEventListener('input', e => {
-      const t = e.target;
-      if (t.matches('[required]') && t.value) { clearInvalid(t); }
-      if (t.name === 'flatAmount' || t.name === 'hourlyRate' || t.name === 'hourlyEstimate') validateBilling();
-    });
-
-    // ====== Serialization ======
-    function serialize() {
-      const fd = new FormData(form);
-      const obj = {};
-      // arrays
-      obj.caseType = qsa('[name="caseType"]:checked').map(x => x.value);
-      if (caseTypeOtherCb?.checked && caseTypeOther.value) obj.caseType.push(caseTypeOther.value);
-
-      obj.appearanceType = qsa('[name="appearanceType"]:checked').map(x => x.value);
-      if (apptOtherCb?.checked && apptOther.value) obj.appearanceType.push(apptOther.value);
-
-      obj.docs = qsa('[name="docs"]:checked').map(x => x.value);
-      if (docsOtherCb?.checked && docsOther.value) obj.docs.push(docsOther.value);
-
-      // scalars
-      ['hiringFirm', 'contactPerson', 'contactPhoneEmail', 'courtLocation', 'partRoom', 'docket', 'county', 'partyNames', 'opposingCounsel', 'appearanceDate', 'appearanceTime', 'relief', 'keyFacts', 'instructions', 'expenses', 'ackName', 'ackSignature', 'ackDate'].forEach(k => obj[k] = fd.get(k) || '');
-
-      // representing & payment
-      obj.representing = fd.get('representing') || '';
-      obj.payment = fd.get('payment') || '';
-
-      // billing
-      const mode = (billingRadios.find(r => r.checked) || {}).value;
-      obj.billing = { mode };
-      if (mode === 'hourly') {
-        obj.billing.hourlyRate = Number(fd.get('hourlyRate') || 0);
-        obj.billing.estimateHours = Number(fd.get('hourlyEstimate') || 0);
-        obj.billing.estimatedTotal = +(obj.billing.hourlyRate * obj.billing.estimateHours).toFixed(2);
-      } else {
-        obj.billing.flatAmount = Number(fd.get('flatAmount') || 0);
-      }
-      return obj;
+            <!-- Right side summary -->
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
     }
 
-    // ====== Autosave (localStorage) ======
-    function saveDraft() { localStorage.setItem(STORAGE_KEY, JSON.stringify(serialize())); showToast('Draft saved'); }
-    function restoreDraft() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY); if (!raw) return;
-        const data = JSON.parse(raw);
-        // checkboxes
-        qsa('[name="caseType"]').forEach(x => x.checked = data.caseType?.includes(x.value));
-        qsa('[name="appearanceType"]').forEach(x => x.checked = data.appearanceType?.includes(x.value));
-        qsa('[name="docs"]').forEach(x => x.checked = data.docs?.includes(x.value));
-        // others
-        for (const k of ['hiringFirm', 'contactPerson', 'contactPhoneEmail', 'courtLocation', 'partRoom', 'docket', 'county', 'partyNames', 'opposingCounsel', 'appearanceDate', 'appearanceTime', 'relief', 'keyFacts', 'instructions', 'expenses', 'ackName', 'ackSignature', 'ackDate']) {
-          if (data[k] !== undefined) form.elements[k].value = data[k];
+
+    @if (CurrentStep == StepPerdiem.Party)
+    {
+
+        <div class="row">
+            <!-- Left side: Case Information -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+                    <div class="card-header fw-bold ">
+                        Party Representation
+                    </div>
+
+                    <div class="card-body">
+                        <!-- Representing -->
+                        <div class="row">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">
+                                    Representing <span class="text-danger">*</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" id="repPetitioner" name="representing" value="Petitioner" required>
+                                    <label class="form-check-label" for="repPetitioner">
+                                        Petitioner (Tenant/Occupant)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" id="repRespondent" name="representing" value="Respondent">
+                                    <label class="form-check-label" for="repRespondent">
+                                        Respondent (Landlord/Owner/Managing Agent)
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Party Details -->
+                        <div class="row g-3">
+                            <!-- Petitioner / Tenant Names -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Petitioner / Tenant Name(s) <span class="text-danger">*</span></label>
+                                <input type="text" name="petitionerNames" class="form-control" required />
+                                <div class="invalid-feedback">Party Name(s).</div>
+                            </div>
+
+   
+                            <!-- Opposing Counsel -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Opposing Counsel (if any)</label>
+                                <input type="text" name="opposingCounsel" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
+    }
+  
+    
+    @if (CurrentStep == StepPerdiem.Appearance)
+    {
+        <div class="row">
+            <!-- Left side: Case Information -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+                    <div class="card-header fw-bold ">
+                        Appearance Details
+                    </div>
+
+                    <div class="card-body">
+                        <!-- Date & Time -->
+                        <div class="row g-3 mb-4">
+                            <!-- Date of Appearance -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Date of Appearance <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" name="appearanceDate" class="form-control" required />
+                                <div class="invalid-feedback">Select a date.</div>
+                            </div>
+
+                            <!-- Time of Appearance -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Time of Appearance <span class="text-danger">*</span>
+                                </label>
+                                <input type="time" name="appearanceTime" class="form-control" required />
+                                <div class="invalid-feedback">Select a time.</div>
+                            </div>
+                        </div>
+
+                        <!-- Type of Appearance -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                Type of Appearance <span class="text-danger">*</span>
+                            </label>
+
+                            <div id="appearanceTypeGroup">
+                                <!-- Checkboxes -->
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="appt1" name="appearanceType" value="First Appearance / Intake">
+                                    <label class="form-check-label" for="appt1">First Appearance / Intake</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="appt2" name="appearanceType" value="Trial / Hearing">
+                                    <label class="form-check-label" for="appt2">Trial / Hearing</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="appt3" name="appearanceType" value="Motion / OSC Return Date">
+                                    <label class="form-check-label" for="appt3">Motion / OSC Return Date</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="appt4" name="appearanceType" value="Adjournment / Stipulation">
+                                    <label class="form-check-label" for="appt4">Adjournment / Stipulation</label>
+                                </div>
+
+                                <!-- Other Option -->
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="apptOtherCb">
+                                    <label class="form-check-label" for="apptOtherCb">Other</label>
+                                </div>
+
+                                <input type="text" id="apptOther" class="form-control mt-2 ms-4" placeholder="Specify other" style="display:none;" />
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <label>Relief / Action Requested Today</label>
+                            </div>
+                            <div class="col-12">
+                                <textarea name="relief" rows="3" style="width:100%"></textarea>
+                            </div>
+                            
+                          
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
+    }
+
+
+    @if (CurrentStep == StepPerdiem.CaseBackground)
+    {
+        <div class="row">
+            <!-- Left side: Case Information -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+                    <div class="card-header fw-bold ">
+                        Case Background (Brief)
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <!-- Petitioner / Tenant -->
+                            <div class="col-md-12">
+                                <label class="req fw-bold">Key Facts to Know (bullet points)</label>
+                            </div>
+                            <div class="col-md-12">
+                                    <textarea name="keyFacts" rows="4" style="width:100%"  placeholder="• Fact 1 • Fact 2 • Fact 3" required></textarea>
+                            </div>
+
+                          
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
+    }
+
+
+    @if (CurrentStep == StepPerdiem.DocumentIntractions)
+    {
+        <div class="row">
+            <!-- Left side: Case Information -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+                    <div class="card-header fw-bold">
+                        Documents & Instructions
+                    </div>
+
+                    <div class="card-body">
+                        <!-- Documents Provided -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Documents Provided <span class="text-danger">*</span></label>
+
+                            <div class="d-flex flex-wrap gap-3" id="docsGroup">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="docsPetition" name="docs" value="Petition/Answer">
+                                    <label class="form-check-label" for="docsPetition">Petition/Answer</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="docsLease" name="docs" value="Lease / Rent Ledger">
+                                    <label class="form-check-label" for="docsLease">Lease / Rent Ledger</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="docsPrior" name="docs" value="Prior Orders">
+                                    <label class="form-check-label" for="docsPrior">Prior Orders</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="docsInspect" name="docs" value="Inspection Reports">
+                                    <label class="form-check-label" for="docsInspect">Inspection Reports</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="docsStip" name="docs" value="Stipulations">
+                                    <label class="form-check-label" for="docsStip">Stipulations</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="docsOtherCb">
+                                    <label class="form-check-label" for="docsOtherCb">Other</label>
+                                </div>
+
+                                <input type="text" id="docsOther" name="docsOther"
+                                       class="form-control mt-2" placeholder="Specify other"
+                                       style="max-width: 300px; display: none;" />
+                            </div>
+
+                           
+                        </div>
+
+                        <!-- Special Instructions -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Special Instructions from Hiring Attorney</label>
+                            <textarea name="instructions" class="form-control" rows="3" placeholder="Enter any special instructions..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
+    }
+
+
+    @if (CurrentStep == StepPerdiem.Reporting)
+    {
+        <div class="row">
+            <!-- Left side: Case Information -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+                    <div class="card-header fw-bold">
+                        Reporting Requirements
+                    </div>
+
+                    <div class="card-body">
+                        <div class="card-body">
+                            <label class="form-label fw-semibold">Select Applicable Reporting Requirements</label>
+
+                            <div class="d-flex flex-column gap-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="reportWritten" name="reporting" value="Written Court Report">
+                                    <label class="form-check-label" for="reportWritten">
+                                        Written Court Report (Outcome, Next Date, Judge’s Notes)
+                                    </label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="reportCopy" name="reporting" value="Copy of Stipulation/Order">
+                                    <label class="form-check-label" for="reportCopy">
+                                        Copy of Any Stipulation/Order Signed
+                                    </label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="reportUpdate" name="reporting" value="Update Status in Platform">
+                                    <label class="form-check-label" for="reportUpdate">
+                                        Updated Case Status in Platform
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="text-danger small mt-2 d-none" id="reportError">
+                                Please select at least one reporting requirement.
+                            </div>
+                        </div>
+                      
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
+    }
+
+
+    @if (CurrentStep == StepPerdiem.Billing)
+    {
+        <div class="row">
+            <!-- Left side: Case Information -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+                    <div class="card-header fw-bold ">
+                       Billing
+                    </div>
+
+                    <div class="card-body">
+                        <!-- Rate / Compensation -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                Rate / Compensation <span class="text-danger">*</span>
+                            </label>
+
+                            <div id="billingRadio" class="d-flex flex-wrap align-items-center gap-3">
+                                <!-- Flat Rate Option -->
+                                <div class="form-check d-flex align-items-center gap-2">
+                                    <input class="form-check-input" type="radio" name="billingMode" id="billingFlat" value="flat" checked>
+                                    <label class="form-check-label" for="billingFlat">Flat</label>
+                                </div>
+                                <input type="number" id="flatAmount" name="flatAmount"
+                                       class="form-control" placeholder="$"
+                                       min="0" step="0.01"
+                                       style="width:160px;" />
+
+                                <!-- Hourly Rate Option -->
+                                <div class="form-check d-flex align-items-center gap-2">
+                                    <input class="form-check-input" type="radio" name="billingMode" id="billingHourly" value="hourly">
+                                    <label class="form-check-label" for="billingHourly">Hourly</label>
+                                </div>
+                                <input type="number" id="hourlyRate" name="hourlyRate"
+                                       class="form-control" placeholder="$ / hr"
+                                       min="0" step="0.01"
+                                       style="width:160px; display:none;" />
+                                <input type="number" id="hourlyEstimate" name="hourlyEstimate"
+                                       class="form-control" placeholder="est. hrs"
+                                       min="0" step="0.25"
+                                       style="width:120px; display:none;" />
+                            </div>
+
+                            <div class="text-danger small mt-1 d-none" id="billingError">
+                                Enter a flat amount, or hourly rate + estimated hours.
+                            </div>
+                        </div>
+
+                        <!-- Travel / Other Expenses & Payment Method -->
+                        <div class="row g-3">
+                            <!-- Travel / Other Expenses -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Travel / Other Expenses</label>
+                                <input type="text" id="expenses" name="expenses"
+                                       class="form-control" placeholder="Optional" />
+                            </div>
+
+                            <!-- Payment Method -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Payment Method <span class="text-danger">*</span></label>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" id="paymentDirect" name="payment" value="Direct Pay" checked>
+                                    <label class="form-check-label" for="paymentDirect">Direct Pay (check / ACH)</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" id="paymentPlatform" name="payment" value="Platform Invoice">
+                                    <label class="form-check-label" for="paymentPlatform">Platform Invoice (EvictionFiler.com)</label>
+                                </div>
+
+                                <div class="text-danger small mt-1 d-none" id="paymentError">
+                                    Please select a payment method.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
+    }
+
+
+    @if (CurrentStep == StepPerdiem.Acknowledgment)
+    {
+        <div class="row">
+            <!-- Left side: Case Information -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+                    <div class="card-header fw-bold ">
+                        ✅ Acknowledgment
+                    </div>
+
+                    <div class="card-body">
+                        <p class="text-muted mb-4">
+                            I, (Per Diem Attorney), accept responsibility to appear and represent the above party in accordance with instructions provided.
+                        </p>
+
+                        <div class="row g-3">
+                            <!-- Attorney Name -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">
+                                    Per Diem Attorney (Name) <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="ackName" name="ackName" required placeholder="Enter full name" />
+                                <div class="text-danger small mt-1 d-none" id="ackNameError">Please enter your full name.</div>
+                            </div>
+
+                            <!-- Signature -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">
+                                    Signature <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="ackSignature" name="ackSignature" required placeholder="Type full name as signature" />
+                                <div class="text-danger small mt-1 d-none" id="ackSignatureError">Please provide your typed signature.</div>
+                            </div>
+
+                            <!-- Date -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">
+                                    Date <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" class="form-control" id="ackDate" name="ackDate" required />
+                                <div class="text-danger small mt-1 d-none" id="ackDateError">Please select a date.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
+    }
+
+
+    <div class="d-flex justify-content-between border-top pt-3 mt-3">
+        <button type="button" class="btn btn-outline-secondary" @onclick="Prev" disabled="@(CurrentStep == StepPerdiem.Acknowledgment)">← Back</button>
+        @if (CurrentStep != StepPerdiem.Acknowledgment)
+        {
+            <button type="button" class="btn" style="background-color:#1F365D !important; color:white" @onclick="Next">Next →</button>
         }
-        // representing & payment
-        if (data.representing) { const r = qs(`[name="representing"][value="${data.representing}"]`); if (r) r.checked = true; }
-        if (data.payment) { const p = qs(`[name="payment"][value="${data.payment}"]`); if (p) p.checked = true; }
-        // billing
-        if (data.billing) {
-          const mode = data.billing.mode || 'flat';
-          const r = qs(`[name="billingMode"][value="${mode}"]`); if (r) r.checked = true;
-          if (mode === 'hourly') {
-            hourlyRate.value = data.billing.hourlyRate ?? '';
-            hourlyEstimate.value = data.billing.estimateHours ?? '';
-          } else {
-            flatAmount.value = data.billing.flatAmount ?? '';
-          }
-          updateBillingUI();
+        else
+        {
+            <button type="button" class="btn btn-success">Submit</button>
         }
-        // others text
-        if (data.caseType?.some(v => !qsa('[name="caseType"]').some(x => x.value === v))) { caseTypeOtherCb.checked = true; caseTypeOther.style.display = 'inline-block'; caseTypeOther.value = data.caseType.find(v => !qsa('[name="caseType"]').some(x => x.value === v)); }
-        if (data.appearanceType?.some(v => !qsa('[name="appearanceType"]').some(x => x.value === v))) { apptOtherCb.checked = true; apptOther.style.display = 'inline-block'; apptOther.value = data.appearanceType.find(v => !qsa('[name="appearanceType"]').some(x => x.value === v)); }
-        if (data.docs?.some(v => !qsa('[name="docs"]').some(x => x.value === v))) { docsOtherCb.checked = true; docsOther.style.display = 'inline-block'; docsOther.value = data.docs.find(v => !qsa('[name="docs"]').some(x => x.value === v)); }
-      } catch { }
-    }
+    </div>
+    @* </EditForm> *@
 
-    saveBtn.addEventListener('click', (e) => { e.preventDefault(); saveDraft(); });
-    form.addEventListener('change', () => localStorage.setItem(STORAGE_KEY, JSON.stringify(serialize())));
-
-    // ====== Submit ======
-    async function submitForm(e) {
-      e.preventDefault();
-      submitBtn.disabled = true;
-      const ok = validateForm();
-      if (!ok) {
-        submitBtn.disabled = false;
-        const firstErr = qs('.invalid, [data-error-for]:not([style*="display: none"])');
-        firstErr?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        showToast('Please fix highlighted fields', false);
-        return;
-      }
-      const payload = serialize();
-      try {
-        const res = await fetch('/api/perdiem/appearances', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-        });
-        if (!res.ok) throw new Error('Server error');
-        const data = await res.json().catch(() => ({ id: 'N/A' }));
-        localStorage.removeItem(STORAGE_KEY);
-        showToast('Submitted successfully');
-        // Optional: redirect after a beat
-        setTimeout(() => { /* window.location.href = `/cases/${data.id}` */ }, 600);
-      } catch (err) {
-        // Fallback demo mode if API not present
-        console.warn('Submit failed, demo success fallback:', err);
-        showToast('Submitted (demo mode)', true);
-      } finally {
-        submitBtn.disabled = false;
-      }
-    }
-
-    qs('#submitBtn').addEventListener('click', submitForm);
-
-    // Initialize
-    restoreDraft();
-  </script>
-</body>
-
-
+</div>
 
 @code {
-    [Parameter]
-    public Guid ClientId { get; set; }
+    private readonly List<string> Steps = new() { "Attorney", "Case", "Party Repre", "Apperence", "Case Background", "Document/Intractions", "Reporting", "Billing", "Acknowledgment "};
 
-    [Parameter]
-    public Guid CaseTypeId { get; set; }
+    [Parameter] public StepPerdiem CurrentStep { get; set; }
+    private void Prev()
+    {
+        if (CurrentStep > StepPerdiem.Attorney) CurrentStep--;
+    }
+
+    private async Task Next()
+    {
+
+        if (CurrentStep < StepPerdiem.Acknowledgment) CurrentStep++;
+    }
+
+    private string Progress => (((int)CurrentStep + 1) * 100.0 / Steps.Count).ToString("0");
 }
+
+

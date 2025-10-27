@@ -1,0 +1,954 @@
+﻿@page "/legalcase/create-hpd"
+
+
+
+@using System.ComponentModel.DataAnnotations
+@using System.Linq.Expressions
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.ApartmentDto
+@using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Application.DTOs.LegalCaseDto
+@using EvictionFiler.Application.DTOs.OccupantDto
+@using EvictionFiler.Application.DTOs.PaginationDto
+@using EvictionFiler.Application.DTOs.TenantDto
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Application.Services
+@using EvictionFiler.Client.Components.Cases
+@using EvictionFiler.Client.Jwt
+@using EvictionFiler.Domain.Entities.Master
+@using Blazored.Typeahead
+
+@inject IClientRoleRepository ClientRoleRepository
+@inject ICaseTypeRepository CaseTypeRepository
+@inject ICaseSubTypeRepository CaseSubTypeRepository
+@inject IRegulationStatusRepository RegulationStatusRepository
+@inject IReasonHoldoverRepository ReasonHoldoverRepository
+@inject ILandlordTypeRepository LandlordTypeRepository
+@inject IRenewalStatusRepository RenewalStatusRepository
+@inject IUnitIllegalRepository UnitIllegalRepository
+@inject ITenancyTypeRepository TenancyTypeRepository
+@inject IDateRentRepository DateRentRepository
+@inject ILandlordSevice _landlordService
+@inject IBuildingService _buildingService
+@inject ILegalCaseService _legalCaseService
+@inject ITenantService _tenantService
+@inject IClientService _clientService
+@inject ICaseProgramRepository _caseprogram
+@inject IAdditionalTenantService _additionalTenant
+@inject IAdditionalOccupantsService _additionalOccupant
+@inject IStateRepository _stateRepository
+
+@using EvictionFiler.Client.SpinnerService
+@using EvictionFiler.Domian.Enums
+@inject IJSRuntime JS
+@inject NavigationManager nav
+@inject SpinnerService spinnerservice
+
+@using Microsoft.AspNetCore.Components.Authorization;
+@using EvictionFiler.Domain.Entities
+
+@using System.Security.Claims
+@inject JwtAuthStateProviders _authStateProvider
+
+<HeadContent>
+
+</HeadContent>
+
+<style>
+    .required-label::after { content: " *"; color: red; }
+
+    :root { --bg: #f7f9fc; --card: #ffffff; --ink: #0f172a; --muted: #64748b; --line: #e2e8f0; --brand: #4f46e5; --brand-2: #4338ca; --ok: #059669; --warn: #b45309; --danger: #b91c1c; --radius: 16px; --shadow: 0 6px 24px rgba(2, 6, 23, .08); }
+
+    * { box-sizing: border-box }
+
+    html,
+    body { height: 100% }
+
+    body { margin: 0; font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; background: radial-gradient(70% 120% at 50% -10%, #eef2ff 0%, var(--bg) 60%); color: var(--ink) }
+
+    .wrap { max-width: 1200px; margin: auto; padding: 24px }
+
+    header.top { position: sticky; top: 0; z-index: 10; background: rgba(255, 255, 255, .9); backdrop-filter: saturate(180%) blur(6px); border-bottom: 1px solid var(--line) }
+
+        header.top .bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; max-width: 1200px; margin: auto }
+
+    .brand { display: flex; gap: 12px; align-items: center }
+
+    .logo { width: 40px; height: 40px; border-radius: 14px; background: #0f172a; color: #fff; display: grid; place-items: center; font-weight: 700 }
+
+    .secure { display: inline-flex; gap: 8px; align-items: center; border-radius: 999px; padding: 6px 10px; border: 1px solid #d1fae5; background: #ecfdf5; color: #065f46; font-size: 12px }
+
+    .stepper { padding: 0 24px 14px; max-width: 1200px; margin: auto }
+
+    .track { height: 6px; background: #e5e7eb; border-radius: 999px; overflow: hidden }
+
+    .meter { height: 100%; background: linear-gradient(90deg, var(--brand), var(--brand-2)); width: 40% }
+
+    .steps { display: flex; gap: 12px; flex-wrap: wrap; margin: 8px 0 }
+
+    .btn-tenant:hover { background: #1F365D !important; }
+
+    .chip { display: flex; gap: 8px; align-items: center; color: #475569 }
+
+    .dot { width: 10px; height: 10px; border-radius: 999px; background: #cbd5e1 }
+
+        .dot.active { background: #818cf8 }
+
+        .dot.done { background: #4f46e5 }
+
+    .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px }
+
+    @@media (max-width:1024px) {
+        .grid { grid-template-columns: 1fr }
+    }
+
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow) }
+
+        .card > header { padding: 18px 20px; border-bottom: 1px solid var(--line); display: flex; gap: 12px; align-items: flex-start }
+
+    .k { width: 28px; height: 28px; border-radius: 12px; background: #0f172a; color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 700 }
+
+    .card .body { padding: 20px }
+
+    .fields { display: grid; gap: 16px }
+
+    .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+
+    .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+
+    @@media (max-width:820px) {
+        .cols-2, .cols-3 { grid-template-columns: 1fr }
+    }
+
+    label.lbl { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: #475569; margin-bottom: 6px }
+
+    input.txt,
+    select.sel { width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 12px; background: #fff; color: #0f172a; outline: none }
+
+        input.txt:focus,
+        select.sel:focus { border-color: #6366f1; box-shadow: 0 0 0 6px #eef2ff }
+
+    .hint { font-size: 12px; color: #64748b; margin-top: 4px }
+
+    .pill { display: inline-block; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 12px; background: #fff; font-size: 13px }
+
+    .aside.card { position: sticky; top: 106px; height: fit-content }
+
+    .kv { display: flex; justify-content: space-between; gap: 12px }
+
+        .kv .k { background: none; color: #64748b; width: auto; height: auto; border-radius: 0; font-weight: 600 }
+
+    .actions { position: sticky; bottom: 0; z-index: 10; background: rgba(255, 255, 255, .9); border-top: 1px solid var(--line) }
+
+        .actions .row { max-width: 1200px; margin: auto; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center }
+
+    .btn { padding: 10px 16px; border-radius: 12px; border: 1px solid #cbd5e1; background: #fff; color: #0f172a }
+
+        .btn.primary { background: var(--brand); border-color: transparent; color: #fff }
+
+        .btn.danger { background: #fee2e2; border-color: #fecaca; color: #991b1b }
+
+    .list { display: flex; flex-direction: column; gap: 8px }
+
+        .list .row { display: flex; gap: 8px }
+
+    .iconbtn { border: 1px solid #cbd5e1; background: #fff; border-radius: 10px; padding: 8px 10px; cursor: pointer }
+
+    .pre { white-space: pre-wrap; background: #0b1020; color: #e2e8f0; border-radius: 12px; padding: 14px; overflow: auto; max-height: 360px }
+
+    @@media (max-width:560px) {
+        .logo { width: 36px; height: 36px }
+
+        .brand h1 { font-size: 16px }
+
+        .secure { display: none }
+    }
+
+    .form-check-input { cursor: pointer; }
+</style>
+
+
+<div class="container-fluid py-3 border-bottom bg-white sticky-top">
+    <div class="d-flex justify-content-between align-items-center">
+
+        <div class="d-flex align-items-center" style="gap:30px">
+            @for (var i = 0; i < Steps.Count; i++)
+            {
+                var bgColor = i <= (int)CurrentStep ? "#1F365D" : "#6c757d";
+
+                <div class="d-flex align-items-center gap-2">
+                    <span class="rounded-circle d-inline-block"
+                          style="width:14px; height:14px; border: 1px solid #333; background-color:@bgColor;"></span>
+                    <span>@Steps[i]</span>
+                </div>
+            }
+        </div>
+
+
+    </div>
+    <div class="progress mt-3" style="height:6px;">
+        <div class="progress-bar" role="progressbar" style="width:@Progress% ;  background-color:#1F365D !important"></div>
+    </div>
+</div>
+
+<div class="container my-4">
+   @*  <EditForm > *@
+      
+        @* Case Info *@
+        @if (CurrentStep == StepHpd.Attorney)
+        {
+
+            <div class="row">
+                <!-- Left side: Attorney Assigning Case -->
+                <div class="col-md-8">
+                    <div class="card mb-3 shadow-sm rounded-3">
+                        <div class="card-header fw-bold ">
+                            Attorney Assigning Case
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <!-- Hiring Attorney / Firm -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Hiring Attorney / Firm <span class="text-danger">*</span></label>
+                                    <input type="text" name="hiringFirm" class="form-control" required />
+                                    <div class="invalid-feedback">
+                                        Please enter the hiring firm.
+                                    </div>
+                                </div>
+
+                                <!-- Contact Person -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Contact Person</label>
+                                    <input type="text" name="contactPerson" class="form-control" />
+                                </div>
+
+                                <!-- Phone / Email -->
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Phone / Email</label>
+                                    <input type="text" name="contactPhoneEmail" class="form-control" placeholder="(555) 555-5555 / name@example.com" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right side summary -->
+                <div class="col-md-4">
+                    <TipsSummary />
+                </div>
+            </div>
+
+
+        }
+
+
+        @if (CurrentStep == StepHpd.Case)
+        {
+        <div class="row">
+            <!-- Left side: Case Information -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+                    <div class="card-header fw-bold ">
+                        Case Information
+                    </div>
+
+                    <div class="card-body">
+                        <!-- Case Type -->
+                        <div class="row">
+                            <div class="col-12">
+                            </div><label class="form-label fw-semibold">Case Type <span class="text-danger">*</span></label>
+                        </div>
+                        <div class="row mt-1">
+                            <div class="col-4">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="caseType1" name="caseType" value="HPD Harassment Proceeding">
+                                    <label class="form-check-label" for="caseType1">HPD Harassment Proceeding</label>
+                                </div>
+                            </div>
+                             <div class="col-5">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="caseType2" name="caseType" value="HPD Code Enforcement / Repairs">
+                                    <label class="form-check-label" for="caseType2">HPD Code Enforcement / Repairs</label>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="form-check form-check-inline">
+                                    <input type="checkbox" class="form-check-input" id="caseTypeOtherCb">
+                                    <label class="form-check-label" for="caseTypeOtherCb">Other</label>
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- Case Details -->
+                        <div class="row g-3 mt-2">
+
+                            <!-- Court Location -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Court Location (Borough) <span class="text-danger">*</span></label>
+                                <input type="text" name="courtLocation" class="form-control" required />
+                                <div class="invalid-feedback">Enter borough.</div>
+                            </div>
+
+                            <!-- Part / Room # -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Part / Room #</label>
+                                <input type="text" name="partRoom" class="form-control" />
+                            </div>
+
+                            <!-- Index / LT Docket # -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Index / LT Docket #</label>
+                                <input type="text" name="docket" class="form-control" />
+                            </div>
+
+                            <!-- County / Borough -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">County / Borough <span class="text-danger">*</span></label>
+                                <input type="text" name="county" class="form-control" required />
+                                <div class="invalid-feedback">Enter county/borough.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right side summary -->
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
+        }
+ 
+        @if (CurrentStep == StepHpd.Party)
+        {
+
+       <div class="row">
+            <!-- Left side: Case Information -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+            <div class="card-header fw-bold ">
+                Party Representation
+            </div>
+
+            <div class="card-body">
+                <!-- Representing -->
+                <div class="row">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">
+                                    Representing <span class="text-danger">*</span>
+                                </label>
+                            </div>
+                </div>
+               
+                <div class="row">
+                    <div class="col-6">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" id="repPetitioner" name="representing" value="Petitioner" required>
+                                    <label class="form-check-label" for="repPetitioner">
+                                        Petitioner (Tenant/Occupant)
+                                    </label>
+                                </div>
+</div>
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" id="repRespondent" name="representing" value="Respondent">
+                                    <label class="form-check-label" for="repRespondent">
+                                        Respondent (Landlord/Owner/Managing Agent)
+                                    </label>
+                                </div>
+                            </div>
+                   
+
+                
+
+                
+
+                   
+                </div>
+
+                <!-- Party Details -->
+                <div class="row g-3">
+                    <!-- Petitioner / Tenant Names -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Petitioner / Tenant Name(s) <span class="text-danger">*</span></label>
+                        <input type="text" name="petitionerNames" class="form-control" required />
+                        <div class="invalid-feedback">Enter petitioner/tenant name(s).</div>
+                    </div>
+
+                    <!-- Respondent / Landlord Names -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Respondent / Landlord Name(s) <span class="text-danger">*</span></label>
+                        <input type="text" name="respondentNames" class="form-control" required />
+                        <div class="invalid-feedback">Enter respondent/landlord name(s).</div>
+                    </div>
+
+                    <!-- Managing Agent -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Managing Agent (if applicable)</label>
+                        <input type="text" name="managingAgent" class="form-control" />
+                    </div>
+
+                    <!-- Opposing Counsel -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Opposing Counsel (if any)</label>
+                        <input type="text" name="opposingCounsel" class="form-control" />
+                    </div>
+                </div>
+            </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
+        }
+
+     
+        @if (CurrentStep == StepHpd.Building)
+        {
+        <div class="row">
+            <!-- Left side: Case Information -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+                    <div class="card-header fw-bold ">
+                       Building Information
+                    </div>
+
+                    <div class="card-body">
+                        <!-- Building Address & Unit -->
+                        <div class="row g-3 mb-4">
+                            <!-- Building Address -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Building Address <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="buildingAddress" class="form-control" required />
+                                <div class="invalid-feedback">Enter building address.</div>
+                            </div>
+
+                            <!-- Unit / Apt # -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Unit / Apt # <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="unitNumber" class="form-control" required />
+                                <div class="invalid-feedback">Enter unit number.</div>
+                            </div>
+                        </div>
+
+                        <!-- Building Type & Registration -->
+                        <div class="row g-4">
+                            <!-- Building Type -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Building Type <span class="text-danger">*</span>
+                                </label>
+
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" id="buildingType1" name="buildingType" value="Multiple Dwelling" required>
+                                    <label class="form-check-label" for="buildingType1">Multiple Dwelling</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" id="buildingType2" name="buildingType" value="Two-Family">
+                                    <label class="form-check-label" for="buildingType2">Two-Family</label>
+                                </div>
+
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" class="form-check-input" id="buildingType3" name="buildingType" value="Other">
+                                    <label class="form-check-label" for="buildingType3">Other</label>
+                                </div>
+
+                                <div class="text-danger small mt-1 d-none" id="buildingTypeError">
+                                    Choose a building type.
+                                </div>
+                            </div>
+
+                            <!-- Registration Status -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Registration Status (HPD/DOF) <span class="text-danger">*</span>
+                                </label>
+
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" id="registration1" name="registration" value="Registered" required>
+                                    <label class="form-check-label" for="registration1">Registered</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" id="registration2" name="registration" value="Not Registered">
+                                    <label class="form-check-label" for="registration2">Not Registered</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" id="registration3" name="registration" value="Unknown">
+                                    <label class="form-check-label" for="registration3">Unknown</label>
+                                </div>
+
+                                <div class="text-danger small mt-1 d-none" id="registrationError">
+                                    Select registration status.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
+        }
+
+        
+        @if (CurrentStep == StepHpd.PetitionerTenant)
+        {
+
+        <div class="row">
+            <!-- Left side: Case Information -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+            <div class="card-header fw-bold bg-primary text-white">
+                Allegations of Harassment (Petitioner / Tenant)
+            </div>
+
+            <div class="card-body">
+                <label class="form-label fw-semibold">
+                    Please select applicable allegations <span class="text-danger">*</span>
+                </label>
+
+                <div class="mb-3" id="allegationsGroup">
+                    <!-- Repeated interruptions -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="alg1" name="allegations" value="Repeated interruptions of essential services">
+                        <label class="form-check-label" for="alg1">
+                            Repeated interruptions of essential services (heat, hot water, gas, electricity)
+                        </label>
+                    </div>
+
+                    <!-- Failure to make necessary repairs -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="alg2" name="allegations" value="Failure to make necessary repairs">
+                        <label class="form-check-label" for="alg2">
+                            Failure to make necessary repairs
+                        </label>
+                    </div>
+
+                    <!-- Repairs Description -->
+                    <div class="mt-2 ms-4">
+                        <label class="form-label fw-semibold">Repairs Description</label>
+                        <input type="text" class="form-control" name="repairsDescription" placeholder="Describe needed repairs" />
+                    </div>
+
+                    <!-- Threats, intimidation -->
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="alg3" name="allegations" value="Threats, intimidation, or verbal abuse">
+                        <label class="form-check-label" for="alg3">
+                            Threats, intimidation, or verbal abuse
+                        </label>
+                    </div>
+
+                    <!-- Illegal lockout attempts -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="alg4" name="allegations" value="Illegal lockout attempts / changed locks">
+                        <label class="form-check-label" for="alg4">
+                            Illegal lockout attempts / changed locks
+                        </label>
+                    </div>
+
+                    <!-- Unlawful entry -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="alg5" name="allegations" value="Unlawful entry into apartment">
+                        <label class="form-check-label" for="alg5">
+                            Unlawful entry into apartment
+                        </label>
+                    </div>
+
+                    <!-- Frivolous court proceedings -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="alg6" name="allegations" value="Commenced frivolous court proceedings">
+                        <label class="form-check-label" for="alg6">
+                            Commenced frivolous court proceedings
+                        </label>
+                    </div>
+
+                    <!-- Other acts -->
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="algOtherCb">
+                        <label class="form-check-label" for="algOtherCb">Other acts</label>
+                    </div>
+
+                    <input type="text" id="algOther" class="form-control mt-2 ms-4" placeholder="Describe other acts" style="display:none;" />
+                </div>
+
+                <div class="text-danger small d-none" id="allegationsError">
+                    Select at least one allegation.
+                </div>
+            </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
+
+        }
+
+      
+        @if (CurrentStep == StepHpd.RespondentLandlord)
+        {
+              <div class="row">
+            <!-- Left side: Case Information -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+        <div class="card-header fw-bold bg-primary text-white">
+            Defense / Position (Respondent / Landlord)
+        </div>
+
+        <div class="card-body">
+            <label class="form-label fw-semibold">
+                Please select applicable defenses <span class="text-danger">*</span>
+            </label>
+
+            <div id="defensesGroup" class="mb-3">
+                <!-- All services provided -->
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="def1" name="defenses" value="All services provided; no interruption proven">
+                    <label class="form-check-label" for="def1">
+                        All services are being provided; no interruption proven
+                    </label>
+                </div>
+
+                <!-- Tenant refused access -->
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="def2" name="defenses" value="Tenant refused access for repairs">
+                    <label class="form-check-label" for="def2">
+                        Tenant has refused access for repairs
+                    </label>
+                </div>
+
+                <!-- Tenant caused conditions -->
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="def3" name="defenses" value="Tenant caused conditions complained of">
+                    <label class="form-check-label" for="def3">
+                        Tenant caused conditions complained of
+                    </label>
+                </div>
+
+                <!-- Tenant owes rent -->
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="def4" name="defenses" value="Tenant owes rent / harassment claim as defense">
+                    <label class="form-check-label" for="def4">
+                        Tenant owes rent / is using harassment claim as defense
+                    </label>
+                </div>
+
+                <!-- Violations corrected -->
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="def5" name="defenses" value="Violations corrected / do not exist">
+                    <label class="form-check-label" for="def5">
+                        Violations cited were corrected / do not exist
+                    </label>
+                </div>
+
+                <!-- Other defenses -->
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="defOtherCb">
+                    <label class="form-check-label" for="defOtherCb">Other defenses</label>
+                </div>
+
+                <input type="text" id="defOther" class="form-control mt-2 ms-4" placeholder="Describe other defenses" style="display:none;" />
+            </div>
+
+            <div class="text-danger small d-none" id="defensesError">
+                Select at least one defense.
+            </div>
+        </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
+        }
+
+
+        @if (CurrentStep == StepHpd.Appearance)
+        {
+        <div class="row">
+            <!-- Left side: Case Information -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+        <div class="card-header fw-bold ">
+            Appearance Details
+        </div>
+
+        <div class="card-body">
+            <!-- Date & Time -->
+            <div class="row g-3 mb-4">
+                <!-- Date of Appearance -->
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                        Date of Appearance <span class="text-danger">*</span>
+                    </label>
+                    <input type="date" name="appearanceDate" class="form-control" required />
+                    <div class="invalid-feedback">Select a date.</div>
+                </div>
+
+                <!-- Time of Appearance -->
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                        Time of Appearance <span class="text-danger">*</span>
+                    </label>
+                    <input type="time" name="appearanceTime" class="form-control" required />
+                    <div class="invalid-feedback">Select a time.</div>
+                </div>
+            </div>
+
+            <!-- Type of Appearance -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">
+                    Type of Appearance <span class="text-danger">*</span>
+                </label>
+
+                <div id="appearanceTypeGroup">
+                    <!-- Checkboxes -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="appt1" name="appearanceType" value="First Appearance / Intake">
+                        <label class="form-check-label" for="appt1">First Appearance / Intake</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="appt2" name="appearanceType" value="Trial / Hearing">
+                        <label class="form-check-label" for="appt2">Trial / Hearing</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="appt3" name="appearanceType" value="Motion / OSC Return Date">
+                        <label class="form-check-label" for="appt3">Motion / OSC Return Date</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="appt4" name="appearanceType" value="Adjournment / Stipulation">
+                        <label class="form-check-label" for="appt4">Adjournment / Stipulation</label>
+                    </div>
+
+                    <!-- Other Option -->
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="apptOtherCb">
+                        <label class="form-check-label" for="apptOtherCb">Other</label>
+                    </div>
+
+                    <input type="text" id="apptOther" class="form-control mt-2 ms-4" placeholder="Specify other" style="display:none;" />
+                </div>
+
+                <div class="text-danger small d-none" id="appearanceTypeError">
+                    Select at least one appearance type.
+                </div>
+            </div>
+        </div>
+             </div>
+            </div>
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
+        }
+
+   
+        @if (CurrentStep == StepHpd.Relief)
+        {
+        <div class="row">
+            <!-- Left side: Case Information -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+        <div class="card-header fw-bold bg-primary text-white">
+            Relief Requested
+        </div>
+
+        <div class="card-body">
+            <div class="row g-4">
+                <!-- Petitioner / Tenant -->
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Petitioner / Tenant</label>
+
+                    <div id="reliefPetitionerGroup">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="relPet1" name="reliefPetitioner" value="Order to Correct">
+                            <label class="form-check-label" for="relPet1">Order to Correct</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="relPet2" name="reliefPetitioner" value="Civil Penalties">
+                            <label class="form-check-label" for="relPet2">Civil Penalties against Landlord</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="relPet3" name="reliefPetitioner" value="Finding of Harassment">
+                            <label class="form-check-label" for="relPet3">Finding of Harassment</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="relPet4" name="reliefPetitioner" value="Access Order for repairs">
+                            <label class="form-check-label" for="relPet4">Access Order for repairs</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="relPet5" name="reliefPetitioner" value="Restoration to possession">
+                            <label class="form-check-label" for="relPet5">Restoration to possession (if lockout)</label>
+                        </div>
+
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="relPetOtherCb">
+                            <label class="form-check-label" for="relPetOtherCb">Other</label>
+                        </div>
+
+                        <input type="text" id="relPetOther" class="form-control mt-2 ms-4" placeholder="Other relief" style="display:none;" />
+                    </div>
+
+                    <div class="text-danger small d-none" id="reliefPetitionerError">Select at least one relief.</div>
+                </div>
+
+                <!-- Respondent / Landlord -->
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Respondent / Landlord</label>
+
+                    <div id="reliefRespondentGroup">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="relRes1" name="reliefRespondent" value="Dismissal of Proceeding">
+                            <label class="form-check-label" for="relRes1">Dismissal of Proceeding</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="relRes2" name="reliefRespondent" value="Vacatur of Orders to Correct">
+                            <label class="form-check-label" for="relRes2">Vacatur of Orders to Correct</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="relRes3" name="reliefRespondent" value="Denial of Harassment Finding">
+                            <label class="form-check-label" for="relRes3">Denial of Harassment Finding</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="relRes4" name="reliefRespondent" value="Access Order against Tenant">
+                            <label class="form-check-label" for="relRes4">Access Order against Tenant</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="relRes5" name="reliefRespondent" value="Costs / Sanctions against Tenant">
+                            <label class="form-check-label" for="relRes5">Costs / Sanctions against Tenant</label>
+                        </div>
+
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="relResOtherCb">
+                            <label class="form-check-label" for="relResOtherCb">Other</label>
+                        </div>
+
+                        <input type="text" id="relResOther" class="form-control mt-2 ms-4" placeholder="Other relief" style="display:none;" />
+                    </div>
+
+                    <div class="text-danger small d-none" id="reliefRespondentError">Select at least one relief.</div>
+                </div>
+            </div>
+        </div>
+         </div>
+            </div>
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
+        }
+
+
+        @if (CurrentStep == StepHpd.Billing)
+        {
+        <div class="row">
+            <!-- Left side: Case Information -->
+            <div class="col-md-8">
+                <div class="card mb-3 shadow-sm rounded-3">
+        <div class="card-header fw-bold bg-primary text-white">
+            Billing Information (if per diem)
+        </div>
+
+        <div class="card-body">
+            <!-- Billing Type -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Billing Type</label>
+                <div id="billingRadio" class="d-flex flex-wrap align-items-center gap-3">
+                    <!-- Hourly Option -->
+                    <div class="form-check d-flex align-items-center gap-2">
+                        <input class="form-check-input" type="radio" id="billingHourly" name="billingType" value="hourly">
+                        <label class="form-check-label" for="billingHourly">Hourly ($/hr)</label>
+                    </div>
+                    <input type="number" id="hourlyRate" name="hourlyRate"
+                           class="form-control" placeholder="$ / hr"
+                           min="0" step="0.01"
+                           style="width:160px; display:none;" />
+
+                    <!-- Flat Option -->
+                    <div class="form-check d-flex align-items-center gap-2">
+                        <input class="form-check-input" type="radio" id="billingFlat" name="billingType" value="flat">
+                        <label class="form-check-label" for="billingFlat">Flat Rate</label>
+                    </div>
+                    <input type="number" id="flatAmount" name="flatAmount"
+                           class="form-control" placeholder="$"
+                           min="0" step="0.01"
+                           style="width:160px; display:none;" />
+                </div>
+
+                <div class="text-danger small d-none" id="billingError">
+                    Please select a billing type and enter an amount.
+                </div>
+            </div>
+
+            <!-- Invoice To -->
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Invoice To</label>
+                    <input type="text" class="form-control" name="invoiceTo" placeholder="Name or Organization" />
+                </div>
+            </div>
+        </div>
+        </div>
+            </div>
+            <div class="col-md-4">
+                <TipsSummary />
+            </div>
+        </div>
+        }
+
+        <div class="d-flex justify-content-between border-top pt-3 mt-3">
+            <button type="button" class="btn btn-outline-secondary" @onclick="Prev" disabled="@(CurrentStep == StepHpd.Billing)">← Back</button>
+            @if (CurrentStep != StepHpd.Billing)
+            {
+                <button type="button" class="btn" style="background-color:#1F365D !important; color:white" @onclick="Next">Next →</button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-success">Submit</button>
+            }
+        </div>
+    @* </EditForm> *@
+
+</div>
+
+@code {
+    private readonly List<string> Steps = new() { "Attorney", "Case", "Party Repre", "Building", "Petitioner/Tenant", "Respondent/Landlord", "Apperence", "Relief", "Biling" };
+  
+    [Parameter] public StepHpd CurrentStep { get; set; }
+    private void Prev()
+    {
+        if (CurrentStep > StepHpd.Attorney) CurrentStep--;
+    }
+
+    private async Task Next()
+    {
+      
+        if (CurrentStep < StepHpd.Billing) CurrentStep++;
+    }
+   
+    private string Progress => (((int)CurrentStep + 1) * 100.0 / Steps.Count).ToString("0");
+}
+
+
