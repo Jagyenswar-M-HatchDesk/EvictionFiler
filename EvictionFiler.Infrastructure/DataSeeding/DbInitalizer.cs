@@ -33,7 +33,9 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				await SeedIsUnitIlligal(context);
 				await SeedCaseprograms(context);
 				await SeedClientRoles(context);
-
+				await SeedCaseStatus(context);
+				await SeedCounty(context);
+				await SeedCourtPart(context);
                 await context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -55,7 +57,42 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			}
 		}
 
-		private static async Task SeedCaseprograms(MainDbContext context)
+        private static async Task SeedCounty(MainDbContext context)
+        {
+            var casetypes = InitialDataGenerator.GetCounty();
+            foreach (var type in casetypes)
+            {
+                if (context.MstCounties.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstCounties.AddAsync(type);
+                }
+            }
+        }
+        private static async Task SeedCaseStatus(MainDbContext context)
+        {
+            var casetypes = InitialDataGenerator.GetCaseStatus();
+            foreach (var type in casetypes)
+            {
+                if (context.MstCaseStatus.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstCaseStatus.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedCourtPart(MainDbContext context)
+        {
+            var casetypes = InitialDataGenerator.GetCourtPart();
+            foreach (var type in casetypes)
+            {
+                if (context.MstCourtPart.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstCourtPart.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedCaseprograms(MainDbContext context)
 		{
 			var casetypes = InitialDataGenerator.GetCasePrograms();
 			foreach (var type in casetypes)

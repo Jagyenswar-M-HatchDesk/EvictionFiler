@@ -1,6 +1,7 @@
 ﻿@page "/Calander"
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.CalanderDto
+@using EvictionFiler.Application.DTOs.CaseHearing
 @using EvictionFiler.Domain.Entities.Master
 @using System.ComponentModel.DataAnnotations
 @using System.Linq.Expressions
@@ -21,6 +22,7 @@
 
 @inject ICaseTypeRepository CaseTypeRepository
 @inject ICalanderService CalanderService
+@inject ICaseHearingService CaseHearingService
 
 @using EvictionFiler.Client.SpinnerService
 @using EvictionFiler.Domian.Enums
@@ -168,7 +170,7 @@
                 <div class="row g-3">
                     <div class="col-md-2">
                         <label for="f-county" class="form-label">County</label>
-                        <InputSelect class="form-select" @bind-Value="calanderDto.CountyId">
+                        <InputSelect class="form-select" @bind-Value="hearingDto.CountyId">
                             <option value="">-- Select type --</option>
                             @foreach (var l in CountyList)
                             {
@@ -178,15 +180,15 @@
                     </div>
                     <div class="col-md-2">
                         <label for="f-from" class="form-label" >Date From</label>
-                        <InputDate  id="f-from" class="form-control" @bind-Value="calanderDto.DateFrom" />
+                        <InputDate id="f-from" class="form-control" @bind-Value="hearingDto.HearingDate" />
                     </div>
                     <div class="col-md-2">
                         <label for="f-to" class="form-label">Date To</label>
-                        <InputDate id="f-from" class="form-control" @bind-Value="calanderDto.DateTo" />
+                        <InputDate id="f-from" class="form-control" @bind-Value="hearingDto.HearingDateTo" />
                     </div>
                     <div class="col-md-2">
                         <label for="f-part" class="form-label">Court Part</label>
-                        <InputSelect class="form-select" @bind-Value="calanderDto.CourtPartId">
+                        <InputSelect class="form-select" @bind-Value="hearingDto.CourtPartId">
                             <option value="">-- Select type --</option>
                             @foreach (var l in CourtPartList)
                             {
@@ -197,11 +199,11 @@
 
                     <div class="col-md-2">
                         <label for="f-room" class="form-label">Room</label>
-                        <InputText id="f-from" class="form-control" placeholder="Enter Room" @bind-Value="calanderDto.Room" />
+                        <InputText id="f-from" class="form-control" placeholder="Enter Room" @bind-Value="hearingDto.RoomNo" />
                     </div>
                     <div class="col-md-2">
                         <label for="f-type" class="form-label">Case Type</label>
-                        <InputSelect class="form-select" @bind-Value="calanderDto.CaseTypeId">
+                        <InputSelect class="form-select" @bind-Value="hearingDto.CaseTypeId">
                             <option value="">-- Select type --</option>
                             @foreach (var l in CaseTypeList)
                             {
@@ -216,11 +218,11 @@
                         <div class="row">
                             <div class="col-md-2">
                                 <label for="f-judge" class="form-label">Judge</label>
-                                <InputText id="f-from" class="form-control" placeholder="Enter Judge" @bind-Value="calanderDto.Judge" />
+                                <InputText id="f-from" class="form-control" placeholder="Enter Judge" @bind-Value="hearingDto.Judge" />
                             </div>
                             <div class="col-md-2">
                                 <label for="f-status" class="form-label">Status</label>
-                                <InputSelect class="form-select" @bind-Value="calanderDto.CaseStatusId">
+                                <InputSelect class="form-select" @bind-Value="hearingDto.CaseStatusId">
                                     <option value="">-- Select type --</option>
                                     @foreach (var l in CaseStatusList)
                                     {
@@ -231,7 +233,7 @@
 
                             <div class="col-md-3">
                                 <label for="f-q" class="form-label">Search</label>
-                                <InputText id="f-from" class="form-control" @bind-Value="calanderDto.Caption" />
+                                <InputText id="f-from" class="form-control" @bind-Value="hearingDto.Caption" />
                             </div>
 
                             <div class="col-md-5 d-flex align-items-center">
@@ -284,18 +286,18 @@
                     </tr>
                 </thead>
                 <tbody id="tbody">
-                    @if (CourtCases != null && CourtCases.Any())
+                    @if (CasesHearing != null && CasesHearing.Any())
                     {
-                        foreach (var c in CourtCases)
+                        foreach (var c in CasesHearing)
                         {
                             <tr>
                                 <td>@c.CountyName</td>
-                                <td>@(c.DateFrom.ToString("yyyy-MM-dd") ?? "")</td>
-                                <td>@c.CountyId</td>
-                                <td>@c.Room</td>
+                                <td>@(c.HearingDate.ToString("yyyy-MM-dd") ?? "")</td>
+                                <td>@c.CourtPart</td>
+                                <td>@c.RoomNo</td>
                                 <td>@c.Caption</td>
-                                <td>LT-310359-25/QU</td>
-                                <td>09:30</td>
+                                <td>@c.IndexNo</td>
+                                <td>@c.HearingTime</td>
                                 <td>@c.CaseTypeName</td>
                                 <td>@c.Judge</td>
                                 <td>@c.CaseStatusName</td>
@@ -318,6 +320,7 @@
 @code {
 
     private CalanderDto calanderDto = new CalanderDto();
+    private CaseHearingDto hearingDto = new CaseHearingDto();
 
     private EditContext _editContext;
     private ValidationMessageStore _messages;  
@@ -329,14 +332,15 @@
     private bool isAdmin = false;
 
     private List<CalanderDto> CourtCases { get; set; }
+    private List<CaseHearingDto> CasesHearing { get; set; }
 
 
     protected override async Task OnInitializedAsync()
     {
-        calanderDto = new CalanderDto();
-        calanderDto.DateFrom = DateTime.Now;
-        calanderDto.DateTo = DateTime.Now;
-        _editContext = new EditContext(calanderDto);
+        hearingDto = new CaseHearingDto();
+        hearingDto.HearingDate = DateTime.Now;
+        hearingDto.HearingDateTo = DateTime.Now;
+        _editContext = new EditContext(hearingDto);
         _messages = new ValidationMessageStore(_editContext);
 
 
@@ -347,6 +351,7 @@
         // legalcaseDto.ClientId = Guid.Parse(ClientId);
 
         CourtCases = await CalanderService.GetAllCalanderAsync();
+        CasesHearing = await CaseHearingService.GetAllCaseHeariingAsync();
 
         var authState = await _authStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
@@ -372,16 +377,16 @@
 
         if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userGuid))
         {
-            calanderDto.CreatedBy = userGuid;
+            hearingDto.CreatedBy = userGuid;
         }
         else
         {
             // unauthenticated user
-            calanderDto.CreatedBy = Guid.Empty;
+            hearingDto.CreatedBy = Guid.Empty;
         }
 
         // Save the full nested object
-        var isSaved = await CalanderService.GenrateCalander(calanderDto);
+        var isSaved = await CaseHearingService.AddHearing(hearingDto);
         if (isSaved)
         {
             Navigation.NavigateTo("/Calander", true);

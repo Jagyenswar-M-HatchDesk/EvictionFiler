@@ -24,6 +24,7 @@ namespace EvictionFiler.Application.DTOs.ClientDto
 		public bool Status { get; set; }
 		public List<CreateToLandLordDto> LandLords { get; set; } = new();
         public Guid? ClientTypeId { get; set; } = Guid.Empty;
+        public string? ClientTypeName { get; set; } 
 		public string? CreatedByName { get; set; }
         public string? Reference { get; set; }
        
