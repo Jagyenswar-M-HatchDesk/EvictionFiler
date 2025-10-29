@@ -68,7 +68,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasIndex("TenantId");
 
-                    b.ToTable("AdditioanlTenants");
+                    b.ToTable("AdditioanlTenants", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.AdditionalOccupants", b =>
@@ -117,7 +117,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasIndex("LegalCaseId");
 
-                    b.ToTable("AdditionalOccupants");
+                    b.ToTable("AdditionalOccupants", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Building", b =>
@@ -208,7 +208,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasIndex("StateId");
 
-                    b.ToTable("Buildings");
+                    b.ToTable("Buildings", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Calander", b =>
@@ -285,7 +285,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasIndex("CourtPartId");
 
-                    b.ToTable("Calanders");
+                    b.ToTable("Calanders", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseForms", b =>
@@ -339,7 +339,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasIndex("LegalCaseId");
 
-                    b.ToTable("CaseForms");
+                    b.ToTable("CaseForms", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseHearing", b =>
@@ -422,7 +422,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasIndex("LegalCaseId");
 
-                    b.ToTable("CaseHearings");
+                    b.ToTable("CaseHearings", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Client", b =>
@@ -517,7 +517,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasIndex("StateId");
 
-                    b.ToTable("Clients");
+                    b.ToTable("Clients", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Courts", b =>
@@ -587,7 +587,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasIndex("CountyId");
 
-                    b.ToTable("Courts");
+                    b.ToTable("Courts", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.FeesCatalog", b =>
@@ -800,7 +800,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasIndex("TypeOfOwnerId");
 
-                    b.ToTable("LandLords");
+                    b.ToTable("LandLords", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.LegalCase", b =>
@@ -1038,7 +1038,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasIndex("TenantId");
 
-                    b.ToTable("LegalCases");
+                    b.ToTable("LegalCases", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CaseProgram", b =>
@@ -1076,7 +1076,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstCaseProgram");
+                    b.ToTable("MstCaseProgram", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CaseStatus", b =>
@@ -1120,7 +1120,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstCaseStatus");
+                    b.ToTable("MstCaseStatus", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CaseSubType", b =>
@@ -1169,7 +1169,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasIndex("CaseTypeId");
 
-                    b.ToTable("MstCaseSubTypes");
+                    b.ToTable("MstCaseSubTypes", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CaseType", b =>
@@ -1213,7 +1213,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstCaseTypes");
+                    b.ToTable("MstCaseTypes", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.Category", b =>
@@ -1257,7 +1257,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstCategories");
+                    b.ToTable("MstCategories", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.ClientRole", b =>
@@ -1301,7 +1301,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstClientRoles");
+                    b.ToTable("MstClientRoles", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.County", b =>
@@ -1345,7 +1345,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstCounties");
+                    b.ToTable("MstCounties", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.CourtPart", b =>
@@ -1389,7 +1389,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstCourtPart");
+                    b.ToTable("MstCourtPart", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.DateRent", b =>
@@ -1433,7 +1433,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstDateRent");
+                    b.ToTable("MstDateRent", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.FormTypes", b =>
@@ -1488,7 +1488,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("MstFormTypes");
+                    b.ToTable("MstFormTypes", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.IsUnitIllegal", b =>
@@ -1532,7 +1532,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstIsUnitIllegal");
+                    b.ToTable("MstIsUnitIllegal", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.LandlordType", b =>
@@ -1576,7 +1576,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstLandlordTypes");
+                    b.ToTable("MstLandlordTypes", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.Language", b =>
@@ -1620,7 +1620,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstLanguages");
+                    b.ToTable("MstLanguages", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.PremiseType", b =>
@@ -1664,7 +1664,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstPremiseTypes");
+                    b.ToTable("MstPremiseTypes", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.ReasonHoldover", b =>
@@ -1708,7 +1708,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstReasonHoldover");
+                    b.ToTable("MstReasonHoldover", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.RegulationStatus", b =>
@@ -1752,7 +1752,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstRegulationStatus");
+                    b.ToTable("MstRegulationStatus", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.RenewalStatus", b =>
@@ -1796,7 +1796,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstRenewalStatus");
+                    b.ToTable("MstRenewalStatus", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.State", b =>
@@ -1840,7 +1840,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstStates");
+                    b.ToTable("MstStates", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.TenancyType", b =>
@@ -1884,7 +1884,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstTenancyTypes");
+                    b.ToTable("MstTenancyTypes", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.TypeOfOwner", b =>
@@ -1928,7 +1928,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MstTypeOfOwners");
+                    b.ToTable("MstTypeOfOwners", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Role", b =>
@@ -2151,7 +2151,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasIndex("TenancyTypeId");
 
-                    b.ToTable("Tenants");
+                    b.ToTable("Tenants", (string)null);
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.User", b =>
@@ -2317,7 +2317,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserDatabases");
+                    b.ToTable("UserDatabases", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

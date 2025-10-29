@@ -23,7 +23,8 @@ namespace EvictionFiler.Application.DTOs.ClientDto
 		public string? Fax { get; set; }
 		public bool Status { get; set; }
 		public List<CreateToLandLordDto> LandLords { get; set; } = new();
-        public Guid? ClientTypeId { get; set; } = Guid.Empty;
+        [Required(ErrorMessage = "Select Client Type")]
+        public Guid? ClientTypeId { get; set; } 
         public string? ClientTypeName { get; set; } 
 		public string? CreatedByName { get; set; }
         public string? Reference { get; set; }

@@ -39,9 +39,9 @@ namespace EvictionFiler.Domain.Entities
 
 		public ICollection<LandLord>? LandLords { get; set; }
 
-		public Guid? ClientTypeId { get; set; }
+		public Guid? ClientTypeId { get; set; } 
 		[ForeignKey("ClientTypeId")]
-		public ClientRole ClientType { get; set; }
+		public ClientRole? ClientType { get; set; }
 
         public string? Reference { get; set; }
     }

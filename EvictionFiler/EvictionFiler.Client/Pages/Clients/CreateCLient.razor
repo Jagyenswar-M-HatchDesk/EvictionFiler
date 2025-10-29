@@ -20,6 +20,7 @@
 @inject SpinnerService spinnerservice
 
 @inject IClientService _clientService
+@inject IClientRoleRepository _clientRoleService
 @inject ILandlordSevice _landlordService
 @inject IBuildingService _apartmentService
 @inject ITenantService _tenantService
@@ -249,7 +250,17 @@ aria-labelledby="createUserLabel">
                     </div>
 
                     <div class="row">
-                        <div class="col-md-4 mb-3">
+                        <div class="col-3 mb-3">
+                            <label class="form-label required-label">Client Type</label>
+                            <InputSelect class="form-select" @bind-Value="createClient.ClientTypeId" style="cursor:pointer;">
+                                <option value="">-- Select Type --</option>
+                                @foreach (var Own in ClientTypeList)
+                                {
+                                    <option value="@Own.Id">@Own.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="col-md-3 mb-3">
                             <label class="form-label color-text ">State</label>
                             <InputSelect class="form-select" @bind-Value="createClient.StateId">
                                 <option value="">-- Select State --</option>
@@ -259,7 +270,7 @@ aria-labelledby="createUserLabel">
                                 }
                             </InputSelect>
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label color-text">City</label>
                             <!-- City -->
                             <div class="input-group mb-3">
@@ -270,7 +281,7 @@ aria-labelledby="createUserLabel">
 
                         </div>
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label color-text ">Zip Code</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-geo"></i></span>
@@ -1317,6 +1328,7 @@ aria-labelledby="createUserLabel">
     private List<TenancyType> TenancyTypeList = new();
     private List<IsUnitIllegal> IsUnitIllegalList = new();
     private List<DateRent> DateRentList = new();
+    private List<ClientRole> ClientTypeList = new();
     private string LatestLandLordCode = "";
     private string LatestBuildingCode = "";
     private string LatestTenantCode = "";
@@ -1340,6 +1352,7 @@ aria-labelledby="createUserLabel">
             RegulationList = await RegulationStatusRepository.GetAllRegulationStatus();
             premiseTypesList = await PremiseTypeRepository.GetAllPremiseType();
             DateRentList = await DateRentRepository.GetAllDateRent();
+            ClientTypeList = await _clientRoleService.GetAllClientRole();
             LangList = await LanguageRepository.GetAllLanguage();
             LandLordTypeList = await LandlordTypeRepository.GetAllLandLordType();
             TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
@@ -1560,7 +1573,9 @@ aria-labelledby="createUserLabel">
     {
         return
             !string.IsNullOrWhiteSpace(createClient.FirstName) &&
-            !string.IsNullOrWhiteSpace(createClient.Email);
+            !string.IsNullOrWhiteSpace(createClient.Email)
+             &&
+            (createClient.ClientTypeId != null && createClient.ClientTypeId != Guid.Empty);
     }
 
     private void CheckCancel()
