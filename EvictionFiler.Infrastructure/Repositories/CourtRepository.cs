@@ -69,6 +69,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 VirtualLink = courtInfosDto.VirtualLink,
                 Judge = courtInfosDto.Judge,
                 Part = courtInfosDto.Part,
+                CountyId = courtInfosDto.CountyId,
             };
 
            var court = _mainDbContext.Courts.Add(entity);
