@@ -24,6 +24,8 @@ namespace EvictionFiler.Application.DTOs.CourtDto
         public string VirtualLink { get; set; } = string.Empty;
         public string CallIn { get; set; } = string.Empty;
         public string ConferenceId { get; set; } = string.Empty;
+        public Guid? CountyId { get; set; } 
+        public string CountyName { get; set; } = string.Empty;
         public string Judge { get; set; } = string.Empty;
     }
 }

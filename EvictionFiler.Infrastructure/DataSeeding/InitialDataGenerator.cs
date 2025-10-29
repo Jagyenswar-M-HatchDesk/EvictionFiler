@@ -39,6 +39,8 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             {
                 new County() { Name = "New York", CreatedOn = now },
                 new County() { Name = "Kings", CreatedOn = now },
+                new County() { Name = "Queens", CreatedOn = now },
+                new County() { Name = "Bronx", CreatedOn = now },
 
             };
         }

@@ -157,7 +157,7 @@ namespace EvictionFiler.Application.Services
                     CreatedByName = userDict.ContainsKey(client.CreatedBy)
                             ? userDict[client.CreatedBy]
                             : "Admin",
-					ClientTypeName = client.ClientType.Name,
+					ClientTypeName = client.ClientType !=null ? client.ClientType.Name : string.Empty,
                 })
                 .ToList();
 
@@ -466,6 +466,7 @@ namespace EvictionFiler.Application.Services
 					ZipCode = client.ZipCode,
 					Phone = client.Phone,
 					CellPhone = client.CellPhone,
+					ClientTypeId = client.ClientTypeId,
 					Fax = client.Fax,
 					CreatedBy = client.CreatedBy,
 					CreatedOn = DateTime.Now

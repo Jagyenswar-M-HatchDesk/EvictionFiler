@@ -358,17 +358,17 @@ namespace EvictionFiler.Application.Services
                     //HasPossession = caseEntity.Tenants?.HasPossession,
                     //OtherOccupants = caseEntity.Tenants?.OtherOccupants
 
-                    CourtId = caseEntity.CourtId,
-                    Court = caseEntity.Courts.Court,
-                    CourtAddress = caseEntity.Courts.Address,
-                    CourtConferenceId = caseEntity.Courts.ConferenceId,
-                    CourtCallIn = caseEntity.Courts.CallIn,
-                    CourtNotes = caseEntity.Courts.Notes,
-                    CourtPart = caseEntity.Courts.Part,
-                    CourtPhone = caseEntity.Courts.Phone,
-                    CourtRoomNo = caseEntity.Courts.RoomNo,
-                    CourtVirtualLink = caseEntity.Courts.VirtualLink,
-                    BillAmount = caseEntity.BillAmount,
+                    CourtId = caseEntity.CourtId != null ? caseEntity.CourtId : Guid.Empty,
+                    Court = caseEntity.Courts != null ? caseEntity.Courts.Court : "",
+                    CourtAddress = caseEntity.Courts != null ? caseEntity.Courts.Address : "",
+                    CourtConferenceId = caseEntity.Courts != null ? caseEntity.Courts.ConferenceId : "",
+                    CourtCallIn = caseEntity.Courts != null ? caseEntity.Courts.CallIn : "",
+                    CourtNotes = caseEntity.Courts != null ? caseEntity.Courts.Notes : "",
+                    CourtPart = caseEntity.Courts != null ? caseEntity.Courts.Part : "",
+                    CourtPhone = caseEntity.Courts != null ? caseEntity.Courts.Phone : "",
+                    CourtRoomNo = caseEntity.Courts != null ? caseEntity.Courts.RoomNo : "",
+                    CourtVirtualLink = caseEntity.Courts != null ? caseEntity.Courts.VirtualLink : "",
+                    BillAmount = caseEntity.BillAmount ?? 0,
                 };
 
                 return intakeModel;

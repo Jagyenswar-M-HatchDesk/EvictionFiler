@@ -27,7 +27,7 @@ namespace EvictionFiler.Infrastructure.Repositories
         }
         public async Task<PaginationDto<Courts>> GetPagedCourtsAsync(int pageNumber, int pageSize, string searchTerm)
         {
-            var query = _mainDbContext.Courts.AsQueryable();
+            var query = _mainDbContext.Courts.Include(e=>e.County).AsQueryable();
 
             // Optional search
             if (!string.IsNullOrWhiteSpace(searchTerm))

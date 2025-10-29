@@ -68,6 +68,8 @@ namespace EvictionFiler.Application.Services
                 Judge = c.Judge,
                 Part = c.Part,
                 VirtualLink = c.VirtualLink,
+                CountyName = c.County != null ? c.County.Name : string.Empty,
+                CountyId = c.CountyId != null ? c.CountyId.Value : Guid.Empty
 
             }).ToList();
 

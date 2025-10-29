@@ -1,7 +1,9 @@
 ﻿using EvictionFiler.Domain.Entities.Base.Base;
+using EvictionFiler.Domain.Entities.Master;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +24,9 @@ namespace EvictionFiler.Domain.Entities
         public string? CallIn { get; set; } = string.Empty;
         public string? ConferenceId { get; set; } = string.Empty;
         public string? Judge { get; set; } = string.Empty;
+        public Guid? CountyId { get; set; }
+        [ForeignKey("CountyId")]
+        public County? County { get; set; }
 
 
     }
