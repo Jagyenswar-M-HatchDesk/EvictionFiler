@@ -53,6 +53,13 @@ namespace EvictionFiler.Application.Services
             return result > 0;
 
         }
+        public async Task<int> GetAllTodayCaseHearingAsync()
+        {
+            var calanders = await _caseHearingRepository
+                  .GetAllQuerable(x => x.HearingDate.HasValue && x.HearingDate.Value.Date == DateTime.Today)
+                  .CountAsync();
+            return calanders;
+        }
 
         public async Task<List<CaseHearingDto>> GetAllCaseHeariingAsync()
         {
