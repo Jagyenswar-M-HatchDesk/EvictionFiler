@@ -11,5 +11,6 @@ namespace EvictionFiler.Application.Interfaces.IServices
     {
         Task<bool> AddHearing(CaseHearingDto dto);
         Task<List<CaseHearingDto>> GetAllCaseHeariingAsync();
+        Task<int> GetAllTodayCaseHearingAsync();
     }
 }

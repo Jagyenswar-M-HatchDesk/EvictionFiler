@@ -10,7 +10,7 @@ namespace EvictionFiler.Application.Constants
     {
         public const string EmailRequired = "Email is required.";
         public const string PasswordRequired = "Password is required.";
-        public const string InvalidCredentials = "The email or password you entered is incorrect.";
+        public const string InvalidCredentials = "Invalid Credentials.";
         public const string UnexpectedError = "An unexpected error occurred. Please try again.";
         
     }
