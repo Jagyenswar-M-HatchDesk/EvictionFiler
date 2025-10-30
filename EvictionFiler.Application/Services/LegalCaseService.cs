@@ -536,9 +536,16 @@ namespace EvictionFiler.Application.Services
                 existingCase.OralAgreeMent = legalCase.OralAgreeMent;
                 existingCase.GoodCauseApplies = legalCase.GoodCauseApplies;
                 existingCase.CalculatedNoticeLength = legalCase.CalculatedNoticeLength;
-                existingCase.CaseProgramId = legalCase.CaseProgramId;
+                if(legalCase.CaseProgramId != null && legalCase.CaseProgramId != Guid.Empty)
+                {
+                    existingCase.CaseProgramId = legalCase.CaseProgramId;
 
-                existingCase.CourtId = legalCase.CourtId;
+                }
+                if (legalCase.CourtId != null && legalCase.CourtId != Guid.Empty)
+                {
+                    existingCase.CourtId = legalCase.CourtId;
+
+                }
                 existingCase.BillAmount = legalCase.BillAmount;
 
                 var updated = _repository.UpdateAsync(existingCase);
