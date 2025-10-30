@@ -1,20 +1,15 @@
 ﻿using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.ApartmentDto;
-using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
-
+using EvictionFiler.Application.DTOs.LegalCaseDto;
 using EvictionFiler.Application.DTOs.OccupantDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
-using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using PdfSharpCore;
-using PdfSharpCore.Pdf.Filters;
 using System.Linq.Expressions;
-using EvictionFiler.Application.DTOs.LegalCaseDto;
 
 namespace EvictionFiler.Application.Services
 {
@@ -135,7 +130,7 @@ namespace EvictionFiler.Application.Services
             var addedcase = await _repository.AddAsync(legalCases);
             var result = await _unitOfWork.SaveChangesAsync();
 
-            if( result != null) return addedcase.Id;
+            if (result != null) return addedcase.Id;
 
             return null;
         }
@@ -373,7 +368,7 @@ namespace EvictionFiler.Application.Services
 
                 return intakeModel;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception();
             }
@@ -553,7 +548,7 @@ namespace EvictionFiler.Application.Services
 
                 return null;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception();
             }
