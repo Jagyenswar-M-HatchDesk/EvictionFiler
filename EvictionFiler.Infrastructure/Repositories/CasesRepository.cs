@@ -25,16 +25,30 @@ namespace EvictionFiler.Infrastructure.Repositories
         {
             if (isAdmin)
             {
-                
-                return await _context.LegalCases.CountAsync();
+                var today = DateTime.Today;
+                var startOfWeek = today.AddDays(-(int)today.DayOfWeek + 1); // Monday
+                var endOfWeek = startOfWeek.AddDays(7);
+
+                var count = await _context.LegalCases
+                    .Where(e => e.CreatedOn >= startOfWeek && e.CreatedOn < endOfWeek)
+                    .CountAsync();
+
+                return count;
             }
             else
             {
               
                 var userGuid = Guid.Parse(userId);
-                return await _context.LegalCases
-                                     .Where(c => c.CreatedBy == userGuid) 
-                                     .CountAsync();
+                
+                var today = DateTime.Today;
+                var startOfWeek = today.AddDays(-(int)today.DayOfWeek + 1); // Monday
+                var endOfWeek = startOfWeek.AddDays(7);
+
+                var count = await _context.LegalCases
+                    .Where(e => e.CreatedOn >= startOfWeek && e.CreatedOn < endOfWeek && e.CreatedBy == userGuid)
+                    .CountAsync();
+                return count;
+
             }
         }
         public async Task<int> GetActiveCasesCountAsync(string userId, bool isAdmin)

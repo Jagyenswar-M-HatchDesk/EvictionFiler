@@ -2673,19 +2673,21 @@
     }
     private async Task OpenHearingPopup()
     {
-        if (string.IsNullOrWhiteSpace(legalcaseDto.Court) ||
-            string.IsNullOrWhiteSpace(legalcaseDto.CourtRoomNo) ||
-            string.IsNullOrWhiteSpace(legalcaseDto.CourtPart) ||
-            string.IsNullOrWhiteSpace(legalcaseDto.Judge))
+        if (legalcaseDto.CourtId != null && legalcaseDto.CourtId != Guid.Empty)
+        {
+            
+            caseHearing.HearingDate = DateTime.Now;
+            var timespan = TimeSpan.FromHours(10);
+            caseHearing.HearingTime = TimeOnly.FromTimeSpan(timespan);
+            await JS.InvokeVoidAsync("showModal", "hearingModal");
+        }
+        else
         {
             showCourtInfoAlert = true;
             return;
         }
 
-        caseHearing.HearingDate = DateTime.Now;
-        var timespan = TimeSpan.FromHours(10);
-        caseHearing.HearingTime = TimeOnly.FromTimeSpan(timespan);
-        await JS.InvokeVoidAsync("showModal", "hearingModal");
+        
     }
     private async Task SaveHearingPopup()
     {
