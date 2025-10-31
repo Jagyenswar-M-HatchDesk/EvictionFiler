@@ -452,6 +452,15 @@
     }
     }
 
+    .table-responsive {
+    overflow-x: auto; /* Enable horizontal scroll */
+    position: relative;
+    }
+    table.table thead th {
+    color: #1F365D;
+    background: #F2F0EC;
+    margin-bottom: 0px !important;
+    }
 
 </style>
 
@@ -594,7 +603,7 @@
                 />
             </div>
             <div class="col-md-2">
-                <button>Search</button>
+                <button @onclick="Search">Search</button>
             </div>
 
 
@@ -602,6 +611,117 @@
         <div class="searchbar">
             <button onclick="@Resetsearch">Reset</button>
         </div>
+        @if (searchResults != null && searchResults.Items.Any())
+        {
+            <div class="table-responsive mb-3">
+                <table class="table table-hover align-middle text-center" style="margin-bottom: 0px;font-size:14px">
+                    <thead>
+                        <tr>
+                            <th>Case Code</th>
+                            <th>Case Type</th>
+                            <th>Client </th>
+                            <th>LandLord </th>
+                            <th>Tenant </th>
+                            @if (isAdmin)
+                            {
+
+                                <th>Created By</th>
+                            }
+                            <th>Last Action Date</th>
+                            <th>Status</th>
+
+                            @* <th class="sticky">Action</th> *@
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (searchResults != null && searchResults.Items.Any())
+                        {
+                            @foreach (var cas in searchResults.Items)
+                            {
+
+                                <tr>
+                                    <td>@(cas?.Casecode ?? "")</td>
+                                    <td>@(cas?.CaseType?.Name ?? "-")</td>
+                                    <td>
+                                        @($"{cas?.Clients?.ClientCode ?? ""} - {cas?.Clients?.FirstName ?? ""} {cas?.Clients?.LastName ?? ""}")
+                                    </td>
+                                    <td>
+                                        @($"{cas?.LandLords?.LandLordCode ?? ""} - {cas?.LandLords?.FirstName ?? ""} {cas?.LandLords?.LastName ?? ""}")
+                                    </td>
+
+                                    <td>
+                                        @($"{cas?.Tenants?.TenantCode ?? ""} - {cas?.Tenants?.FirstName ?? ""} {cas?.Tenants?.LastName ?? ""}")
+                                    </td>
+                                    @if (isAdmin)
+                                    {
+
+                                        <td>@(cas?.CreatedByName ?? "-")</td>
+                                    }
+                                    <td>@(cas?.CreatedOn.ToString("MM/dd/yyyy"))</td>
+                                    <td>
+                                        @(
+                                        cas.IsActive == true
+                                            ? "Active"
+                                            : cas.IsDeleted == true
+                                            ? "InActive"
+                                            : "Not Set"
+                                        )
+                                    </td>
+
+
+
+                                    @* <td class="sticky">
+                                    <i class="fa-solid fa-pen-to-square text-navy me-2" style="cursor:pointer"
+                                       @onclick="@(() => EditCase(cas.Id))"
+                                       title="Edit"></i>
+                                    <i class="fa-solid fa-trash-can text-navy  me-2" title="Delete" style="cursor:pointer" @onclick="@(() => DeleteCase(cas.Id, isAdmin))"></i>
+                                    <i class="fa-solid  fa-circle-info text-navy" title="Info" style="cursor:pointer" @onclick="@(() => CaseDetails(cas.Id))"></i>
+                                </td> *@
+
+                                </tr>
+
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="10" class="text-muted">No Cases found.</td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        }
+        <!-- Pagination -->
+        @if (searchResults != null && searchResults.TotalCount > 0)
+        {
+            <div class="d-flex justify-content-between mt-3">
+                <small style="font-size:14px">
+                    Showing @(((currentPage - 1) * pageSize) + 1)
+                    to @(Math.Min(currentPage * pageSize, searchResults.TotalCount))
+                    of @searchResults.TotalCount entries
+                </small>
+                <nav>
+                    <ul class="pagination mb-0" style="font-size:14px">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(currentPage - 1)">←</button>
+                        </li>
+                        @for (int i = 1; i <= Math.Ceiling((double)searchResults.TotalCount / pageSize); i++)
+                        {
+                            var pageNumber = i;
+                            <li class="page-item @(pageNumber == currentPage ? "active" : "")">
+                                <button class="page-link" @onclick="() => ChangePage(pageNumber)">@pageNumber</button>
+                            </li>
+                        }
+                        <li class="page-item @(currentPage == Math.Ceiling((double)searchResults.TotalCount / pageSize) ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(currentPage + 1)">→</button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+
     </div>
 
     <!-- Greeting & suggestions -->
@@ -998,10 +1118,18 @@
         totalCasesHearing = await _caseService.GetAllTodayCaseHearingAsync();
         activeCases = await _service.GetActiveCasesCountAsync(loggedInUserId, isAdmin);
     }
-
-     private async Task Search()
+    private async Task ChangePage(int page)
     {
-        
+        if (page >= 1 && page <= Math.Ceiling((double)searchResults.TotalCount / pageSize))
+        {
+            currentPage = page;
+            await Search();
+        }
+    }
+
+    private async Task Search()
+    {
+
         if (string.IsNullOrWhiteSpace(selectedCase) &&
             string.IsNullOrWhiteSpace(selectedClient) &&
             string.IsNullOrWhiteSpace(selectedTenant) &&
@@ -1010,7 +1138,7 @@
             string.IsNullOrWhiteSpace(searchTermDate) &&
             string.IsNullOrWhiteSpace(searchTermStatus))
         {
-           
+
             searchResults = null;
             isSearched = true;
 
@@ -1109,7 +1237,7 @@
         }
     }
 
-      private void SelectClient(string client)
+    private void SelectClient(string client)
     {
         selectedClient = client;
         clientSuggestions.Clear();
@@ -1137,16 +1265,18 @@
         caseSuggestionsChecked = false;
     }
 
-        private void Resetsearch()
+    private void Resetsearch()
     {
-         selectedClient = string.Empty;
+        selectedClient = string.Empty;
         selectedCase = string.Empty;
         selectedTenant = string.Empty;
         selectedLandlord = string.Empty;
         selectedReasonholdover = string.Empty;
         searchTermDate = string.Empty;
         searchTermStatus = string.Empty;
-        
+
+        searchResults = null;
+
     }
 
      int columnWidth = 15; // default desktop width
