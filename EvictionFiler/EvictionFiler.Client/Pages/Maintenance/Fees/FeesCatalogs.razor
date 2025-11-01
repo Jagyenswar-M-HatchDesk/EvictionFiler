@@ -395,22 +395,23 @@
     }
 
 
-    private async Task<bool> SaveRow(FeeRow row)
+    private async Task<(bool Success,bool Changed ,bool Deleted)> SaveRow(FeeRow row)
     {
         int filledCount = row.Values.Count(v => !string.IsNullOrWhiteSpace(v.Value))
                         + row.NumberValues.Count(n => n.Value > 0);
 
         // If row is empty and exists in DB, delete it
-        if (filledCount == 0 && row.EntityId > 0)
+        if (filledCount == 0 && row.EntityId == 0)
         {
             await DeleteEntityAsync(row);
             FeeRows.Remove(row);
             StateHasChanged();
-            return true;   //Show warning for deletion
+            return (false,false,false);   //Show warning for deletion
         }
 
         // Skip saving rows with insufficient data
-        if (filledCount < 4) return false;
+        if (filledCount < 4)
+            return (false,false,false);
 
         try
         {
@@ -435,9 +436,9 @@
                         if (newatt.HasValue)
                         {
                             row.EntityId = att.Id;
-                            return true; // Success for new row
+                            return (true,true,false); // Success for new row
                         }
-                        return false;
+
                     }
                     else
                     {
@@ -451,7 +452,7 @@
                                              existing.HourlyRate != row.NumberValues.GetValueOrDefault("Hourly Rate", 0m) ||
                                              existing.TravelWait != row.NumberValues.GetValueOrDefault("Travel/Wait (opt.)", 0m);
 
-                            if (!isChanged) return false; // Nothing changed → show Info
+                            if (!isChanged) return (false,false,false); // Nothing changed → show Info
 
                             existing.Name = row.Values["Name"];
                             existing.Role = row.Values["Role"];
@@ -460,7 +461,8 @@
                             existing.HourlyRate = row.NumberValues.GetValueOrDefault("Hourly Rate", 0m);
                             existing.TravelWait = row.NumberValues.GetValueOrDefault("Travel/Wait (opt.)", 0m);
 
-                            return await AttorneyService.UpdateAsync(existing); // Success for update
+                            bool updated = await AttorneyService.UpdateAsync(existing); // Success for update
+                            return (updated, true, false);
                         }
                     }
                     break;
@@ -479,9 +481,8 @@
                         if (newcourt.HasValue)
                         {
                             row.EntityId = court.Id;
-                            return true;
+                            return (true,true,false);
                         }
-                        return false;
                     }
                     else
                     {
@@ -493,14 +494,15 @@
                                              existing.CourtAppearance != row.NumberValues.GetValueOrDefault("Court Appearance", 0m) ||
                                              existing.PerDiem != row.NumberValues.GetValueOrDefault("Per Diem", 0m);
 
-                            if (!isChanged) return false;
+                            if (!isChanged) return (false,false,false);
 
                             existing.County = row.Values["County"];
                             existing.AttorneyHourly = row.NumberValues.GetValueOrDefault("Attorney Hourly", 0m);
                             existing.CourtAppearance = row.NumberValues.GetValueOrDefault("Court Appearance", 0m);
                             existing.PerDiem = row.NumberValues.GetValueOrDefault("Per Diem", 0m);
 
-                            return await CourtService.UpdateAsync(existing);
+                            bool updated= await CourtService.UpdateAsync(existing);
+                            return (updated, true, false);
                         }
                     }
                     break;
@@ -520,9 +522,9 @@
                         if (newgen.HasValue)
                         {
                             row.EntityId = gen.Id;
-                            return true;
+                            return (true ,true,false);
                         }
-                        return false;
+
                     }
                     else
                     {
@@ -535,7 +537,7 @@
                                              existing.Rate != row.NumberValues.GetValueOrDefault("Rate (USD)", 0m) ||
                                              existing.Category != SelectedCategory;
 
-                            if (!isChanged) return false;
+                            if (!isChanged) return (false, false, false) ;
 
                             existing.Code = row.Values["Code"];
                             existing.Label = row.Values["Label"];
@@ -543,7 +545,8 @@
                             existing.Rate = row.NumberValues.GetValueOrDefault("Rate (USD)", 0m);
                             existing.Category = SelectedCategory;
 
-                            return await FeesCatalogService.UpdateAsync(existing);
+                            bool updated = await FeesCatalogService.UpdateAsync(existing);
+                            return (updated, true, false);
                         }
                     }
                     break;
@@ -553,9 +556,9 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Error saving row: {ex.Message}");
-            return false;
+            return (false,false,false);
         }
-        return false;
+        return (false,false,false);
     }
 
 
@@ -601,7 +604,6 @@
         }
     }
 
-
     private async Task SaveChanges()
     {
         try
@@ -610,32 +612,42 @@
             await Task.Delay(200);
 
             bool anySuccess = false;
-            bool anyFailure = false;
+            bool anyDeleted = false;
+            bool anyBlankRows = false;
 
-            foreach (var row in FeeRows)
+            foreach (var row in FeeRows.ToList())
             {
-                var result = await SaveRow(row);
-                if (result)
+                var (success, changed, deleted) = await SaveRow(row);
+
+                if (deleted)
+                    anyDeleted = true;
+                else if (success && changed)
                     anySuccess = true;
-                else
-                    anyFailure = true;
+                else if (!success && !changed && row.EntityId == 0)
+                    anyBlankRows = true; // newly added but empty
             }
-            if (anySuccess && !anyFailure)
+
+            // ✅ Show messages in correct order
+            if (anyDeleted)
             {
-                ToastService.ShowSuccess("Fee details updated successfully!");
+                ToastService.ShowWarning("Some empty rows were removed.");
             }
-            else if (anySuccess && anyFailure)
+            else if (anyBlankRows)
             {
-                ToastService.ShowWarning("Some records are missing!");
+                ToastService.ShowWarning("Please fill Fee details!");
+            }
+            else if (anySuccess)
+            {
+                ToastService.ShowSuccess("Fee details saved successfully!");
             }
             else
             {
-                ToastService.ShowInfo("No changes were saved");
+                ToastService.ShowWarning("No changes were made.");
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            ToastService.ShowError("an unexcepted error occurred while saving the fee details!");
+            ToastService.ShowError("An unexpected error occurred while saving the fee details!");
             Console.WriteLine(ex.Message);
         }
         finally
@@ -643,6 +655,8 @@
             SpinnerService.Hide();
         }
     }
+
+
 
 
     public class FeeRow
