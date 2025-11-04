@@ -16,7 +16,6 @@ namespace EvictionFiler.Application.DTOs.FormTypeDto
         public string Name { get; set; } = string.Empty;
 
         public Guid? CaseTypeId { get; set; }
-        [Required(ErrorMessage = "Category is Required")]
         public Guid? CategoryId { get; set; }
         public CaseType? CaseType { get; set; }
         public string? CaseTypeName { get; set; }

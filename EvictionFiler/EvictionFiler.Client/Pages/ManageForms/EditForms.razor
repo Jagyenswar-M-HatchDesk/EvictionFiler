@@ -13,6 +13,7 @@
 @inject IManageFormService ManageFormService
 @inject SpinnerService spinnerservice
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <style>
     .offcanvas.show {
@@ -83,7 +84,7 @@
                     </select>
                   
                 </div>
-                <div class="mb-4 col-md-4">
+                @* <div class="mb-4 col-md-4">
                     <label class="form-label color-text required-label">Category</label>
                     <select class="form-select" @bind="editForm.CategoryId">
                         <option value="">--  Select Category --</option>
@@ -95,16 +96,15 @@
                     <ValidationMessage For="@(() => editForm.CategoryId)" />
 
 
-                </div>
+                </div> *@
             </div>
 
             <div class="row mb-3">
                 <div class="col-md-12">
                     <label class="form-label color-text">HTML</label>
                     @* <RadzenHtmlEditor @bind-Value="@editForm.HTML" style="height: 450px;" /> *@
-                    <RadzenHtmlEditor @ref="htmlEditor"
-                                      Value="@htmlContent"
-                                      style="height: 450px;" />
+                    <textarea class="form-control" placeholder="Paste or type your full HTML here..." @onfocusout="GetHtmlValue"
+                              style="height: 450px; font-family: monospace;" id="htmlEditor">@html</textarea>
 
 
 
@@ -124,16 +124,16 @@
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-xl">
-            <div class="modal-content shadow">
+            <div class="modal-content shadow" style="height:650px;">
                 <div class="modal-header">
                     <h5 class="modal-title">Edit Form Preview</h5>
                     <button type="button" class="btn-close" @onclick="ClosePreview"></button>
                 </div>
                 <div class="modal-body">
-                    @if (!string.IsNullOrWhiteSpace(htmlContent))
+                    @if (!string.IsNullOrWhiteSpace(editForm.HTML))
                     {
                         <div style="border:1px solid #ddd; padding:15px; border-radius:5px;">
-                            @((MarkupString)htmlContent)
+                            @((MarkupString)editForm.HTML)
                         </div>
                     }
                     else
@@ -148,6 +148,11 @@
         </div>
     </div>
 }
+<script>
+    window.getTextareaValue = (id) => {
+    return document.getElementById(id).value;
+    };
+</script>
 
 @code {
     [Parameter] public FormAddEditViewModelDto editForm { get; set; } = new();
@@ -166,7 +171,7 @@
    
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
         CategoryList = await CategoryRepository.GetAllCategory();
-        htmlContent = editForm.HTML;
+        html = editForm.HTML;
     }
 
     public async Task HideAsync()
@@ -192,16 +197,23 @@
     private void ShowPreview()
     {
         // Editor ke current content ko forcefully lo
-        htmlContent = htmlEditor.Value;
+        // htmlContent = htmlEditor.Value;
 
         // Model me bhi update karo
-        editForm.HTML = htmlContent;
+        // editForm.HTML = htmlContent;
 
         // Ab preview modal show karo
         IsPreviewVisible = true;
         StateHasChanged();
     }
+    private string html;
 
+
+    private async Task GetHtmlValue()
+    {
+        html = await JS.InvokeAsync<string>("getTextareaValue", "htmlEditor");
+        editForm.HTML = html;
+    }
 
     private void ClosePreview()
     {
