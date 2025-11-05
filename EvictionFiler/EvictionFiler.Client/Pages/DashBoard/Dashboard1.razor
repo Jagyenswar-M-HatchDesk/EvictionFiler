@@ -1,8 +1,11 @@
 ﻿@page "/dashboard" 
 <PageTitle>Dashboard - Housing CourtFiler</PageTitle>
+@using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.DashboardDto
+@using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
 @using EvictionFiler.Application.DTOs.PaginationDto
+@using EvictionFiler.Application.DTOs.TenantDto
 @using EvictionFiler.Application.Interfaces.IRepository
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Client.Jwt
@@ -19,6 +22,7 @@
 @inject ILegalCaseService _service
 @inject ICaseHearingService _caseService
 @inject IDashBoardRepository DashBoardRepository;
+@inject NavigationManager Nav
 <style>
     :root {
     /* Light theme with Navy & Gold brand accents */
@@ -128,19 +132,30 @@
     .searchbar input {
     flex: 1 1 145px;
     padding: 8px 6px;
-    border: 1px solid var(--border);
+            border: 2px solid #020336;
     border-radius: 8px;
     outline: 0;
     font-size: .9rem
     }
 
-    .searchbar button {
+    .searchbtn {
     padding: 8px 14px;
     background: var(--navy);
     border: 0;
     border-radius: 8px;
     color: #fff;
     cursor: pointer
+    }
+
+    .searchbtn:hover {
+        padding: 8px 14px;
+        background: #6b84af;
+        border: 0;
+        border-radius: 8px;
+        color: #fff;
+        cursor: pointer;
+            transition: all 0.25s ease;
+            transform: translateY(-2px);
     }
 
     .top-icons {
@@ -479,13 +494,13 @@
     </div>
     <div class="topbar1 card">
         <div>
-            <span style="color: grey; font-size: 14px;">CASE SEARCH & FILTERS</span>
+            <span style="color: grey; font-size: 14px; font-weight:600;">CASE SEARCH & FILTERS</span>
         </div>
         <div class="searchbar row">
-            <div class="col-md-2 ">
+            <div class="col ">
                 <input class="form-control search-box"
                 placeholder="Search by Case"
-                @bind="selectedCase"
+                @bind="selectedCase" @onfocusout="FocusOutCase"
                 @oninput="OnCaseInput"
                 autocomplete="off" />
 
@@ -511,10 +526,10 @@
                     }
                 </ul>
             </div>     
-            <div class="col-md-2 ">
+            <div class="col ">
                 <input class="form-control search-box"
-                placeholder="Search Client by Code/Name"
-                @bind="selectedClient"
+                placeholder="Search by Client"
+                @bind="selectedClient" @onfocusout="FocusOutClient"
                 @oninput="OnClientInput"
                 autocomplete="off" />
 
@@ -528,7 +543,7 @@
                             <li class="list-group-item list-group-item-action"
                             style="cursor:pointer;"
                             @onclick="() => SelectClient(suggestion)">
-                                @suggestion
+                                @suggestion.ClientCode - @suggestion.FirstName @suggestion.LastName
                             </li>
                         }
                     }
@@ -542,9 +557,9 @@
 
 
             </div>
-            <div class="col-md-2 ">
-                <input class="form-control search-box" placeholder="Search LandLord by Code/Name" @bind="selectedLandlord"
-                @oninput="OnLandlordInput"
+            <div class="col ">
+                <input class="form-control search-box" placeholder="Search by LandLord" @bind="selectedLandlord"
+                @oninput="OnLandlordInput" @onfocusout="FocusOutLandlord"
                 autocomplete="off" />
 
 
@@ -557,7 +572,7 @@
                             <li class="list-group-item list-group-item-action"
                             style="cursor:pointer;"
                             @onclick="() => Selectlandlord(suggestion)">
-                                @suggestion
+                                @suggestion.LandLordCode - @suggestion.FirstName @suggestion.LastName
                             </li>
                         }
                     }
@@ -569,10 +584,10 @@
                     }
                 </ul>
             </div>
-            <div class="col-md-2 ">
+            <div class="col ">
                 <input class="form-control search-box"
-                placeholder="Search Tenant by Code/Name"
-                @bind="selectedTenant"
+                placeholder="Search by Tenant"
+                @bind="selectedTenant" @onfocusout="FocusOutTenant"
                 @oninput="OnTenantInput"
                 autocomplete="off" />
 
@@ -586,7 +601,7 @@
                             <li class="list-group-item list-group-item-action"
                             style="cursor:pointer;"
                             @onclick="() => SelectTenant(suggestion)">
-                                @suggestion
+                                @suggestion.TenantCode - @suggestion.FirstName @suggestion.LastName
                             </li>
                         }
                     }
@@ -598,132 +613,16 @@
                     }
                 </ul>
             </div>
-            <div class="col-md-2 ">
+            
+            <div class="col-md-2" >
 
-                <input class="form-control search-box"
-                placeholder="Search by Index #" 
-                />
-            </div>
-            <div class="col-md-2">
-                <button @onclick="Search">Search</button>
+                <button class="searchbtn" @onclick="Search" style="border-radius:25px; width:100%;"> <i class="fa fa-search mx-1"></i>  </button>
             </div>
 
 
         </div>
-        <div class="searchbar">
-            <button onclick="@Resetsearch">Reset</button>
-        </div>
-        @if (searchResults != null && searchResults.Items.Any())
-        {
-            <div class="table-responsive mb-3">
-                <table class="table table-hover align-middle text-center" style="margin-bottom: 0px;font-size:14px">
-                    <thead>
-                        <tr>
-                            <th>Case Code</th>
-                            <th>Case Type</th>
-                            <th>Client </th>
-                            <th>LandLord </th>
-                            <th>Tenant </th>
-                            @if (isAdmin)
-                            {
-
-                                <th>Created By</th>
-                            }
-                            <th>Last Action Date</th>
-                            <th>Status</th>
-
-                            @* <th class="sticky">Action</th> *@
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (searchResults != null && searchResults.Items.Any())
-                        {
-                            @foreach (var cas in searchResults.Items)
-                            {
-
-                                <tr>
-                                    <td>@(cas?.Casecode ?? "")</td>
-                                    <td>@(cas?.CaseType?.Name ?? "-")</td>
-                                    <td>
-                                        @($"{cas?.Clients?.ClientCode ?? ""} - {cas?.Clients?.FirstName ?? ""} {cas?.Clients?.LastName ?? ""}")
-                                    </td>
-                                    <td>
-                                        @($"{cas?.LandLords?.LandLordCode ?? ""} - {cas?.LandLords?.FirstName ?? ""} {cas?.LandLords?.LastName ?? ""}")
-                                    </td>
-
-                                    <td>
-                                        @($"{cas?.Tenants?.TenantCode ?? ""} - {cas?.Tenants?.FirstName ?? ""} {cas?.Tenants?.LastName ?? ""}")
-                                    </td>
-                                    @if (isAdmin)
-                                    {
-
-                                        <td>@(cas?.CreatedByName ?? "-")</td>
-                                    }
-                                    <td>@(cas?.CreatedOn.ToString("MM/dd/yyyy"))</td>
-                                    <td>
-                                        @(
-                                        cas.IsActive == true
-                                            ? "Active"
-                                            : cas.IsDeleted == true
-                                            ? "InActive"
-                                            : "Not Set"
-                                        )
-                                    </td>
-
-
-
-                                    @* <td class="sticky">
-                                    <i class="fa-solid fa-pen-to-square text-navy me-2" style="cursor:pointer"
-                                       @onclick="@(() => EditCase(cas.Id))"
-                                       title="Edit"></i>
-                                    <i class="fa-solid fa-trash-can text-navy  me-2" title="Delete" style="cursor:pointer" @onclick="@(() => DeleteCase(cas.Id, isAdmin))"></i>
-                                    <i class="fa-solid  fa-circle-info text-navy" title="Info" style="cursor:pointer" @onclick="@(() => CaseDetails(cas.Id))"></i>
-                                </td> *@
-
-                                </tr>
-
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="10" class="text-muted">No Cases found.</td>
-                            </tr>
-                        }
-
-                    </tbody>
-                </table>
-            </div>
-        }
-        <!-- Pagination -->
-        @if (searchResults != null && searchResults.TotalCount > 0)
-        {
-            <div class="d-flex justify-content-between mt-3">
-                <small style="font-size:14px">
-                    Showing @(((currentPage - 1) * pageSize) + 1)
-                    to @(Math.Min(currentPage * pageSize, searchResults.TotalCount))
-                    of @searchResults.TotalCount entries
-                </small>
-                <nav>
-                    <ul class="pagination mb-0" style="font-size:14px">
-                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                            <button class="page-link" @onclick="() => ChangePage(currentPage - 1)">←</button>
-                        </li>
-                        @for (int i = 1; i <= Math.Ceiling((double)searchResults.TotalCount / pageSize); i++)
-                        {
-                            var pageNumber = i;
-                            <li class="page-item @(pageNumber == currentPage ? "active" : "")">
-                                <button class="page-link" @onclick="() => ChangePage(pageNumber)">@pageNumber</button>
-                            </li>
-                        }
-                        <li class="page-item @(currentPage == Math.Ceiling((double)searchResults.TotalCount / pageSize) ? "disabled" : "")">
-                            <button class="page-link" @onclick="() => ChangePage(currentPage + 1)">→</button>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        }
-
+       
+        
     </div>
 
     <!-- Greeting & suggestions -->
@@ -1074,7 +973,7 @@
 
     private string selectedClient = string.Empty;
     private bool clientSuggestionsChecked = false;
-    private List<string> clientSuggestions = new List<string>();
+    private List<EditToClientDto> clientSuggestions = new List<EditToClientDto>();
 
     private string selectedReasonholdover = string.Empty;
     private bool reasonholdoverSuggestionsChecked = false;
@@ -1082,7 +981,7 @@
 
     private string selectedTenant = string.Empty;
     private bool tenantSuggestionsChecked = false;
-    private List<string> tenantSuggestions = new List<string>();
+    private List<EditToTenantDto> tenantSuggestions = new List<EditToTenantDto>();
 
     private string selectedCase= string.Empty;
     private bool caseSuggestionsChecked = false;
@@ -1090,7 +989,7 @@
 
     private string selectedLandlord = string.Empty;
     private bool landlordSuggestionsChecked = false;
-    private List<string> landlordSuggestions = new List<string>();
+    private List<EditToLandlordDto> landlordSuggestions = new List<EditToLandlordDto>();
 
     private List<List<LegalCase>> legalcaseDto = new();
     private List<LegalCase> TodaylegalcaseDto = new();
@@ -1152,27 +1051,28 @@
         spinnerservice.Show();
         isSearched = true;
 
-        var filters = new CaseFilterDto
-        {
-            CaseCode = selectedCase,
-            Client = selectedClient,
-            Tenant = selectedTenant,
-            LandLord = selectedLandlord,
-            ReasonHoldover = selectedReasonholdover,
-            ActionDate = searchTermDate,
-            Status = searchTermStatus
-        };
-        searchResults = await DashBoardRepository.Search(currentPage, pageSize, filters);
+        Nav.NavigateTo("/legalcases");
+        // var filters = new CaseFilterDto
+        // {
+        //     CaseCode = selectedCase,
+        //     Client = selectedClient,
+        //     Tenant = selectedTenant,
+        //     LandLord = selectedLandlord,
+        //     ReasonHoldover = selectedReasonholdover,
+        //     ActionDate = searchTermDate,
+        //     Status = searchTermStatus
+        // };
+        // searchResults = await DashBoardRepository.Search(currentPage, pageSize, filters);
 
-        selectedClient = string.Empty;
-        selectedCase = string.Empty;
-        selectedTenant = string.Empty;
-        selectedLandlord = string.Empty;
-        selectedReasonholdover = string.Empty;
-        searchTermDate = string.Empty;
-        searchTermStatus = string.Empty;
+        // selectedClient = string.Empty;
+        // selectedCase = string.Empty;
+        // selectedTenant = string.Empty;
+        // selectedLandlord = string.Empty;
+        // selectedReasonholdover = string.Empty;
+        // searchTermDate = string.Empty;
+        // searchTermStatus = string.Empty;
 
-        spinnerservice.Hide();
+        // spinnerservice.Hide();
     }
 
     private async Task OnClientInput(ChangeEventArgs e)
@@ -1186,7 +1086,7 @@
         }
         else
         {
-            clientSuggestions = new List<string>();
+            clientSuggestions = new List<EditToClientDto>();
             clientSuggestionsChecked = false; 
         }
     }
@@ -1202,7 +1102,7 @@
         }
         else
         {
-            tenantSuggestions = new List<string>();
+            tenantSuggestions = new List<EditToTenantDto>();
             tenantSuggestionsChecked = false;
         }
     }
@@ -1234,28 +1134,45 @@
         }
         else
         {
-            landlordSuggestions = new List<string>();
+            landlordSuggestions = new List<EditToLandlordDto>();
             landlordSuggestionsChecked = false;
         }
     }
 
-    private void SelectClient(string client)
+    private void SelectClient(EditToClientDto client)
     {
-        selectedClient = client;
+        selectedClient = client.ClientCode;
+        clientSuggestions.Clear();
+        clientSuggestionsChecked = false;
+    }
+    private async Task FocusOutClient()
+    {
+        await Task.Delay(500);
         clientSuggestions.Clear();
         clientSuggestionsChecked = false;
     }
 
-    private void Selectlandlord(string client)
+    private void Selectlandlord(EditToLandlordDto landlord)
     {
-        selectedLandlord = client;
+        selectedLandlord = landlord.LandLordCode;
         landlordSuggestions.Clear();
         landlordSuggestionsChecked = false;
     }
-
-    private void SelectTenant(string tenant)
+    private async Task FocusOutLandlord()
     {
-        selectedTenant = tenant;
+        await Task.Delay(500);
+        landlordSuggestions.Clear();
+        landlordSuggestionsChecked = false;
+    }
+    private void SelectTenant(EditToTenantDto tenant)
+    {
+        selectedTenant = tenant.TenantCode;
+        tenantSuggestions.Clear();
+        tenantSuggestionsChecked = false;
+    }
+    private async Task FocusOutTenant()
+    {
+        await Task.Delay(500);
         tenantSuggestions.Clear();
         tenantSuggestionsChecked = false;
     }
@@ -1263,6 +1180,12 @@
     private void SelectCase(string cases)
     {
         selectedCase = cases;
+        caseSuggestions.Clear();
+        caseSuggestionsChecked = false;
+    }
+    private async Task FocusOutCase()
+    {
+        await Task.Delay(500);
         caseSuggestions.Clear();
         caseSuggestionsChecked = false;
     }
