@@ -1,5 +1,6 @@
 ﻿
 using System.Drawing.Printing;
+using System.Globalization;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
@@ -46,6 +47,9 @@ namespace EvictionFiler.Infrastructure.Repositories
                 var caseDetails = await (from lc in _context.LegalCases
                                          join landlord in _context.LandLords on lc.LandLordId equals landlord.Id
                                          join building in _context.Buildings on lc.BuildingId equals building.Id
+                                         join court in _context.Courts on lc.CourtId equals court.Id
+                                         join county in _context.MstCounties on court.CountyId equals county.Id
+                                         join rentdue in _context.MstDateRent on lc.RentDueEachMonthOrWeekId equals rentdue.Id
                                          where lc.Id == legalCaseId
                                          select new
                                          {
@@ -59,7 +63,13 @@ namespace EvictionFiler.Infrastructure.Repositories
                                                                building.City + " " + building.State.Name + " " + building.Zipcode,
                                              NumberofRoom = building.BuildingUnits.ToString(),
                                              TenantIds = lc.TenantId, // <-- List of tenant IDs from LegalCase,
-                                             LeaseEnd = lc.LeaseEnd
+                                             LeaseEnd = lc.LeaseEnd,
+                                             CityorCounty = county.Name,
+                                             RentOwned = lc.TotalRentOwed,
+                                             RentDate = rentdue.Name,
+                                             LastRent = lc.LastRentPaid,
+                                             NoticePeriod = lc.CalculatedNoticeLength,
+                                             VacateDate = lc.ExpirationDate,
                                          }).FirstOrDefaultAsync();
 
                 if (caseDetails == null)
@@ -113,19 +123,51 @@ namespace EvictionFiler.Infrastructure.Repositories
                 string firstTenantName = tenants.Count > 0 ? tenants[0].FullName : "";
                 string firstApartmentNumber = tenants.Count > 0 ? tenants[0].ApartmentNumber : "";
 
+
+                string lastRent =  "";
+                DateTime lastRentDate;
+
+                // Try parsing the string to a DateTime
+                if (DateTime.TryParseExact(caseDetails.LastRent , "MMM yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out lastRentDate) ||
+                    DateTime.TryParseExact(caseDetails.LastRent , "MMMM yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out lastRentDate))
+                {
+                    // Add one month
+                    DateTime nextMonthDate = lastRentDate.AddMonths(1);
+
+                    // Format as desired, e.g., "May 2023"
+                    lastRent = nextMonthDate.ToString("MMMM");
+
+                    // Replace in your template
+                }
+                
+
+
                 // 6. Fill HTML placeholders
                 string filledHtml = template.HTML
                     .Replace("{{LandlordName}}", caseDetails.LandlordName ?? "")
+                    .Replace("{{Landlord_Name}}", caseDetails.LandlordName ?? "")
                     .Replace("{{LandlordAddress}}", caseDetails.LandlordAddress ?? "")
+                    .Replace("{{Landlord_Address}}", caseDetails.LandlordAddress ?? "")
                     .Replace("{{LandlordPhone}}", caseDetails.LandlordPhone ?? "")
+                    .Replace("{{Landlord_Phone}}", caseDetails.LandlordPhone ?? "")
                     .Replace("{{LandlordEmail}}", caseDetails.LandlordEmail ?? "")
+                    .Replace("{{Landlord_Email}}", caseDetails.LandlordEmail ?? "")
                     .Replace("{{LandlordDate}}", noticeDate.ToString("dd/MM/yyyy"))
+                    .Replace("{{Notice_Date}}", noticeDate.ToString("dd/MM/yyyy"))
                     .Replace("{{PropertyAddress}}", caseDetails.PropertyAddress ?? "")
+                    .Replace("{{Premises_Address}}", caseDetails.PropertyAddress ?? "")
                     .Replace("{{ApartmentNumber}}", firstApartmentNumber ?? "")
                     .Replace("{{CurrentDate}}", DateTime.Now.ToString("dd/MM/yyyy"))
                     .Replace("{{NumberofRoom}}", caseDetails.NumberofRoom ?? "")
-                    .Replace("{{TenantName}}", firstTenantName); // Single tenant for top
-
+                    .Replace("{{TenantName}}", firstTenantName) // Single tenant for top
+                    .Replace("{{City_County}}", caseDetails.CityorCounty ?? "") 
+                    .Replace("{{Rent_Owned}}", caseDetails.RentOwned.ToString() ?? "") 
+                    .Replace("{{Rent_day}}", caseDetails.RentDate.ToString() ?? "") 
+                    .Replace("{{month}}", lastRent ?? "") 
+                    .Replace("{{year}}", DateTime.Now.ToString("yy") ?? "") 
+                    .Replace("{{Vacate_Date}}", caseDetails.VacateDate.ToString() ?? "") 
+                    .Replace("{{Notice_Period}}", caseDetails.NoticePeriod.ToString() ?? "") 
+                    .Replace("{{Tenant_Names}}", firstTenantName); 
                 // 7. Fill up to 12 tenant names dynamically
                 for (int i = 0; i < 12; i++)
                 {
@@ -207,6 +249,8 @@ namespace EvictionFiler.Infrastructure.Repositories
                 noticeDays = 90;
             else if (formName.ToLower().Contains("5 days"))
                 noticeDays = 5;
+            else if (formName.ToLower().Contains("60 days"))
+                noticeDays = 60;
             else if (formName.ToLower().Contains("30 days"))
                 noticeDays = 30;
 
