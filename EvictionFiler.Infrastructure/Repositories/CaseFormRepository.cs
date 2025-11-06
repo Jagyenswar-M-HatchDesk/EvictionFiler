@@ -70,6 +70,11 @@ namespace EvictionFiler.Infrastructure.Repositories
                                              LastRent = lc.LastRentPaid,
                                              NoticePeriod = lc.CalculatedNoticeLength,
                                              VacateDate = lc.ExpirationDate,
+                                             BuildingStreet = building.Address1 + " " + building.Address2,
+                                             BuildingCity = building.City,
+                                             BuildingState = building.State.Name,
+                                             BuildingZip = building.Zipcode,
+                                             BuildindAptno = building.ApartmentCode,
                                          }).FirstOrDefaultAsync();
 
                 if (caseDetails == null)
@@ -167,6 +172,11 @@ namespace EvictionFiler.Infrastructure.Repositories
                     .Replace("{{year}}", DateTime.Now.ToString("yy") ?? "") 
                     .Replace("{{Vacate_Date}}", caseDetails.VacateDate.ToString() ?? "") 
                     .Replace("{{Notice_Period}}", caseDetails.NoticePeriod.ToString() ?? "") 
+                    .Replace("{{Building_Street}}", caseDetails.BuildingStreet ?? "") 
+                    .Replace("{{Building_State}}", caseDetails.BuildingState ?? "") 
+                    .Replace("{{Building_AptNo}}", caseDetails.BuildindAptno ?? "") 
+                    .Replace("{{Building_Zip}}", caseDetails.BuildingZip ?? "") 
+                    .Replace("{{Building_City}}", caseDetails.BuildingCity ?? "") 
                     .Replace("{{Tenant_Names}}", firstTenantName); 
                 // 7. Fill up to 12 tenant names dynamically
                 for (int i = 0; i < 12; i++)
