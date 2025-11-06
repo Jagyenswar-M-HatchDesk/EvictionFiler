@@ -13,8 +13,8 @@ namespace EvictionFiler.Domian.Enums
         Building = 2,
         Tenant = 3,
         Terms = 4,
-        Rent = 6,
         Case = 5,
+        Rent = 6,
         Notice =7,
        
     }
