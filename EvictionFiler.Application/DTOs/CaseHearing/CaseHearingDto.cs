@@ -35,6 +35,6 @@ namespace EvictionFiler.Application.DTOs.CaseHearing
         public string? CaseStatusName { get; set; }
 
 
-
+        public DateTime? CreatedOn { get; set; }
     }
 }

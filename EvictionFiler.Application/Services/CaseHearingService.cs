@@ -43,6 +43,8 @@ namespace EvictionFiler.Application.Services
                 Judge = dto.Judge,
                 RoomNo = dto.RoomNo,
                 CaseTypeId = dto.CaseTypeId,
+                CreatedOn = DateTime.Now,
+                CreatedBy = dto.CreatedBy,
 
 
             };
@@ -60,11 +62,10 @@ namespace EvictionFiler.Application.Services
                   .CountAsync();
             return calanders;
         }
-
         public async Task<List<CaseHearingDto>> GetAllCaseHeariingAsync()
         {
             var calanders = await _caseHearingRepository
-                  .GetAllQuerable(x => x.IsDeleted != true, x => x.LegalCase , x =>x.Courts, x => x.LegalCase.CaseType)
+                  .GetAllQuerable(x => x.IsDeleted != true, x => x.LegalCase, x => x.Courts, x => x.LegalCase.CaseType)
                   .ToListAsync();
 
             var result = calanders.Select(dto => new CaseHearingDto
@@ -117,6 +118,71 @@ namespace EvictionFiler.Application.Services
             ? dto.Counties?.Name
             : string.Empty
             }).ToList();
+
+
+            return result;
+        }
+
+        public async Task<List<CaseHearingDto>> GetAllCaseHeariingByCaseIdAsync(Guid id)
+        {
+            var calanders = await _caseHearingRepository
+                  .GetAllQuerable(x => x.IsDeleted != true && x.LegalCaseId == id, x => x.LegalCase , x =>x.Courts )
+                  .ToListAsync();
+
+            var result = calanders.Select(dto => new CaseHearingDto
+            {
+                Id = dto.Id,
+
+                HearingDate = dto.HearingDate ?? DateTime.Today,
+
+                HearingTime = (dto.HearingTime == default || dto.HearingTime == TimeOnly.MinValue)
+    ? TimeOnly.FromTimeSpan(TimeSpan.FromHours(9.5))
+    : dto.HearingTime.Value,
+
+
+                CourtId = dto.CourtId,
+                LegalCaseId = dto.LegalCaseId,
+                IndexNo = dto.IndexNo,
+                Caption = dto.Caption,
+
+                // CaseType name — safe whether CaseTypeId or LegalCaseId is null
+                CaseTypeName =
+        dto.CaseTypeId != null
+            ? dto.CaseTypes?.Name
+            : dto.LegalCase?.CaseType?.Name ?? string.Empty,
+
+                // Judge — prefer Hearing Judge, fallback to Court Judge
+                Judge = dto.Judge
+        ?? dto.Courts?.Judge
+        ?? string.Empty,
+
+                // Court part — from CourtPart or fallback to Court.Part
+                CourtPart =
+        dto.CourtPartId != null
+            ? dto.CourtParts?.Name
+            : dto.Courts?.Part ?? string.Empty,
+
+                // Case status name — only if present
+                CaseStatusName =
+        dto.CaseStatusId != null
+            ? dto.CaseStatus?.Name
+            : string.Empty,
+
+                // Room number — prefer explicit RoomNo, fallback to Court’s RoomNo
+                RoomNo = dto.RoomNo
+        ?? dto.Courts?.RoomNo
+        ?? string.Empty,
+
+                // County name — safe for null CountyId
+                CountyName =
+        dto.CountyId != null
+            ? dto.Counties?.Name
+            : string.Empty,
+
+                CreatedOn = dto.CreatedOn,
+
+            }).ToList();
+
 
 
             return result;

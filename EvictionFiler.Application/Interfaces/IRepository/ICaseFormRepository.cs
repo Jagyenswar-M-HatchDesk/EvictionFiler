@@ -13,5 +13,6 @@ namespace EvictionFiler.Application.Interfaces.IRepository
 		Task<bool> GenerateNoticeAsync(Guid legalCaseId, Guid formTypeId, Guid createdBy);
 		Task<byte[]> GetPdfBytesAsync(Guid id);
 
-	}
+        //Task<bool> GetCaseForms(Guid legalCaseId, Guid formTypeId, Guid createdBy);
+    }
 }

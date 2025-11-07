@@ -44,38 +44,56 @@ namespace EvictionFiler.Infrastructure.Repositories
                 DateTime noticeDate = CalculateNoticeDate(template.Name);
 
                 // 2. Get case details (TenantIds are in LegalCase)
-                var caseDetails = await (from lc in _context.LegalCases
-                                         join landlord in _context.LandLords on lc.LandLordId equals landlord.Id
-                                         join building in _context.Buildings on lc.BuildingId equals building.Id
-                                         join court in _context.Courts on lc.CourtId equals court.Id
-                                         join county in _context.MstCounties on court.CountyId equals county.Id
-                                         join rentdue in _context.MstDateRent on lc.RentDueEachMonthOrWeekId equals rentdue.Id
-                                         where lc.Id == legalCaseId
-                                         select new
-                                         {
-                                             CaseCode = lc.Casecode,
-                                             LandlordName = landlord.FirstName + " " + landlord.LastName,
-                                             LandlordAddress = landlord.Address1 + " " + landlord.Address2 + " " +
-                                                               landlord.City + " " + landlord.State.Name + " " + landlord.Zipcode,
-                                             LandlordPhone = landlord.Phone,
-                                             LandlordEmail = landlord.Email,
-                                             PropertyAddress = building.Address1 + " " + building.Address2 + " " +
-                                                               building.City + " " + building.State.Name + " " + building.Zipcode,
-                                             NumberofRoom = building.BuildingUnits.ToString(),
-                                             TenantIds = lc.TenantId, // <-- List of tenant IDs from LegalCase,
-                                             LeaseEnd = lc.LeaseEnd,
-                                             CityorCounty = county.Name,
-                                             RentOwned = lc.TotalRentOwed,
-                                             RentDate = rentdue.Name,
-                                             LastRent = lc.LastRentPaid,
-                                             NoticePeriod = lc.CalculatedNoticeLength,
-                                             VacateDate = lc.ExpirationDate,
-                                             BuildingStreet = building.Address1 + " " + building.Address2,
-                                             BuildingCity = building.City,
-                                             BuildingState = building.State.Name,
-                                             BuildingZip = building.Zipcode,
-                                             BuildindAptno = building.ApartmentCode,
-                                         }).FirstOrDefaultAsync();
+                var caseDetails = await (
+                                    from lc in _context.LegalCases
+
+                                    join landlord in _context.LandLords on lc.LandLordId equals landlord.Id
+                                    join building in _context.Buildings on lc.BuildingId equals building.Id
+
+                                    // LEFT JOIN Court
+                                    join court in _context.Courts on lc.CourtId equals court.Id into cCourt
+                                    from court in cCourt.DefaultIfEmpty()
+
+                                        // LEFT JOIN County
+                                    join county in _context.MstCounties on court.CountyId equals county.Id into cCounty
+                                    from county in cCounty.DefaultIfEmpty()
+
+                                        // LEFT JOIN RentDue table
+                                    join rentdue in _context.MstDateRent on lc.RentDueEachMonthOrWeekId equals rentdue.Id into cRent
+                                    from rentdue in cRent.DefaultIfEmpty()
+
+                                    where lc.Id == legalCaseId
+
+                                    select new
+                                    {
+                                        CaseCode = lc.Casecode,
+                                        LandlordName = landlord.FirstName + " " + landlord.LastName,
+                                        LandlordAddress = landlord.Address1 + " " + landlord.Address2 + " " +
+                                                          landlord.City + " " + landlord.State.Name + " " + landlord.Zipcode,
+                                        LandlordPhone = landlord.Phone,
+                                        LandlordEmail = landlord.Email,
+
+                                        PropertyAddress = building.Address1 + " " + building.Address2 + " " +
+                                                          building.City + " " + building.State.Name + " " + building.Zipcode,
+                                        NumberofRoom = building.BuildingUnits.ToString(),
+
+                                        TenantIds = lc.TenantId,
+                                        LeaseEnd = lc.LeaseEnd,
+
+                                        CityorCounty = county != null ? county.Name : null,
+                                        RentOwned = lc.TotalRentOwed,
+                                        RentDate = rentdue != null ? rentdue.Name : null,
+                                        LastRent = lc.LastRentPaid,
+                                        NoticePeriod = lc.CalculatedNoticeLength,
+                                        VacateDate = lc.ExpirationDate,
+
+                                        BuildingStreet = building.Address1 + " " + building.Address2,
+                                        BuildingCity = building.City,
+                                        BuildingState = building.State.Name,
+                                        BuildingZip = building.Zipcode,
+                                        BuildindAptno = building.ApartmentCode
+                                    }
+                                ).FirstOrDefaultAsync();
 
                 if (caseDetails == null)
                     throw new Exception("Case details not found.");
@@ -129,12 +147,12 @@ namespace EvictionFiler.Infrastructure.Repositories
                 string firstApartmentNumber = tenants.Count > 0 ? tenants[0].ApartmentNumber : "";
 
 
-                string lastRent =  "";
+                string lastRent = "";
                 DateTime lastRentDate;
 
                 // Try parsing the string to a DateTime
-                if (DateTime.TryParseExact(caseDetails.LastRent , "MMM yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out lastRentDate) ||
-                    DateTime.TryParseExact(caseDetails.LastRent , "MMMM yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out lastRentDate))
+                if (DateTime.TryParseExact(caseDetails.LastRent, "MMM yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out lastRentDate) ||
+                    DateTime.TryParseExact(caseDetails.LastRent, "MMMM yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out lastRentDate))
                 {
                     // Add one month
                     DateTime nextMonthDate = lastRentDate.AddMonths(1);
@@ -144,7 +162,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
                     // Replace in your template
                 }
-                
+
 
 
                 // 6. Fill HTML placeholders
@@ -165,19 +183,19 @@ namespace EvictionFiler.Infrastructure.Repositories
                     .Replace("{{CurrentDate}}", DateTime.Now.ToString("dd/MM/yyyy"))
                     .Replace("{{NumberofRoom}}", caseDetails.NumberofRoom ?? "")
                     .Replace("{{TenantName}}", firstTenantName) // Single tenant for top
-                    .Replace("{{City_County}}", caseDetails.CityorCounty ?? "") 
-                    .Replace("{{Rent_Owned}}", caseDetails.RentOwned.ToString() ?? "") 
-                    .Replace("{{Rent_day}}", caseDetails.RentDate.ToString() ?? "") 
-                    .Replace("{{month}}", lastRent ?? "") 
-                    .Replace("{{year}}", DateTime.Now.ToString("yy") ?? "") 
-                    .Replace("{{Vacate_Date}}", caseDetails.VacateDate.ToString() ?? "") 
-                    .Replace("{{Notice_Period}}", caseDetails.NoticePeriod.ToString() ?? "") 
-                    .Replace("{{Building_Street}}", caseDetails.BuildingStreet ?? "") 
-                    .Replace("{{Building_State}}", caseDetails.BuildingState ?? "") 
-                    .Replace("{{Building_AptNo}}", caseDetails.BuildindAptno ?? "") 
-                    .Replace("{{Building_Zip}}", caseDetails.BuildingZip ?? "") 
-                    .Replace("{{Building_City}}", caseDetails.BuildingCity ?? "") 
-                    .Replace("{{Tenant_Names}}", firstTenantName); 
+                    .Replace("{{City_County}}", caseDetails.CityorCounty ?? "")
+                    .Replace("{{Rent_Owned}}", caseDetails.RentOwned.ToString() ?? "")
+                    .Replace("{{Rent_day}}", caseDetails.RentDate.ToString() ?? "")
+                    .Replace("{{month}}", lastRent ?? "")
+                    .Replace("{{year}}", DateTime.Now.ToString("yy") ?? "")
+                    .Replace("{{Vacate_Date}}", caseDetails.VacateDate.ToString() ?? "")
+                    .Replace("{{Notice_Period}}", caseDetails.NoticePeriod.ToString() ?? "")
+                    .Replace("{{Building_Street}}", caseDetails.BuildingStreet ?? "")
+                    .Replace("{{Building_State}}", caseDetails.BuildingState ?? "")
+                    .Replace("{{Building_AptNo}}", caseDetails.BuildindAptno ?? "")
+                    .Replace("{{Building_Zip}}", caseDetails.BuildingZip ?? "")
+                    .Replace("{{Building_City}}", caseDetails.BuildingCity ?? "")
+                    .Replace("{{Tenant_Names}}", firstTenantName);
                 // 7. Fill up to 12 tenant names dynamically
                 for (int i = 0; i < 12; i++)
                 {

@@ -15,10 +15,10 @@ namespace EvictionFiler.Application.DTOs.FormTypeDto
 		public Guid? LegalCaseId { get; set; }
 		public Guid? FormTypeId { get; set; }
 		public string? FormTypeName { get; set; }
-		public DateTime CreatedOn { get; set; }
+		public DateTime? CreatedOn { get; set; }
 
 		public string? CreatedByName { get; set; }
-		public int? BillAmount { get; set; }
+		public decimal? BillAmount { get; set; }
 
 	}
 }
