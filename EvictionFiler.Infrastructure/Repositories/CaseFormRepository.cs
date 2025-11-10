@@ -49,6 +49,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
                                     join landlord in _context.LandLords on lc.LandLordId equals landlord.Id
                                     join building in _context.Buildings on lc.BuildingId equals building.Id
+                                    join tenant in _context.Tenants on lc.TenantId equals tenant.Id
 
                                     // LEFT JOIN Court
                                     join court in _context.Courts on lc.CourtId equals court.Id into cCourt
@@ -91,7 +92,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                                         BuildingCity = building.City,
                                         BuildingState = building.State.Name,
                                         BuildingZip = building.Zipcode,
-                                        BuildindAptno = building.ApartmentCode
+                                        BuildindAptno = tenant.UnitOrApartmentNumber,
                                     }
                                 ).FirstOrDefaultAsync();
 
