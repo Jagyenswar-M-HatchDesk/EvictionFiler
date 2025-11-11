@@ -7,10 +7,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using HtmlRendererCore.PdfSharp;
 using Microsoft.EntityFrameworkCore;
-
-
-using PuppeteerSharp;
-using PuppeteerSharp.Media;
+using Microsoft.Playwright;
 
 
 
@@ -212,34 +209,38 @@ namespace EvictionFiler.Infrastructure.Repositories
                 }
 
 
-
-                // 9. Generate PDF
-                await new BrowserFetcher().DownloadAsync();
-                await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
-                {
-                    Headless = true,
-                    Args = new[] { "--no-sandbox" }
-                });
-
-                var page = await browser.NewPageAsync();
-                await page.SetContentAsync(filledHtml, new NavigationOptions
-                {
-                    WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
-                });
-
-                var pdfBytes = await page.PdfDataAsync(new PdfOptions
-                {
-                    Format = PaperFormat.A4,
-                    PrintBackground = true
-                });
-
-                // 10. Save PDF to server
+                // 7. Generate PDF with Playwright
                 var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "CaseForms", caseDetails.CaseCode);
                 Directory.CreateDirectory(folderPath);
 
                 var fileName = $"{Guid.NewGuid()}.pdf";
                 var filePath = Path.Combine(folderPath, fileName);
+                using var playwright = await Playwright.CreateAsync();
+                await using var browser = await playwright.Chromium.LaunchAsync(new()
+                {
+                    Headless = true,
+                    Args = new[] { "--no-sandbox" } // Important for Azure App Service
+                });
+
+                var page = await browser.NewPageAsync();
+                await page.SetContentAsync(filledHtml);
+
+                var pdfBytes = await page.PdfAsync(new PagePdfOptions
+                {
+                    Format = "A4",
+                    PrintBackground = true,
+                    Margin = new Margin
+                    {
+                        Top = "0.6in",
+                        Bottom = "0.6in",
+                        Left = "0.6in",
+                        Right = "0.6in"
+                    }
+                });
+
                 await File.WriteAllBytesAsync(filePath, pdfBytes);
+                await browser.CloseAsync();
+
 
                 // 11. Save form record to DB
                 var fileUrl = $"/CaseForms/{caseDetails.CaseCode}/{fileName}";
@@ -287,35 +288,35 @@ namespace EvictionFiler.Infrastructure.Repositories
             return DateTime.Now.AddDays(noticeDays);
         }
 
-        public async Task<byte[]?> GetPdfBytesAsync(Guid id)
-        {
-            var caseForm = await _context.CaseForms
-                .FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted != true);
+        //public async Task<byte[]?> GetPdfBytesAsync(Guid id)
+        //{
+        //    var caseForm = await _context.CaseForms
+        //        .FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted != true);
 
-            if (caseForm == null || string.IsNullOrWhiteSpace(caseForm.HTML))
-                return null;
+        //    if (caseForm == null || string.IsNullOrWhiteSpace(caseForm.HTML))
+        //        return null;
 
-            await new BrowserFetcher().DownloadAsync();
-            await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
-            {
-                Headless = true,
-                Args = new[] { "--no-sandbox" }
-            });
+        //    await new BrowserFetcher().DownloadAsync();
+        //    await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+        //    {
+        //        Headless = true,
+        //        Args = new[] { "--no-sandbox" }
+        //    });
 
 
-            var page = await browser.NewPageAsync();
-            await page.SetContentAsync(caseForm.HTML, new NavigationOptions
-            {
-                WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
-            });
+        //    var page = await browser.NewPageAsync();
+        //    await page.SetContentAsync(caseForm.HTML, new NavigationOptions
+        //    {
+        //        WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
+        //    });
 
-            var pdfBytes = await page.PdfDataAsync(new PdfOptions
-            {
-                Format = PaperFormat.A4,
-                PrintBackground = true
-            });
+        //    var pdfBytes = await page.PdfDataAsync(new PdfOptions
+        //    {
+        //        Format = PaperFormat.A4,
+        //        PrintBackground = true
+        //    });
 
-            return pdfBytes;
-        }
+        //    return pdfBytes;
+        //}
     }
 }
