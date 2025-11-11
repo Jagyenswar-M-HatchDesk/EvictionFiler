@@ -16,12 +16,20 @@ namespace EvictionFiler.Domian.Enums
         Case = 5,
         Rent = 6,
         Notice =7,
-       
+        Attorney = 8,
+        CaseInfo = 9,
+        Party = 10,
+        BuildingInfo = 11,
+        PetitionerTenant = 12,
+        RespondentLandlord = 13,
+        Appearance = 14,
+        Relief = 15,
+        Billing = 16,
+
     }
 
     public enum StepHpd
     {
-        CaseAndclient = 0,
         Attorney = 0,
         Case = 1,
         Party = 2,
