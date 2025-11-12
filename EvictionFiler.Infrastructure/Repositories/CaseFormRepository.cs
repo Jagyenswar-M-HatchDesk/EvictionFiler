@@ -7,7 +7,10 @@ using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using HtmlRendererCore.PdfSharp;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Playwright;
+using Syncfusion.HtmlConverter;
+using Syncfusion.Pdf.Graphics;
+using Syncfusion.Pdf;
+using Syncfusion.Drawing;
 
 
 
@@ -29,7 +32,6 @@ namespace EvictionFiler.Infrastructure.Repositories
         {
             try
             {
-                // 1. Get the template
                 var template = await _context.MstFormTypes
                     .Where(f => f.Id == formTypeId)
                     .Select(f => new { f.HTML, f.Name })
@@ -40,7 +42,6 @@ namespace EvictionFiler.Infrastructure.Repositories
 
                 DateTime noticeDate = CalculateNoticeDate(template.Name);
 
-                // 2. Get case details (TenantIds are in LegalCase)
                 var caseDetails = await (
                                     from lc in _context.LegalCases
 
@@ -48,15 +49,12 @@ namespace EvictionFiler.Infrastructure.Repositories
                                     join building in _context.Buildings on lc.BuildingId equals building.Id
                                     join tenant in _context.Tenants on lc.TenantId equals tenant.Id
 
-                                    // LEFT JOIN Court
                                     join court in _context.Courts on lc.CourtId equals court.Id into cCourt
                                     from court in cCourt.DefaultIfEmpty()
 
-                                        // LEFT JOIN County
                                     join county in _context.MstCounties on court.CountyId equals county.Id into cCounty
                                     from county in cCounty.DefaultIfEmpty()
 
-                                        // LEFT JOIN RentDue table
                                     join rentdue in _context.MstDateRent on lc.RentDueEachMonthOrWeekId equals rentdue.Id into cRent
                                     from rentdue in cRent.DefaultIfEmpty()
 
@@ -96,17 +94,15 @@ namespace EvictionFiler.Infrastructure.Repositories
                 if (caseDetails == null)
                     throw new Exception("Case details not found.");
 
-                // 3. Parse TenantIds
                 List<Guid> tenantIds = new List<Guid>();
 
 
-                if (caseDetails.TenantIds.HasValue)  // since it's Guid?
+                if (caseDetails.TenantIds.HasValue)
                 {
                     tenantIds.Add(caseDetails.TenantIds.Value);
                 }
 
 
-                // 4. Fetch all tenants for this case
                 var tenants = await _context.Tenants
                     .Where(t => tenantIds.Contains(t.Id))
                     .Select(t => new
@@ -140,7 +136,6 @@ namespace EvictionFiler.Infrastructure.Repositories
                     tenants.AddRange(additionaloccupants);
                 }
 
-                // 5. Get first tenant details for top section
                 string firstTenantName = tenants.Count > 0 ? tenants[0].FullName : "";
                 string firstApartmentNumber = tenants.Count > 0 ? tenants[0].ApartmentNumber : "";
 
@@ -148,22 +143,15 @@ namespace EvictionFiler.Infrastructure.Repositories
                 string lastRent = "";
                 DateTime lastRentDate;
 
-                // Try parsing the string to a DateTime
                 if (DateTime.TryParseExact(caseDetails.LastRent, "MMM yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out lastRentDate) ||
                     DateTime.TryParseExact(caseDetails.LastRent, "MMMM yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out lastRentDate))
                 {
-                    // Add one month
                     DateTime nextMonthDate = lastRentDate.AddMonths(1);
 
-                    // Format as desired, e.g., "May 2023"
                     lastRent = nextMonthDate.ToString("MMMM");
 
-                    // Replace in your template
                 }
 
-
-
-                // 6. Fill HTML placeholders
                 string filledHtml = template.HTML
                     .Replace("{{LandlordName}}", caseDetails.LandlordName ?? "")
                     .Replace("{{Landlord_Name}}", caseDetails.LandlordName ?? "")
@@ -208,41 +196,35 @@ namespace EvictionFiler.Infrastructure.Repositories
                     filledHtml = filledHtml.Replace("{{lease_expired}}", "chceked");
                 }
 
-
-                // 7. Generate PDF with Playwright
                 var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "CaseForms", caseDetails.CaseCode);
                 Directory.CreateDirectory(folderPath);
 
                 var fileName = $"{Guid.NewGuid()}.pdf";
                 var filePath = Path.Combine(folderPath, fileName);
-                using var playwright = await Playwright.CreateAsync();
-                await using var browser = await playwright.Chromium.LaunchAsync(new()
+
+                HtmlToPdfConverter htmlConverter = new HtmlToPdfConverter();
+
+                BlinkConverterSettings settings = new BlinkConverterSettings
                 {
-                    Headless = true,
-                    Args = new[] { "--no-sandbox" } // Important for Azure App Service
-                });
+                    EnableJavaScript = true,
+                    //PrintBackground = true,
+                    Margin = new PdfMargins { All = 0 },
+                    PdfPageSize = PdfPageSize.A4,
+                    Orientation = PdfPageOrientation.Portrait,
+                    ViewPortSize = new Size(920, 0)
+                };
 
-                var page = await browser.NewPageAsync();
-                await page.SetContentAsync(filledHtml);
+                htmlConverter.ConverterSettings = settings;
 
-                var pdfBytes = await page.PdfAsync(new PagePdfOptions
+                PdfDocument document = htmlConverter.Convert(filledHtml, "");
+
+                using (FileStream fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
                 {
-                    Format = "A4",
-                    PrintBackground = true,
-                    Margin = new Margin
-                    {
-                        Top = "0.6in",
-                        Bottom = "0.6in",
-                        Left = "0.6in",
-                        Right = "0.6in"
-                    }
-                });
+                    document.Save(fileStream);
+                }
 
-                await File.WriteAllBytesAsync(filePath, pdfBytes);
-                await browser.CloseAsync();
+                document.Close(true);
 
-
-                // 11. Save form record to DB
                 var fileUrl = $"/CaseForms/{caseDetails.CaseCode}/{fileName}";
                 var caseForm = new CaseForms
                 {
@@ -266,7 +248,6 @@ namespace EvictionFiler.Infrastructure.Repositories
                 return false;
             }
         }
-
 
         private DateTime CalculateNoticeDate(string formName)
         {
