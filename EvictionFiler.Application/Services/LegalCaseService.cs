@@ -6,9 +6,13 @@ using EvictionFiler.Application.DTOs.OccupantDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
+using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
 using System.Linq.Expressions;
 
 namespace EvictionFiler.Application.Services
@@ -16,18 +20,20 @@ namespace EvictionFiler.Application.Services
     public class LegalCaseService : ILegalCaseService
     {
         private readonly ICasesRepository _repository;
+       private readonly ICaseTypeRepository _caseTypeRepository;
 
         private readonly ILandLordRepository _landlordrepo;
         private readonly IBuildingRepository _buildingrepo;
         private readonly ITenantRepository _tenantRepo;
         private readonly IAdditionalOccupantsRepository _additionalOccupantsRepo;
         private readonly IUnitOfWork _unitOfWork;
-        public LegalCaseService(ICasesRepository repository, ITenantRepository tenantRepo, ILandLordRepository landlordrepo, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
+        public LegalCaseService(ICasesRepository repository, ITenantRepository tenantRepo, ILandLordRepository landlordrepo, ICaseTypeRepository caseTypeRepository, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
         {
             _repository = repository;
             _tenantRepo = tenantRepo;
             _landlordrepo = landlordrepo;
             _buildingrepo = buildingrepo;
+            _caseTypeRepository = caseTypeRepository;
             _unitOfWork = unitOfWork;
             _additionalOccupantsRepo = additionalOccupantsRepo;
 
@@ -35,57 +41,7 @@ namespace EvictionFiler.Application.Services
 
         public async Task<Guid?> CreateCasesAsync(IntakeModel legalCase)
         {
-            //// 1. Save Landlord
-            //var landlord = new LandLord
-            //{
-            //    Id = Guid.NewGuid(),
-            //    LandLordCode = await _landlordrepo.GenerateLandlordCodeAsync(),
-            //    FirstName = legalCase.FullName,
-            //    Phone = legalCase.Phone,
-            //    Email = legalCase.Email,
-            //    LandlordTypeId = legalCase.LandLordTypeId,
-            //    CreatedBy = legalCase.CreatedBy,
-            //    CreatedOn = DateTime.Now,
-
-
-            //};
-            //await _landlordrepo.AddAsync(landlord);
-            //await _unitOfWork.SaveChangesAsync();
-
-            //// 2. Save Building
-            //var building = new Building
-            //{
-            //    Id = Guid.NewGuid(),
-            //    BuildingCode = await _buildingrepo.GenerateBuildingCodeAsync(),
-            //    MDRNumber = legalCase.Mdr,
-            //    BuildingUnits = legalCase.Units,
-            //    Address1 = legalCase.BuildingAddress,
-            //    RegulationStatusId = legalCase.RegulationStatusId,
-            //    CreatedBy = legalCase.CreatedBy,
-            //    CreatedOn = DateTime.Now,
-            //};
-            //await _buildingrepo.AddAsync(building);
-            //await _unitOfWork.SaveChangesAsync();
-
-            //// 3. Save Tenant
-            //var tenant = new Tenant
-            //{
-            //    Id = Guid.NewGuid(),
-            //    TenantCode = await _tenantRepo.GenerateTenantCodeAsync(),
-            //    FirstName = legalCase.FullName,
-            //    UnitOrApartmentNumber = legalCase.UnitNumber,
-            //    IsUnitIllegalId = legalCase.IsUnitIllegalId,
-
-            //    TenantRecord = legalCase.TenantRecord,
-            //    HasPossession = legalCase.HasPossession,
-            //    OtherOccupants = legalCase.OtherOccupants,
-            //    CreatedBy = legalCase.CreatedBy,
-            //    CreatedOn = DateTime.Now,
-            //};
-            //await _tenantRepo.AddAsync(tenant);
-            //await _unitOfWork.SaveChangesAsync();
-
-            // 4. Save Legal Case with foreign keys
+           
             var legalCases = new LegalCase
             {
                 Id = Guid.NewGuid(),
@@ -102,17 +58,13 @@ namespace EvictionFiler.Application.Services
                 OralEnd = legalCase.OralEnd,
                 WrittenLease = legalCase.WrittenLease,
                 DateTenantMoved = legalCase.DateTenantMoved,
-                //CreatedBy = legalCase.CreatedBy,
                 CreatedOn = DateTime.Now,
                 TenancyTypeId = legalCase.TenancyTypeId,
-                // Foreign keys
                 LandLordId = legalCase.LandlordId,
                 LandlordTypeId = legalCase.LandLordTypeId,
                 CreatedBy = legalCase.CreatedBy,
-
                 BuildingId = legalCase.BuildingId,
                 TenantId = legalCase.TenantId,
-
                 UnitOrApartmentNumber = legalCase.UnitOrApartmentNumber,
                 LeaseEnd = legalCase.LeaseEnd,
                 DateNoticeServed = legalCase.DateNoticeServed,
@@ -125,14 +77,107 @@ namespace EvictionFiler.Application.Services
                 GoodCauseApplies = legalCase.GoodCauseApplies,
                 CalculatedNoticeLength = legalCase.CalculatedNoticeLength,
                 CaseProgramId = legalCase.CaseProgramId,
+                Attrney = legalCase.Attrney,
+                AttrneyContactInfo = legalCase.AttrneyContactInfo,
+                AttrneyEmail = legalCase.AttrneyEmail,
+                CaseTypeHPDId = legalCase.CaseTypeHPDId,
+                CourtLocation = legalCase.CourtLocation,
+                CourtRoom = legalCase.CourtRoom,
+                Index = legalCase.Index,
+                County = legalCase.County,
+                PartyRepresentId = legalCase.PartyRepresentId,
+                //LandLords = legalCase.landlordName,
+                ManagingAgent = legalCase.ManagingAgent,
+                OpposingCounsel = legalCase.OpposingCounsel,
+                HarassmentTypeId = legalCase.HarassmentTypeId,  
+                DefenseTypeId = legalCase.DefenseTypeId,
+                AppearanceDate = legalCase.AppearanceDate,
+                AppearanceTime = legalCase.AppearanceTime,
+                AppearanceTypeId = legalCase.AppearanceTypeId,
+                ReliefPetitionerTypeId = legalCase.ReliefPetitionerTypeId,
+                ReliefRespondentTypeId = legalCase.ReliefRespondentTypeId,
+                BilingTypeId = legalCase.BilingTypeId,
+                InvoiceTo = legalCase.InvoiceTo,   
             };
 
-            var addedcase = await _repository.AddAsync(legalCases);
-            var result = await _unitOfWork.SaveChangesAsync();
+            var caseType = await _caseTypeRepository.GetAsync(legalCase.CaseTypeId);
 
-            if (result != null) return addedcase.Id;
+            if (caseType != null)
+            {
+                if (caseType.Name.Equals("Holdover", StringComparison.OrdinalIgnoreCase))
+                {
+                    // 🟢 HOLDOVER specific fields
+                    legalCases.Id = Guid.NewGuid();
+                    legalCases.Casecode = await _repository.GenerateCaseCodeAsync();
+                    legalCases.ClientId = legalCase.ClientId;
+                    legalCases.CaseTypeId = legalCase.CaseTypeId;
+                    legalCases.IsERAPPaymentReceived = legalCase.IsERAPPaymentReceived;
 
-            return null;
+                    legalCases.MonthlyRent = legalCase.MonthlyRent;
+                    legalCases.TotalRentOwed = legalCase.TotalOwed;
+                    legalCases.TenantShare = legalCase.TenantShare;
+                    legalCases.RentDueEachMonthOrWeekId = legalCase.RentDueEachMonthOrWeekId;
+                    legalCases.OralStart = legalCase.OralStart;
+                    legalCases.OralEnd = legalCase.OralEnd;
+                    legalCases.WrittenLease = legalCase.WrittenLease;
+                    legalCases.DateTenantMoved = legalCase.DateTenantMoved;
+                legalCases.CreatedOn = DateTime.Now;
+                    legalCases.TenancyTypeId = legalCase.TenancyTypeId;
+                    legalCases.LandLordId = legalCase.LandlordId;
+                    legalCases.LandlordTypeId = legalCase.LandLordTypeId;
+                    legalCases.CreatedBy = legalCase.CreatedBy;
+                    legalCases.BuildingId = legalCase.BuildingId;
+                    legalCases.TenantId = legalCase.TenantId;
+                    legalCases.UnitOrApartmentNumber = legalCase.UnitOrApartmentNumber;
+                    legalCases.LeaseEnd = legalCase.LeaseEnd;
+                    legalCases.DateNoticeServed = legalCase.DateNoticeServed;
+                    legalCases.ExpirationDate = legalCase.ExpirationDate;
+                    legalCases.PredicateNotice = legalCase.PredicateNotice;
+                    legalCases.SocialService = legalCase.SocialService;
+                    legalCases.LastRentPaid = legalCase.LastRentPaid;
+                    legalCases.Reference = legalCase.Reference;
+                    legalCases.OralAgreeMent = legalCase.OralAgreeMent;
+                    legalCases.GoodCauseApplies = legalCase.GoodCauseApplies;
+                    legalCases.CalculatedNoticeLength = legalCase.CalculatedNoticeLength;
+                    legalCases.CaseProgramId = legalCase.CaseProgramId;
+                }
+                else if (caseType.Name.Equals("HPD", StringComparison.OrdinalIgnoreCase))
+                {
+                    // 🟣 HPD specific fields
+                    legalCases.Id = Guid.NewGuid();
+                    legalCases.Casecode = await _repository.GenerateCaseCodeAsync();
+                    legalCases.ClientId = legalCase.ClientId;
+                    legalCases.CaseTypeId = legalCase.CaseTypeId;
+                    legalCases.Attrney = legalCase.Attrney;
+                    legalCases.AttrneyContactInfo = legalCase.AttrneyContactInfo;
+                    legalCases.AttrneyEmail = legalCase.AttrneyEmail;
+                    legalCases.CaseTypeHPDId = legalCase.CaseTypeHPDId;
+                    legalCases.CourtLocation = legalCase.CourtLocation;
+                    legalCases.CourtRoom = legalCase.CourtRoom;
+                    legalCases.Index = legalCase.Index;
+                    legalCases.County = legalCase.County;
+                    legalCases.PartyRepresentId = legalCase.PartyRepresentId;
+                    ////legalCases.//LandLords = legalCase.landlordName,
+                    legalCases.ManagingAgent = legalCase.ManagingAgent;
+                    legalCases.OpposingCounsel = legalCase.OpposingCounsel;
+                    legalCases.HarassmentTypeId = legalCase.HarassmentTypeId;
+                    legalCases.DefenseTypeId = legalCase.DefenseTypeId;
+                    legalCases.AppearanceDate = legalCase.AppearanceDate;
+                    legalCases.AppearanceTime = legalCase.AppearanceTime;
+                    legalCases.AppearanceTypeId = legalCase.AppearanceTypeId;
+                    legalCases.ReliefPetitionerTypeId = legalCase.ReliefPetitionerTypeId;
+                    legalCases.ReliefRespondentTypeId = legalCase.ReliefRespondentTypeId;
+                    legalCases.BilingTypeId = legalCase.BilingTypeId;
+                    legalCases.InvoiceTo = legalCase.InvoiceTo;
+                }
+
+                var addedcase = await _repository.AddAsync(legalCases);
+                var result = await _unitOfWork.SaveChangesAsync();
+
+                if (result != null) return addedcase.Id;
+
+                return null;
+            
         }
 
 

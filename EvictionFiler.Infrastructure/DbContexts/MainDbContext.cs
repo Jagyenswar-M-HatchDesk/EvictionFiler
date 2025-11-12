@@ -17,10 +17,20 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<Client> Clients { get; set; }
         public DbSet<LandLord> LandLords { get; set; }
 		public DbSet<CaseType> MstCaseTypes { get; set; }
-
+        public DbSet<BuildingType> MstBuildingTypes { get; set; }
+        public DbSet<CaseTypeHPD> MstCaseTypesHPD { get; set; }
+        public DbSet<PartyRepresent> MstPartyRepresents { get; set; }
         public DbSet<CourtPart> MstCourtPart { get; set; }
         public DbSet<CaseStatus> MstCaseStatus { get; set; }
+        public DbSet<Registrationstatus> MstRegistrationstatuses { get; set; }
 
+        public DbSet<HarassmentType> MstHarassmentTypes{ get; set; }
+        public DbSet<AppearanceType> MstAppearanceTypes { get; set; }
+        public DbSet<ReliefPetitionerType> MstReliefPetitionerTypes { get; set; }
+        public DbSet<ReliefRespondentType> MstReliefRespondentTypes { get; set; }
+
+        public DbSet<BilingType> MstBilingTypes { get; set; }
+        public DbSet<DefenseType> MstDefenseTypes { get; set; }
         public DbSet<County> MstCounties { get; set; }
         public DbSet<Category> MstCategories { get; set; }
         public DbSet<LandlordType> MstLandlordTypes { get; set; }

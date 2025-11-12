@@ -34,5 +34,55 @@ namespace EvictionFiler.Infrastructure.Repositories
         {
             return await _context.MstCourtPart.ToListAsync();
         }
+
+        public async Task<List<CaseTypeHPD>> GetAllCaseTypeHPD()
+        {
+            return await _context.MstCaseTypesHPD.ToListAsync();
+        }
+
+        public async Task<List<PartyRepresent>> GetAllpartyRepresenting()
+        {
+            return await _context.MstPartyRepresents.ToListAsync();
+        }
+
+        public async Task<List<BuildingType>> GetAllBuildingTypes()
+        {
+            return await _context.MstBuildingTypes.ToListAsync();
+        }
+
+        public async Task<List<Registrationstatus>> GetAllRegistrationstatus()
+        {
+            return await _context.MstRegistrationstatuses.ToListAsync();
+        }
+
+        public async Task<List<HarassmentType>> GetAllHarassmentTypes()
+        {
+            return await _context.MstHarassmentTypes.ToListAsync();
+        }
+
+        public async Task<List<DefenseType>> GetAllDefenseTypes()
+        {
+            return await _context.MstDefenseTypes.ToListAsync();
+        }
+
+        public async Task<List<AppearanceType>> GetAllAppearanceTypes()
+        {
+            return await _context.MstAppearanceTypes.ToListAsync();
+        }
+
+        public async Task<List<ReliefPetitionerType>> GetAllReliefPetitionerTypes()
+        {
+            return await _context.MstReliefPetitionerTypes.ToListAsync();
+        }
+
+        public async Task<List<ReliefRespondentType>> GetAllReliefRespondentTypes()
+        {
+            return await _context.MstReliefRespondentTypes.ToListAsync();
+        }
+
+        public async Task<List<BilingType>> GetAllBilingTypes()
+        {
+            return await _context.MstBilingTypes.ToListAsync();
+        }
     }
 }

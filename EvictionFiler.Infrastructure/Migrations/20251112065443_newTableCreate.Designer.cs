@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251112065443_newTableCreate")]
+    partial class newTableCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -822,7 +825,7 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<DateOnly?>("AppearanceDate")
                         .HasColumnType("date");
 
-                    b.Property<TimeOnly?>("AppearanceTime")
+                    b.Property<TimeSpan?>("AppearanceTime")
                         .HasColumnType("time");
 
                     b.Property<Guid?>("AppearanceTypeId")
@@ -839,9 +842,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<string>("AttrneyEmail")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<Guid?>("BilingTypeId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal?>("BillAmount")
                         .HasColumnType("decimal(18,2)");
@@ -906,9 +906,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<DateOnly?>("DateTenantMoved")
                         .HasColumnType("date");
 
-                    b.Property<Guid?>("DefenseTypeId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("DateTime");
 
@@ -933,9 +930,6 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Property<bool?>("GoodCauseApplies")
                         .HasColumnType("bit");
-
-                    b.Property<Guid?>("HarassmentTypeId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool?>("HasPossession")
                         .HasColumnType("bit");
@@ -1076,8 +1070,6 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasIndex("AppearanceTypeId");
 
-                    b.HasIndex("BilingTypeId");
-
                     b.HasIndex("BuildingId");
 
                     b.HasIndex("CaseSubTypeId");
@@ -1091,10 +1083,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasIndex("ClientRoleId");
 
                     b.HasIndex("CourtId");
-
-                    b.HasIndex("DefenseTypeId");
-
-                    b.HasIndex("HarassmentTypeId");
 
                     b.HasIndex("IsUnitIllegalId");
 
@@ -1153,8 +1141,8 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
@@ -1197,8 +1185,8 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
@@ -1241,8 +1229,8 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
@@ -1460,8 +1448,8 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
@@ -1724,8 +1712,8 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
@@ -1823,8 +1811,8 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
@@ -1999,8 +1987,8 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
@@ -2131,8 +2119,8 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
@@ -2219,8 +2207,8 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
@@ -2263,8 +2251,8 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
@@ -3147,10 +3135,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("AppearanceTypeId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.BilingType", "BilingType")
-                        .WithMany()
-                        .HasForeignKey("BilingTypeId");
-
                     b.HasOne("EvictionFiler.Domain.Entities.Building", "Buildings")
                         .WithMany()
                         .HasForeignKey("BuildingId");
@@ -3178,14 +3162,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasOne("EvictionFiler.Domain.Entities.Courts", "Courts")
                         .WithMany()
                         .HasForeignKey("CourtId");
-
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.DefenseType", "DefenseType")
-                        .WithMany()
-                        .HasForeignKey("DefenseTypeId");
-
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.HarassmentType", "HarassmentType")
-                        .WithMany()
-                        .HasForeignKey("HarassmentTypeId");
 
                     b.HasOne("EvictionFiler.Domain.Entities.Master.IsUnitIllegal", "IsUnitIllegal")
                         .WithMany()
@@ -3237,8 +3213,6 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Navigation("AppearanceType");
 
-                    b.Navigation("BilingType");
-
                     b.Navigation("Buildings");
 
                     b.Navigation("CaseSubType");
@@ -3252,10 +3226,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Navigation("Clients");
 
                     b.Navigation("Courts");
-
-                    b.Navigation("DefenseType");
-
-                    b.Navigation("HarassmentType");
 
                     b.Navigation("IsUnitIllegal");
 

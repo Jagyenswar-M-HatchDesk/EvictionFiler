@@ -39,6 +39,14 @@ namespace EvictionFiler.Domain.Entities
 		[ForeignKey("LandlordId")]
 		public LandLord? Landlord { get; set; }
 
-		public ICollection<Tenant>? Tenants { get; set; }
+        public Guid? RegistrationStatusId { get; set; }
+        [ForeignKey("RegistrationStatusId")]
+        public Registrationstatus? RegistrationStatus { get; set; }
+
+        public Guid? BuildingTypeId { get; set; }
+        [ForeignKey("BuildingTypeId")]
+        public BuildingType? BuildingType { get; set; }
+
+        public ICollection<Tenant>? Tenants { get; set; }
 	}
 }

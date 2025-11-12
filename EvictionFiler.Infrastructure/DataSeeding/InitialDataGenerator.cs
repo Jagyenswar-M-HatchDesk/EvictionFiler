@@ -20,6 +20,17 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             };
         }
 
+        public static IEnumerable<BilingType> GetBilingTypes()
+        {
+            var now = DateTime.UtcNow;
+            return new List<BilingType>
+            {
+                new BilingType() { Name = "Hourly ($/hr)", CreatedOn = now },
+                new BilingType() { Name = "Flat Rate", CreatedOn = now },
+                
+            };
+        }
+
         public static IEnumerable<CaseType> GetCaseTypes()
         {
             var now = DateTime.UtcNow;
@@ -29,6 +40,130 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new CaseType() { Name = "NonPayment", CreatedOn = now },
                 new CaseType() { Name = "HPD", CreatedOn = now },
                 new CaseType() { Name = "Per Diem", CreatedOn = now },
+            };
+        }
+
+        public static IEnumerable<CaseTypeHPD> GetCaseTypesHPD()
+        {
+            var now = DateTime.UtcNow;
+            return new List<CaseTypeHPD>
+            {
+                new CaseTypeHPD() { Name = "HPD Harassment Proceeding", CreatedOn = now },
+                new CaseTypeHPD() { Name = "HPD Code Enforcement / Repairs", CreatedOn = now },
+                new CaseTypeHPD() { Name = "Other", CreatedOn = now },
+                
+            };
+        }
+        public static IEnumerable<BuildingType> GetBuildingTypes()
+        {
+            var now = DateTime.UtcNow;
+            return new List<BuildingType>
+            {
+                new BuildingType() { Name = "Multiple Dwelling", CreatedOn = now },
+                new BuildingType() { Name = "Two-Family", CreatedOn = now },
+                new BuildingType() { Name = "Other", CreatedOn = now },
+
+            };
+        }
+
+        public static IEnumerable<DefenseType> GetDefensetypes()
+        {
+            var now = DateTime.UtcNow;
+            return new List<DefenseType>
+            {
+                new DefenseType() { Name = "All services are being provided; no interruption proven", CreatedOn = now },
+                new DefenseType() { Name = "Tenant has refused access for repairs", CreatedOn = now },
+                new DefenseType() { Name = "Tenant caused conditions complained of", CreatedOn = now },
+                new DefenseType() { Name = "Tenant owes rent / is using harassment claim as defense", CreatedOn = now },
+                new DefenseType() { Name = "Violations cited were corrected / do not exist", CreatedOn = now },
+                new DefenseType() { Name = "Other defenses", CreatedOn = now },
+
+            };
+        }
+
+        public static IEnumerable<ReliefPetitionerType> GetReliefPetitionerTypes()
+        {
+            var now = DateTime.UtcNow;
+            return new List<ReliefPetitionerType>
+            {
+                new ReliefPetitionerType() { Name = "Order to Correct", CreatedOn = now },
+                new ReliefPetitionerType() { Name = "Civil Penalties against Landlord", CreatedOn = now },
+                new ReliefPetitionerType() { Name = "Finding of Harassment", CreatedOn = now },
+                new ReliefPetitionerType() { Name = "Access Order for repairs", CreatedOn = now },
+                new ReliefPetitionerType() { Name = "Restoration to possession (if lockout)", CreatedOn = now },
+                new ReliefPetitionerType() { Name = "Other", CreatedOn = now },
+
+            };
+        }
+
+        public static IEnumerable<ReliefRespondentType> GetReliefRespondentTypes()
+        {
+            var now = DateTime.UtcNow;
+            return new List<ReliefRespondentType>
+            {
+                new ReliefRespondentType() { Name = "Dismissal of Proceeding", CreatedOn = now },
+                new ReliefRespondentType() { Name = "Vacatur of Orders to Correct", CreatedOn = now },
+                new ReliefRespondentType() { Name = "Denial of Harassment Finding", CreatedOn = now },
+                new ReliefRespondentType() { Name = "Access Order for repairs", CreatedOn = now },
+                new ReliefRespondentType() { Name = "Costs / Sanctions against Tenant", CreatedOn = now },
+                new ReliefRespondentType() { Name = "Other", CreatedOn = now },
+
+            };
+        }
+
+        public static IEnumerable<AppearanceType> GetAppearanceTypes()
+        {
+            var now = DateTime.UtcNow;
+            return new List<AppearanceType>
+            {
+                new AppearanceType() { Name = "First Appearance / Intake", CreatedOn = now },
+                new AppearanceType() { Name = "Trial / Hearing", CreatedOn = now },
+                new AppearanceType() { Name = "Motion / OSC Return Date", CreatedOn = now },
+                new AppearanceType() { Name = "Adjournment / Stipulation", CreatedOn = now },
+                   new AppearanceType() { Name = "Other", CreatedOn = now },
+
+            };
+        }
+
+
+        public static IEnumerable<HarassmentType> GetHarassmentTypes()
+        {
+            var now = DateTime.UtcNow;
+            return new List<HarassmentType>
+            {
+                new HarassmentType() { Name = "Repeated interruptions of essential services (heat, hot water, gas, electricity)", CreatedOn = now },
+                new HarassmentType() { Name = "Failure to make necessary repairs", CreatedOn = now },
+                new HarassmentType() { Name = "Threats, intimidation, or verbal abuse", CreatedOn = now },
+                 new HarassmentType() { Name = "Illegal lockout attempts / changed locks", CreatedOn = now },
+                  new HarassmentType() { Name = "Unlawful entry into apartment", CreatedOn = now },
+                   new HarassmentType() { Name = "Commenced frivolous court proceedings", CreatedOn = now },
+                    new HarassmentType() { Name = "Other acts", CreatedOn = now },
+
+            };
+        }
+        public static IEnumerable<Registrationstatus> GetRegistrationStatus()
+        {
+            var now = DateTime.UtcNow;
+            return new List<Registrationstatus>
+            {
+                new Registrationstatus() { Name = "Registered", CreatedOn = now },
+                new Registrationstatus() { Name = "Not Registered", CreatedOn = now },
+                new Registrationstatus() { Name = "UnKnown ", CreatedOn = now },
+
+            };
+        }
+
+
+
+        public static IEnumerable<PartyRepresent> GetPartyRepresent()
+        {
+            var now = DateTime.UtcNow;
+            return new List<PartyRepresent>
+            {
+                new PartyRepresent() { Name = "Petitioner (Tenant/Occupant)", CreatedOn = now },
+                new PartyRepresent() { Name = "Respondent (Landlord/Owner/Managing Agent)", CreatedOn = now },
+               
+
             };
         }
 

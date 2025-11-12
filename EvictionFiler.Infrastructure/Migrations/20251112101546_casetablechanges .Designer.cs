@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251112101546_casetablechanges ")]
+    partial class casetablechanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -906,9 +909,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<DateOnly?>("DateTenantMoved")
                         .HasColumnType("date");
 
-                    b.Property<Guid?>("DefenseTypeId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("DateTime");
 
@@ -933,9 +933,6 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Property<bool?>("GoodCauseApplies")
                         .HasColumnType("bit");
-
-                    b.Property<Guid?>("HarassmentTypeId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool?>("HasPossession")
                         .HasColumnType("bit");
@@ -1091,10 +1088,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasIndex("ClientRoleId");
 
                     b.HasIndex("CourtId");
-
-                    b.HasIndex("DefenseTypeId");
-
-                    b.HasIndex("HarassmentTypeId");
 
                     b.HasIndex("IsUnitIllegalId");
 
@@ -3179,14 +3172,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("CourtId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.DefenseType", "DefenseType")
-                        .WithMany()
-                        .HasForeignKey("DefenseTypeId");
-
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.HarassmentType", "HarassmentType")
-                        .WithMany()
-                        .HasForeignKey("HarassmentTypeId");
-
                     b.HasOne("EvictionFiler.Domain.Entities.Master.IsUnitIllegal", "IsUnitIllegal")
                         .WithMany()
                         .HasForeignKey("IsUnitIllegalId");
@@ -3252,10 +3237,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Navigation("Clients");
 
                     b.Navigation("Courts");
-
-                    b.Navigation("DefenseType");
-
-                    b.Navigation("HarassmentType");
 
                     b.Navigation("IsUnitIllegal");
 

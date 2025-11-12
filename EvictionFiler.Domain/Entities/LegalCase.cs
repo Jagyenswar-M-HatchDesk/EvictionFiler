@@ -87,6 +87,8 @@ namespace EvictionFiler.Domain.Entities
 		public string? Attrney { get; set; }
 		[MaxLength(100)]
 		public string? AttrneyContactInfo { get; set; }
+
+
 		[MaxLength(50)]
 		public string? Firm { get; set; }
 
@@ -132,6 +134,54 @@ namespace EvictionFiler.Domain.Entities
         public Courts? Courts { get; set; }
 
         public decimal? BillAmount { get; set; }
+
+        [MaxLength(100)]
+        public string? AttrneyEmail { get; set; }
+
+        public Guid? CaseTypeHPDId{ get; set; }
+        [ForeignKey("CaseTypeHPDId")]
+        public CaseTypeHPD? CaseTypeHPDs { get; set; }
+
+        public Guid? PartyRepresentId { get; set; }
+        [ForeignKey("PartyRepresentId")]
+        public PartyRepresent? PartyRepresents { get; set; }
+        public Guid? AppearanceTypeId{ get; set; }
+        [ForeignKey("AppearanceTypeId")]
+        public AppearanceType? AppearanceType { get; set; }
+
+        public Guid? ReliefRespondentTypeId { get; set; }
+        [ForeignKey("ReliefRespondentTypeId")]
+        public ReliefRespondentType? ReliefRespondentType { get; set; }
+        public Guid? ReliefPetitionerTypeId { get; set; }
+        [ForeignKey("ReliefPetitionerTypeId")]
+        public ReliefPetitionerType? ReliefPetitionerType { get; set; }
+
+        public Guid? BilingTypeId { get; set; }
+        [ForeignKey("BilingTypeId")]
+        public BilingType? BilingType { get; set; }
+
+        public Guid? HarassmentTypeId { get; set; }
+        [ForeignKey("HarassmentTypeId")]
+        public HarassmentType? HarassmentType { get; set; }
+
+        public Guid? DefenseTypeId { get; set; }
+        [ForeignKey("DefenseTypeId")]
+        public DefenseType? DefenseType { get; set; }
+
+
+        [MaxLength(100)]
+        public string? CourtLocation { get; set; }
+
+        public string? County { get; set; }
+        public string? Index { get; set; }
+        public string? CourtRoom{ get; set; }
+        public string? OpposingCounsel { get; set; }
+        public string? ManagingAgent { get; set; }
+        public DateOnly? AppearanceDate { get; set; }
+
+        public string? InvoiceTo { get; set; }
+        public TimeOnly? AppearanceTime { get; set; }
+
 
     }
 }

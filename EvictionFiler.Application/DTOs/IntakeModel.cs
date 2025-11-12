@@ -1,7 +1,9 @@
 ﻿using EvictionFiler.Domain.Entities.Base.Base;
+using EvictionFiler.Domain.Entities.Master;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -119,6 +121,57 @@ namespace EvictionFiler.Application.DTOs
         public string CourtCallIn { get; set; } = string.Empty;
         public string CourtConferenceId { get; set; } = string.Empty;
         public string Judge { get; set; } = string.Empty;
-        public decimal? BillAmount { get; set; } 
+        public decimal? BillAmount { get; set; }
+
+        public string? CourtLocation { get; set; }
+
+        public string? County { get; set; }
+        public string? Index { get; set; }
+        public string? CourtRoom { get; set; }
+        public string? OpposingCounsel { get; set; }
+        public string? ManagingAgent { get; set; }
+        public DateOnly? AppearanceDate { get; set; }
+
+        public string? InvoiceTo { get; set; }
+        public TimeOnly? AppearanceTime { get; set; }
+        public Guid? HarassmentTypeId { get; set; }
+        public Guid? DefenseTypeId { get; set; }
+        public string? AttrneyEmail { get; set; }
+
+        public string? Attrney { get; set; }
+       
+        public string? AttrneyContactInfo { get; set; }
+
+        public Guid? CaseTypeHPDId { get; set; }
+        
+        public CaseTypeHPD? CaseTypeHPDs { get; set; }
+        public List<Guid> SelectedCaseTypeHPDIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedPartyRepresentIds { get; set; } = new List<Guid>();
+
+        public List<Guid> SelectedAppearanceTypeIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedReliefRespondentTypeIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedReliefPetitionerTypeIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedBilingTypeIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedBuildingTypeIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedRegistrationStatusTypeIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedHarassmentTypeIds { get; set; } = new List<Guid>();
+
+        public List<Guid> SelectedDefenseTypeIds { get; set; } = new List<Guid>();
+        public Guid? PartyRepresentId { get; set; }
+       
+        public PartyRepresent? PartyRepresents { get; set; }
+        public Guid? BilingTypeId { get; set; }
+   
+        public BilingType? BilingType { get; set; }
+        public Guid? AppearanceTypeId { get; set; }
+      
+        public AppearanceType? AppearanceType { get; set; }
+
+        public Guid? ReliefRespondentTypeId { get; set; }
+    
+        public ReliefRespondentType? ReliefRespondentType { get; set; }
+        public Guid? ReliefPetitionerTypeId { get; set; }
+     
+        public ReliefPetitionerType? ReliefPetitionerType { get; set; }
     }
 }

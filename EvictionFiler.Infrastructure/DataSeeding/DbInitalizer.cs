@@ -17,10 +17,22 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			{
 				await context.Database.MigrateAsync();
 				await SeedLanguage(context);
+
 				await SeedPremiseType(context);
 				await SeedCaseTypes(context);
+                await SeedBuildingTypes(context);
+                await SeedCaseTypesHPD(context);
+                await SeedBillingTypes(context);
+                await SeedPartyRepresent(context);
                 await SeedDateRent(context);
-				await SeedTypeOfOwner(context);
+                await SeedHarassmentType(context);
+                await SeedDefenseType(context);
+				await SeedAppearanceType(context);
+                await SeedReliefPetitionerType(context);
+                await SeedReliefRespondentType(context);
+                await SeedRegistrationStatus(context);
+
+                await SeedTypeOfOwner(context);
                 await context.SaveChangesAsync();
 
                 await SeedRenewalStatus(context);
@@ -56,6 +68,125 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				}
 			}
 		}
+
+        private static async Task SeedDefenseType(MainDbContext context)
+        {
+            var defensetypes = InitialDataGenerator.GetDefensetypes();
+            foreach (var type in defensetypes)
+            {
+                if (context.MstDefenseTypes.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstDefenseTypes.AddAsync(type);
+                }
+            }
+        }
+        private static async Task SeedBillingTypes(MainDbContext context)
+        {
+            var bilingTypes = InitialDataGenerator.GetBilingTypes();
+            foreach (var type in bilingTypes)
+            {
+                if (context.MstBilingTypes.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstBilingTypes.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedReliefPetitionerType(MainDbContext context)
+        {
+            var ReliefPetitionerTypes = InitialDataGenerator.GetReliefPetitionerTypes();
+            foreach (var type in ReliefPetitionerTypes)
+            {
+                if (context.MstReliefPetitionerTypes.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstReliefPetitionerTypes.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedReliefRespondentType(MainDbContext context)
+        {
+            var ReliefRespondentTypes = InitialDataGenerator.GetReliefRespondentTypes();
+            foreach (var type in ReliefRespondentTypes)
+            {
+                if (context.MstReliefRespondentTypes.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstReliefRespondentTypes.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedAppearanceType(MainDbContext context)
+        {
+            var appearanceTypes = InitialDataGenerator.GetAppearanceTypes();
+            foreach (var type in appearanceTypes)
+            {
+                if (context.MstAppearanceTypes.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstAppearanceTypes.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedHarassmentType(MainDbContext context)
+        {
+            var HarassmentTypes = InitialDataGenerator.GetHarassmentTypes();
+            foreach (var type in HarassmentTypes)
+            {
+                if (context.MstHarassmentTypes.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstHarassmentTypes.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedBuildingTypes(MainDbContext context)
+        {
+            var building = InitialDataGenerator.GetBuildingTypes();
+            foreach (var type in building)
+            {
+                if (context.MstBuildingTypes.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstBuildingTypes.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedRegistrationStatus(MainDbContext context)
+        {
+            var registrationStatus = InitialDataGenerator.GetRegistrationStatus();
+            foreach (var type in registrationStatus)
+            {
+                if (context.MstRegistrationstatuses.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstRegistrationstatuses.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedCaseTypesHPD(MainDbContext context)
+        {
+            var casetypes = InitialDataGenerator.GetCaseTypesHPD();
+            foreach (var type in casetypes)
+            {
+                if (context.MstCaseTypesHPD.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstCaseTypesHPD.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedPartyRepresent(MainDbContext context)
+        {
+            var pr = InitialDataGenerator.GetPartyRepresent();
+            foreach (var type in pr)
+            {
+                if (context.MstPartyRepresents.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstPartyRepresents.AddAsync(type);
+                }
+            }
+        }
 
         private static async Task SeedCounty(MainDbContext context)
         {
