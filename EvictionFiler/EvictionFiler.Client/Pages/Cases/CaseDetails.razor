@@ -1545,6 +1545,16 @@
         }
 
     </script>
+    <script>
+            window.openTab = function (tabId) {
+            const triggerEl = document.querySelector(`#${tabId}-tab`);
+            if (triggerEl) {
+                const tab = new bootstrap.Tab(triggerEl);
+                tab.show();
+            }
+        };
+
+    </script>
 
 </body>
 
@@ -1754,7 +1764,7 @@
     {
         spinnerservice.Show();
 
-        legalcaseDto.BillAmount = (legalcaseDto.BillAmount ?? 0) + (BillAmount ?? 0);
+        legalcaseDto.BillAmount = (legalcaseDto.BillAmount ?? 0) + (noticeModel.BillAmount ?? 0);
 
         var successcase = await _service.UpdateCaseAsync(legalcaseDto);
         if (!successcase.HasValue)
@@ -1763,7 +1773,7 @@
         }
         else
         {
-            BillAmount = null;
+            noticeModel.BillAmount = null;
         }
 
         if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty && noticeModel.FormTypeId.HasValue)
@@ -1811,6 +1821,8 @@
                 noticeModel = new GenrateNoticeModel();
                 isEditMode = false;
                 CurrentCaseId = caseId;
+
+                await JS.InvokeVoidAsync("openTab", "activity");
             }
         }
         else

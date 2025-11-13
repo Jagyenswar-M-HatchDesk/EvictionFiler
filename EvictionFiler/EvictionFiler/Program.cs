@@ -27,6 +27,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Radzen;
 using Syncfusion.Blazor;
+using Syncfusion.Licensing;
 using System.Text;
 
 
@@ -68,13 +69,12 @@ builder.Services.AddDbContext<MainDbContext>(
 
 );
 
+SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JFaF1cX2hIf0x3THxbf1x1ZFdMYVpbQHNPMyBoS35Rc0RiWH1ecnVTQmVcUER2VEFc");
 
 builder.Services.AddScoped<DialogService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<TooltipService>();
 builder.Services.AddScoped<ContextMenuService>();
-
-
 
 builder.Services.AddScoped<ICourtService, CourtService>();
 builder.Services.AddScoped<ICourtRepository, CourtRepository>();
