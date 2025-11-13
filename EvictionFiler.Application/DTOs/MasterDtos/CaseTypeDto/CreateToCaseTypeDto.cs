@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.DTOs.MasterDtos.CaseTypeDto
 {
-    public class CreateToCourtPartDto : DeletableBaseEntity
+    public class CreateToCaseTypeDto : DeletableBaseEntity
     {
         [Required(ErrorMessage = "  Casetype Name is required")]
         public string Name { get; set; } = string.Empty;

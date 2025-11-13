@@ -42,63 +42,7 @@ namespace EvictionFiler.Application.Services
         public async Task<Guid?> CreateCasesAsync(IntakeModel legalCase)
         {
            
-            var legalCases = new LegalCase
-            {
-                Id = Guid.NewGuid(),
-                Casecode = await _repository.GenerateCaseCodeAsync(),
-                ClientId = legalCase.ClientId,
-                CaseTypeId = legalCase.CaseTypeId,
-                IsERAPPaymentReceived = legalCase.IsERAPPaymentReceived,
-
-                MonthlyRent = legalCase.MonthlyRent,
-                TotalRentOwed = legalCase.TotalOwed,
-                TenantShare = legalCase.TenantShare,
-                RentDueEachMonthOrWeekId = legalCase.RentDueEachMonthOrWeekId,
-                OralStart = legalCase.OralStart,
-                OralEnd = legalCase.OralEnd,
-                WrittenLease = legalCase.WrittenLease,
-                DateTenantMoved = legalCase.DateTenantMoved,
-                CreatedOn = DateTime.Now,
-                TenancyTypeId = legalCase.TenancyTypeId,
-                LandLordId = legalCase.LandlordId,
-                LandlordTypeId = legalCase.LandLordTypeId,
-                CreatedBy = legalCase.CreatedBy,
-                BuildingId = legalCase.BuildingId,
-                TenantId = legalCase.TenantId,
-                UnitOrApartmentNumber = legalCase.UnitOrApartmentNumber,
-                LeaseEnd = legalCase.LeaseEnd,
-                DateNoticeServed = legalCase.DateNoticeServed,
-                ExpirationDate = legalCase.ExpirationDate,
-                PredicateNotice = legalCase.PredicateNotice,
-                SocialService = legalCase.SocialService,
-                LastRentPaid = legalCase.LastRentPaid,
-                Reference = legalCase.Reference,
-                OralAgreeMent = legalCase.OralAgreeMent,
-                GoodCauseApplies = legalCase.GoodCauseApplies,
-                CalculatedNoticeLength = legalCase.CalculatedNoticeLength,
-                CaseProgramId = legalCase.CaseProgramId,
-                Attrney = legalCase.Attrney,
-                AttrneyContactInfo = legalCase.AttrneyContactInfo,
-                AttrneyEmail = legalCase.AttrneyEmail,
-                CaseTypeHPDId = legalCase.CaseTypeHPDId,
-                CourtLocation = legalCase.CourtLocation,
-                CourtRoom = legalCase.CourtRoom,
-                Index = legalCase.Index,
-                County = legalCase.County,
-                PartyRepresentId = legalCase.PartyRepresentId,
-                //LandLords = legalCase.landlordName,
-                ManagingAgent = legalCase.ManagingAgent,
-                OpposingCounsel = legalCase.OpposingCounsel,
-                HarassmentTypeId = legalCase.HarassmentTypeId,  
-                DefenseTypeId = legalCase.DefenseTypeId,
-                AppearanceDate = legalCase.AppearanceDate,
-                AppearanceTime = legalCase.AppearanceTime,
-                AppearanceTypeId = legalCase.AppearanceTypeId,
-                ReliefPetitionerTypeId = legalCase.ReliefPetitionerTypeId,
-                ReliefRespondentTypeId = legalCase.ReliefRespondentTypeId,
-                BilingTypeId = legalCase.BilingTypeId,
-                InvoiceTo = legalCase.InvoiceTo,   
-            };
+            var legalCases = new LegalCase();
 
             var caseType = await _caseTypeRepository.GetAsync(legalCase.CaseTypeId);
 
@@ -121,7 +65,7 @@ namespace EvictionFiler.Application.Services
                     legalCases.OralEnd = legalCase.OralEnd;
                     legalCases.WrittenLease = legalCase.WrittenLease;
                     legalCases.DateTenantMoved = legalCase.DateTenantMoved;
-                legalCases.CreatedOn = DateTime.Now;
+                    legalCases.CreatedOn = DateTime.Now;
                     legalCases.TenancyTypeId = legalCase.TenancyTypeId;
                     legalCases.LandLordId = legalCase.LandlordId;
                     legalCases.LandlordTypeId = legalCase.LandLordTypeId;
@@ -151,30 +95,29 @@ namespace EvictionFiler.Application.Services
                     legalCases.Attrney = legalCase.Attrney;
                     legalCases.AttrneyContactInfo = legalCase.AttrneyContactInfo;
                     legalCases.AttrneyEmail = legalCase.AttrneyEmail;
-                    legalCases.CaseTypeHPDId = legalCase.CaseTypeHPDId;
                     legalCases.CourtLocation = legalCase.CourtLocation;
                     legalCases.CourtRoom = legalCase.CourtRoom;
                     legalCases.Index = legalCase.Index;
                     legalCases.County = legalCase.County;
                     legalCases.PartyRepresentId = legalCase.PartyRepresentId;
-                    ////legalCases.//LandLords = legalCase.landlordName,
                     legalCases.ManagingAgent = legalCase.ManagingAgent;
                     legalCases.OpposingCounsel = legalCase.OpposingCounsel;
-                    legalCases.HarassmentTypeId = legalCase.HarassmentTypeId;
-                    legalCases.DefenseTypeId = legalCase.DefenseTypeId;
-                    legalCases.AppearanceDate = legalCase.AppearanceDate;
-                    legalCases.AppearanceTime = legalCase.AppearanceTime;
-                    legalCases.AppearanceTypeId = legalCase.AppearanceTypeId;
-                    legalCases.ReliefPetitionerTypeId = legalCase.ReliefPetitionerTypeId;
-                    legalCases.ReliefRespondentTypeId = legalCase.ReliefRespondentTypeId;
+
                     legalCases.BilingTypeId = legalCase.BilingTypeId;
                     legalCases.InvoiceTo = legalCase.InvoiceTo;
+                    legalCases.CaseTypeHPDs = await _repository.GetHPDByIdsAsync(legalCase.SelectedCaseTypeHPDIds);
+                    legalCases.HarassmentTypse = await _repository.GetHarassmentTypeIdAsync(legalCase.SelectedHarassmentTypeIds);
+                    legalCases.DefenseTypse = await _repository.GetDefenseTypeIdAsync(legalCase.SelectedDefenseTypeIds);
+                    legalCases.AppearanceType = await _repository.GetApperenceTypeIdAsync(legalCase.SelectedAppearanceTypeIds);
+                    legalCases.ReliefPetitionerType = await _repository.GetReliefPetitionerTypesListTypeIdAsync(legalCase.SelectedReliefPetitionerTypeIds);
+                    legalCases.ReliefRespondentType = await _repository.GetReliefRespondentTypesListTypeIdAsync(legalCase.SelectedReliefRespondentTypeIds);
                 }
 
                 var addedcase = await _repository.AddAsync(legalCases);
                 var result = await _unitOfWork.SaveChangesAsync();
 
                 if (result != null) return addedcase.Id;
+            }
 
                 return null;
             

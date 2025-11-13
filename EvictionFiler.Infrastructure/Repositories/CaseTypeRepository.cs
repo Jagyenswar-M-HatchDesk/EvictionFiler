@@ -1,4 +1,10 @@
-﻿using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
+﻿using EvictionFiler.Application.DTOs.MasterDtos.ApperenceTypeDto;
+using EvictionFiler.Application.DTOs.MasterDtos.CaseTypeHPDDto;
+using EvictionFiler.Application.DTOs.MasterDtos.DefenseTypeDto;
+using EvictionFiler.Application.DTOs.MasterDtos.HarassmentTypeDto;
+using EvictionFiler.Application.DTOs.MasterDtos.ReliefPetitionerTypeDto;
+using EvictionFiler.Application.DTOs.MasterDtos.ReliefRespondentTypeDto;
+using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
@@ -35,10 +41,20 @@ namespace EvictionFiler.Infrastructure.Repositories
             return await _context.MstCourtPart.ToListAsync();
         }
 
-        public async Task<List<CaseTypeHPD>> GetAllCaseTypeHPD()
+        public async Task<List<CaseTypeHPDDto>> GetAllCaseTypeHPD()
         {
-            return await _context.MstCaseTypesHPD.ToListAsync();
+            var entities = await _context.MstCaseTypesHPD.ToListAsync();
+
+            var dtos = entities.Select(e => new CaseTypeHPDDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+              
+            }).ToList();
+
+            return dtos;
         }
+
 
         public async Task<List<PartyRepresent>> GetAllpartyRepresenting()
         {
@@ -55,29 +71,74 @@ namespace EvictionFiler.Infrastructure.Repositories
             return await _context.MstRegistrationstatuses.ToListAsync();
         }
 
-        public async Task<List<HarassmentType>> GetAllHarassmentTypes()
+        public async Task<List<HarassmentTypeDto>> GetAllHarassmentTypes()
         {
-            return await _context.MstHarassmentTypes.ToListAsync();
+            var entities = await _context.MstHarassmentTypes.ToListAsync();
+
+            var dtos = entities.Select(e => new HarassmentTypeDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+
+            }).ToList();
+
+            return dtos;
         }
 
-        public async Task<List<DefenseType>> GetAllDefenseTypes()
+        public async Task<List<DefenseTypeDto>> GetAllDefenseTypes()
         {
-            return await _context.MstDefenseTypes.ToListAsync();
+            var entities = await _context.MstDefenseTypes.ToListAsync();
+
+            var dtos = entities.Select(e => new DefenseTypeDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+
+            }).ToList();
+
+            return dtos;
         }
 
-        public async Task<List<AppearanceType>> GetAllAppearanceTypes()
+        public async Task<List<ApperenceTypeDto>> GetAllAppearanceTypes()
         {
-            return await _context.MstAppearanceTypes.ToListAsync();
+            var entities = await _context.MstAppearanceTypes.ToListAsync();
+
+            var dtos = entities.Select(e => new ApperenceTypeDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+
+            }).ToList();
+
+            return dtos;
         }
 
-        public async Task<List<ReliefPetitionerType>> GetAllReliefPetitionerTypes()
+        public async Task<List<ReliefPetitionerTypeDto>> GetAllReliefPetitionerTypes()
         {
-            return await _context.MstReliefPetitionerTypes.ToListAsync();
+            var entities = await _context.MstReliefPetitionerTypes.ToListAsync();
+
+            var dtos = entities.Select(e => new ReliefPetitionerTypeDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+
+            }).ToList();
+
+            return dtos;
         }
 
-        public async Task<List<ReliefRespondentType>> GetAllReliefRespondentTypes()
+        public async Task<List<ReliefRespondentTypeDto>> GetAllReliefRespondentTypes()
         {
-            return await _context.MstReliefRespondentTypes.ToListAsync();
+            var entities = await _context.MstReliefRespondentTypes.ToListAsync();
+
+            var dtos = entities.Select(e => new ReliefRespondentTypeDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+
+            }).ToList();
+
+            return dtos;
         }
 
         public async Task<List<BilingType>> GetAllBilingTypes()

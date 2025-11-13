@@ -138,35 +138,22 @@ namespace EvictionFiler.Domain.Entities
         [MaxLength(100)]
         public string? AttrneyEmail { get; set; }
 
-        public Guid? CaseTypeHPDId{ get; set; }
-        [ForeignKey("CaseTypeHPDId")]
-        public CaseTypeHPD? CaseTypeHPDs { get; set; }
+        public ICollection<CaseTypeHPD> CaseTypeHPDs { get; set; } = new List<CaseTypeHPD>();
 
         public Guid? PartyRepresentId { get; set; }
         [ForeignKey("PartyRepresentId")]
         public PartyRepresent? PartyRepresents { get; set; }
-        public Guid? AppearanceTypeId{ get; set; }
-        [ForeignKey("AppearanceTypeId")]
-        public AppearanceType? AppearanceType { get; set; }
-
-        public Guid? ReliefRespondentTypeId { get; set; }
-        [ForeignKey("ReliefRespondentTypeId")]
-        public ReliefRespondentType? ReliefRespondentType { get; set; }
-        public Guid? ReliefPetitionerTypeId { get; set; }
-        [ForeignKey("ReliefPetitionerTypeId")]
-        public ReliefPetitionerType? ReliefPetitionerType { get; set; }
-
+        public ICollection<AppearanceType> AppearanceType { get; set; } = new List<AppearanceType>();
+        public ICollection<ReliefRespondentType> ReliefRespondentType { get; set; } = new List<ReliefRespondentType>();
+        public ICollection<ReliefPetitionerType> ReliefPetitionerType { get; set; } = new List<ReliefPetitionerType>();
+ 
         public Guid? BilingTypeId { get; set; }
         [ForeignKey("BilingTypeId")]
         public BilingType? BilingType { get; set; }
 
-        public Guid? HarassmentTypeId { get; set; }
-        [ForeignKey("HarassmentTypeId")]
-        public HarassmentType? HarassmentType { get; set; }
+        public ICollection<HarassmentType> HarassmentTypse { get; set; } = new List<HarassmentType>();
 
-        public Guid? DefenseTypeId { get; set; }
-        [ForeignKey("DefenseTypeId")]
-        public DefenseType? DefenseType { get; set; }
+        public ICollection<DefenseType> DefenseTypse { get; set; } = new List<DefenseType>();
 
 
         [MaxLength(100)]

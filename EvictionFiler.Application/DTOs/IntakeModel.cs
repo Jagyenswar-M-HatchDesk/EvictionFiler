@@ -146,14 +146,10 @@ namespace EvictionFiler.Application.DTOs
         
         public CaseTypeHPD? CaseTypeHPDs { get; set; }
         public List<Guid> SelectedCaseTypeHPDIds { get; set; } = new List<Guid>();
-        public List<Guid> SelectedPartyRepresentIds { get; set; } = new List<Guid>();
-
+     
         public List<Guid> SelectedAppearanceTypeIds { get; set; } = new List<Guid>();
         public List<Guid> SelectedReliefRespondentTypeIds { get; set; } = new List<Guid>();
         public List<Guid> SelectedReliefPetitionerTypeIds { get; set; } = new List<Guid>();
-        public List<Guid> SelectedBilingTypeIds { get; set; } = new List<Guid>();
-        public List<Guid> SelectedBuildingTypeIds { get; set; } = new List<Guid>();
-        public List<Guid> SelectedRegistrationStatusTypeIds { get; set; } = new List<Guid>();
         public List<Guid> SelectedHarassmentTypeIds { get; set; } = new List<Guid>();
 
         public List<Guid> SelectedDefenseTypeIds { get; set; } = new List<Guid>();
@@ -161,7 +157,11 @@ namespace EvictionFiler.Application.DTOs
        
         public PartyRepresent? PartyRepresents { get; set; }
         public Guid? BilingTypeId { get; set; }
-   
+
+        public Guid? BuildingTypeId { get; set; }
+
+        public Guid? RegistrationStatusId { get; set; }
+
         public BilingType? BilingType { get; set; }
         public Guid? AppearanceTypeId { get; set; }
       

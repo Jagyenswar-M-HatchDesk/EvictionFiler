@@ -1,4 +1,10 @@
-﻿using EvictionFiler.Application.Interfaces.IRepository.Base;
+﻿using EvictionFiler.Application.DTOs.MasterDtos.ApperenceTypeDto;
+using EvictionFiler.Application.DTOs.MasterDtos.CaseTypeHPDDto;
+using EvictionFiler.Application.DTOs.MasterDtos.DefenseTypeDto;
+using EvictionFiler.Application.DTOs.MasterDtos.HarassmentTypeDto;
+using EvictionFiler.Application.DTOs.MasterDtos.ReliefPetitionerTypeDto;
+using EvictionFiler.Application.DTOs.MasterDtos.ReliefRespondentTypeDto;
+using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -16,17 +22,17 @@ namespace EvictionFiler.Application.Interfaces.IRepository.MasterRepository
         public Task<List<CourtPart>> GetAllCourtPart();
         public Task<List<CaseStatus>> GetAllCaseStatus();
         public Task<List<County>> GetAllCounty();
-        public  Task<List<CaseTypeHPD>> GetAllCaseTypeHPD();
+        public  Task<List<CaseTypeHPDDto>> GetAllCaseTypeHPD();
         public  Task<List<PartyRepresent>> GetAllpartyRepresenting();
         public  Task<List<BuildingType>> GetAllBuildingTypes();
         public  Task<List<Registrationstatus>> GetAllRegistrationstatus();
-        public  Task<List<HarassmentType>> GetAllHarassmentTypes();
+        public  Task<List<HarassmentTypeDto>> GetAllHarassmentTypes();
 
-        public  Task<List<DefenseType>> GetAllDefenseTypes();
+        public  Task<List<DefenseTypeDto>> GetAllDefenseTypes();
 
-        public Task<List<AppearanceType>> GetAllAppearanceTypes();
-        public Task<List<ReliefPetitionerType>> GetAllReliefPetitionerTypes();
-        public Task<List<ReliefRespondentType>> GetAllReliefRespondentTypes();
+        public Task<List<ApperenceTypeDto>> GetAllAppearanceTypes();
+        public Task<List<ReliefPetitionerTypeDto>> GetAllReliefPetitionerTypes();
+        public Task<List<ReliefRespondentTypeDto>> GetAllReliefRespondentTypes();
         public Task<List<BilingType>> GetAllBilingTypes();
         
 
