@@ -102,6 +102,8 @@ namespace EvictionFiler.Application.Services
                     legalCases.PartyRepresentId = legalCase.PartyRepresentId;
                     legalCases.ManagingAgent = legalCase.ManagingAgent;
                     legalCases.OpposingCounsel = legalCase.OpposingCounsel;
+                    legalCases.LandLordId = legalCase.LandlordId;
+                    legalCases.BuildingId = legalCase.BuildingId;
 
                     legalCases.BilingTypeId = legalCase.BilingTypeId;
                     legalCases.InvoiceTo = legalCase.InvoiceTo;

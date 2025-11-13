@@ -40,6 +40,8 @@ namespace EvictionFiler.Domain.Entities
 		public LandLord? Landlord { get; set; }
 
         public Guid? RegistrationStatusId { get; set; }
+
+
         [ForeignKey("RegistrationStatusId")]
         public Registrationstatus? RegistrationStatus { get; set; }
 

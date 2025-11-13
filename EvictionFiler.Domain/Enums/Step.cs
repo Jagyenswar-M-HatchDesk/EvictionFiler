@@ -28,17 +28,5 @@ namespace EvictionFiler.Domian.Enums
 
     }
 
-    public enum StepHpd
-    {
-        Attorney = 0,
-        Case = 1,
-        Party = 2,
-        Building = 3,
-        PetitionerTenant = 4,
-        RespondentLandlord = 5,
-        Appearance = 6,
-        Relief = 7,
-        Billing = 8,
-
-    }
+    
 }
