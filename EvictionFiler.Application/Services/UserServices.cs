@@ -36,7 +36,7 @@ namespace EvictionFiler.Application.Services
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Name, user.FirstName +" " + user.LastName ?? ""),
-            new Claim(ClaimTypes.Email, user.Email ?? "")
+            new Claim(ClaimTypes.Email, user.Email ?? ""),
         };
 
             foreach (var role in userRoles)

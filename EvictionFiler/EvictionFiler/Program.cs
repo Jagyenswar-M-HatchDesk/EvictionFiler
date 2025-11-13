@@ -1,8 +1,9 @@
-using BlazorDownloadFile;
+﻿using BlazorDownloadFile;
 using Blazored.SessionStorage;
 using Blazored.Toast;
 using EvictionFiler.Application;
 using EvictionFiler.Application.DTOs;
+using EvictionFiler.Application.DTOs.UserDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Application.Interfaces.IServices;
@@ -11,7 +12,8 @@ using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Application.Services;
 using EvictionFiler.Application.Services.Helper;
 using EvictionFiler.Application.Services.Master;
-using EvictionFiler.Client.Jwt;
+//using EvictionFiler.Client.Jwt;
+//using EvictionFiler.Client.Services;
 using EvictionFiler.Client.SpinnerService;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure;
@@ -19,8 +21,11 @@ using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Extensions;
 using EvictionFiler.Infrastructure.Repositories;
 using EvictionFiler.Server.Components;
-using EvictionFiler.Server.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +33,10 @@ using Microsoft.IdentityModel.Tokens;
 using Radzen;
 using Syncfusion.Blazor;
 using Syncfusion.Licensing;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Components.Server;
 
 
 
@@ -36,11 +44,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 
-builder.Services.AddDbContext<MainDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+//builder.Services.AddDbContext<MainDbContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
-// Add services to the container.
+// Add services to the container
+builder.Services.AddRazorPages();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
@@ -59,6 +68,14 @@ builder.Services.AddIdentity<User, Role>(options =>
 builder.Services.AddBlazorDownloadFile();
 builder.Services.AddRadzenComponents();
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient();
+builder.Services.AddScoped(sp =>
+{
+    var nav = sp.GetRequiredService<NavigationManager>();
+    return new HttpClient { BaseAddress = new Uri(nav.BaseUri) };
+});
+
 
 
 builder.Services.AddDbContext<MainDbContext>(
@@ -68,6 +85,8 @@ builder.Services.AddDbContext<MainDbContext>(
     )
 
 );
+builder.Services.AddBlazoredSessionStorage();
+
 
 SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JFaF1cX2hIf0x3THxbf1x1ZFdMYVpbQHNPMyBoS35Rc0RiWH1ecnVTQmVcUER2VEFc");
 
@@ -115,14 +134,41 @@ builder.Services.AddScoped<IAdditionalOccupantsRepository, AdditionalOccupantsRe
 builder.Services.AddScoped<IAdditionalOccupantsService, AdditionalOccupantsService>();
 builder.Services.AddScoped<IAdditionalTenantsRepository, AdditionalTenantsRepository>();
 builder.Services.AddScoped<IAdditionalTenantService, AdditionalTenantService>();
-builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
-builder.Services.AddAuthorizationCore();
-builder.Services.AddScoped<JwtAuthStateProvider>();
-builder.Services.AddScoped<AuthService>();
+//builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
+//    .AddIdentityCookies();
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddCascadingAuthenticationState();
+//builder.Services.AddScoped<ServerAuthenticationStateProvider>();
+//builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
+//    sp.GetRequiredService<ServerAuthenticationStateProvider>());
+builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+
+
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/";
+    options.AccessDeniedPath = "/unauthorized";
+
+    options.Cookie.HttpOnly = true;  // OK
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.None;  
+});
+
+//builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
+//    .AddIdentityCookies();
+
+//builder.Services.AddScoped<AuthenticationStateProvider,
+//    RevalidatingIdentityAuthenticationStateProvider<User>>();
+
+//builder.Services.AddScoped<JwtAuthStateProviders>();
+//builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<SpinnerService>();
-builder.Services.AddScoped<JwtAuthStateProvider>();
-builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
-    provider.GetRequiredService<JwtAuthStateProvider>());
+//builder.Services.AddScoped<JwtAuthStateProviders>();
+//builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
+//    provider.GetRequiredService<JwtAuthStateProviders>());
 builder.Services.AddScoped<IUserservices , UserService>();
 builder.Services.AddScoped<ICaseFormService, CaseFormService>();
 builder.Services.AddScoped<ILegalCaseService, LegalCaseService>();
@@ -149,7 +195,7 @@ builder.Services.AddScoped<NavigationDataService>();
 builder.Services.AddSingleton<SuccessMessageService>();
 builder.Services.AddBlazoredToast();
 
-builder.Services.AddScoped<JwtAuthStateProviders>();
+//builder.Services.AddScoped<JwtAuthStateProviders>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 // Repository Registrations (in EvictionFiler.Infrastructure)
 builder.Services.AddScoped<IFeesCatalogRepository, FeesCatalogRepository>();
@@ -160,27 +206,30 @@ builder.Services.AddScoped<IFeesCatalogAttorneyRosterRepository, FeesCatalogAtto
 builder.Services.AddScoped<IFeesCatalogService, FeesCatalogService>();
 builder.Services.AddScoped<IFeesCatalogCourtAppearanceService, FeesCatalogCourtAppearanceService>();
 builder.Services.AddScoped<IFeesCatalogAttorneyRosterService, FeesCatalogAttorneyRosterService>();
-builder.Services.AddAuthorizationCore();
-builder.Services.AddBlazoredSessionStorage();
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
-    };
-});
+
+
+
+
+//builder.Services.AddAuthentication(options =>
+//{
+//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+//})
+//    .AddCookie()
+//.AddJwtBearer(options =>
+//{
+//    options.RequireHttpsMetadata = false;
+//    options.SaveToken = true;
+//    options.TokenValidationParameters = new TokenValidationParameters
+//    {
+//        ValidateIssuer = true,
+//        ValidateAudience = true,
+//        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+//        ValidAudience = builder.Configuration["Jwt:Audience"],
+//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+//    };
+//});
 
 var app = builder.Build();
 
@@ -199,13 +248,20 @@ else
 await app.ConfigureDataContext();
 app.UseHttpsRedirection();
 app.UseAuthentication();
-app.UseStaticFiles();
-//app.MapBlazorHub(options =>
+app.UseAuthorization();
+//app.Use(async (context, next) =>
 //{
-//    options.Transports =
-//        Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets |
-//        Microsoft.AspNetCore.Http.Connections.HttpTransportType.LongPolling;
+//    var user = context.User;
+//    if (user?.Identity?.IsAuthenticated == true)
+//    {
+//        // Required for Interactive Blazor Server
+//        context.Items["IdentityUser"] = user;
+//    }
+//    await next();
 //});
+
+app.UseStaticFiles();
+
 
 
 using var scope = app.Services.CreateScope();
@@ -230,5 +286,20 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(EvictionFiler.Client._Imports).Assembly);
+
+
+app.MapPost("/api/auth/logout", async (HttpContext http, SignInManager<User> signInManager) =>
+{
+    Console.WriteLine("LOGOUT POST HIT!");
+    await signInManager.SignOutAsync();
+    await http.SignOutAsync(IdentityConstants.ApplicationScheme);
+    http.Response.Cookies.Delete(".AspNetCore.Identity.Application");
+    return Results.Ok();
+});
+
+
+
+
+app.MapRazorPages();
 
 app.Run();

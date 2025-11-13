@@ -6,15 +6,22 @@
 </Router>
  *@
 
+@using EvictionFiler.Server.Components.Pages
 @using Microsoft.AspNetCore.Components.Authorization
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
-
 <CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="new[] { typeof(Client._Imports).Assembly }">
+    <Router AppAssembly="@typeof(Program).Assembly"
+            AdditionalAssemblies="new[] { typeof(EvictionFiler.Client._Imports).Assembly }">
+
         <Found Context="routeData">
-            <RouteView RouteData="@routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            <AuthorizeRouteView RouteData="@routeData"
+                                DefaultLayout="typeof(Layout.MainLayout)">
+                <NotAuthorized>
+                    <RedirectToLogin />
+                </NotAuthorized>
+            </AuthorizeRouteView>
         </Found>
+
         <NotFound>
             <LayoutView Layout="@typeof(Layout.MainLayout)">
                 <p>Sorry, there's nothing at this address.</p>
@@ -22,4 +29,12 @@
         </NotFound>
     </Router>
 </CascadingAuthenticationState>
+
+
+@code {
+    [Inject] NavigationManager Navigation { get; set; }
+
+    void RedirectToLogin() => Navigation.NavigateTo("/login");
+}
+
 
