@@ -57,7 +57,11 @@ namespace EvictionFiler.Application.Services
 
             if (caseType != null)
             {
-                if (caseType.Name.Equals("Holdover", StringComparison.OrdinalIgnoreCase))
+                if (caseType.Name.Equals("Holdover", StringComparison.OrdinalIgnoreCase)||
+                     caseType.Name.Equals("NonPayment", StringComparison.OrdinalIgnoreCase) ||
+                      caseType.Name.Equals("Non-Payment", StringComparison.OrdinalIgnoreCase) ||
+                      caseType.Name.Equals("Non Payment", StringComparison.OrdinalIgnoreCase)
+                    )
                 {
                     // 🟢 HOLDOVER specific fields
                     legalCases.Id = Guid.NewGuid();
@@ -309,7 +313,10 @@ namespace EvictionFiler.Application.Services
         c => c.Buildings.State,
         c => c.Addoccupants,
         c => c.Buildings.Landlord.State,
-        c => c.Buildings.Landlord.LandlordType
+        c => c.Buildings.Landlord.LandlordType,
+        c=>c.CaseTypeHPDs
+
+        
     )
     .FirstOrDefaultAsync();
 
@@ -408,6 +415,17 @@ namespace EvictionFiler.Application.Services
                     CourtPhone = caseEntity.Courts != null ? caseEntity.Courts.Phone : "",
                     CourtRoomNo = caseEntity.Courts != null ? caseEntity.Courts.RoomNo : "",
                     CourtVirtualLink = caseEntity.Courts != null ? caseEntity.Courts.VirtualLink : "",
+                    Attrney = caseEntity.Attrney,
+                    AttrneyContactInfo = caseEntity.AttrneyContactInfo,
+                    AttrneyEmail = caseEntity.AttrneyEmail,
+                    CourtLocation = caseEntity.CourtLocation,
+                    CourtRoom = caseEntity.CourtRoom,
+                    Index = caseEntity.Index,
+                    County = caseEntity.County,
+                    SelectedCaseTypeHPDIds = caseEntity.CaseTypeHPDs
+                                                .Select(x => x.Id)
+                                                .ToList(),
+
                     BillAmount = caseEntity.BillAmount ?? 0,
                 };
 
