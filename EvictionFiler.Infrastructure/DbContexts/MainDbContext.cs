@@ -20,12 +20,18 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<BuildingType> MstBuildingTypes { get; set; }
         public DbSet<CaseTypeHPD> MstCaseTypesHPD { get; set; }
         public DbSet<PartyRepresent> MstPartyRepresents { get; set; }
+        public DbSet<PartyRepresentPerDiem> MstPartyRepresentPerDiems { get; set; }
+        public DbSet<DocumentTypePerDiem> MstDocumentTypePerDiems { get; set; }
+        public DbSet<ReportingTypePerDiem> MstReportingTypePerDiems { get; set; }
+        public DbSet<RateType> MstRateTypes { get; set; }
+        public DbSet<PaymentMethod> MstPaymentMethods { get; set; }
         public DbSet<CourtPart> MstCourtPart { get; set; }
         public DbSet<CaseStatus> MstCaseStatus { get; set; }
         public DbSet<Registrationstatus> MstRegistrationstatuses { get; set; }
 
         public DbSet<HarassmentType> MstHarassmentTypes{ get; set; }
         public DbSet<AppearanceType> MstAppearanceTypes { get; set; }
+        public DbSet<AppearanceTypePerDiem> MstAppearanceTypesPerDiems { get; set; }
         public DbSet<ReliefPetitionerType> MstReliefPetitionerTypes { get; set; }
         public DbSet<ReliefRespondentType> MstReliefRespondentTypes { get; set; }
 
@@ -35,7 +41,9 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<Category> MstCategories { get; set; }
         public DbSet<LandlordType> MstLandlordTypes { get; set; }
 		public DbSet<CaseSubType>MstCaseSubTypes { get; set; }
-		public DbSet<Building> Buildings { get; set; }
+
+        public DbSet<CaseTypePerdiem> MstCaseTypePerdiems { get; set; }
+        public DbSet<Building> Buildings { get; set; }
         public DbSet<LegalCase> LegalCases { get; set; }
 		public DbSet<AdditionalOccupants> AdditionalOccupants { get; set; }
         public DbSet<AdditioanlTenants> AdditioanlTenants { get; set; }

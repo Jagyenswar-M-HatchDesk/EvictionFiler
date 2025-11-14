@@ -24,13 +24,21 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 await SeedCaseTypesHPD(context);
                 await SeedBillingTypes(context);
                 await SeedPartyRepresent(context);
+                await SeedPartyRepresentPerDiem(context);
                 await SeedDateRent(context);
                 await SeedHarassmentType(context);
                 await SeedDefenseType(context);
 				await SeedAppearanceType(context);
+                await SeedAppearanceTypePerDiem(context);
                 await SeedReliefPetitionerType(context);
                 await SeedReliefRespondentType(context);
+                await SeedCaseTypePerdiem(context);
                 await SeedRegistrationStatus(context);
+                await  SeedDocumentInstructionsTypePerDiem(context);
+                await SeedRate(context);
+                await SeedPaymentMethod(context);
+                await SeedReportingTypePerDiem(context);
+                
 
                 await SeedTypeOfOwner(context);
                 await context.SaveChangesAsync();
@@ -56,8 +64,20 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			}
 		}
 
+        private static async Task SeedPaymentMethod(MainDbContext context)
+        {
+            var casetypes = InitialDataGenerator.GetPaymentMethod();
+            foreach (var type in casetypes)
+            {
+                if (context.MstPaymentMethods.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstPaymentMethods.AddAsync(type);
+                }
+            }
+        }
 
-		private static async Task SeedCaseTypes(MainDbContext context)
+
+        private static async Task SeedCaseTypes(MainDbContext context)
 		{
 			var casetypes = InitialDataGenerator.GetCaseTypes();
 			foreach (var type in casetypes)
@@ -68,6 +88,41 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				}
 			}
 		}
+        private static async Task SeedRate(MainDbContext context)
+        {
+            var casetypes = InitialDataGenerator.GetRateTypes();
+            foreach (var type in casetypes)
+            {
+                if (context.MstRateTypes.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstRateTypes.AddAsync(type);
+                }
+            }
+        }
+
+
+        private static async Task SeedReportingTypePerDiem(MainDbContext context)
+        {
+            var casetypes = InitialDataGenerator.GetReportingTypePerDiems();
+            foreach (var type in casetypes)
+            {
+                if (context.MstReportingTypePerDiems.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstReportingTypePerDiems.AddAsync(type);
+                }
+            }
+        }
+        private static async Task SeedCaseTypePerdiem(MainDbContext context)
+        {
+            var casetypes = InitialDataGenerator.GetCaseTypesPerDiem();
+            foreach (var type in casetypes)
+            {
+                if (context.MstCaseTypePerdiems.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstCaseTypePerdiems.AddAsync(type);
+                }
+            }
+        }
 
         private static async Task SeedDefenseType(MainDbContext context)
         {
@@ -128,6 +183,30 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             }
         }
 
+        private static async Task SeedAppearanceTypePerDiem(MainDbContext context)
+        {
+            var appearanceTypes = InitialDataGenerator.GetAppearanceTypesPerDiem();
+            foreach (var type in appearanceTypes)
+            {
+                if (context.MstAppearanceTypesPerDiems.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstAppearanceTypesPerDiems.AddAsync(type);
+                }
+            }
+        }
+        private static async Task SeedDocumentInstructionsTypePerDiem(MainDbContext context)
+        {
+            var appearanceTypes = InitialDataGenerator.GetDocumentTypesPerDiem();
+            foreach (var type in appearanceTypes)
+            {
+                if (context.MstDocumentTypePerDiems.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstDocumentTypePerDiems.AddAsync(type);
+                }
+            }
+        }
+
+
         private static async Task SeedHarassmentType(MainDbContext context)
         {
             var HarassmentTypes = InitialDataGenerator.GetHarassmentTypes();
@@ -184,6 +263,18 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 if (context.MstPartyRepresents.FirstOrDefault(d => d.Name == type.Name) == null)
                 {
                     await context.MstPartyRepresents.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedPartyRepresentPerDiem(MainDbContext context)
+        {
+            var pr = InitialDataGenerator.GetPartyRepresentPerDiem();
+            foreach (var type in pr)
+            {
+                if (context.MstPartyRepresentPerDiems.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstPartyRepresentPerDiems.AddAsync(type);
                 }
             }
         }

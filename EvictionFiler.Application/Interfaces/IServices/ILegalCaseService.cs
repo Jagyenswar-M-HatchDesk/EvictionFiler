@@ -23,7 +23,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<bool> DeleteAsync(Guid id, bool isAdmin);
         Task<List<LegalCase>> GetTodayCasesAsync();
         Task<int> GetActiveCasesCountAsync(string userId, bool isAdmin);
-        Task<Guid?> CreateCasesAsync(IntakeModel legalCase);
+        Task<Guid?> CreateCasesAsync(IntakeModel legalCase );
         Task<IntakeModel> GetCaseByIdAsync(Guid caseId);
         Task<Guid?> UpdateCaseAsync(IntakeModel legalCase);
 

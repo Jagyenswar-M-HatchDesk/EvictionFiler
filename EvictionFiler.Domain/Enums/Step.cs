@@ -25,6 +25,11 @@ namespace EvictionFiler.Domian.Enums
         Appearance = 14,
         Relief = 15,
         Billing = 16,
+        CasebackGround = 17,
+        DocumentInstructions = 18,
+        Reporting = 19,
+        Acknowledgment = 20,
+
 
     }
 

@@ -371,6 +371,18 @@ namespace EvictionFiler.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<CaseTypePerdiem>> GetCaseTypePerDiemByIdsAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+                return new List<CaseTypePerdiem>();
+
+            return await _context.MstCaseTypePerdiems
+                .Where(h => ids.Contains(h.Id))
+                .ToListAsync();
+        }
+
+        
+
         public async Task<List<HarassmentType>> GetHarassmentTypeIdAsync(List<Guid> ids)
         {
             if (ids == null || !ids.Any())
@@ -396,6 +408,36 @@ namespace EvictionFiler.Infrastructure.Repositories
                 return new List<AppearanceType>();
 
             return await _context.MstAppearanceTypes
+                .Where(h => ids.Contains(h.Id))
+                .ToListAsync();
+        }
+
+        public async Task<List<AppearanceTypePerDiem>> GetApperenceTypePerDiemIdAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+                return new List<AppearanceTypePerDiem>();
+
+            return await _context.MstAppearanceTypesPerDiems
+                .Where(h => ids.Contains(h.Id))
+                .ToListAsync();
+        }
+
+        public async Task<List<DocumentTypePerDiem>> GetDocumentIntructionsTypsIdAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+                return new List<DocumentTypePerDiem>();
+
+            return await _context.MstDocumentTypePerDiems
+                .Where(h => ids.Contains(h.Id))
+                .ToListAsync();
+        }
+
+        public async Task<List<ReportingTypePerDiem>> GetReportingTypePerDiemsIdAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+                return new List<ReportingTypePerDiem>();
+
+            return await _context.MstReportingTypePerDiems
                 .Where(h => ids.Contains(h.Id))
                 .ToListAsync();
         }

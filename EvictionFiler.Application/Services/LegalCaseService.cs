@@ -39,12 +39,21 @@ namespace EvictionFiler.Application.Services
 
         }
 
-        public async Task<Guid?> CreateCasesAsync(IntakeModel legalCase)
+        public async Task<Guid?> CreateCasesAsync(IntakeModel legalCase )
         {
            
             var legalCases = new LegalCase();
 
             var caseType = await _caseTypeRepository.GetAsync(legalCase.CaseTypeId);
+            var billingTypes = await _caseTypeRepository.GetAllBilingTypes();
+
+            var flatGuid = billingTypes
+                .FirstOrDefault(x => x.Name.Equals("Flat Rate", StringComparison.OrdinalIgnoreCase))
+                ?.Id;
+
+            var hourlyGuid = billingTypes
+                            .FirstOrDefault(x => x.Name.Equals("Hourly ($/hr)", StringComparison.OrdinalIgnoreCase))
+                            ?.Id;
 
             if (caseType != null)
             {
@@ -113,6 +122,52 @@ namespace EvictionFiler.Application.Services
                     legalCases.AppearanceType = await _repository.GetApperenceTypeIdAsync(legalCase.SelectedAppearanceTypeIds);
                     legalCases.ReliefPetitionerType = await _repository.GetReliefPetitionerTypesListTypeIdAsync(legalCase.SelectedReliefPetitionerTypeIds);
                     legalCases.ReliefRespondentType = await _repository.GetReliefRespondentTypesListTypeIdAsync(legalCase.SelectedReliefRespondentTypeIds);
+                }
+                else if (caseType.Name.Equals("Per Diem", StringComparison.OrdinalIgnoreCase))
+                {
+                    // 🟣 HPD specific fields
+                    legalCases.Id = Guid.NewGuid();
+                    legalCases.Casecode = await _repository.GenerateCaseCodeAsync();
+                    legalCases.ClientId = legalCase.ClientId;
+                    legalCases.CaseTypeId = legalCase.CaseTypeId;
+                    legalCases.Attrney = legalCase.Attrney;
+                    legalCases.AttrneyContactInfo = legalCase.AttrneyContactInfo;
+                    legalCases.AttrneyEmail = legalCase.AttrneyEmail;
+                    legalCases.CourtLocation = legalCase.CourtLocation;
+                    legalCases.CourtRoom = legalCase.CourtRoom;
+                    legalCases.Index = legalCase.Index;
+                    legalCases.County = legalCase.County;
+                    legalCases.PartyRepresentPerDiemId = legalCase.PartyRepresentPerDiemId;
+                    legalCases.Partynames = legalCase.Partynames;
+                    legalCases.ManagingAgent = legalCase.ManagingAgent;
+                    legalCases.OpposingCounsel = legalCase.OpposingCounsel;
+                    legalCases.CaseBackground = legalCase.CaseBackground;
+                    legalCases.SpecialInstruction = legalCase.SpecialInstruction;
+                    legalCases.BilingTypeId = legalCase.BilingTypeId;
+                    // Biling type save logic
+                    if (legalCase.BilingTypeId == flatGuid)
+                    {
+                        legalCases.Flatdescription = legalCase.BilingTypeInputValue;
+                        legalCases.Hourlydescription = null;
+                    }
+                    else if (legalCase.BilingTypeId == hourlyGuid)
+                    {
+                        legalCases.Hourlydescription = legalCase.BilingTypeInputValue;
+                        legalCases.Flatdescription = null;
+                    }
+
+                    legalCases.TravelExpense = legalCase.TravelExpense;
+                    legalCases.PaymentMethodId = legalCase.PaymentMethodId;
+                    legalCases.PerDiemAttorneyname = legalCase.PerDiemAttorneyname;
+                    legalCases.PerDiemSignature = legalCase.PerDiemSignature;
+                    legalCases.PerDiemDate = legalCase.PerDiemDate;
+
+
+                    legalCases.CaseTypePerDiems = await _repository.GetCaseTypePerDiemByIdsAsync(legalCase.SelectedCaseTypePerDiemIds);
+                    legalCases.AppearanceTypePerDiem = await _repository.GetApperenceTypePerDiemIdAsync(legalCase.SelectedAppearanceTypePerDiemIds);
+                    legalCases.DocumentIntructionsTypse = await _repository.GetDocumentIntructionsTypsIdAsync(legalCase.SelectedDocumentInstructionPerDiemIds);
+                    legalCases.ReportingTypePerDiems = await _repository.GetReportingTypePerDiemsIdAsync(legalCase.SelectedReportingRequirementPerDiemIds);
+                   
                 }
 
                 var addedcase = await _repository.AddAsync(legalCases);

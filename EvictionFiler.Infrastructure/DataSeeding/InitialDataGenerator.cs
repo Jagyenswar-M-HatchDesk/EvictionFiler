@@ -54,6 +54,22 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 
             };
         }
+
+        public static IEnumerable<CaseTypePerdiem> GetCaseTypesPerDiem()
+        {
+            var now = DateTime.UtcNow;
+            return new List<CaseTypePerdiem>
+            {
+                new CaseTypePerdiem() { Name = "Residential Holdover", CreatedOn = now },
+                new CaseTypePerdiem() { Name = "Residential Nonpayment", CreatedOn = now },
+                new CaseTypePerdiem() { Name = "HPD/Code Enforcement", CreatedOn = now },
+                new CaseTypePerdiem() { Name = "Commercial Case", CreatedOn = now },
+                new CaseTypePerdiem() { Name = "Illegal Lockout", CreatedOn = now },
+                new CaseTypePerdiem() { Name = "Post‑Eviction / Restoration", CreatedOn = now },
+                 new CaseTypePerdiem() { Name = "Other", CreatedOn = now },
+
+            };
+        }
         public static IEnumerable<BuildingType> GetBuildingTypes()
         {
             var now = DateTime.UtcNow;
@@ -125,6 +141,71 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             };
         }
 
+        public static IEnumerable<AppearanceTypePerDiem> GetAppearanceTypesPerDiem()
+        {
+            var now = DateTime.UtcNow;
+            return new List<AppearanceTypePerDiem>
+            {
+                new AppearanceTypePerDiem() { Name = "First Appearance / Return Date", CreatedOn = now },
+                new AppearanceTypePerDiem() { Name = "Motion / OSC Hearing", CreatedOn = now },
+                new AppearanceTypePerDiem() { Name = "Trial / Evidentiary Hearing", CreatedOn = now },
+                new AppearanceTypePerDiem() { Name = "Post‑Eviction Motion (Restoration, ERAP, etc.)", CreatedOn = now },
+                   new AppearanceTypePerDiem() { Name = "HPD Compliance / Inspection Hearing", CreatedOn = now },
+                    new AppearanceTypePerDiem() { Name = "Other", CreatedOn = now },
+
+            };
+        }
+        public static IEnumerable<DocumentTypePerDiem> GetDocumentTypesPerDiem()
+        {
+            var now = DateTime.UtcNow;
+            return new List<DocumentTypePerDiem>
+            {
+                new DocumentTypePerDiem() { Name = "Petition/Answer", CreatedOn = now },
+                new DocumentTypePerDiem() { Name = "Lease / Rent Ledger", CreatedOn = now },
+                new DocumentTypePerDiem() { Name = "Prior Orders", CreatedOn = now },
+                new DocumentTypePerDiem() { Name = "Inspection Reports", CreatedOn = now },
+                   new DocumentTypePerDiem() { Name = "Stipulations", CreatedOn = now },
+                    new DocumentTypePerDiem() { Name = "Other", CreatedOn = now },
+
+            };
+        }
+
+        public static IEnumerable<ReportingTypePerDiem> GetReportingTypePerDiems()
+        {
+            var now = DateTime.UtcNow;
+            return new List<ReportingTypePerDiem>
+            {
+                new ReportingTypePerDiem() { Name = "Written Court Report (Outcome, Next Date, Judge’s Notes)", CreatedOn = now },
+                new ReportingTypePerDiem() { Name = "Copy of Any Stipulation/Order Signed", CreatedOn = now },
+                new ReportingTypePerDiem() { Name = "Updated Case Status in Platform", CreatedOn = now },
+                
+
+            };
+        }
+        public static IEnumerable<RateType> GetRateTypes()
+        {
+            var now = DateTime.UtcNow;
+            return new List<RateType>
+            {
+                new RateType() { Name = "Flat", CreatedOn = now },
+                new RateType() { Name = "Hourly", CreatedOn = now },
+               
+
+
+            };
+        }
+
+        public static IEnumerable<PaymentMethod> GetPaymentMethod()
+        {
+            var now = DateTime.UtcNow;
+            return new List<PaymentMethod>
+            {
+                new PaymentMethod() { Name = "Direct Pay (check/ACH)", CreatedOn = now },
+                new PaymentMethod() { Name = "Platform Invoice (EvictionFiler.com)", CreatedOn = now },
+
+            };
+        }
+
 
         public static IEnumerable<HarassmentType> GetHarassmentTypes()
         {
@@ -163,6 +244,18 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new PartyRepresent() { Name = "Petitioner (Tenant/Occupant)", CreatedOn = now },
                 new PartyRepresent() { Name = "Respondent (Landlord/Owner/Managing Agent)", CreatedOn = now },
                
+
+            };
+        }
+
+        public static IEnumerable<PartyRepresentPerDiem> GetPartyRepresentPerDiem()
+        {
+            var now = DateTime.UtcNow;
+            return new List<PartyRepresentPerDiem>
+            {
+                new PartyRepresentPerDiem() { Name = "Petitioner (Landlord/Owner/Managing Agent)", CreatedOn = now },
+                new PartyRepresentPerDiem() { Name = "Respondent (Tenant/Occupant)", CreatedOn = now },
+
 
             };
         }

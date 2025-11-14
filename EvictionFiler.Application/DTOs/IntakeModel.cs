@@ -143,30 +143,40 @@ namespace EvictionFiler.Application.DTOs
         public string? AttrneyContactInfo { get; set; }
 
         public Guid? CaseTypeHPDId { get; set; }
-        
+        public Guid? CaseTypePerDiemId { get; set; }
+       
+
         public CaseTypeHPD? CaseTypeHPDs { get; set; }
+        public CaseTypePerdiem? CaseTypePerdiems { get; set; }
         public List<Guid> SelectedCaseTypeHPDIds { get; set; } = new List<Guid>();
-     
+        public List<Guid> SelectedCaseTypePerDiemIds { get; set; } = new List<Guid>();
+
         public List<Guid> SelectedAppearanceTypeIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedAppearanceTypePerDiemIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedDocumentInstructionPerDiemIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedReportingRequirementPerDiemIds { get; set; } = new List<Guid>();
         public List<Guid> SelectedReliefRespondentTypeIds { get; set; } = new List<Guid>();
         public List<Guid> SelectedReliefPetitionerTypeIds { get; set; } = new List<Guid>();
         public List<Guid> SelectedHarassmentTypeIds { get; set; } = new List<Guid>();
 
         public List<Guid> SelectedDefenseTypeIds { get; set; } = new List<Guid>();
         public Guid? PartyRepresentId { get; set; }
-       
-        public PartyRepresent? PartyRepresents { get; set; }
+        public Guid? PartyRepresentPerDiemId { get; set; }
+
         public Guid? BilingTypeId { get; set; }
 
         public Guid? BuildingTypeId { get; set; }
         public Guid? RegistrationStatusTypeId { get; set; }
 
-
-
+        public Guid? PaymentMethodId { get; set; }
+        public string? TravelExpense { get; set; }
         public BilingType? BilingType { get; set; }
         public Guid? AppearanceTypeId { get; set; }
-      
+
+        public Guid? AppearanceTypePerdiemId { get; set; }
+
         public AppearanceType? AppearanceType { get; set; }
+        public AppearanceTypePerDiem? AppearanceTypePerDiem { get; set; }
 
         public Guid? ReliefRespondentTypeId { get; set; }
     
@@ -174,5 +184,15 @@ namespace EvictionFiler.Application.DTOs
         public Guid? ReliefPetitionerTypeId { get; set; }
      
         public ReliefPetitionerType? ReliefPetitionerType { get; set; }
+        public string? Partynames { get; set; }
+        public string? CaseBackground { get; set; }
+        public decimal? BilingTypeInputValue { get; set; }
+        public string? PerDiemAttorneyname { get; set; }
+        public string? PerDiemSignature { get; set; }
+        public DateOnly? PerDiemDate { get; set; }
+       
+        public string? SpecialInstruction { get; set; }
+
+
     }
 }

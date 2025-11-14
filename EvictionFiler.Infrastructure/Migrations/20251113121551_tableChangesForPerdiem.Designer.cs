@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251113121551_tableChangesForPerdiem")]
+    partial class tableChangesForPerdiem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,21 +38,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasIndex("LegalCasesId");
 
                     b.ToTable("AppearanceTypeLegalCase");
-                });
-
-            modelBuilder.Entity("AppearanceTypePerDiemLegalCase", b =>
-                {
-                    b.Property<Guid>("AppearanceTypePerDiemId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("LegalCasesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("AppearanceTypePerDiemId", "LegalCasesId");
-
-                    b.HasIndex("LegalCasesId");
-
-                    b.ToTable("AppearanceTypePerDiemLegalCase");
                 });
 
             modelBuilder.Entity("CaseTypeHPDLegalCase", b =>
@@ -915,6 +903,9 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<TimeOnly?>("AppearanceTime")
                         .HasColumnType("time");
 
+                    b.Property<Guid?>("AppearanceTypePerDiemId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Attrney")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -1184,6 +1175,8 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AppearanceTypePerDiemId");
 
                     b.HasIndex("BilingTypeId");
 
@@ -3440,21 +3433,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AppearanceTypePerDiemLegalCase", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.AppearanceTypePerDiem", null)
-                        .WithMany()
-                        .HasForeignKey("AppearanceTypePerDiemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EvictionFiler.Domain.Entities.LegalCase", null)
-                        .WithMany()
-                        .HasForeignKey("LegalCasesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("CaseTypeHPDLegalCase", b =>
                 {
                     b.HasOne("EvictionFiler.Domain.Entities.Master.CaseTypeHPD", null)
@@ -3706,6 +3684,10 @@ namespace EvictionFiler.Infrastructure.Migrations
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.LegalCase", b =>
                 {
+                    b.HasOne("EvictionFiler.Domain.Entities.Master.AppearanceTypePerDiem", null)
+                        .WithMany("LegalCases")
+                        .HasForeignKey("AppearanceTypePerDiemId");
+
                     b.HasOne("EvictionFiler.Domain.Entities.Master.BilingType", "BilingType")
                         .WithMany()
                         .HasForeignKey("BilingTypeId");
@@ -4037,6 +4019,11 @@ namespace EvictionFiler.Infrastructure.Migrations
             modelBuilder.Entity("EvictionFiler.Domain.Entities.LegalCase", b =>
                 {
                     b.Navigation("Addoccupants");
+                });
+
+            modelBuilder.Entity("EvictionFiler.Domain.Entities.Master.AppearanceTypePerDiem", b =>
+                {
+                    b.Navigation("LegalCases");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Tenant", b =>

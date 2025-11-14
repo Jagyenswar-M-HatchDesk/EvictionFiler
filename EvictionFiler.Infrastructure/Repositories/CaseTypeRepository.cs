@@ -1,9 +1,12 @@
 ﻿using EvictionFiler.Application.DTOs.MasterDtos.ApperenceTypeDto;
 using EvictionFiler.Application.DTOs.MasterDtos.CaseTypeHPDDto;
+using EvictionFiler.Application.DTOs.MasterDtos.CaseTypePerDiemDto;
 using EvictionFiler.Application.DTOs.MasterDtos.DefenseTypeDto;
+using EvictionFiler.Application.DTOs.MasterDtos.DocumentInstructionPerDiemDto;
 using EvictionFiler.Application.DTOs.MasterDtos.HarassmentTypeDto;
 using EvictionFiler.Application.DTOs.MasterDtos.ReliefPetitionerTypeDto;
 using EvictionFiler.Application.DTOs.MasterDtos.ReliefRespondentTypeDto;
+using EvictionFiler.Application.DTOs.MasterDtos.ReportingRequirementPerDiemDto;
 using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
@@ -55,12 +58,64 @@ namespace EvictionFiler.Infrastructure.Repositories
             return dtos;
         }
 
+        public async Task<List<CaseTypePerDiemDto>> GetAllCaseTypePerDiem()
+        {
+            var entities = await _context.MstCaseTypePerdiems.ToListAsync();
+
+            var dtos = entities.Select(e => new CaseTypePerDiemDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+
+            }).ToList();
+
+            return dtos;
+        }
+
+        public async Task<List<DocumentInstructionPerDiemDto>> GetAllDocumentInstructionPerDiem()
+        {
+            var entities = await _context.MstDocumentTypePerDiems.ToListAsync();
+
+            var dtos = entities.Select(e => new DocumentInstructionPerDiemDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+
+            }).ToList();
+
+            return dtos;
+        }
+
+        public async Task<List<ReportingRequirementPerDiemDto>> GetAllReportingRequirementPerDiem()
+        {
+            var entities = await _context.MstReportingTypePerDiems.ToListAsync();
+
+            var dtos = entities.Select(e => new ReportingRequirementPerDiemDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+
+            }).ToList();
+
+            return dtos;
+        }
+
 
         public async Task<List<PartyRepresent>> GetAllpartyRepresenting()
         {
             return await _context.MstPartyRepresents.ToListAsync();
+
         }
 
+        public async Task<List<PaymentMethod>> GetAllPaymentMethod()
+        {
+            return await _context.MstPaymentMethods.ToListAsync();
+        }
+
+        public async Task<List<PartyRepresentPerDiem>> GetAllpartyRepresentingPerDiem()
+        {
+            return await _context.MstPartyRepresentPerDiems.ToListAsync();
+        }
         public async Task<List<BuildingType>> GetAllBuildingTypes()
         {
             return await _context.MstBuildingTypes.ToListAsync();
@@ -102,6 +157,20 @@ namespace EvictionFiler.Infrastructure.Repositories
         public async Task<List<ApperenceTypeDto>> GetAllAppearanceTypes()
         {
             var entities = await _context.MstAppearanceTypes.ToListAsync();
+
+            var dtos = entities.Select(e => new ApperenceTypeDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+
+            }).ToList();
+
+            return dtos;
+        }
+
+        public async Task<List<ApperenceTypeDto>> GetAllAppearanceTypesPerDiem()
+        {
+            var entities = await _context.MstAppearanceTypesPerDiems.ToListAsync();
 
             var dtos = entities.Select(e => new ApperenceTypeDto
             {
