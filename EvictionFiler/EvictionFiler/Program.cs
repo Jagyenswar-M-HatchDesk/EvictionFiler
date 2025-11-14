@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Radzen;
 using Syncfusion.Blazor;
@@ -207,7 +208,18 @@ app.UseStaticFiles();
 //        Microsoft.AspNetCore.Http.Connections.HttpTransportType.LongPolling;
 //});
 
+app.UseStaticFiles();
 
+var caseFormsPath = Path.Combine(app.Environment.ContentRootPath, "CaseForms");
+if (!Directory.Exists(caseFormsPath))
+    Directory.CreateDirectory(caseFormsPath);
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(caseFormsPath),
+    RequestPath = "/CaseForms",
+    ServeUnknownFileTypes = true
+});
 using var scope = app.Services.CreateScope();
 
 var services = scope.ServiceProvider;
