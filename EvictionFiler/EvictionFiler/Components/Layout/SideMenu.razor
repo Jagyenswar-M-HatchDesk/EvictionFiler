@@ -3,12 +3,15 @@
 @using System.Security.Claims
 
 @using EvictionFiler.Server
-@using EvictionFiler.Server.Services
+@* @using EvictionFiler.Client.Services *@
  @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
 @* @inject SpinnerService SpinnerService *@
 @inject AuthenticationStateProvider AuthenticationStateProvider 
-@inject AuthService _authService
+@* @inject AuthService _authService *@
 @inject NavigationManager Navigation
+@inject HttpClient _httpClient
+@inject IJSRuntime JS
 
 
 
@@ -720,8 +723,12 @@
 
     private async Task LogoutUser()
     {
-        await _authService.LogoutAsync();
-        Navigation.NavigateTo("/", forceLoad: true); 
+        await JS.InvokeVoidAsync("fetch", "/api/auth/logout", new
+        {
+            method = "POST",
+            credentials = "include"
+        });
+        Navigation.NavigateTo("/", forceLoad: true);
     }
 
     private void ToggleProfileOptions()
