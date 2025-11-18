@@ -1,5 +1,6 @@
 using BlazorDownloadFile;
-using Blazored.SessionStorage;
+
+//using Blazored.SessionStorage
 //using EvictionFiler.Client.Jwt;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -11,7 +12,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 
 
-builder.Services.AddBlazoredSessionStorage();
+//builder.Services.AddBlazoredSessionStorage();
 //builder.Services.AddAuthorizationCore();
 //builder.Services.AddScoped<JwtAuthStateProviders>();
 //builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<JwtAuthStateProviders>());
