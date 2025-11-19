@@ -191,7 +191,9 @@ namespace EvictionFiler.Application.DTOs
         public string? PerDiemAttorneyname { get; set; }
         public string? PerDiemSignature { get; set; }
         public DateOnly? PerDiemDate { get; set; }
-       
+        public decimal? Flatdescription { get; set; }
+        public decimal? Hourlydescription { get; set; }
+
         public string? SpecialInstruction { get; set; }
 
 

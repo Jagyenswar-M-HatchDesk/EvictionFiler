@@ -774,7 +774,9 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <div class="form-check mb-2">
                                                             <InputRadio class="form-check-input"
                                                                         id="@($"partyType_{partyType.Id}")"
-                                                                        Value="@partyType.Id" />
+                                                                        Value="@partyType.Id" 
+                                                                         checked="@(legalcaseDto.PartyRepresentPerDiemId == partyType.Id)"
+                                                                        @onchange="() => OnPartyRepresentPerdiemChanged(partyType.Id)"/>
                                                             <label class="form-check-label"
                                                                    for="@($"partyType_{partyType.Id}")">@partyType.Name</label>
                                                         </div>
@@ -1402,6 +1404,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                     <InputRadio class="form-check-input me-2"
                                                                                 Value="@Type.Id"
                                                                                 id="@($"Type_{Type.Id}")"
+                                                                                checked="@(legalcaseDto.BilingTypeId == Type.Id)"
+                                                                              
                                                                                 @onclick="@(() => OnBillingTypeChanged(Type.Id))" />
 
                                                                     <!-- Label -->
@@ -1448,7 +1452,9 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                     <div class="form-check mb-2">
                                                                         <InputRadio class="form-check-input"
                                                                                     id="@($"partyType_{method.Id}")"
-                                                                                    Value="@method.Id" />
+                                                                                    Value="@method.Id"
+                                                                                    checked="@(legalcaseDto.PaymentMethodId == method.Id)"
+                                                                                    @onchange="() => OnPaymentmethodChanged(method.Id)" />
                                                                         <label class="form-check-label"
                                                                                for="@($"method{method.Id}")">@method.Name</label>
                                                                     </div>
@@ -2593,8 +2599,9 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         legalcaseDto = new IntakeModel();
         _editContext = new EditContext(legalcaseDto);
         _messages = new ValidationMessageStore(_editContext);
+          
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
-
+    
         ClientList = await _clientService.GetAllClient(loggedInUserId!, isAdmin);
         CaseTypeHPDList = await CaseTypeRepository.GetAllCaseTypeHPD();
         CaseTypePerDiemList = await CaseTypeRepository.GetAllCaseTypePerDiem();
@@ -2636,11 +2643,18 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         LandlordList = await _landlordService.GetAllLandLordsAsync();
         selectedlandlord = LandlordList.Where(e => e.Id == legalcaseDto.LandlordId).FirstOrDefault() ?? new EditToLandlordDto();
         legalcaseDto.LandLordTypeId = selectedlandlord.LandlordTypeId;
+        var caseTypeName = CaseTypeList
+                      .FirstOrDefault(x => x.Id == legalcaseDto.CaseTypeId)
+                      ?.Name ?? string.Empty;
 
-        BuildingList = await _buildingService.GetBuildingsByLandlordIdAsync(legalcaseDto.LandlordId!.Value);
+         @if(caseTypeName != "Per Diem")
+         {
+                     BuildingList = await _buildingService.GetBuildingsByLandlordIdAsync(legalcaseDto.LandlordId!.Value);
+            TenantList = await _tenantService.GetTenantsByClientIdAsync(legalcaseDto.BuildingId!.Value);
+         }
         selectedbuilding = BuildingList.Where(e => e.Id == legalcaseDto.BuildingId).FirstOrDefault() ?? new EditToBuildingDto();
 
-        TenantList = await _tenantService.GetTenantsByClientIdAsync(legalcaseDto.BuildingId!.Value);
+        
         selectedtenant = TenantList.Where(e => e.Id == legalcaseDto.TenantId).FirstOrDefault() ?? new EditToTenantDto();
 
         Tenants.Add($"{selectedtenant.FirstName} {selectedtenant.LastName}");
@@ -2735,6 +2749,38 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
          foreach (var item in ReliefRespondentTypesList)
         {
             if (legalcaseDto.SelectedReliefRespondentTypeIds.Contains(item.Id))
+            {
+                item.IsSelected = true;   // UI checkbox checked hoga
+            }
+        }
+
+        foreach (var item in CaseTypePerDiemList)
+        {
+            if (legalcaseDto.SelectedCaseTypePerDiemIds.Contains(item.Id))
+            {
+                item.IsSelected = true;   // UI checkbox checked hoga
+            }
+        }
+
+        foreach (var item in AppearanceTypesPerDiemList)
+        {
+            if (legalcaseDto.SelectedAppearanceTypePerDiemIds.Contains(item.Id))
+            {
+                item.IsSelected = true;   // UI checkbox checked hoga
+            }
+        }
+
+         foreach (var item in DocumentInstructionPerDiemList)
+        {
+            if (legalcaseDto.SelectedDocumentInstructionPerDiemIds.Contains(item.Id))
+            {
+                item.IsSelected = true;   // UI checkbox checked hoga
+            }
+        }
+
+          foreach (var item in ReportingRequirementPerDiemList)
+        {
+            if (legalcaseDto.SelectedReportingRequirementPerDiemIds.Contains(item.Id))
             {
                 item.IsSelected = true;   // UI checkbox checked hoga
             }
@@ -3409,13 +3455,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         return value;
     }
 
-    void OnBillingTypeChanged(Guid id)
-    {
-        legalcaseDto.BilingTypeId = id;
-
-        // Input reset jab Flat → Hourly switch hota hai
-        legalcaseDto.BilingTypeInputValue = null;
-    }
+  
 
     private bool ValidateAll()
     {
@@ -4010,6 +4050,112 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                         nav.NavigateTo("/legalcases?edit=true");
                     }
                   
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+
+            }
+        }
+        @if (legalcaseDto.CaseTypeName == "Per Diem")
+        {
+            try
+            {
+                spinnerservice.Show();
+                var authState = await _authStateProvider.GetAuthenticationStateAsync();
+                var user = authState.User;
+
+                var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userGuid))
+                {
+                    legalcaseDto.UpdatedBy = userGuid;
+                    legalcaseDto.UpdatedOn = DateTime.Now;
+                }
+                else
+                {
+                    // unauthenticated user
+                    legalcaseDto.UpdatedBy = Guid.Empty;
+                    legalcaseDto.UpdatedOn = DateTime.Now;
+                }
+                // 1. Handle Client
+                if (selectedClient == null)
+                {
+                    // create new client
+                    var nameparts = legalcaseDto.ClientName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    newClient = new CreateToClientDto()
+                    {
+                        FirstName = nameparts.Count() > 0 ? nameparts[0] : string.Empty,
+                        LastName = nameparts.Count() > 1 ? nameparts[nameparts.Count() - 1] : string.Empty,
+                        Email = legalcaseDto.ClientEmail,
+                        Phone = legalcaseDto.ClientPhone,
+                        ClientTypeId = legalcaseDto.ClientTypeId,
+                        CreatedBy = legalcaseDto.CreatedBy
+
+                    };
+
+
+                    var clientId = await _clientService.CreateOnlyClient(newClient);
+                    legalcaseDto.ClientId = clientId;
+                }
+                else
+                {
+                    // check if changed -> update
+                    if (selectedClient != null && HasClientChanged(selectedClient, legalcaseDto))
+                    {
+                        var nameparts = legalcaseDto.ClientName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                        var updateclient = new EditToClientDto
+                        {
+                            Id = legalcaseDto.ClientId ?? Guid.Empty,
+                            FirstName = nameparts.Count() > 0 ? nameparts[0] : string.Empty,
+                            LastName = nameparts.Count() > 1 ? nameparts[nameparts.Count() - 1] : string.Empty,
+                            Email = legalcaseDto.ClientEmail,
+                            Phone = legalcaseDto.ClientPhone,
+                            ClientTypeId = legalcaseDto.ClientTypeId,
+                            Reference = legalcaseDto.Reference
+
+                        };
+                        await _clientService.UpdateClientformCase(updateclient);
+                    }
+                }
+
+               
+
+                legalcaseDto.SelectedCaseTypePerDiemIds = CaseTypePerDiemList
+                                                   .Where(x => x.IsSelected)
+                                                   .Select(x => x.Id)
+                                                   .ToList();
+                legalcaseDto.SelectedAppearanceTypePerDiemIds = AppearanceTypesPerDiemList
+                  .Where(x => x.IsSelected)
+                  .Select(x => x.Id)
+                  .ToList();
+
+                legalcaseDto.SelectedDocumentInstructionPerDiemIds = DocumentInstructionPerDiemList
+              .Where(x => x.IsSelected)
+              .Select(x => x.Id)
+              .ToList();
+
+                legalcaseDto.SelectedReportingRequirementPerDiemIds = ReportingRequirementPerDiemList
+            .Where(x => x.IsSelected)
+            .Select(x => x.Id)
+            .ToList();
+
+
+
+
+                if (legalcaseDto != null || legalcaseDto.Id == Guid.Empty)
+                {
+
+
+                    var result = await _legalCaseService.UpdateCaseAsync(legalcaseDto);
+
+                    if (result != null)
+                    {
+                        nav.NavigateTo("/legalcases?edit=true");
+                    }
+
 
                 }
             }
@@ -4676,6 +4822,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         
     }
 
+    void OnPartyRepresentPerdiemChanged(Guid id)
+    {
+        legalcaseDto.PartyRepresentPerDiemId = id;
+
+    }
+
+  
+
     void OnBuildingTypeChanged(Guid id)
     {
         legalcaseDto.BuildingTypeId = id;
@@ -4690,8 +4844,18 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         legalcaseDto.BilingTypeId = id;
     }
 
+    void OnPaymentmethodChanged(Guid id)
+    {
+        legalcaseDto.PaymentMethodId = id;
+    }
 
+    void OnBillingTypeChanged(Guid id)
+    {
+        legalcaseDto.BilingTypeId = id;
 
+        // Input reset jab Flat → Hourly switch hota hai
+        legalcaseDto.BilingTypeInputValue = null;
+    }
 
 
 
