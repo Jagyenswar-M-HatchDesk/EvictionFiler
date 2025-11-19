@@ -59,6 +59,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				)
 				.Select(e => new EditToClientDto
                 {
+					Id = e.Id,
 					ClientCode = e.ClientCode,
 					FirstName = e.FirstName,
 					LastName = e.LastName,
