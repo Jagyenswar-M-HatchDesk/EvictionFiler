@@ -1,4 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.OccupantDto;
 using EvictionFiler.Application.DTOs.TenantDto;
@@ -87,6 +88,8 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
 		public List<AdditionalOccupantDto>? AdditionalOccupants { get; set; }
 
 		public string ? CreatedByName {get;set;}
+
+        public EditToClientDto Client { get; set; }
 
     }
 }

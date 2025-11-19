@@ -166,6 +166,7 @@ namespace EvictionFiler.Application.DTOs
         public Guid? BilingTypeId { get; set; }
 
         public Guid? BuildingTypeId { get; set; }
+        public BuildingType? BuildingType { get; set; }
         public Guid? RegistrationStatusTypeId { get; set; }
 
         public Guid? PaymentMethodId { get; set; }
