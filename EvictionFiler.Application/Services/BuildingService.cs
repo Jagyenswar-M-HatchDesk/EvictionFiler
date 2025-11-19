@@ -165,9 +165,9 @@ namespace EvictionFiler.Application.Services
             };
         }
 
-        public async Task<List<EditToBuildingDto>> SearchBuildingByCode(string code, Guid landlordId, Guid excludeBuildingId)
+        public async Task<List<EditToBuildingDto>> SearchBuilding(string code, Guid landlordId)
         {
-            return await _repository.SearchBuildingByCode(code, landlordId, excludeBuildingId);
+            return await _repository.SearchBuilding(code, landlordId);
         }
 
         public async Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id)

@@ -259,7 +259,7 @@ namespace EvictionFiler.Application.Services
 
 
 
-        public async Task<List<CreateToClientDto>> SearchClient(string searchTerm)
+        public async Task<List<EditToClientDto>> SearchClient(string searchTerm)
 		{
 			var newtenant = await _clientRepo.SearchClient(searchTerm);
 			return newtenant;

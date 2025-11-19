@@ -9,7 +9,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
 	{
         Task<List<State>> GetAllStateAsync();
 		Task<Client?> GetClientWithAllDetailsAsync(Guid clientId);
-		Task<List<CreateToClientDto>> SearchClient(string searchTerm);
+		Task<List<EditToClientDto>> SearchClient(string searchTerm);
 
 		Task<string> GenerateClientCodeAsync();
 

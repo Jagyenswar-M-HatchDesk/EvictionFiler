@@ -168,9 +168,9 @@ namespace EvictionFiler.Application.Services
         }
 
 
-        public async Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query, Guid clientId)
+        public async Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query)
         {
-            return await _landLordRepository.SearchLandlordsAsync(query, clientId);
+            return await _landLordRepository.SearchLandlordsAsync(query);
         }
 
         public async Task<CreateToLandLordDto?> GetLandLordByIdAsync(Guid id)

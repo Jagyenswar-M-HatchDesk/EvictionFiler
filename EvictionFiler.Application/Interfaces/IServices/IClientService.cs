@@ -14,7 +14,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 
 		Task<EditToClientDto?> GetClientByIdAsync(Guid? id);
 		Task<bool> DeleteClientAsync(Guid id, bool isAdmin);
-		Task<List<CreateToClientDto>> SearchClient(string searchTerm);
+		Task<List<EditToClientDto>> SearchClient(string searchTerm);
 		Task<List<EditToClientDto>> GetAllClient(string userId, bool isAdmin);
 
 		Task<Guid> CreateOnlyClient(CreateToClientDto client);

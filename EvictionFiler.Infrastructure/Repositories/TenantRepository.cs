@@ -84,24 +84,47 @@ namespace EvictionFiler.Infrastructure.Repositories
 			query = query?.Trim().ToLower() ?? "";
 
 			var tenants = await _dbContext.Tenants
-				.Include(t => t.Building)
-					.ThenInclude(b => b.Landlord)
 				.Where(t =>
-					t.Building.Landlord.ClientId == clientId && (
+					t.BuildinId == clientId && 
+					t.IsDeleted != true && (
 						t.TenantCode.ToLower().Contains(query) ||
-						(t.FirstName + " " + t.LastName).ToLower().StartsWith(query)
+						(t.FirstName + " " + t.LastName).ToLower().StartsWith(query) ||
+						(t.UnitOrApartmentNumber!).ToLower().StartsWith(query) 
 					)
 				)
-				.Select(t => new EditToTenantDto
+				.Select(dto => new EditToTenantDto
 				{
-					Id = t.Id,
-					FirstName = t.FirstName,
-					LastName = t.LastName,
-					Email = t.Email,
-					Phone = t.Phone,
-					TenantCode = t.TenantCode
-				})
-				.Take(10)
+                    Id = dto.Id,
+                    TenantCode = dto.TenantCode,
+                    FirstName = dto.FirstName,
+                    LastName = dto.LastName,
+                    UnitOrApartmentNumber = dto.UnitOrApartmentNumber,
+
+                    RentDueEachMonthOrWeekId = dto.RentDueEachMonthOrWeekId,
+                    MonthlyRent = dto.MonthlyRent,
+                    TenantShare = dto.TenantShare,
+                    SocialServices = dto.SocialServices,
+
+                    IsUnitIllegalId = dto.IsUnitIllegalId,
+                    IsUnitIllegalName = dto.IsUnitIllegal!.Name,
+                    TenancyTypeId = dto.TenancyTypeId,
+                    TenancyTypeName = dto.TenancyType!.Name,
+                    RenewalOffer = dto.RenewalOffer,
+                    SSN = dto.SSN,
+                    Phone = dto.Phone,
+                    Email = dto.Email,
+                    LanguageId = dto.LanguageId,
+                    LanguageName = dto.Language!.Name,
+
+                    HasPossession = dto.HasPossession,
+                    HasRegulatedTenancy = dto.HasRegulatedTenancy,
+
+                    OtherOccupants = dto.OtherOccupants,
+
+                    TenantRecord = dto.TenantRecord,
+                    HasPriorCase = dto.HasPriorCase,
+                    BuildingId = dto.BuildinId,
+                })
 				.ToListAsync();
 
 			return tenants;
