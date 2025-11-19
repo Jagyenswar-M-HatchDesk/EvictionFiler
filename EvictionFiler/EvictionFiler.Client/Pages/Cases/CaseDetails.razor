@@ -16,7 +16,7 @@
 @using EvictionFiler.Application.Interfaces.IServices
 @inject NavigationManager Navigation
 @inject ILegalCaseService _service
-@using EvictionFiler.Client.Jwt
+@* @using EvictionFiler.Client.Jwt *@
 @using EvictionFiler.Client.SpinnerService
 @using EvictionFiler.Domain.Entities.Master
 @using EvictionFiler.Infrastructure.Repositories
@@ -37,12 +37,14 @@
 @inject IFeesCatalogService _feeCatalogService
 @inject IToastService ToastService
 @inject IJSRuntime JS
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization;
 @using EvictionFiler.Domain.Entities
+@attribute [Authorize]
 
 @using System.Security.Claims
-@inject JwtAuthStateProviders _authStateProvider
-
+@inject AuthenticationStateProvider _authStateProvider
+<PageTitle>Case Details - Housing Court Filer</PageTitle>
 <style>
     :root {
         /* default palette (indigo/teal) */
@@ -1834,12 +1836,13 @@
     }
 
 
-    private void ViewPdf(string filePath)
+    private async Task ViewPdf(string filePath)
     {
         if (!string.IsNullOrWhiteSpace(filePath))
         {
             var fullUrl = Navigation.BaseUri.TrimEnd('/') + filePath;
-            Navigation.NavigateTo(fullUrl, forceLoad: true);
+            // Navigation.NavigateTo(fullUrl, forceLoad: true);
+            await JS.InvokeVoidAsync("open", fullUrl, "_blank");
         }
     }
 
@@ -2735,24 +2738,22 @@
     }
     private async Task OpenHearingPopup()
     {
-
-        if (legalcaseDto.CourtId != null && legalcaseDto.CourtId != Guid.Empty)
-        {
-
-            caseHearing.HearingDate = DateTime.Now;
-            var timespan = TimeSpan.FromHours(10);
-            caseHearing.HearingTime = TimeOnly.FromTimeSpan(timespan);
-            await JS.InvokeVoidAsync("showModal", "hearingModal");
-        }
-        else
+        if (legalcaseDto.CourtId == null || legalcaseDto.CourtId == Guid.Empty)
         {
             showCourtInfoAlert = true;
             return;
         }
-        if (!caseFormDto.Any())
+        else if (!caseFormDto.Any())
         {
             IsFormGenerated = true;
             return;
+        }
+        else
+        {
+            caseHearing.HearingDate = DateTime.Now;
+            var timespan = TimeSpan.FromHours(10);
+            caseHearing.HearingTime = TimeOnly.FromTimeSpan(timespan);
+            await JS.InvokeVoidAsync("showModal", "hearingModal");
         }
 
     }

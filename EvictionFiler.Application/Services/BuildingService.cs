@@ -6,7 +6,6 @@ using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
-using PdfSharpCore.Pdf;
 
 namespace EvictionFiler.Application.Services
 {

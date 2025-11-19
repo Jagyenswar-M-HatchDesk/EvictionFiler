@@ -3,12 +3,15 @@
 @using System.Security.Claims
 
 @using EvictionFiler.Server
-@using EvictionFiler.Server.Services
+@* @using EvictionFiler.Client.Services *@
  @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
 @* @inject SpinnerService SpinnerService *@
 @inject AuthenticationStateProvider AuthenticationStateProvider 
-@inject AuthService _authService
+@* @inject AuthService _authService *@
 @inject NavigationManager Navigation
+@inject HttpClient _httpClient
+@inject IJSRuntime JS
 
 
 
@@ -135,8 +138,8 @@
 
                 </div>
                 <div class="nav flex-column ">
-                    <a title="Client" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Calander") || (isCollapsed && IsSubmenuActive("Calander")) ? "active" : "")"
-                       @onclick="@(() => ToggleMenu("Calander"))">
+                    <a title="Client" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Calender") || (isCollapsed && IsSubmenuActive("Calender")) ? "active" : "")"
+                       @onclick="@(() => ToggleMenu("Calender"))">
                         <i class="fa-solid fa-calendar-days menu-icon"></i>
 
                         <span class="hide-on-collapse menu-label">  Calender</span>
@@ -633,7 +636,7 @@
         }
 
         string[] menus = {
-    "Home", "ManageCases", "Users", "Client", "Calander","Drafting",
+    "Home", "ManageCases", "Users", "Client", "Calender","Drafting",
     "Reporting", "Real-Estate","Attorney", "Accounting", "Maintenance",
     "Process", "Transfer", "FormsPrint","NYCEFEmail" , "Settings"
 };
@@ -682,8 +685,8 @@
             case "Client":
                 nav.NavigateTo("/clients");
                 break;
-            case "Calander":
-                nav.NavigateTo("/Calander");
+            case "Calender":
+                nav.NavigateTo("/calender");
                 break; 
             case "Real-Estate":
                 nav.NavigateTo("/real-estate");
@@ -720,8 +723,12 @@
 
     private async Task LogoutUser()
     {
-        await _authService.LogoutAsync();
-        Navigation.NavigateTo("/", forceLoad: true); 
+        await JS.InvokeVoidAsync("fetch", "/api/auth/logout", new
+        {
+            method = "POST",
+            credentials = "include"
+        });
+        Navigation.NavigateTo("/", forceLoad: true);
     }
 
     private void ToggleProfileOptions()
