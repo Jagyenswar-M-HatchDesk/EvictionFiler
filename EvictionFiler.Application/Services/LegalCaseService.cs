@@ -170,6 +170,9 @@ namespace EvictionFiler.Application.Services
                    
                 }
 
+                legalCases.CreatedBy = legalCase.CreatedBy;
+                legalCases.CreatedOn = DateTime.Now;
+
                 var addedcase = await _repository.AddAsync(legalCases);
                 var result = await _unitOfWork.SaveChangesAsync();
 
