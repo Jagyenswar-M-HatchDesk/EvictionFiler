@@ -33,5 +33,59 @@ namespace EvictionFiler.Domian.Enums
 
     }
 
-    
+    public enum StepHoldover
+    {
+        CaseAndclient = 0,
+        Landlord = 1,
+        Building = 2,
+        Tenant = 3,
+        Terms = 4,
+        Case = 5,
+        Rent = 6,
+        Notice = 7,
+       
+
+    }
+
+    public enum StepNonPayment
+    {
+        CaseAndclient = 0,
+        Landlord = 1,
+        Building = 2,
+        Tenant = 3,
+        Terms = 4,
+        Rent = 6,
+        Notice = 7,
+    }
+
+    public enum StepHPD
+    {
+        CaseAndclient = 0,
+        Attorney = 1,
+        CaseInfo = 2,
+        Party = 3,
+        BuildingInfo = 4,
+        PetitionerTenant = 5,
+        RespondentLandlord = 6,
+        Appearance = 7,
+        Relief = 8,
+        Billing = 9,
+
+    }
+
+    public enum StepPerDiem
+    {
+        CaseAndclient = 0,
+        Attorney = 1,
+        CaseInfo = 2,
+        Party = 3,
+        Appearance = 4,
+        CasebackGround = 5,
+        DocumentInstructions = 6,
+        Reporting = 7,
+        Billing = 8,
+        Acknowledgment = 9,
+    }
+
+
 }
