@@ -149,6 +149,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     CreatedOn = c.CreatedOn,
                     CreatedBy = c.CreatedBy,
                     ReasonHoldover = c.ReasonHoldover,
+                    TenantName = c.TenantName,
                     CaseType = c.CaseType != null ? new CaseType
                     {
                         Name = c.CaseType.Name
@@ -301,6 +302,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     CaseType = c.CaseType,
                     ReasonHoldover = c.ReasonHoldover,
                     CreatedBy = c.CreatedBy,
+                    TenantName = c.TenantName,
                     CreatedByName = userDict.ContainsKey(c.CreatedBy)
                             ? userDict[c.CreatedBy]
                             : "Admin",

@@ -192,6 +192,7 @@ namespace EvictionFiler.Domain.Entities
         public DateOnly? AppearanceDate { get; set; }
 
         public string? InvoiceTo { get; set; }
+        public string? TenantName { get; set; }
         public TimeOnly? AppearanceTime { get; set; }
 
 

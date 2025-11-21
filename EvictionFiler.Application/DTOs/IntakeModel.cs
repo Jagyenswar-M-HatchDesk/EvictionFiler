@@ -50,8 +50,8 @@ namespace EvictionFiler.Application.DTOs
         public Guid? RegulationStatusId { get; set; }
         public string RegulationStatusName { get; set; }
 
-        public string TenantName { get; set; }
-        public string UnitNumber { get; set; }
+        public string? TenantName { get; set; }
+        public string? UnitNumber { get; set; }
         public bool? TenantRecord { get; set; }
         public bool? HasPossession { get; set; }
         public bool? OtherOccupants { get; set; }

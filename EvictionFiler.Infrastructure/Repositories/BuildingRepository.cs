@@ -150,7 +150,10 @@ namespace EvictionFiler.Infrastructure.Repositories
                     PetitionerInterest = b.PetitionerInterest,
                     RegulationStatusId = b.RegulationStatusId,
                     BuildingUnits = b.BuildingUnits,
-                    LandlordId = b.LandlordId
+                    LandlordId = b.LandlordId,
+					BuildingTypeId = b.BuildingTypeId,
+					RegistrationStatusId = b.RegistrationStatusId
+
                 })
                 .ToListAsync();
         }
