@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251121093815_updatetblFeesmanagement")]
+    partial class updatetblFeesmanagement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -692,7 +695,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.FeesCatalog", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("Ids")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
@@ -719,7 +722,7 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.HasKey("Id");
+                    b.HasKey("Ids");
 
                     b.HasIndex("LabelId");
 
@@ -728,7 +731,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.FeesCatalogAttorneyRoster", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("Ids")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
@@ -758,14 +761,14 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<decimal>("TravelWait")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.HasKey("Id");
+                    b.HasKey("Ids");
 
                     b.ToTable("FeesCatalog_AttorneyRoster", "dbo");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.FeesCatalogCourtAppearance", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("Ids")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
@@ -783,7 +786,7 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<decimal>("PerDiem")
                         .HasColumnType("decimal(10, 2)");
 
-                    b.HasKey("Id");
+                    b.HasKey("Ids");
 
                     b.ToTable("FeesCatalog_CourtAppearance", "dbo");
                 });

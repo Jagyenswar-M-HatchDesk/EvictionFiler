@@ -8,7 +8,7 @@ namespace EvictionFiler.Domain.Entities
     public class FeesCatalogCourtAppearance
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         [Required]
         [MaxLength(100)]
         public string County { get; set; } = string.Empty;

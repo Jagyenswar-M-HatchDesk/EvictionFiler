@@ -1,0 +1,609 @@
+﻿@page "/maintenance/feesCatalog1"
+@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.FormTypeDto
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Application.Interfaces.IServices.Master
+@using DomainMaster = EvictionFiler.Domain.Entities.Master
+@using EvictionFiler.Domain.Entities
+@using EvictionFiler.Client.SpinnerService
+@using Microsoft.AspNetCore.Authorization
+
+@inject IToastService ToastService
+@inject IManageFormService ManageFormService
+@inject SpinnerService SpinnerService
+
+@attribute [Authorize]
+
+<PageTitle>Fees Catalog - Housing Court Filer</PageTitle>
+
+<div class="container my-4">
+    <div class="mb-4">
+        <h3>Fee Catalog Management</h3>
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body d-flex flex-wrap align-items-center justify-content-between">
+            <div class="mb-2">
+                <button class="btn btn-primary me-2 mb-2" @onclick="SaveChanges" style="background: #162646;">Save Catalog</button>
+                <button class="btn btn-outline-secondary me-2 mb-2">Export JSON</button>
+                <label class="btn btn-outline-secondary mb-2" for="imp">Import JSON</label>
+                <input id="imp" type="file" accept="application/json" hidden />
+                <button class="btn btn-outline-secondary mb-2">Reset to Defaults</button>
+            </div>
+            <button class="btn btn-outline-primary mb-2">Dashboard Light Theme</button>
+        </div>
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="card-title mb-0">@SelectedCategory</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-secondary">Category:</span>
+                    <select class="form-select" style="width:auto;" @bind="SelectedCategory" @bind:after="LoadDataForSelectedCategory">
+                        @foreach (var category in Categories)
+                        {
+                            <option value="@category">@category</option>
+                        }
+                    </select>
+
+                    <button class="btn btn-success" style="background: #162646;" @onclick="AddRowWithSave">Add Row</button>
+
+                    @if (IsLoading)
+                    {
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="table-container">
+                <!-- STATIC GENERAL FEES TABLE -->
+                @if (SelectedCategory != "Attorney Billing — Roster & Defaults"
+                    && SelectedCategory != "Court Appearance & Attorney Fees by County")
+                {
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Code</th>
+                                <th>Label</th>
+                                <th>Unit</th>
+                                <th>Rate (USD)</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var row in FeeRows)
+                            {
+                                <tr>
+                                    <td><input class="form-control" @bind='row.Values["Code"]' /></td>
+                                    <td>
+                                        <select class="form-select" @bind='row.Values["LabelId"]'>
+                                            <option value="">--select--</option>
+                                            @foreach (var form in CaseformList)
+                                            {
+                                                <option value="@form.Id">@form.Name</option>
+                                            }
+                                        </select>
+                                    </td>
+
+                                    <td>
+                                        <select class="form-select" @bind='row.Values["Unit"]'>
+                                            <option value="">--select--</option>
+                                            @foreach (var u in Units)
+                                            {
+                                                <option value="@u">@u</option>
+                                            }
+                                        </select>
+                                    </td>
+
+                                    <td>
+                                        <input class="form-control" type="number"
+                                               step="0.01"
+                                               value="@(row.NumberValues.ContainsKey("Rate (USD)")
+                                                    ? row.NumberValues["Rate (USD)"].ToString("0.##") : "")"
+                                               @oninput="@(e => OnNumberInputChanged(row, "Rate (USD)", e))" />
+                                    </td>
+
+                                    <td class="text-center">
+                                        <button class="btn btn-danger btn-sm" @onclick="() => RemoveRow(row)">Remove</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                <!-- STATIC COURT FEES TABLE -->
+                @if (SelectedCategory == "Court Appearance & Attorney Fees by County")
+                {
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>County</th>
+                                <th>Attorney Hourly</th>
+                                <th>Court Appearance</th>
+                                <th>Per Diem</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var row in FeeRows)
+                            {
+                                <tr>
+                                    <td><input class="form-control" @bind='row.Values["County"]' /></td>
+
+                                    <td><input class="form-control" type="number" @bind='row.NumberValues["Attorney Hourly"]' @oninput="@(e => OnNumberInputChanged(row, "Attorney Hourly", e))" /></td>
+                                    <td><input class="form-control" type="number" @bind='row.NumberValues["Court Appearance"]' @oninput="@(e => OnNumberInputChanged(row, "Court Appearance", e))" /></td>
+                                    <td><input class="form-control" type="number" @bind='row.NumberValues["Per Diem"]' @oninput="@(e => OnNumberInputChanged(row, "Per Diem", e))" /></td>
+
+                                    <td class="text-center">
+                                        <button class="btn btn-danger btn-sm" @onclick="() => RemoveRow(row)">Remove</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                <!-- STATIC ATTORNEY ROSTER TABLE -->
+                @if (SelectedCategory == "Attorney Billing — Roster & Defaults")
+                {
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Bar #</th>
+                                <th>Email</th>
+                                <th>Hourly Rate</th>
+                                <th>Travel/Wait (opt.)</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var row in FeeRows)
+                            {
+                                <tr>
+                                    <td><input class="form-control" @bind='row.Values["Name"]' /></td>
+
+                                    <td>
+                                        <select class="form-select" @bind='row.Values["Role"]'>
+                                            @foreach (var r in RoleOptions)
+                                            {
+                                                <option value="@r">@r</option>
+                                            }
+                                        </select>
+                                    </td>
+
+                                    <td><input class="form-control" @bind='row.Values["Bar #"]'/></td>
+                                    <td><input class="form-control" @bind='row.Values["Email"]'/></td>
+
+                                    <td>
+                                        <input class="form-control" type="number" @bind='row.NumberValues["Hourly Rate"]'
+                                               @oninput="@(e => OnNumberInputChanged(row, "Hourly Rate", e))" /></td>
+
+                                    <td>
+                                        <input class="form-control" type="number" @bind='row.NumberValues["Travel/Wait (opt.)"]'
+                                               @oninput="@(e => OnNumberInputChanged(row, "Travel/Wait (opt.)", e))" /></td>
+
+                                    <td class="text-center">
+                                        <button class="btn btn-danger btn-sm" @onclick="() => RemoveRow(row)">Remove</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-container {
+        max-height: 500px;
+        overflow: auto;
+        border-radius: 8px;
+    }
+    .table-container table {
+        min-width: 1000px;
+    }
+    .table-container thead {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background-color: #f8f9fa;
+    }
+</style>
+
+@code {
+    [Inject] public IFeesCatalogService FeesCatalogService { get; set; } = default!;
+    [Inject] public IFeesCatalogCourtAppearanceService CourtService { get; set; } = default!;
+    [Inject] public IFeesCatalogAttorneyRosterService AttorneyService { get; set; } = default!;
+
+    private List<FormAddEditViewModelDto> CaseformList = new();
+
+
+    private bool IsLoading = false;
+    private string SelectedCategory { get; set; } = "Holdover";
+
+    private List<string> Categories = new()
+    {
+        "Holdover", "Nonpayment", "Warrant & Marshal Notices",
+        "Process Server", "Court Appearance & Attorney Fees by County",
+        "Filing & Administrative", "Attorney Billing — Roster & Defaults"
+    };
+
+    private List<string> Units = new() { "item", "hour", "flat", "page" };
+    private List<string> RoleOptions = new() { "Partner", "Associate", "Per Diem", "Of Counsel", "Paralegal" };
+
+    private List<FeeRow> FeeRows = new();
+    private List<FeesCatalogDto> GeneralFees = new();
+    private List<FeesCatalogCourtAppearanceDto> CourtFees = new();
+    private List<FeesCatalogAttorneyRosterDto> AttorneyFees = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        SpinnerService.Show();
+        await Task.Delay(200);
+       
+        await LoadDataForSelectedCategory();
+        SpinnerService.Hide();
+    }
+    private async Task LoadForms()
+    {
+        CaseformList = await ManageFormService.GetAllFormByCategoryAsync(SelectedCategory);
+    }
+
+    private async Task LoadDataForSelectedCategory()
+    {
+        SpinnerService.Show();
+        IsLoading = true;
+
+        await LoadForms();
+
+        FeeRows.Clear();
+        try
+        {
+            switch (SelectedCategory)
+            {
+                case "Attorney Billing — Roster & Defaults":
+                    AttorneyFees = await AttorneyService.GetAllAsync();
+                    FeeRows = AttorneyFees.Select(MapAttorneyFeeToFeeRow).ToList();
+                    break;
+                case "Court Appearance & Attorney Fees by County":
+                    CourtFees = await CourtService.GetAllAsync();
+                    FeeRows = CourtFees.Select(MapCourtFeeToFeeRow).ToList();
+                    break;
+                default:
+                    GeneralFees = await FeesCatalogService.GetAllByCategoryAsync(SelectedCategory);
+                    FeeRows = GeneralFees.Select(MapGeneralFeeToFeeRow).ToList();
+                    break;
+            }
+            if (!FeeRows.Any()) AddBlankRow();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading data: {ex.Message}");
+            AddBlankRow();
+        }
+        finally
+        {
+            IsLoading = false;
+            SpinnerService.Hide();
+            StateHasChanged();
+        }
+    }
+
+    private FeeRow MapGeneralFeeToFeeRow(FeesCatalogDto e)
+        => new FeeRow
+        {
+            EntityId = e.Id,
+            Values = new()
+            {
+                ["Code"] = e.Code ?? "",
+                ["Label"] = e.Label ?? "",
+                ["LabelId"] = e.LabelId?.ToString() ?? "",
+                ["Unit"] = e.Unit ?? ""
+            },
+            NumberValues = new()
+            {
+                ["Rate (USD)"] = e.Rate
+            }
+        };
+
+    private FeeRow MapCourtFeeToFeeRow(FeesCatalogCourtAppearanceDto e)
+        => new FeeRow
+        {
+            EntityId = e.Id,
+            Values = new() { ["County"] = e.County ?? "" },
+            NumberValues = new()
+            {
+                ["Attorney Hourly"] = e.AttorneyHourly,
+                ["Court Appearance"] = e.CourtAppearance,
+                ["Per Diem"] = e.PerDiem
+            }
+        };
+
+    private FeeRow MapAttorneyFeeToFeeRow(FeesCatalogAttorneyRosterDto e)
+        => new FeeRow
+        {
+            EntityId = e.Id,
+            Values = new()
+            {
+                ["Name"] = e.Name ?? "",
+                ["Role"] = e.Role ?? RoleOptions.First(),
+                ["Bar #"] = e.BarNumber ?? "",
+                ["Email"] = e.Email ?? ""
+            },
+            NumberValues = new()
+            {
+                ["Hourly Rate"] = e.HourlyRate,
+                ["Travel/Wait (opt.)"] = e.TravelWait
+            }
+        };
+
+    private void AddBlankRow()
+    {
+        FeeRow r = new() { EntityId = Guid.Empty };
+
+        if (SelectedCategory == "Attorney Billing — Roster & Defaults")
+        {
+            r.Values["Name"] = "";
+            r.Values["Role"] = RoleOptions.First();
+            r.Values["Bar #"] = "";
+            r.Values["Email"] = "";
+            r.NumberValues["Hourly Rate"] = 0;
+            r.NumberValues["Travel/Wait (opt.)"] = 0;
+        }
+        else if (SelectedCategory == "Court Appearance & Attorney Fees by County")
+        {
+            r.Values["County"] = "";
+            r.NumberValues["Attorney Hourly"] = 0;
+            r.NumberValues["Court Appearance"] = 0;
+            r.NumberValues["Per Diem"] = 0;
+        }
+        else
+        {
+            r.Values["Code"] = "";
+            r.Values["Label"] = "";
+            r.Values["Unit"] = "";
+            r.Values["LabelId"] = "";
+            r.NumberValues["Rate (USD)"] = 0;
+        }
+
+        FeeRows.Add(r);
+    }
+
+    private async Task AddRowWithSave()
+    {
+        if (FeeRows.Any())
+            await SaveRow(FeeRows.Last());
+
+        AddBlankRow();
+    }
+
+    private async Task SaveChanges()
+    {
+        foreach (var row in FeeRows)
+            await SaveRow(row);
+    }
+
+    private async Task SaveRow(FeeRow row)
+    {
+        int filledCount = row.Values.Count(v => !string.IsNullOrWhiteSpace(v.Value))
+                        + row.NumberValues.Count(n => n.Value > 0);
+
+        // If row is empty and exists in DB, delete it
+        // if (filledCount == 0 && row.EntityId == null && row.EntityId == Guid.Empty )
+        // {
+        //     await DeleteEntityAsync(row);
+        //     FeeRows.Remove(row);
+        //     StateHasChanged();
+        //     return;
+        // }
+
+        // Skip saving rows with insufficient data
+        if (filledCount < 4) return;
+
+        try
+        {
+            switch (SelectedCategory)
+            {
+                case "Attorney Billing — Roster & Defaults":
+                    if (row.EntityId == null || row.EntityId == Guid.Empty)
+                    {
+                        // Add new
+                        var att = new FeesCatalogAttorneyRoster
+                        {
+                            Id = Guid.NewGuid(),
+
+                            Name = row.Values["Name"],
+                            Role = row.Values["Role"],
+                            BarNumber = row.Values["Bar #"],
+                            Email = row.Values["Email"],
+                            HourlyRate = row.NumberValues.GetValueOrDefault("Hourly Rate", 0m),
+                            TravelWait = row.NumberValues.GetValueOrDefault("Travel/Wait (opt.)", 0m)
+                        };
+                        var newatt = await AttorneyService.AddAsync(att);
+                        if (newatt.HasValue)
+                        {
+                            ToastService.ShowSuccess("Attorney details created successfully!");
+                            row.EntityId = att.Id;
+
+                        }
+                        else
+                        {
+                            ToastService.ShowError("Failed to create Attorney Record!");
+
+                        }
+                    }
+                    else
+                    {
+                        // Update existing: fetch tracked instance first
+                        var existing = AttorneyFees.FirstOrDefault(f => f.Id == row.EntityId);
+                        if (existing != null)
+                        {
+
+                            existing.Name = row.Values["Name"];
+                            existing.Role = row.Values["Role"];
+                            existing.BarNumber = row.Values["Bar #"];
+                            existing.Email = row.Values["Email"];
+                            existing.HourlyRate = row.NumberValues.GetValueOrDefault("Hourly Rate", 0m);
+                            existing.TravelWait = row.NumberValues.GetValueOrDefault("Travel/Wait (opt.)", 0m);
+
+                            var update = await AttorneyService.UpdateAsync(existing);
+                            if (update)
+                            {
+                                ToastService.ShowSuccess("Attorney details updated successfully!");
+                            }
+                            else
+                            {
+                                ToastService.ShowError("Failed to update Attorney Record!");
+                            }
+
+                        }
+                    }
+                    break;
+
+                case "Court Appearance & Attorney Fees by County":
+                    if (row.EntityId == null || row.EntityId == Guid.Empty)
+                    {
+                        var court = new FeesCatalogCourtAppearance
+                        {
+                            Id = Guid.NewGuid(),
+
+                            County = row.Values["County"],
+                            AttorneyHourly = row.NumberValues.GetValueOrDefault("Attorney Hourly", 0m),
+                            CourtAppearance = row.NumberValues.GetValueOrDefault("Court Appearance", 0m),
+                            PerDiem = row.NumberValues.GetValueOrDefault("Per Diem", 0m)
+                        };
+                        var newcourt = await CourtService.AddAsync(court);
+                        if (newcourt.HasValue)
+                        {
+                            ToastService.ShowSuccess("Court Appearance details created successfully!");
+                            row.EntityId = court.Id;
+                        }
+                        else
+                        {
+                            ToastService.ShowError("Failed to create Court Appreance Record!");
+                        }
+                    }
+                    else
+                    {
+                        var existing = CourtFees.FirstOrDefault(f => f.Id == row.EntityId);
+                        if (existing != null)
+                        {
+                            existing.County = row.Values["County"];
+                            existing.AttorneyHourly = row.NumberValues.GetValueOrDefault("Attorney Hourly", 0m);
+                            existing.CourtAppearance = row.NumberValues.GetValueOrDefault("Court Appearance", 0m);
+                            existing.PerDiem = row.NumberValues.GetValueOrDefault("Per Diem", 0m);
+
+                            var update = await CourtService.UpdateAsync(existing);
+                            if (update)
+                            {
+                                ToastService.ShowSuccess("Court Appreance details updated successfully!");
+                            }
+                            else
+                            {
+                                ToastService.ShowError("Failed to update Court Appreance Record!");
+                            }
+                        }
+                    }
+                    break;
+
+                default: // General Fees
+                    if (row.EntityId == null || row.EntityId == Guid.Empty)
+                    {
+                        var gen = new FeesCatalogDto
+                        {
+                            Id = Guid.NewGuid(),
+                            Code = row.Values["Code"],
+                            LabelId = Guid.Parse( row.Values["LabelId"]),
+                            Unit = row.Values["Unit"],
+                            Rate = row.NumberValues.GetValueOrDefault("Rate (USD)", 0m),
+                            Category = SelectedCategory,
+                            Label = CaseformList.FirstOrDefault(e => e.Id == Guid.Parse(row.Values["LabelId"]))!.Name ?? " ",
+
+                        };
+                        var newgen = await FeesCatalogService.AddAsync(gen);
+                        if (newgen.HasValue)
+                        {
+                            ToastService.ShowSuccess("Fees details created successfully!");
+                            row.EntityId = gen.Id;
+                        }
+                        else
+                        {
+                            ToastService.ShowError("Failed to create Fees Record!");
+                        }
+
+                    }
+                    else
+                    {
+                        var existing = GeneralFees.FirstOrDefault(f => f.Id == row.EntityId);
+                        if (existing != null)
+                        {
+                            existing.Code = row.Values["Code"];
+                            existing.Label = row.Values["Label"];
+                            existing.Unit = row.Values["Unit"];
+                            existing.Rate = row.NumberValues.GetValueOrDefault("Rate (USD)", 0m);
+                            existing.Category = SelectedCategory;
+
+                            var update = await FeesCatalogService.UpdateAsync(existing);
+                            if (update)
+                            {
+                                ToastService.ShowSuccess("Fees details updated successfully!");
+                            }
+                            else
+                            {
+                                ToastService.ShowError("Failed to update Fees Record!");
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving row: {ex.Message}");
+        }
+    }
+
+
+    private async Task RemoveRow(FeeRow row)
+    {
+        if (row.EntityId != null && row.EntityId != Guid.Empty)
+            await DeleteEntityAsync(row);
+
+        FeeRows.Remove(row);
+    }
+
+    private async Task DeleteEntityAsync(FeeRow row)
+    {
+        if (SelectedCategory == "Attorney Billing — Roster & Defaults")
+            await AttorneyService.DeleteAsync(row.EntityId);
+        else if (SelectedCategory == "Court Appearance & Attorney Fees by County")
+            await CourtService.DeleteAsync(row.EntityId);
+        else
+            await FeesCatalogService.DeleteAsync(row.EntityId);
+    }
+
+    public class FeeRow
+    {
+        public Guid EntityId { get; set; }
+        public Dictionary<string, string> Values { get; set; } = new();
+        public Dictionary<string, decimal> NumberValues { get; set; } = new();
+    }
+
+    private void OnNumberInputChanged(FeeRow row, string key, ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), out var value))
+            row.NumberValues[key] = value;
+    }
+}

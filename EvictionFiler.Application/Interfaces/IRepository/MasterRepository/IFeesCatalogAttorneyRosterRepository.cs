@@ -1,5 +1,6 @@
 ﻿
 
+using EvictionFiler.Application.DTOs;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using System.Collections.Generic;
@@ -9,12 +10,12 @@ namespace EvictionFiler.Application.Interfaces.IRepository
 {
     public interface IFeesCatalogAttorneyRosterRepository
     {
-        Task<List<FeesCatalogAttorneyRoster>> GetAllAsync();
-        Task<FeesCatalogAttorneyRoster?> GetByIdAsync(int id);
+        Task<List<FeesCatalogAttorneyRosterDto>> GetAllAsync();
+        Task<FeesCatalogAttorneyRoster?> GetByIdAsync(Guid id);
         // Task AddAsync(FeesCatalogAttorneyRoster entity);
-        Task<int> AddAsync(FeesCatalogAttorneyRoster entity);
+        Task<Guid> AddAsync(FeesCatalogAttorneyRoster entity);
 
-        Task<bool> UpdateAsync(FeesCatalogAttorneyRoster entity);
-        Task DeleteAsync(int id);
+        Task<bool> UpdateAsync(FeesCatalogAttorneyRosterDto entity);
+        Task DeleteAsync(Guid id);
     }
 }

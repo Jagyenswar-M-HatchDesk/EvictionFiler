@@ -1,5 +1,6 @@
 ﻿
 
+using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IServices.Master;
@@ -18,21 +19,21 @@ namespace EvictionFiler.Application.Services.Master
             _repository = repository;
         }
 
-        public async Task<List<FeesCatalogCourtAppearance>> GetAllAsync() =>
+        public async Task<List<FeesCatalogCourtAppearanceDto>> GetAllAsync() =>
             await _repository.GetAllAsync();
 
-        public async Task<FeesCatalogCourtAppearance?> GetByIdAsync(int id) =>
+        public async Task<FeesCatalogCourtAppearance?> GetByIdAsync(Guid id) =>
             await _repository.GetByIdAsync(id);
 
-        public async Task<int?> AddAsync(FeesCatalogCourtAppearance entity)
+        public async Task<Guid?> AddAsync(FeesCatalogCourtAppearance entity)
         {
             return await _repository.AddAsync(entity);
         }
-        public async Task<bool> UpdateAsync(FeesCatalogCourtAppearance entity)
+        public async Task<bool> UpdateAsync(FeesCatalogCourtAppearanceDto entity)
         { 
             return await _repository.UpdateAsync(entity);
         }
-        public async Task DeleteAsync(int id) =>
+        public async Task DeleteAsync(Guid id) =>
             await _repository.DeleteAsync(id);
     }
 }

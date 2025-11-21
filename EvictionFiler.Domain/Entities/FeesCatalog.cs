@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using EvictionFiler.Domain.Entities.Master;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvictionFiler.Domain.Entities
@@ -8,12 +9,11 @@ namespace EvictionFiler.Domain.Entities
     public class FeesCatalog
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         [Required]
         [MaxLength(50)]
         public string Code { get; set; } = string.Empty;
-        [Required]
-        [MaxLength(255)]
+       
         public string Label { get; set; } = string.Empty;
         [Required]
         [MaxLength(50)]
@@ -22,5 +22,9 @@ namespace EvictionFiler.Domain.Entities
         [Column(TypeName = "decimal(10, 2)")]
         public decimal Rate { get; set; }
         public string? Category { get; set; }
+        
+        public Guid? LabelId { get; set; }
+        [ForeignKey("LabelId")]
+        public FormTypes? Form { get; set; }
     }
 }

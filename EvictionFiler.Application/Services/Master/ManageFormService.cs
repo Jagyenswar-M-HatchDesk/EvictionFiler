@@ -77,6 +77,48 @@ namespace EvictionFiler.Application.Services.Master
             };
         }
 
+        public async Task<List<FormAddEditViewModelDto>> GetAllFormByCategoryAsync(string searchTerm)
+        {
+            var query = _repository.GetAllQuerable
+                (
+                x => x.IsDeleted != true,
+                    x => x.CaseType,
+                    x => x.Category
+               );
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var lowerSearch = searchTerm.ToLower();
+                query = query.Where(form =>
+                       (form.CaseType.Name ?? "").ToLower().Contains(lowerSearch) ||
+                      (form.Category.Name ?? "").ToLower().Contains(lowerSearch) ||
+                       (form.Name ?? "").ToLower().Contains(lowerSearch)
+
+                 );
+
+            }
+
+
+            var totalCount = query.Count();
+
+            var forms = query
+        .OrderBy(c => c.Id)
+        .Select(x => new FormAddEditViewModelDto
+        {
+            Name = x.Name,
+            CaseType = x.CaseType,
+            CaseTypeId = x.CaseTypeId,
+            CaseTypeName = x.CaseType != null ? x.CaseType.Name : "-",
+            CategoryName = x.Category != null ? x.Category.Name : "-",
+            HTML = x.HTML,
+            CreatedOn = x.CreatedOn,
+            Id = x.Id,
+        })
+        .ToList();
+
+            return forms;
+        }
+
         public async Task<bool> CreateForm(FormAddEditViewModelDto dto)
         {
         
