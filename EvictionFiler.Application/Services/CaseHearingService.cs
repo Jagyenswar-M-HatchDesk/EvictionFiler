@@ -90,27 +90,27 @@ namespace EvictionFiler.Application.Services
             ? dto.CaseTypes?.Name
             : dto.LegalCase?.CaseType?.Name ?? string.Empty,
 
-                // Judge — prefer Hearing Judge, fallback to Court Judge
-                Judge = dto.Judge
-        ?? dto.Courts?.Judge
-        ?? string.Empty,
+        //        // Judge — prefer Hearing Judge, fallback to Court Judge
+        //        Judge = dto.Judge
+        //?? dto.Courts?.Judge
+        //?? string.Empty,
 
-                // Court part — from CourtPart or fallback to Court.Part
-                CourtPart =
-        dto.CourtPartId != null
-            ? dto.CourtParts?.Name
-            : dto.Courts?.Part ?? string.Empty,
+        //        // Court part — from CourtPart or fallback to Court.Part
+        //        CourtPart =
+        //dto.CourtPartId != null
+        //    ? dto.CourtParts?.Part
+        //    : dto.Courts?.Part ?? string.Empty,
 
-                // Case status name — only if present
-                CaseStatusName =
-        dto.CaseStatusId != null
-            ? dto.CaseStatus?.Name
-            : string.Empty,
+        //        // Case status name — only if present
+        //        CaseStatusName =
+        //dto.CaseStatusId != null
+        //    ? dto.CaseStatus?.Name
+        //    : string.Empty,
 
-                // Room number — prefer explicit RoomNo, fallback to Court’s RoomNo
-                RoomNo = dto.RoomNo
-        ?? dto.Courts?.RoomNo
-        ?? string.Empty,
+        //        // Room number — prefer explicit RoomNo, fallback to Court’s RoomNo
+        //        RoomNo = dto.RoomNo
+        //?? dto.Courts?.RoomNo
+        //?? string.Empty,
 
                 // County name — safe for null CountyId
                 CountyName =
@@ -151,16 +151,16 @@ namespace EvictionFiler.Application.Services
             ? dto.CaseTypes?.Name
             : dto.LegalCase?.CaseType?.Name ?? string.Empty,
 
-                // Judge — prefer Hearing Judge, fallback to Court Judge
-                Judge = dto.Judge
-        ?? dto.Courts?.Judge
-        ?? string.Empty,
+        //        // Judge — prefer Hearing Judge, fallback to Court Judge
+        //        Judge = dto.Judge
+        //?? dto.Courts?.Judge
+        //?? string.Empty,
 
-                // Court part — from CourtPart or fallback to Court.Part
-                CourtPart =
-        dto.CourtPartId != null
-            ? dto.CourtParts?.Name
-            : dto.Courts?.Part ?? string.Empty,
+        //        // Court part — from CourtPart or fallback to Court.Part
+        //        CourtPart =
+        //dto.CourtPartId != null
+        //    ? dto.CourtParts?.Part
+        //    : dto.Courts?.Part ?? string.Empty,
 
                 // Case status name — only if present
                 CaseStatusName =
@@ -168,10 +168,10 @@ namespace EvictionFiler.Application.Services
             ? dto.CaseStatus?.Name
             : string.Empty,
 
-                // Room number — prefer explicit RoomNo, fallback to Court’s RoomNo
-                RoomNo = dto.RoomNo
-        ?? dto.Courts?.RoomNo
-        ?? string.Empty,
+        //        // Room number — prefer explicit RoomNo, fallback to Court’s RoomNo
+        //        RoomNo = dto.RoomNo
+        //?? dto.Courts?.RoomNo
+        //?? string.Empty,
 
                 // County name — safe for null CountyId
                 CountyName =

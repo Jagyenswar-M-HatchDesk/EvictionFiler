@@ -14,7 +14,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 
         public Task<Guid?> AddCourtAsync(CourtDto courtInfosDto);
         public Task<CourtDto> GetCourtByIdAsync(Guid id);
-        public Task UpdateCourtAsync(CourtDto dto);
+        public Task<bool> UpdateCourtAsync(CourtDto dto);
         public Task DeleteCourtAsync(Guid id);
 
         Task<PaginationDto<CourtDto>> GetAllCourtsAsync(

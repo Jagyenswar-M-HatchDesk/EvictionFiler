@@ -27,7 +27,7 @@ namespace EvictionFiler.Infrastructure.Repositories
         }
         public async Task<PaginationDto<Courts>> GetPagedCourtsAsync(int pageNumber, int pageSize, string searchTerm)
         {
-            var query = _mainDbContext.Courts.Include(e=>e.County).AsQueryable();
+            var query = _mainDbContext.Courts.Include(e=>e.County).Include(e=>e.CourtParts).AsQueryable();
 
             // Optional search
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -63,12 +63,12 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Address = courtInfosDto.Address,
                 Phone = courtInfosDto.Phone,
                 Notes = courtInfosDto.Notes,
-                RoomNo = courtInfosDto.RoomNo,
-                ConferenceId = courtInfosDto.ConferenceId,
-                CallIn = courtInfosDto.CallIn,
-                VirtualLink = courtInfosDto.VirtualLink,
-                Judge = courtInfosDto.Judge,
-                Part = courtInfosDto.Part,
+                //RoomNo = courtInfosDto.RoomNo,
+                //ConferenceId = courtInfosDto.ConferenceId,
+                //CallIn = courtInfosDto.CallIn,
+                //VirtualLink = courtInfosDto.VirtualLink,
+                //Judge = courtInfosDto.Judge,
+                //Part = courtInfosDto.Part,
                 CountyId = courtInfosDto.CountyId,
             };
 
@@ -85,10 +85,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 
         }
-        public async Task UpdateCourtAsync(CourtDto dto)
+        public async Task<bool> UpdateCourtAsync(CourtDto dto)
         {
             var entity = await _mainDbContext.Courts.FindAsync(dto.Id);
-            if (entity == null) return;
+            if (entity == null) return false;
 
             entity.Court = dto.Court;
             entity.Address = dto.Address;
@@ -96,7 +96,10 @@ namespace EvictionFiler.Infrastructure.Repositories
             entity.Notes = dto.Notes;
 
             _mainDbContext.Courts.Update(entity);
-            await _mainDbContext.SaveChangesAsync();
+            var result =await _mainDbContext.SaveChangesAsync();
+            if(result > 0) return true;
+
+            return false;
         }
         public async Task DeleteCourtAsync(Guid id)
         {

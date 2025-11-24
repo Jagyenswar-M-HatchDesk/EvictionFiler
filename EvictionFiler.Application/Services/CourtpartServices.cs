@@ -3,15 +3,20 @@ using EvictionFiler.Application.DTOs.CourtPart;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Services
 {
-    public class CourtService:ICourtService
+    public class CourtpartServices : ICourtpartServices
     {
-        private readonly ICourtRepository _courtRepository;
+        private readonly ICourtpartRepository _courtRepository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public CourtService(ICourtRepository courtRepository, IUnitOfWork unitOfWork)
+        public CourtpartServices(ICourtpartRepository courtRepository, IUnitOfWork unitOfWork)
         {
             _courtRepository = courtRepository;
             _unitOfWork = unitOfWork;
@@ -19,34 +24,31 @@ namespace EvictionFiler.Application.Services
 
 
 
-        public async Task<List<CourtDto>> GetAllCourtDataAsync()
+        public async Task<List<CourtPartDto>> GetAllCourtDataAsync()
         {
             //    return await _courtRepository.GetAllCourtDataAsync();
 
             var courts = await _courtRepository.GetAllCourtDataAsync(); // returns List<CourtInfos>
 
             // map entities to DTOs
-            var courtDtos = courts.Select(c => new CourtDto
+            var courtDtos = courts.Select(c => new CourtPartDto
             {
 
                 Id = c.Id,
-                Court = c.Court,
-                Address = c.Address,
-                Phone = c.Phone,
-                Notes = c.Notes,
-                //CallIn = c.CallIn,
-                //ConferenceId = c.ConferenceId,
-                //RoomNo = c.RoomNo,
-                //Judge = c.Judge,
-                //Part = c.Part,
-                //VirtualLink = c.VirtualLink,
-                
+
+                CallIn = c.CallIn,
+                ConferenceId = c.ConferenceId,
+                RoomNo = c.RoomNo,
+                Judge = c.Judge,
+                Part = c.Part,
+                VirtualLink = c.VirtualLink,
+
             }).ToList();
 
             return courtDtos;
         }
 
-        public async Task<PaginationDto<CourtDto>> GetAllCourtsAsync(
+        public async Task<PaginationDto<CourtPartDto>> GetAllCourtsAsync(
     int pageNumber,
     int pageSize,
     string searchTerm,
@@ -56,37 +58,22 @@ namespace EvictionFiler.Application.Services
             // Since your repository doesn't filter by user yet, we’ll ignore userId and isAdmin for now
             var result = await _courtRepository.GetPagedCourtsAsync(pageNumber, pageSize, searchTerm);
 
-            var dtoList = result.Items.Select(c => new CourtDto
+            var dtoList = result.Items.Select(c => new CourtPartDto
             {
                 Id = c.Id,
-                Court = c.Court,
-                Address = c.Address,
-                Phone = c.Phone,
-                Notes = c.Notes,
-                //CallIn = c.CallIn,
-                //ConferenceId = c.ConferenceId,
-                //RoomNo = c.RoomNo,
-                //Judge = c.Judge,
-                //Part = c.Part,
-                //VirtualLink = c.VirtualLink,
-                CountyName = c.County != null ? c.County.Name : string.Empty,
-                CountyId = c.CountyId != null ? c.CountyId.Value : Guid.Empty,
-                CourtPart = c.CourtParts.Select(e=> new CourtPartDto
-                {
-                    Id = e.Id,
-                    CallIn = e.CallIn,
-                    ConferenceId = e.ConferenceId,
-                    RoomNo = e.RoomNo,
-                    Part = e.Part,
-                    Judge = e.Judge,
-                    Tollfree = e.Tollfree,
-                    VirtualLink = e.VirtualLink,
-                    CourtId = e.CourtId,
-                }).ToList(),
+
+                CallIn = c.CallIn,
+                ConferenceId = c.ConferenceId,
+                RoomNo = c.RoomNo,
+                Judge = c.Judge,
+                Part = c.Part,
+                VirtualLink = c.VirtualLink,
+                Court = c.Courts != null ? c.Courts.Court! : string.Empty!,
+                County = c.Courts != null ? c.Courts.County!.Name : string.Empty,
 
             }).ToList();
 
-            return new PaginationDto<CourtDto>
+            return new PaginationDto<CourtPartDto>
             {
                 Items = dtoList,
                 TotalCount = result.TotalCount
@@ -145,35 +132,46 @@ namespace EvictionFiler.Application.Services
         //        };
         //    }
 
-        public async Task<Guid?> AddCourtAsync(CourtDto courtInfosDto)
+        public async Task<Guid?> AddCourtAsync(CourtPartDto courtInfosDto)
         {
             return await _courtRepository.AddCourtAsync(courtInfosDto);
 
 
 
         }
-        public async Task<CourtDto> GetCourtByIdAsync(Guid id)
+        public async Task<bool> AddCourtPartListAsync(List<CourtPartDto> courtInfosDto)
+        {
+            return await _courtRepository.AddCourtPartListAsync(courtInfosDto);
+
+
+
+        }
+        public async Task<CourtPartDto> GetCourtByIdAsync(Guid id)
         {
             var court = await _courtRepository.GetCourtByIdAsync(id);
             if (court == null) return null;
-            return new CourtDto
+            return new CourtPartDto
             {
                 Id = court.Id,
-                Court = court.Court,
-                Address = court.Address,
-                Phone = court.Phone,
-                Notes = court.Notes,
-                //RoomNo = court.RoomNo,
-                //Judge = court.Judge,
-                //VirtualLink = court.VirtualLink,
-                //ConferenceId = court.ConferenceId,
-                //CallIn = court.CallIn,
-                //Part = court.Part,
+
+                RoomNo = court.RoomNo,
+                Judge = court.Judge,
+                VirtualLink = court.VirtualLink,
+                ConferenceId = court.ConferenceId,
+                CallIn = court.CallIn,
+                Part = court.Part,
+                Court = court.Courts != null ? court.Courts.Court! : string.Empty!,
+                County = court.Courts != null ? court.Courts.County!.Name : string.Empty,
             };
         }
-        public async Task<bool> UpdateCourtAsync(CourtDto dto)
+        public async Task UpdateCourtAsync(CourtPartDto dto)
         {
-            return await _courtRepository.UpdateCourtAsync(dto);
+            await _courtRepository.UpdateCourtAsync(dto);
+        }
+
+        public async Task<bool> SaveCourtPartList(List<CourtPartDto> dto, Guid id)
+        {
+            return await _courtRepository.SaveCourtPartListAsync(dto, id);
         }
         public async Task DeleteCourtAsync(Guid id)
         {

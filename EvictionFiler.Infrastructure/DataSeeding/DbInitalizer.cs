@@ -55,7 +55,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				await SeedClientRoles(context);
 				await SeedCaseStatus(context);
 				await SeedCounty(context);
-				await SeedCourtPart(context);
+				await SeedCategory(context);
                 await context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -76,6 +76,17 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             }
         }
 
+        private static async Task SeedCategory(MainDbContext context)
+        {
+            var casetypes = InitialDataGenerator.GetCategory();
+            foreach (var type in casetypes)
+            {
+                if (context.MstCategories.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstCategories.AddAsync(type);
+                }
+            }
+        }
 
         private static async Task SeedCaseTypes(MainDbContext context)
 		{
@@ -302,17 +313,17 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             }
         }
 
-        private static async Task SeedCourtPart(MainDbContext context)
-        {
-            var casetypes = InitialDataGenerator.GetCourtPart();
-            foreach (var type in casetypes)
-            {
-                if (context.MstCourtPart.FirstOrDefault(d => d.Name == type.Name) == null)
-                {
-                    await context.MstCourtPart.AddAsync(type);
-                }
-            }
-        }
+        //private static async Task SeedCourtPart(MainDbContext context)
+        //{
+        //    var casetypes = InitialDataGenerator.GetCourtPart();
+        //    foreach (var type in casetypes)
+        //    {
+        //        if (context.MstCourtPart.FirstOrDefault(d => d.Name == type.Name) == null)
+        //        {
+        //            await context.MstCourtPart.AddAsync(type);
+        //        }
+        //    }
+        //}
 
         private static async Task SeedCaseprograms(MainDbContext context)
 		{

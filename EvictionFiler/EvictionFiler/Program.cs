@@ -128,6 +128,8 @@ builder.Services.AddScoped<IAdditionalOccupantsService, AdditionalOccupantsServi
 builder.Services.AddScoped<IAdditionalTenantsRepository, AdditionalTenantsRepository>();
 builder.Services.AddScoped<ICaseTypeHPDRepository, CaseTypeHPDRepository>();
 builder.Services.AddScoped<IAdditionalTenantService, AdditionalTenantService>();
+builder.Services.AddScoped<ICourtpartServices, CourtpartServices>();
+builder.Services.AddScoped<ICourtpartRepository, CourtpartRepository>();
 //builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 //    .AddIdentityCookies();
 

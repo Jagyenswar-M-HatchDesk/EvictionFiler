@@ -1,13 +1,15 @@
-﻿using EvictionFiler.Domain.Entities.Base.Base;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace EvictionFiler.Domain.Entities.Master
+namespace EvictionFiler.Application.DTOs.CourtPart
 {
-	public class CourtPart : DeletableBaseEntity
-	{
+    public class CourtPartDto
+    {
         public Guid Id { get; set; }
-
+       
         public string Tollfree { get; set; } = string.Empty;
 
         public string Part { get; set; } = string.Empty;
@@ -16,9 +18,8 @@ namespace EvictionFiler.Domain.Entities.Master
         public string CallIn { get; set; } = string.Empty;
         public string ConferenceId { get; set; } = string.Empty;
         public Guid? CourtId { get; set; }
-        [ForeignKey("CourtId")]
-        public Courts? Courts { get; set; }
         public string Judge { get; set; } = string.Empty;
-
+        public string Court { get; set; } = string.Empty;
+        public string County { get; set; } = string.Empty;
     }
 }

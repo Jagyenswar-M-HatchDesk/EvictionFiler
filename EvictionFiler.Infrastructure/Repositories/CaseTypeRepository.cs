@@ -41,7 +41,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<CourtPart>> GetAllCourtPart()
         {
-            return await _context.MstCourtPart.ToListAsync();
+            return await _context.CourtPart.ToListAsync();
         }
 
         public async Task<List<CaseTypeHPDDto>> GetAllCaseTypeHPD()

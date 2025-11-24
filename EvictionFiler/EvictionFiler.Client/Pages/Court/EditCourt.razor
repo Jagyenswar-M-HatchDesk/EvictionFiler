@@ -1,11 +1,14 @@
 ﻿@using EvictionFiler.Application.DTOs.CourtDto
+@using EvictionFiler.Application.DTOs.CourtPart
 @using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Client.SpinnerService
 @using EvictionFiler.Domain.Entities.Master
 @inject ICourtService courtService
+@inject ICourtpartServices courtpartService
 @inject ICaseTypeRepository CaseTypeRepository
 @inject SpinnerService spinnerservice
+@inject IJSRuntime JS
 
 <style>
     .offcanvas.show {
@@ -23,113 +26,271 @@
 </style>
 
 <div class="offcanvas offcanvas-end show border-start shadow" tabindex="-1" id="editCourt"
-style="visibility:@(IsVisible ? "visible" : "hidden"); transition: transform 0.9s ease-in-out; min-width:55%;"
+style="visibility:@(IsVisible ? "visible" : "hidden"); transition: transform 0.9s ease-in-out; min-width:50%;"
 aria-labelledby="editCourtLabel">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="editCourtLabel">Edit Court</h5>
         <button type="button" class="btn-close text-reset" @onclick="Hide"></button>
     </div>
 
-    <div class="offcanvas-body">
-        <EditForm Model="@courtDto" OnValidSubmit="SubmitCourt" FormName="EditCourt">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
+    <div class="offcanvas-body p-0">
+        <div class="d-flex align-items-center position-relative">
+            @if (activeTab == "court")
+            {
+                <!-- CLIENT FORM -->
+                <div class="form-wrapper @(activeTab != string.Empty ? "hidden" : "") flex-grow-1 p-3 pe-5">
+                    <EditForm Model="@courtDto" OnValidSubmit="SubmitCourt" FormName="CreateCourt">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
 
-            <div class="row">
-                <div class=" col-6 mb-3">
-                    <label class="form-label color-text">Court Name</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa fa-landmark color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="courtDto.Court" placeholder="Enter Court Name" />
-                    </div>
-                </div>
-                <div class=" col-6 mb-3">
-                    <label class="form-label color-text">Phone</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa fa-phone color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="courtDto.Phone" placeholder="Enter Phone" />
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-4 mb-3">
-                    <label class="form-label color-text">Part</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa fa-landmark color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="courtDto.Part" placeholder="Enter Part" />
-                    </div>
-                </div>
-                <div class="col-4 mb-3">
-                    <label class="form-label color-text">Room No.</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-solid fa-door-open color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="courtDto.RoomNo" placeholder="Enter Room Number" />
-                    </div>
-                </div>
-                <div class="col-4 mb-3">
-                    <label class="form-label color-text">Virtual Link</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-solid fa-tv color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="courtDto.VirtualLink" placeholder="Enter Virtual Link" />
-                    </div>
-                </div>
-            </div>
+                        <div class="row">
+                            <div class="col-4 mb-3">
+                                <label class="form-label color-text required-label">County</label>
+                                <InputSelect class="form-select" @bind-Value="courtDto.CountyId" style="cursor:pointer;">
+                                    <option value="emptyGuid">-- Select Type --</option>
+                                    @foreach (var l in AllCounty)
+                                    {
+                                        <option value="@l.Id">@l.Name</option>
+                                    }
+                                </InputSelect>
 
-            <div class="row">
-                <div class="col-7 mb-3">
-                    <label class="form-label color-text">Address</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa fa-location-dot color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="courtDto.Address" placeholder="Enter Address" />
-                    </div>
-                </div>
-                <div class="col-5 mb-3">
-                    <label class="form-label color-text">Toll-Free</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa fa-phone color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="courtDto.CallIn" placeholder="Enter Toll-Free Number " />
-                    </div>
-                </div>
-            </div>
+                            </div>
+                            <div class=" col-8 mb-3">
+                                <label class="form-label color-text required-label">Court Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa fa-landmark color-text"></i></span>
+                                    <InputText class="form-control" @bind-Value="courtDto.Court" placeholder="Enter Court Name" />
+                                </div>
+                            </div>
 
-            <div class="row">
-                <div class="col-4 mb-3">
-                    <label class="form-label color-text">ConferenceId</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-solid fa-tv color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="courtDto.ConferenceId" placeholder="Enter ConferenceId" />
-                    </div>
-                </div>
+                        </div>
 
-                <div class="col-4 mb-3">
-                    <label class="form-label color-text">Judge</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-solid fa-gavel color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="courtDto.Judge" placeholder="Enter Judge Name" />
+                        <div class="row">
+                            <div class="col-7 mb-3">
+                                <label class="form-label color-text">Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa fa-location-dot color-text"></i></span>
+                                    <InputText class="form-control" @bind-Value="courtDto.Address" placeholder="Enter Address" />
+                                </div>
+                            </div>
+                            <div class=" col-5 mb-3">
+                                <label class="form-label color-text">Phone</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa fa-phone color-text"></i></span>
+                                    <InputText class="form-control" @bind-Value="courtDto.Phone" placeholder="Enter Phone" />
+                                </div>
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="mb-4">
+                            <label class="form-label color-text">Notes</label>
+                            <InputTextArea class="form-control" @bind-Value="courtDto.Notes" placeholder="Enter Notes" />
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary btn-lg" style="background-color:#1F365D;">Submit</button>
+                        </div>
+                    </EditForm>
+
+                    <div class="vertical-buttons d-flex flex-column align-items-center position-absolute end-0 top-50 translate-middle-y ">
+                        <button class="vertical-tab-button @(activeTab == "courtpart" ? "active-vertical" : "")" @onclick="@(() => SetActiveTab("courtpart"))">Part</button>
+
                     </div>
                 </div>
-                <div class="col-4 mb-3">
-                    <label class="form-label color-text">County</label>
-                    <InputSelect class="form-select" @bind-Value="courtDto.CountyId" style="cursor:pointer;">
-                        <option value="">-- Select Type --</option>
-                        @foreach (var l in AllCounty)
+            }
+
+        </div>
+        @if (activeTab == "courtpart")
+        {
+            <div class="overlay-form overlay-landlord p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="color-text fw-bold mb-0">COURT PART INFORMATION</h5>
+                    <div>
+                        <button class="btn btn-outline-secondary fw-semibold me-2"
+                                @onclick="@BackToPreviousTab">
+                            ←
+                        </button>
+                        @* <button class="btn btn-outline-secondary fw-semibold me-2" @onclick="@(() => SetActiveTab(string.Empty))">←</button> *@
+                        <button class="btn bg-navy text-white" style="font-size:14px; background:#1F365D;" @onclick="ToggleLandlordForm">@GetToggleButtonText()</button>
+                        @if (showCourtPartForm)
                         {
-                            <option value="@l.Id">@l.Name</option>
+                            <button type="submit" form="landlordForm" class="btn bg-navy text-white me-2" style="font-size:14px; background:#1F365D;margin-left:10px;">Save</button>
                         }
-                    </InputSelect>
-
+                    </div>
                 </div>
-            </div>
-            <div class="mb-4">
-                <label class="form-label color-text">Notes</label>
-                <InputTextArea class="form-control" @bind-Value="courtDto.Notes" placeholder="Enter Notes" />
-            </div>
 
-            <div class="d-flex justify-content-end" >
-                <button type="submit" class="btn btn-primary btn-lg" style="background-color:#1F365D;">Save</button>
+                @if (showCourtPartForm)
+                {
+                    <EditForm Id="landlordForm" Model="@courtdto" OnValidSubmit="SaveLandlordAsync">
+
+                        <DataAnnotationsValidator />
+
+                        <div class="row">
+                            <div class="col-3 mb-3">
+                                <label class="form-label color-text">Part</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa fa-landmark color-text"></i></span>
+                                    <InputText class="form-control" @bind-Value="courtdto.Part" placeholder="Enter Part" />
+                                </div>
+                            </div>
+                            <div class="col-4 mb-3">
+                                <label class="form-label color-text">Room No.</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-door-open color-text"></i></span>
+                                    <InputText class="form-control" @bind-Value="courtdto.RoomNo" placeholder="Enter Room" />
+                                </div>
+                            </div>
+                            <div class="col-5 mb-3">
+                                <label class="form-label color-text">Judge</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-gavel color-text"></i></span>
+                                    <InputText class="form-control" @bind-Value="courtdto.Judge" placeholder="Enter Judge Name" />
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label color-text">ConferenceId</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-tv color-text"></i></span>
+                                    <InputText class="form-control" @bind-Value="courtdto.ConferenceId" placeholder="Enter ConferenceId" />
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label color-text">Call In #</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-gavel color-text"></i></span>
+                                    <InputText class="form-control" @bind-Value="courtdto.CallIn" placeholder="Enter Call In Number" />
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                        <div class="row">
+
+                            <div class="col-5 mb-3">
+                                <label class="form-label color-text">Toll-Free #</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-gavel color-text"></i></span>
+                                    <InputText class="form-control" @bind-Value="courtdto.Tollfree" placeholder="Enter Tollfree Number" />
+                                </div>
+                            </div>
+
+                            <div class="col-7 mb-3">
+                                <label class="form-label color-text">Virtual Link</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-tv color-text"></i></span>
+                                    <InputText class="form-control" @bind-Value="courtdto.VirtualLink" placeholder="Enter Virtual Link" />
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                    </EditForm>
+
+                }
+
+                @if (!showCourtPartForm)
+                {
+                    <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
+                        <table class="table table-bordered mt-4" style="min-width: 1000px;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Part</th>
+                                    <th>Room No.</th>
+                                    <th>Virtual Link</th>
+                                    <th>Call In#</th>
+                                    <th>Toll Free#</th>
+                                    <th>Conference Id</th>
+                                    <th>Judge</th>
+                                    <th class="sticky">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (saveCourtpartList.Any())
+                                {
+                                    @foreach (var l in saveCourtpartList)
+                                    {
+                                        <tr>
+                                            <td>@(string.IsNullOrWhiteSpace(l.Part) ? "-" : l.Part)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(l.RoomNo) ? "-" : l.RoomNo)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(l.VirtualLink) ? "-" : l.VirtualLink)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(l.CallIn) ? "-" : l.CallIn)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(l.Tollfree) ? "-" : l.Tollfree)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(l.ConferenceId) ? "-" : l.ConferenceId)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(l.Judge) ? "-" : l.Judge)</td>
+                                            <td class="sticky">
+                                                <i class="fa-solid fa-pen-to-square text-navy me-3 " @onclick="() => ShowEditCourtPart(l)" style="cursor: pointer;" title="Edit"></i>
+                                                @* <i class="fa-solid fa-trash-can text-danger " @onclick=" ()=>DeleteClient(client.Id ,isAdmin)" style="cursor: pointer;" title="Delete"></i> *@
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="7" class="text-muted">No Court Part added yet.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                }
+
             </div>
-        </EditForm>
+        }
     </div>
+    @if (!showCourtPartForm)
+    {
+        <div class="sticky-footer bg-white border-top p-3 d-flex justify-content-between gap-2">
+            @if (!IsCourtFormValid())
+            {
+                <div class="text-danger mt-2">
+                    Please fill all required Court fields to enable Submit.
+                </div>
+            }
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary px-4 fw-semibold" @onclick="CheckCancel">Cancel</button>
+
+                @if (showCancelPopup)
+                {
+                    <div class="modal-backdrop fade show "></div>
+                    <div class="modal fade show d-block" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Confirm Cancel</h5>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Do you want to cancel?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-secondary" @onclick="() => showCancelPopup = false">No</button>
+                                    <button class="btn btn-navy" @onclick="ConfirmCancel">Yes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <button class="btn bg-navy text-white px-4 fw-semibold" style="font-size:14px; background:#1F365D;"
+                        disabled="@(!IsCourtFormValid())"
+                        @onclick="SubmitCourt">
+                    Submit
+                </button>
+            </div>
+        </div>
+    }
+
+
 </div>
 
 @code {
@@ -150,13 +311,16 @@ aria-labelledby="editCourtLabel">
                 Address = model.Address,
                 Phone = model.Phone,
                 Notes = model.Notes,
-                Part = model.Part,
-                RoomNo = model.RoomNo,
-                ConferenceId = model.ConferenceId,
-                VirtualLink = model.VirtualLink,
-                Judge = model.Judge,
-                CallIn = model.CallIn
+            // Part = model.Part,
+            // RoomNo = model.RoomNo,
+            // ConferenceId = model.ConferenceId,
+            // VirtualLink = model.VirtualLink,
+            // Judge = model.Judge,
+            // CallIn = model.CallIn
+                CountyId = model.CountyId
             };
+
+        saveCourtpartList = model.CourtPart;
         IsVisible = true;
         StateHasChanged();
         spinnerservice.Hide();
@@ -167,22 +331,245 @@ aria-labelledby="editCourtLabel">
         IsVisible = false;
         StateHasChanged();
     }
+    private int? editingIndex = null;
+
+    private void ShowEditCourtPart(CourtPartDto part)
+    {
+        editingIndex = saveCourtpartList.IndexOf(part);
+        if (editingIndex >= 0)
+        {
+            courtdto = new CourtPartDto
+            {
+                Id = saveCourtpartList[(int)editingIndex].Id,
+                Part = saveCourtpartList[(int)editingIndex].Part,
+                RoomNo = saveCourtpartList[(int)editingIndex].RoomNo,
+                ConferenceId = saveCourtpartList[(int)editingIndex].ConferenceId,
+                CallIn = saveCourtpartList[(int)editingIndex].CallIn,
+                Tollfree = saveCourtpartList[(int)editingIndex].Tollfree,
+                VirtualLink = saveCourtpartList[(int)editingIndex].VirtualLink,
+                Judge = saveCourtpartList[(int)editingIndex].Judge,
+                CourtId = saveCourtpartList[(int)editingIndex].CourtId
+            };
+
+            showCourtPartForm = true;
+        }
+    }
+
 
     private async Task SubmitCourt()
     {
         spinnerservice.Show();
 
         // Call your service to update court
-        await courtService.UpdateCourtAsync(courtDto);
-
-        if (OnSubmit.HasDelegate)
+        var result = await courtService.UpdateCourtAsync(courtDto);
+        if(result)
         {
-            await OnSubmit.InvokeAsync(courtDto);
+            var partresult = await courtpartService.SaveCourtPartList(saveCourtpartList, courtDto.Id);
+            if(partresult)
+            {
+                if (OnSubmit.HasDelegate)
+                {
+                    await OnSubmit.InvokeAsync(courtDto);
+                }
+
+                Hide();
+                await Task.Delay(500);
+            }
         }
 
-        Hide();
-        await Task.Delay(500);
         spinnerservice.Hide();
+    }
+
+    private string activeTab = "court";
+    private Stack<string> tabHistory = new();
+    private bool showCourtPartForm = false;
+    private bool showCancelPopup = false;
+    private List<CourtPartDto> saveCourtpartList = new();
+    private CourtPartDto courtdto = new();
+    private string LatestLandLordCode = "";
+    private List<TypeOfOwner> TypeOwnerList = new();
+    private List<LandlordType> LandLordTypeList = new();
+    private List<State> StatesList = new();
+    private string LatestTenantCode = "";
+
+
+    // public async void Show(CourtDto model = null)
+    // {
+    //     spinnerservice.Show();
+    //     await Task.Delay(200);
+    //     courtDto = model ?? new CourtDto();
+    //     IsVisible = true;
+    //     AllCounty = await CaseTypeRepository.GetAllCounty();
+    //     StateHasChanged();
+    //     spinnerservice.Hide();
+    // }
+    private void ToggleLandlordForm() => showCourtPartForm = !showCourtPartForm;
+    private string GetToggleButtonText() => (activeTab == "landlord" && showCourtPartForm)
+      ? "Cancel"
+      : "Add New";
+
+    private void BackToPreviousTab()
+    {
+        if (tabHistory.Count > 0)
+        {
+            activeTab = tabHistory.Pop();
+
+            showCourtPartForm = false;
+
+
+            // Reset forms if needed
+            if (activeTab == "courtpart") showCourtPartForm = false;
+
+        }
+        else
+        {
+            activeTab = string.Empty;
+        }
+
+        StateHasChanged();
+    }
+    private void ConfirmCancel()
+    {
+        Hide();
+
+        // Popup close
+        showCancelPopup = false;
+
+        StateHasChanged();
+    }
+    private void CheckCancel()
+    {
+        // Agar koi bhi field filled hai to modal dikhao
+        if (!string.IsNullOrWhiteSpace(courtDto.Court) ||
+            !string.IsNullOrWhiteSpace(courtDto.Phone) ||
+            !string.IsNullOrWhiteSpace(courtDto.Address) ||
+            !string.IsNullOrWhiteSpace(courtDto.CountyName))
+
+        {
+            showCancelPopup = true;
+        }
+        else
+        {
+
+            courtDto = new CourtDto();
+            Hide();
+        }
+    }
+
+    private Task SaveLandlordAsync()
+    {
+
+        if (editingIndex == null)
+        {
+            saveCourtpartList.Add(courtdto);
+
+        }
+        else
+        {
+            var index = saveCourtpartList.FindIndex(x => x.Id == courtdto.Id);
+            if (index >= 0)
+            {
+                saveCourtpartList[index] = courtdto;
+            }
+        }
+
+        courtdto = new();
+        showCourtPartForm = false;
+        return Task.CompletedTask;
+    }
+    private void FormatPhone(ChangeEventArgs e, string target)
+    {
+        var phoneValue = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(phoneValue))
+            return;
+
+        var formattedPhone = ApplyMask(phoneValue);
+
+        switch (target)
+        {
+
+            case "landlord":
+                courtdto.Tollfree = formattedPhone;
+                break;
+
+        }
+    }
+    private string ApplyMask(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return string.Empty;
+
+        // Sirf digits rakho
+        var digits = new string(input.Where(char.IsDigit).ToArray());
+
+        // Max 10 digits lo
+        if (digits.Length > 10)
+            digits = digits.Substring(0, 10);
+
+        if (digits.Length <= 3)
+            return digits;
+        else if (digits.Length <= 6)
+            return $"{digits.Substring(0, 3)}-{digits.Substring(3)}";
+        else
+            return $"{digits.Substring(0, 3)}-{digits.Substring(3, 3)}-{digits.Substring(6)}";
+    }
+
+    
+
+    // private async Task SubmitCourt()
+    // {
+    //     spinnerservice.Show();
+
+    //     var courtid = await courtService.AddCourtAsync(courtDto);
+    //     if (courtid != null && courtid != Guid.Empty)
+    //     {
+    //         foreach (var part in saveCourtpartList)
+    //         {
+    //             part.CourtId = courtid;
+    //         }
+    //         var courtpartid = await courtpartService.AddCourtPartListAsync(saveCourtpartList);
+    //         if (courtpartid)
+    //         {
+    //             if (OnSubmit.HasDelegate)
+    //             {
+    //                 await OnSubmit.InvokeAsync(courtDto);
+    //             }
+
+    //             Hide();
+    //             await Task.Delay(500);
+    //         }
+    //     }
+
+
+    //     spinnerservice.Hide();
+    // }
+
+    private async Task SetActiveTab(string tab)
+    {
+        // Step 1: Client tab complete hona chahiye for Landlord
+        if (tab == "courtpart")
+        {
+            if (courtDto == null || string.IsNullOrWhiteSpace(courtDto.Court) || (courtDto.CountyId == null && courtDto.CountyId == Guid.Empty))
+            {
+                await JS.InvokeVoidAsync("alert", "Please complete the Client form before moving to Landlord.");
+                return;
+            }
+        }
+
+
+        if (!string.IsNullOrEmpty(activeTab))
+        {
+            tabHistory.Push(activeTab);
+        }
+        // All checks passed: change tab
+        activeTab = tab;
+    }
+
+    private bool IsCourtFormValid()
+    {
+        return
+            !string.IsNullOrWhiteSpace(courtDto.Court) &&
+            (courtDto.CountyId != null && courtDto.CountyId != Guid.Empty);
     }
 }
 
