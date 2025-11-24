@@ -341,6 +341,7 @@ namespace EvictionFiler.Application.Services
             {
                 Id = x.Id,
                 FirstName = x.FirstName,
+                TenantCode = x.TenantCode,
                 LastName = x.LastName,
             })
              .ToList();
