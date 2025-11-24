@@ -61,15 +61,15 @@ namespace EvictionFiler.Domian.Enums
     public enum StepHPD
     {
         CaseAndclient = 0,
-        Attorney = 1,
-        CaseInfo = 2,
-        Party = 3,
-        Building = 4,
-        Petitioner = 5,
-        Respondent= 6,
-        Appearance = 7,
-        Relief = 8,
-        Billing = 9,
+        //Attorney = 1,
+        CaseInfo = 1,
+        Party = 2,
+        Building = 3,
+        Petitioner = 4,
+        Respondent= 5,
+        Appearance = 6,
+        Relief = 7,
+        Billing = 8,
 
     }
 

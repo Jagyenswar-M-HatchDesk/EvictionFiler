@@ -22,7 +22,8 @@
 @inject ILegalCaseService _service
 @inject ICaseHearingService _caseService
 @inject IDashBoardRepository DashBoardRepository;
-@inject NavigationManager Nav
+@inject SpinnerService spinnerservice
+@inject NavigationManager navManager
 @attribute [Authorize]
 <style>
     :root {
@@ -1003,9 +1004,35 @@
     private string? loggedInUserId;
     private bool isAdmin = false;
     private bool isAuth = false;
+        private string successMessage;
     private string? loginUser { get; set; }
     protected override async Task OnInitializedAsync()
     {
+
+       
+        var uri = new Uri(navManager.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.TryGetValue("success", out var isSuccess) && isSuccess == "true")
+        {
+            successMessage = "Case Added successfully!";
+            await Task.Delay(1000);
+            successMessage = string.Empty;
+
+            navManager.NavigateTo("dashboard", forceLoad: true);
+        }
+        else if (query.TryGetValue("edit", out var isEdit) && isEdit == "true")
+        {
+            successMessage = "Case updated successfully!";
+            StateHasChanged();
+
+            await Task.Delay(2000);
+            successMessage = string.Empty;
+            StateHasChanged();
+
+            navManager.NavigateTo("/dashboard", forceLoad: false);
+        }
+
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         isAuth = authState.User.Identity?.IsAuthenticated ?? false;
         var user = authState.User;
@@ -1072,7 +1099,7 @@
         if (queryParams.Any())
             url += "?" + string.Join("&", queryParams);
 
-        Nav.NavigateTo(url);
+        navManager.NavigateTo(url);
 
         // var filters = new CaseFilterDto
         // {

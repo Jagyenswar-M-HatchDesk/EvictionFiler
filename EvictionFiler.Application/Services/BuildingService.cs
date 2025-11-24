@@ -233,6 +233,7 @@ namespace EvictionFiler.Application.Services
                 if (entity.RegulationStatusId != appartment.RegulationStatusId)  entity.RegulationStatusId = appartment.RegulationStatusId;
                 if (entity.BuildingUnits != appartment.BuildingUnits) entity.BuildingUnits = appartment.BuildingUnits;
                 if (entity.BuildingTypeId != appartment.BuildingTypeId) entity.BuildingTypeId = appartment.BuildingTypeId;
+                if (entity.PremiseTypeId != appartment.PremiseTypeId) entity.PremiseTypeId = appartment.PremiseTypeId;
                 if (entity.RegistrationStatusId != appartment.RegistrationStatusId) entity.RegistrationStatusId = appartment.RegistrationStatusId;
 
                 _repository.UpdateAsync(entity);

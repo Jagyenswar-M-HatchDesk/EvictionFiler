@@ -1,9 +1,11 @@
-﻿using EvictionFiler.Application.DTOs.CourtDto;
+﻿using EvictionFiler.Application.DTOs.ClientDto;
+using EvictionFiler.Application.DTOs.CourtDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using Polly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,6 +86,31 @@ namespace EvictionFiler.Infrastructure.Repositories
             return await _mainDbContext.Courts.FindAsync(id);
 
 
+        }
+
+        public async Task<List<CourtDto>> SearchCourt(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return new List<CourtDto>();
+
+            searchTerm = searchTerm.Trim().ToLower();
+
+           
+
+            var court = await _mainDbContext.Courts
+                .Where(e =>
+                    (e.Court != null && e.Court.ToLower().Contains(searchTerm))
+                   
+                )
+                .Select(e => new CourtDto
+                {
+                    Id = e.Id,
+                    Court = e.Court,
+                   
+                })
+                .ToListAsync();
+
+            return court ?? new List<CourtDto>();
         }
         public async Task UpdateCourtAsync(CourtDto dto)
         {

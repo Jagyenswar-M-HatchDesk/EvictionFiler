@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Application.DTOs.CourtDto;
+﻿using EvictionFiler.Application.DTOs.ClientDto;
+using EvictionFiler.Application.DTOs.CourtDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
@@ -39,6 +40,7 @@ namespace EvictionFiler.Application.Services
                 Judge = c.Judge,
                 Part = c.Part,
                 VirtualLink = c.VirtualLink,
+                CountyId = c.CountyId,
                 
             }).ToList();
 
@@ -166,5 +168,11 @@ namespace EvictionFiler.Application.Services
         {
             await _courtRepository.DeleteCourtAsync(id);
         }
+        public async Task<List<CourtDto>> SearchCourt(string searchTerm)
+        {
+            var courts= await _courtRepository.SearchCourt(searchTerm);
+            return courts;
+        }
+
     }
 }
