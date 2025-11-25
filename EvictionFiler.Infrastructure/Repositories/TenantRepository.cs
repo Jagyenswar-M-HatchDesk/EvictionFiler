@@ -1,4 +1,6 @@
-﻿using EvictionFiler.Application.DTOs.OccupantDto;
+﻿using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.DTOs.OccupantDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IUserRepository;
@@ -7,6 +9,7 @@ using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
+using Polly;
 using System.Linq;
 
 namespace EvictionFiler.Infrastructure.Repositories
@@ -151,6 +154,57 @@ namespace EvictionFiler.Infrastructure.Repositories
 			return await _dbContext.MstLanguages.ToListAsync();
 		}
 
+        public async Task<(EditToLandlordDto landlord, EditToBuildingDto building)>
+GetLandlordBuildingByTenantAsync(Guid tenantId)
+        {
+            var data = await _dbContext.Tenants
+                .Where(t => t.Id == tenantId)
+                .Select(t => new
+                {
+                    Landlord = new EditToLandlordDto
+                    {
+                        Id = t.Building.Landlord.Id,
+                        FirstName = t.Building.Landlord.FirstName,
+                        LastName = t.Building.Landlord.LastName,
+                        LandLordCode = t.Building.Landlord.LandLordCode
+                    },
+                    Building = new EditToBuildingDto
+                    {
+                        Id = t.Building.Id,
+                        BuildingCode = t.Building.BuildingCode,
+                        BuildingUnits = t.Building.BuildingUnits,
+                        Address1 = t.Building.Address1,
+                        PremiseTypeId = t.Building.PremiseTypeId,
+                        RegistrationStatusId = t.Building.RegistrationStatusId,
+                    }
+                })
+                .FirstOrDefaultAsync();
 
-	}
+            return (data.Landlord, data.Building);
+        }
+
+        public async Task<List<EditToTenantDto>> GetTenantsByLandlordIdAsync(Guid landlordId)
+        {
+            // Step 1: Get Building Ids for the selected landlord
+            var buildingIds = await _dbContext.Buildings
+                .Where(b => b.LandlordId == landlordId && b.IsDeleted != true)
+                .Select(b => b.Id)
+                .ToListAsync();
+
+            // Step 2: Get tenants that belong to those buildings
+            return await _dbContext.Tenants
+                .Where(t => buildingIds.Contains(t.BuildinId.Value) && t.IsDeleted != true)
+                .Select(t => new EditToTenantDto
+                {
+                    Id = t.Id,
+                    FirstName = t.FirstName,
+                    LastName = t.LastName,
+                    TenantCode = t.TenantCode,
+                    BuildingId = t.BuildinId
+                })
+                .ToListAsync();
+        }
+
+
+    }
 }

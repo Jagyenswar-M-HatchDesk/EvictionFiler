@@ -25,8 +25,10 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<List<EditToTenantDto>> GetAlltenant();
         Task<Guid?> AddOnlyTenantfromCase(CreateToTenantDto dto);
         Task<bool> UpdateTenantfromCase(EditToTenantDto tenants);
-
+        Task<(EditToLandlordDto landlord, EditToBuildingDto building)>
+    GetLandlordBuildingByTenantAsync(Guid tenantId);
 
         Task<Guid?> AddTenantfromCase(CreateToTenantDto t);
+        Task<List<EditToTenantDto>> GetTenantsByLandlordIdAsync(Guid landlordId);
     }
 }

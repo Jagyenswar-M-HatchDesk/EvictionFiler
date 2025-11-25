@@ -159,9 +159,9 @@ namespace EvictionFiler.Application.Services
             return newtenant;
         }
 
-        public async Task<List<EditToTenantDto>> SearchTenantsAsync(string query , Guid ClientId)
+        public async Task<List<EditToTenantDto>> SearchTenantsAsync(string query, Guid ClientId)
         {
-            return await _repo.SearchTenantAsync(query , ClientId);
+            return await _repo.SearchTenantAsync(query, ClientId);
         }
 
         public async Task<EditToTenantDto> GetByIdAsync(Guid id)
@@ -291,7 +291,7 @@ namespace EvictionFiler.Application.Services
             }
 
 
-            var code = $"LL{nextNumber.ToString().PadLeft(10, '0')}";
+            var code = $"TT{nextNumber.ToString().PadLeft(10, '0')}";
             nextNumber++;
 
             var tenant = new Tenant
@@ -300,7 +300,7 @@ namespace EvictionFiler.Application.Services
                 TenantCode = code,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
-               
+
             };
 
 
@@ -320,7 +320,7 @@ namespace EvictionFiler.Application.Services
             var entity = await _repo.GetAsync(tenants.Id);
             if (entity != null)
             {
-              
+
                 if (entity.FirstName != tenants.FirstName) entity.FirstName = tenants.FirstName;
                 if (entity.LastName != tenants.LastName) entity.LastName = tenants.LastName;
 
@@ -385,8 +385,8 @@ namespace EvictionFiler.Application.Services
 
             _repo.UpdateAsync(entity);
             var result = await _unitOfWork.SaveChangesAsync();
-            if (result > 0) return true; 
-            
+            if (result > 0) return true;
+
             return false;
         }
 
@@ -431,6 +431,21 @@ namespace EvictionFiler.Application.Services
         {
             var lastTenantCode = await _repo.GetLasttenantCodeAsync();
             return lastTenantCode!;
+        }
+
+        public async Task<(EditToLandlordDto landlord, EditToBuildingDto building)>
+    GetLandlordBuildingByTenantAsync(Guid tenantId)
+        {
+
+            var lastTenant = await _repo.GetLandlordBuildingByTenantAsync(tenantId);
+            return lastTenant;
+
+        }
+
+        public async Task<List<EditToTenantDto>> GetTenantsByLandlordIdAsync(Guid landlordId)
+        {
+            var lastTenant = await _repo.GetTenantsByLandlordIdAsync(landlordId);
+            return lastTenant;
         }
     }
 }
