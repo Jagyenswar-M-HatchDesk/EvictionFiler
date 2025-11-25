@@ -56,6 +56,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				await SeedCaseStatus(context);
 				await SeedCounty(context);
 				await SeedCategory(context);
+				await SeedUnitType(context);
                 await context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -72,6 +73,18 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 if (context.MstPaymentMethods.FirstOrDefault(d => d.Name == type.Name) == null)
                 {
                     await context.MstPaymentMethods.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedUnitType(MainDbContext context)
+        {
+            var casetypes = InitialDataGenerator.GetUnitTypes();
+            foreach (var type in casetypes)
+            {
+                if (context.MstUnits.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstUnits.AddAsync(type);
                 }
             }
         }

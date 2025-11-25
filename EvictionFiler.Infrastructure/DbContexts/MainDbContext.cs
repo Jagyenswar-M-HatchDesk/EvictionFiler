@@ -67,6 +67,7 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<FeesCatalogCourtAppearance> FeesCatalogCourtAppearances { get; set; }
         public DbSet<FeesCatalogAttorneyRoster> FeesCatalogAttorneyRosters { get; set; }
         public DbSet<CaseHearing> CaseHearings { get; set; }
+        public DbSet<Unit> MstUnits { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

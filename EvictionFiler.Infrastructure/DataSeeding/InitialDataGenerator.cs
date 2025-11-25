@@ -27,7 +27,20 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             {
                 new BilingType() { Name = "Hourly ($/hr)", CreatedOn = now },
                 new BilingType() { Name = "Flat Rate", CreatedOn = now },
-                
+
+            };
+        }
+
+        public static IEnumerable<Unit> GetUnitTypes()
+        {
+            var now = DateTime.UtcNow;
+            return new List<Unit>
+            {
+                new Unit() { Name = "item", CreatedOn = now },
+                new Unit() { Name = "hour", CreatedOn = now },
+                new Unit() { Name = "flat", CreatedOn = now },
+                new Unit() { Name = "page", CreatedOn = now },
+
             };
         }
 
