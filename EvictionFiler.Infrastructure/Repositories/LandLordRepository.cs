@@ -47,13 +47,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 				.Select(l => l.LandLordCode)
 				.FirstOrDefaultAsync();
 		}
-		public async Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query)
+		public async Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query , Guid clientId)
 		{
 			query = query?.Trim().ToLower() ?? "";
 
 			var landlords = await _mainDbContext.LandLords.Include(e=>e.State).Include(e=>e.TypeOfOwner)
 				.Where(l =>
-					//l.ClientId == clientId &&                
+					l.ClientId == clientId &&
 					l.IsDeleted != true &&
 					(
 						l.FirstName.ToLower().StartsWith(query) ||

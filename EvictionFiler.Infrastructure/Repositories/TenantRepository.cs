@@ -7,6 +7,7 @@ using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
@@ -79,115 +80,73 @@ namespace EvictionFiler.Infrastructure.Repositories
 			return tenant;
 		}
 
-		public async Task<List<EditToTenantDto>> SearchTenantAsync(string query, Guid clientId)
-		{
-			query = query?.Trim().ToLower() ?? "";
+        public async Task<List<EditToTenantDto>> SearchTenantAsync(string query, Guid clientId)
+        {
+            query = query?.Trim().ToLower() ?? "";
 
-			var tenants = await _dbContext.Tenants
-				.Where(t =>
-					t.BuildinId == clientId && 
-					t.IsDeleted != true && (
-						t.TenantCode.ToLower().Contains(query) ||
-						(t.FirstName + " " + t.LastName).ToLower().StartsWith(query) ||
-						(t.UnitOrApartmentNumber!).ToLower().StartsWith(query) 
-					)
-				)
-				.Select(dto => new EditToTenantDto
-				{
+            // 1️⃣ Get all BuildingIds for the selected Client
+            var buildingIds = await _dbContext.Buildings
+                .Where(b => b.Landlord.ClientId == clientId)
+                .Select(b => b.Id)
+                .ToListAsync();
+
+            // 2️⃣ Now search tenant under those buildings
+            var tenants = await _dbContext.Tenants
+                .Where(t =>
+                    buildingIds.Contains(t.BuildinId.Value) &&
+                    t.IsDeleted != true &&
+                    (
+                        t.TenantCode.ToLower().Contains(query) ||
+                        (t.FirstName + " " + t.LastName).ToLower().StartsWith(query) ||
+                        t.UnitOrApartmentNumber.ToLower().StartsWith(query)
+                    )
+                )
+                .Select(dto => new EditToTenantDto
+                {
                     Id = dto.Id,
                     TenantCode = dto.TenantCode,
                     FirstName = dto.FirstName,
-                    LastName = dto.LastName,
-                    UnitOrApartmentNumber = dto.UnitOrApartmentNumber,
-
-                    RentDueEachMonthOrWeekId = dto.RentDueEachMonthOrWeekId,
-                    MonthlyRent = dto.MonthlyRent,
-                    TenantShare = dto.TenantShare,
-                    SocialServices = dto.SocialServices,
-
-                    IsUnitIllegalId = dto.IsUnitIllegalId,
-                    IsUnitIllegalName = dto.IsUnitIllegal!.Name,
-                    TenancyTypeId = dto.TenancyTypeId,
-                    TenancyTypeName = dto.TenancyType!.Name,
-                    RenewalOffer = dto.RenewalOffer,
-                    SSN = dto.SSN,
-                    Phone = dto.Phone,
-                    Email = dto.Email,
-                    LanguageId = dto.LanguageId,
-                    LanguageName = dto.Language!.Name,
-
-                    HasPossession = dto.HasPossession,
-                    HasRegulatedTenancy = dto.HasRegulatedTenancy,
-
-                    OtherOccupants = dto.OtherOccupants,
-
-                    TenantRecord = dto.TenantRecord,
-                    HasPriorCase = dto.HasPriorCase,
-                    BuildingId = dto.BuildinId,
+                    LastName = dto.LastName
                 })
-				.ToListAsync();
+                .ToListAsync();
 
-			return tenants;
-		}
-
-
+            return tenants;
+        }
 
 
-		public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? buildingId)
-		{
-			
-			var tenants = await _dbContext.Tenants
-		.Include(a => a.Language).Include(e => e.IsUnitIllegal).Include(e => e.TenancyType).Include(e => e.AddTenants)
-		.Where(t => t.BuildinId == buildingId && t.IsDeleted != true)
-		.Select(dto => new EditToTenantDto
-		{
-			Id = dto.Id,
-			TenantCode = dto.TenantCode,
-			FirstName = dto.FirstName,
-			LastName = dto.LastName,
-			UnitOrApartmentNumber = dto.UnitOrApartmentNumber,
 
-			RentDueEachMonthOrWeekId = dto.RentDueEachMonthOrWeekId,
-			MonthlyRent = dto.MonthlyRent,
-			TenantShare = dto.TenantShare,
-			SocialServices = dto.SocialServices,
+       
 
-			IsUnitIllegalId = dto.IsUnitIllegalId,
-			IsUnitIllegalName = dto.IsUnitIllegal!.Name,
-			TenancyTypeId = dto.TenancyTypeId,
-			TenancyTypeName = dto.TenancyType!.Name,
-			RenewalOffer = dto.RenewalOffer,
-			SSN = dto.SSN,
-			Phone = dto.Phone,
-			Email = dto.Email,
-			LanguageId = dto.LanguageId,
-			LanguageName = dto.Language!.Name,
+        public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? clientId)
+        {
+            // 1️⃣ Get BuildingIds for the selected Client
+            var buildingIds = await _dbContext.Buildings
+                .Where(b => b.Landlord.ClientId == clientId)
+                .Select(b => b.Id)
+                .ToListAsync();
 
-			HasPossession = dto.HasPossession,
-			HasRegulatedTenancy = dto.HasRegulatedTenancy,
+            // 2️⃣ Get Tenants under those buildings
+            var tenants = await _dbContext.Tenants
+                .Where(t =>
+                    t.IsDeleted != true &&
+                    t.BuildinId != null &&
+                    buildingIds.Contains(t.BuildinId.Value)
+                )
+                .Select(t => new EditToTenantDto
+                {
+                    Id = t.Id,
+                    TenantCode = t.TenantCode,
+                    FirstName = t.FirstName,
+                    LastName = t.LastName
+                })
+                .ToListAsync();
 
-			OtherOccupants = dto.OtherOccupants,
-
-			TenantRecord = dto.TenantRecord,
-			HasPriorCase = dto.HasPriorCase,
-			BuildingId = dto.BuildinId,
-			AdditioalTenants = dto.AddTenants
-				.Select(o => new AddtionalTenantDto
-				{
-					Id = o.Id,
-					FirstName = o.FirstName,
-					LastName = o.LastName,
-					TenantId = o.TenantId,
-					IsVisible = true
-				}).ToList()
-		}).ToListAsync();
+            return tenants;
+        }
 
 
-			return tenants;
-		}
 
-
-		public async Task<List<Language>> GetAllLanguage()
+        public async Task<List<Language>> GetAllLanguage()
 		{
 			return await _dbContext.MstLanguages.ToListAsync();
 		}

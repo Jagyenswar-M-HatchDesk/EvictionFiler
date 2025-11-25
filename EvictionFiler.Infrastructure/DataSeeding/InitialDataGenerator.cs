@@ -354,6 +354,8 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new PremiseType() { Name = "Two Family", CreatedOn = now },
                 new PremiseType() { Name = "Three Family", CreatedOn = now },
                 new PremiseType() { Name = "Four Family", CreatedOn = now },
+                 new PremiseType() { Name = "Multiple Dwelling", CreatedOn = now },
+                  new PremiseType() { Name = "Other", CreatedOn = now },
             };
         }
 

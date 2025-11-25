@@ -12,12 +12,13 @@ namespace EvictionFiler.Application.DTOs
 {
     public class IntakeModel : DeletableBaseEntity
     {
-        public Guid Id { get; set; }
+        //public Guid Id { get; set; }
         //[Required(ErrorMessage = "Client is required")]
         public Guid? ClientId { get; set; }
         public Guid? CourtId { get; set; }
+        public Guid? CountyId { get; set; }
 
-        public string Selectedclient { get; set; }
+        public string ?Selectedclient { get; set; }
         public string Status { get; set; }
         public string ClientName { get; set; }
         public string ClientAddress { get; set; }
@@ -173,6 +174,8 @@ namespace EvictionFiler.Application.DTOs
         public string? TravelExpense { get; set; }
         public BilingType? BilingType { get; set; }
         public Guid? AppearanceTypeId { get; set; }
+
+        public Guid? PremiseTypeId { get; set; }
 
         public Guid? AppearanceTypePerdiemId { get; set; }
 

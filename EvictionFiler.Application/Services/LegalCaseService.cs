@@ -118,6 +118,7 @@ namespace EvictionFiler.Application.Services
                     legalCases.Id = Guid.NewGuid();
                     legalCases.Casecode = await _repository.GenerateCaseCodeAsync();
                     legalCases.ClientId = legalCase.ClientId;
+                    legalCases.TenantId = legalCase.TenantId;
                     legalCases.CaseTypeId = legalCase.CaseTypeId;
                     legalCases.Attrney = legalCase.Attrney;
                     legalCases.AttrneyContactInfo = legalCase.AttrneyContactInfo;
