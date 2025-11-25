@@ -300,6 +300,7 @@ namespace EvictionFiler.Application.Services
                 TenantCode = code,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
+                BuildinId = dto.BuildingId,
 
             };
 
@@ -323,6 +324,7 @@ namespace EvictionFiler.Application.Services
 
                 if (entity.FirstName != tenants.FirstName) entity.FirstName = tenants.FirstName;
                 if (entity.LastName != tenants.LastName) entity.LastName = tenants.LastName;
+                if (entity.BuildinId != tenants.BuildingId) entity.BuildinId = tenants.BuildingId;
 
             }
 
