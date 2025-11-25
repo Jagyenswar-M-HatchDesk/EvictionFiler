@@ -131,6 +131,7 @@ builder.Services.AddScoped<ICaseTypeHPDRepository, CaseTypeHPDRepository>();
 builder.Services.AddScoped<IAdditionalTenantService, AdditionalTenantService>();
 builder.Services.AddScoped<ICourtpartServices, CourtpartServices>();
 builder.Services.AddScoped<ICourtpartRepository, CourtpartRepository>();
+builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 //builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 //    .AddIdentityCookies();
 

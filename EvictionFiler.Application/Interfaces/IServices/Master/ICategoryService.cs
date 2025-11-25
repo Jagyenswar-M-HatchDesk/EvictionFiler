@@ -14,6 +14,8 @@ namespace EvictionFiler.Application.Interfaces.IServices.Master
 
         Task<EditToCategoryDto?> GetCategoryByIdAsync(Guid? id);
         Task<bool> DeleteCategoryAsync(Guid id);
-        
+        Task<List<EditToCategoryDto>> GetAllCategory();
+
+
     }
 }
