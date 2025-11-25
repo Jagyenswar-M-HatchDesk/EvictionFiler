@@ -123,7 +123,7 @@ namespace EvictionFiler.Application.Services
                     legalCases.Attrney = legalCase.Attrney;
                     legalCases.AttrneyContactInfo = legalCase.AttrneyContactInfo;
                     legalCases.AttrneyEmail = legalCase.AttrneyEmail;
-                    legalCases.CourtLocation = legalCase.CourtLocation;
+                    legalCases.CourtLocationId = legalCase.CourtLocationId;
                     legalCases.CourtRoom = legalCase.CourtRoom;
                     legalCases.Index = legalCase.Index;
                     legalCases.County = legalCase.County;
@@ -155,7 +155,7 @@ namespace EvictionFiler.Application.Services
                     legalCases.Attrney = legalCase.Attrney;
                     legalCases.AttrneyContactInfo = legalCase.AttrneyContactInfo;
                     legalCases.AttrneyEmail = legalCase.AttrneyEmail;
-                    legalCases.CourtLocation = legalCase.CourtLocation;
+                    legalCases.CourtLocationId = legalCase.CourtLocationId;
                     legalCases.CourtRoom = legalCase.CourtRoom;
                     legalCases.Index = legalCase.Index;
                     legalCases.County = legalCase.County;
@@ -465,7 +465,7 @@ namespace EvictionFiler.Application.Services
                     Attrney = caseEntity.Attrney,
                     AttrneyContactInfo = caseEntity.AttrneyContactInfo,
                     AttrneyEmail = caseEntity.AttrneyEmail,
-                    CourtLocation = caseEntity.CourtLocation,
+                    CourtLocationId = caseEntity.CourtLocationId,
                     CourtRoom = caseEntity.CourtRoom,
                     Index = caseEntity.Index,
                     County = caseEntity.County,
@@ -715,7 +715,7 @@ namespace EvictionFiler.Application.Services
                 existingCase.Attrney = legalCase.Attrney;
                 existingCase.AttrneyContactInfo = legalCase.AttrneyContactInfo;
                 existingCase.AttrneyEmail = legalCase.AttrneyEmail;
-                existingCase.CourtLocation = legalCase.CourtLocation;
+                existingCase.CourtLocationId = legalCase.CourtLocationId;
                 existingCase.CourtRoom = legalCase.CourtRoom;
                 existingCase.Index = legalCase.Index;
                 existingCase.County = legalCase.County;

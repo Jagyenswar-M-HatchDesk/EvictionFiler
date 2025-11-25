@@ -176,8 +176,9 @@ namespace EvictionFiler.Domain.Entities
         public ICollection<ReportingTypePerDiem> ReportingTypePerDiems { get; set; } = new List<ReportingTypePerDiem>();
 
 
-        [MaxLength(100)]
-        public string? CourtLocation { get; set; }
+        public Guid? CourtLocationId { get; set; }
+        [ForeignKey("CourtLocationId")]
+        public Courts? CourtLocation { get; set; }
 
         public string? County { get; set; }
         public string? Index { get; set; }
