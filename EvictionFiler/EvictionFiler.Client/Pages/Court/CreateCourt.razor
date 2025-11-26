@@ -19,6 +19,7 @@
     }
 
     .offcanvas {
+        animation: slideIn 0.5s ease forwards;
         transform: translateX(100%);
         width: 500px !important;
     }
@@ -64,13 +65,58 @@
         content: " *";
         color: red;
     }
+
+    .drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        height: 100vh;
+        width: 700px;
+        max-width: 70%;
+        background: #fff;
+        border-left: 1px solid #ddd;
+        box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+        transform: translateX(100%);
+        transition: transform 0.45s ease-in-out;
+        z-index: 1055;
+    }
+
+        .drawer.open {
+            transform: translateX(0);
+        }
+
+    .drawer-hidden {
+        display: none;
+    }
+
+    .overlay-form {
+        animation: slideIn 0.5s ease forwards;
+        background-color: white;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0%);
+        }
+    }
+
 </style>
+
 
 <div class="offcanvas offcanvas-end show border-start shadow" tabindex="-1" id="createCourt"
      style="visibility:@(IsVisible ? "visible" : "hidden"); transition: transform 0.9s ease-in-out; min-width: 50%;"
      aria-labelledby="createCourtLabel">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="createCourtLabel">Add New Court</h5>
+        <h3 class="offcanvas-title" id="createCourtLabel">Add New Court</h3>
         <button type="button" class="btn-close text-reset" @onclick="Hide"></button>
     </div>
 
@@ -247,8 +293,8 @@
                                     <th>Part</th>
                                     <th>Room No.</th>
                                     <th>Virtual Link</th>
-                                    <th>Call In#</th>
-                                    <th>Toll Free#</th>
+                                    <th>Call In #</th>
+                                    <th>Toll-free#</th>
                                     <th>Conference Id</th>
                                     <th>Judge</th>
                                     <th class="sticky">Actions</th>
@@ -357,7 +403,6 @@
     public async void Show(CourtDto model = null)
     {
         spinnerservice.Show();
-        await Task.Delay(200);
         courtDto = model ?? new CourtDto();
         IsVisible = true;
         AllCounty = await CaseTypeRepository.GetAllCounty();

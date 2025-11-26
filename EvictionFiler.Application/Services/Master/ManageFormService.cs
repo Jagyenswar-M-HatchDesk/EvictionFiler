@@ -102,8 +102,9 @@ namespace EvictionFiler.Application.Services.Master
             Id = x.Id,
             CategoryId = x.CategoryId,
             UnitId = x.UnitId,
-            Code = x.Code,
-            Rate = x.Rate,
+            Code = x.Code ?? "-",
+            Rate = x.Rate ?? "-" ,
+            UnitName = x.Units != null ? x.Units.Name : "-",
             
         })
         .ToList();
