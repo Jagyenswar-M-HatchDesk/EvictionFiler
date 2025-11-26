@@ -4262,6 +4262,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     {
         searchTenantText = e.Value?.ToString() ?? "";
 
+
         // Empty → reset full list
         if (string.IsNullOrWhiteSpace(searchTenantText))
         {
@@ -4404,10 +4405,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
     private void OnTenantInputFocus()
     {
-        // 👉 Agar landlord ke tenants 0 the → dropdown hide
+        
         if (!tenantLoadedFromLandlord)
         {
-            filteredTenant = new List<EditToTenantDto>();   // clear dropdown
+            filteredTenant = new List<EditToTenantDto>();   
         }
 
         StateHasChanged();
@@ -4424,23 +4425,21 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         searchTenantText = $"{tenant.FirstName} {tenant.LastName}";
         legalcaseDto.TenantId = tenant.Id;
         legalcaseDto.TenantName = searchTenantText;
-
-        filteredTenant = null; 
-
-        // Fetch building + landlord
+        filteredTenant = new List<EditToTenantDto>();
         var data = await _tenantService.GetLandlordBuildingByTenantAsync(tenant.Id);
 
-        // ---- Auto Fill Landlord ----
+
         if (data.landlord != null)
         {
             legalcaseDto.LandlordId = data.landlord.Id;
             legalcaseDto.landlordName = $"{data.landlord.FirstName} {data.landlord.LastName}";
             searchlandlordText = legalcaseDto.landlordName;
 
-            // Dropdown completely hide
-            filteredLandlords = null;
-            showLandlordfields = true; // Don't show search or dropdown
+
+            filteredLandlords = new List<EditToLandlordDto>();
+            showLandlordfields = true;
         }
+
 
         // ---- Auto Fill Building ----
         if (data.building != null)
@@ -4452,19 +4451,15 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
             legalcaseDto.RegistrationStatusTypeId = data.building.RegistrationStatusId;
 
             searchBuildingText = $"{data.building.Address1} / {data.building.BuildingCode}";
-            filteredBuildings = null;
+            filteredBuildings = new List<EditToBuildingDto>();
             selectedbuilding = data.building;
 
-            // ⭐ Make sure ADD form not open
             IsNewBuilding = false;
             showBuildingfields = true;
-
         }
 
         StateHasChanged();
     }
-
-
 
     private async Task SelectTenants()
     {
@@ -4474,9 +4469,6 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         legalcaseDto.TenantId = null;
         legalcaseDto.TenantName = searchTenantText;
         filteredTenant?.Clear();
-
-
-
 
     }
 

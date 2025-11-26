@@ -364,7 +364,7 @@ namespace EvictionFiler.Application.Services
                 if (caseEntity == null)
                     return null;
 
-                if (caseEntity.CaseType.Name == "Holover" || caseEntity.CaseType.Name == "NonPayment" || caseEntity.CaseType.Name == "HPD")
+                if (caseEntity.CaseType.Name == "Holdover" || caseEntity.CaseType.Name == "NonPayment" || caseEntity.CaseType.Name == "HPD")
                 {
                     var intakeModel = new IntakeModel
                     {
