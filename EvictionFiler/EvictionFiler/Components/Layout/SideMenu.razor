@@ -5,6 +5,7 @@
 @using EvictionFiler.Server
 @* @using EvictionFiler.Client.Services *@
  @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using Microsoft.AspNetCore.Components.WebAssembly.Http
 @* @inject SpinnerService SpinnerService *@
 @inject AuthenticationStateProvider AuthenticationStateProvider 
@@ -12,6 +13,8 @@
 @inject NavigationManager Navigation
 @inject HttpClient _httpClient
 @inject IJSRuntime JS
+@inject ProtectedLocalStorage LocalStorage
+
 
 
 
@@ -615,7 +618,7 @@
     private bool showProfileOptions = false;
     Dictionary<string, bool> expandedMenus = new();
     private string userRole = "";
-  
+
 
     public string Name { get; set; }
 
@@ -659,14 +662,120 @@
             expandedMenus[menu] = false;
         }
 
-        expandedMenus["Organisation"] = true;
-        activeMenu = "Tags";
+        // expandedMenus["Organisation"] = true;
+        // activeMenu = "Tags";
         var uri = nav.Uri.ToLower();
 
-        if (uri.EndsWith("/"))
+        if (uri.EndsWith("/dashboard"))
         {
             activeMenu = "Home";
-            expandedMenus["Home"] = false;
+            expandedMenus["Home"] = true;
+        }
+        if (uri.EndsWith("/legalcases") || uri.Contains("/legalcase"))
+        {
+            activeMenu = "ManageCases";
+            expandedMenus["ManageCases"] = true;
+        }
+        if (uri.EndsWith("/users") )
+        {
+            activeMenu = "Users";
+            expandedMenus["Users"] = true;
+        }
+        if (uri.EndsWith("/clients"))
+        {
+            activeMenu = "Client";
+            expandedMenus["Client"] = true;
+        }
+        if (uri.EndsWith("/calender"))
+        {
+            activeMenu = "Calender";
+            expandedMenus["Calender"] = true;
+        }
+        if (uri.EndsWith("/calender"))
+        {
+            activeMenu = "Calender";
+            expandedMenus["Calender"] = true;
+        }
+        if (uri.EndsWith("/attorney"))
+        {
+            activeMenu = "Attorney";
+            expandedMenus["Attorney"] = true;
+        }
+
+        if (uri.EndsWith("/reporting") || uri.Contains("/reporting"))
+        {
+            activeMenu = "Reporting";
+            expandedMenus["Reporting"] = true;
+        }
+        if (uri.EndsWith("/maintenance") || uri.Contains("/maintenance"))
+        {
+            activeMenu = "Maintenance";
+            expandedMenus["Maintenance"] = true;
+            if (uri.EndsWith("/court"))
+            {
+                activeMenu = "Courts";
+            }
+            if (uri.EndsWith("/feescatalog"))
+            {
+                activeMenu = "Fees Catalog";
+            }
+        }
+        if (uri.EndsWith("/drafting") || uri.Contains("/drafting"))
+        {
+            activeMenu = "Drafting";
+            expandedMenus["Drafting"] = true;
+            
+            if (uri.EndsWith("/manage-forms"))
+            {
+                activeMenu = "Manage-Forms";
+            }
+
+            if (uri.EndsWith("/affidavits-of-service"))
+            {
+                activeMenu = "Affidavits";
+            }
+            if (uri.EndsWith("/appeals"))
+            {
+                activeMenu = "Appeals";
+            }
+            if (uri.EndsWith("/hold-over-forms"))
+            {
+                activeMenu = "Hold Over";
+            }
+
+            if (uri.EndsWith("/motions-and-orders-to-show-cause"))
+            {
+                activeMenu = "Motions";
+            }
+            if (uri.EndsWith("/non-military-affidavit-of-investigation"))
+            {
+                activeMenu = "Non-Military";
+            }
+            if (uri.EndsWith("/non-payment-forms"))
+            {
+                activeMenu = "Non-Payment";
+            }
+            if (uri.EndsWith("/notice-of-entry"))
+            {
+                activeMenu = "Notice of Entry";
+            }
+            if (uri.EndsWith("/stipulations"))
+            {
+                activeMenu = "Stipulations";
+            }
+            if (uri.EndsWith("/tenant-forms"))
+            {
+                activeMenu = "Tenant";
+            }
+            if (uri.EndsWith("/warrants"))
+            {
+                activeMenu = "Warrants";
+            }
+        }
+        if (uri.EndsWith("/settings"))
+        {
+            activeMenu = "Settings";
+            expandedMenus["Settings"] = true;
         }
 
     }
@@ -679,12 +788,15 @@
     }
 
 
-    void ToggleMenu(string menu)
+    async Task ToggleMenu(string menu)
     {
         if (!expandedMenus[menu])
             CollapseAll();
 
         expandedMenus[menu] = !expandedMenus[menu];
+
+        await LocalStorage.SetAsync("activeMenu", activeMenu);
+
         switch (menu)
         {
             case "Home":
