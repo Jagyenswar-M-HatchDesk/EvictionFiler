@@ -51,9 +51,11 @@ namespace EvictionFiler.Application.Services
             }
 
             var landlords = await query
-       .OrderByDescending(x => x.CreatedOn)   // optional: latest first
-       .Take(10)
-       .ToListAsync();
+            .OrderBy(x => x.FirstName)
+            .ThenBy(x => x.LastName)
+            .Take(10)
+            .ToListAsync();
+
 
             //var landlords = await query.ToListAsync();
 
