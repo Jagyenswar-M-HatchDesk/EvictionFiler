@@ -50,7 +50,12 @@ namespace EvictionFiler.Application.Services
                 query = query.Where(x => x.CreatedBy == userGuid);
             }
 
-            var landlords = await query.ToListAsync();
+            var landlords = await query
+       .OrderByDescending(x => x.CreatedOn)   // optional: latest first
+       .Take(10)
+       .ToListAsync();
+
+            //var landlords = await query.ToListAsync();
 
             var result = landlords.Select(client => new EditToClientDto
             {

@@ -5,11 +5,13 @@
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.DTOs.CourtDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
 @using EvictionFiler.Application.DTOs.MasterDtos.ApperenceTypeDto
 @using EvictionFiler.Application.DTOs.MasterDtos.CaseTypeHPDDto
 @using EvictionFiler.Application.DTOs.MasterDtos.CaseTypePerDiemDto
+@using EvictionFiler.Application.DTOs.MasterDtos.CountyDto
 @using EvictionFiler.Application.DTOs.MasterDtos.DefenseTypeDto
 @using EvictionFiler.Application.DTOs.MasterDtos.DocumentInstructionPerDiemDto
 @using EvictionFiler.Application.DTOs.MasterDtos.HarassmentTypeDto
@@ -21,11 +23,13 @@
 
 @using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
 @using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Application.Interfaces.IServices.Master
 @using EvictionFiler.Client.Components.Cases
 @* @using EvictionFiler.Client.Jwt *@
 @using EvictionFiler.Domain.Entities
 @using EvictionFiler.Domain.Entities.Master
 @inject IClientRoleRepository ClientRoleRepository
+@inject IPremiseTypeRepository PremiseTypeRepository
 @inject ICaseTypeRepository CaseTypeRepository
 @inject ICaseSubTypeRepository CaseSubTypeRepository
 @inject IRegulationStatusRepository RegulationStatusRepository
@@ -38,6 +42,8 @@
 @inject ILandlordSevice _landlordService
 @inject IBuildingService _buildingService
 @inject ILegalCaseService _legalCaseService
+@inject ICountyService _countyService
+@inject ICourtService _courtService
 @inject ITenantService _tenantService
 @inject IClientService _clientService
 @inject ICaseProgramRepository _caseprogram
@@ -508,7 +514,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <InputText type="text" class="form-control"
                                                        placeholder="Search by client name or code..."
                                                        @bind-value="searchText" @bind-value:after="OnBindClientAfter"
-                                                       @oninput="OnSearchInput" />
+                                                       @oninput="OnSearchInput" @onclick="ShowAllClients" />
 
                                             @if (filteredClients?.Any() == true)
                                             {
@@ -613,51 +619,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
 
             }
-            @if ( Steps[CurrentStep].Name == "Attorney")
-            {
-
-                <div class="row">
-                    <!-- Left side: Attorney Assigning Case -->
-                    <div class="col-md-8">
-                        <div class="card mb-3 shadow-sm rounded-3">
-                            <div class="card-header fw-bold ">
-                                Attorney Assigning Case
-                            </div>
-                            <div class="card-body">
-                                <div class="row g-3">
-                                    <!-- Hiring Attorney / Firm -->
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Hiring Attorney / Firm <span class="text-danger">*</span></label>
-                                        <InputText name="hiringFirm" class="form-control" @bind-Value="legalcaseDto.Attrney" />
-                                        <ValidationMessage For="() => legalcaseDto.Attrney" />
-                                    </div>
-
-                                    <!-- Contact Person -->
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Contact Person</label>
-                                        <InputText name="contactPerson" class="form-control" @bind-Value="legalcaseDto.AttrneyContactInfo" />
-
-                                    </div>
-
-                                    <!-- Phone / Email -->
-                                    <div class="col-md-12">
-                                        <label class="form-label fw-semibold">Phone / Email</label>
-                                        <InputText name="contactPhoneEmail" class="form-control" placeholder="(555) 555-5555 / name@example.com" @bind-Value="legalcaseDto.AttrneyEmail" />
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right side summary -->
-                    <div class="col-md-4">
-                        <TipsSummary />
-                    </div>
-                </div>
-
-
-            }
+            
             @if ( Steps[CurrentStep].Name == "CaseInfo")
             {
                 <div class="row">
@@ -714,6 +676,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <ValidationMessage For="() => legalcaseDto.CaseTypePerDiemId" />
                                         }
 
+
                                     </div>
                                 }
                                 <!-- Case Details -->
@@ -722,8 +685,22 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <!-- Court Location -->
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">Court Location (Borough) <span class="text-danger">*</span></label>
-                                        <InputText type="text" name="courtLocation" class="form-control" @bind-Value="legalcaseDto.CourtLocation" />
-                                        <ValidationMessage For="() => legalcaseDto.CourtLocation" />
+                                        <InputText type="text" name="courtLocation" class="form-control" placeholder="Search by Court Location..."
+                                                   @bind-value="searchCourtText" @oninput="OnSearchCourtInput" @onclick="ShowAllCourts" />
+                                        @if (filteredCourts?.Any() == true)
+                                        {
+                                            <ul class="dropdown-menu show" style="position: absolute; width:45% !important; cursor:pointer;">
+                                                @foreach (var c in filteredCourts)
+                                                {
+                                                    <li class="dropdown-item" @onclick="() => SelectCourt(c)">
+                                                        @c.Court
+                                                    </li>
+
+                                                }
+                                            </ul>
+
+                                        }
+                                        <ValidationMessage For="() => legalcaseDto.CourtLocationId" />
                                     </div>
 
                                     <!-- Part / Room # -->
@@ -741,7 +718,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <!-- County / Borough -->
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">County / Borough <span class="text-danger">*</span></label>
-                                        <InputText type="text" name="county" class="form-control" @bind-Value="legalcaseDto.County" />
+                                        <InputText type="text" name="county" class="form-control" @bind-Value="legalcaseDto.County"  readonly/>
 
                                         <ValidationMessage For="() => legalcaseDto.County" />
                                     </div>
@@ -834,13 +811,70 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">Petitioner / Tenant Name(s) <span class="text-danger">*</span></label>
-                                            <InputText name="petitionerNames" class="form-control" @bind-Value="legalcaseDto.TenantName" placeholder="Enter Tenant Full Name" />
-                                            <div class="invalid-feedback">Enter petitioner/tenant name(s).</div>
+                                            <div class="row mt-2 ">
+                                                @if (showTenantfields)
+                                                {
+                                                    <button class="  m-2" style="background: transparent; border: none; position:absolute ;right:55px"
+                                                            @onclick="CancelTenants">
+                                                        <i class="fa-solid fa-arrow-left"></i> Back
+                                                    </button>
+                                                }
+                                                <div class="col-md-8 position-relative" @onfocusout="HideTenantsDropDown">
+
+                                                    @if (showTenantfields && selectedTenant == null)
+                                                    {
+                                                        <InputText type="text" class="form-control"
+                                                                   placeholder="Enter tenant name"
+                                                                   @bind-value="searchTenantText"
+                                                                   @onblur="saveTenantName" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <InputText type="text" class="form-control "
+                                                                   placeholder="Search by tennat name or code...."
+                                                                   @bind-value="searchTenantText"
+                                                                   @oninput="OnSearchTenantHpdInput" @onblur="saveTenantName" @onclick="ShowAllTenant" @onfocus="OnTenantInputFocus" />
+                                                    }
+
+
+                                                    @if (filteredTenant?.Any() == true)
+                                                    {
+                                                        <ul class="dropdown-menu show " style="position: absolute; width:94% !important; cursor:pointer;">
+                                                            @foreach (var c in filteredTenant)
+                                                            {
+                                                                <li class="dropdown-item" @onclick="() => SelectTenanthpd(c)">
+                                                                    @c.FirstName @c.LastName / @c.TenantCode
+                                                                </li>
+                                                            }
+                                                        </ul>
+                                                    }
+                                                    <ValidationMessage For="() => legalcaseDto.TenantId" />
+                                                </div>
+
+                                                @if (!showTenantfields)
+                                                {
+
+
+                                                    <div class="col-md-1 d-flex justify-content-center align-items-end" style="padding-bottom:10px;">
+                                                        <div>
+                                                            OR
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3 d-flex align-items-end">
+                                                        <button type="button" class="btn" style="background-color:#1F365D !important;height:40px; color:white" @onclick="SelectTenants">+ ADD</button>
+                                                    </div>
+
+                                                }
+
+
+                                            </div>
+
                                         </div>
 
                                         <!-- Respondent / Landlord Names -->
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">Respondent / Landlord Name(s) <span class="text-danger">*</span></label>
+
                                             <div class="row mt-2 ">
                                                 @if (showLandlordfields)
                                                 {
@@ -849,7 +883,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <i class="fa-solid fa-arrow-left"></i> Back
                                                     </button>
                                                 }
-                                                <div class="col-md-12 position-relative" @onfocusout="HideLandlordsDropDown">
+                                                <div class="col-md-8 position-relative" @onfocusout="HideLandlordsDropDown">
 
                                                     @if (showLandlordfields && selectedlandlord == null)
                                                     {
@@ -857,16 +891,13 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                    placeholder="Enter Landlord name"
                                                                    @bind-value="searchlandlordText"
                                                                    @onblur="saveLandLordName" />
-
                                                     }
                                                     else
                                                     {
                                                         <InputText type="text" class="form-control "
                                                                    placeholder="Search by LandLord name or code..."
                                                                    @bind-value="searchlandlordText"
-                                                                   @oninput="OnSearchLandlordInput" @onblur="saveLandLordName" />
-
-
+                                                                   @oninput="OnSearchLandlordInput" @onblur="saveLandLordName" @onclick="ShowAlllandlords" />
                                                     }
 
 
@@ -875,7 +906,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <ul class="dropdown-menu show " style="position: absolute; width:94% !important; cursor:pointer;">
                                                             @foreach (var c in filteredLandlords)
                                                             {
-                                                                <li class="dropdown-item" @onclick="() => SelectLandlord(c)">
+                                                                <li class="dropdown-item" @onclick="() => SelectLandlordhpd(c)">
                                                                     @c.FirstName @c.LastName / @c.LandLordCode
                                                                 </li>
                                                             }
@@ -883,6 +914,21 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     }
                                                     <ValidationMessage For="() => legalcaseDto.LandlordId" />
                                                 </div>
+
+                                                @if (!showLandlordfields)
+                                                {
+
+
+                                                    <div class="col-md-1 d-flex justify-content-center align-items-end" style="padding-bottom:10px;">
+                                                        <div>
+                                                            OR
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3 d-flex align-items-end">
+                                                        <button type="button" class="btn" style="background-color:#1F365D !important;height:40px; color:white" @onclick="SelectLandlords">+ ADD</button>
+                                                    </div>
+
+                                                }
 
 
                                             </div>
@@ -1010,25 +1056,24 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 </label>
 
                                                 <div class="col-6">
-                                                    @if (BuildingTypesList != null && BuildingTypesList.Any())
+                                                    @if (PremiseTypesList != null && PremiseTypesList.Any())
                                                     {
-                                                        <InputRadioGroup @bind-Value="legalcaseDto.BuildingTypeId" class="d-flex flex-wrap">
-                                                            @foreach (var Type in BuildingTypesList)
+                                                        <InputRadioGroup @bind-Value="legalcaseDto.PremiseTypeId" class="d-flex flex-wrap">
+                                                            @foreach (var Type in PremiseTypesList)
                                                             {
                                                                 <div class="col-12">
                                                                     <div class="form-check">
                                                                         <InputRadio class="form-check-input"
                                                                                     id="@($"Type_{Type.Id}")"
-                                                                                    Value="@Type.Id"
-                                                                                    checked="@(legalcaseDto.BuildingTypeId == Type.Id)"
-                                                                                    @onchange="() => OnBuildingTypeChanged(Type.Id)" />
+                                                                                    checked
+                                                                                    Value="@Type.Id" />
                                                                         <label class="form-check-label" for="@($"Type_{Type.Id}")">@Type.Name</label>
                                                                     </div>
                                                                 </div>
                                                             }
                                                         </InputRadioGroup>
 
-                                                        <ValidationMessage For="() => legalcaseDto.BuildingTypeId" />
+                                                        <ValidationMessage For="() => legalcaseDto.PremiseTypeId" />
                                                     }
                                                 </div>
                                             </div>
@@ -1091,7 +1136,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                             <div class="card-body">
                                 <label class="form-label fw-semibold">
-                                    Please select applicable Harassment <span class="text-danger">*</span>
+                                    Please select applicable Harassment 
                                 </label>
                                 <div class="mb-3" id="allegationsGroup">
                                     <!-- Repeated interruptions -->
@@ -1109,7 +1154,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             </div>
                                         }
                                     }
-                                    <ValidationMessage For="() => legalcaseDto.HarassmentTypeId" />
+                                    @* <ValidationMessage For="() => legalcaseDto.HarassmentTypeId" /> *@
 
 
                                 </div>
@@ -1136,7 +1181,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                             <div class="card-body">
                                 <label class="form-label fw-semibold">
-                                    Please select applicable defenses <span class="text-danger">*</span>
+                                    Please select applicable defenses 
                                 </label>
 
                                 <div id="defensesGroup" class="mb-3">
@@ -2555,7 +2600,12 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     private DateTime? MovedIn { get; set; }
     private string RentDueDate { get; set; } = "1";
     private int CalcNoticeLength { get; set; }
+    private List<CourtDto> filteredCourts = new();
+    private List<EditToCountyDto> CountyList = new();
 
+    private string searchCourtText;
+
+    
 
     // Merge preview
     private NoticeMergeModel MergeData { get; set; } = new NoticeMergeModel();
@@ -2586,8 +2636,11 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     private List<AdditioanlTenants> AdditionalTenantfromDbList = new();
     private string? loggedInUserId;
     private bool isAdmin = false;
+    private bool IsNewTenants = false;
+    private CreateToTenantDto newTenant = new();
     private bool? canbool = null;
     private bool showLandlordfields = false;
+    private bool showTenantfields = false;
     private bool showBuildingfields = false;
     private int currentPage = 1;
     private int pageSize = 10;
@@ -2596,6 +2649,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     private bool isLoading = true;
 
     private List<CaseTypePerDiemDto> CaseTypePerDiemList = new();
+    private List<PremiseType> PremiseTypesList = new();
     private List<CaseTypeHPDDto> CaseTypeHPDList = new();
     private List<PartyRepresent> PartyRepresentList = new();
     private List<PartyRepresentPerDiem> PartyRepresentPerDiemList = new();
@@ -2611,6 +2665,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     private List<DocumentInstructionPerDiemDto> DocumentInstructionPerDiemList = new();
     private List<ReportingRequirementPerDiemDto> ReportingRequirementPerDiemList = new();
     private List<PaymentMethod> PaymentMethodDtoList = new();
+    bool tenantLoadedFromLandlord = false;
+    private EditToTenantDto selectedTenant;
+    private List<EditToTenantDto> filteredTenants = new();
+    private List<EditToTenantDto> masterTenantList = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -2634,6 +2692,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         DefenseTypesList = await CaseTypeRepository.GetAllDefenseTypes();
         AppearanceTypesList = await CaseTypeRepository.GetAllAppearanceTypes();
         AppearanceTypesPerDiemList = await CaseTypeRepository.GetAllAppearanceTypesPerDiem();
+        PremiseTypesList = await PremiseTypeRepository.GetAllPremiseType();
         ReliefPetitionerTypesList = await CaseTypeRepository.GetAllReliefPetitionerTypes();
         ReliefRespondentTypesList = await CaseTypeRepository.GetAllReliefRespondentTypes();
         BilingTypesList = await CaseTypeRepository.GetAllBilingTypes();
@@ -2643,7 +2702,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
         DateRentList = await DateRentRepository.GetAllDateRent();
         StateList = await _stateRepository.GetAllState();
-
+        CountyList = await _countyService.GetAllCounty();
         ClientTypeList = await ClientRoleRepository.GetAllClientRole();
         CaseProgramList = await _caseprogram.GetAllCaseProgram();
         legalcaseDto = await _legalCaseService.GetCaseByIdAsync(caseId);
@@ -2651,9 +2710,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         showClientTextbox = true;
         showLandlordfields = true;
         searchText = legalcaseDto.ClientName;
+        searchCourtText = legalcaseDto.CourtName;
         searchBuildingText = legalcaseDto.Buildingcode ?? string.Empty;
         searchlandlordText = legalcaseDto.landlordName;
-        searchTenantText = legalcaseDto.ApartmentNumber ?? string.Empty;
+        searchTenantText = legalcaseDto.TenantName ?? string.Empty;
         selectedClient = ClientList.Where(e => e.Id == legalcaseDto.ClientId).FirstOrDefault() ?? new EditToClientDto();
 
         Task.Delay(500);
@@ -2811,6 +2871,58 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         spinnerservice.Hide();
 
     }
+
+    // private async Task OnSearchCourtInput(ChangeEventArgs e)
+    // {
+    //     searchCourtText = e.Value?.ToString() ?? "";
+
+    //     // 🟢 Court clear → County clear
+    //     if (string.IsNullOrWhiteSpace(searchCourtText))
+    //     {
+    //         legalcaseDto.Court = null;
+    //         legalcaseDto.County = null;
+    //         filteredCourts = new List<CourtDto>();
+    //         return;
+    //     }
+
+    //     // 🟢 Search only when 3+ characters
+    //     if (searchCourtText.Length >= 3)
+    //     {
+    //         filteredCourts = await _courtService.SearchCourt(searchCourtText);
+    //     }
+    //     else
+    //     {
+    //         // 🟢 Local filter on <3 chars
+    //         filteredCourts = filteredCourts
+    //             ?.Where(c => c.Court.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase))
+    //             .ToList() ?? new List<CourtDto>();
+    //     }
+    // }
+
+    private async Task OnSearchCourtInput(ChangeEventArgs e)
+    {
+        searchCourtText = e.Value?.ToString() ?? "";
+
+        // ⭐ Court input empty → reset Court & County + clear list
+        if (string.IsNullOrWhiteSpace(searchCourtText))
+        {
+            legalcaseDto.Court = null;
+            legalcaseDto.County = null;
+            filteredCourts = new List<CourtDto>();
+            return;
+        }
+
+        // ⭐ Jab tak 3 characters nahi — full court list dikhado
+        if (searchCourtText.Length < 3)
+        {
+            await ShowAllCourts();   // <-- yeh method bana lenge niche
+            return;
+        }
+
+        // ⭐ 3 characters hote hi — server search
+        filteredCourts = await _courtService.SearchCourt(searchCourtText);
+    }
+
     public async Task BuildSteps()
     {
         spinnerservice.Show();
@@ -2893,6 +3005,169 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         StateHasChanged();
 
 
+    }
+
+    private async void CancelTenants()
+    {
+        showTenantfields = false;
+        searchTenantText = null;
+        selectedTenant = null;
+        legalcaseDto.TenantId = null;
+        legalcaseDto.TenantName = searchTenantText;
+        legalcaseDto.LandlordId = null;
+        legalcaseDto.landlordName = string.Empty;
+        searchlandlordText = string.Empty;
+        filteredLandlords?.Clear();
+
+        // Building reset
+        legalcaseDto.BuildingId = null;
+        legalcaseDto.BuildingAddress = string.Empty;
+        filteredBuildings?.Clear();
+
+
+    }
+
+ 
+
+
+
+
+
+    private async Task ShowAllTenant()
+    {
+        if (legalcaseDto.LandlordId != null && legalcaseDto.LandlordId != Guid.Empty)
+        {
+            masterTenantList = (await _tenantService
+                .GetTenantsByLandlordIdAsync(legalcaseDto.LandlordId.Value))
+                .ToList();
+
+            filteredTenant = masterTenantList.ToList();
+            tenantLoadedFromLandlord = true;
+            return;
+        }
+
+        // No landlord → client ke basis par tenants
+        masterTenantList = (await _tenantService
+            .GetTenantsByClientIdAsync(legalcaseDto.ClientId))
+            .ToList();
+
+        filteredTenant = masterTenantList.ToList();
+        tenantLoadedFromLandlord = false;
+    }
+
+    private async Task SelectTenanthpd(EditToTenantDto tenant)
+    {
+        selectedTenant = tenant;
+        showTenantfields = true;
+        showLandlordfields = true;
+
+        // Tenant fill
+        searchTenantText = $"{tenant.FirstName} {tenant.LastName}";
+        legalcaseDto.TenantId = tenant.Id;
+        legalcaseDto.TenantName = searchTenantText;
+
+        filteredTenant = null;
+
+        // Fetch building + landlord
+        var data = await _tenantService.GetLandlordBuildingByTenantAsync(tenant.Id);
+
+        // ---- Auto Fill Landlord ----
+        if (data.landlord != null)
+        {
+            legalcaseDto.LandlordId = data.landlord.Id;
+            legalcaseDto.landlordName = $"{data.landlord.FirstName} {data.landlord.LastName}";
+            searchlandlordText = legalcaseDto.landlordName;
+
+            // Dropdown completely hide
+            filteredLandlords = null;
+            showLandlordfields = true; // Don't show search or dropdown
+        }
+
+        // ---- Auto Fill Building ----
+        if (data.building != null)
+        {
+            legalcaseDto.BuildingId = data.building.Id;
+            legalcaseDto.Units = data.building.BuildingUnits;
+            legalcaseDto.BuildingAddress = data.building.Address1;
+            legalcaseDto.PremiseTypeId = data.building.PremiseTypeId;
+            legalcaseDto.RegistrationStatusTypeId = data.building.RegistrationStatusId;
+
+            searchBuildingText = $"{data.building.Address1} / {data.building.BuildingCode}";
+            filteredBuildings = null;
+            selectedbuilding = data.building;
+
+            // ⭐ Make sure ADD form not open
+            IsNewBuilding = false;
+            showBuildingfields = true;
+
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task SelectTenants()
+    {
+        showTenantfields = true;
+        selectedTenant = null;
+        searchTenantText = null;
+        legalcaseDto.TenantId = null;
+        legalcaseDto.TenantName = searchTenantText;
+        filteredTenant?.Clear();
+
+
+
+
+    }
+
+    private void saveTenantName()
+    {
+        legalcaseDto.TenantName = searchTenantText;
+    }
+    private void OnTenantInputFocus()
+    {
+        // 👉 Agar landlord ke tenants 0 the → dropdown hide
+        if (!tenantLoadedFromLandlord)
+        {
+            filteredTenant = new List<EditToTenantDto>();   // clear dropdown
+        }
+
+        StateHasChanged();
+    }
+
+
+    private async Task OnSearchTenantHpdInput(ChangeEventArgs e)
+    {
+        searchTenantText = e.Value?.ToString() ?? "";
+
+        // Empty → reset full list
+        if (string.IsNullOrWhiteSpace(searchTenantText))
+        {
+            filteredTenant = masterTenantList.ToList();
+            return;
+        }
+
+        // Local filter only
+        filteredTenant = masterTenantList
+            .Where(c =>
+                (c.UnitOrApartmentNumber ?? "").Contains(searchTenantText, StringComparison.OrdinalIgnoreCase) ||
+                (c.FirstName ?? "").Contains(searchTenantText, StringComparison.OrdinalIgnoreCase) ||
+                (c.LastName ?? "").Contains(searchTenantText, StringComparison.OrdinalIgnoreCase) ||
+                (c.TenantCode ?? "").Contains(searchTenantText, StringComparison.OrdinalIgnoreCase)
+            )
+            .ToList();
+    }
+
+    async Task HideTenantsDropDown(FocusEventArgs e)
+    {
+        // Small delay to allow click on dropdown item to register before hiding
+        await Task.Delay(500);
+        if (filteredTenant.Any())
+        {
+
+            filteredTenant.Clear();
+
+        }
+        StateHasChanged();
     }
 
     private async Task OnStepClick(int step)
@@ -3067,6 +3342,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     {
         if (!ValidateCurrentStep()) return;
 
+
         //legalcaseDto.LandLordTypeName = LandLordTypeList.FirstOrDefault(x => x.Id == legalcaseDto.LandLordTypeId)?.Name;
         //legalcaseDto.RegulationStatusName = RegulationList.FirstOrDefault(x => x.Id == legalcaseDto.RegulationStatusId)?.Name;
         //legalcaseDto.IsUnitIllegalName = IsUnitIllegalList.FirstOrDefault(x => x.Id == legalcaseDto.IsUnitIllegalId)?.Name;
@@ -3093,6 +3369,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         }
 
         @if (legalcaseDto.CaseTypeName == "HPD")
+
         {
             if (CurrentStep < Steps.Count() - 1)
             {
@@ -3291,23 +3568,26 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                     Require(() => legalcaseDto.ClientTypeId, nameof(legalcaseDto.ClientTypeId), "Client Type is required");
 
                 }
-                else if (Steps[CurrentStep].Name == "Attorney")
-                {
-                    Require(() => legalcaseDto.Attrney, nameof(legalcaseDto.Attrney), "Attorney/Firm is required");
-
-
-                }
                 else if (Steps[CurrentStep].Name == "CaseInfo")
                 {
-                    Require(() => legalcaseDto.CourtLocation, nameof(legalcaseDto.CourtLocation), "Court Location is required");
+                    // 🟢 Validate CourtId
+                    if (legalcaseDto.CourtLocationId == null || legalcaseDto.CourtLocationId == Guid.Empty)
+                    {
+                        Require(() => legalcaseDto.CourtLocationId, nameof(legalcaseDto.CourtLocationId), "Court Location is required");
+                    }
 
-                    Require(() => legalcaseDto.County, nameof(legalcaseDto.County), "County  is required");
+                   
+                        Require(() => legalcaseDto.County, nameof(legalcaseDto.County), "County is required");
+                    
+
+                    // 🟢 Validate Case Types (HPD)
                     if (legalcaseDto.SelectedCaseTypeHPDIds == null || !legalcaseDto.SelectedCaseTypeHPDIds.Any())
                     {
                         Require(() => legalcaseDto.CaseTypeHPDId, nameof(legalcaseDto.CaseTypeHPDId), "Please select at least one Case Type");
                     }
-
                 }
+
+
                 else if (Steps[CurrentStep].Name == "Party")
                 {
                     Require(() => legalcaseDto.PartyRepresentId, nameof(legalcaseDto.PartyRepresentId), "Please select at least one Representation");
@@ -3319,7 +3599,19 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                     if (!isExistingLandlordSelected && !isNewLandlordEntered)
                     {
                         Require(() => legalcaseDto.LandlordId, nameof(legalcaseDto.LandlordId), "Landlord Name is required");
+
                     }
+
+                    // TENANT VALIDATION (Require se)
+                    bool isTenantIdSelected = legalcaseDto.TenantId.HasValue && legalcaseDto.TenantId.Value != Guid.Empty;
+                    bool isTenantTextEntered = !string.IsNullOrWhiteSpace(searchTenantText);
+
+                    // ✔ Validation trigger only when both are empty
+                    if (!isTenantIdSelected && !isTenantTextEntered)
+                    {
+                        Require(() => legalcaseDto.TenantId, nameof(legalcaseDto.TenantId), "Tenant Name is required");
+                    }
+
                 }
 
 
@@ -3334,7 +3626,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                     Require(() => legalcaseDto.Units, nameof(legalcaseDto.Units), "Units required");
                     Require(() => legalcaseDto.BuildingAddress, nameof(legalcaseDto.BuildingAddress), "Address required");
-                    Require(() => legalcaseDto.BuildingTypeId, nameof(legalcaseDto.BuildingTypeId), "Select Building Type");
+                    Require(() => legalcaseDto.PremiseTypeId, nameof(legalcaseDto.PremiseTypeId), "Select Building Type");
                     Require(() => legalcaseDto.RegistrationStatusTypeId, nameof(legalcaseDto.RegistrationStatusTypeId), "Select Registration Status");
                 }
 
@@ -3342,7 +3634,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 {
                     if (legalcaseDto.SelectedHarassmentTypeIds == null || !legalcaseDto.SelectedHarassmentTypeIds.Any())
                     {
-                        Require(() => legalcaseDto.HarassmentTypeId, nameof(legalcaseDto.HarassmentTypeId), "Please select ate least one Harasmment");
+                        Require(() => legalcaseDto.HarassmentTypeId, nameof(legalcaseDto.HarassmentTypeId), "Please select at least one Harasmment");
                     }
 
 
@@ -4000,8 +4292,9 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                     {
                         Address1 = legalcaseDto.BuildingAddress,
                         BuildingUnits = legalcaseDto.Units,
-                        BuildingTypeId = legalcaseDto.BuildingTypeId,
+                        PremiseTypeId = legalcaseDto.PremiseTypeId,
                         RegistrationStatusId = legalcaseDto.RegistrationStatusTypeId,
+
                         LandlordId = legalcaseDto.LandlordId
                     };
 
@@ -4020,9 +4313,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                             Id = legalcaseDto.BuildingId.Value,
                             Address1 = legalcaseDto.BuildingAddress,
                             RegistrationStatusId = legalcaseDto.RegistrationStatusTypeId,
-                            BuildingTypeId = legalcaseDto.BuildingTypeId,
+                            PremiseTypeId = legalcaseDto.PremiseTypeId,
                             City = legalcaseDto.Borough,
-                            LandlordId = legalcaseDto.LandlordId,
 
                             BuildingUnits = legalcaseDto.Units,
                             ApartmentCode = legalcaseDto.UnitOrApartmentNumber,
@@ -4032,6 +4324,40 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                         await _buildingService.UpdateonlyBuildingfromCase(updateBuilding);
 
+                    }
+                }
+
+                if (selectedTenant == null)
+                {
+                    var nameparts = searchTenantText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    newTenant = new CreateToTenantDto()
+                    {
+
+                        FirstName = nameparts.Count() > 0 ? nameparts[0] : string.Empty,
+                        LastName = nameparts.Count() > 1 ? nameparts[nameparts.Count() - 1] : string.Empty,
+                        BuildingId = legalcaseDto.BuildingId,
+                    };
+                    var tenantId = await _tenantService.AddOnlyTenantfromCase(newTenant);
+                    legalcaseDto.TenantId = tenantId;
+                }
+                else
+                {
+                    if (selectedTenant != null && HasTenantChanged(selectedTenant, legalcaseDto))
+                    {
+                        var nameparts = searchlandlordText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                        var updateTenant = new EditToTenantDto()
+                        {
+                            Id = legalcaseDto.TenantId.Value,
+                            FirstName = nameparts.Count() > 0 ? nameparts[0] : string.Empty,
+                            LastName = nameparts.Count() > 1 ? nameparts[nameparts.Count() - 1] : string.Empty,
+
+                            BuildingId = legalcaseDto.BuildingId,
+
+
+
+                        };
+                        await _tenantService.UpdateTenantfromCase(updateTenant);
                     }
                 }
 
@@ -4074,7 +4400,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                     if (result != null)
                     {
-                        nav.NavigateTo("/legalcases?edit=true");
+                        nav.NavigateTo("/dashboard?edit=true");
                     }
                   
 
@@ -4334,14 +4660,29 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     private string searchTenantText;
 
 
-    private void OnSearchLandlordInput(ChangeEventArgs e)
+    private async Task OnSearchLandlordInput(ChangeEventArgs e)
     {
-        searchlandlordText = e.Value.ToString();
-        filteredLandlords = LandlordList
-            .Where(c => c.FirstName.Contains(searchlandlordText, StringComparison.OrdinalIgnoreCase)
-                        || c.LastName.Contains(searchlandlordText, StringComparison.OrdinalIgnoreCase)
-                        || c.LandLordCode.Contains(searchlandlordText, StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        searchlandlordText = e.Value?.ToString() ?? "";
+
+        // ⭐ Empty — show all landlords
+        if (string.IsNullOrWhiteSpace(searchlandlordText))
+        {
+            await ShowAlllandlords();   // helper method neeche diya hai
+            return;
+        }
+
+        // ⭐ Jab tak 3 characters nahi — show all landlords
+        if (searchlandlordText.Length < 3)
+        {
+            await ShowAlllandlords();
+            return;
+        }
+
+        // ⭐ 3 characters → server search
+        filteredLandlords = await _landlordService.SearchLandlordsAsync(
+            searchlandlordText,
+            legalcaseDto.ClientId.Value
+        );
     }
     private async void saveLandLordName()
     {
@@ -4618,14 +4959,26 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
     // }
 
-    private void OnSearchInput(ChangeEventArgs e)
+    private async Task OnSearchInput(ChangeEventArgs e)
     {
-        searchText = e.Value.ToString();
-        filteredClients = ClientList
-            .Where(c => c.FirstName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                        || c.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                        || c.ClientCode.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        searchText = e.Value?.ToString() ?? "";
+
+        // ⭐ Input empty → show all clients
+        if (string.IsNullOrWhiteSpace(searchText))
+        {
+            ShowAllClients();
+            return;
+        }
+
+        // ⭐ Jab tak 3 letters nahi hote → show all clients
+        if (searchText.Length < 3)
+        {
+            ShowAllClients();
+            return;
+        }
+
+        // ⭐ 3 letters aa gaye → server search start
+        filteredClients = await _clientService.SearchClient(searchText);
     }
 
     private void InputboxClientBlur()
@@ -4757,12 +5110,84 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         legalcaseDto.BilingTypeId = id;
     }
 
+    private async Task ShowAllClients()
+    {
+        filteredClients = await _clientService.GetAllClient(loggedInUserId, isAdmin);
+    }
 
 
+    private async Task ShowAllCourts()
+    {
+        filteredCourts = await _courtService.GetAllCourtDataAsync();
+    }
+
+    private void SelectCourt(CourtDto c)
+    {
+        searchCourtText = c.Court;
+
+        legalcaseDto.CourtLocationId = c.Id;
+
+        // ✔ CountyId set karein
+        legalcaseDto.CountyId = c.CountyId;
+
+        // ✔ County Name Input me dikhana ho to:
+        legalcaseDto.County = CountyList
+                                .FirstOrDefault(x => x.Id == c.CountyId)
+                                ?.Name;
+
+        filteredCourts = new List<CourtDto>();
+    }
+
+    private async Task ShowAlllandlords()
+    {
+        filteredLandlords = await _landlordService.GetLandlordsByClientIdAsync(legalcaseDto.ClientId);
+    }
+
+    private async Task SelectLandlordhpd(EditToLandlordDto landlord)
+    {
+        showLandlordfields = true;
+        selectedlandlord = landlord;
+
+        searchlandlordText = $"{landlord.FirstName} {landlord.LastName}";
+        filteredLandlords.Clear();
+
+        // Fill card
+        legalcaseDto.LandlordId = landlord.Id;
+        legalcaseDto.landlordName = $"{landlord.FirstName} {landlord.LastName}";
 
 
+        // ⭐ Load tenants for this landlord
+        var tenants = await _tenantService.GetTenantsByLandlordIdAsync(landlord.Id);
+
+        if (tenants.Any())
+        {
+            filteredTenant = tenants;
+            tenantLoadedFromLandlord = true;
+
+        }
+        else
+        {
+            filteredTenant = new List<EditToTenantDto>();
+            tenantLoadedFromLandlord = false;
+        }
+
+        // Tenant search input hamesha empty rakho
+        searchTenantText = "";
+
+        // Tenant select reset
+        legalcaseDto.TenantId = null;
+        legalcaseDto.TenantName = "";
+
+        StateHasChanged();
+    }
 
 
+    private bool HasTenantChanged(EditToTenantDto existing, IntakeModel dto)
+    {
+        return !dto.TenantName.Contains(existing.FirstName)
+            || !dto.TenantName.Contains(existing.LastName!);
+
+    }
 
     // private enum Step { Landlord = 0, Building = 1, Tenant = 2, Rent = 3, Case = 4, Review = 5 }
 }

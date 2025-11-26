@@ -469,6 +469,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 {
                                                     <li class="dropdown-item" @onclick="() => SelectCourt(c)">
                                                         @c.Court
+
                                                     </li>
 
                                                 }
@@ -620,7 +621,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             }
                                                         </ul>
                                                     }
-                                                    <ValidationMessage For="() => legalcaseDto.TenantName" />
+                                                    <ValidationMessage For="() => legalcaseDto.TenantId" />
                                                 </div>
 
                                                 @if (!showTenantfields)
@@ -683,7 +684,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             }
                                                         </ul>
                                                     }
-                                                    <ValidationMessage For="() => legalcaseDto.landlordName" />
+                                                    <ValidationMessage For="() => legalcaseDto.LandlordId" />
                                                 </div>
 
                                                 @if (!showLandlordfields)
@@ -909,7 +910,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                             <div class="card-body">
                                 <label class="form-label fw-semibold">
-                                    Please select applicable Harassment <span class="text-danger">*</span>
+                                    Please select applicable Harassment 
                                 </label>
                                 <div class="mb-3" id="allegationsGroup">
                                     <!-- Repeated interruptions -->
@@ -928,7 +929,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             </div>
                                         }
                                     }
-                                    <ValidationMessage For="() => legalcaseDto.HarassmentTypeId" />
+                                    @* <ValidationMessage For="() => legalcaseDto.HarassmentTypeId" /> *@
 
 
                                 </div>
@@ -955,7 +956,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                             <div class="card-body">
                                 <label class="form-label fw-semibold">
-                                    Please select applicable defenses <span class="text-danger">*</span>
+                                    Please select applicable defenses 
                                 </label>
 
                                 <div id="defensesGroup" class="mb-3">
@@ -974,7 +975,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             </div>
                                         }
                                     }
-                                    <ValidationMessage For="() => legalcaseDto.DefenseTypeId" />
+                                    @* <ValidationMessage For="() => legalcaseDto.DefenseTypeId" /> *@
 
                                 </div>
 
@@ -2600,7 +2601,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 else if (Steps[CurrentStep].Name == "CaseInfo")
                 {
                     // 🟢 Validate CourtId
-                    if (legalcaseDto.CourtId == null || legalcaseDto.CourtId == Guid.Empty)
+                    if (legalcaseDto.CourtLocationId == null || legalcaseDto.CourtLocationId == Guid.Empty)
                     {
                         Require(() => legalcaseDto.CourtLocationId, nameof(legalcaseDto.CourtLocationId), "Court Location is required");
                     }
@@ -2630,8 +2631,19 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                     if (!isExistingLandlordSelected && !isNewLandlordEntered)
                     {
                         Require(() => legalcaseDto.LandlordId, nameof(legalcaseDto.LandlordId), "Landlord Name is required");
+                        
+                    }
+
+                    // TENANT VALIDATION (Require se)
+                    bool isTenantIdSelected = legalcaseDto.TenantId.HasValue && legalcaseDto.TenantId.Value != Guid.Empty;
+                    bool isTenantTextEntered = !string.IsNullOrWhiteSpace(searchTenantText);
+
+                    // ✔ Validation trigger only when both are empty
+                    if (!isTenantIdSelected && !isTenantTextEntered)
+                    {
                         Require(() => legalcaseDto.TenantId, nameof(legalcaseDto.TenantId), "Tenant Name is required");
                     }
+
                 }
 
 
@@ -2654,7 +2666,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 {
                     if (legalcaseDto.SelectedHarassmentTypeIds == null || !legalcaseDto.SelectedHarassmentTypeIds.Any())
                     {
-                        Require(() => legalcaseDto.HarassmentTypeId, nameof(legalcaseDto.HarassmentTypeId), "Please select ate least one Harasmment");
+                        Require(() => legalcaseDto.HarassmentTypeId, nameof(legalcaseDto.HarassmentTypeId), "Please select at least one Harasmment");
                     }
 
 
@@ -2808,7 +2820,9 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         {
             if (!legalcaseDto.SelectedHarassmentTypeIds.Contains(id))
                 legalcaseDto.SelectedHarassmentTypeIds.Add(id);
+
         }
+
         else
         {
             legalcaseDto.SelectedHarassmentTypeIds.Remove(id);
@@ -4046,10 +4060,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     {
         // Small delay to allow click on dropdown item to register before hiding
         await Task.Delay(500);
-        if (filteredTenants.Any())
+        if (filteredTenant.Any())
         {
 
-            filteredTenants.Clear();
+            filteredTenant.Clear();
 
         }
         StateHasChanged();
@@ -4181,12 +4195,12 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
     private bool IsNewLandlord = false;
     private bool IsNewTenants = false;
+    private CreateToTenantDto newTenant = new();
     private EditToLandlordDto selectedlandlord;
     private EditToTenantDto selectedTenant;
     private string searchlandlordText;
     private string searchTenantText;
     private CreateToLandLordDto newLandlord = new();
-    private CreateToTenantDto newTenant = new();
     private List<EditToLandlordDto> filteredLandlords = new();
     private List<EditToTenantDto> filteredTenants = new();
 
@@ -4224,50 +4238,6 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
 
 
-    // private async Task OnSearchTenantHpdInput(ChangeEventArgs e)
-    // {
-    //     searchTenantText = e.Value?.ToString() ?? "";
-
-    //     // ❌ Agar landlord ke paas tenant hi nahi → nothing to show
-    //     if (!tenantLoadedFromLandlord)
-    //     {
-    //         filteredTenant = new List<EditToTenantDto>();
-    //         return;
-    //     }
-
-    //     // ❌ Tenant input blank → reset everything
-    //     if (string.IsNullOrWhiteSpace(searchTenantText))
-    //     {
-    //         ClearTenantAndLandlord();
-    //         return;
-    //     }
-
-    //     // ⭐ 3 letters → DB search
-    //     if (searchTenantText.Length >= 3)
-    //     {
-    //         filteredTenant = await _tenantService.SearchTenantsAsync(
-    //             searchTenantText,
-    //             legalcaseDto.BuildingId!.Value
-    //         );
-    //     }
-    //     // ⭐ 1–2 letters → local filter
-    //     else if (searchTenantText.Length >= 1)
-    //     {
-    //         filteredTenant = filteredTenant
-    //             .Where(c =>
-    //                 (c.UnitOrApartmentNumber ?? "").Contains(searchTenantText, StringComparison.OrdinalIgnoreCase) ||
-    //                 (c.FirstName ?? "").Contains(searchTenantText, StringComparison.OrdinalIgnoreCase) ||
-    //                 (c.LastName ?? "").Contains(searchTenantText, StringComparison.OrdinalIgnoreCase) ||
-    //                 (c.TenantCode ?? "").Contains(searchTenantText, StringComparison.OrdinalIgnoreCase)
-    //             )
-    //             .ToList();
-    //     }
-    //     else
-    //     {
-    //         // No text → empty list
-    //         filteredTenant = new List<EditToTenantDto>();
-    //     }
-    // }
 
 
     private void ClearTenantAndLandlord()
@@ -4296,29 +4266,29 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
     private async Task OnSearchLandlordInput(ChangeEventArgs e)
     {
-        searchlandlordText = e.Value.ToString();
+        searchlandlordText = e.Value?.ToString() ?? "";
 
-        if (searchlandlordText.Count() >= 3)
+        // ⭐ Empty — show all landlords
+        if (string.IsNullOrWhiteSpace(searchlandlordText))
         {
-            filteredLandlords = await _landlordService.SearchLandlordsAsync(searchlandlordText, legalcaseDto.ClientId.Value);
+            await ShowAlllandlords();   // helper method neeche diya hai
+            return;
+        }
 
-        }
-        else if (searchlandlordText.Count() < 3 && searchlandlordText.Count() > 0)
+        // ⭐ Jab tak 3 characters nahi — show all landlords
+        if (searchlandlordText.Length < 3)
         {
-            if (filteredLandlords.Any())
-            {
-                filteredLandlords = filteredLandlords
-                    .Where(c => c.FirstName.Contains(searchlandlordText, StringComparison.OrdinalIgnoreCase)
-                                || c.LastName.Contains(searchlandlordText, StringComparison.OrdinalIgnoreCase)
-                                || c.LandLordCode.Contains(searchlandlordText, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-            }
+            await ShowAlllandlords();
+            return;
         }
-        else
-        {
-            filteredLandlords = new List<EditToLandlordDto>();
-        }
+
+        // ⭐ 3 characters → server search
+        filteredLandlords = await _landlordService.SearchLandlordsAsync(
+            searchlandlordText,
+            legalcaseDto.ClientId.Value
+        );
     }
+
 
     private void saveLandLordName()
     {
@@ -4585,32 +4555,59 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         }
     }
 
+    // private async Task OnSearchTenantInput(ChangeEventArgs e)
+    // {
+    //     searchTenantText = e.Value!.ToString()!;
+    //     if (searchTenantText!.Count() >= 2)
+    //     {
+    //         filteredTenant = await _tenantService.SearchTenantsAsync(searchTenantText!, legalcaseDto.BuildingId!.Value);
+    //     }
+    //     else if (searchTenantText!.Count() <= 1 && searchTenantText.Count() > 0)
+    //     {
+    //         if (filteredTenant.Any())
+    //         {
+    //             filteredTenant = filteredTenant
+    //             .Where(c => c.UnitOrApartmentNumber!.Contains(searchTenantText, StringComparison.OrdinalIgnoreCase)
+    //                         || c.FirstName.Contains(searchTenantText, StringComparison.OrdinalIgnoreCase)
+    //                         || c.LastName!.Contains(searchTenantText, StringComparison.OrdinalIgnoreCase)
+    //                         || c.TenantCode!.Contains(searchTenantText, StringComparison.OrdinalIgnoreCase)
+    //                         )
+    //             .ToList();
+    //         }
+
+    //     }
+    //     else
+    //     {
+    //         filteredTenant = new List<EditToTenantDto>();
+    //     }
+    // }
     private async Task OnSearchTenantInput(ChangeEventArgs e)
     {
-        searchTenantText = e.Value!.ToString()!;
-        if (searchTenantText!.Count() >= 2)
-        {
-            filteredTenant = await _tenantService.SearchTenantsAsync(searchTenantText!, legalcaseDto.BuildingId!.Value);
-        }
-        else if (searchTenantText!.Count() <= 1 && searchTenantText.Count() > 0)
-        {
-            if (filteredTenant.Any())
-            {
-                filteredTenant = filteredTenant
-                .Where(c => c.UnitOrApartmentNumber!.Contains(searchTenantText, StringComparison.OrdinalIgnoreCase)
-                            || c.FirstName.Contains(searchTenantText, StringComparison.OrdinalIgnoreCase)
-                            || c.LastName!.Contains(searchTenantText, StringComparison.OrdinalIgnoreCase)
-                            || c.TenantCode!.Contains(searchTenantText, StringComparison.OrdinalIgnoreCase)
-                            )
-                .ToList();
-            }
+        searchTenantText = e.Value?.ToString() ?? "";
 
-        }
-        else
+        // ⭐ Empty input → load all tenants (ONLY here)
+        if (string.IsNullOrWhiteSpace(searchTenantText))
         {
-            filteredTenant = new List<EditToTenantDto>();
+            await ShowAllTenant();
+            return;
         }
+
+        // ⭐ 1st & 2nd character → DO NOTHING (keep list unchanged)
+        if (searchTenantText.Length < 3)
+        {
+            // ❗ No reload here (important)
+            return;
+        }
+
+        // ⭐ 3+ characters → server search
+        filteredTenant = await _tenantService.SearchTenantsAsync(
+            searchTenantText,
+            tenantLoadedFromLandlord
+                ? legalcaseDto.LandlordId!.Value
+                : legalcaseDto.ClientId!.Value
+        );
     }
+
 
     private void SelectTenant()
     {
@@ -4837,11 +4834,43 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
     // }
 
+    // private async Task OnSearchCourtInput(ChangeEventArgs e)
+    // {
+    //     searchCourtText = e.Value?.ToString() ?? "";
+
+    //     // 🟢 Court clear → County clear
+    //     if (string.IsNullOrWhiteSpace(searchCourtText))
+    //     {
+    //         legalcaseDto.Court = null;
+    //         legalcaseDto.County = null;
+    //         filteredCourts = new List<CourtDto>();
+    //         return;
+    //     }
+
+    //     // 🟢 Search only when 3+ characters
+    //     if (searchCourtText.Length >= 3)
+    //     {
+    //         filteredCourts = await _courtService.SearchCourt(searchCourtText);
+    //     }
+    //     else
+    //     {
+    //         // 🟢 Local filter on <3 chars
+    //         filteredCourts = filteredCourts
+    //             ?.Where(c => c.Court.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase))
+    //             .ToList() ?? new List<CourtDto>();
+    //     }
+    // }
+
+
+
+
     private async Task OnSearchCourtInput(ChangeEventArgs e)
     {
         searchCourtText = e.Value?.ToString() ?? "";
+        legalcaseDto.CourtLocationId = Guid.Empty;
+        legalcaseDto.CountyId = Guid.Empty;
 
-        // 🟢 Court clear → County clear
+        // ⭐ Court input empty → reset Court & County + clear list
         if (string.IsNullOrWhiteSpace(searchCourtText))
         {
             legalcaseDto.Court = null;
@@ -4850,49 +4879,70 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
             return;
         }
 
-        // 🟢 Search only when 3+ characters
-        if (searchCourtText.Length >= 3)
+        // ⭐ Jab tak 3 characters nahi — full court list dikhado
+        if (searchCourtText.Length < 3)
         {
-            filteredCourts = await _courtService.SearchCourt(searchCourtText);
+            await ShowAllCourts();   // <-- yeh method bana lenge niche
+            return;
         }
-        else
-        {
-            // 🟢 Local filter on <3 chars
-            filteredCourts = filteredCourts
-                ?.Where(c => c.Court.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase))
-                .ToList() ?? new List<CourtDto>();
-        }
-    }
 
+        // ⭐ 3 characters hote hi — server search
+        filteredCourts = await _courtService.SearchCourt(searchCourtText);
+    }
 
     private async Task OnSearchInput(ChangeEventArgs e)
     {
-        searchText = e.Value.ToString();
-        if (searchText.Count() >= 3)
-        {
-            filteredClients = await _clientService.SearchClient(searchText);
-        }
-        else if (searchText.Count() <= 3)
-        {
-            if (filteredClients.Any())
-            {
-                filteredClients = filteredClients
-                    .Where(c => c.FirstName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                                || c.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                                || c.ClientCode.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-            }
-            else
-            {
+        searchText = e.Value?.ToString() ?? "";
 
-                ShowAllClients();
-            }
-        }
-        else
+        // ⭐ Input empty → show all clients
+        if (string.IsNullOrWhiteSpace(searchText))
         {
-            filteredClients = new List<EditToClientDto>();
+            ShowAllClients();
+            return;
         }
+
+        // ⭐ Jab tak 3 letters nahi hote → show all clients
+        if (searchText.Length < 3)
+        {
+            ShowAllClients();
+            return;
+        }
+
+        // ⭐ 3 letters aa gaye → server search start
+        filteredClients = await _clientService.SearchClient(searchText);
     }
+
+
+
+
+    // private async Task OnSearchInput(ChangeEventArgs e)
+    // {
+    //     searchText = e.Value.ToString();
+    //     if (searchText.Count() >= 3)
+    //     {
+    //         filteredClients = await _clientService.SearchClient(searchText);
+    //     }
+    //     else if (searchText.Count() <= 3)
+    //     {
+    //         if (filteredClients.Any())
+    //         {
+    //             filteredClients = filteredClients
+    //                 .Where(c => c.FirstName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+    //                             || c.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+    //                             || c.ClientCode.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+    //                 .ToList();
+    //         }
+    //         else
+    //         {
+
+    //             ShowAllClients();
+    //         }
+    //     }
+    //     else
+    //     {
+    //         filteredClients = new List<EditToClientDto>();
+    //     }
+    // }
 
     private void InputboxClientBlur()
     {
@@ -5048,37 +5098,6 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         filteredCourts = await _courtService.GetAllCourtDataAsync();
     }
 
-    // private async Task ShowAllTenant()
-    // {
-    //     filteredTenant = await _tenantService.GetAlltenant();
-    // }
-
-
-
-    // private async Task ShowAllTenant()
-    // {
-    //     // 1️⃣ Landlord selected hai
-    //     if (legalcaseDto.LandlordId != null && legalcaseDto.LandlordId != Guid.Empty)
-    //     {
-    //         var tenants = await _tenantService.GetTenantsByLandlordIdAsync(legalcaseDto.LandlordId.Value);
-
-    //         if (tenants.Any())
-    //         {
-    //             filteredTenant = tenants;
-    //             tenantLoadedFromLandlord = true;
-    //         }
-    //         else
-    //         {
-    //             filteredTenant = new List<EditToTenantDto>(); // ❌ landlord ke paas tenant nahi
-    //         }
-
-    //         return;
-    //     }
-
-    //     // 2️⃣ Landlord selected Nahi hai → Client ke basis pe tenant show karo
-    //     filteredTenant = await _tenantService.GetTenantsByClientIdAsync(legalcaseDto.ClientId);
-    //     tenantLoadedFromLandlord = false;
-    // }
     private List<EditToTenantDto> masterTenantList = new();
 
 
@@ -5091,6 +5110,9 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 .ToList();
 
             filteredTenant = masterTenantList.ToList();
+
+
+
             tenantLoadedFromLandlord = true;
             return;
         }

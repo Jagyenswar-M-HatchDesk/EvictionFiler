@@ -359,7 +359,8 @@ namespace EvictionFiler.Application.Services
                      c=> c.CaseTypePerDiems,
                      c => c.AppearanceTypePerDiem,
                      c=>c.ReportingTypePerDiems,
-                     c=> c.DocumentIntructionsTypse
+                     c=> c.DocumentIntructionsTypse,
+                     c=>c.CourtLocation
     )
     .FirstOrDefaultAsync();
 
@@ -451,9 +452,9 @@ namespace EvictionFiler.Application.Services
                     //TenantRecord = caseEntity.Tenants?.TenantRecord,
                     //HasPossession = caseEntity.Tenants?.HasPossession,
                     //OtherOccupants = caseEntity.Tenants?.OtherOccupants
+                    
 
-                    CourtId = caseEntity.CourtId != null ? caseEntity.CourtId : Guid.Empty,
-                    Court = caseEntity.Courts != null ? caseEntity.Courts.Court : "",
+                  
                     CourtAddress = caseEntity.Courts != null ? caseEntity.Courts.Address : "",
                     //////////CourtConferenceId = caseEntity.Courts != null ? caseEntity.Courts.ConferenceId : "",
                     //////////CourtCallIn = caseEntity.Courts != null ? caseEntity.Courts.CallIn : "",
@@ -465,7 +466,7 @@ namespace EvictionFiler.Application.Services
                     Attrney = caseEntity.Attrney,
                     AttrneyContactInfo = caseEntity.AttrneyContactInfo,
                     AttrneyEmail = caseEntity.AttrneyEmail,
-                    CourtLocationId = caseEntity.CourtLocationId,
+     
                     CourtRoom = caseEntity.CourtRoom,
                     Index = caseEntity.Index,
                     County = caseEntity.County,
@@ -512,6 +513,9 @@ namespace EvictionFiler.Application.Services
 
                     PartyRepresentId = caseEntity.PartyRepresentId,
                     PaymentMethodId = caseEntity.PaymentMethodId,
+                    PremiseTypeId = caseEntity.Buildings.PremiseTypeId,
+                    CourtLocationId = caseEntity.CourtLocationId,
+                    CourtName = caseEntity.CourtLocation != null ? $"{caseEntity.CourtLocation.Court}" : "",
                     PerDiemAttorneyname = caseEntity.PerDiemAttorneyname,
                     PerDiemSignature = caseEntity.PerDiemSignature,
                     PerDiemDate = caseEntity.PerDiemDate,
