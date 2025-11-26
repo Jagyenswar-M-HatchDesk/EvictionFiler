@@ -47,6 +47,7 @@
 //    }
 //}
 
+using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
@@ -62,10 +63,21 @@ namespace EvictionFiler.Infrastructure.Repositories
         private readonly MainDbContext _context;
         public FeesCatalogAttorneyRosterRepository(MainDbContext context) => _context = context;
 
-        public async Task<List<FeesCatalogAttorneyRoster>> GetAllAsync() =>
-            await _context.FeesCatalogAttorneyRosters.AsNoTracking().ToListAsync();
-
-        public Task<FeesCatalogAttorneyRoster?> GetByIdAsync(int id) =>
+        public async Task<List<FeesCatalogAttorneyRosterDto>> GetAllAsync()
+        {
+            var data = await _context.FeesCatalogAttorneyRosters.ToListAsync();
+            return data.Select(e => new FeesCatalogAttorneyRosterDto()
+            {
+                Id = e.Id,
+                Name = e.Name,
+                BarNumber = e.BarNumber,
+                Email = e.Email,
+                HourlyRate = e.HourlyRate,
+                Role = e.Role,
+                TravelWait = e.TravelWait,
+            }).ToList();
+        }
+        public Task<FeesCatalogAttorneyRoster?> GetByIdAsync(Guid id) =>
             _context.FeesCatalogAttorneyRosters.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
 
         //public async Task AddAsync(FeesCatalogAttorneyRoster entity)
@@ -74,29 +86,35 @@ namespace EvictionFiler.Infrastructure.Repositories
         //    await _context.SaveChangesAsync();
 
         //}
-        public async Task<int> AddAsync(FeesCatalogAttorneyRoster entity)
+        public async Task<Guid> AddAsync(FeesCatalogAttorneyRoster entity)
         {
             _context.FeesCatalogAttorneyRosters.Add(entity);
             await _context.SaveChangesAsync();
 
             return entity.Id;
         }
-        public async Task<bool> UpdateAsync(FeesCatalogAttorneyRoster entity)
+        public async Task<bool> UpdateAsync(FeesCatalogAttorneyRosterDto entity)
         {
             var existing = await _context.FeesCatalogAttorneyRosters
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == entity.Id);
 
             if (existing == null)
-                throw new KeyNotFoundException($"Attorney Roster with Id {entity.Id} not found.");
+                return false;
 
+            existing.Email = entity.Email;
+            existing.Name = entity.Name;
+            existing.BarNumber = entity.BarNumber;
+            existing.Role = entity.Role;
+            existing.TravelWait = entity.TravelWait;
+            
             // Attach and mark modified
-            _context.Entry(entity).State = EntityState.Modified;
+            _context.Entry(existing).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return true;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Guid id)
         {
             var entity = await _context.FeesCatalogAttorneyRosters.FindAsync(id);
             if (entity != null)

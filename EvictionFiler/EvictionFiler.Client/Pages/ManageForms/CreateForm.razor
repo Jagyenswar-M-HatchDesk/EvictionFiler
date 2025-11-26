@@ -16,45 +16,46 @@
 @inject IManageFormService ManageFormService
 @inject SpinnerService spinnerservice
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <style>
     .offcanvas.show {
-        transform: translateX(0%);
+    transform: translateX(0%);
     }
 
     .offcanvas {
-        transform: translateX(100%);
-        width: 900px !important;
+    transform: translateX(100%);
+    width: 900px !important;
     }
 
     .color-text {
-        color: #1F365D;
+    color: #1F365D;
     }
 
     .required-label::after {
-        content: " *";
-        color: red;
+    content: " *";
+    color: red;
     }
 
     /* Modal Content Styling */
     .modal-dialog {
-        max-width: 900px;
+    max-width: 900px;
     }
 
     .modal-content {
-        border-radius: 10px;
-        padding: 10px;
+    border-radius: 10px;
+    padding: 10px;
     }
 
     .modal-body {
-        max-height: 500px;
-        overflow-y: auto;
+    max-height: 500px;
+    overflow-y: auto;
     }
 </style>
 
 <div class="offcanvas offcanvas-end show border-start shadow bg-white"
-     tabindex="-1" id="createClient"
-     aria-labelledby="createUserLabel">
+tabindex="-1" id="createClient"
+aria-labelledby="createUserLabel">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="createUserLabel">Add New Form</h5>
         <button type="button" class="btn-close text-reset" @onclick="HideAsync"></button>
@@ -85,7 +86,7 @@
                     </select>
                     @* <ValidationMessage For="@(() => createForm.CaseTypeId)" /> *@
 
-                    
+
                 </div>
                 <div class="mb-4 col-md-4">
                     <label class="form-label color-text required-label">Category</label>
@@ -96,7 +97,6 @@
                             <option value="@category.Id">@category.Name</option>
                         }
                     </select>
-                    <ValidationMessage For="@(() => createForm.CategoryId)" />
 
 
                 </div>
@@ -104,8 +104,14 @@
 
             <div class="row mb-3">
                 <div class="col-md-12">
-                    <label class="form-label color-text">HTML</label>
-                    <RadzenHtmlEditor @bind-Value="@createForm.HTML" style="height: 450px;" />
+                    <label class="form-label color-text">HTML Code</label>
+                    @* <InputTextArea class="form-control"
+                              style="height: 450px; font-family: monospace;" 
+                              @bind-Value="createForm.HTML"
+                              placeholder="Paste or type your full HTML here..."></InputTextArea> *@
+
+                    <textarea class="form-control" placeholder="Paste or type your full HTML here..." @onfocusout="GetHtmlValue"
+                              style="height: 450px; font-family: monospace;" id="htmlEditor">@html</textarea>
                 </div>
             </div>
 
@@ -113,6 +119,7 @@
                 <button type="button" class="btn btn-secondary btn-lg" @onclick="ShowPreview">Preview</button>
                 <button type="submit" class="btn btn-primary btn-lg">Submit</button>
             </div>
+
         </EditForm>
     </div>
 </div>
@@ -123,7 +130,7 @@
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-xl">
-            <div class="modal-content shadow">
+            <div class="modal-content shadow" style="height:650px">
                 <div class="modal-header">
                     <h5 class="modal-title">Add Form Preview</h5>
                     <button type="button" class="btn-close" @onclick="ClosePreview"></button>
@@ -147,6 +154,11 @@
         </div>
     </div>
 }
+<script>
+    window.getTextareaValue = (id) => {
+    return document.getElementById(id).value;
+    };
+</script>
 
 @code {
     [Parameter] public FormAddEditViewModelDto createForm { get; set; } = new();
@@ -160,7 +172,7 @@
     {
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
         CategoryList = await CategoryRepository.GetAllCategory();
-          
+
 
         // var defaultCaseType = CaseTypeList.FirstOrDefault(c => c.Name == "Common");
         // if (defaultCaseType != null)
@@ -192,9 +204,17 @@
 
     private void ShowPreview()
     {
+        Console.WriteLine($"HTML Content: {createForm.HTML}");
         IsPreviewVisible = true;
     }
+    private string html;
 
+    
+    private async Task GetHtmlValue()
+    {
+        html = await JS.InvokeAsync<string>("getTextareaValue", "htmlEditor");
+        createForm.HTML = html;
+    }
     private void ClosePreview()
     {
         IsPreviewVisible = false;

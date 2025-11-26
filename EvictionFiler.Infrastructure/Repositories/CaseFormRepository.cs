@@ -1,15 +1,16 @@
-﻿
-using System.Drawing.Printing;
+﻿using System.Drawing.Printing;
+using System.Globalization;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
-using HtmlRendererCore.PdfSharp;
 using Microsoft.EntityFrameworkCore;
-
-
-using PuppeteerSharp;
-using PuppeteerSharp.Media;
+using Syncfusion.HtmlConverter;
+using Syncfusion.Pdf.Graphics;
+using Syncfusion.Pdf;
+using Syncfusion.Drawing;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 
 
 
@@ -18,20 +19,34 @@ namespace EvictionFiler.Infrastructure.Repositories
     public class CaseFormRepository : Repository<CaseForms>, ICaseFormRepository
     {
         private readonly MainDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IConfiguration _config;
 
-        public CaseFormRepository(MainDbContext context) : base(context)
+        public CaseFormRepository(MainDbContext context, IHttpContextAccessor httpContextAccessor, IConfiguration config) : base(context)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
+            _config = config;
         }
 
-
-
-
+        
         public async Task<bool> GenerateNoticeAsync(Guid legalCaseId, Guid formTypeId, Guid createdBy)
         {
             try
             {
-                // 1. Get the template
+                string logFile = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "pdf_errors.log");
+
+                void Log(string msg)
+                {
+                    File.AppendAllText(logFile, $"[{DateTime.UtcNow}] {msg}\n");
+                    Console.WriteLine(msg);
+                }
+
+                Log("=== GenerateNoticeAsync STARTED ===");
+
+                // --------------------
+                // LOAD TEMPLATE
+                // --------------------
                 var template = await _context.MstFormTypes
                     .Where(f => f.Id == formTypeId)
                     .Select(f => new { f.HTML, f.Name })
@@ -40,161 +55,222 @@ namespace EvictionFiler.Infrastructure.Repositories
                 if (string.IsNullOrEmpty(template?.HTML))
                     throw new Exception("Template not found.");
 
+                Log("Template loaded.");
+
                 DateTime noticeDate = CalculateNoticeDate(template.Name);
 
-                // 2. Get case details (TenantIds are in LegalCase)
-                var caseDetails = await (from lc in _context.LegalCases
-                                         join landlord in _context.LandLords on lc.LandLordId equals landlord.Id
-                                         join building in _context.Buildings on lc.BuildingId equals building.Id
-                                         where lc.Id == legalCaseId
-                                         select new
-                                         {
-                                             CaseCode = lc.Casecode,
-                                             LandlordName = landlord.FirstName + " " + landlord.LastName,
-                                             LandlordAddress = landlord.Address1 + " " + landlord.Address2 + " " +
-                                                               landlord.City + " " + landlord.State.Name + " " + landlord.Zipcode,
-                                             LandlordPhone = landlord.Phone,
-                                             LandlordEmail = landlord.Email,
-                                             PropertyAddress = building.Address1 + " " + building.Address2 + " " +
-                                                               building.City + " " + building.State.Name + " " + building.Zipcode,
-                                             NumberofRoom = building.BuildingUnits.ToString(),
-                                             TenantIds = lc.TenantId, // <-- List of tenant IDs from LegalCase,
-                                             LeaseEnd = lc.LeaseEnd
-                                         }).FirstOrDefaultAsync();
+                // --------------------
+                // LOAD CASE DATA
+                // --------------------
+                var caseDetails = await (
+                    from lc in _context.LegalCases
+                    join landlord in _context.LandLords on lc.LandLordId equals landlord.Id
+                    join building in _context.Buildings on lc.BuildingId equals building.Id
+                    join tenant in _context.Tenants on lc.TenantId equals tenant.Id
+                    join court in _context.Courts on lc.CourtId equals court.Id into cCourt
+                    from court in cCourt.DefaultIfEmpty()
+                    join county in _context.MstCounties on court.CountyId equals county.Id into cCounty
+                    from county in cCounty.DefaultIfEmpty()
+                    join rentdue in _context.MstDateRent on lc.RentDueEachMonthOrWeekId equals rentdue.Id into cRent
+                    from rentdue in cRent.DefaultIfEmpty()
+                    where lc.Id == legalCaseId
+
+                    select new
+                    {
+                        CaseCode = lc.Casecode,
+                        LandlordName = landlord.FirstName + " " + landlord.LastName,
+                        LandlordAddress = landlord.Address1 + " " + landlord.Address2 + " " +
+                                          landlord.City + " " + landlord.State.Name + " " + landlord.Zipcode,
+                        LandlordPhone = landlord.Phone,
+                        LandlordEmail = landlord.Email,
+                        PropertyAddress = building.Address1 + " " + building.Address2 + " " +
+                                          building.City + " " + building.State.Name + " " + building.Zipcode,
+                        NumberofRoom = building.BuildingUnits.ToString(),
+                        TenantIds = lc.TenantId,
+                        LeaseEnd = lc.LeaseEnd,
+                        CityorCounty = county != null ? county.Name : null,
+                        RentOwned = lc.TotalRentOwed,
+                        RentDate = rentdue != null ? rentdue.Name : null,
+                        LastRent = lc.LastRentPaid,
+                        NoticePeriod = lc.CalculatedNoticeLength,
+                        VacateDate = lc.ExpirationDate,
+                        BuildingStreet = building.Address1 + " " + building.Address2,
+                        BuildingCity = building.City,
+                        BuildingState = building.State.Name,
+                        BuildingZip = building.Zipcode,
+                        BuildindAptno = tenant.UnitOrApartmentNumber
+                    }
+                ).FirstOrDefaultAsync();
 
                 if (caseDetails == null)
                     throw new Exception("Case details not found.");
 
-                // 3. Parse TenantIds
-                List<Guid> tenantIds = new List<Guid>();
+                Log("Case data loaded.");
 
+                // --------------------
+                // LOAD TENANTS
+                // --------------------
+                List<Guid> tenantIds = new();
 
-                if (caseDetails.TenantIds.HasValue)  // since it's Guid?
-                {
+                if (caseDetails.TenantIds.HasValue)
                     tenantIds.Add(caseDetails.TenantIds.Value);
-                }
 
-
-                // 4. Fetch all tenants for this case
                 var tenants = await _context.Tenants
                     .Where(t => tenantIds.Contains(t.Id))
-                    .Select(t => new
-                    {
-                        FullName = t.FirstName + " " + t.LastName,
-                        ApartmentNumber = t.UnitOrApartmentNumber
-                    })
+                    .Select(t => new { FullName = t.FirstName + " " + t.LastName, ApartmentNumber = t.UnitOrApartmentNumber })
                     .ToListAsync();
 
-                var additionalTenants = await _context.AdditioanlTenants.Where(e => tenantIds.Contains(e.TenantId.Value)).Select(t => new
-                {
-                    FullName = t.FirstName + " " + t.LastName,
-                    ApartmentNumber = " "
+                var additionalTenants = await _context.AdditioanlTenants
+                    .Where(e => tenantIds.Contains(e.TenantId.Value))
+                    .Select(t => new { FullName = t.FirstName + " " + t.LastName, ApartmentNumber = "" })
+                    .ToListAsync();
 
-                }).ToListAsync();
+                tenants.AddRange(additionalTenants);
 
-                if (additionalTenants.Count > 0)
-                {
-                    tenants.AddRange(additionalTenants);
-                }
+                var additionalOccupants = await _context.AdditionalOccupants
+                    .Where(e => e.LegalCaseId == legalCaseId)
+                    .Select(t => new { FullName = t.Name, ApartmentNumber = "" })
+                    .ToListAsync();
 
-                var additionaloccupants = await _context.AdditionalOccupants.Where(e => e.LegalCaseId == legalCaseId).Select(t => new
-                {
-                    FullName = t.Name + " ",
-                    ApartmentNumber = " "
+                tenants.AddRange(additionalOccupants);
 
-                }).ToListAsync();
+                Log($"Total Tenants found: {tenants.Count}");
 
-                if (additionaloccupants.Count > 0)
-                {
-                    tenants.AddRange(additionaloccupants);
-                }
-
-                // 5. Get first tenant details for top section
+                // --------------------
+                // HTML VARIABLE REPLACEMENT
+                // --------------------
                 string firstTenantName = tenants.Count > 0 ? tenants[0].FullName : "";
                 string firstApartmentNumber = tenants.Count > 0 ? tenants[0].ApartmentNumber : "";
 
-                // 6. Fill HTML placeholders
-                string filledHtml = template.HTML
-                    .Replace("{{LandlordName}}", caseDetails.LandlordName ?? "")
-                    .Replace("{{LandlordAddress}}", caseDetails.LandlordAddress ?? "")
-                    .Replace("{{LandlordPhone}}", caseDetails.LandlordPhone ?? "")
-                    .Replace("{{LandlordEmail}}", caseDetails.LandlordEmail ?? "")
-                    .Replace("{{LandlordDate}}", noticeDate.ToString("dd/MM/yyyy"))
-                    .Replace("{{PropertyAddress}}", caseDetails.PropertyAddress ?? "")
-                    .Replace("{{ApartmentNumber}}", firstApartmentNumber ?? "")
-                    .Replace("{{CurrentDate}}", DateTime.Now.ToString("dd/MM/yyyy"))
-                    .Replace("{{NumberofRoom}}", caseDetails.NumberofRoom ?? "")
-                    .Replace("{{TenantName}}", firstTenantName); // Single tenant for top
+                // Parse last rent
+                string lastRent = "";
+                if (DateTime.TryParseExact(caseDetails.LastRent, "MMM yyyy", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out var lastRentDate) ||
+                    DateTime.TryParseExact(caseDetails.LastRent, "MMMM yyyy", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out lastRentDate))
+                {
+                    lastRent = lastRentDate.AddMonths(1).ToString("MMMM");
+                }
 
-                // 7. Fill up to 12 tenant names dynamically
+                string filledHtml = template.HTML
+    .Replace("{{LandlordName}}", caseDetails.LandlordName ?? "")
+    .Replace("{{Landlord_Name}}", caseDetails.LandlordName ?? "")
+    .Replace("{{LandlordAddress}}", caseDetails.LandlordAddress ?? "")
+    .Replace("{{Landlord_Address}}", caseDetails.LandlordAddress ?? "")
+    .Replace("{{LandlordPhone}}", caseDetails.LandlordPhone ?? "")
+    .Replace("{{Landlord_Phone}}", caseDetails.LandlordPhone ?? "")
+    .Replace("{{LandlordEmail}}", caseDetails.LandlordEmail ?? "")
+    .Replace("{{Landlord_Email}}", caseDetails.LandlordEmail ?? "")
+    .Replace("{{LandlordDate}}", noticeDate.ToString("dd/MM/yyyy"))
+    .Replace("{{Notice_Date}}", noticeDate.ToString("dd/MM/yyyy"))
+    .Replace("{{PropertyAddress}}", caseDetails.PropertyAddress ?? "")
+    .Replace("{{Premises_Address}}", caseDetails.PropertyAddress ?? "")
+    .Replace("{{ApartmentNumber}}", firstApartmentNumber ?? "")
+    .Replace("{{CurrentDate}}", DateTime.Now.ToString("dd/MM/yyyy"))
+    .Replace("{{NumberofRoom}}", caseDetails.NumberofRoom ?? "")
+    .Replace("{{TenantName}}", firstTenantName)
+    .Replace("{{City_County}}", caseDetails.CityorCounty ?? "")
+    .Replace("{{Rent_Owned}}", caseDetails.RentOwned.ToString())
+    .Replace("{{Rent_day}}", caseDetails.RentDate ?? "")
+    .Replace("{{month}}", lastRent ?? "")
+    .Replace("{{year}}", DateTime.Now.ToString("yy"))
+    .Replace("{{Vacate_Date}}", caseDetails.VacateDate.ToString())
+    .Replace("{{Notice_Period}}", caseDetails.NoticePeriod.ToString())
+    .Replace("{{Building_Street}}", caseDetails.BuildingStreet ?? "")
+    .Replace("{{Building_State}}", caseDetails.BuildingState ?? "")
+    .Replace("{{Building_AptNo}}", caseDetails.BuildindAptno ?? "")
+    .Replace("{{Building_Zip}}", caseDetails.BuildingZip ?? "")
+    .Replace("{{Building_City}}", caseDetails.BuildingCity ?? "")
+    .Replace("{{Tenant_Names}}", firstTenantName);
+
+
                 for (int i = 0; i < 12; i++)
                 {
                     string tenantValue = i < tenants.Count ? tenants[i].FullName : "";
                     filledHtml = filledHtml.Replace($"{{{{TenantName{i + 1}}}}}", tenantValue);
                 }
 
-                filledHtml = filledHtml.Replace("{{lease_expired_date}}", caseDetails.LeaseEnd?.ToString("dd/MM/yyyy") ?? "");
                 if (caseDetails.LeaseEnd != null)
-                {
-                    Console.WriteLine("Checkbox is ticked");
-                    filledHtml = filledHtml.Replace("{{lease_expired}}", "chceked");
-                }
+                    filledHtml = filledHtml.Replace("{{lease_expired}}", "checked");
 
+                filledHtml = filledHtml.Replace("{{lease_expired_date}}",
+                    caseDetails.LeaseEnd?.ToString("dd/MM/yyyy") ?? "");
 
+                Log("HTML filled successfully.");
 
-                // 9. Generate PDF
-                await new BrowserFetcher().DownloadAsync();
-                await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
-                {
-                    Headless = true,
-                    Args = new[] { "--no-sandbox" }
-                });
+                // ----------------------------------------------------------------------
+                // ADD CSS TO REMOVE SCROLLBARS (IRONPDF limitation fix)
+                // ----------------------------------------------------------------------
+                string cssPatch = @"
+        <style>
+            html, body { overflow: visible !important; height: auto !important; }
+            * { overflow: visible !important; }
+        </style>
+    ";
 
-                var page = await browser.NewPageAsync();
-                await page.SetContentAsync(filledHtml, new NavigationOptions
-                {
-                    WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
-                });
+                filledHtml = filledHtml.Replace("</head>", cssPatch + "</head>");
 
-                var pdfBytes = await page.PdfDataAsync(new PdfOptions
-                {
-                    Format = PaperFormat.A4,
-                    PrintBackground = true
-                });
+                // --------------------
+                // CREATE FOLDER
+                // --------------------
+                string root = Directory.GetCurrentDirectory();
+                string caseFolder = Path.Combine(root, "CaseForms", caseDetails.CaseCode);
+                Directory.CreateDirectory(caseFolder);
 
-                // 10. Save PDF to server
-                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "CaseForms", caseDetails.CaseCode);
-                Directory.CreateDirectory(folderPath);
+                string fileName = $"{Guid.NewGuid()}.pdf";
+                string filePath = Path.Combine(caseFolder, fileName);
 
-                var fileName = $"{Guid.NewGuid()}.pdf";
-                var filePath = Path.Combine(folderPath, fileName);
-                await File.WriteAllBytesAsync(filePath, pdfBytes);
+                // --------------------
+                // IRONPDF GENERATION
+                // --------------------
+                Log("IronPDF Rendering Start...");
 
-                // 11. Save form record to DB
-                var fileUrl = $"/CaseForms/{caseDetails.CaseCode}/{fileName}";
+                var renderer = new ChromePdfRenderer();
+                renderer.RenderingOptions.MarginTop = 0;
+                renderer.RenderingOptions.MarginBottom = 0;
+                renderer.RenderingOptions.MarginLeft = 0;
+                renderer.RenderingOptions.MarginRight = 0;
+                renderer.RenderingOptions.PaperSize = IronPdf.Rendering.PdfPaperSize.A4;
+
+                // Convert HTML → PDF
+                var pdf = renderer.RenderHtmlAsPdf(filledHtml);
+
+                Log("IronPDF Rendering Success.");
+
+                pdf.SaveAs(filePath);
+                Log($"PDF Saved: {filePath}");
+
+                // --------------------
+                // SAVE DB ENTRY
+                // --------------------
                 var caseForm = new CaseForms
                 {
                     Id = Guid.NewGuid(),
                     LegalCaseId = legalCaseId,
                     FormTypeId = formTypeId,
                     HTML = filledHtml,
-                    File = fileUrl,
+                    File = $"/CaseForms/{caseDetails.CaseCode}/{fileName}",
                     CreatedOn = DateTime.UtcNow,
-                    IsDeleted = false,
                     CreatedBy = createdBy,
-
+                    IsDeleted = false
                 };
 
                 _context.CaseForms.Add(caseForm);
-                return await _context.SaveChangesAsync() > 0;
+                await _context.SaveChangesAsync();
+
+                Log("DB Save Success.");
+                Log("=== GenerateNoticeAsync COMPLETED ===");
+
+                return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error generating notice: {ex.Message}");
+                string finalLog = $"ERROR in GenerateNoticeAsync: {ex}";
+                File.AppendAllText(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "pdf_errors.log"), finalLog);
+                Console.WriteLine(finalLog);
                 return false;
             }
         }
-
 
         private DateTime CalculateNoticeDate(string formName)
         {
@@ -207,6 +283,8 @@ namespace EvictionFiler.Infrastructure.Repositories
                 noticeDays = 90;
             else if (formName.ToLower().Contains("5 days"))
                 noticeDays = 5;
+            else if (formName.ToLower().Contains("60 days"))
+                noticeDays = 60;
             else if (formName.ToLower().Contains("30 days"))
                 noticeDays = 30;
 
@@ -214,35 +292,35 @@ namespace EvictionFiler.Infrastructure.Repositories
             return DateTime.Now.AddDays(noticeDays);
         }
 
-        public async Task<byte[]?> GetPdfBytesAsync(Guid id)
-        {
-            var caseForm = await _context.CaseForms
-                .FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted != true);
+        //public async Task<byte[]?> GetPdfBytesAsync(Guid id)
+        //{
+        //    var caseForm = await _context.CaseForms
+        //        .FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted != true);
 
-            if (caseForm == null || string.IsNullOrWhiteSpace(caseForm.HTML))
-                return null;
+        //    if (caseForm == null || string.IsNullOrWhiteSpace(caseForm.HTML))
+        //        return null;
 
-            await new BrowserFetcher().DownloadAsync();
-            await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
-            {
-                Headless = true,
-                Args = new[] { "--no-sandbox" }
-            });
+        //    await new BrowserFetcher().DownloadAsync();
+        //    await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+        //    {
+        //        Headless = true,
+        //        Args = new[] { "--no-sandbox" }
+        //    });
 
 
-            var page = await browser.NewPageAsync();
-            await page.SetContentAsync(caseForm.HTML, new NavigationOptions
-            {
-                WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
-            });
+        //    var page = await browser.NewPageAsync();
+        //    await page.SetContentAsync(caseForm.HTML, new NavigationOptions
+        //    {
+        //        WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
+        //    });
 
-            var pdfBytes = await page.PdfDataAsync(new PdfOptions
-            {
-                Format = PaperFormat.A4,
-                PrintBackground = true
-            });
+        //    var pdfBytes = await page.PdfDataAsync(new PdfOptions
+        //    {
+        //        Format = PaperFormat.A4,
+        //        PrintBackground = true
+        //    });
 
-            return pdfBytes;
-        }
+        //    return pdfBytes;
+        //}
     }
 }

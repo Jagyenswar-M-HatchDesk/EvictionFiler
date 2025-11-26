@@ -1,5 +1,6 @@
 ﻿
 
+using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
@@ -15,29 +16,49 @@ namespace EvictionFiler.Infrastructure.Repositories
         public FeesCatalogCourtAppearanceRepository(MainDbContext context) => _context = context;
 
         // Added missing GetByIdAsync
-        public Task<FeesCatalogCourtAppearance?> GetByIdAsync(int id)
+        public Task<FeesCatalogCourtAppearance?> GetByIdAsync(Guid id)
         {
             return _context.FeesCatalogCourtAppearances.FindAsync(id).AsTask();
         }
 
-        public async Task<List<FeesCatalogCourtAppearance>> GetAllAsync() =>
-            await _context.FeesCatalogCourtAppearances.ToListAsync();
-
-        public async Task<int?> AddAsync(FeesCatalogCourtAppearance entity)
+        public async Task<List<FeesCatalogCourtAppearanceDto>> GetAllAsync()
+        {
+           var data = await _context.FeesCatalogCourtAppearances.ToListAsync();
+            return data.Select(e => new FeesCatalogCourtAppearanceDto()
+            {
+                Id = e.Id,
+                AttorneyHourly = e.AttorneyHourly,
+                County = e.County,
+                CourtAppearance = e.CourtAppearance,
+                PerDiem = e.PerDiem,
+            }).ToList();
+        }
+        public async Task<Guid?> AddAsync(FeesCatalogCourtAppearance entity)
         {
             _context.FeesCatalogCourtAppearances.Add(entity);
             await _context.SaveChangesAsync();
             return entity.Id;
         }
 
-        public async Task<bool> UpdateAsync(FeesCatalogCourtAppearance entity)
+        public async Task<bool> UpdateAsync(FeesCatalogCourtAppearanceDto entity)
         {
-            _context.FeesCatalogCourtAppearances.Update(entity);
-            await _context.SaveChangesAsync();
-            return true;
+            var existing = await _context.FeesCatalogCourtAppearances.FindAsync(entity.Id);
+            if (existing != null)
+            {
+                existing.CourtAppearance = entity.CourtAppearance;
+                existing.County = entity.County;
+                existing.PerDiem = entity.PerDiem;
+                existing.AttorneyHourly = entity.AttorneyHourly;
+
+
+                _context.FeesCatalogCourtAppearances.Update(existing);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Guid id)
         {
             var e = await _context.FeesCatalogCourtAppearances.FindAsync(id);
             if (e != null)

@@ -34,12 +34,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 				.FirstOrDefaultAsync();
 		}
 
-		public async Task<List<CreateToClientDto>> SearchClient(string searchTerm)
+		public async Task<List<EditToClientDto>> SearchClient(string searchTerm)
 		{
 			if (string.IsNullOrWhiteSpace(searchTerm))
-				return new List<CreateToClientDto>();
+				return new List<EditToClientDto>();
 
 			searchTerm = searchTerm.Trim().ToLower();
+
+			var testclient = _context.Clients.ToList();
 
 			var client = await _context.Clients
 				.Where(e =>
@@ -55,8 +57,9 @@ namespace EvictionFiler.Infrastructure.Repositories
 					(e.City != null && e.City.ToLower().Contains(searchTerm)) ||
 					  (e.IsActive ? "active" : "inactive").Contains(searchTerm)
 				)
-				.Select(e => new CreateToClientDto
-				{
+				.Select(e => new EditToClientDto
+                {
+					Id = e.Id,
 					ClientCode = e.ClientCode,
 					FirstName = e.FirstName,
 					LastName = e.LastName,
@@ -69,11 +72,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 					Phone = e.Phone,
 					CellPhone = e.CellPhone,
 					Fax = e.Fax,
-					Status = e.IsActive 
+					Status = e.IsActive ,
+					ClientTypeId = e.ClientTypeId,
+					Reference = e.Reference,
 				})
 				.ToListAsync();
 
-			return client ?? new List<CreateToClientDto>();
+			return client ?? new List<EditToClientDto>();
 		}
 
 

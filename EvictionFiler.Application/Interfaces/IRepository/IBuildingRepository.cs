@@ -9,8 +9,9 @@ namespace EvictionFiler.Application.Interfaces.IRepository
     public interface IBuildingRepository : IRepository<Building>
     {
 		Task<string?> GetLastBuildingCodeAsync();
-        Task<List<EditToBuildingDto>> SearchBuildingByCode(string code, Guid landlordId, Guid excludeBuildingId);
-		Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id);
+        Task<List<EditToBuildingDto>> SearchBuilding(string searchText, Guid landlordId);
+
+        Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id);
         Task<List<EditToBuildingDto>> GetBuildingsByLandlordIdAsync(Guid landlordId);
 		Task<EditToBuildingDto> GetBuildingByIdAsync(Guid buildingId);
         Task<string> GenerateBuildingCodeAsync();

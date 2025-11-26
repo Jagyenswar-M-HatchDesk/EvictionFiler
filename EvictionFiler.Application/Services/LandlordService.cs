@@ -168,7 +168,7 @@ namespace EvictionFiler.Application.Services
         }
 
 
-        public async Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query, Guid clientId)
+        public async Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query , Guid clientId)
         {
             return await _landLordRepository.SearchLandlordsAsync(query, clientId);
         }
@@ -261,6 +261,8 @@ namespace EvictionFiler.Application.Services
                 if (entity.LawFirm != landlords.LawFirm) entity.LawFirm = landlords.LawFirm;
                 if (entity.AttorneyOfRecord != landlords.AttorneyOfRecord) entity.AttorneyOfRecord = landlords.AttorneyOfRecord;
                 if (entity.Address1 != landlords.Address1) entity.Address1 = landlords.Address1;
+                if (entity.FirstName != landlords.FirstName) entity.FirstName = landlords.FirstName;
+                if (entity.LastName != landlords.LastName) entity.LastName = landlords.LastName;
 
             }
 

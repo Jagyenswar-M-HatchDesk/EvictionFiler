@@ -9,7 +9,7 @@ namespace EvictionFiler.Domain.Entities
     public class FeesCatalogAttorneyRoster
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         [Required]
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;

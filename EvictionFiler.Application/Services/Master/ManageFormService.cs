@@ -77,6 +77,41 @@ namespace EvictionFiler.Application.Services.Master
             };
         }
 
+        public async Task<List<FormAddEditViewModelDto>> GetAllFormByCategoryAsync()
+        {
+            var query = _repository.GetAllQuerable
+                (
+                x => x.IsDeleted != true,
+                    x => x.CaseType,
+                    x => x.Category
+               );
+
+            
+
+
+            var forms = query
+        .Select(x => new FormAddEditViewModelDto
+        {
+            Name = x.Name.Trim(),
+            CaseType = x.CaseType,
+            CaseTypeId = x.CaseTypeId,
+            CaseTypeName = x.CaseType != null ? x.CaseType.Name : "-",
+            CategoryName = x.Category != null ? x.Category.Name : "-",
+            HTML = x.HTML,
+            CreatedOn = x.CreatedOn,
+            Id = x.Id,
+            CategoryId = x.CategoryId,
+            UnitId = x.UnitId,
+            Code = x.Code ?? "-",
+            Rate = x.Rate ?? "-" ,
+            UnitName = x.Units != null ? x.Units.Name : "-",
+            
+        })
+        .ToList();
+
+            return forms;
+        }
+
         public async Task<bool> CreateForm(FormAddEditViewModelDto dto)
         {
         
@@ -146,7 +181,24 @@ namespace EvictionFiler.Application.Services.Master
 
             return true;
         }
+        public async Task<bool> UpdateFormFeeAsync(FormAddEditViewModelDto form)
+        {
+            var existing = await _repository.GetAsync(form.Id);
+            if (existing == null) return false;
 
+            // Pehle existing legal case fields update karo (already hai)
+            existing.Code = form.Code;
+            existing.UnitId = form.UnitId;
+            existing.Rate = form.Rate;
+            existing.UpdatedOn = DateTime.Now;
+
+            // Save changes
+            _repository.UpdateAsync(existing);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if(result > 0) return true;
+
+            return false;
+        }
         public async Task<PaginationDto<FormAddEditViewModelDto>> GetAllAffidavaitAsync(int pageNumber, int pageSize, string searchTerm)
         {
             var query = _repository.GetAllQuerable

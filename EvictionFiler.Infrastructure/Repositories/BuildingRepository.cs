@@ -112,37 +112,54 @@ namespace EvictionFiler.Infrastructure.Repositories
 		}
 
 
-		public async Task<List<EditToBuildingDto>> SearchBuildingByCode(string code, Guid landlordId, Guid excludeBuildingId)
-		{
-			return await _context.Buildings
-				.Where(appartment =>
-					appartment.LandlordId == landlordId &&
-					appartment.Id != excludeBuildingId && // current building exclude
-					appartment.BuildingCode.StartsWith(code) &&
-					appartment.IsDeleted != true
-				)
-				.Select(appartment => new EditToBuildingDto
-				{
-					Id = appartment.Id,
-					BuildingCode = appartment.BuildingCode,
-					ApartmentCode = appartment.ApartmentCode,
-					City = appartment.City,
-					StateId = appartment.StateId,
-					PremiseTypeId = appartment.PremiseTypeId,
-					Address1 = appartment.Address1,
-					Address2 = appartment.Address2,
-					Zipcode = appartment.Zipcode,
-					MDRNumber = appartment.MDRNumber,
-					PetitionerInterest = appartment.PetitionerInterest,
-					RegulationStatusId = appartment.RegulationStatusId,
-					BuildingUnits = appartment.BuildingUnits,
-					LandlordId = appartment.LandlordId
-				})
-				.ToListAsync();
-		}
+        public async Task<List<EditToBuildingDto>> SearchBuilding(string searchText, Guid landlordId)
+        {
+            searchText = searchText?.Trim() ?? "";
+
+            return await _context.Buildings
+                .Where(b =>
+                    b.LandlordId == landlordId &&
+                    b.IsDeleted != true &&
+                    (
+                        // Search by BuildingCode (StartsWith = indexed & fast)
+                        b.BuildingCode.StartsWith(searchText) ||
+
+                        // MDRNumber - often numeric, but still contains
+                        b.MDRNumber.Contains(searchText) ||
+
+                        // Address - partial match
+                        b.Address1.Contains(searchText) ||
+                        b.Address2.Contains(searchText) ||
+
+                        // City
+                        b.City.Contains(searchText)
+                    )
+                )
+                .Select(b => new EditToBuildingDto
+                {
+                    Id = b.Id,
+                    BuildingCode = b.BuildingCode,
+                    ApartmentCode = b.ApartmentCode,
+                    City = b.City,
+                    StateId = b.StateId,
+                    PremiseTypeId = b.PremiseTypeId,
+                    Address1 = b.Address1,
+                    Address2 = b.Address2,
+                    Zipcode = b.Zipcode,
+                    MDRNumber = b.MDRNumber,
+                    PetitionerInterest = b.PetitionerInterest,
+                    RegulationStatusId = b.RegulationStatusId,
+                    BuildingUnits = b.BuildingUnits,
+                    LandlordId = b.LandlordId,
+					BuildingTypeId = b.BuildingTypeId,
+					RegistrationStatusId = b.RegistrationStatusId
+
+                })
+                .ToListAsync();
+        }
 
 
-		public async Task<List<EditToBuildingDto>> GetBuildingsByLandlordIdAsync(Guid landlordId)
+        public async Task<List<EditToBuildingDto>> GetBuildingsByLandlordIdAsync(Guid landlordId)
 		{
 			var building = await _context.Buildings
 		.Include(a => a.State)

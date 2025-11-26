@@ -47,16 +47,17 @@ namespace EvictionFiler.Infrastructure.Repositories
 				.Select(l => l.LandLordCode)
 				.FirstOrDefaultAsync();
 		}
-		public async Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query, Guid clientId)
+		public async Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query , Guid clientId)
 		{
 			query = query?.Trim().ToLower() ?? "";
 
-			var landlords = await _mainDbContext.LandLords
+			var landlords = await _mainDbContext.LandLords.Include(e=>e.State).Include(e=>e.TypeOfOwner)
 				.Where(l =>
-					l.ClientId == clientId &&                
+					l.ClientId == clientId &&
 					l.IsDeleted != true &&
 					(
 						l.FirstName.ToLower().StartsWith(query) ||
+						l.LastName.ToLower().StartsWith(query) ||
 						l.LandLordCode.ToLower().StartsWith(query)
 					)
 				)
@@ -64,10 +65,23 @@ namespace EvictionFiler.Infrastructure.Repositories
 				{
 					Id = l.Id,
 					FirstName = l.FirstName,
+					LastName = l.LastName,
+					Address1 = l.Address1,
+					Address2 = l.Address2,	
+					City = l.City,
+					Zipcode = l.Zipcode,
+					StateId = l.StateId,
+
 					Email = l.Email,
 					Phone = l.Phone,
-					LandLordCode = l.LandLordCode
-				})
+					LandLordCode = l.LandLordCode,
+                    EINorSSN = l.EINorSSN,
+                    ContactPersonName = l.ContactPersonName,
+                    TypeOwnerId = l.TypeOfOwnerId,
+                    LandlordTypeName = l.LandlordType != null ? l.LandlordType.Name : string.Empty,
+                    StateName = l.State != null ? l.State.Name : string.Empty,
+                    TypeOwnerName = l.TypeOfOwner != null ? l.TypeOfOwner.Name : string.Empty,
+                })
 				.ToListAsync();
 
 			return landlords;

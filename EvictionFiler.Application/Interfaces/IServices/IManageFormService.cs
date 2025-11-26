@@ -28,6 +28,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<PaginationDto<FormAddEditViewModelDto>> GetAllTenantAsync(int pageNumber, int pageSize, string searchTerm);
         Task<PaginationDto<FormAddEditViewModelDto>> GetAllWarrantsAsync(int pageNumber, int pageSize, string searchTerm);
 
-
+        Task<List<FormAddEditViewModelDto>> GetAllFormByCategoryAsync();
+        Task<bool> UpdateFormFeeAsync(FormAddEditViewModelDto form);
     }
 }

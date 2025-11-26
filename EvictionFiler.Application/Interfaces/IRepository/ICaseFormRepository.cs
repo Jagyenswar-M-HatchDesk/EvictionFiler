@@ -11,7 +11,8 @@ namespace EvictionFiler.Application.Interfaces.IRepository
 	public interface ICaseFormRepository :  IRepository<CaseForms>
 	{
 		Task<bool> GenerateNoticeAsync(Guid legalCaseId, Guid formTypeId, Guid createdBy);
-		Task<byte[]> GetPdfBytesAsync(Guid id);
+		//Task<byte[]> GetPdfBytesAsync(Guid id);
 
-	}
+        //Task<bool> GetCaseForms(Guid legalCaseId, Guid formTypeId, Guid createdBy);
+    }
 }

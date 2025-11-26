@@ -1,6 +1,9 @@
-﻿using EvictionFiler.Application.DTOs.DashboardDto;
+﻿using EvictionFiler.Application.DTOs.ClientDto;
+using EvictionFiler.Application.DTOs.DashboardDto;
+using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.LegalCaseDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
+using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -14,9 +17,9 @@ namespace EvictionFiler.Application.Interfaces.IRepository
     {
         
         Task<PaginationDto<LegalCase>> Search(int pageNumber, int pageSize, CaseFilterDto filters);
-        Task<List<string>> GetClientSuggestions(string term);
-        Task<List<string>> GetTenantSuggestions(string term);
-        Task<List<string>> GetLandlordSuggestions(string term);
+        Task<List<EditToClientDto>> GetClientSuggestions(string term);
+        Task<List<EditToTenantDto>> GetTenantSuggestions(string term);
+        Task<List<EditToLandlordDto>> GetLandlordSuggestions(string term);
         Task<List<string>> GetCaseSuggestions(string term);
         Task<List<string>> GetReasonHoldoverSuggestions(string term);
     }

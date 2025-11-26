@@ -1,7 +1,9 @@
 ﻿using EvictionFiler.Domain.Entities.Base.Base;
+using EvictionFiler.Domain.Entities.Master;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,14 +12,16 @@ namespace EvictionFiler.Application.DTOs
 {
     public class IntakeModel : DeletableBaseEntity
     {
-        public Guid Id { get; set; }
+        //public Guid Id { get; set; }
         //[Required(ErrorMessage = "Client is required")]
         public Guid? ClientId { get; set; }
         public Guid? CourtId { get; set; }
+        public Guid? CountyId { get; set; }
 
-        public string Selectedclient { get; set; }
+        public string ?Selectedclient { get; set; }
         public string Status { get; set; }
         public string ClientName { get; set; }
+        public string ClientAddress { get; set; }
         public string Casecode { get; set; }
         public string Buildingcode { get; set; }
         public string FullName { get; set; }
@@ -41,14 +45,16 @@ namespace EvictionFiler.Application.DTOs
         public string? ApartmentNumber { get; set; }
 
         public Guid? BuildingId { get; set; }
+        public Guid? CourtLocationId{ get; set; }
         public Guid? BuildingStateId { get; set; }
         public string? BuildingState { get; set; }
         public string BuildingAddress { get; set; }
         public Guid? RegulationStatusId { get; set; }
         public string RegulationStatusName { get; set; }
+        public string? CourtName { get; set; }
 
-        public string TenantName { get; set; }
-        public string UnitNumber { get; set; }
+        public string? TenantName { get; set; }
+        public string? UnitNumber { get; set; }
         public bool? TenantRecord { get; set; }
         public bool? HasPossession { get; set; }
         public bool? OtherOccupants { get; set; }
@@ -118,6 +124,81 @@ namespace EvictionFiler.Application.DTOs
         public string CourtCallIn { get; set; } = string.Empty;
         public string CourtConferenceId { get; set; } = string.Empty;
         public string Judge { get; set; } = string.Empty;
-        public decimal? BillAmount { get; set; } 
+        public decimal? BillAmount { get; set; }
+
+        public string? CourtLocation { get; set; }
+
+        public string? County { get; set; }
+        public string? Index { get; set; }
+        public string? CourtRoom { get; set; }
+        public string? OpposingCounsel { get; set; }
+        public string? ManagingAgent { get; set; }
+        public DateOnly? AppearanceDate { get; set; }
+
+        public string? InvoiceTo { get; set; }
+        public TimeOnly? AppearanceTime { get; set; }
+        public Guid? HarassmentTypeId { get; set; }
+        public Guid? DefenseTypeId { get; set; }
+        public string? AttrneyEmail { get; set; }
+
+        public string? Attrney { get; set; }
+       
+        public string? AttrneyContactInfo { get; set; }
+
+        public Guid? CaseTypeHPDId { get; set; }
+        public Guid? CaseTypePerDiemId { get; set; }
+       
+
+        public CaseTypeHPD? CaseTypeHPDs { get; set; }
+        public CaseTypePerdiem? CaseTypePerdiems { get; set; }
+        public List<Guid> SelectedCaseTypeHPDIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedCaseTypePerDiemIds { get; set; } = new List<Guid>();
+
+        public List<Guid> SelectedAppearanceTypeIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedAppearanceTypePerDiemIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedDocumentInstructionPerDiemIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedReportingRequirementPerDiemIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedReliefRespondentTypeIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedReliefPetitionerTypeIds { get; set; } = new List<Guid>();
+        public List<Guid> SelectedHarassmentTypeIds { get; set; } = new List<Guid>();
+
+        public List<Guid> SelectedDefenseTypeIds { get; set; } = new List<Guid>();
+        public Guid? PartyRepresentId { get; set; }
+        public Guid? PartyRepresentPerDiemId { get; set; }
+
+        public Guid? BilingTypeId { get; set; }
+
+        public Guid? BuildingTypeId { get; set; }
+        public BuildingType? BuildingType { get; set; }
+        public Guid? RegistrationStatusTypeId { get; set; }
+
+        public Guid? PaymentMethodId { get; set; }
+        public string? TravelExpense { get; set; }
+        public BilingType? BilingType { get; set; }
+        public Guid? AppearanceTypeId { get; set; }
+
+        public Guid? PremiseTypeId { get; set; }
+
+        public Guid? AppearanceTypePerdiemId { get; set; }
+
+        public AppearanceType? AppearanceType { get; set; }
+        public AppearanceTypePerDiem? AppearanceTypePerDiem { get; set; }
+
+        public Guid? ReliefRespondentTypeId { get; set; }
+    
+        public ReliefRespondentType? ReliefRespondentType { get; set; }
+        public Guid? ReliefPetitionerTypeId { get; set; }
+     
+        public ReliefPetitionerType? ReliefPetitionerType { get; set; }
+        public string? Partynames { get; set; }
+        public string? CaseBackground { get; set; }
+        public decimal? BilingTypeInputValue { get; set; }
+        public string? PerDiemAttorneyname { get; set; }
+        public string? PerDiemSignature { get; set; }
+        public DateOnly? PerDiemDate { get; set; }
+       
+        public string? SpecialInstruction { get; set; }
+
+
     }
 }

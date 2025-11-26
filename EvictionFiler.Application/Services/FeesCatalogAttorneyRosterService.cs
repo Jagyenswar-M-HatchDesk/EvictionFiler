@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Application.Interfaces.IRepository;
+﻿using EvictionFiler.Application.DTOs;
+using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IServices.Master;
 using EvictionFiler.Domain.Entities;
@@ -17,13 +18,13 @@ namespace EvictionFiler.Application.Services.Master
             _repository = repository;
         }
 
-        public async Task<List<FeesCatalogAttorneyRoster>> GetAllAsync() =>
+        public async Task<List<FeesCatalogAttorneyRosterDto>> GetAllAsync() =>
             await _repository.GetAllAsync();
 
-        public async Task<FeesCatalogAttorneyRoster?> GetByIdAsync(int id) =>
+        public async Task<FeesCatalogAttorneyRoster?> GetByIdAsync(Guid id) =>
             await _repository.GetByIdAsync(id);
 
-        public async Task<int?> AddAsync(FeesCatalogAttorneyRoster entity)
+        public async Task<Guid?> AddAsync(FeesCatalogAttorneyRoster entity)
         {
             return await _repository.AddAsync(entity);
         }
@@ -32,13 +33,13 @@ namespace EvictionFiler.Application.Services.Master
         //    return await _repository.AddAsync(entity);
         //}
 
-        public async Task<bool> UpdateAsync(FeesCatalogAttorneyRoster entity)
+        public async Task<bool> UpdateAsync(FeesCatalogAttorneyRosterDto entity)
         {
 
             return await _repository.UpdateAsync(entity);
         }
 
-        public async Task DeleteAsync(int id) =>
+        public async Task DeleteAsync(Guid id) =>
             await _repository.DeleteAsync(id);
     }
 }

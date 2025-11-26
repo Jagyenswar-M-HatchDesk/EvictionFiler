@@ -87,6 +87,8 @@ namespace EvictionFiler.Domain.Entities
 		public string? Attrney { get; set; }
 		[MaxLength(100)]
 		public string? AttrneyContactInfo { get; set; }
+
+
 		[MaxLength(50)]
 		public string? Firm { get; set; }
 
@@ -132,6 +134,68 @@ namespace EvictionFiler.Domain.Entities
         public Courts? Courts { get; set; }
 
         public decimal? BillAmount { get; set; }
+
+        [MaxLength(100)]
+        public string? AttrneyEmail { get; set; }
+
+        public ICollection<CaseTypeHPD> CaseTypeHPDs { get; set; } = new List<CaseTypeHPD>();
+        public ICollection<CaseTypePerdiem> CaseTypePerDiems { get; set; } = new List<CaseTypePerdiem>();
+        public ICollection<AppearanceType> AppearanceType { get; set; } = new List<AppearanceType>();
+        public ICollection<AppearanceTypePerDiem> AppearanceTypePerDiem { get; set; } = new List<AppearanceTypePerDiem>();
+        public ICollection<ReliefRespondentType> ReliefRespondentType { get; set; } = new List<ReliefRespondentType>();
+        public ICollection<ReliefPetitionerType> ReliefPetitionerType { get; set; } = new List<ReliefPetitionerType>();
+
+        public Guid? PartyRepresentPerDiemId { get; set; }
+        [ForeignKey("PartyRepresentPerDiemId")]
+        public PartyRepresentPerDiem? PartyRepresentPerDiems { get; set; }
+
+        public Guid? PartyRepresentId { get; set; }
+        [ForeignKey("PartyRepresentId")]
+        public PartyRepresent? PartyRepresents { get; set; }
+  
+        public Guid? BilingTypeId { get; set; }
+        [ForeignKey("BilingTypeId")]
+        public BilingType? BilingType { get; set; }
+        public Guid? PaymentMethodId { get; set; }
+        [ForeignKey("PaymentMethodId")]
+        public PaymentMethod? PaymentMethod { get; set; }
+
+        public Guid? RatetypeId { get; set; }
+        public decimal? Flatdescription{ get; set; }
+        public decimal? Hourlydescription { get; set; }
+        [ForeignKey("RatetypeId")]
+        public RateType? RateType { get; set; }
+        public string? TravelExpense { get; set; }
+        public string? PerDiemAttorneyname { get; set; }
+        public string? PerDiemSignature { get; set; }
+        public DateOnly? PerDiemDate { get; set; }
+        public ICollection<HarassmentType> HarassmentTypse { get; set; } = new List<HarassmentType>();
+
+        public ICollection<DefenseType> DefenseTypse { get; set; } = new List<DefenseType>();
+        public ICollection<DocumentTypePerDiem> DocumentIntructionsTypse { get; set; } = new List<DocumentTypePerDiem>();
+        public ICollection<ReportingTypePerDiem> ReportingTypePerDiems { get; set; } = new List<ReportingTypePerDiem>();
+
+
+        public Guid? CourtLocationId { get; set; }
+        [ForeignKey("CourtLocationId")]
+        public Courts? CourtLocation { get; set; }
+
+        public string? County { get; set; }
+        public string? Index { get; set; }
+        public string? CourtRoom{ get; set; }
+        public string? OpposingCounsel { get; set; }
+        public string? ManagingAgent { get; set; }
+
+        public string? Partynames { get; set; }
+        public string? ReliefActionRequested { get; set; }
+        public string? CaseBackground { get; set; }
+        public string? SpecialInstruction { get; set; }
+        public DateOnly? AppearanceDate { get; set; }
+
+        public string? InvoiceTo { get; set; }
+        public string? TenantName { get; set; }
+        public TimeOnly? AppearanceTime { get; set; }
+
 
     }
 }

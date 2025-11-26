@@ -1,12 +1,17 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace EvictionFiler.Application.DTOs
 {
     public class FeesCatalogAttorneyRosterDto
     {
-        public int Id { get; set; }
-        public int FeesCatalogId { get; set; }
-        public int AttorneyId { get; set; }
-        public decimal Rate { get; set; } = decimal.Zero;
-        public decimal TravelWait { get; set; } = 0;
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public string BarNumber { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public decimal HourlyRate { get; set; }
+        public decimal TravelWait { get; set; }
     }
 }

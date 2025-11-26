@@ -17,6 +17,16 @@ namespace EvictionFiler.Application.Interfaces.IRepository
         Task<List<LegalCase>> GetTodayCasesAsync();
         Task<int> GetTotalCasesCountAsync(string userId, bool isAdmin);
         Task<int> GetActiveCasesCountAsync(string userId, bool isAdmin);
+        Task<List<CaseTypeHPD>> GetHPDByIdsAsync(List<Guid> ids);
+        Task<List<HarassmentType>> GetHarassmentTypeIdAsync(List<Guid> ids);
+        Task<List<DefenseType>> GetDefenseTypeIdAsync(List<Guid> ids);
+        Task<List<AppearanceType>> GetApperenceTypeIdAsync(List<Guid> ids);
+        Task<List<ReliefPetitionerType>> GetReliefPetitionerTypesListTypeIdAsync(List<Guid> ids);
+        Task<List<ReliefRespondentType>> GetReliefRespondentTypesListTypeIdAsync(List<Guid> ids);
+        Task<List<CaseTypePerdiem>> GetCaseTypePerDiemByIdsAsync(List<Guid> ids);
+        Task<List<AppearanceTypePerDiem>> GetApperenceTypePerDiemIdAsync(List<Guid> ids);
+        Task<List<DocumentTypePerDiem>> GetDocumentIntructionsTypsIdAsync(List<Guid> ids);
+        Task<List<ReportingTypePerDiem>> GetReportingTypePerDiemsIdAsync(List<Guid> ids);
 
 
     }

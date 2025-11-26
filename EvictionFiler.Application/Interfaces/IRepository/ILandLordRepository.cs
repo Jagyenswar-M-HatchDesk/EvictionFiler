@@ -13,7 +13,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
     public interface ILandLordRepository : IRepository<LandLord>
 	{
 		Task<string?> GetLastLandLordCodeAsync();
-        Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query, Guid clientId);
+        Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query  , Guid clientId);
 		Task<LandlordWithBuildings?> GetLandlordWithBuildingsAsync(Guid landlordId);
         Task<List<EditToLandlordDto>> GetByClientIdAsync(Guid? clientId);
         Task<List<TypeOfOwner>> GetAllOwner();

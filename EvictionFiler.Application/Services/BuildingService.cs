@@ -6,7 +6,6 @@ using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
-using PdfSharpCore.Pdf;
 
 namespace EvictionFiler.Application.Services
 {
@@ -126,6 +125,9 @@ namespace EvictionFiler.Application.Services
                 MDRNumber = appartment.MDRNumber,
                 PetitionerInterest = appartment.PetitionerInterest,
                 BuildingUnits = appartment.BuildingUnits,
+                BuildingTypeId = appartment.BuildingTypeId,
+                RegistrationStatusId = appartment.RegistrationStatusId,
+
 
                 LandlordId = appartment.LandlordId,
             };
@@ -166,9 +168,9 @@ namespace EvictionFiler.Application.Services
             };
         }
 
-        public async Task<List<EditToBuildingDto>> SearchBuildingByCode(string code, Guid landlordId, Guid excludeBuildingId)
+        public async Task<List<EditToBuildingDto>> SearchBuilding(string code, Guid landlordId)
         {
-            return await _repository.SearchBuildingByCode(code, landlordId, excludeBuildingId);
+            return await _repository.SearchBuilding(code, landlordId);
         }
 
         public async Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id)
@@ -230,6 +232,9 @@ namespace EvictionFiler.Application.Services
                 if (entity.MDRNumber != appartment.MDRNumber) entity.MDRNumber = appartment.MDRNumber;
                 if (entity.RegulationStatusId != appartment.RegulationStatusId)  entity.RegulationStatusId = appartment.RegulationStatusId;
                 if (entity.BuildingUnits != appartment.BuildingUnits) entity.BuildingUnits = appartment.BuildingUnits;
+                if (entity.BuildingTypeId != appartment.BuildingTypeId) entity.BuildingTypeId = appartment.BuildingTypeId;
+                if (entity.PremiseTypeId != appartment.PremiseTypeId) entity.PremiseTypeId = appartment.PremiseTypeId;
+                if (entity.RegistrationStatusId != appartment.RegistrationStatusId) entity.RegistrationStatusId = appartment.RegistrationStatusId;
 
                 _repository.UpdateAsync(entity);
                 await _unitOfWork.SaveChangesAsync();

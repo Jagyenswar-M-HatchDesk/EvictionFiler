@@ -1,4 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.LegalCaseDto;
+using EvictionFiler.Application.DTOs.MasterDtos.HarassmentTypeDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IUserRepository;
@@ -148,6 +149,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     CreatedOn = c.CreatedOn,
                     CreatedBy = c.CreatedBy,
                     ReasonHoldover = c.ReasonHoldover,
+                    TenantName = c.TenantName,
                     CaseType = c.CaseType != null ? new CaseType
                     {
                         Name = c.CaseType.Name
@@ -300,6 +302,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     CaseType = c.CaseType,
                     ReasonHoldover = c.ReasonHoldover,
                     CreatedBy = c.CreatedBy,
+                    TenantName = c.TenantName,
                     CreatedByName = userDict.ContainsKey(c.CreatedBy)
                             ? userDict[c.CreatedBy]
                             : "Admin",
@@ -360,5 +363,108 @@ namespace EvictionFiler.Infrastructure.Repositories
 			return newCode;
 		}
 
-	}
+        public async Task<List<CaseTypeHPD>> GetHPDByIdsAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+                return new List<CaseTypeHPD>();
+
+            return await _context.MstCaseTypesHPD
+                .Where(h => ids.Contains(h.Id))
+                .ToListAsync();
+        }
+
+        public async Task<List<CaseTypePerdiem>> GetCaseTypePerDiemByIdsAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+                return new List<CaseTypePerdiem>();
+
+            return await _context.MstCaseTypePerdiems
+                .Where(h => ids.Contains(h.Id))
+                .ToListAsync();
+        }
+
+        
+
+        public async Task<List<HarassmentType>> GetHarassmentTypeIdAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+                return new List<HarassmentType>();
+
+            return await _context.MstHarassmentTypes
+                .Where(h => ids.Contains(h.Id))
+                .ToListAsync();
+        }
+
+        public async Task<List<DefenseType>> GetDefenseTypeIdAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+                return new List<DefenseType>();
+
+            return await _context.MstDefenseTypes
+                .Where(h => ids.Contains(h.Id))
+                .ToListAsync();
+        }
+        public async Task<List<AppearanceType>> GetApperenceTypeIdAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+                return new List<AppearanceType>();
+
+            return await _context.MstAppearanceTypes
+                .Where(h => ids.Contains(h.Id))
+                .ToListAsync();
+        }
+
+        public async Task<List<AppearanceTypePerDiem>> GetApperenceTypePerDiemIdAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+                return new List<AppearanceTypePerDiem>();
+
+            return await _context.MstAppearanceTypesPerDiems
+                .Where(h => ids.Contains(h.Id))
+                .ToListAsync();
+        }
+
+        public async Task<List<DocumentTypePerDiem>> GetDocumentIntructionsTypsIdAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+                return new List<DocumentTypePerDiem>();
+
+            return await _context.MstDocumentTypePerDiems
+                .Where(h => ids.Contains(h.Id))
+                .ToListAsync();
+        }
+
+        public async Task<List<ReportingTypePerDiem>> GetReportingTypePerDiemsIdAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+                return new List<ReportingTypePerDiem>();
+
+            return await _context.MstReportingTypePerDiems
+                .Where(h => ids.Contains(h.Id))
+                .ToListAsync();
+        }
+
+        public async Task<List<ReliefPetitionerType>> GetReliefPetitionerTypesListTypeIdAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+                return new List<ReliefPetitionerType>();
+
+            return await _context.MstReliefPetitionerTypes
+                .Where(h => ids.Contains(h.Id))
+                .ToListAsync();
+        }
+
+        public async Task<List<ReliefRespondentType>> GetReliefRespondentTypesListTypeIdAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+                return new List<ReliefRespondentType>();
+
+            return await _context.MstReliefRespondentTypes
+                .Where(h => ids.Contains(h.Id))
+                .ToListAsync();
+        }
+
+
+
+    }
 }

@@ -1,9 +1,11 @@
 ﻿
+using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace EvictionFiler.Infrastructure.Repositories
@@ -13,32 +15,67 @@ namespace EvictionFiler.Infrastructure.Repositories
         private readonly MainDbContext _context;
         public FeesCatalogRepository(MainDbContext context) => _context = context;
 
-        public Task<FeesCatalog?> GetByIdAsync(int id)
+        public Task<FeesCatalog?> GetByIdAsync(Guid id)
         {
             // Implementation of GetByIdAsync using FindAsync
             return _context.FeesCatalogs.FindAsync(id).AsTask();
         }
 
-        public async Task<List<FeesCatalog>> GetAllByCategoryAsync(string Category) =>
-            await _context.FeesCatalogs.Where(e=>e.Category == Category).ToListAsync();
+        public async Task<List<FeesCatalogDto>> GetAllByCategoryAsync(string Category)
+        {
+            var feescatalog = await _context.FeesCatalogs.Include(e=>e.Form).Where(e => e.Category == Category).ToListAsync();
+            return feescatalog.Select(e=> new FeesCatalogDto()
+            {
+                Id = e.Id,
+                Label = e.Form != null ? e.Form.Name : "",
+                Code = e.Code,
+                Rate = e.Rate,
+                Unit = e.Unit,
+                LabelId = e.LabelId,
 
+            }).ToList();
+        }
         public async Task<List<FeesCatalog>> GetAllAsync() =>
             await _context.FeesCatalogs.ToListAsync();
-        public async Task<int?> AddAsync(FeesCatalog entity)
+        public async Task<Guid?> AddAsync(FeesCatalogDto entity)
         {
-            _context.FeesCatalogs.Add(entity);
+            if(entity == null) return null;
+
+            var fees = new FeesCatalog()
+            {
+                Id = entity.Id,
+                Label = entity.Label,
+                Code = entity.Code,
+                Rate = entity.Rate,
+                Unit = entity.Unit,
+                LabelId = entity.LabelId,
+                Category = entity.Category,
+
+            };
+
+            _context.FeesCatalogs.Add(fees);
             await _context.SaveChangesAsync();
             return entity.Id;
         }
 
-        public async Task<bool> UpdateAsync(FeesCatalog entity)
+        public async Task<bool> UpdateAsync(FeesCatalogDto entity)
         {
-            _context.FeesCatalogs.Update(entity);
+            var data = await _context.FeesCatalogs.FindAsync(entity.Id);
+            if (data == null) return false;
+
+            data.Unit = entity.Unit;
+            data.Label = entity.Label;
+            data.Code = entity.Code;
+            data.Rate = entity.Rate;
+            data.LabelId = entity.LabelId;
+            data.Category = entity.Category;
+
+            _context.FeesCatalogs.Update(data);
             await _context.SaveChangesAsync();
             return true;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Guid id)
         {
             var e = await _context.FeesCatalogs.FindAsync(id);
             if (e != null)

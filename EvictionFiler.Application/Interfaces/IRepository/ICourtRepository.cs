@@ -14,8 +14,9 @@ namespace EvictionFiler.Application.Interfaces.IRepository
         Task<List<Courts>> GetAllCourtDataAsync();
         public Task<Guid?> AddCourtAsync(CourtDto courtInfosDto);
         public Task<Courts> GetCourtByIdAsync(Guid id);
-        public Task UpdateCourtAsync(CourtDto dto);
+        public Task<bool> UpdateCourtAsync(CourtDto dto);
         public Task DeleteCourtAsync(Guid id);
+        Task<List<CourtDto>> SearchCourt(string searchTerm);
         Task<PaginationDto<Courts>> GetPagedCourtsAsync(int pageNumber, int pageSize, string searchTerm);
     }
 }

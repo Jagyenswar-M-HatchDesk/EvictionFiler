@@ -1,4 +1,6 @@
-﻿using EvictionFiler.Application.DTOs.CourtDto;
+﻿using EvictionFiler.Application.DTOs.ClientDto;
+using EvictionFiler.Application.DTOs.CourtDto;
+using EvictionFiler.Application.DTOs.CourtPart;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
@@ -33,13 +35,13 @@ namespace EvictionFiler.Application.Services
                 Address = c.Address,
                 Phone = c.Phone,
                 Notes = c.Notes,
-                CallIn = c.CallIn,
-                ConferenceId = c.ConferenceId,
-                RoomNo = c.RoomNo,
-                Judge = c.Judge,
-                Part = c.Part,
-                VirtualLink = c.VirtualLink,
-                
+                //CallIn = c.CallIn,
+                //ConferenceId = c.ConferenceId,
+                //RoomNo = c.RoomNo,
+                //Judge = c.Judge,
+                //Part = c.Part,
+                //VirtualLink = c.VirtualLink,
+                  CountyId = c.CountyId,
             }).ToList();
 
             return courtDtos;
@@ -62,14 +64,26 @@ namespace EvictionFiler.Application.Services
                 Address = c.Address,
                 Phone = c.Phone,
                 Notes = c.Notes,
-                CallIn = c.CallIn,
-                ConferenceId = c.ConferenceId,
-                RoomNo = c.RoomNo,
-                Judge = c.Judge,
-                Part = c.Part,
-                VirtualLink = c.VirtualLink,
+                //CallIn = c.CallIn,
+                //ConferenceId = c.ConferenceId,
+                //RoomNo = c.RoomNo,
+                //Judge = c.Judge,
+                //Part = c.Part,
+                //VirtualLink = c.VirtualLink,
                 CountyName = c.County != null ? c.County.Name : string.Empty,
-                CountyId = c.CountyId != null ? c.CountyId.Value : Guid.Empty
+                CountyId = c.CountyId != null ? c.CountyId.Value : Guid.Empty,
+                CourtPart = c.CourtParts.Select(e=> new CourtPartDto
+                {
+                    Id = e.Id,
+                    CallIn = e.CallIn,
+                    ConferenceId = e.ConferenceId,
+                    RoomNo = e.RoomNo,
+                    Part = e.Part,
+                    Judge = e.Judge,
+                    Tollfree = e.Tollfree,
+                    VirtualLink = e.VirtualLink,
+                    CourtId = e.CourtId,
+                }).ToList(),
 
             }).ToList();
 
@@ -150,21 +164,27 @@ namespace EvictionFiler.Application.Services
                 Address = court.Address,
                 Phone = court.Phone,
                 Notes = court.Notes,
-                RoomNo = court.RoomNo,
-                Judge = court.Judge,
-                VirtualLink = court.VirtualLink,
-                ConferenceId = court.ConferenceId,
-                CallIn = court.CallIn,
-                Part = court.Part,
+                //RoomNo = court.RoomNo,
+                //Judge = court.Judge,
+                //VirtualLink = court.VirtualLink,
+                //ConferenceId = court.ConferenceId,
+                //CallIn = court.CallIn,
+                //Part = court.Part,
             };
         }
-        public async Task UpdateCourtAsync(CourtDto dto)
+        public async Task<bool> UpdateCourtAsync(CourtDto dto)
         {
-            await _courtRepository.UpdateCourtAsync(dto);
+            return await _courtRepository.UpdateCourtAsync(dto);
         }
         public async Task DeleteCourtAsync(Guid id)
         {
             await _courtRepository.DeleteCourtAsync(id);
         }
+        public async Task<List<CourtDto>> SearchCourt(string searchTerm)
+        {
+            var courts= await _courtRepository.SearchCourt(searchTerm);
+            return courts;
+        }
+
     }
 }

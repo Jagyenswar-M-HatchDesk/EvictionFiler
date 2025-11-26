@@ -8,11 +8,11 @@ namespace EvictionFiler.Application.Interfaces.IServices
 {
     public interface IFeesCatalogService
     {
-        Task<List<FeesCatalog>> GetAllByCategoryAsync(string Category) ;
+        Task<List<FeesCatalogDto>> GetAllByCategoryAsync(string Category) ;
         Task<List<FeesCatalogDto>> GetAllAsync();
-        Task<FeesCatalog?> GetByIdAsync(int id);
-        Task<int?> AddAsync(FeesCatalog entity);
-        Task<bool> UpdateAsync(FeesCatalog entity);
-        Task DeleteAsync(int id);
+        Task<FeesCatalog?> GetByIdAsync(Guid id);
+        Task<Guid?> AddAsync(FeesCatalogDto entity);
+        Task<bool> UpdateAsync(FeesCatalogDto entity);
+        Task DeleteAsync(Guid id);
     }
 }

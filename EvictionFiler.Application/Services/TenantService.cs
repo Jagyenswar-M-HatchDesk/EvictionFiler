@@ -1,7 +1,6 @@
-﻿using System.Numerics;
-using System.Runtime.Intrinsics.X86;
-using EvictionFiler.Application.DTOs.ApartmentDto;
+﻿using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.DTOs.MasterDtos.CountyDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IRepository.Base;
@@ -10,6 +9,9 @@ using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
+using System.Numerics;
+using System.Runtime.Intrinsics.X86;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace EvictionFiler.Application.Services
 {
@@ -157,9 +159,9 @@ namespace EvictionFiler.Application.Services
             return newtenant;
         }
 
-        public async Task<List<EditToTenantDto>> SearchTenantsAsync(string query, Guid clientId)
+        public async Task<List<EditToTenantDto>> SearchTenantsAsync(string query, Guid ClientId)
         {
-            return await _repo.SearchTenantAsync(query, clientId);
+            return await _repo.SearchTenantAsync(query, ClientId);
         }
 
         public async Task<EditToTenantDto> GetByIdAsync(Guid id)
@@ -273,6 +275,83 @@ namespace EvictionFiler.Application.Services
 
 
         }
+
+        public async Task<Guid?> AddOnlyTenantfromCase(CreateToTenantDto dto)
+        {
+            var lastCode = await _repo.GetLasttenantCodeAsync();
+
+            int nextNumber = 1;
+            if (!string.IsNullOrEmpty(lastCode) && lastCode.Length > 2)
+            {
+                var numericPart = lastCode.Substring(2);
+                if (int.TryParse(numericPart, out int lastNumber))
+                {
+                    nextNumber = lastNumber + 1;
+                }
+            }
+
+
+            var code = $"TT{nextNumber.ToString().PadLeft(10, '0')}";
+            nextNumber++;
+
+            var tenant = new Tenant
+            {
+                Id = Guid.NewGuid(),
+                TenantCode = code,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                BuildinId = dto.BuildingId,
+
+            };
+
+
+
+
+            var result = await _repo.AddAsync(tenant);
+            if (result == null) return null;
+
+            await _unitOfWork.SaveChangesAsync();
+            return tenant.Id;
+        }
+
+        public async Task<bool> UpdateTenantfromCase(EditToTenantDto tenants)
+
+        {
+
+            var entity = await _repo.GetAsync(tenants.Id);
+            if (entity != null)
+            {
+
+                if (entity.FirstName != tenants.FirstName) entity.FirstName = tenants.FirstName;
+                if (entity.LastName != tenants.LastName) entity.LastName = tenants.LastName;
+                if (entity.BuildinId != tenants.BuildingId) entity.BuildinId = tenants.BuildingId;
+
+            }
+
+            _repo.UpdateAsync(entity);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+
+
+        }
+
+        public async Task<List<EditToTenantDto>> GetAlltenant()
+        {
+            var tenants = await _repo.GetAllAsync();
+
+            var result = tenants.Select(x => new EditToTenantDto
+            {
+                Id = x.Id,
+                FirstName = x.FirstName,
+                TenantCode = x.TenantCode,
+                LastName = x.LastName,
+            })
+             .ToList();
+
+            return result;
+
+
+        }
         public async Task<bool> UpdateTenantAsync(EditToTenantDto t)
         {
             var entity = await _repo.GetAsync(t.Id);
@@ -308,8 +387,8 @@ namespace EvictionFiler.Application.Services
 
             _repo.UpdateAsync(entity);
             var result = await _unitOfWork.SaveChangesAsync();
-            if (result > 0) return true; 
-            
+            if (result > 0) return true;
+
             return false;
         }
 
@@ -354,6 +433,21 @@ namespace EvictionFiler.Application.Services
         {
             var lastTenantCode = await _repo.GetLasttenantCodeAsync();
             return lastTenantCode!;
+        }
+
+        public async Task<(EditToLandlordDto landlord, EditToBuildingDto building)>
+    GetLandlordBuildingByTenantAsync(Guid tenantId)
+        {
+
+            var lastTenant = await _repo.GetLandlordBuildingByTenantAsync(tenantId);
+            return lastTenant;
+
+        }
+
+        public async Task<List<EditToTenantDto>> GetTenantsByLandlordIdAsync(Guid landlordId)
+        {
+            var lastTenant = await _repo.GetTenantsByLandlordIdAsync(landlordId);
+            return lastTenant;
         }
     }
 }

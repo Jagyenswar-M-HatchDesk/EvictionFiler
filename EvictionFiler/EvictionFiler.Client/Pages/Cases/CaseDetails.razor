@@ -16,7 +16,7 @@
 @using EvictionFiler.Application.Interfaces.IServices
 @inject NavigationManager Navigation
 @inject ILegalCaseService _service
-@using EvictionFiler.Client.Jwt
+@* @using EvictionFiler.Client.Jwt *@
 @using EvictionFiler.Client.SpinnerService
 @using EvictionFiler.Domain.Entities.Master
 @using EvictionFiler.Infrastructure.Repositories
@@ -37,103 +37,105 @@
 @inject IFeesCatalogService _feeCatalogService
 @inject IToastService ToastService
 @inject IJSRuntime JS
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization;
 @using EvictionFiler.Domain.Entities
+@attribute [Authorize]
 
 @using System.Security.Claims
-@inject JwtAuthStateProviders _authStateProvider
-
+@inject AuthenticationStateProvider _authStateProvider
+<PageTitle>Case Details - Housing Court Filer</PageTitle>
 <style>
     :root {
-    /* default palette (indigo/teal) */
-    --brand-primary: #4f46e5; /* indigo-600 */
-    --brand-primary-600: #4f46e5;
-    --brand-primary-700: #4338ca;
-    --brand-primary-50: #eef2ff;
-    --brand-primary-text: #3730a3;
-    --brand-accent: #10b981; /* emerald-500 */
-    --brand-accent-100: #d1fae5;
-    --brand-accent-text: #065f46;
+        /* default palette (indigo/teal) */
+        --brand-primary: #4f46e5; /* indigo-600 */
+        --brand-primary-600: #4f46e5;
+        --brand-primary-700: #4338ca;
+        --brand-primary-50: #eef2ff;
+        --brand-primary-text: #3730a3;
+        --brand-accent: #10b981; /* emerald-500 */
+        --brand-accent-100: #d1fae5;
+        --brand-accent-text: #065f46;
     }
     /* Optional alt theme examples; swap by changing data-theme */
     html[data-theme="sky-rose"] {
-    --brand-primary: #0284c7;
-    --brand-primary-600: #0284c7;
-    --brand-primary-700: #0369a1;
-    --brand-primary-50: #e0f2fe;
-    --brand-primary-text: #075985;
-    --brand-accent: #e11d48;
-    --brand-accent-100: #ffe4e6;
-    --brand-accent-text: #881337;
+        --brand-primary: #0284c7;
+        --brand-primary-600: #0284c7;
+        --brand-primary-700: #0369a1;
+        --brand-primary-50: #e0f2fe;
+        --brand-primary-text: #075985;
+        --brand-accent: #e11d48;
+        --brand-accent-100: #ffe4e6;
+        --brand-accent-text: #881337;
     }
 
     html[data-theme="midalta"] {
-    /* Replace with your brand hexes */
-    --brand-primary: #0B3B6E;
-    --brand-primary-600: #0B3B6E;
-    --brand-primary-700: #0a2f57;
-    --brand-primary-50: #E6EEF7;
-    --brand-primary-text: #0B3B6E;
-    --brand-accent: #14B8A6;
-    --brand-accent-100: #CCFBF1;
-    --brand-accent-text: #0F766E;
+        /* Replace with your brand hexes */
+        --brand-primary: #0B3B6E;
+        --brand-primary-600: #0B3B6E;
+        --brand-primary-700: #0a2f57;
+        --brand-primary-50: #E6EEF7;
+        --brand-primary-text: #0B3B6E;
+        --brand-accent: #14B8A6;
+        --brand-accent-100: #CCFBF1;
+        --brand-accent-text: #0F766E;
     }
 
     .sticky-blur {
-    backdrop-filter: saturate(180%) blur(6px);
+        backdrop-filter: saturate(180%) blur(6px);
     }
 
     .bg-brand-primary {
-    background-color: var(--brand-primary) !important;
+        background-color: var(--brand-primary) !important;
     }
 
     .bg-brand-primary-50 {
-    background-color: var(--brand-primary-50) !important;
+        background-color: var(--brand-primary-50) !important;
     }
 
     .text-brand-primary {
-    color: var(--brand-primary-text) !important;
+        color: var(--brand-primary-text) !important;
     }
 
     .bg-brand-accent {
-    background-color: var(--brand-accent) !important;
+        background-color: var(--brand-accent) !important;
     }
 
     .bg-brand-accent-100 {
-    background-color: var(--brand-accent-100) !important;
+        background-color: var(--brand-accent-100) !important;
     }
 
     .text-brand-accent {
-    color: var(--brand-accent-text) !important;
+        color: var(--brand-accent-text) !important;
     }
 
     /* Simple timeline */
     .timeline {
-    position: relative;
-    border-left: 2px solid var(--bs-border-color);
-    margin-left: .75rem;
-    padding-left: 1.5rem;
+        position: relative;
+        border-left: 2px solid var(--bs-border-color);
+        margin-left: .75rem;
+        padding-left: 1.5rem;
     }
 
-    .timeline .dot {
-    position: absolute;
-    left: -10px;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--bs-secondary-bg);
-    border: 2px solid var(--bs-border-color);
-    box-shadow: 0 0 0 2px #fff;
-    }
+        .timeline .dot {
+            position: absolute;
+            left: -10px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--bs-secondary-bg);
+            border: 2px solid var(--bs-border-color);
+            box-shadow: 0 0 0 2px #fff;
+        }
 
-    .timeline .item {
-    position: relative;
-    padding-bottom: 1rem;
-    }
+        .timeline .item {
+            position: relative;
+            padding-bottom: 1rem;
+        }
 
-    .timeline .item .dot {
-    top: .25rem;
-    }
+            .timeline .item .dot {
+                top: .25rem;
+            }
 
 
 
@@ -141,419 +143,419 @@
 
     /* Tokens */
     :root {
-    --ef-radius: 14px;
-    --ef-gap: 1rem;
-    --ef-gap-sm: .75rem;
-    --ef-gap-xs: .5rem;
+        --ef-radius: 14px;
+        --ef-gap: 1rem;
+        --ef-gap-sm: .75rem;
+        --ef-gap-xs: .5rem;
     }
 
     /* General polish */
     .container {
-    max-width: 1100px; /* keeps content readable on desktop */
+        max-width: 1100px; /* keeps content readable on desktop */
     }
 
     .card {
-    border-radius: var(--ef-radius);
+        border-radius: var(--ef-radius);
     }
 
     .card-header {
-    border-top-left-radius: var(--ef-radius);
-    border-top-right-radius: var(--ef-radius);
+        border-top-left-radius: var(--ef-radius);
+        border-top-right-radius: var(--ef-radius);
     }
 
     /* Sticky header spacing on mobile so content doesn't hide under it */
     .sticky-top {
-    backdrop-filter: saturate(120%) blur(6px);
-    border-bottom: 1px solid rgba(0,0,0,.06);
+        backdrop-filter: saturate(120%) blur(6px);
+        border-bottom: 1px solid rgba(0,0,0,.06);
     }
 
     /* Stepper dots */
     .step-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
-    display: inline-block;
-    background: #cbd5e1; /* inactive */
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        display: inline-block;
+        background: #cbd5e1; /* inactive */
     }
 
-    .step-dot.active {
-    background: #60a5fa;
-    }
-    /* info */
-    .step-dot.done {
-    background: #0d6efd;
-    }
+        .step-dot.active {
+            background: #60a5fa;
+        }
+        /* info */
+        .step-dot.done {
+            background: #0d6efd;
+        }
     /* primary */
 
     /* Minor tweaks for Bootstrap form controls on touch */
     .form-control, .form-select, .btn {
-    border-radius: 12px;
+        border-radius: 12px;
     }
 
     .form-control, .form-select {
-    min-height: 44px; /* good touch target */
+        min-height: 44px; /* good touch target */
     }
 
     .btn {
-    min-height: 42px;
+        min-height: 42px;
     }
 
     /* Review JSON block */
     details > pre {
-    background: #0f172a;
-    color: #e2e8f0;
-    border-radius: 12px;
-    padding: 12px;
-    overflow: auto;
+        background: #0f172a;
+        color: #e2e8f0;
+        border-radius: 12px;
+        padding: 12px;
+        overflow: auto;
     }
 
     /* Footer action bar */
     @@media (min-width: 0px) {
-    /* On small screens make actions stick and fill width cleanly */
-    .ef-actions {
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
-    background: rgba(255,255,255,.94);
-    backdrop-filter: blur(6px);
-    border-top: 1px solid rgba(0,0,0,.06);
-    padding: .75rem .5rem;
-    }
+        /* On small screens make actions stick and fill width cleanly */
+        .ef-actions {
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+            background: rgba(255,255,255,.94);
+            backdrop-filter: blur(6px);
+            border-top: 1px solid rgba(0,0,0,.06);
+            padding: .75rem .5rem;
+        }
     }
 
     /* ---------- Mobile-first layout ---------- */
     @@media (max-width: 575.98px) {
-    /* Tighten container padding */
-    .container, .container-fluid {
-    padding-left: .75rem !important;
-    padding-right: .75rem !important;
-    }
-    /* Header stack */
-    .sticky-top .d-flex.justify-content-between {
-    flex-direction: column;
-    align-items: flex-start !important;
-    gap: .5rem;
-    }
-    /* Stepper dots wrap nicely */
-    .sticky-top .d-flex.align-items-center.gap-2 {
-    flex-wrap: wrap;
-    gap: .4rem !important;
-    }
-    /* Card body spacing */
-    .card-body.row.g-3 {
-    row-gap: var(--ef-gap-sm) !important;
-    }
-    /* Form labels slightly smaller to reduce wrapping */
-    .form-label {
-    font-size: .9rem;
-    margin-bottom: .25rem;
-    }
-    /* Inputs extend full width */
-    .form-control, .form-select {
-    font-size: 1rem;
-    }
-    /* Buttons fill width in footer and stack */
-    .ef-actions .btn {
-    width: 100%;
-    }
+        /* Tighten container padding */
+        .container, .container-fluid {
+            padding-left: .75rem !important;
+            padding-right: .75rem !important;
+        }
+        /* Header stack */
+        .sticky-top .d-flex.justify-content-between {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: .5rem;
+        }
+        /* Stepper dots wrap nicely */
+        .sticky-top .d-flex.align-items-center.gap-2 {
+            flex-wrap: wrap;
+            gap: .4rem !important;
+        }
+        /* Card body spacing */
+        .card-body.row.g-3 {
+            row-gap: var(--ef-gap-sm) !important;
+        }
+        /* Form labels slightly smaller to reduce wrapping */
+        .form-label {
+            font-size: .9rem;
+            margin-bottom: .25rem;
+        }
+        /* Inputs extend full width */
+        .form-control, .form-select {
+            font-size: 1rem;
+        }
+        /* Buttons fill width in footer and stack */
+        .ef-actions .btn {
+            width: 100%;
+        }
 
-    .ef-actions .btn + .btn {
-    margin-top: .5rem;
-    }
-    /* Turn 2-column sections into single column */
-    .row.g-3 > [class*="col-md-6"] {
-    width: 100%;
-    flex: 0 0 100%;
-    max-width: 100%;
-    }
-    /* Download PDF button: keep visible but compact */
-    .card-header .btn.btn-sm {
-    padding: .25rem .5rem;
-    font-size: .8rem;
-    }
+            .ef-actions .btn + .btn {
+                margin-top: .5rem;
+            }
+        /* Turn 2-column sections into single column */
+        .row.g-3 > [class*="col-md-6"] {
+            width: 100%;
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+        /* Download PDF button: keep visible but compact */
+        .card-header .btn.btn-sm {
+            padding: .25rem .5rem;
+            font-size: .8rem;
+        }
     }
 
     /* ---------- Small tablets ---------- */
     @@media (min-width: 576px) and (max-width: 767.98px) {
-    .card-body.row.g-3 {
-    row-gap: var(--ef-gap-sm) !important;
-    }
+        .card-body.row.g-3 {
+            row-gap: var(--ef-gap-sm) !important;
+        }
 
-    .form-control, .form-select {
-    font-size: 1rem;
-    }
+        .form-control, .form-select {
+            font-size: 1rem;
+        }
     }
 
     /* ---------- Tablets / small laptops ---------- */
     @@media (min-width: 768px) and (max-width: 991.98px) {
-    .card-body.row.g-3 {
-    row-gap: var(--ef-gap) !important;
-    }
+        .card-body.row.g-3 {
+            row-gap: var(--ef-gap) !important;
+        }
     }
 
     /* ---------- Large screens ---------- */
     @@media (min-width: 992px) {
-    .card-body.row.g-3 {
-    row-gap: var(--ef-gap) !important;
-    }
+        .card-body.row.g-3 {
+            row-gap: var(--ef-gap) !important;
+        }
     }
 
     /* Accessibility: clear focus states even on mobile */
     :focus-visible {
-    outline: 3px solid rgba(13,110,253,.35);
-    outline-offset: 2px;
-    border-radius: 10px;
+        outline: 3px solid rgba(13,110,253,.35);
+        outline-offset: 2px;
+        border-radius: 10px;
     }
 
     /* Reduce animations if user prefers */
     @@media (prefers-reduced-motion: reduce) {
-    * {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
-    }
+        * {
+            animation: none !important;
+            transition: none !important;
+            scroll-behavior: auto !important;
+        }
     }
 
     /* Print (nice PDF from browser too) */
     @@media print {
-    .sticky-top, .ef-actions, details {
-    display: none !important;
-    }
+        .sticky-top, .ef-actions, details {
+            display: none !important;
+        }
 
-    .card {
-    box-shadow: none !important;
-    border: 1px solid #ddd;
-    }
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #ddd;
+        }
 
-    .card-header {
-    background: #f8f9fa !important;
-    }
+        .card-header {
+            background: #f8f9fa !important;
+        }
 
-    body {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    }
+        body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
     }
 
     /*
-    .card {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow)
-    }
+        .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow)
+        }
 
-    .card > header {
-    padding: 18px 20px;
-    border-bottom: 1px solid var(--line);
-    display: flex;
-    gap: 12px;
-    align-items: flex-start
-    }
+        .card > header {
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        gap: 12px;
+        align-items: flex-start
+        }
 
-    .k {
-    width: 28px;
-    height: 28px;
-    border-radius: 12px;
-    background: #0f172a;
-    color: #fff;
-    display: grid;
-    place-items: center;
-    font-size: 12px;
-    font-weight: 700
-    }
+        .k {
+        width: 28px;
+        height: 28px;
+        border-radius: 12px;
+        background: #0f172a;
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        font-weight: 700
+        }
 
-    .card .body {
-    padding: 20px
-    }
+        .card .body {
+        padding: 20px
+        }
 
-    .fields {
-    display: grid;
-    gap: 16px
-    }
+        .fields {
+        display: grid;
+        gap: 16px
+        }
 
-    .cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr))
-    }
+        .cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+        }
 
-    .cols-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr))
-    }
+        .cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr))
+        }
 
-    @@media (max-width:820px) {
-    .cols-2, .cols-3 {
-    grid-template-columns: 1fr
-    }
-    }
+        @@media (max-width:820px) {
+        .cols-2, .cols-3 {
+        grid-template-columns: 1fr
+        }
+        }
 
-    label.lbl {
-    display: block;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    font-weight: 700;
-    color: #475569;
-    margin-bottom: 6px
-    }
+        label.lbl {
+        display: block;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        font-weight: 700;
+        color: #475569;
+        margin-bottom: 6px
+        }
 
-    input.txt,
-    select.sel {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid #cbd5e1;
-    border-radius: 12px;
-    background: #fff;
-    color: #0f172a;
-    outline: none
-    }
+        input.txt,
+        select.sel {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        background: #fff;
+        color: #0f172a;
+        outline: none
+        }
 
-    input.txt:focus,
-    select.sel:focus {
-    border-color: #6366f1;
-    box-shadow: 0 0 0 6px #eef2ff
-    }
+        input.txt:focus,
+        select.sel:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 6px #eef2ff
+        }
 
-    .hint {
-    font-size: 12px;
-    color: #64748b;
-    margin-top: 4px
-    }
+        .hint {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 4px
+        }
 
-    .pill {
-    display: inline-block;
-    padding: 8px 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 12px;
-    background: #fff;
-    font-size: 13px
-    }
+        .pill {
+        display: inline-block;
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        background: #fff;
+        font-size: 13px
+        }
 
-    .aside.card {
-    position: sticky;
-    top: 106px;
-    height: fit-content
-    }
+        .aside.card {
+        position: sticky;
+        top: 106px;
+        height: fit-content
+        }
 
-    .kv {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px
-    }
+        .kv {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px
+        }
 
-    .kv .k {
-    background: none;
-    color: #64748b;
-    width: auto;
-    height: auto;
-    border-radius: 0;
-    font-weight: 600
-    }
+        .kv .k {
+        background: none;
+        color: #64748b;
+        width: auto;
+        height: auto;
+        border-radius: 0;
+        font-weight: 600
+        }
 
-    .actions {
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
-    background: rgba(255, 255, 255, .9);
-    border-top: 1px solid var(--line)
-    }
+        .actions {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        background: rgba(255, 255, 255, .9);
+        border-top: 1px solid var(--line)
+        }
 
-    .actions .row {
-    max-width: 1200px;
-    margin: auto;
-    padding: 12px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center
-    }
-    */
+        .actions .row {
+        max-width: 1200px;
+        margin: auto;
+        padding: 12px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center
+        }
+        */
 
     .btn {
-    padding: 10px 16px;
-    border-radius: 12px;
-    border: 1px solid #cbd5e1;
-    background: #fff;
-    color: #0f172a
+        padding: 10px 16px;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #0f172a
     }
 
-    .btn.primary {
-    background: var(--brand);
-    border-color: transparent;
-    color: #fff
-    }
+        .btn.primary {
+            background: var(--brand);
+            border-color: transparent;
+            color: #fff
+        }
 
-    .btn.danger {
-    background: #fee2e2;
-    border-color: #fecaca;
-    color: #991b1b
-    }
+        .btn.danger {
+            background: #fee2e2;
+            border-color: #fecaca;
+            color: #991b1b
+        }
 
-    .btn.base {
-    background: #1F365D !important;
-    color: #fff;
-    }
+        .btn.base {
+            background: #1F365D !important;
+            color: #fff;
+        }
 
-    .btn.normal {
-    background: transparent !important;
-    border: none;
-    }
+        .btn.normal {
+            background: transparent !important;
+            border: none;
+        }
 
     .list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px
+        display: flex;
+        flex-direction: column;
+        gap: 8px
     }
 
-    .list .row {
-    display: flex;
-    gap: 8px
-    }
+        .list .row {
+            display: flex;
+            gap: 8px
+        }
 
     .iconbtn {
-    border: 1px solid #cbd5e1;
-    background: #fff;
-    border-radius: 10px;
-    padding: 8px 10px;
-    cursor: pointer
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        border-radius: 10px;
+        padding: 8px 10px;
+        cursor: pointer
     }
     /*
-    .pre {
-    white-space: pre-wrap;
-    background: #0b1020;
-    color: #e2e8f0;
-    border-radius: 12px;
-    padding: 14px;
-    overflow: auto;
-    max-height: 360px
-    }
+        .pre {
+        white-space: pre-wrap;
+        background: #0b1020;
+        color: #e2e8f0;
+        border-radius: 12px;
+        padding: 14px;
+        overflow: auto;
+        max-height: 360px
+        }
 
-    @@media (max-width:560px) {
-    .logo {
-    width: 36px;
-    height: 36px
-    }
+        @@media (max-width:560px) {
+        .logo {
+        width: 36px;
+        height: 36px
+        }
 
-    .brand h1 {
-    font-size: 16px
-    }
+        .brand h1 {
+        font-size: 16px
+        }
 
-    .secure {
-    display: none
-    }
-    }
+        .secure {
+        display: none
+        }
+        }
 
-    .form-check-input {
-    cursor: pointer;
-    }  */
+        .form-check-input {
+        cursor: pointer;
+        }  */
 
     .btn-tenant:hover {
-    background: #1F365D !important;
+        background: #1F365D !important;
     }
 </style>
 <style>
     #activityTable th,
     #activityTable td {
-    white-space: nowrap !important;
-    vertical-align: middle !important;
+        white-space: nowrap !important;
+        vertical-align: middle !important;
     }
 </style>
 
@@ -722,7 +724,15 @@
                         <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
                             <div class="fw-semibold  gap-2"><i class="bi bi-hammer"></i> Court Information</div>
                             <button type="button" class="btn btn-sm normal p-1" title="Edit Court" @onclick="ShowCourtModal">
-                                <i class="bi bi-pencil"></i>
+                                @if (isNewCourt)
+                                {
+                                    <i class="fa-solid fa-plus"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-pencil"></i>
+
+                                }
                             </button>
                         </div>
                         <div class="card-body">
@@ -733,7 +743,7 @@
                                 <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Part</div><div class="fw-medium">@(string.IsNullOrWhiteSpace(legalcaseDto.CourtPart) ? "--" : legalcaseDto.CourtPart)</div></div></div>
                                 <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Judge</div><div class="fw-medium">@(string.IsNullOrWhiteSpace(legalcaseDto.Judge) ? "--" : legalcaseDto.Judge)</div></div></div>
                                 <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Index No.</div><div class="fw-medium">--</div></div></div>
-                                <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Marshal</div><div class="fw-medium">--</div></div></div>
+                                <!-- <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Marshal</div><div class="fw-medium">--</div></div></div> -->
                                 <div class="col-12 col-md-3 "><div class="border rounded-3 p-3"><div class="text-secondary">Docket No.</div><div class="fw-medium">--</div></div></div>
                             </div>
                         </div>
@@ -786,7 +796,7 @@
                                                         {
                                                             <td>@form.CreatedByName</td>
                                                         }
-                                                        <td>@form.CreatedOn.ToString("dd/MM/yyyy")</td>
+                                                        <td>@form.CreatedOn?.ToString("dd/MM/yyyy")</td>
                                                         <td class="d-flex " style="gap:2px">
                                                             <button class="btn btn-sm btn-outline-secondary" @onclick="@(() => ViewPdf(form.File))">View</button>
                                                             <button class="btn btn-sm btn-outline-primary" @onclick="@(() => EditCaseDetail(form.Id))">Edit</button>
@@ -818,19 +828,19 @@
                                 <div class="timeline" id="timelineList">
                                     <div class="item" data-status="completed">
                                         <span class="dot bg-success"></span>
-                                        <div class="text-secondary small mx-2">09/01/2025</div>
+                                        <div class="text-secondary small mx-2">@legalcaseDto.CreatedOn.ToString("dd/MM/yyyy") </div>
                                         <div class="fw-semibold mx-2">Case Created</div>
                                         <div class="text-secondary small mx-2">Initial intake and file opened</div>
                                     </div>
                                     <div class="item" data-status="completed">
                                         <span class="dot bg-success"></span>
-                                        <div class="text-secondary small mx-2">09/05/2025</div>
+                                        <div class="text-secondary small mx-2">@(caseForm.CreatedOn?.ToString("dd/MM/yyyy") ?? "---")</div>
                                         <div class="fw-semibold mx-2">Notice Served</div>
                                         <div class="text-secondary small mx-2">Written Demand to Terminate (move out)</div>
                                     </div>
                                     <div class="item" data-status="current">
                                         <span class="dot bg-brand-primary"></span>
-                                        <div class="text-secondary small mx-2">10/01/2025</div>
+                                        <div class="text-secondary small mx-2">@(CaseHearing.HearingDate.ToString("dd/MM/yyyy") ?? "---")</div>
                                         <div class="fw-semibold mx-2">Hearing Scheduled</div>
                                         <div class="text-secondary small mx-2">Awaiting confirmation from court</div>
                                     </div>
@@ -852,33 +862,39 @@
                             <!-- Actions -->
                             <div class="tab-pane fade" id="actions" role="tabpanel" aria-labelledby="actions-tab">
                                 <div class="d-flex flex-wrap gap-2 mb-3">
-                                    <button class="btn bg-brand-primary text-white">Send to Marshal</button>
+                                    <button class="btn btn-secondary ">Send to Marshal</button>
                                     <button class="btn btn-secondary">Send to Process Server</button>
                                     <button class="btn btn-outline-secondary">Upload / View Documents</button>
                                     <button class="btn btn-outline-secondary">Add Notes</button>
                                     <button class="btn btn-outline-secondary" @onclick="OpenHearingPopup">Add Hearing</button>
                                 </div>
-                                <div class="row g-2 align-items-end">
-                                    <div class="col-12 col-md-6">
-                                        <label for="formType" class="form-label">File a Motion</label>
-                                        <select class="form-select" @bind="noticeModel.FormTypeId" @bind:after="FormTypeBindAfter">
-                                            <option value="">-- Select Form Type --</option>
-                                            @foreach (var formType in FilteredFormTypeList)
-                                            {
-                                                <option value="@formType.Id">@formType.Name - ($@formType.BillAmount)</option>
-                                            }
-                                        </select>
-                                    </div>
-                                    <div class="col-auto">
-                                        <div class=" input-group" style="width:140px">
-                                            <span class="input-group-text">$</span>
-                                            <input class="form-control" type="number" @bind="BillAmount">
+                                <EditForm Model="noticeModel" FormName="NoticeForm" OnValidSubmit="GenerateNotice">
+                                    <DataAnnotationsValidator />
+                                    <div class="row g-2 align-items-end">
+                                        <div class="col-12 col-md-6">
+                                            <label for="formType" class="form-label">File a Motion</label>
+                                            <select class="form-select" @bind="noticeModel.FormTypeId" @bind:after="FormTypeBindAfter">
+                                                <option value="">-- Select Form Type --</option>
+                                                @foreach (var formType in FilteredFormTypeList)
+                                                {
+                                                    <option value="@formType.Id">@formType.Name @(formType.BillAmount != null ? $"- (${formType.BillAmount}) " : "")</option>
+                                                }
+                                            </select>
+                                            <ValidationMessage For="() => noticeModel.FormTypeId" />
+                                        </div>
+                                        <div class="col-auto">
+                                            <div class=" input-group" style="width:140px">
+                                                <span class="input-group-text">$</span>
+                                                <input class="form-control" type="number" @bind="noticeModel.BillAmount">
+                                            </div>
+                                            <ValidationMessage For="() => noticeModel.BillAmount" />
+                                        </div>
+                                        <div class="col-auto">
+                                            <button class="btn bg-brand-primary base">  @(isEditMode ? "Update" : "Generate")</button>
                                         </div>
                                     </div>
-                                    <div class="col-auto">
-                                        <button class="btn bg-brand-primary base" @onclick="GenerateNotice">  @(isEditMode ? "Update" : "Generate")</button>
-                                    </div>
-                                </div>
+
+                                </EditForm>
                             </div>
                         </div>
                     </div>
@@ -1338,7 +1354,7 @@
 
                                 <!-- Search + Add Section -->
                                 <div class="row mt-2">
-                                    @if (!IsNewBuilding)
+                                    @if (!isNewCourt)
                                     {
                                         <div class="col-md-6 position-relative">
                                             <label class="form-label  required-label">Court</label>
@@ -1405,11 +1421,6 @@
                                                 <InputText class="form-control" @bind-Value="court.Judge" placeholder="Enter Judge" />
                                             </div>
 
-
-                                            <div class="col-md-6">
-                                                <label class="form-label required-label">Marshal</label>
-                                                <input class="form-control" placeholder="Enter Marshal" />
-                                            </div>
                                             <div class="col-md-6">
                                                 <label class="form-label required-label">Docket No.</label>
                                                 <input class="form-control" placeholder="Enter Docket No." />
@@ -1431,19 +1442,36 @@
         </div>
     </div>
     <!-- Alert Modal (shown when no court info exists) -->
-    @if (showCourtInfoAlert)
+    @if (showCourtInfoAlert || IsFormGenerated)
     {
         <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow">
                     <div class="modal-header  text-white" style="background-color: #1F365D;">
-                        <h5 class="modal-title">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i> Missing Court Info
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" aria-label="Close"@onclick="CloseCourtInfoAlert"></button>
+
+                        @if (showCourtInfoAlert)
+                        {
+                            <h5 class="modal-title">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i> Missing Court Info
+                            </h5>
+                        }
+                        else
+                        {
+                            <h5 class="modal-title">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i> Missing Notice
+                            </h5>
+                        }
+                        <button type="button" class="btn-close btn-close-white" aria-label="Close" @onclick="CloseCourtInfoAlert"></button>
                     </div>
                     <div class="modal-body text-center">
-                        <p class="fw-semibold mb-2">Please add Court Information before adding a hearing.</p>
+                        @if (showCourtInfoAlert)
+                        {
+                            <p class="fw-semibold mb-2">Please add Court Information before adding a hearing.</p>
+                        }
+                        else
+                        {
+                            <p class="fw-semibold mb-2">Please Generate Notice before adding a hearing.</p>
+                        }
                     </div>
                     @*<div class="modal-footer justify-content-center">
                         <button class="btn btn-primary" @onclick="ShowCourtModal">Add Court Info</button>
@@ -1484,20 +1512,12 @@
                                             <InputDate class="form-control" @bind-Value="caseHearing.HearingDate" placeholder="Select Date" />
                                         </div>
 
-                                        <div class="col-md-6 mt-2">
+                                        <div class="col-md-6 mt-2 ">
                                             <label class="form-label required-label">Time</label>
                                             <input type="time" class="form-control" @bind="caseHearing.HearingTime" />
                                         </div>
 
-                                        <div class="col-md-6 mt-2">
-                                            <label class="form-label required-label">Index No.</label>
-                                            <InputText class="form-control" @bind-Value="caseHearing.IndexNo" placeholder="Enter Index no." />
-                                        </div>
 
-                                        <div class="col-md-6 mt-2">
-                                            <label class="form-label required-label">Caption</label>
-                                            <InputText class="form-control" @bind-Value="caseHearing.Caption" placeholder="Enter Caption" />
-                                        </div>
 
                                     </div>
                                 </div>
@@ -1527,6 +1547,16 @@
         }
 
     </script>
+    <script>
+            window.openTab = function (tabId) {
+            const triggerEl = document.querySelector(`#${tabId}-tab`);
+            if (triggerEl) {
+                const tab = new bootstrap.Tab(triggerEl);
+                tab.show();
+            }
+        };
+
+    </script>
 
 </body>
 
@@ -1540,11 +1570,16 @@
     private GenrateNoticeModel noticeModel = new GenrateNoticeModel();
     [Parameter] public Guid? CurrentCaseId { get; set; }
     private List<GenrateNoticeModel> caseFormDto = new();
+    private GenrateNoticeModel caseForm = new();
     private List<FeesCatalogDto> feecatalogDto = new();
+    private List<CaseHearingDto> CaseHearings = new();
+    private CaseHearingDto CaseHearing = new();
+    private CaseForms CaseForm = new();
     private string? loggedInUserId;
     private bool isAdmin = false;
 
     private bool isEditMode = false;
+    private bool isNewCourt = false;
 
 
     protected override async Task OnInitializedAsync()
@@ -1559,16 +1594,28 @@
         }
         ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
         courts = await _courtService.GetAllCourtDataAsync();
+        //courts = new List<CourtDto>();
+        if (!courts.Any())
+        {
+            isNewCourt = true;
+            showCourtFields = true;
+        }
+
         spinnerservice.Show();
         await LoadCaseDetails();
         await LoadCaseForms();
+        await LoadHearing();
         spinnerservice.Hide();
     }
 
     private async Task LoadCaseDetails()
     {
         legalcaseDto = await _service.GetCaseByIdAsync(caseId);
-        FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
+        if (legalcaseDto != null && legalcaseDto.CaseTypeId != null)
+        {
+            FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
+
+        }
         feecatalogDto = await _feeCatalogService.GetAllAsync();
         var feeLookup = feecatalogDto.ToDictionary(f => f.Label.ToLower(), f => f.Rate);
 
@@ -1585,97 +1632,97 @@
         {
 
             legalcaseDto = new IntakeModel
-            {
-                Id = legalcaseDto.Id,
-                ClientId = legalcaseDto.ClientId,
-                Casecode = legalcaseDto.Casecode,
-                CaseTypeId = legalcaseDto.CaseTypeId,
-                CaseTypeName = legalcaseDto.CaseTypeName,
-                IsERAPPaymentReceived = legalcaseDto.IsERAPPaymentReceived,
-                MonthlyRent = legalcaseDto.MonthlyRent,
-                TotalOwed = legalcaseDto.TotalOwed,
-                TenantShare = legalcaseDto.TenantShare,
-                RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
-                OralStart = legalcaseDto.OralStart,
-                OralEnd = legalcaseDto.OralEnd,
-                WrittenLease = legalcaseDto.WrittenLease,
-                DateTenantMoved = legalcaseDto.DateTenantMoved,
-                TenancyTypeId = legalcaseDto.TenancyTypeId,
-                CreatedOn = legalcaseDto.CreatedOn,
-                Status = legalcaseDto.IsActive ? "Active" : "Inactive",
+                {
+                    Id = legalcaseDto.Id,
+                    ClientId = legalcaseDto.ClientId,
+                    Casecode = legalcaseDto.Casecode,
+                    CaseTypeId = legalcaseDto.CaseTypeId,
+                    CaseTypeName = legalcaseDto.CaseTypeName,
+                    IsERAPPaymentReceived = legalcaseDto.IsERAPPaymentReceived,
+                    MonthlyRent = legalcaseDto.MonthlyRent,
+                    TotalOwed = legalcaseDto.TotalOwed,
+                    TenantShare = legalcaseDto.TenantShare,
+                    RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                    OralStart = legalcaseDto.OralStart,
+                    OralEnd = legalcaseDto.OralEnd,
+                    WrittenLease = legalcaseDto.WrittenLease,
+                    DateTenantMoved = legalcaseDto.DateTenantMoved,
+                    TenancyTypeId = legalcaseDto.TenancyTypeId,
+                    CreatedOn = legalcaseDto.CreatedOn,
+                    Status = legalcaseDto.IsActive ? "Active" : "Inactive",
 
-                // for client
-                ClientCode = legalcaseDto.ClientCode,
-                FirstName = legalcaseDto.FirstName,
-                LastName = legalcaseDto.LastName,
-                Address1 = legalcaseDto.Address1,
-                Address2 = legalcaseDto.Address2,
-                StateName = legalcaseDto.StateName,
-                ZipCode = legalcaseDto.ZipCode,
-                ClientEmail = legalcaseDto.ClientEmail,
-                ClientPhone = legalcaseDto.ClientPhone,
+                    // for client
+                    ClientCode = legalcaseDto.ClientCode,
+                    FirstName = legalcaseDto.FirstName,
+                    LastName = legalcaseDto.LastName,
+                    Address1 = legalcaseDto.Address1,
+                    Address2 = legalcaseDto.Address2,
+                    StateName = legalcaseDto.StateName,
+                    ZipCode = legalcaseDto.ZipCode,
+                    ClientEmail = legalcaseDto.ClientEmail,
+                    ClientPhone = legalcaseDto.ClientPhone,
 
-                // Landlord
-                FullName = legalcaseDto.FullName,
-                Phone = legalcaseDto.Phone,
-                Email = legalcaseDto.Email,
-                LandLordTypeId = legalcaseDto.LandLordTypeId ?? Guid.Empty,
-                LandlordId = legalcaseDto.LandlordId,
+                    // Landlord
+                    FullName = legalcaseDto.FullName,
+                    Phone = legalcaseDto.Phone,
+                    Email = legalcaseDto.Email,
+                    LandLordTypeId = legalcaseDto.LandLordTypeId ?? Guid.Empty,
+                    LandlordId = legalcaseDto.LandlordId,
 
-                // Building
-                BuildingId = legalcaseDto.BuildingId,
-                Mdr = legalcaseDto.Mdr,
-                Units = legalcaseDto.Units,
-                BuildingAddress = legalcaseDto.BuildingAddress,
-                RegulationStatusId = legalcaseDto.RegulationStatusId ?? Guid.Empty,
-                Borough = legalcaseDto.Borough,
-                BuildingState = legalcaseDto.BuildingState,
-                BuildingZip = legalcaseDto.BuildingZip,
+                    // Building
+                    BuildingId = legalcaseDto.BuildingId,
+                    Mdr = legalcaseDto.Mdr,
+                    Units = legalcaseDto.Units,
+                    BuildingAddress = legalcaseDto.BuildingAddress,
+                    RegulationStatusId = legalcaseDto.RegulationStatusId ?? Guid.Empty,
+                    Borough = legalcaseDto.Borough,
+                    BuildingState = legalcaseDto.BuildingState,
+                    BuildingZip = legalcaseDto.BuildingZip,
 
-                // RegulationStatusName = legalcaseDto.RegulationStatusName,
+                    // RegulationStatusName = legalcaseDto.RegulationStatusName,
 
-                // Tenant
-                TenantId = legalcaseDto.TenantId,
-                TenantName = legalcaseDto.TenantName,
-                UnitNumber = legalcaseDto.UnitNumber,
-                IsUnitIllegalId = legalcaseDto.IsUnitIllegalId,
-                TenantRecord = legalcaseDto.TenantRecord,
-                HasPossession = legalcaseDto.HasPossession,
-                OtherOccupants = legalcaseDto.OtherOccupants,
-                ApartmentNumber = legalcaseDto.ApartmentNumber,
+                    // Tenant
+                    TenantId = legalcaseDto.TenantId,
+                    TenantName = legalcaseDto.TenantName,
+                    UnitNumber = legalcaseDto.UnitNumber,
+                    IsUnitIllegalId = legalcaseDto.IsUnitIllegalId,
+                    TenantRecord = legalcaseDto.TenantRecord,
+                    HasPossession = legalcaseDto.HasPossession,
+                    OtherOccupants = legalcaseDto.OtherOccupants,
+                    ApartmentNumber = legalcaseDto.ApartmentNumber,
 
-                //WrittenLease = legalcaseDto.WrittenLease,
-                OralAgreeMent = legalcaseDto.OralAgreeMent,
-                CaseProgramId = legalcaseDto.CaseProgramId,
-                GoodCauseApplies = legalcaseDto.GoodCauseApplies,
-                //DateTenantMoved = legalcaseDto.DateTenantMoved,
-                LeaseEnd = legalcaseDto.LeaseEnd,
-                //TenancyTypeId = legalcaseDto.TenancyTypeId,
-                DateNoticeServed = legalcaseDto.DateNoticeServed,
-                CalculatedNoticeLength = legalcaseDto.CalculatedNoticeLength,
-                ExpirationDate = legalcaseDto.ExpirationDate,
-                PredicateNotice = legalcaseDto.PredicateNotice,
-                //RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
-                //MonthlyRent = legalcaseDto.MonthlyRent,
-                //TotalOwed = legalcaseDto.TotalOwed,
-                //TenantShare = legalcaseDto.TenantShare,
-                SocialService = legalcaseDto.SocialService,
-                LastRentPaid = legalcaseDto.LastRentPaid,
+                    //WrittenLease = legalcaseDto.WrittenLease,
+                    OralAgreeMent = legalcaseDto.OralAgreeMent,
+                    CaseProgramId = legalcaseDto.CaseProgramId,
+                    GoodCauseApplies = legalcaseDto.GoodCauseApplies,
+                    //DateTenantMoved = legalcaseDto.DateTenantMoved,
+                    LeaseEnd = legalcaseDto.LeaseEnd,
+                    //TenancyTypeId = legalcaseDto.TenancyTypeId,
+                    DateNoticeServed = legalcaseDto.DateNoticeServed,
+                    CalculatedNoticeLength = legalcaseDto.CalculatedNoticeLength,
+                    ExpirationDate = legalcaseDto.ExpirationDate,
+                    PredicateNotice = legalcaseDto.PredicateNotice,
+                    //RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                    //MonthlyRent = legalcaseDto.MonthlyRent,
+                    //TotalOwed = legalcaseDto.TotalOwed,
+                    //TenantShare = legalcaseDto.TenantShare,
+                    SocialService = legalcaseDto.SocialService,
+                    LastRentPaid = legalcaseDto.LastRentPaid,
 
-                CourtId = legalcaseDto.CourtId,
-                Court = legalcaseDto.Court,
-                CourtAddress = legalcaseDto.CourtAddress,
-                CourtConferenceId = legalcaseDto.CourtConferenceId,
-                CourtCallIn = legalcaseDto.CourtCallIn,
-                CourtNotes = legalcaseDto.CourtNotes,
-                CourtPart = legalcaseDto.CourtPart,
-                CourtPhone = legalcaseDto.CourtPhone,
-                CourtRoomNo = legalcaseDto.CourtRoomNo,
-                CourtVirtualLink = legalcaseDto.CourtVirtualLink,
+                    CourtId = legalcaseDto.CourtId,
+                    Court = legalcaseDto.Court,
+                    CourtAddress = legalcaseDto.CourtAddress,
+                    CourtConferenceId = legalcaseDto.CourtConferenceId,
+                    CourtCallIn = legalcaseDto.CourtCallIn,
+                    CourtNotes = legalcaseDto.CourtNotes,
+                    CourtPart = legalcaseDto.CourtPart,
+                    CourtPhone = legalcaseDto.CourtPhone,
+                    CourtRoomNo = legalcaseDto.CourtRoomNo,
+                    CourtVirtualLink = legalcaseDto.CourtVirtualLink,
 
-                BillAmount = legalcaseDto.BillAmount,
+                    BillAmount = legalcaseDto.BillAmount,
 
-            };
+                };
 
         };
 
@@ -1690,13 +1737,13 @@
         if (result != null)
         {
             noticeModel = new GenrateNoticeModel
-            {
-                Id = result.Id,
-                FormTypeId = result.FormTypeId,
-                File = result.File,
-                HTML = result.HTML,
-                CreatedOn = result.CreatedOn,
-            };
+                {
+                    Id = result.Id,
+                    FormTypeId = result.FormTypeId,
+                    File = result.File,
+                    HTML = result.HTML,
+                    CreatedOn = result.CreatedOn,
+                };
             isEditMode = true;
 
         }
@@ -1711,9 +1758,9 @@
             .FirstOrDefault(f => f.Id == noticeModel.FormTypeId);
 
         if (selectedForm != null)
-            BillAmount = selectedForm.BillAmount;
+            noticeModel.BillAmount = selectedForm.BillAmount;
         else
-            BillAmount = null;
+            noticeModel.BillAmount = null;
 
         StateHasChanged(); // ensure UI refreshes
     }
@@ -1723,16 +1770,16 @@
     {
         spinnerservice.Show();
 
-        legalcaseDto.BillAmount = (legalcaseDto.BillAmount ?? 0) + (BillAmount ?? 0);
+        legalcaseDto.BillAmount = (legalcaseDto.BillAmount ?? 0) + (noticeModel.BillAmount ?? 0);
 
         var successcase = await _service.UpdateCaseAsync(legalcaseDto);
-        if(!successcase.HasValue)
+        if (!successcase.HasValue)
         {
             return;
         }
         else
         {
-            BillAmount = null;
+            noticeModel.BillAmount = null;
         }
 
         if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty && noticeModel.FormTypeId.HasValue)
@@ -1743,14 +1790,14 @@
             {
                 // UPDATE existing notice
                 success = await _CaseFormService.UpdateCaseFormAsync(new GenrateNoticeModel
-                {
-                    Id = noticeModel.Id,
-                    LegalCaseId = CurrentCaseId.Value,
-                    FormTypeId = noticeModel.FormTypeId,
-                    File = noticeModel.File,
-                    HTML = noticeModel.HTML,
-                    CreatedOn = noticeModel.CreatedOn
-                });
+                    {
+                        Id = noticeModel.Id,
+                        LegalCaseId = CurrentCaseId.Value,
+                        FormTypeId = noticeModel.FormTypeId,
+                        File = noticeModel.File,
+                        HTML = noticeModel.HTML,
+                        CreatedOn = noticeModel.CreatedOn
+                    });
 
                 if (success)
                 {
@@ -1780,19 +1827,26 @@
                 noticeModel = new GenrateNoticeModel();
                 isEditMode = false;
                 CurrentCaseId = caseId;
+
+                await JS.InvokeVoidAsync("openTab", "activity");
             }
+        }
+        else
+        {
+
         }
 
         spinnerservice.Hide();
     }
 
 
-    private void ViewPdf(string filePath)
+    private async Task ViewPdf(string filePath)
     {
         if (!string.IsNullOrWhiteSpace(filePath))
         {
             var fullUrl = Navigation.BaseUri.TrimEnd('/') + filePath;
-            Navigation.NavigateTo(fullUrl, forceLoad: true);
+            // Navigation.NavigateTo(fullUrl, forceLoad: true);
+            await JS.InvokeVoidAsync("open", fullUrl, "_blank");
         }
     }
 
@@ -1800,6 +1854,18 @@
     private async Task LoadCaseForms()
     {
         caseFormDto = await _CaseFormService.GetCaseFormsByCaseId(CurrentCaseId.Value, loggedInUserId, isAdmin);
+        if (caseFormDto.Any())
+        {
+            caseForm = caseFormDto.FirstOrDefault()!;
+        }
+    }
+    private async Task LoadHearing()
+    {
+        CaseHearings = await _caseHearingService.GetAllCaseHeariingByCaseIdAsync(CurrentCaseId.Value);
+        if (CaseHearings.Any())
+        {
+            CaseHearing = CaseHearings.FirstOrDefault()!;
+        }
 
     }
 
@@ -1934,6 +2000,7 @@
     private List<AddtionalTenantDto> AdditionalTenantList = new();
     private List<AdditionalOccupantDto> AdditionalOccupantsList = new();
     private bool showCourtInfoAlert = false;
+    private bool IsFormGenerated = false;
     public EditToTenantDto selectedTenant = new EditToTenantDto();
     public EditToTenantDto ViewTenant = new EditToTenantDto();
     public CourtDto court = new CourtDto();
@@ -1956,12 +2023,12 @@
     }
     private async Task ShowCourtModal()
     {
-        if (legalcaseDto.CourtId == Guid.Empty)
+        if (legalcaseDto.CourtId == Guid.Empty && !isNewCourt)
         {
             showCourtFields = false;
             searchCourtText = "";
         }
-        else
+        else if (legalcaseDto.CourtId != Guid.Empty && !isNewCourt)
         {
             court = await _courtService.GetCourtByIdAsync(legalcaseDto.CourtId.Value);
             searchCourtText = court.Court ?? court.RoomNo;
@@ -2059,6 +2126,7 @@
     private void OnBindCourtCancel()
     {
         showCourtFields = false;
+        isNewCourt = false;
         searchCourtText = null;
         court = new CourtDto();
     }
@@ -2088,18 +2156,18 @@
         if (editBuildingModel.Id == null || editBuildingModel.Id == Guid.Empty)
         {
             var newBuilding = new CreateToBuildingDto()
-            {
-                Address1 = editBuildingModel.Address1,
-                //Address2 = address2,
-                City = editBuildingModel.City,
-                StateId = editBuildingModel.StateId,
-                Zipcode = editBuildingModel.Zipcode,
-                BuildingUnits = editBuildingModel.BuildingUnits,
-                ApartmentCode = editBuildingModel.ApartmentCode,
-                MDRNumber = editBuildingModel.MDRNumber,
-                RegulationStatusId = editBuildingModel.RegulationStatusId,
-                LandlordId = legalcaseDto.LandlordId
-            };
+                {
+                    Address1 = editBuildingModel.Address1,
+                    //Address2 = address2,
+                    City = editBuildingModel.City,
+                    StateId = editBuildingModel.StateId,
+                    Zipcode = editBuildingModel.Zipcode,
+                    BuildingUnits = editBuildingModel.BuildingUnits,
+                    ApartmentCode = editBuildingModel.ApartmentCode,
+                    MDRNumber = editBuildingModel.MDRNumber,
+                    RegulationStatusId = editBuildingModel.RegulationStatusId,
+                    LandlordId = legalcaseDto.LandlordId
+                };
 
             var buildingId = await _buildingService.AddOnlyApartmentfromCase(newBuilding);
             addorupdate = true;
@@ -2112,19 +2180,19 @@
             {
 
                 var updateBuilding = new EditToBuildingDto()
-                {
-                    Id = editBuildingModel.Id,
-                    Address1 = editBuildingModel.Address1,
-                    BuildingCode = editBuildingModel.BuildingCode,
-                    //Address2 = address2,
-                    City = editBuildingModel.City,
-                    StateId = editBuildingModel.StateId,
-                    Zipcode = editBuildingModel.Zipcode,
-                    BuildingUnits = editBuildingModel.BuildingUnits,
-                    ApartmentCode = editBuildingModel.ApartmentCode,
-                    MDRNumber = editBuildingModel.MDRNumber,
-                    RegulationStatusId = editBuildingModel.RegulationStatusId,
-                };
+                    {
+                        Id = editBuildingModel.Id,
+                        Address1 = editBuildingModel.Address1,
+                        BuildingCode = editBuildingModel.BuildingCode,
+                        //Address2 = address2,
+                        City = editBuildingModel.City,
+                        StateId = editBuildingModel.StateId,
+                        Zipcode = editBuildingModel.Zipcode,
+                        BuildingUnits = editBuildingModel.BuildingUnits,
+                        ApartmentCode = editBuildingModel.ApartmentCode,
+                        MDRNumber = editBuildingModel.MDRNumber,
+                        RegulationStatusId = editBuildingModel.RegulationStatusId,
+                    };
 
                 await _buildingService.UpdateonlyBuildingfromCase(updateBuilding);
                 addorupdate = true;
@@ -2169,19 +2237,19 @@
         if (client.Id == null || client.Id == Guid.Empty)
         {
             var newClient = new CreateToClientDto()
-            {
-                Address1 = client.Address1,
-                //Address2 = address2,
-                City = client.City,
-                StateId = client.StateId,
-                ZipCode = client.ZipCode,
-                FirstName = client.FirstName,
-                LastName = client.LastName,
-                Reference = client.Reference,
-                ClientTypeId = client.ClientTypeId,
-                Phone = client.Phone,
-                Email = client.Email,
-            };
+                {
+                    Address1 = client.Address1,
+                    //Address2 = address2,
+                    City = client.City,
+                    StateId = client.StateId,
+                    ZipCode = client.ZipCode,
+                    FirstName = client.FirstName,
+                    LastName = client.LastName,
+                    Reference = client.Reference,
+                    ClientTypeId = client.ClientTypeId,
+                    Phone = client.Phone,
+                    Email = client.Email,
+                };
 
             var clientId = await _clientService.CreateOnlyClient(newClient);
             addorupdate = true;
@@ -2194,22 +2262,22 @@
             {
 
                 var updateBuilding = new EditToClientDto()
-                {
-                    Id = client.Id,
-                    Address1 = client.Address1,
-                    ClientCode = client.ClientCode,
-                    //Address2 = address2,
-                    ClientTypeId = client.ClientTypeId,
-                    City = client.City,
-                    StateId = client.StateId,
-                    ZipCode = client.ZipCode,
-                    Phone = client.Phone,
-                    Email = client.Email,
-                    Reference = client.Reference,
-                    FirstName = client.FirstName,
-                    LastName = client.LastName,
+                    {
+                        Id = client.Id,
+                        Address1 = client.Address1,
+                        ClientCode = client.ClientCode,
+                        //Address2 = address2,
+                        ClientTypeId = client.ClientTypeId,
+                        City = client.City,
+                        StateId = client.StateId,
+                        ZipCode = client.ZipCode,
+                        Phone = client.Phone,
+                        Email = client.Email,
+                        Reference = client.Reference,
+                        FirstName = client.FirstName,
+                        LastName = client.LastName,
 
-                };
+                    };
 
                 await _clientService.UpdateClientformCase(updateBuilding);
                 addorupdate = true;
@@ -2263,19 +2331,19 @@
                 var lastName = parts.Length > 1 ? parts[1] : "";
 
                 var newTenant = new CreateToTenantDto()
-                {
-                    FirstName = firstName,
-                    LastName = lastName,
-                    UnitOrApartmentNumber = legalcaseDto.ApartmentNumber,
-                    BuildingId = legalcaseDto.BuildingId,
-                    MoveInDate = legalcaseDto.DateTenantMoved,
-                    MonthlyRent = legalcaseDto.MonthlyRent,
-                    TenantShare = legalcaseDto.TenantShare,
-                    RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
-                    TotalRentOwed = legalcaseDto.TotalOwed,
-                    TenancyTypeId = legalcaseDto.TenancyTypeId,
-                    SocialServices = legalcaseDto.SocialService,
-                };
+                    {
+                        FirstName = firstName,
+                        LastName = lastName,
+                        UnitOrApartmentNumber = legalcaseDto.ApartmentNumber,
+                        BuildingId = legalcaseDto.BuildingId,
+                        MoveInDate = legalcaseDto.DateTenantMoved,
+                        MonthlyRent = legalcaseDto.MonthlyRent,
+                        TenantShare = legalcaseDto.TenantShare,
+                        RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                        TotalRentOwed = legalcaseDto.TotalOwed,
+                        TenancyTypeId = legalcaseDto.TenancyTypeId,
+                        SocialServices = legalcaseDto.SocialService,
+                    };
                 var tenantId = await _tenantService.AddTenantfromCase(newTenant);
 
                 legalcaseDto.TenantId = tenantId;
@@ -2297,21 +2365,21 @@
                     // Only update if anything actually changed
 
                     var updateTenant = new EditToTenantDto
-                    {
-                        Id = legalcaseDto.TenantId ?? Guid.Empty,
-                        FirstName = firstName,
-                        LastName = lastName,
-                        BuildingId = legalcaseDto.BuildingId,
-                        UnitOrApartmentNumber = legalcaseDto.ApartmentNumber,
-                        MonthlyRent = legalcaseDto.MonthlyRent,
-                        TenantShare = legalcaseDto.TenantShare,
-                        RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
-                        TotalRentOwed = legalcaseDto.TotalOwed,
-                        TenancyTypeId = legalcaseDto.TenancyTypeId,
-                        SocialServices = legalcaseDto.SocialService,
-                        UpdatedOn = DateTime.Now,
+                        {
+                            Id = legalcaseDto.TenantId ?? Guid.Empty,
+                            FirstName = firstName,
+                            LastName = lastName,
+                            BuildingId = legalcaseDto.BuildingId,
+                            UnitOrApartmentNumber = legalcaseDto.ApartmentNumber,
+                            MonthlyRent = legalcaseDto.MonthlyRent,
+                            TenantShare = legalcaseDto.TenantShare,
+                            RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                            TotalRentOwed = legalcaseDto.TotalOwed,
+                            TenancyTypeId = legalcaseDto.TenancyTypeId,
+                            SocialServices = legalcaseDto.SocialService,
+                            UpdatedOn = DateTime.Now,
 
-                    };
+                        };
 
                     await _tenantService.UpdateTenantAsync(updateTenant);
                     addorupdate = true;
@@ -2334,13 +2402,13 @@
                 if (i - 1 < AdditionalTenantfromDbList.Count)
                 {
                     var existingList = AdditionalTenantfromDbList.Select(e => new AddtionalTenantDto
-                    {
-                        Id = e.Id,
-                        FirstName = e.FirstName,
-                        LastName = e.LastName,
-                        TenantId = e.TenantId,
+                        {
+                            Id = e.Id,
+                            FirstName = e.FirstName,
+                            LastName = e.LastName,
+                            TenantId = e.TenantId,
 
-                    }).ToList();
+                        }).ToList();
                     var existing = existingList[i - 1];
 
                     existing.FirstName = firstName;
@@ -2353,15 +2421,15 @@
                 {
                     // New Additional Tenant
                     var newAdditional = new AddtionalTenantDto
-                    {
-                        TenantId = legalcaseDto.TenantId,
-                        FirstName = firstName,
-                        LastName = lastName,
-                        CreatedOn = DateTime.Now,
-                        IsActive = true,
-                        IsDeleted = false,
-                        IsVisible = true
-                    };
+                        {
+                            TenantId = legalcaseDto.TenantId,
+                            FirstName = firstName,
+                            LastName = lastName,
+                            CreatedOn = DateTime.Now,
+                            IsActive = true,
+                            IsDeleted = false,
+                            IsVisible = true
+                        };
 
                     await _additionalTenantService.AddAdditionalTenantAsync(new List<AddtionalTenantDto> { newAdditional });
                 }
@@ -2410,30 +2478,6 @@
         if (court.Id == null || court.Id == Guid.Empty)
         {
             var newCourt = new CourtDto()
-            {
-                Address = court.Address,
-                Part = court.Part,
-                RoomNo = court.RoomNo,
-                Judge = court.Judge,
-                Court = court.Court,
-                ConferenceId = court.ConferenceId,
-                CallIn = court.CallIn,
-                Phone = court.Phone,
-                VirtualLink = court.VirtualLink,
-                Notes = court.Notes
-            };
-
-            var CourtId = await _courtService.AddCourtAsync(newCourt);
-            addorupdate = true;
-            legalcaseDto.CourtId = CourtId;
-
-        }
-        else
-        {
-            if (court.Id != null)
-            {
-
-                var updateCourt = new CourtDto()
                 {
                     Address = court.Address,
                     Part = court.Part,
@@ -2446,6 +2490,30 @@
                     VirtualLink = court.VirtualLink,
                     Notes = court.Notes
                 };
+
+            var CourtId = await _courtService.AddCourtAsync(newCourt);
+            addorupdate = true;
+            legalcaseDto.CourtId = CourtId;
+
+        }
+        else
+        {
+            if (court.Id != null)
+            {
+
+                var updateCourt = new CourtDto()
+                    {
+                        Address = court.Address,
+                        Part = court.Part,
+                        RoomNo = court.RoomNo,
+                        Judge = court.Judge,
+                        Court = court.Court,
+                        ConferenceId = court.ConferenceId,
+                        CallIn = court.CallIn,
+                        Phone = court.Phone,
+                        VirtualLink = court.VirtualLink,
+                        Notes = court.Notes
+                    };
 
                 await _courtService.UpdateCourtAsync(updateCourt);
                 addorupdate = true;
@@ -2480,18 +2548,18 @@
         spinnerservice.Show();
 
         var newHearing = new CaseHearingDto()
-        {
-            Caption = caseHearing.Caption,
-            IndexNo = caseHearing.IndexNo,
-            LegalCaseId = legalcaseDto.Id,
-            CourtId = legalcaseDto.CourtId,
-            HearingDate = caseHearing.HearingDate,
-            HearingTime = caseHearing.HearingTime,
-            // CallIn = caseHearing.CallIn,
-            // Phone = caseHearing.Phone,
-            // VirtualLink = caseHearing.VirtualLink,
-            // Notes = caseHearing.Notes
-        };
+            {
+                Caption = caseHearing.Caption,
+                LegalCaseId = legalcaseDto.Id,
+                CourtId = legalcaseDto.CourtId,
+                HearingDate = caseHearing.HearingDate,
+                HearingTime = caseHearing.HearingTime,
+                CreatedBy = Guid.Parse(loggedInUserId),
+                // CallIn = caseHearing.CallIn,
+                // Phone = caseHearing.Phone,
+                // VirtualLink = caseHearing.VirtualLink,
+                // Notes = caseHearing.Notes
+            };
 
         var CourtId = await _caseHearingService.AddHearing(newHearing);
 
@@ -2507,6 +2575,7 @@
             ToastService.ShowError("Failed to create Hearing details.");
         }
         // Map edited fields
+        LoadHearing();
         spinnerservice.Hide();
     }
     // Edit model
@@ -2595,15 +2664,15 @@
             else
             {
                 var additional = new AddtionalTenantDto()
-                {
-                    FirstName = splittedname[0],
-                    LastName = splittedname[1],
-                    TenantId = TenantList.Select(e => e.Id).FirstOrDefault(),
-                    CreatedOn = DateTime.Now,
-                    IsActive = true,
-                    IsDeleted = false, // better to keep false
-                    IsVisible = true
-                };
+                    {
+                        FirstName = splittedname[0],
+                        LastName = splittedname[1],
+                        TenantId = TenantList.Select(e => e.Id).FirstOrDefault(),
+                        CreatedOn = DateTime.Now,
+                        IsActive = true,
+                        IsDeleted = false, // better to keep false
+                        IsVisible = true
+                    };
 
                 AdditionalTenantList.Add(additional);
             }
@@ -2658,13 +2727,13 @@
         else
         {
             var additional = new AdditionalOccupantDto()
-            {
-                Name = name,
-                CreatedOn = DateTime.Now,
-                IsActive = true,
-                IsDeleted = false, // better to keep false
-                IsVisible = true
-            };
+                {
+                    Name = name,
+                    CreatedOn = DateTime.Now,
+                    IsActive = true,
+                    IsDeleted = false, // better to keep false
+                    IsVisible = true
+                };
 
             AdditionalOccupantsList.Add(additional);
         }
@@ -2673,21 +2742,24 @@
     }
     private async Task OpenHearingPopup()
     {
-        if (legalcaseDto.CourtId != null && legalcaseDto.CourtId != Guid.Empty)
+        if (legalcaseDto.CourtId == null || legalcaseDto.CourtId == Guid.Empty)
         {
-            
+            showCourtInfoAlert = true;
+            return;
+        }
+        else if (!caseFormDto.Any())
+        {
+            IsFormGenerated = true;
+            return;
+        }
+        else
+        {
             caseHearing.HearingDate = DateTime.Now;
             var timespan = TimeSpan.FromHours(10);
             caseHearing.HearingTime = TimeOnly.FromTimeSpan(timespan);
             await JS.InvokeVoidAsync("showModal", "hearingModal");
         }
-        else
-        {
-            showCourtInfoAlert = true;
-            return;
-        }
 
-        
     }
     private async Task SaveHearingPopup()
     {
@@ -2727,6 +2799,7 @@
     private void CloseCourtInfoAlert()
     {
         showCourtInfoAlert = false;
+        IsFormGenerated = false;
     }
 
 

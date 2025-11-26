@@ -67,7 +67,7 @@ namespace EvictionFiler.Application.Services
                 Judge = dto.Judge,
                 CaseStatusId = dto.CaseStatusId,
                 Caption = dto.Caption,
-                CourtPartName = dto.CourtPart?.Name ?? "Unknown",
+                CourtPartName = dto.CourtPart?.Part ?? "Unknown",
                 CountyName = dto.County?.Name ?? "Unknown",
                 CaseTypeName = dto.CaseType?.Name ?? "Unknown",
                 CaseStatusName = dto.CaseStatus?.Name ?? "Unknown",

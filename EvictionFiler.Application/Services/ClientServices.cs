@@ -50,7 +50,12 @@ namespace EvictionFiler.Application.Services
                 query = query.Where(x => x.CreatedBy == userGuid);
             }
 
-            var landlords = await query.ToListAsync();
+            var landlords = await query
+       .OrderByDescending(x => x.CreatedOn)   // optional: latest first
+       .Take(10)
+       .ToListAsync();
+
+            //var landlords = await query.ToListAsync();
 
             var result = landlords.Select(client => new EditToClientDto
             {
@@ -259,7 +264,7 @@ namespace EvictionFiler.Application.Services
 
 
 
-        public async Task<List<CreateToClientDto>> SearchClient(string searchTerm)
+        public async Task<List<EditToClientDto>> SearchClient(string searchTerm)
 		{
 			var newtenant = await _clientRepo.SearchClient(searchTerm);
 			return newtenant;

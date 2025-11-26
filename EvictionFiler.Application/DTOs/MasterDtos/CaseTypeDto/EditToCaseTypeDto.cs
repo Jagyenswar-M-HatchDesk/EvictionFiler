@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.DTOs.MasterDtos.CaseTypeDto
 {
-    public class EditToCourtPartDto : CreateToCourtPartDto
+    public class EditToCaseTypeDto : CreateToCaseTypeDto
     {
        
     }

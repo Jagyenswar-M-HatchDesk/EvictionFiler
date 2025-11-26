@@ -9,7 +9,6 @@ using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
-using PuppeteerSharp.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,47 +26,44 @@ namespace EvictionFiler.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<List<string>> GetTenantSuggestions(string term)
+        public async Task<List<EditToTenantDto>> GetTenantSuggestions(string term)
         {
             term = term.ToLower().Trim();
 
-            IQueryable<string> query;
+            IQueryable<EditToTenantDto> query;
 
-            if (term.StartsWith("t")) 
-            {
-                query = _context.Tenants
-                    .Where(c => c.TenantCode.ToLower().Contains(term))
-                    .Select(c => c.TenantCode);
-            }
-            else
-            {
-                query = _context.Tenants
-              .Where(c => (c.FirstName + " " + c.LastName).ToLower().StartsWith(term))
-           .Select(c => c.FirstName + " " + c.LastName);
-            }
+
+            query = _context.Tenants
+                .Where(c => c.TenantCode.ToLower().Contains(term) || (c.FirstName + " " + c.LastName).ToLower().StartsWith(term))
+                    .Select(c => new EditToTenantDto
+                    {
+                        Id = c.Id,
+                       TenantCode = c.TenantCode ,
+                       FirstName = c.FirstName,
+                       LastName =  c.LastName
+                    });
+           
 
             return await query.Take(5).ToListAsync();
         }
 
-        public async Task<List<string>> GetLandlordSuggestions(string term)
+        public async Task<List<EditToLandlordDto>> GetLandlordSuggestions(string term)
         {
             term = term.ToLower().Trim();
 
-            IQueryable<string> query;
+            IQueryable<EditToLandlordDto> query;
 
-            if (term.StartsWith("l")) 
-            {
-                query = _context.LandLords
-                    .Where(c => c.LandLordCode.ToLower().Contains(term))
-                    .Select(c => c.LandLordCode);
-            }
-            else
-            {
-                query = _context.LandLords
-                        .Where(c => (c.FirstName + " " + c.LastName).ToLower().StartsWith(term))
-                        .Select(c => c.FirstName + " " + c.LastName);
-            }
 
+            query = _context.LandLords
+                .Where(c => c.LandLordCode.ToLower().Contains(term) || (c.FirstName + " " + c.LastName).ToLower().StartsWith(term))
+                    .Select(c =>new EditToLandlordDto
+                    {  
+                        Id = c.Id ,
+                        LandLordCode =  c.LandLordCode ,
+                        FirstName = c.FirstName ,
+                        LastName = c.LastName 
+                    });
+            
             return await query.Take(5).ToListAsync();
         }
 
@@ -97,24 +93,23 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 
 
-        public async Task<List<string>> GetClientSuggestions(string term)
+        public async Task<List<EditToClientDto>> GetClientSuggestions(string term)
         {
             term = term.ToLower().Trim();
 
-            IQueryable<string> query;
+            IQueryable<EditToClientDto> query;
 
-            if (term.StartsWith("c")) 
-            {
-                query = _context.Clients
-                    .Where(c => c.ClientCode.ToLower().Contains(term))
-                    .Select(c => c.ClientCode);
-            }
-            else 
-            {
-                query = _context.Clients
-              .Where(c => (c.FirstName + " " + c.LastName).ToLower().StartsWith(term))
-           .Select(c => c.FirstName + " " + c.LastName);
-            }
+
+            query = _context.Clients
+                .Where(c => c.ClientCode.ToLower().Contains(term) || (c.FirstName + " " + c.LastName).ToLower().StartsWith(term))
+                    .Select(c => new EditToClientDto
+                    {
+                        Id = c.Id,
+                        ClientCode = c.ClientCode ,
+                        FirstName = c.FirstName ,
+                        LastName = c.LastName 
+                    });
+           
 
             return await query.Take(5).ToListAsync();
         }

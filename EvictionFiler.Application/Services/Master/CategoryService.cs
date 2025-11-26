@@ -94,6 +94,42 @@ namespace EvictionFiler.Application.Services.Master
             };
         }
 
+
+        public async Task<List<EditToCategoryDto>> GetAllCategory()
+        {
+            var query = await _repository.GetAllAsync();
+
+            //if (!string.IsNullOrWhiteSpace(searchTerm))
+            //{
+            //    var lowerSearch = searchTerm.ToLower();
+            //    query = query.Where(form =>
+            //          (form.Name ?? "").ToLower().Contains(lowerSearch)
+
+            //     );
+
+            //}
+
+
+            //var totalCount = query.Count();
+
+            var forms = query
+        //.OrderBy(c => c.Id)
+        
+        .Select(x => new EditToCategoryDto
+        {
+            Id = x.Id,
+            Name = x.Name,
+            CreatedOn = x.CreatedOn,
+            CreatedBy = x.CreatedBy,
+            IsActive = x.IsActive,
+            IsDeleted = x.IsDeleted,
+
+        })
+        .ToList();
+
+            return forms;
+        }
+
         public async Task<EditToCategoryDto?> GetCategoryByIdAsync(Guid? id)
         {
             var form = await _repository.GetAsync(id);

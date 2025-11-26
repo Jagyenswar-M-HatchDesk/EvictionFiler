@@ -1,14 +1,19 @@
 ﻿using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.LegalCaseDto;
 using EvictionFiler.Application.DTOs.OccupantDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
+using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
 using System.Linq.Expressions;
 
 namespace EvictionFiler.Application.Services
@@ -16,123 +21,190 @@ namespace EvictionFiler.Application.Services
     public class LegalCaseService : ILegalCaseService
     {
         private readonly ICasesRepository _repository;
+       private readonly ICaseTypeRepository _caseTypeRepository;
+        private readonly ICaseTypeHPDRepository _caseTypeHPDRepository;
+        private readonly IHarassmentTypeRepository _harassmentTypeRepository;
+        private readonly IDefenseTypeRepository _defenseTypeRepository;
+        private readonly IAppearanceTypeRepository _appearanceTypeRepository;
+        private readonly IReliefPetitionerTypeRepository _reliefPetitionerTypeRepository;
+        private readonly IReliefRespondenTypeRepository _reliefRespondenTypeRepository;
+
 
         private readonly ILandLordRepository _landlordrepo;
         private readonly IBuildingRepository _buildingrepo;
         private readonly ITenantRepository _tenantRepo;
         private readonly IAdditionalOccupantsRepository _additionalOccupantsRepo;
         private readonly IUnitOfWork _unitOfWork;
-        public LegalCaseService(ICasesRepository repository, ITenantRepository tenantRepo, ILandLordRepository landlordrepo, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
+        public LegalCaseService(ICasesRepository repository,IReliefPetitionerTypeRepository reliefPetitionerTypeRepository , IReliefRespondenTypeRepository reliefRespondenTypeRepository, IAppearanceTypeRepository appearanceTypeRepository,IDefenseTypeRepository defenseTypeRepository,IHarassmentTypeRepository harassmentTypeRepository,ICaseTypeHPDRepository caseTypeHPDRepository ,ITenantRepository tenantRepo, ILandLordRepository landlordrepo, ICaseTypeRepository caseTypeRepository, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
         {
             _repository = repository;
             _tenantRepo = tenantRepo;
             _landlordrepo = landlordrepo;
             _buildingrepo = buildingrepo;
+            _caseTypeRepository = caseTypeRepository;
+            _caseTypeHPDRepository = caseTypeHPDRepository;
+            _harassmentTypeRepository = harassmentTypeRepository;
+            _appearanceTypeRepository = appearanceTypeRepository;
+            _reliefRespondenTypeRepository = reliefRespondenTypeRepository;
+            _reliefPetitionerTypeRepository = reliefPetitionerTypeRepository;
+            _defenseTypeRepository = defenseTypeRepository;
             _unitOfWork = unitOfWork;
             _additionalOccupantsRepo = additionalOccupantsRepo;
 
         }
 
-        public async Task<Guid?> CreateCasesAsync(IntakeModel legalCase)
+        public async Task<Guid?> CreateCasesAsync(IntakeModel legalCase )
         {
-            //// 1. Save Landlord
-            //var landlord = new LandLord
-            //{
-            //    Id = Guid.NewGuid(),
-            //    LandLordCode = await _landlordrepo.GenerateLandlordCodeAsync(),
-            //    FirstName = legalCase.FullName,
-            //    Phone = legalCase.Phone,
-            //    Email = legalCase.Email,
-            //    LandlordTypeId = legalCase.LandLordTypeId,
-            //    CreatedBy = legalCase.CreatedBy,
-            //    CreatedOn = DateTime.Now,
+           
+            var legalCases = new LegalCase();
 
+            var caseType = await _caseTypeRepository.GetAsync(legalCase.CaseTypeId);
+            var billingTypes = await _caseTypeRepository.GetAllBilingTypes();
 
-            //};
-            //await _landlordrepo.AddAsync(landlord);
-            //await _unitOfWork.SaveChangesAsync();
+            var flatGuid = billingTypes
+                .FirstOrDefault(x => x.Name.Equals("Flat Rate", StringComparison.OrdinalIgnoreCase))
+                ?.Id;
 
-            //// 2. Save Building
-            //var building = new Building
-            //{
-            //    Id = Guid.NewGuid(),
-            //    BuildingCode = await _buildingrepo.GenerateBuildingCodeAsync(),
-            //    MDRNumber = legalCase.Mdr,
-            //    BuildingUnits = legalCase.Units,
-            //    Address1 = legalCase.BuildingAddress,
-            //    RegulationStatusId = legalCase.RegulationStatusId,
-            //    CreatedBy = legalCase.CreatedBy,
-            //    CreatedOn = DateTime.Now,
-            //};
-            //await _buildingrepo.AddAsync(building);
-            //await _unitOfWork.SaveChangesAsync();
+            var hourlyGuid = billingTypes
+                            .FirstOrDefault(x => x.Name.Equals("Hourly ($/hr)", StringComparison.OrdinalIgnoreCase))
+                            ?.Id;
 
-            //// 3. Save Tenant
-            //var tenant = new Tenant
-            //{
-            //    Id = Guid.NewGuid(),
-            //    TenantCode = await _tenantRepo.GenerateTenantCodeAsync(),
-            //    FirstName = legalCase.FullName,
-            //    UnitOrApartmentNumber = legalCase.UnitNumber,
-            //    IsUnitIllegalId = legalCase.IsUnitIllegalId,
-
-            //    TenantRecord = legalCase.TenantRecord,
-            //    HasPossession = legalCase.HasPossession,
-            //    OtherOccupants = legalCase.OtherOccupants,
-            //    CreatedBy = legalCase.CreatedBy,
-            //    CreatedOn = DateTime.Now,
-            //};
-            //await _tenantRepo.AddAsync(tenant);
-            //await _unitOfWork.SaveChangesAsync();
-
-            // 4. Save Legal Case with foreign keys
-            var legalCases = new LegalCase
+            if (caseType != null)
             {
-                Id = Guid.NewGuid(),
-                Casecode = await _repository.GenerateCaseCodeAsync(),
-                ClientId = legalCase.ClientId,
-                CaseTypeId = legalCase.CaseTypeId,
-                IsERAPPaymentReceived = legalCase.IsERAPPaymentReceived,
+                if (caseType.Name.Equals("Holdover", StringComparison.OrdinalIgnoreCase)||
+                     caseType.Name.Equals("NonPayment", StringComparison.OrdinalIgnoreCase) ||
+                      caseType.Name.Equals("Non-Payment", StringComparison.OrdinalIgnoreCase) ||
+                      caseType.Name.Equals("Non Payment", StringComparison.OrdinalIgnoreCase)
+                    )
+                {
+                    // 🟢 HOLDOVER specific fields
+                    legalCases.Id = Guid.NewGuid();
+                    legalCases.Casecode = await _repository.GenerateCaseCodeAsync();
+                    legalCases.ClientId = legalCase.ClientId;
+                    legalCases.CaseTypeId = legalCase.CaseTypeId;
+                    legalCases.IsERAPPaymentReceived = legalCase.IsERAPPaymentReceived;
 
-                MonthlyRent = legalCase.MonthlyRent,
-                TotalRentOwed = legalCase.TotalOwed,
-                TenantShare = legalCase.TenantShare,
-                RentDueEachMonthOrWeekId = legalCase.RentDueEachMonthOrWeekId,
-                OralStart = legalCase.OralStart,
-                OralEnd = legalCase.OralEnd,
-                WrittenLease = legalCase.WrittenLease,
-                DateTenantMoved = legalCase.DateTenantMoved,
-                //CreatedBy = legalCase.CreatedBy,
-                CreatedOn = DateTime.Now,
-                TenancyTypeId = legalCase.TenancyTypeId,
-                // Foreign keys
-                LandLordId = legalCase.LandlordId,
-                LandlordTypeId = legalCase.LandLordTypeId,
-                CreatedBy = legalCase.CreatedBy,
+                    legalCases.MonthlyRent = legalCase.MonthlyRent;
+                    legalCases.TotalRentOwed = legalCase.TotalOwed;
+                    legalCases.TenantShare = legalCase.TenantShare;
+                    legalCases.RentDueEachMonthOrWeekId = legalCase.RentDueEachMonthOrWeekId;
+                    legalCases.OralStart = legalCase.OralStart;
+                    legalCases.OralEnd = legalCase.OralEnd;
+                    legalCases.WrittenLease = legalCase.WrittenLease;
+                    legalCases.DateTenantMoved = legalCase.DateTenantMoved;
+                    legalCases.CreatedOn = DateTime.Now;
+                    legalCases.TenancyTypeId = legalCase.TenancyTypeId;
+                    legalCases.LandLordId = legalCase.LandlordId;
+                    legalCases.LandlordTypeId = legalCase.LandLordTypeId;
+                    legalCases.CreatedBy = legalCase.CreatedBy;
+                    legalCases.BuildingId = legalCase.BuildingId;
+                    legalCases.TenantId = legalCase.TenantId;
+                    legalCases.UnitOrApartmentNumber = legalCase.UnitOrApartmentNumber;
+                    legalCases.LeaseEnd = legalCase.LeaseEnd;
+                    legalCases.DateNoticeServed = legalCase.DateNoticeServed;
+                    legalCases.ExpirationDate = legalCase.ExpirationDate;
+                    legalCases.PredicateNotice = legalCase.PredicateNotice;
+                    legalCases.SocialService = legalCase.SocialService;
+                    legalCases.LastRentPaid = legalCase.LastRentPaid;
+                    legalCases.Reference = legalCase.Reference;
+                    legalCases.OralAgreeMent = legalCase.OralAgreeMent;
+                    legalCases.GoodCauseApplies = legalCase.GoodCauseApplies;
+                    legalCases.CalculatedNoticeLength = legalCase.CalculatedNoticeLength;
+                    legalCases.CaseProgramId = legalCase.CaseProgramId;
+                }
+                else if (caseType.Name.Equals("HPD", StringComparison.OrdinalIgnoreCase))
+                {
+                    // 🟣 HPD specific fields
+                    legalCases.Id = Guid.NewGuid();
+                    legalCases.Casecode = await _repository.GenerateCaseCodeAsync();
+                    legalCases.ClientId = legalCase.ClientId;
+                    legalCases.TenantId = legalCase.TenantId;
+                    legalCases.CaseTypeId = legalCase.CaseTypeId;
+                    legalCases.Attrney = legalCase.Attrney;
+                    legalCases.AttrneyContactInfo = legalCase.AttrneyContactInfo;
+                    legalCases.AttrneyEmail = legalCase.AttrneyEmail;
+                    legalCases.CourtLocationId = legalCase.CourtLocationId;
+                    legalCases.CourtRoom = legalCase.CourtRoom;
+                    legalCases.Index = legalCase.Index;
+                    legalCases.County = legalCase.County;
+                    legalCases.PartyRepresentId = legalCase.PartyRepresentId;
+                    legalCases.ManagingAgent = legalCase.ManagingAgent;
+                    legalCases.OpposingCounsel = legalCase.OpposingCounsel;
+                    legalCases.LandLordId = legalCase.LandlordId;
+                    legalCases.BuildingId = legalCase.BuildingId;
+                    legalCases.AppearanceDate = legalCase.AppearanceDate;
+                    legalCases.AppearanceTime = legalCase.AppearanceTime;
+                    legalCases.TenantName = legalCase.TenantName;
 
-                BuildingId = legalCase.BuildingId,
-                TenantId = legalCase.TenantId,
+                    legalCases.BilingTypeId = legalCase.BilingTypeId;
+                    legalCases.InvoiceTo = legalCase.InvoiceTo;
+                    legalCases.CaseTypeHPDs = await _repository.GetHPDByIdsAsync(legalCase.SelectedCaseTypeHPDIds);
+                    legalCases.HarassmentTypse = await _repository.GetHarassmentTypeIdAsync(legalCase.SelectedHarassmentTypeIds);
+                    legalCases.DefenseTypse = await _repository.GetDefenseTypeIdAsync(legalCase.SelectedDefenseTypeIds);
+                    legalCases.AppearanceType = await _repository.GetApperenceTypeIdAsync(legalCase.SelectedAppearanceTypeIds);
+                    legalCases.ReliefPetitionerType = await _repository.GetReliefPetitionerTypesListTypeIdAsync(legalCase.SelectedReliefPetitionerTypeIds);
+                    legalCases.ReliefRespondentType = await _repository.GetReliefRespondentTypesListTypeIdAsync(legalCase.SelectedReliefRespondentTypeIds);
+                }
+                else if (caseType.Name.Equals("Per Diem", StringComparison.OrdinalIgnoreCase))
+                {
+                    // 🟣 HPD specific fields
+                    legalCases.Id = Guid.NewGuid();
+                    legalCases.Casecode = await _repository.GenerateCaseCodeAsync();
+                    legalCases.ClientId = legalCase.ClientId;
+                    legalCases.CaseTypeId = legalCase.CaseTypeId;
+                    legalCases.Attrney = legalCase.Attrney;
+                    legalCases.AttrneyContactInfo = legalCase.AttrneyContactInfo;
+                    legalCases.AttrneyEmail = legalCase.AttrneyEmail;
+                    legalCases.CourtLocationId = legalCase.CourtLocationId;
+                    legalCases.CourtRoom = legalCase.CourtRoom;
+                    legalCases.Index = legalCase.Index;
+                    legalCases.County = legalCase.County;
+                    legalCases.PartyRepresentPerDiemId = legalCase.PartyRepresentPerDiemId;
+                    legalCases.Partynames = legalCase.Partynames;
+                    legalCases.ManagingAgent = legalCase.ManagingAgent;
+                    legalCases.OpposingCounsel = legalCase.OpposingCounsel;
+                    legalCases.CaseBackground = legalCase.CaseBackground;
+                    legalCases.SpecialInstruction = legalCase.SpecialInstruction;
+                    legalCases.BilingTypeId = legalCase.BilingTypeId;
+                    legalCases.AppearanceDate = legalCase.AppearanceDate;
+                    legalCases.AppearanceTime = legalCase.AppearanceTime;
+                    // Biling type save logic
+                    if (legalCase.BilingTypeId == flatGuid)
+                    {
+                        legalCases.Flatdescription = legalCase.BilingTypeInputValue;
+                        legalCases.Hourlydescription = null;
+                    }
+                    else if (legalCase.BilingTypeId == hourlyGuid)
+                    {
+                        legalCases.Hourlydescription = legalCase.BilingTypeInputValue;
+                        legalCases.Flatdescription = null;
+                    }
 
-                UnitOrApartmentNumber = legalCase.UnitOrApartmentNumber,
-                LeaseEnd = legalCase.LeaseEnd,
-                DateNoticeServed = legalCase.DateNoticeServed,
-                ExpirationDate = legalCase.ExpirationDate,
-                PredicateNotice = legalCase.PredicateNotice,
-                SocialService = legalCase.SocialService,
-                LastRentPaid = legalCase.LastRentPaid,
-                Reference = legalCase.Reference,
-                OralAgreeMent = legalCase.OralAgreeMent,
-                GoodCauseApplies = legalCase.GoodCauseApplies,
-                CalculatedNoticeLength = legalCase.CalculatedNoticeLength,
-                CaseProgramId = legalCase.CaseProgramId,
-            };
+                    legalCases.TravelExpense = legalCase.TravelExpense;
+                    legalCases.PaymentMethodId = legalCase.PaymentMethodId;
+                    legalCases.PerDiemAttorneyname = legalCase.PerDiemAttorneyname;
+                    legalCases.PerDiemSignature = legalCase.PerDiemSignature;
+                    legalCases.PerDiemDate = legalCase.PerDiemDate;
 
-            var addedcase = await _repository.AddAsync(legalCases);
-            var result = await _unitOfWork.SaveChangesAsync();
 
-            if (result != null) return addedcase.Id;
+                    legalCases.CaseTypePerDiems = await _repository.GetCaseTypePerDiemByIdsAsync(legalCase.SelectedCaseTypePerDiemIds);
+                    legalCases.AppearanceTypePerDiem = await _repository.GetApperenceTypePerDiemIdAsync(legalCase.SelectedAppearanceTypePerDiemIds);
+                    legalCases.DocumentIntructionsTypse = await _repository.GetDocumentIntructionsTypsIdAsync(legalCase.SelectedDocumentInstructionPerDiemIds);
+                    legalCases.ReportingTypePerDiems = await _repository.GetReportingTypePerDiemsIdAsync(legalCase.SelectedReportingRequirementPerDiemIds);
+                   
+                }
 
-            return null;
+                legalCases.CreatedBy = legalCase.CreatedBy;
+                legalCases.CreatedOn = DateTime.Now;
+
+                var addedcase = await _repository.AddAsync(legalCases);
+                var result = await _unitOfWork.SaveChangesAsync();
+
+                if (result != null) return addedcase.Id;
+            }
+
+                return null;
+            
         }
 
 
@@ -244,6 +316,8 @@ namespace EvictionFiler.Application.Services
 
         }
 
+      
+
         public async Task<IntakeModel> GetCaseByIdAsync(Guid caseId)
         {
             try
@@ -264,109 +338,258 @@ namespace EvictionFiler.Application.Services
         c => c.Buildings.State,
         c => c.Addoccupants,
         c => c.Buildings.Landlord.State,
-        c => c.Buildings.Landlord.LandlordType
+        c => c.Buildings.Landlord.LandlordType,
+        c => c.CaseTypeHPDs,
+          c => c.CaseTypePerDiems,
+        c => c.PartyRepresents,
+         c => c.Buildings.BuildingType,
+          c => c.Buildings.RegistrationStatus,
+           c => c.HarassmentTypse,
+            c => c.DefenseTypse,
+               c => c.ReliefPetitionerType,
+                  c => c.ReliefRespondentType,
+                     c => c.AppearanceType,
+                      c => c.AppearanceTypePerDiem,
+                     c => c.BilingType,
+                       c => c.ReportingTypePerDiems,
+                     c => c.DocumentIntructionsTypse,
+                     c => c.CourtLocation
+
+
+
+
     )
     .FirstOrDefaultAsync();
 
                 if (caseEntity == null)
                     return null;
 
-                var intakeModel = new IntakeModel
+                if (caseEntity.CaseType.Name == "Holover" || caseEntity.CaseType.Name == "NonPayment" || caseEntity.CaseType.Name == "HPD")
                 {
-                    // for Case
-                    Id = caseEntity.Id,
-                    Casecode = caseEntity.Casecode,
-                    ClientId = caseEntity.Clients.Id,
-                    CaseTypeName = caseEntity.CaseType.Name,
-                    //IsERAPPaymentReceived = caseEntity.IsERAPPaymentReceived,
-                    CaseTypeId = caseEntity.CaseTypeId,
+                    var intakeModel = new IntakeModel
+                    {
+                        // for Case
+                        Id = caseEntity.Id,
+                        Casecode = caseEntity.Casecode,
+                        ClientId = caseEntity.Clients.Id,
+                        CaseTypeName = caseEntity.CaseType.Name,
+                        CaseTypeId = caseEntity.CaseTypeId,
+                        CreatedOn = caseEntity.CreatedOn,
+                        Status = caseEntity.IsActive ? "Active" : "Inactive",
+                        //for Client
+                        ClientCode = caseEntity.Clients.ClientCode,
+                        ClientName = $"{caseEntity.Clients.FirstName} {caseEntity.Clients.LastName}",
+                        ClientTypeId = caseEntity.Clients.ClientTypeId,
+                        ClientEmail = caseEntity.Clients.Email,
+                        ClientPhone = caseEntity.Clients.Phone,
+                        Reference = caseEntity.Reference,
+                        Address1 = caseEntity.Clients.Address1,
+                        Address2 = caseEntity.Clients.Address2,
+                        City = caseEntity.Clients.City,
+                        StateName = caseEntity.Clients.State != null ? caseEntity.Clients.State.Name : string.Empty,
+                        ZipCode = caseEntity.Clients.ZipCode,
 
-                    //OralStart = caseEntity.OralStart,
-                    //OralEnd = caseEntity.OralEnd,
-                    CreatedOn = caseEntity.CreatedOn,
-                    Status = caseEntity.IsActive ? "Active" : "Inactive",
+                        // Landlord
+                        LandlordId = caseEntity.LandLordId,
+                        landlordName = $"{caseEntity.LandLords.FirstName} {caseEntity.LandLords.LastName}",
+                        ContactPersonName = caseEntity.LandLords.ContactPersonName,
+                        LawFirm = caseEntity.LandLords.LawFirm,
+                        AttorneyOfRecord = caseEntity.LandLords.AttorneyOfRecord,
+                        LandlordAddress = caseEntity.LandLords.Address1,
 
 
-                    //for Client
-                    ClientCode = caseEntity.Clients.ClientCode,
-                    ClientName = $"{caseEntity.Clients.FirstName} {caseEntity.Clients.LastName}",
-                    ClientTypeId = caseEntity.Clients.ClientTypeId,
-                    ClientEmail = caseEntity.Clients.Email,
-                    ClientPhone = caseEntity.Clients.Phone,
-                    Reference = caseEntity.Reference,
-                    Address1 = caseEntity.Clients.Address1,
-                    Address2 = caseEntity.Clients.Address2,
-                    City = caseEntity.Clients.City,
-                    StateName = caseEntity.Clients.State != null ? caseEntity.Clients.State.Name : string.Empty,
-                    ZipCode = caseEntity.Clients.ZipCode,
+                        // Building
+                        BuildingId = caseEntity.BuildingId,
+                        Buildingcode = caseEntity.Buildings.BuildingCode,
+                        Mdr = caseEntity.Buildings?.MDRNumber,
+                        UnitOrApartmentNumber = caseEntity.Buildings.ApartmentCode,
 
-                    // Landlord
-                    LandlordId = caseEntity.LandLordId,
-                    landlordName = $"{caseEntity.LandLords.FirstName} {caseEntity.LandLords.LastName}",
-                    ContactPersonName = caseEntity.LandLords.ContactPersonName,
-                    LawFirm = caseEntity.LandLords.LawFirm,
-                    AttorneyOfRecord = caseEntity.LandLords.AttorneyOfRecord,
-                    LandlordAddress = caseEntity.LandLords.Address1,
-                    //FullName = caseEntity.LandLords?.FirstName,
-                    //Phone = caseEntity.LandLords?.Phone,
-                    //Email = caseEntity.LandLords?.Email,
-                    //LandLordTypeId = caseEntity.LandLords?.LandlordTypeId ?? Guid.Empty,
+                        Borough = caseEntity.Buildings?.City,
+                        Units = caseEntity.Buildings?.BuildingUnits,
+                        BuildingState = caseEntity.Buildings.State != null ? caseEntity.Buildings.State.Name : string.Empty,
+                        BuildingAddress = caseEntity.Buildings?.Address1,
+                        BuildingZip = caseEntity.Buildings.Zipcode,
+                        //RegulationStatusId = caseEntity.Buildings?.RegulationStatusId ?? Guid.Empty,
+                        BuildingTypeId = caseEntity.Buildings.BuildingTypeId,
+                        RegistrationStatusTypeId = caseEntity.Buildings.RegistrationStatusId,
 
-                    // Building
-                    BuildingId = caseEntity.BuildingId,
-                    Buildingcode = caseEntity.Buildings.BuildingCode,
-                    Mdr = caseEntity.Buildings?.MDRNumber,
-                    UnitOrApartmentNumber = caseEntity.Buildings.ApartmentCode,
-                    //ApartmentNumber = caseEntity.Buildings.ApartmentCode,
-                    Borough = caseEntity.Buildings?.City,
-                    Units = caseEntity.Buildings?.BuildingUnits,
-                    BuildingState = caseEntity.Buildings.State != null ? caseEntity.Buildings.State.Name : string.Empty,
-                    BuildingAddress = caseEntity.Buildings?.Address1,
-                    BuildingZip = caseEntity.Buildings.Zipcode,
-                    RegulationStatusId = caseEntity.Buildings?.RegulationStatusId ?? Guid.Empty,
-                    //RegulationStatusName = caseEntity.Buildings.RegulationStatus.Name,
 
-                    // Tenant
-                    TenantId = caseEntity.TenantId,
-                    TenantName = $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}",
-                    ApartmentNumber = caseEntity.Tenants?.UnitOrApartmentNumber,
+                        // Tenant
+                        TenantId = caseEntity.TenantId,
+                        TenantName = $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}",
+                        ApartmentNumber = caseEntity.Tenants?.UnitOrApartmentNumber,
 
-                    WrittenLease = caseEntity.WrittenLease,
-                    OralAgreeMent = caseEntity.OralAgreeMent,
-                    CaseProgramId = caseEntity.CaseProgramId,
-                    GoodCauseApplies = caseEntity.GoodCauseApplies,
-                    DateTenantMoved = caseEntity.DateTenantMoved,
-                    LeaseEnd = caseEntity.LeaseEnd,
-                    TenancyTypeId = caseEntity.TenancyTypeId,
-                    DateNoticeServed = caseEntity.DateNoticeServed,
-                    CalculatedNoticeLength = caseEntity.CalculatedNoticeLength,
-                    ExpirationDate = caseEntity.ExpirationDate,
-                    PredicateNotice = caseEntity.PredicateNotice,
-                    RentDueEachMonthOrWeekId = caseEntity.RentDueEachMonthOrWeekId,
-                    MonthlyRent = caseEntity.MonthlyRent,
-                    TotalOwed = caseEntity.TotalRentOwed,
-                    TenantShare = caseEntity.TenantShare,
-                    SocialService = caseEntity.SocialService,
-                    LastRentPaid = caseEntity.LastRentPaid,
-                    //IsUnitIllegalId = caseEntity.Tenants?.IsUnitIllegalId ?? Guid.Empty,
-                    //TenantRecord = caseEntity.Tenants?.TenantRecord,
-                    //HasPossession = caseEntity.Tenants?.HasPossession,
-                    //OtherOccupants = caseEntity.Tenants?.OtherOccupants
+                        WrittenLease = caseEntity.WrittenLease,
+                        OralAgreeMent = caseEntity.OralAgreeMent,
+                        CaseProgramId = caseEntity.CaseProgramId,
+                        GoodCauseApplies = caseEntity.GoodCauseApplies,
+                        DateTenantMoved = caseEntity.DateTenantMoved,
+                        LeaseEnd = caseEntity.LeaseEnd,
+                        TenancyTypeId = caseEntity.TenancyTypeId,
+                        DateNoticeServed = caseEntity.DateNoticeServed,
+                        CalculatedNoticeLength = caseEntity.CalculatedNoticeLength,
+                        ExpirationDate = caseEntity.ExpirationDate,
+                        PredicateNotice = caseEntity.PredicateNotice,
+                        RentDueEachMonthOrWeekId = caseEntity.RentDueEachMonthOrWeekId,
+                        MonthlyRent = caseEntity.MonthlyRent,
+                        TotalOwed = caseEntity.TotalRentOwed,
+                        TenantShare = caseEntity.TenantShare,
+                        SocialService = caseEntity.SocialService,
+                        LastRentPaid = caseEntity.LastRentPaid,
 
-                    CourtId = caseEntity.CourtId != null ? caseEntity.CourtId : Guid.Empty,
-                    Court = caseEntity.Courts != null ? caseEntity.Courts.Court : "",
-                    CourtAddress = caseEntity.Courts != null ? caseEntity.Courts.Address : "",
-                    CourtConferenceId = caseEntity.Courts != null ? caseEntity.Courts.ConferenceId : "",
-                    CourtCallIn = caseEntity.Courts != null ? caseEntity.Courts.CallIn : "",
-                    CourtNotes = caseEntity.Courts != null ? caseEntity.Courts.Notes : "",
-                    CourtPart = caseEntity.Courts != null ? caseEntity.Courts.Part : "",
-                    CourtPhone = caseEntity.Courts != null ? caseEntity.Courts.Phone : "",
-                    CourtRoomNo = caseEntity.Courts != null ? caseEntity.Courts.RoomNo : "",
-                    CourtVirtualLink = caseEntity.Courts != null ? caseEntity.Courts.VirtualLink : "",
-                    BillAmount = caseEntity.BillAmount ?? 0,
-                };
 
-                return intakeModel;
+                        CourtId = caseEntity.CourtId != null ? caseEntity.CourtId : Guid.Empty,
+                        Court = caseEntity.Courts != null ? caseEntity.Courts.Court : "",
+                        CourtAddress = caseEntity.Courts != null ? caseEntity.Courts.Address : "",
+                        //CourtConferenceId = caseEntity.Courts != null ? caseEntity.Courts.ConferenceId : "",
+                        //CourtCallIn = caseEntity.Courts != null ? caseEntity.Courts.CallIn : "",
+                        //CourtNotes = caseEntity.Courts != null ? caseEntity.Courts.Notes : "",
+                        //CourtPart = caseEntity.Courts != null ? caseEntity.Courts.Part : "",
+                        //CourtPhone = caseEntity.Courts != null ? caseEntity.Courts.Phone : "",
+                        //CourtRoomNo = caseEntity.Courts != null ? caseEntity.Courts.RoomNo : "",
+                        //CourtVirtualLink = caseEntity.Courts != null ? caseEntity.Courts.VirtualLink : "",
+                        Attrney = caseEntity.Attrney,
+                        AttrneyContactInfo = caseEntity.AttrneyContactInfo,
+                        AttrneyEmail = caseEntity.AttrneyEmail,
+                        CourtLocationId = caseEntity.CourtLocationId,
+                        CourtName = caseEntity.CourtLocation != null ? $"{caseEntity.CourtLocation.Court}" : "",
+                        CourtRoom = caseEntity.CourtRoom,
+                        Index = caseEntity.Index,
+                        County = caseEntity.County,
+                        ManagingAgent = caseEntity.ManagingAgent,
+                        OpposingCounsel = caseEntity.OpposingCounsel,
+                        AppearanceDate = caseEntity.AppearanceDate,
+                        AppearanceTime = caseEntity.AppearanceTime,
+                        InvoiceTo = caseEntity.InvoiceTo,
+                        BilingTypeId = caseEntity.BilingTypeId,
+
+
+                        SelectedCaseTypeHPDIds = caseEntity.CaseTypeHPDs
+                                              .Select(x => x.Id)
+                                              .ToList(),
+                        SelectedHarassmentTypeIds = caseEntity.HarassmentTypse
+                                              .Select(x => x.Id)
+                                              .ToList(),
+                        SelectedDefenseTypeIds = caseEntity.DefenseTypse
+                                              .Select(x => x.Id)
+                                              .ToList(),
+                        SelectedAppearanceTypeIds = caseEntity.AppearanceType
+                                              .Select(x => x.Id)
+                                              .ToList(),
+
+                        SelectedReliefPetitionerTypeIds = caseEntity.ReliefPetitionerType
+                                              .Select(x => x.Id)
+                                              .ToList(),
+                        SelectedReliefRespondentTypeIds = caseEntity.ReliefRespondentType
+                                              .Select(x => x.Id)
+                                              .ToList(),
+                        PartyRepresentId = caseEntity.PartyRepresentId,
+                        PremiseTypeId =  caseEntity.Buildings.PremiseTypeId,
+
+
+                        BillAmount = caseEntity.BillAmount ?? 0,
+                    };
+                    return intakeModel;
+                }
+                if (caseEntity.CaseType.Name == "Per Diem")
+                {
+                    var billingTypes = await _caseTypeRepository.GetAllBilingTypes();
+                    var flatGuid = billingTypes
+               .FirstOrDefault(x => x.Name.Equals("Flat Rate", StringComparison.OrdinalIgnoreCase))
+               ?.Id;
+
+                    var hourlyGuid = billingTypes
+                                    .FirstOrDefault(x => x.Name.Equals("Hourly ($/hr)", StringComparison.OrdinalIgnoreCase))
+                                    ?.Id;
+                    var intakeModel = new IntakeModel
+                    {
+                        // for Case
+                        Id = caseEntity.Id,
+                        Casecode = caseEntity.Casecode,
+                        ClientId = caseEntity.Clients.Id,
+                        CaseTypeName = caseEntity.CaseType.Name,
+                        CaseTypeId = caseEntity.CaseTypeId,
+                        CreatedOn = caseEntity.CreatedOn,
+                        Status = caseEntity.IsActive ? "Active" : "Inactive",
+                        //for Client
+                        ClientCode = caseEntity.Clients.ClientCode,
+                        ClientName = $"{caseEntity.Clients.FirstName} {caseEntity.Clients.LastName}",
+                        ClientTypeId = caseEntity.Clients.ClientTypeId,
+                        ClientEmail = caseEntity.Clients.Email,
+                        ClientPhone = caseEntity.Clients.Phone,
+                        Reference = caseEntity.Reference,
+                        Address1 = caseEntity.Clients.Address1,
+                        Address2 = caseEntity.Clients.Address2,
+                        City = caseEntity.Clients.City,
+                        StateName = caseEntity.Clients.State != null ? caseEntity.Clients.State.Name : string.Empty,
+                        ZipCode = caseEntity.Clients.ZipCode,
+
+                        Attrney = caseEntity.Attrney,
+                        AttrneyContactInfo = caseEntity.AttrneyContactInfo,
+                        AttrneyEmail = caseEntity.AttrneyEmail,
+                        CourtLocationId = caseEntity.CourtLocationId,
+                        CourtName = caseEntity.CourtLocation != null ? $"{caseEntity.CourtLocation.Court}" : "",
+                        CourtRoom = caseEntity.CourtRoom,
+                        Index = caseEntity.Index,
+                        County = caseEntity.County,
+
+                        OpposingCounsel = caseEntity.OpposingCounsel,
+                        Partynames = caseEntity.Partynames,
+                        CaseBackground = caseEntity.CaseBackground,
+                        SpecialInstruction = caseEntity.SpecialInstruction,
+                        CountyId = caseEntity.CourtLocation.CountyId,
+
+                        TravelExpense = caseEntity.TravelExpense,
+                        BilingTypeId = caseEntity.BilingTypeId,
+                        PerDiemAttorneyname = caseEntity.PerDiemAttorneyname,
+                        AppearanceDate = caseEntity.AppearanceDate,
+                        AppearanceTime = caseEntity.AppearanceTime,
+                        PerDiemDate = caseEntity.PerDiemDate,
+
+
+
+                        PerDiemSignature = caseEntity.PerDiemSignature,
+                        SelectedCaseTypePerDiemIds = caseEntity.CaseTypePerDiems
+                                              .Select(x => x.Id)
+                                              .ToList(),
+
+                        SelectedAppearanceTypePerDiemIds = caseEntity.AppearanceTypePerDiem
+                                              .Select(x => x.Id)
+                                              .ToList(),
+
+                        SelectedDocumentInstructionPerDiemIds = caseEntity.DocumentIntructionsTypse
+                                              .Select(x => x.Id)
+                                              .ToList(),
+                        SelectedReportingRequirementPerDiemIds = caseEntity.ReportingTypePerDiems
+                                              .Select(x => x.Id)
+                                              .ToList(),
+                        PartyRepresentPerDiemId = caseEntity.PartyRepresentPerDiemId,
+                       
+                      
+                        PaymentMethodId = caseEntity.PaymentMethodId,
+
+                    };
+
+
+                    if (flatGuid != null && caseEntity.BilingTypeId == flatGuid)
+                    {
+                        intakeModel.BilingTypeInputValue = caseEntity.Flatdescription;
+                    }
+                    else if (hourlyGuid != null && caseEntity.BilingTypeId == hourlyGuid)
+                    {
+                        intakeModel.BilingTypeInputValue = caseEntity.Hourlydescription;
+                    }
+
+
+
+
+                    return intakeModel;
+                }
+
+
+                return null;
+
+
             }
             catch (Exception ex)
             {
@@ -402,7 +625,7 @@ namespace EvictionFiler.Application.Services
             {
                 Id = legalcaseEntity.Id,
 
-                ClientId = legalcaseEntity.Clients.Id,
+                //ClientId = legalcaseEntity.Clients.Id,
                 BuildingId = legalcaseEntity.Buildings?.Id,
                 LandLordId = legalcaseEntity.LandLordId,
                 TenantId = legalcaseEntity.Tenants?.Id,
@@ -445,6 +668,17 @@ namespace EvictionFiler.Application.Services
                     LegalCaseId = o.LegalCaseId,
                     IsVisible = true
                 }).ToList(),
+
+                Client = legalcaseEntity.Clients == null ? null : new EditToClientDto
+                {
+                    Id = legalcaseEntity.Clients.Id,
+                    FirstName = legalcaseEntity.Clients.FirstName,
+                    LastName = legalcaseEntity.Clients.LastName,
+                   
+                    Email = legalcaseEntity.Clients.Email,
+                    ClientTypeId = legalcaseEntity.ClientRoleId,
+                    Reference= legalcaseEntity.Reference,
+                },
 
 
 
@@ -498,6 +732,15 @@ namespace EvictionFiler.Application.Services
                 var existingCase = await _repository.GetAsync(legalCase.Id);
                 if (existingCase == null) return null;
 
+                var billingTypes = await _caseTypeRepository.GetAllBilingTypes();
+
+                var flatGuid = billingTypes
+                    .FirstOrDefault(x => x.Name.Equals("Flat Rate", StringComparison.OrdinalIgnoreCase))
+                    ?.Id;
+
+                var hourlyGuid = billingTypes
+                                .FirstOrDefault(x => x.Name.Equals("Hourly ($/hr)", StringComparison.OrdinalIgnoreCase))
+                                ?.Id;
                 //var landlord = await _landlordrepo.GetAsync(existingCase.LandLordId);
                 //var building = await _buildingrepo.GetAsync(existingCase.BuildingId);
                 //var tenant = await _tenantRepo.GetAsync(existingCase.TenantId);
@@ -524,6 +767,7 @@ namespace EvictionFiler.Application.Services
 
                 existingCase.BuildingId = legalCase.BuildingId;
                 existingCase.TenantId = legalCase.TenantId;
+                existingCase.TenantName = legalCase.TenantName;
 
                 existingCase.UnitOrApartmentNumber = legalCase.UnitOrApartmentNumber;
                 existingCase.LeaseEnd = legalCase.LeaseEnd;
@@ -536,7 +780,34 @@ namespace EvictionFiler.Application.Services
                 existingCase.OralAgreeMent = legalCase.OralAgreeMent;
                 existingCase.GoodCauseApplies = legalCase.GoodCauseApplies;
                 existingCase.CalculatedNoticeLength = legalCase.CalculatedNoticeLength;
-                if(legalCase.CaseProgramId != null && legalCase.CaseProgramId != Guid.Empty)
+                existingCase.Attrney = legalCase.Attrney;
+                existingCase.AttrneyContactInfo = legalCase.AttrneyContactInfo;
+                existingCase.AttrneyEmail = legalCase.AttrneyEmail;
+                existingCase.CourtLocationId = legalCase.CourtLocationId;
+                existingCase.CourtRoom = legalCase.CourtRoom;
+                existingCase.Index = legalCase.Index;
+                existingCase.County = legalCase.County;
+                existingCase.ManagingAgent = legalCase.ManagingAgent;
+                existingCase.OpposingCounsel = legalCase.OpposingCounsel;
+                existingCase.AppearanceDate = legalCase.AppearanceDate;
+                existingCase.AppearanceTime = legalCase.AppearanceTime; 
+                existingCase.InvoiceTo = legalCase.InvoiceTo;   
+
+                if (legalCase.PartyRepresentId != null && legalCase.PartyRepresentId != Guid.Empty)
+                {
+                    existingCase.PartyRepresentId = legalCase.PartyRepresentId;
+
+                }
+
+                if (legalCase.BilingTypeId != null && legalCase.BilingTypeId != Guid.Empty)
+                {
+                    existingCase.BilingTypeId = legalCase.BilingTypeId;
+
+                }
+
+
+
+                if (legalCase.CaseProgramId != null && legalCase.CaseProgramId != Guid.Empty)
                 {
                     existingCase.CaseProgramId = legalCase.CaseProgramId;
 
@@ -549,6 +820,97 @@ namespace EvictionFiler.Application.Services
                 existingCase.BillAmount = legalCase.BillAmount;
 
                 var updated = _repository.UpdateAsync(existingCase);
+
+
+                existingCase.CaseTypeHPDs.Clear();
+                existingCase.HarassmentTypse.Clear();
+                existingCase.DefenseTypse.Clear();
+                existingCase.AppearanceType.Clear();
+                existingCase.ReliefRespondentType.Clear();
+                existingCase.ReliefPetitionerType.Clear();
+
+                if (legalCase.SelectedCaseTypeHPDIds != null)
+                {
+                    foreach (var id in legalCase.SelectedCaseTypeHPDIds)
+                    {
+                        var hpd = await _caseTypeHPDRepository.GetAsync(id);
+                        if (hpd != null)
+                        {
+                            existingCase.CaseTypeHPDs.Add(hpd);
+                        }
+                    }
+                }
+
+                if (legalCase.SelectedAppearanceTypeIds != null)
+                {
+                    foreach (var id in legalCase.SelectedAppearanceTypeIds)
+                    {
+                        var hpd = await _appearanceTypeRepository.GetAsync(id);
+                        if (hpd != null)
+                        {
+                            existingCase.AppearanceType.Add(hpd);
+                        }
+                    }
+                }
+
+                if (legalCase.SelectedReliefPetitionerTypeIds != null)
+                {
+                    foreach (var id in legalCase.SelectedReliefPetitionerTypeIds)
+                    {
+                        var hpd = await _reliefPetitionerTypeRepository.GetAsync(id);
+                        if (hpd != null)
+                        {
+                            existingCase.ReliefPetitionerType.Add(hpd);
+                        }
+                    }
+                }
+
+                if (legalCase.SelectedReliefRespondentTypeIds != null)
+                {
+                    foreach (var id in legalCase.SelectedReliefRespondentTypeIds)
+                    {
+                        var hpd = await _reliefRespondenTypeRepository.GetAsync(id);
+                        if (hpd != null)
+                        {
+                            existingCase.ReliefRespondentType.Add(hpd);
+                        }
+                    }
+                }
+
+                if (legalCase.SelectedHarassmentTypeIds != null)
+                {
+                    foreach (var id in legalCase.SelectedHarassmentTypeIds)
+                    {
+                        var hpharasmentType = await _harassmentTypeRepository.GetAsync(id);
+                        if (hpharasmentType != null)
+                        {
+                            existingCase.HarassmentTypse.Add(hpharasmentType);
+                        }
+                    }
+                }
+
+                if (legalCase.SelectedDefenseTypeIds != null)
+                {
+                    foreach (var id in legalCase.SelectedDefenseTypeIds)
+                    {
+                        var defenseType = await _defenseTypeRepository.GetAsync(id);
+                        if (defenseType != null)
+                        {
+                            existingCase.DefenseTypse.Add(defenseType);
+                        }
+                    }
+                }
+                if (legalCase.BilingTypeId == flatGuid)
+                {
+                    existingCase.Flatdescription = legalCase.BilingTypeInputValue;
+                    existingCase.Hourlydescription = null;
+                }
+                else if (legalCase.BilingTypeId == hourlyGuid)
+                {
+                    existingCase.Hourlydescription = legalCase.BilingTypeInputValue;
+                    existingCase.Flatdescription = null;
+                }
+
                 var result = await _unitOfWork.SaveChangesAsync();
 
                 if (result > 0) return updated.Id;

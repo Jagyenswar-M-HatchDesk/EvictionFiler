@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EvictionFiler.Application.DTOs.CourtPart;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -27,5 +28,7 @@ namespace EvictionFiler.Application.DTOs.CourtDto
         public Guid? CountyId { get; set; } 
         public string CountyName { get; set; } = string.Empty;
         public string Judge { get; set; } = string.Empty;
+
+        public List<CourtPartDto> CourtPart { get; set; } = new List<CourtPartDto>();
     }
 }

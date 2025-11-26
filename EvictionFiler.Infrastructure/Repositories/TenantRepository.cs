@@ -1,4 +1,6 @@
-﻿using EvictionFiler.Application.DTOs.OccupantDto;
+﻿using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.DTOs.OccupantDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IUserRepository;
@@ -7,6 +9,8 @@ using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
+using Polly;
+using System.Linq;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
@@ -79,96 +83,128 @@ namespace EvictionFiler.Infrastructure.Repositories
 			return tenant;
 		}
 
-		public async Task<List<EditToTenantDto>> SearchTenantAsync(string query, Guid clientId)
-		{
-			query = query?.Trim().ToLower() ?? "";
+        public async Task<List<EditToTenantDto>> SearchTenantAsync(string query, Guid clientId)
+        {
+            query = query?.Trim().ToLower() ?? "";
 
-			var tenants = await _dbContext.Tenants
-				.Include(t => t.Building)
-					.ThenInclude(b => b.Landlord)
-				.Where(t =>
-					t.Building.Landlord.ClientId == clientId && (
-						t.TenantCode.ToLower().Contains(query) ||
-						(t.FirstName + " " + t.LastName).ToLower().StartsWith(query)
-					)
-				)
-				.Select(t => new EditToTenantDto
-				{
-					Id = t.Id,
-					FirstName = t.FirstName,
-					LastName = t.LastName,
-					Email = t.Email,
-					Phone = t.Phone,
-					TenantCode = t.TenantCode
-				})
-				.Take(10)
-				.ToListAsync();
+            // 1️⃣ Get all BuildingIds for the selected Client
+            var buildingIds = await _dbContext.Buildings
+                .Where(b => b.Landlord.ClientId == clientId)
+                .Select(b => b.Id)
+                .ToListAsync();
 
-			return tenants;
-		}
+            // 2️⃣ Now search tenant under those buildings
+            var tenants = await _dbContext.Tenants
+                .Where(t =>
+                    buildingIds.Contains(t.BuildinId.Value) &&
+                    t.IsDeleted != true &&
+                    (
+                        t.TenantCode.ToLower().Contains(query) ||
+                        (t.FirstName + " " + t.LastName).ToLower().StartsWith(query) ||
+                        t.UnitOrApartmentNumber.ToLower().StartsWith(query)
+                    )
+                )
+                .Select(dto => new EditToTenantDto
+                {
+                    Id = dto.Id,
+                    TenantCode = dto.TenantCode,
+                    FirstName = dto.FirstName,
+                    LastName = dto.LastName
+                })
+                .ToListAsync();
 
-
-
-
-		public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? buildingId)
-		{
-			
-			var tenants = await _dbContext.Tenants
-		.Include(a => a.Language).Include(e => e.IsUnitIllegal).Include(e => e.TenancyType).Include(e => e.AddTenants)
-		.Where(t => t.BuildinId == buildingId && t.IsDeleted != true)
-		.Select(dto => new EditToTenantDto
-		{
-			Id = dto.Id,
-			TenantCode = dto.TenantCode,
-			FirstName = dto.FirstName,
-			LastName = dto.LastName,
-			UnitOrApartmentNumber = dto.UnitOrApartmentNumber,
-
-			RentDueEachMonthOrWeekId = dto.RentDueEachMonthOrWeekId,
-			MonthlyRent = dto.MonthlyRent,
-			TenantShare = dto.TenantShare,
-			SocialServices = dto.SocialServices,
-
-			IsUnitIllegalId = dto.IsUnitIllegalId,
-			IsUnitIllegalName = dto.IsUnitIllegal!.Name,
-			TenancyTypeId = dto.TenancyTypeId,
-			TenancyTypeName = dto.TenancyType!.Name,
-			RenewalOffer = dto.RenewalOffer,
-			SSN = dto.SSN,
-			Phone = dto.Phone,
-			Email = dto.Email,
-			LanguageId = dto.LanguageId,
-			LanguageName = dto.Language!.Name,
-
-			HasPossession = dto.HasPossession,
-			HasRegulatedTenancy = dto.HasRegulatedTenancy,
-
-			OtherOccupants = dto.OtherOccupants,
-
-			TenantRecord = dto.TenantRecord,
-			HasPriorCase = dto.HasPriorCase,
-			BuildingId = dto.BuildinId,
-			AdditioalTenants = dto.AddTenants
-				.Select(o => new AddtionalTenantDto
-				{
-					Id = o.Id,
-					FirstName = o.FirstName,
-					LastName = o.LastName,
-					TenantId = o.TenantId,
-					IsVisible = true
-				}).ToList()
-		}).ToListAsync();
+            return tenants;
+        }
 
 
-			return tenants;
-		}
+
+       
+
+        public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? clientId)
+        {
+            // 1️⃣ Get BuildingIds for the selected Client
+            var buildingIds = await _dbContext.Buildings
+                .Where(b => b.Landlord.ClientId == clientId)
+                .Select(b => b.Id)
+                .ToListAsync();
+
+            // 2️⃣ Get Tenants under those buildings
+            var tenants = await _dbContext.Tenants
+                .Where(t =>
+                    t.IsDeleted != true &&
+                    t.BuildinId != null &&
+                    buildingIds.Contains(t.BuildinId.Value)
+                )
+                .Select(t => new EditToTenantDto
+                {
+                    Id = t.Id,
+                    TenantCode = t.TenantCode,
+                    FirstName = t.FirstName,
+                    LastName = t.LastName
+                })
+                .ToListAsync();
+
+            return tenants;
+        }
 
 
-		public async Task<List<Language>> GetAllLanguage()
+
+        public async Task<List<Language>> GetAllLanguage()
 		{
 			return await _dbContext.MstLanguages.ToListAsync();
 		}
 
+        public async Task<(EditToLandlordDto landlord, EditToBuildingDto building)>
+GetLandlordBuildingByTenantAsync(Guid tenantId)
+        {
+            var data = await _dbContext.Tenants
+                .Where(t => t.Id == tenantId)
+                .Select(t => new
+                {
+                    Landlord = new EditToLandlordDto
+                    {
+                        Id = t.Building.Landlord.Id,
+                        FirstName = t.Building.Landlord.FirstName,
+                        LastName = t.Building.Landlord.LastName,
+                        LandLordCode = t.Building.Landlord.LandLordCode
+                    },
+                    Building = new EditToBuildingDto
+                    {
+                        Id = t.Building.Id,
+                        BuildingCode = t.Building.BuildingCode,
+                        BuildingUnits = t.Building.BuildingUnits,
+                        Address1 = t.Building.Address1,
+                        PremiseTypeId = t.Building.PremiseTypeId,
+                        RegistrationStatusId = t.Building.RegistrationStatusId,
+                    }
+                })
+                .FirstOrDefaultAsync();
 
-	}
+            return (data.Landlord, data.Building);
+        }
+
+        public async Task<List<EditToTenantDto>> GetTenantsByLandlordIdAsync(Guid landlordId)
+        {
+            // Step 1: Get Building Ids for the selected landlord
+            var buildingIds = await _dbContext.Buildings
+                .Where(b => b.LandlordId == landlordId && b.IsDeleted != true)
+                .Select(b => b.Id)
+                .ToListAsync();
+
+            // Step 2: Get tenants that belong to those buildings
+            return await _dbContext.Tenants
+                .Where(t => buildingIds.Contains(t.BuildinId.Value) && t.IsDeleted != true)
+                .Select(t => new EditToTenantDto
+                {
+                    Id = t.Id,
+                    FirstName = t.FirstName,
+                    LastName = t.LastName,
+                    TenantCode = t.TenantCode,
+                    BuildingId = t.BuildinId
+                })
+                .ToListAsync();
+        }
+
+
+    }
 }

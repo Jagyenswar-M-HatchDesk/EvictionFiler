@@ -16,7 +16,6 @@ namespace EvictionFiler.Application.DTOs.FormTypeDto
         public string Name { get; set; } = string.Empty;
 
         public Guid? CaseTypeId { get; set; }
-        [Required(ErrorMessage = "Category is Required")]
         public Guid? CategoryId { get; set; }
         public CaseType? CaseType { get; set; }
         public string? CaseTypeName { get; set; }
@@ -26,5 +25,11 @@ namespace EvictionFiler.Application.DTOs.FormTypeDto
         public DateTime CreatedOn { get; set; }
 
         public decimal? BillAmount { get; set; }
+        public Guid? UnitId { get; set; }
+        public string? UnitName { get; set; }
+        public string? Rate { get; set; }
+        public string? Code { get; set; }
+        public bool IsChanged { get; set; } = false;
+
     }
 }

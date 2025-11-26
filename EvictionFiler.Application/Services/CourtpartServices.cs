@@ -1,0 +1,181 @@
+﻿using EvictionFiler.Application.DTOs.CourtDto;
+using EvictionFiler.Application.DTOs.CourtPart;
+using EvictionFiler.Application.DTOs.PaginationDto;
+using EvictionFiler.Application.Interfaces.IRepository;
+using EvictionFiler.Application.Interfaces.IServices;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EvictionFiler.Application.Services
+{
+    public class CourtpartServices : ICourtpartServices
+    {
+        private readonly ICourtpartRepository _courtRepository;
+        private readonly IUnitOfWork _unitOfWork;
+
+        public CourtpartServices(ICourtpartRepository courtRepository, IUnitOfWork unitOfWork)
+        {
+            _courtRepository = courtRepository;
+            _unitOfWork = unitOfWork;
+        }
+
+
+
+        public async Task<List<CourtPartDto>> GetAllCourtDataAsync()
+        {
+            //    return await _courtRepository.GetAllCourtDataAsync();
+
+            var courts = await _courtRepository.GetAllCourtDataAsync(); // returns List<CourtInfos>
+
+            // map entities to DTOs
+            var courtDtos = courts.Select(c => new CourtPartDto
+            {
+
+                Id = c.Id,
+
+                CallIn = c.CallIn,
+                ConferenceId = c.ConferenceId,
+                RoomNo = c.RoomNo,
+                Judge = c.Judge,
+                Part = c.Part,
+                VirtualLink = c.VirtualLink,
+
+            }).ToList();
+
+            return courtDtos;
+        }
+
+        public async Task<PaginationDto<CourtPartDto>> GetAllCourtsAsync(
+    int pageNumber,
+    int pageSize,
+    string searchTerm,
+    string userId,
+    bool isAdmin)
+        {
+            // Since your repository doesn't filter by user yet, we’ll ignore userId and isAdmin for now
+            var result = await _courtRepository.GetPagedCourtsAsync(pageNumber, pageSize, searchTerm);
+
+            var dtoList = result.Items.Select(c => new CourtPartDto
+            {
+                Id = c.Id,
+
+                CallIn = c.CallIn,
+                ConferenceId = c.ConferenceId,
+                RoomNo = c.RoomNo,
+                Judge = c.Judge,
+                Part = c.Part,
+                VirtualLink = c.VirtualLink,
+                Court = c.Courts != null ? c.Courts.Court! : string.Empty!,
+                County = c.Courts != null ? c.Courts.County!.Name : string.Empty,
+
+            }).ToList();
+
+            return new PaginationDto<CourtPartDto>
+            {
+                Items = dtoList,
+                TotalCount = result.TotalCount
+            };
+        }
+
+
+        //    public async Task<PaginationDto<CourtInfosDto>> GetAllCourtsDataAsync(
+        //int pageNumber,
+        //int pageSize,
+        //string searchTerm,
+        //string userId,
+        //bool isAdmin)
+        //    {
+        //        var query = _courtRepository.GetAllQuerable(x => x.IsDeleted != true, x => x.State);
+
+        //        // Filter by user if not admin
+        //        if (!isAdmin && Guid.TryParse(userId, out Guid userGuid))
+        //        {
+        //            query = query.Where(x => x.CreatedBy == userGuid);
+        //        }
+
+        //        // Search filter
+        //        if (!string.IsNullOrWhiteSpace(searchTerm))
+        //        {
+        //            query = query.Where(x =>
+        //                x.Court.Contains(searchTerm) ||
+        //                x.Address.Contains(searchTerm) ||
+        //                x.Phone.Contains(searchTerm) ||
+        //                x.Notes.Contains(searchTerm));
+        //        }
+
+        //        var totalCount = await query.CountAsync();
+
+        //        var courts = await query
+        //            .OrderBy(x => x.Court)
+        //            .Skip((pageNumber - 1) * pageSize)
+        //            .Take(pageSize)
+        //            .ToListAsync();
+
+        //        // Map to DTO
+        //        var courtDtos = courts.Select(c => new CourtInfosDto
+        //        {
+        //            Id = c.Id,
+        //            Court = c.Court,
+        //            Address = c.Address,
+        //            Phone = c.Phone,
+        //            Notes = c.Notes
+
+        //        }).ToList();
+
+        //        return new PaginationDto<CourtInfosDto>
+        //        {
+        //            Items = courtDtos,
+        //            TotalCount = totalCount
+        //        };
+        //    }
+
+        public async Task<Guid?> AddCourtAsync(CourtPartDto courtInfosDto)
+        {
+            return await _courtRepository.AddCourtAsync(courtInfosDto);
+
+
+
+        }
+        public async Task<bool> AddCourtPartListAsync(List<CourtPartDto> courtInfosDto)
+        {
+            return await _courtRepository.AddCourtPartListAsync(courtInfosDto);
+
+
+
+        }
+        public async Task<CourtPartDto> GetCourtByIdAsync(Guid id)
+        {
+            var court = await _courtRepository.GetCourtByIdAsync(id);
+            if (court == null) return null;
+            return new CourtPartDto
+            {
+                Id = court.Id,
+
+                RoomNo = court.RoomNo,
+                Judge = court.Judge,
+                VirtualLink = court.VirtualLink,
+                ConferenceId = court.ConferenceId,
+                CallIn = court.CallIn,
+                Part = court.Part,
+                Court = court.Courts != null ? court.Courts.Court! : string.Empty!,
+                County = court.Courts != null ? court.Courts.County!.Name : string.Empty,
+            };
+        }
+        public async Task UpdateCourtAsync(CourtPartDto dto)
+        {
+            await _courtRepository.UpdateCourtAsync(dto);
+        }
+
+        public async Task<bool> SaveCourtPartList(List<CourtPartDto> dto, Guid id)
+        {
+            return await _courtRepository.SaveCourtPartListAsync(dto, id);
+        }
+        public async Task DeleteCourtAsync(Guid id)
+        {
+            await _courtRepository.DeleteCourtAsync(id);
+        }
+    }
+}
