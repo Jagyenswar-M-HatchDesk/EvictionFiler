@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251125095726_TblUnits")]
+    partial class TblUnits
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -951,8 +954,9 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<Guid?>("CourtId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("CourtLocationId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("CourtLocation")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("CourtRoom")
                         .HasColumnType("nvarchar(max)");
@@ -1180,8 +1184,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasIndex("ClientRoleId");
 
                     b.HasIndex("CourtId");
-
-                    b.HasIndex("CourtLocationId");
 
                     b.HasIndex("IsUnitIllegalId");
 
@@ -3801,10 +3803,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("CourtId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Courts", "CourtLocation")
-                        .WithMany()
-                        .HasForeignKey("CourtLocationId");
-
                     b.HasOne("EvictionFiler.Domain.Entities.Master.IsUnitIllegal", "IsUnitIllegal")
                         .WithMany()
                         .HasForeignKey("IsUnitIllegalId");
@@ -3868,8 +3866,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Navigation("ClientRole");
 
                     b.Navigation("Clients");
-
-                    b.Navigation("CourtLocation");
 
                     b.Navigation("Courts");
 

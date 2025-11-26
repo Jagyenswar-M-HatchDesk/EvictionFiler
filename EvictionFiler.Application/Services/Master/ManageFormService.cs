@@ -77,7 +77,7 @@ namespace EvictionFiler.Application.Services.Master
             };
         }
 
-        public async Task<List<FormAddEditViewModelDto>> GetAllFormByCategoryAsync(string searchTerm)
+        public async Task<List<FormAddEditViewModelDto>> GetAllFormByCategoryAsync()
         {
             var query = _repository.GetAllQuerable
                 (
@@ -86,26 +86,13 @@ namespace EvictionFiler.Application.Services.Master
                     x => x.Category
                );
 
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                var lowerSearch = searchTerm.ToLower();
-                query = query.Where(form =>
-                       (form.CaseType.Name ?? "").ToLower().Contains(lowerSearch) ||
-                      (form.Category.Name ?? "").ToLower().Contains(lowerSearch) ||
-                       (form.Name ?? "").ToLower().Contains(lowerSearch)
+            
 
-                 );
-
-            }
-
-
-            var totalCount = query.Count();
 
             var forms = query
-        .OrderBy(c => c.Id)
         .Select(x => new FormAddEditViewModelDto
         {
-            Name = x.Name,
+            Name = x.Name.Trim(),
             CaseType = x.CaseType,
             CaseTypeId = x.CaseTypeId,
             CaseTypeName = x.CaseType != null ? x.CaseType.Name : "-",
@@ -113,6 +100,11 @@ namespace EvictionFiler.Application.Services.Master
             HTML = x.HTML,
             CreatedOn = x.CreatedOn,
             Id = x.Id,
+            CategoryId = x.CategoryId,
+            UnitId = x.UnitId,
+            Code = x.Code,
+            Rate = x.Rate,
+            
         })
         .ToList();
 
@@ -188,7 +180,24 @@ namespace EvictionFiler.Application.Services.Master
 
             return true;
         }
+        public async Task<bool> UpdateFormFeeAsync(FormAddEditViewModelDto form)
+        {
+            var existing = await _repository.GetAsync(form.Id);
+            if (existing == null) return false;
 
+            // Pehle existing legal case fields update karo (already hai)
+            existing.Code = form.Code;
+            existing.UnitId = form.UnitId;
+            existing.Rate = form.Rate;
+            existing.UpdatedOn = DateTime.Now;
+
+            // Save changes
+            _repository.UpdateAsync(existing);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if(result > 0) return true;
+
+            return false;
+        }
         public async Task<PaginationDto<FormAddEditViewModelDto>> GetAllAffidavaitAsync(int pageNumber, int pageSize, string searchTerm)
         {
             var query = _repository.GetAllQuerable

@@ -1,0 +1,1115 @@
+﻿@page "/maintenance/feesCatalog"
+@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.FormTypeDto
+@using EvictionFiler.Application.DTOs.MasterDtos.CategoryDto
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Application.Interfaces.IServices.Master
+@using DomainMaster = EvictionFiler.Domain.Entities.Master
+@using EvictionFiler.Domain.Entities
+@using EvictionFiler.Client.SpinnerService
+@using EvictionFiler.Domain.Entities.Master
+@using Microsoft.AspNetCore.Authorization
+
+@inject IToastService ToastService
+@inject IManageFormService ManageFormService
+@inject ICategoryService categoryService
+@inject IUnitRepository unitService
+@inject SpinnerService SpinnerService
+
+@attribute [Authorize]
+
+<PageTitle>Fees Catalog - Housing Court Filer</PageTitle>
+
+<div class="container my-4">
+    <div class="mb-4">
+        <h3>Fee Catalog Management</h3>
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body d-flex flex-wrap align-items-center justify-content-between">
+            <div class="mb-2">
+                <button class="btn btn-primary me-2 mb-2" @onclick="SaveChanges" style="background: #162646;">Save Catalog</button>
+                <button class="btn btn-outline-secondary me-2 mb-2">Export JSON</button>
+                <label class="btn btn-outline-secondary mb-2" for="imp">Import JSON</label>
+                <input id="imp" type="file" accept="application/json" hidden />
+                <button class="btn btn-outline-secondary mb-2">Reset to Defaults</button>
+            </div>
+            <button class="btn btn-outline-primary mb-2">Dashboard Light Theme</button>
+        </div>
+    </div>
+    <!-- Holdover -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between @(IsTableCollapsed ? "" : "mb-3")">
+                <div class="d-flex align-items-center toggle-header"
+                     @onclick="ToggleTableCollapse"
+                     style="cursor:pointer;">
+
+                    <span class=" me-2">
+                        @if (IsTableCollapsed)
+                        {
+                            <i class="fa-solid fa-caret-right"></i>
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-caret-down"></i>
+                        }
+                    </span>
+
+
+                    <h5 class="card-title mb-0" style="font-weight:600">Holdover - Notices & Filing</h5>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="pill bg-secondary">category: holdover</span>
+                    
+
+
+                    @if (IsLoading)
+                    {
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="@(IsTableCollapsed ? "collapse" : "collapse show")" id="feeTableCollapse">
+                <div class="table-container">
+                    <!-- STATIC GENERAL FEES TABLE -->
+
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th style="width:20%">Code</th>
+                                <th style="width:55%">Label</th>
+                                <th style="width:15%">Unit</th>
+                                <th style="width:10%" >Rate (USD)</th>
+                                @* <th class="text-center">Actions</th> *@
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var row in HoldoverDataList)
+                            {
+                                <tr>
+                                    <td>
+                                        <input class="form-control col-auto" @bind="row.Code" @bind:after="() => row.IsChanged = true" />
+                                    </td>
+                                    <td>
+                                        @* <select class="form-select" @bind='row.Name'>
+                                                <option value="">--select--</option>
+                                                @foreach (var form in CaseformList)
+                                                {
+                                                    <option value="@form.Id">@form.Name</option>
+                                                }
+                                            </select> *@
+                                        <input class="form-control col-auto" @bind="row.Name"  />
+
+                                    </td>
+
+                                    <td>
+                                        <select class="form-select col-auto" @bind='row.UnitId' @bind:after="() => row.IsChanged = true">
+                                            <option value="">--select--</option>
+                                            @foreach (var u in Units)
+                                            {
+                                                <option value="@u.Id">@u.Name</option>
+                                            }
+                                        </select>
+                                    </td>
+
+                                    <td>
+                                        @* <input class="form-control" type="number"
+                                                   step="0.01"
+                                                   value="@(row.NumberValues.ContainsKey("Rate (USD)")
+                                                  ? row.NumberValues["Rate (USD)"].ToString("0.##") : "")"
+                                           @oninput="@(e => OnNumberInputChanged(row, "Rate (USD)", e))" /> *@
+                                        <input class="form-control col-auto" @bind="row.Rate" @bind:after="() => row.IsChanged = true" />
+                                    </td>
+
+                                    @* <td class="text-center">
+                                            <button class="btn btn-danger btn-sm" @onclick="() => RemoveRow(row)">Remove</button>
+                                        </td> *@
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+
+                    <!-- STATIC COURT FEES TABLE -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Non Payment-->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between @(IsTableCollapsedNonpayment ? "" : "mb-3")">
+                <div class="d-flex align-items-center toggle-header"
+                     @onclick="ToggleTableCollapseNonPayment"
+                     style="cursor:pointer;">
+
+                    <span class=" me-2">
+                        @if (IsTableCollapsedNonpayment)
+                        {
+                            <i class="fa-solid fa-caret-right"></i>
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-caret-down"></i>
+                        }
+                    </span>
+
+
+                    <h5 class="card-title mb-0" style="font-weight:600">Nonpayment - Predicate Notices</h5>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="pill bg-secondary">category: nonpayment_predicate</span>
+                    
+
+
+                    @if (IsLoading)
+                    {
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="@(IsTableCollapsedNonpayment ? "collapse" : "collapse show")" id="feeTableCollapse">
+                <div class="table-container">
+                    <!-- STATIC GENERAL FEES TABLE -->
+
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th style="width:20%">Code</th>
+                                <th style="width:55%">Label</th>
+                                <th style="width:15%">Unit</th>
+                                <th style="width:10%">Rate (USD)</th>
+                                @* <th class="text-center">Actions</th> *@
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var row in NonpaymentDataList)
+                            {
+                                <tr>
+                                    <td>
+                                        <input class="form-control" @bind='row.Code' @bind:after="() => row.IsChanged = true" />
+                                    </td>
+                                    <td>
+                                        <input class="form-select" @bind='row.Name' />
+
+                                    </td>
+
+                                    <td>
+                                        <select class="form-select" @bind='row.UnitId' @bind:after="() => row.IsChanged = true">
+                                            <option value="">--select--</option>
+                                            @foreach (var u in Units)
+                                            {
+                                                <option value="@u.Id">@u.Name</option>
+                                            }
+                                        </select>
+                                    </td>
+
+                                    <td>
+                                        @* <input class="form-control" type="number"
+                                                   step="0.01"
+                                                   value="@(row.NumberValues.ContainsKey("Rate (USD)")
+                                                                                                     ? row.NumberValues["Rate (USD)"].ToString("0.##") : "")"
+                                           @oninput="@(e => OnNumberInputChanged(row, "Rate (USD)", e))" /> *@
+                                        <input class="form-select" @bind='row.Rate' @bind:after="() => row.IsChanged = true" />
+                                    </td>
+
+                                    @* <td class="text-center">
+                                            <button class="btn btn-danger btn-sm" @onclick="() => RemoveRow(row)">Remove</button>
+                                        </td> *@
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+
+                    <!-- STATIC COURT FEES TABLE -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Warrant & Marshal Notices -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between @(IsTableCollapsedWarrant ? "" : "mb-3")">
+                <div class="d-flex align-items-center toggle-header"
+                     @onclick="ToggleTableCollapseWarrant"
+                     style="cursor:pointer;">
+
+                    <span class=" me-2">
+                        @if (IsTableCollapsedWarrant)
+                        {
+                            <i class="fa-solid fa-caret-right"></i>
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-caret-down"></i>
+                        }
+                    </span>
+
+
+                    <h5 class="card-title mb-0" style="font-weight:600">Warrant & Marshal Notices</h5>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="pill bg-secondary">category: warrant_marshal</span>
+                    
+
+                   
+
+                    @if (IsLoading)
+                    {
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="@(IsTableCollapsedWarrant ? "collapse" : "collapse show")" id="feeTableCollapse">
+                <div class="table-container">
+                    <!-- STATIC GENERAL FEES TABLE -->
+
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th style="width:20%">Code</th>
+                                <th style="width:55%">Label</th>
+                                <th style="width:15%">Unit</th>
+                                <th style="width:10%">Rate (USD)</th>
+                              
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var row in FeeRows)
+                            {
+                                <tr>
+                                    <td><input class="form-control" @bind='row.Values["Code"]' /></td>
+                                    <td>
+                                        <select class="form-select" @bind='row.Values["LabelId"]'>
+                                            <option value="">--select--</option>
+                                            @foreach (var form in CaseformList)
+                                            {
+                                                <option value="@form.Id">@form.Name</option>
+                                            }
+                                        </select>
+                                    </td>
+
+                                    <td>
+                                        <select class="form-select" @bind='row.Values["Unit"]'>
+                                            <option value="">--select--</option>
+                                            @foreach (var u in Units)
+                                            {
+                                                <option value="@u">@u</option>
+                                            }
+                                        </select>
+                                    </td>
+
+                                    <td>
+                                        <input class="form-control" type="number"
+                                               step="0.01"
+                                               value="@(row.NumberValues.ContainsKey("Rate (USD)")
+                                               ? row.NumberValues["Rate (USD)"].ToString("0.##") : "")"
+                                           @oninput="@(e => OnNumberInputChanged(row, "Rate (USD)", e))" />
+                                </td>
+
+                                    <td class="text-center">
+                                        <button class="btn btn-danger btn-sm" @onclick="() => RemoveRow(row)">Remove</button>
+                                    </td>
+                                </tr>
+                                                        }
+                        </tbody>
+                    </table>
+
+
+                    <!-- STATIC COURT FEES TABLE -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Process Server -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between @(IsTableCollapsedProcess ? "" : "mb-3")">
+                <div class="d-flex align-items-center toggle-header"
+                     @onclick="ToggleTableCollapseProcess"
+                     style="cursor:pointer;">
+
+                    <span class=" me-2">
+                        @if (IsTableCollapsedProcess)
+                        {
+                            <i class="fa-solid fa-caret-right"></i>
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-caret-down"></i>
+                        }
+                    </span>
+
+
+                    <h5 class="card-title mb-0" style="font-weight:600">Process Server</h5>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="pill bg-secondary">Category: process_server</span>
+                    
+                    <button class="btn btn-success" style="background: #162646;" >Add Row</button>
+
+                    @if (IsLoading)
+                    {
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="@(IsTableCollapsedProcess ? "collapse" : "collapse show")" id="feeTableCollapse">
+                <div class="table-container">
+                    <!-- STATIC GENERAL FEES TABLE -->
+
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th style="width:20%">Code</th>
+                                <th style="width:55%">Label</th>
+                                <th style="width:15%">Unit</th>
+                                <th style="width:10%">Rate (USD)</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var row in FeeRows)
+                            {
+                                <tr>
+                                    <td><input class="form-control" @bind='row.Values["Code"]' /></td>
+                                    <td>
+                                        <select class="form-select" @bind='row.Values["LabelId"]'>
+                                            <option value="">--select--</option>
+                                            @foreach (var form in CaseformList)
+                                            {
+                                                <option value="@form.Id">@form.Name</option>
+                                            }
+                                        </select>
+                                    </td>
+
+                                    <td>
+                                        <select class="form-select" @bind='row.Values["Unit"]'>
+                                            <option value="">--select--</option>
+                                            @foreach (var u in Units)
+                                            {
+                                                <option value="@u">@u</option>
+                                            }
+                                        </select>
+                                    </td>
+
+                                    <td>
+                                        <input class="form-control" type="number"
+                                               step="0.01"
+                                               value="@(row.NumberValues.ContainsKey("Rate (USD)")
+                                                                                                                                                    ? row.NumberValues["Rate (USD)"].ToString("0.##") : "")"
+                                           @oninput="@(e => OnNumberInputChanged(row, "Rate (USD)", e))" />
+                                </td>
+
+                                    <td class="text-center">
+                                        <button class="btn btn-danger btn-sm" @onclick="() => RemoveRow(row)">Remove</button>
+                                    </td>
+                                </tr>
+                                                        }
+                        </tbody>
+                    </table>
+
+
+                    <!-- STATIC COURT FEES TABLE -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Court Appearance & Attorney Fees by County -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between @(IsTableCollapsedCourt ? "" : "mb-3")">
+                <div class="d-flex align-items-center toggle-header"
+                     @onclick="ToggleTableCollapseCourt"
+                     style="cursor:pointer;">
+
+                    <span class=" me-2">
+                        @if (IsTableCollapsedCourt)
+                        {
+                            <i class="fa-solid fa-caret-right"></i>
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-caret-down"></i>
+                        }
+                    </span>
+
+
+                    <h5 class="card-title mb-0" style="font-weight:600">Court Appearance & Attorney Fees by County</h5>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="pill bg-secondary">category: appreance_matrix</span>
+                    
+
+                   
+
+                    @if (IsLoading)
+                    {
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="@(IsTableCollapsedCourt ? "collapse" : "collapse show")" id="feeTableCollapse">
+                <div class="table-container">
+                    <!-- STATIC GENERAL FEES TABLE -->
+                    <!-- STATIC COURT FEES TABLE -->
+
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>County</th>
+                                <th>Attorney Hourly</th>
+                                <th>Court Appearance</th>
+                                <th>Per Diem</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @* @foreach (var row in FeeRows)
+                                {
+                                    <tr>
+                                        <td><input class="form-control" @bind='row.Values["County"]' /></td>
+
+                                        <td><input class="form-control" type="number" @bind='row.NumberValues["Attorney Hourly"]' @oninput="@(e => OnNumberInputChanged(row, "Attorney Hourly", e))" /></td>
+                                        <td><input class="form-control" type="number" @bind='row.NumberValues["Court Appearance"]' @oninput="@(e => OnNumberInputChanged(row, "Court Appearance", e))" /></td>
+                                        <td><input class="form-control" type="number" @bind='row.NumberValues["Per Diem"]' @oninput="@(e => OnNumberInputChanged(row, "Per Diem", e))" /></td>
+
+                                        <td class="text-center">
+                                            <button class="btn btn-danger btn-sm" @onclick="() => RemoveRow(row)">Remove</button>
+                                        </td>
+                                    </tr>
+                                }
+              *@       
+                            </tbody>
+                    </table>
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Filling & Administrative -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between @(IsTableCollapsedFilling ? "" : "mb-3")">
+                <div class="d-flex align-items-center toggle-header"
+                     @onclick="ToggleTableCollapseFilling"
+                     style="cursor:pointer;">
+
+                    <span class=" me-2">
+                        @if (IsTableCollapsedFilling)
+                        {
+                            <i class="fa-solid fa-caret-right"></i>
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-caret-down"></i>
+                        }
+                    </span>
+
+
+                    <h5 class="card-title mb-0" style="font-weight:600">Filling & Administrative</h5>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="pill bg-secondary">category: filing_admin</span>
+                    
+
+                   
+
+                    @if (IsLoading)
+                    {
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="@(IsTableCollapsedFilling ? "collapse" : "collapse show")" id="feeTableCollapse">
+                <div class="table-container">
+                    <!-- STATIC GENERAL FEES TABLE -->
+
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th style="width:20%">Code</th>
+                                <th style="width:55%">Label</th>
+                                <th style="width:15%">Unit</th>
+                                <th style="width:10%">Rate (USD)</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var row in FeeRows)
+                            {
+                                <tr>
+                                    <td><input class="form-control" @bind='row.Values["Code"]' /></td>
+                                    <td>
+                                        <select class="form-select" @bind='row.Values["LabelId"]'>
+                                            <option value="">--select--</option>
+                                            @foreach (var form in CaseformList)
+                                            {
+                                                <option value="@form.Id">@form.Name</option>
+                                            }
+                                        </select>
+                                    </td>
+
+                                    <td>
+                                        <select class="form-select" @bind='row.Values["Unit"]'>
+                                            <option value="">--select--</option>
+                                            @foreach (var u in Units)
+                                            {
+                                                <option value="@u">@u</option>
+                                            }
+                                        </select>
+                                    </td>
+
+                                    <td>
+                                        <input class="form-control" type="number"
+                                               step="0.01"
+                                               value="@(row.NumberValues.ContainsKey("Rate (USD)")
+                                                                                                                                                    ? row.NumberValues["Rate (USD)"].ToString("0.##") : "")"
+                                           @oninput="@(e => OnNumberInputChanged(row, "Rate (USD)", e))" />
+                                </td>
+
+                                    <td class="text-center">
+                                        <button class="btn btn-danger btn-sm" @onclick="() => RemoveRow(row)">Remove</button>
+                                    </td>
+                                </tr>
+                                                        }
+                        </tbody>
+                    </table>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Attorney Billing - Rooster & Defaults -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between @(IsTableCollapsedAttorney ? "" : "mb-3")">
+                <div class="d-flex align-items-center toggle-header"
+                     @onclick="ToggleTableCollapseAttorney"
+                     style="cursor:pointer;">
+
+                    <span class=" me-2">
+                        @if (IsTableCollapsedAttorney)
+                        {
+                            <i class="fa-solid fa-caret-right"></i>
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-caret-down"></i>
+                        }
+                    </span>
+
+
+                    <h5 class="card-title mb-0" style="font-weight:600">Attorney Billing - Rooster & Defaults</h5>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="pill bg-secondary">Manage attorney & defaults hourly rates</span>
+                    
+
+                   
+
+                    @if (IsLoading)
+                    {
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="@(IsTableCollapsedAttorney ? "collapse" : "collapse show")" id="feeTableCollapse">
+                <div class="table-container">
+
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Bar #</th>
+                                <th>Email</th>
+                                <th>Hourly Rate</th>
+                                <th>Travel/Wait (opt.)</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @*  @foreach (var row in FeeRows)
+                                {
+                                    <tr>
+                                        <td><input class="form-control" @bind='row.Values["Name"]' /></td>
+
+                                        <td>
+                                            <select class="form-select" @bind='row.Values["Role"]'>
+                                                @foreach (var r in RoleOptions)
+                                                {
+                                                    <option value="@r">@r</option>
+                                                }
+                                            </select>
+                                        </td>
+
+                                        <td><input class="form-control" @bind='row.Values["Bar #"]' /></td>
+                                        <td><input class="form-control" @bind='row.Values["Email"]' /></td>
+
+                                        <td>
+                                            <input class="form-control" type="number" @bind='row.NumberValues["Hourly Rate"]'
+                                                   @oninput="@(e => OnNumberInputChanged(row, "Hourly Rate", e))" />
+                                        </td>
+
+                                        <td>
+                                            <input class="form-control" type="number" @bind='row.NumberValues["Travel/Wait (opt.)"]'
+                                                   @oninput="@(e => OnNumberInputChanged(row, "Travel/Wait (opt.)", e))" />
+                                        </td>
+
+                                        <td class="text-center">
+                                            <button class="btn btn-danger btn-sm" @onclick="() => RemoveRow(row)">Remove</button>
+                                        </td>
+                                    </tr>
+                                }
+         *@          
+                            </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+
+<style>
+    .table-container {
+        /* max-height: 500px; */
+        overflow: auto;
+        border-radius: 8px;
+    }
+
+        .table-container table {
+            min-width: 1000px;
+        }
+
+        .table-container thead {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background-color: #f8f9fa;
+        }
+
+    .collapse-arrow {
+        width: 0;
+        height: 0;
+        border-style: solid;
+        display: inline-block;
+    }
+
+    .arrow-right {
+        border-width: 6px 0 6px 10px;
+        border-color: transparent transparent transparent #333;
+    }
+
+    .arrow-down {
+        border-width: 10px 6px 0 6px;
+        border-color: #333 transparent transparent transparent;
+    }
+
+    .toggle-header:hover .collapse-arrow {
+        border-color: #000 !important;
+    }
+
+    .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #6b84af !important;
+        color: #1F365D !important;
+        border: 1px solid #dfe7ff;
+        font-size: .83rem;
+    }
+</style>
+
+@code {
+    [Inject] public IFeesCatalogService FeesCatalogService { get; set; } = default!;
+    [Inject] public IFeesCatalogCourtAppearanceService CourtService { get; set; } = default!;
+    [Inject] public IFeesCatalogAttorneyRosterService AttorneyService { get; set; } = default!;
+
+    private List<FormAddEditViewModelDto> CaseformList = new();
+
+
+    private bool IsLoading = false;
+    private string SelectedCategory { get; set; } = "Holdover";
+
+    private List<EditToCategoryDto> Categories = new();
+    private List<FormAddEditViewModelDto> HoldoverDataList = new();
+    private List<FormAddEditViewModelDto> NonpaymentDataList = new();
+    private List<FormAddEditViewModelDto> WarrentDataList = new();
+    private List<FormAddEditViewModelDto> ProcessDataList = new();
+    private List<FormAddEditViewModelDto> CourtDataList = new();
+    private List<FormAddEditViewModelDto> FillingDataList = new();
+    private List<FormAddEditViewModelDto> AttorneyDataList = new();
+
+    private IEnumerable<Unit> Units = new List<Unit>() ;
+    private List<string> RoleOptions = new() { "Partner", "Associate", "Per Diem", "Of Counsel", "Paralegal" };
+
+    private List<FeeRow> FeeRows = new();
+    private List<FeesCatalogDto> GeneralFees = new();
+    private List<FeesCatalogCourtAppearanceDto> CourtFees = new();
+    private List<FeesCatalogAttorneyRosterDto> AttorneyFees = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        SpinnerService.Show();
+        await Task.Delay(200);
+        Units = await unitService.GetAllAsync();
+        Categories = await categoryService.GetAllCategory();
+        await LoadForms();
+        await LoadHoldoverForms();
+        await LoadNonpaymentForms();
+
+        SpinnerService.Hide();
+    }
+    private async Task LoadForms()
+    {
+        CaseformList = await ManageFormService.GetAllFormByCategoryAsync();
+
+    }
+
+    private async Task LoadHoldoverForms()
+    {
+        HoldoverDataList = CaseformList.Where(e => e.CaseTypeName.Contains("Holdover")).ToList();
+    }
+
+    private async Task LoadNonpaymentForms()
+    {
+        NonpaymentDataList = CaseformList.Where(e => e.CaseTypeName.Contains("NonPayment")).ToList();
+    }
+    private async Task LoadWarrenaForms()
+    {
+        NonpaymentDataList = CaseformList.Where(e => e.CaseTypeName.Contains("Warrant")).ToList();
+    }
+    private async Task LoadProcessForms()
+    {
+        NonpaymentDataList = CaseformList.Where(e => e.CaseTypeName.Contains("Process")).ToList();
+    }
+    // private async Task LoadCourtForms()
+    // {
+    //     NonpaymentDataList = CaseformList.Where(e => e.CaseTypeName.Contains("Nonpayment")).ToList();
+    // }
+    private async Task LoadFillingForms()
+    {
+        NonpaymentDataList = CaseformList.Where(e => e.CaseTypeName.Contains("Nonpayment")).ToList();
+    }
+    // private async Task LoadAttorneyForms()
+    // {
+    //     NonpaymentDataList = CaseformList.Where(e => e.CaseTypeName.Contains("Nonpayment")).ToList();
+    // }
+    private bool IsTableCollapsed { get; set; } = false;
+
+    private void ToggleTableCollapse()
+    {
+        IsTableCollapsed = !IsTableCollapsed;
+    }
+
+    private bool IsTableCollapsedNonpayment { get; set; } = false;
+
+    private void ToggleTableCollapseNonPayment()
+    {
+        IsTableCollapsedNonpayment = !IsTableCollapsedNonpayment;
+    }
+
+    private bool IsTableCollapsedWarrant { get; set; } = false;
+
+    private void ToggleTableCollapseWarrant()
+    {
+        IsTableCollapsedWarrant = !IsTableCollapsedWarrant;
+    }
+
+    private bool IsTableCollapsedProcess { get; set; } = false;
+
+    private void ToggleTableCollapseProcess()
+    {
+        IsTableCollapsedProcess = !IsTableCollapsedProcess;
+    }
+
+    private bool IsTableCollapsedCourt { get; set; } = false;
+
+    private void ToggleTableCollapseCourt()
+    {
+        IsTableCollapsedCourt = !IsTableCollapsedCourt;
+    }
+
+    private bool IsTableCollapsedFilling { get; set; } = false;
+
+    private void ToggleTableCollapseFilling()
+    {
+        IsTableCollapsedFilling = !IsTableCollapsedFilling;
+    }
+
+    private bool IsTableCollapsedAttorney { get; set; } = false;
+
+    private void ToggleTableCollapseAttorney()
+    {
+        IsTableCollapsedAttorney = !IsTableCollapsedAttorney;
+    }
+
+    private async Task LoadDataForSelectedCategory()
+    {
+        SpinnerService.Show();
+        IsLoading = true;
+
+        await LoadForms();
+
+        FeeRows.Clear();
+        try
+        {
+            switch (SelectedCategory)
+            {
+                case "Attorney Billing — Roster & Defaults":
+                    AttorneyFees = await AttorneyService.GetAllAsync();
+                    FeeRows = AttorneyFees.Select(MapAttorneyFeeToFeeRow).ToList();
+                    break;
+                case "Court Appearance & Attorney Fees by County":
+                    CourtFees = await CourtService.GetAllAsync();
+                    FeeRows = CourtFees.Select(MapCourtFeeToFeeRow).ToList();
+                    break;
+                default:
+                    GeneralFees = await FeesCatalogService.GetAllByCategoryAsync(SelectedCategory);
+                    FeeRows = GeneralFees.Select(MapGeneralFeeToFeeRow).ToList();
+                    break;
+            }
+            if (!FeeRows.Any()) AddBlankRow();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading data: {ex.Message}");
+            AddBlankRow();
+        }
+        finally
+        {
+            IsLoading = false;
+            SpinnerService.Hide();
+            StateHasChanged();
+        }
+    }
+
+    private FeeRow MapGeneralFeeToFeeRow(FeesCatalogDto e)
+        => new FeeRow
+        {
+            EntityId = e.Id,
+            Values = new()
+            {
+                ["Code"] = e.Code ?? "",
+                ["Label"] = e.Label ?? "",
+                ["LabelId"] = e.LabelId?.ToString() ?? "",
+                ["Unit"] = e.Unit ?? ""
+            },
+            NumberValues = new()
+            {
+                ["Rate (USD)"] = e.Rate
+            }
+        };
+
+    private FeeRow MapCourtFeeToFeeRow(FeesCatalogCourtAppearanceDto e)
+        => new FeeRow
+        {
+            EntityId = e.Id,
+            Values = new() { ["County"] = e.County ?? "" },
+            NumberValues = new()
+            {
+                ["Attorney Hourly"] = e.AttorneyHourly,
+                ["Court Appearance"] = e.CourtAppearance,
+                ["Per Diem"] = e.PerDiem
+            }
+        };
+
+    private FeeRow MapAttorneyFeeToFeeRow(FeesCatalogAttorneyRosterDto e)
+        => new FeeRow
+        {
+            EntityId = e.Id,
+            Values = new()
+            {
+                ["Name"] = e.Name ?? "",
+                ["Role"] = e.Role ?? RoleOptions.First(),
+                ["Bar #"] = e.BarNumber ?? "",
+                ["Email"] = e.Email ?? ""
+            },
+            NumberValues = new()
+            {
+                ["Hourly Rate"] = e.HourlyRate,
+                ["Travel/Wait (opt.)"] = e.TravelWait
+            }
+        };
+
+    private void AddBlankRow()
+    {
+        FeeRow r = new() { EntityId = Guid.Empty };
+
+        if (SelectedCategory == "Attorney Billing — Roster & Defaults")
+        {
+            r.Values["Name"] = "";
+            r.Values["Role"] = RoleOptions.First();
+            r.Values["Bar #"] = "";
+            r.Values["Email"] = "";
+            r.NumberValues["Hourly Rate"] = 0;
+            r.NumberValues["Travel/Wait (opt.)"] = 0;
+        }
+        else if (SelectedCategory == "Court Appearance & Attorney Fees by County")
+        {
+            r.Values["County"] = "";
+            r.NumberValues["Attorney Hourly"] = 0;
+            r.NumberValues["Court Appearance"] = 0;
+            r.NumberValues["Per Diem"] = 0;
+        }
+        else
+        {
+            r.Values["Code"] = "";
+            r.Values["Label"] = "";
+            r.Values["Unit"] = "";
+            r.Values["LabelId"] = "";
+            r.NumberValues["Rate (USD)"] = 0;
+        }
+
+        FeeRows.Add(r);
+    }
+
+
+
+    private async Task SaveChanges()
+    {
+        var changedRowsholdover = HoldoverDataList.Where(r => r.IsChanged).ToList();
+        var changedRowsnonpayment = NonpaymentDataList.Where(r => r.IsChanged).ToList();
+
+        if (changedRowsholdover.Any())
+        {
+            // ToastService.ShowInfo("No changes to save.");
+            await SaveHoldoverChanges(changedRowsholdover);
+        }
+
+        if (changedRowsnonpayment.Any())
+        {
+            // ToastService.ShowInfo("No changes to save.");
+            await SaveNonpaymentChanges(changedRowsnonpayment);
+        }
+
+        
+    }
+
+    private async Task SaveHoldoverChanges(List<FormAddEditViewModelDto> data)
+    {
+        
+
+        int successCount = 0;
+
+        foreach (var row in data)
+        {
+            var response = await ManageFormService.UpdateFormFeeAsync(row);
+
+            if (response == true)
+            {
+                row.IsChanged = false;
+                successCount++;
+            }
+            else
+            {
+                // OPTIONAL: track failed rows or show detailed error
+            }
+        }
+
+        // Show ONE toast after saving all items
+        ToastService.ShowSuccess($"{successCount} Holdover item(s) updated successfully!");
+    }
+
+    private async Task SaveNonpaymentChanges(List<FormAddEditViewModelDto> data)
+    {
+
+
+        int successCount = 0;
+
+        foreach (var row in data)
+        {
+            var response = await ManageFormService.UpdateFormFeeAsync(row);
+
+            if (response == true)
+            {
+                row.IsChanged = false;
+                successCount++;
+            }
+            else
+            {
+                // OPTIONAL: track failed rows or show detailed error
+            }
+        }
+
+        // Show ONE toast after saving all items
+        ToastService.ShowSuccess($"{successCount} Nonpayment item(s) updated successfully!");
+    }
+    
+   
+    private async Task RemoveRow(FeeRow row)
+    {
+        if (row.EntityId != null && row.EntityId != Guid.Empty)
+            await DeleteEntityAsync(row);
+
+        FeeRows.Remove(row);
+    }
+
+    private async Task DeleteEntityAsync(FeeRow row)
+    {
+        if (SelectedCategory == "Attorney Billing — Roster & Defaults")
+            await AttorneyService.DeleteAsync(row.EntityId);
+        else if (SelectedCategory == "Court Appearance & Attorney Fees by County")
+            await CourtService.DeleteAsync(row.EntityId);
+        else
+            await FeesCatalogService.DeleteAsync(row.EntityId);
+    }
+
+    public class FeeRow
+    {
+        public Guid EntityId { get; set; }
+        public Dictionary<string, string> Values { get; set; } = new();
+        public Dictionary<string, decimal> NumberValues { get; set; } = new();
+    }
+
+    private void OnNumberInputChanged(FeeRow row, string key, ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), out var value))
+            row.NumberValues[key] = value;
+    }
+}

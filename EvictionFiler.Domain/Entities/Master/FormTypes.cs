@@ -23,6 +23,12 @@ namespace EvictionFiler.Domain.Entities.Master
         [ForeignKey("CategoryId")]
         public Category? Category { get; set; }
         public string? HTML { get; set; }
+        public string? Code { get; set; }
+       
+        public Guid? UnitId { get; set; }
+        [ForeignKey("UnitId")]
+        public Unit? Units { get; set; }
+        public string? Rate { get; set; }
 
 		[NotMapped]
 		public string CaseTypeName { get; set; }
