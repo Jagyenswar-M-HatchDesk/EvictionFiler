@@ -17,6 +17,7 @@
 @inject NavigationManager Navigation
 @inject ILegalCaseService _service
 @* @using EvictionFiler.Client.Jwt *@
+@using EvictionFiler.Client.Pages.Actions
 @using EvictionFiler.Client.SpinnerService
 @using EvictionFiler.Domain.Entities.Master
 @using EvictionFiler.Infrastructure.Repositories
@@ -582,7 +583,7 @@
                     <span id="statusBadge" class="badge bg-success">@(string.IsNullOrWhiteSpace(legalcaseDto.Status) ? "--" : legalcaseDto.Status)</span>
                     <span id="substatusBadge" class="badge text-brand-primary bg-brand-primary-50 border">@(string.IsNullOrWhiteSpace(legalcaseDto.CaseTypeName) ? "--" : legalcaseDto.CaseTypeName)</span>
                     <button class="btn btn-outline-secondary" @onclick="BackTocases">View Previous Cases</button>
-                    <button class="btn bg-brand-primary base text-white">New Action</button>
+                    <button class="btn bg-brand-primary base text-white" @onclick="ShowCreateAction">New Action</button>
                 </div>
             </div>
         </header>
@@ -1534,6 +1535,15 @@
         </div>
     </div>
 
+    @if (_showCreateAction)
+    {
+        <GenrateAction createAction="noticeModel"
+                       OnClose="HandleCloseCreateAction"
+                       CurrentCaseId="CurrentCaseId" />
+    }
+
+
+
     <script>
         window.showModal = (id) => {
         const modal = new bootstrap.Modal(document.getElementById(id));
@@ -1580,6 +1590,7 @@
 
     private bool isEditMode = false;
     private bool isNewCourt = false;
+    private bool _showCreateAction = false;
 
 
     protected override async Task OnInitializedAsync()
@@ -1608,6 +1619,20 @@
         spinnerservice.Hide();
     }
 
+   
+
+
+
+    private void ShowCreateAction()
+    {
+        noticeModel = new GenrateNoticeModel();
+        _showCreateAction = true;
+    }
+
+    private void HandleCloseCreateAction()
+    {
+        _showCreateAction = false;
+    }
     private async Task LoadCaseDetails()
     {
         legalcaseDto = await _service.GetCaseByIdAsync(caseId);
@@ -1616,6 +1641,7 @@
             FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
 
         }
+
         feecatalogDto = await _feeCatalogService.GetAllAsync();
         var feeLookup = feecatalogDto.ToDictionary(f => f.Label.ToLower(), f => f.Rate);
 

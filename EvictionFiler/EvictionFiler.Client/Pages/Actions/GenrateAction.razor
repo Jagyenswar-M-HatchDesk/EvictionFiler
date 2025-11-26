@@ -1,0 +1,334 @@
+﻿@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.ApartmentDto
+@using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.DTOs.FormTypeDto
+@using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Application.DTOs.OccupantDto
+@using EvictionFiler.Application.DTOs.TenantDto
+@using EvictionFiler.Application.Interfaces.IRepository
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Application.Services
+@using EvictionFiler.Client.SpinnerService
+@using EvictionFiler.Domain.Entities.Master
+@inject ICaseFormRepository CaseFormRepository
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Authorization;
+@inject ICaseFormService _CaseFormService
+@using System.Security.Claims
+@inject IToastService ToastService
+@inject ILegalCaseService _service
+@inject AuthenticationStateProvider _authStateProvider
+
+@inject IFormTypesRepository FormTypesRepository
+@* @using EvictionFiler.Client.Jwt *@
+
+@inject SpinnerService spinnerservice
+
+@inject IClientService _clientService
+@inject IClientRoleRepository _clientRoleService
+@inject ILandlordSevice _landlordService
+@inject IBuildingService _apartmentService
+@inject ITenantService _tenantService
+@inject IStateRepository StateRepository
+@inject IPremiseTypeRepository PremiseTypeRepository
+@inject ITypeOwnerRepository TypeOwnerRepository
+@inject IRegulationStatusRepository RegulationStatusRepository
+@inject ILanguageRepository LanguageRepository
+@inject IUnitIllegalRepository UnitIllegalRepository
+@inject ITenancyTypeRepository TenancyTypeRepository
+@inject ILandlordTypeRepository LandlordTypeRepository
+@inject IDateRentRepository DateRentRepository
+
+
+
+@inject SpinnerService spinnerservice
+@rendermode InteractiveAuto
+@using System.Security.Claims
+@inject AuthenticationStateProvider _authStateProvider
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<style>
+    :root { --bs-primary: #1F365D; --bs-warning: #D4A844; --bs-light: #F7F6F3; }
+
+    body { background-color: var(--bs-light); }
+
+    .offcanvas.show { transform: translateX(0%); }
+
+    .offcanvas { transform: translateX(100%); width: 650px !important; transition: transform 0.5s ease-in-out; }
+
+    .color-text { color: var(--bs-primary); }
+
+    .form-control::placeholder { font-size: 0.9rem; }
+
+    .input-group-text { background-color: var(--bs-light); color: var(--bs-primary); font-weight: 500; }
+
+    .form-wrapper { transition: transform 0.5s ease, opacity 0.5s ease; will-change: transform, opacity; }
+
+    /* .form-wrapper.hidden {
+        transform: translateX(-100%);
+        opacity: 0;
+        pointer-events: none;
+        } */
+
+    .overlay-form { animation: slideIn 0.5s ease forwards; background-color: white; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+
+    @@keyframes slideIn {
+        from { opacity: 0; transform: translateX(100%); }
+
+        to { opacity: 1; transform: translateX(0%); }
+    }
+
+    .form-wrapper.hidden { display: none !important; }
+
+    .vertical-buttons button { /*  min-width: 100px; */ text-align: center; }
+
+    .vertical-tab-button { writing-mode: vertical-rl; /* vertical top-to-bottom */ text-orientation: upright; background-color: #f0f2f5; color: #1F365D; font-weight: 700; font-size: 14px; border: none; padding: 12px 8px; border-radius: 10px; margin-bottom: 12px; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+
+        .vertical-tab-button:hover { background-color: #1F365D; color: white; transform: translateY(-2px); }
+
+    .active-vertical { background: linear-gradient(135deg, #1F365D, #2F4F7F); color: white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
+
+    .required-label::after { content: " *"; color: red; }
+
+    .btn-navy { background-color: #020336; color: white; border: none; }
+</style>
+@using System.Collections.Generic
+
+
+<div class="offcanvas offcanvas-end show border-start shadow bg-white"
+     tabindex="-1" id="createClient"
+     aria-labelledby="createUserLabel">
+
+    <div class="offcanvas-header border-bottom">
+
+        <h5 class="offcanvas-title fw-bold color-text" id="createUserLabel">Actions</h5>
+
+        <button type="button" class="btn-close" @onclick="HideAsync" aria-label="Close"></button>
+    </div>
+
+    <div class="offcanvas-body p-0">
+        <div class="d-flex align-items-center position-relative">
+            <!-- CLIENT FORM -->
+           
+            <div class="form-wrapper  flex-grow-1 p-3 pe-5">
+
+               
+
+                    <div class="row">
+                        <div class="tab-pane " id="actions" role="tabpanel" aria-labelledby="actions-tab">
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <button class="btn btn-secondary ">Send to Marshal</button>
+                                <button class="btn btn-secondary">Send to Process Server</button>
+                                <button class="btn btn-outline-secondary">Upload / View Documents</button>
+                                <button class="btn btn-outline-secondary">Add Notes</button>
+                                <button class="btn btn-outline-secondary" >Add Hearing</button>
+                            </div>
+                         <EditForm Model="createAction" FormName="NoticeForm" OnValidSubmit="GenerateNotice">
+                                <DataAnnotationsValidator />
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-12 col-md-6">
+                                        <label for="formType" class="form-label">File a Motion</label>
+                                    <select class="form-select" @bind="createAction.FormTypeId" @bind:after="FormTypeBindAfter">
+                                            <option value="">-- Select Form Type --</option>
+                                            @foreach (var formType in FilteredFormTypeList)
+                                            {
+                                                <option value="@formType.Id">@formType.Name @(formType.BillAmount != null ? $"- (${formType.BillAmount}) " : "")</option>
+                                            }
+                                        </select>
+                                    <ValidationMessage For="() => createAction.FormTypeId" />
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class=" input-group" style="width:140px">
+                                            <span class="input-group-text">$</span>
+                                        <input class="form-control" type="number" @bind="createAction.BillAmount">
+                                        </div>
+                                    <ValidationMessage For="() => createAction.BillAmount" />
+                                    </div>
+                                    <div class="col-auto">
+                                        <button class="btn bg-brand-primary base">  @(isEditMode ? "Update" : "Generate")</button>
+                                    </div>
+                                </div>
+
+                            </EditForm> 
+                        </div>
+                      
+
+                    </div>
+
+
+             
+
+            </div>
+
+           
+        </div>
+
+    </div>
+
+
+
+
+
+</div>
+
+@code {
+    [Parameter] public GenrateNoticeModel createAction { get; set; } = new();
+    public Guid caseId { get; set; }
+    private List<FormAddEditViewModelDto> FilteredFormTypeList = new();
+    private IntakeModel legalcaseDto = new IntakeModel();
+    private string? loggedInUserId;
+    private bool isAdmin = false;
+    private bool isEditMode = false;
+    private GenrateNoticeModel caseForm = new();
+    private List<GenrateNoticeModel> caseFormDto = new();
+    [Parameter] public Guid? CurrentCaseId { get; set; }
+    
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+    // [Parameter] public EventCallback<CreateToClientDto> Submit { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await _authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+        }
+        FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
+       
+        spinnerservice.Hide();
+    }
+
+    private async Task GenerateNotice()
+    {
+        spinnerservice.Show();
+
+        legalcaseDto.BillAmount = (legalcaseDto.BillAmount ?? 0) + (createAction.BillAmount ?? 0);
+
+        var successcase = await _service.UpdateCaseAsync(legalcaseDto);
+        if (!successcase.HasValue)
+        {
+            return;
+        }
+        else
+        {
+            createAction.BillAmount = null;
+        }
+
+        if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty && createAction.FormTypeId.HasValue)
+        {
+            bool success = false;
+
+            if (isEditMode)
+            {
+                // UPDATE existing notice
+                success = await _CaseFormService.UpdateCaseFormAsync(new GenrateNoticeModel
+                {
+                    Id = createAction.Id,
+                    LegalCaseId = CurrentCaseId.Value,
+                    FormTypeId = createAction.FormTypeId,
+                    File = createAction.File,
+                    HTML = createAction.HTML,
+                    CreatedOn = createAction.CreatedOn
+                });
+
+                if (success)
+                {
+                    ToastService.ShowSuccess("Notice has been updated successfully!");
+                }
+            }
+            else
+            {
+                // CREATE new notice
+                success = await CaseFormRepository.GenerateNoticeAsync(
+                    CurrentCaseId.Value,
+                    createAction.FormTypeId.Value,
+                       Guid.Parse(loggedInUserId)
+                );
+
+                if (success)
+                {
+                    ToastService.ShowSuccess("Notice has been generated successfully!");
+                }
+            }
+
+            if (success)
+            {
+                await LoadCaseForms();
+
+                // Reset form
+                createAction = new GenrateNoticeModel();
+                isEditMode = false;
+                CurrentCaseId = caseId;
+
+                await JS.InvokeVoidAsync("openTab", "activity");
+            }
+        }
+        else
+        {
+
+        }
+
+        spinnerservice.Hide();
+    }
+
+    private async Task LoadCaseForms()
+    {
+        caseFormDto = await _CaseFormService.GetCaseFormsByCaseId(CurrentCaseId.Value, loggedInUserId, isAdmin);
+        if (caseFormDto.Any())
+        {
+            caseForm = caseFormDto.FirstOrDefault()!;
+        }
+    }
+
+    public async Task EditCaseDetail(Guid id)
+    {
+        spinnerservice.Show();
+        var result = await _CaseFormService.GetCaseFormByIdAsync(id);
+
+        if (result != null)
+        {
+            createAction = new GenrateNoticeModel
+            {
+                Id = result.Id,
+                FormTypeId = result.FormTypeId,
+                File = result.File,
+                HTML = result.HTML,
+                CreatedOn = result.CreatedOn,
+            };
+            isEditMode = true;
+
+        }
+        spinnerservice.Hide();
+        await JS.InvokeVoidAsync("showBootstrapTab", "#actions-tab");
+    }
+
+    private void FormTypeBindAfter()
+    {
+        var selectedForm = FilteredFormTypeList
+            .FirstOrDefault(f => f.Id == createAction.FormTypeId);
+
+        if (selectedForm != null)
+            createAction.BillAmount = selectedForm.BillAmount;
+        else
+            createAction.BillAmount = null;
+
+        StateHasChanged(); // ensure UI refreshes
+    }
+
+    public async Task HideAsync()
+    {
+
+
+        await OnClose.InvokeAsync();
+        StateHasChanged();
+    }
+  
+}
