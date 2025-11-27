@@ -88,7 +88,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                         NumberofRoom = building.BuildingUnits.ToString(),
                         TenantIds = lc.TenantId,
                         LeaseEnd = lc.LeaseEnd,
-                        CityorCounty = county != null ? county.Name : null,
+                        CityorCounty = county != null ? county.Name : building.City,
                         RentOwned = lc.TotalRentOwed,
                         RentDate = rentdue != null ? rentdue.Name : null,
                         LastRent = lc.LastRentPaid,
@@ -162,7 +162,7 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{LandlordEmail}}", caseDetails.LandlordEmail ?? "")
     .Replace("{{Landlord_Email}}", caseDetails.LandlordEmail ?? "")
     .Replace("{{LandlordDate}}", noticeDate.ToString("dd/MM/yyyy"))
-    .Replace("{{Notice_Date}}", noticeDate.ToString("dd/MM/yyyy"))
+    .Replace("{{Notice_Date}}", DateTime.Now.ToString("dd/MM/yyyy"))
     .Replace("{{PropertyAddress}}", caseDetails.PropertyAddress ?? "")
     .Replace("{{Premises_Address}}", caseDetails.PropertyAddress ?? "")
     .Replace("{{ApartmentNumber}}", firstApartmentNumber ?? "")
@@ -175,7 +175,7 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{month}}", lastRent ?? "")
     .Replace("{{year}}", DateTime.Now.ToString("yy"))
     .Replace("{{Vacate_Date}}", caseDetails.VacateDate.ToString())
-    .Replace("{{Notice_Period}}", caseDetails.NoticePeriod.ToString())
+    .Replace("{{NP}}", caseDetails.NoticePeriod.ToString())
     .Replace("{{Building_Street}}", caseDetails.BuildingStreet ?? "")
     .Replace("{{Building_State}}", caseDetails.BuildingState ?? "")
     .Replace("{{Building_AptNo}}", caseDetails.BuildindAptno ?? "")

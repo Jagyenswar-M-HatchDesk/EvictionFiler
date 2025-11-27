@@ -33,7 +33,8 @@ namespace EvictionFiler.Infrastructure.Repositories
                 .Select(f => new FormAddEditViewModelDto
                 {
                     Id = f.Id,
-                    Name = f.Name
+                    Name = f.Name,
+                    Rate = f.Rate,
                 })
                 .ToListAsync();
         }

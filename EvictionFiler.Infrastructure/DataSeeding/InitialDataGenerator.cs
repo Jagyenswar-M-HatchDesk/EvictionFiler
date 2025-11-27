@@ -423,7 +423,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             var now = DateTime.UtcNow;
             return new List<FormTypes>
             {
-                new FormTypes() { Name = "90 Days Notice", CaseTypeName = "HoldOver", HTML = "", CreatedOn = now },
+                new FormTypes() { Name = "Demand Notice", CaseTypeName = "HoldOver", HTML = "", CreatedOn = now },
                 new FormTypes() { Name = "5 Days Notice", CaseTypeName = "NonPayment", HTML = "", CreatedOn = now },
                 new FormTypes() { Name = "14 Days Notice", CaseTypeName = "NonPayment", HTML = "", CreatedOn = now },
             };
