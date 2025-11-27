@@ -1,8 +1,9 @@
 ﻿using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.BuildingDto;
+using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
-using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
@@ -168,18 +169,20 @@ namespace EvictionFiler.Application.Services
             };
         }
 
-        public async Task<List<EditToBuildingDto>> SearchBuilding(string code, Guid landlordId)
+
+        public async Task<List<EditToBuildingDto>> SearchBuilding(string query, Guid landlordId)
         {
-            return await _repository.SearchBuilding(code, landlordId);
+            return await _repository.SearchBuilding(query, landlordId);
         }
+       
 
         public async Task<BuildingWithTenant?> GetBuildingsWithTenantAsync(Guid id)
         {
             return await _repository.GetBuildingsWithTenantAsync(id);
         }
-        public async Task<List<EditToBuildingDto>> GetBuildingsByLandlordIdAsync(Guid clientId)
+        public async Task<List<EditToBuildingDto>> GetBuildingsByLandlordIdAsync(Guid landlordId)
         {
-            var landlords = await _repository.GetBuildingsByLandlordIdAsync(clientId);
+            var landlords = await _repository.GetBuildingsByLandlordIdAsync(landlordId);
             return landlords;
 
 

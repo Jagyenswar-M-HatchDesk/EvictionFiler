@@ -123,15 +123,8 @@ namespace EvictionFiler.Infrastructure.Repositories
                     (
                         // Search by BuildingCode (StartsWith = indexed & fast)
                         b.BuildingCode.StartsWith(searchText) ||
-
-                        // MDRNumber - often numeric, but still contains
-                        b.MDRNumber.Contains(searchText) ||
-
-                        // Address - partial match
                         b.Address1.Contains(searchText) ||
                         b.Address2.Contains(searchText) ||
-
-                        // City
                         b.City.Contains(searchText)
                     )
                 )

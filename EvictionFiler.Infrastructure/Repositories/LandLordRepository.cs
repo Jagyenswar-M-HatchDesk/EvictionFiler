@@ -152,14 +152,19 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 		public async Task<List<EditToLandlordDto>> GetByClientIdAsync(Guid? clientId)
 		{
-			var landlords = await _mainDbContext.LandLords
+			var query = await _mainDbContext.LandLords
 				.Where(x => x.ClientId == clientId && x.IsDeleted != true)
 				.Include(x => x.State)
 				.Include(x => x.LandlordType)
 				.Include(x => x.TypeOfOwner)
+				.OrderBy (x=> x.FirstName)
+                .OrderBy(x => x.LastName)
+                .Take(10)
 				.ToListAsync();
 
-			return landlords.Select(l => new EditToLandlordDto
+          
+
+            return query.Select(l => new EditToLandlordDto
 			{
 				Id = l.Id,
 				LandLordCode = l.LandLordCode,

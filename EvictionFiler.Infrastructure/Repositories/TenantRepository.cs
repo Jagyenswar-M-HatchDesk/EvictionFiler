@@ -83,33 +83,27 @@ namespace EvictionFiler.Infrastructure.Repositories
 			return tenant;
 		}
 
-        public async Task<List<EditToTenantDto>> SearchTenantAsync(string query, Guid clientId)
+        public async Task<List<EditToTenantDto>> SearchTenantAsync(string query, Guid buildingId)
         {
             query = query?.Trim().ToLower() ?? "";
 
-            // 1️⃣ Get all BuildingIds for the selected Client
-            var buildingIds = await _dbContext.Buildings
-                .Where(b => b.Landlord.ClientId == clientId)
-                .Select(b => b.Id)
-                .ToListAsync();
-
-            // 2️⃣ Now search tenant under those buildings
             var tenants = await _dbContext.Tenants
                 .Where(t =>
-                    buildingIds.Contains(t.BuildinId.Value) &&
-                    t.IsDeleted != true &&
+                    t.BuildinId == buildingId &&      
+                    t.IsDeleted != true &&             
                     (
                         t.TenantCode.ToLower().Contains(query) ||
-                        (t.FirstName + " " + t.LastName).ToLower().StartsWith(query) ||
-                        t.UnitOrApartmentNumber.ToLower().StartsWith(query)
+                        (t.FirstName + " " + t.LastName).ToLower().Contains(query) ||
+                        t.UnitOrApartmentNumber.ToLower().Contains(query)
                     )
                 )
-                .Select(dto => new EditToTenantDto
+                .Select(t => new EditToTenantDto
                 {
-                    Id = dto.Id,
-                    TenantCode = dto.TenantCode,
-                    FirstName = dto.FirstName,
-                    LastName = dto.LastName
+                    Id = t.Id,
+                    TenantCode = t.TenantCode,
+                    FirstName = t.FirstName,
+                    LastName = t.LastName,
+                    UnitOrApartmentNumber = t.UnitOrApartmentNumber
                 })
                 .ToListAsync();
 
@@ -118,7 +112,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 
 
-       
+
+
 
         public async Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? clientId)
         {
@@ -205,6 +200,22 @@ GetLandlordBuildingByTenantAsync(Guid tenantId)
                 .ToListAsync();
         }
 
-
+        public async Task<List<EditToTenantDto>> GetTenantsByBuildingIdAsync(Guid buildingId)
+        {
+           
+            return await _dbContext.Tenants
+                 .Where(b => b.BuildinId == buildingId && b.IsDeleted != true)
+                 .Select(t => new EditToTenantDto
+                 {
+                     Id = t.Id,
+                     FirstName = t.FirstName,
+                     LastName = t.LastName,
+                     TenantCode = t.TenantCode,
+                     BuildingId = t.BuildinId,
+                     UnitOrApartmentNumber = t.UnitOrApartmentNumber,
+                     
+                 })
+                 .ToListAsync();
+        }
     }
 }

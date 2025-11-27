@@ -14,7 +14,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
     {
 		Task<bool> AddTenantAsync(List<CreateToTenantDto> dto);
 		Task<List<CreateToTenantDto>> SearchTenantbyCode(string code);
-        Task<List<EditToTenantDto>> SearchTenantsAsync(string query, Guid ClientId);
+        Task<List<EditToTenantDto>> SearchTenantsAsync(string query, Guid buildingId);
 
         Task<EditToTenantDto> GetByIdAsync(Guid id);
 		Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? clientId);
@@ -30,5 +30,6 @@ namespace EvictionFiler.Application.Interfaces.IServices
 
         Task<Guid?> AddTenantfromCase(CreateToTenantDto t);
         Task<List<EditToTenantDto>> GetTenantsByLandlordIdAsync(Guid landlordId);
+        Task<List<EditToTenantDto>> GetTenantsByBuildingIdAsync(Guid buildingId);
     }
 }

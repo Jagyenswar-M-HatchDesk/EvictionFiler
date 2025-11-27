@@ -159,9 +159,9 @@ namespace EvictionFiler.Application.Services
             return newtenant;
         }
 
-        public async Task<List<EditToTenantDto>> SearchTenantsAsync(string query, Guid ClientId)
+        public async Task<List<EditToTenantDto>> SearchTenantsAsync(string query, Guid buildingId)
         {
-            return await _repo.SearchTenantAsync(query, ClientId);
+            return await _repo.SearchTenantAsync(query, buildingId);
         }
 
         public async Task<EditToTenantDto> GetByIdAsync(Guid id)
@@ -448,6 +448,12 @@ namespace EvictionFiler.Application.Services
         {
             var lastTenant = await _repo.GetTenantsByLandlordIdAsync(landlordId);
             return lastTenant;
+        }
+
+        public async Task<List<EditToTenantDto>> GetTenantsByBuildingIdAsync(Guid buildingId)
+        {
+            var tenants = await _repo.GetTenantsByBuildingIdAsync(buildingId);
+            return tenants;
         }
     }
 }
