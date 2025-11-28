@@ -27,6 +27,9 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<IntakeModel> GetCaseByIdAsync(Guid caseId);
         Task<Guid?> UpdateCaseAsync(IntakeModel legalCase);
 
+        Task<bool> UpdateNotesAsync(IntakeModel cases);
+        Task<bool> AddDocumentAsync(List<CaseDocument> document);
+
 
     }
 }

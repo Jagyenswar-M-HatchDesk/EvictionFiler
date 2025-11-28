@@ -1,6 +1,7 @@
 ﻿@using Blazored.Toast.Services
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ApartmentDto
+@using EvictionFiler.Application.DTOs.CaseHearing
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.FormTypeDto
 @using EvictionFiler.Application.DTOs.LandLordDto
@@ -11,6 +12,7 @@
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Application.Services
 @using EvictionFiler.Client.SpinnerService
+@using EvictionFiler.Domain.Entities
 @using EvictionFiler.Domain.Entities.Master
 @inject ICaseFormRepository CaseFormRepository
 @using Microsoft.AspNetCore.Components.Forms
@@ -40,6 +42,7 @@
 @inject ITenancyTypeRepository TenancyTypeRepository
 @inject ILandlordTypeRepository LandlordTypeRepository
 @inject IDateRentRepository DateRentRepository
+@inject ICaseHearingService _caseHearingService
 
 
 
@@ -51,49 +54,224 @@
 @inject IJSRuntime JS
 
 <style>
-    :root { --bs-primary: #1F365D; --bs-warning: #D4A844; --bs-light: #F7F6F3; }
-
-    body { background-color: var(--bs-light); }
-
-    .offcanvas.show { transform: translateX(0%); }
-
-    .offcanvas { transform: translateX(100%); width: 650px !important; transition: transform 0.5s ease-in-out; }
-
-    .color-text { color: var(--bs-primary); }
-
-    .form-control::placeholder { font-size: 0.9rem; }
-
-    .input-group-text { background-color: var(--bs-light); color: var(--bs-primary); font-weight: 500; }
-
-    .form-wrapper { transition: transform 0.5s ease, opacity 0.5s ease; will-change: transform, opacity; }
-
-    /* .form-wrapper.hidden {
-        transform: translateX(-100%);
-        opacity: 0;
-        pointer-events: none;
-        } */
-
-    .overlay-form { animation: slideIn 0.5s ease forwards; background-color: white; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-
-    @@keyframes slideIn {
-        from { opacity: 0; transform: translateX(100%); }
-
-        to { opacity: 1; transform: translateX(0%); }
+    :root {
+        --bs-primary: #1F365D;
+        --bs-warning: #D4A844;
+        --bs-light: #F7F6F3;
     }
 
-    .form-wrapper.hidden { display: none !important; }
+    body {
+        background-color: var(--bs-light);
+    }
 
-    .vertical-buttons button { /*  min-width: 100px; */ text-align: center; }
+    .offcanvas.show {
+        transform: translateX(0%);
+    }
 
-    .vertical-tab-button { writing-mode: vertical-rl; /* vertical top-to-bottom */ text-orientation: upright; background-color: #f0f2f5; color: #1F365D; font-weight: 700; font-size: 14px; border: none; padding: 12px 8px; border-radius: 10px; margin-bottom: 12px; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    .offcanvas {
+        transform: translateX(100%);
+        width: 650px !important;
+        transition: transform 1s ease-in-out;
+    }
 
-        .vertical-tab-button:hover { background-color: #1F365D; color: white; transform: translateY(-2px); }
+    .color-text {
+        color: var(--bs-primary);
+    }
 
-    .active-vertical { background: linear-gradient(135deg, #1F365D, #2F4F7F); color: white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
+    .form-control::placeholder {
+        font-size: 0.9rem;
+    }
 
-    .required-label::after { content: " *"; color: red; }
+    .input-group-text {
+        background-color: var(--bs-light);
+        color: var(--bs-primary);
+        font-weight: 500;
+    }
 
-    .btn-navy { background-color: #020336; color: white; border: none; }
+    .form-wrapper {
+        transition: transform 0.5s ease, opacity 0.5s ease;
+        will-change: transform, opacity;
+    }
+
+    /* .form-wrapper.hidden {
+                    transform: translateX(-100%);
+                    opacity: 0;
+                    pointer-events: none;
+                    } */
+
+    .overlay-form {
+        animation: slideIn 1.0s ease forwards;
+        background-color: white;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0%);
+        }
+    }
+
+    .form-wrapper.hidden {
+        display: none !important;
+    }
+
+    .vertical-buttons button { /*  min-width: 100px; */
+        text-align: center;
+    }
+
+    .vertical-tab-button {
+        writing-mode: vertical-rl; /* vertical top-to-bottom */
+        text-orientation: upright;
+        background-color: #f0f2f5;
+        color: #1F365D;
+        font-weight: 700;
+        font-size: 14px;
+        border: none;
+        padding: 12px 8px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+        .vertical-tab-button:hover {
+            background-color: #1F365D;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    .active-vertical {
+        background: linear-gradient(135deg, #1F365D, #2F4F7F);
+        color: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .required-label::after {
+        content: " *";
+        color: red;
+    }
+
+    .btn-navy {
+        background-color: #020336;
+        color: white;
+        border: none;
+    }
+
+    .drop-zone {
+        border: 1px solid black;
+        min-height: 100px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .drop-zone:hover {
+            border: 1px solid Green;
+        }
+
+    .google-upload-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .google-upload-item {
+        background: #fff;
+        border: 1px solid #e3e3e3;
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: box-shadow 0.2s ease;
+    }
+
+        .google-upload-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+    .file-info {
+        display: flex;
+        align-items: center;
+        width:100%;
+    }
+
+    .file-icon {
+        font-size: 25px;
+    }
+
+    .file-meta {
+        display: flex;
+       justify-content:space-between;
+       align-items:center;
+        width: 89%;
+        margin-top: 6px;
+    }
+
+    .file-name {
+        font-weight: 500;
+        font-size: 14px;
+        margin-bottom: 3px;
+        color: #333;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .progress-container {
+        display: flex;
+        align-items: center;
+        
+        width: 65%;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-right: 5px;
+    }
+
+    .progress-bar {
+        border-radius: 3px;
+        height: 6px;
+        background: green;
+        transition: width 0.2s ease-out;
+    }
+
+    .progress-text {
+        font-size: 12px;
+        color: #555;
+    }
+
+    .delete-btn {
+        border: none;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+        margin-top:5px;
+    }
+
+        .delete-btn:hover {
+            opacity: 1;
+        }
+
+        .tab-content
+        {
+        padding: 20px 20px;
+        border-bottom: 1px solid;
+        }
+
+    .dropzonecontent
+    {
+        display:flex;
+        justify-content:center;
+    }
 </style>
 @using System.Collections.Generic
 
@@ -112,58 +290,221 @@
     <div class="offcanvas-body p-0">
         <div class="d-flex align-items-center position-relative">
             <!-- CLIENT FORM -->
-           
-            <div class="form-wrapper  flex-grow-1 p-3 pe-5">
 
-               
+            <div class="form-wrapper  flex-grow-1 p-3 ">
 
-                    <div class="row">
-                        <div class="tab-pane " id="actions" role="tabpanel" aria-labelledby="actions-tab">
-                            <div class="d-flex flex-wrap gap-2 mb-3">
-                                <button class="btn btn-secondary ">Send to Marshal</button>
-                                <button class="btn btn-secondary">Send to Process Server</button>
-                                <button class="btn btn-outline-secondary">Upload / View Documents</button>
-                                <button class="btn btn-outline-secondary">Add Notes</button>
-                                <button class="btn btn-outline-secondary" >Add Hearing</button>
+
+
+                <div class="row">
+                    
+                    <ul class="nav nav-tabs" id="actionTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="marshal-tab" data-bs-toggle="tab" data-bs-target="#marshal" type="button" role="tab">Marshal</button>
+                        </li>
+
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="server-tab" data-bs-toggle="tab" data-bs-target="#server" type="button" role="tab">Process Server</button>
+                        </li>
+
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab"> Documents</button>
+                        </li>
+
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="notes-tab" data-bs-toggle="tab" data-bs-target="#notes" type="button" role="tab">Notes</button>
+                        </li>
+
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="hearing-tab" data-bs-toggle="tab" data-bs-target="#hearing" type="button" role="tab">Hearing</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content mb-3" id="actionTabsContent">
+
+                        <div class="tab-pane fade show active" id="marshal" role="tabpanel" aria-labelledby="marshal-tab">
+                            <!-- CONTENT for Send to Marshal -->
+
+                        </div>
+
+                        <div class="tab-pane fade" id="server" role="tabpanel" aria-labelledby="server-tab">
+                            <!-- CONTENT for Process Server -->
+                        </div>
+
+                        <div class="tab-pane fade" id="documents" role="tabpanel" aria-labelledby="documents-tab">
+                            <!-- CONTENT for Upload / View Documents -->
+                            <InputFile @ref="fileInput" OnChange="OnInputChanged" multiple style="display:none" />
+
+                            <div class="drop-zone"
+                                 @ref="dropZoneRef"
+                                 @onclick="OpenFileDialog">
+
+                                 <div class="row">
+                                    <div class="dropzonecontent">Upload Documents</div>
+                                    <div class="dropzonecontent"><span style="text-decoration:underline; cursor:pointer; color:#00a7ff;margin-right:5px;">Click</span> or drag & drop file(s) here</div>
+                                 </div>
+                               
                             </div>
-                         <EditForm Model="createAction" FormName="NoticeForm" OnValidSubmit="GenerateNotice">
-                                <DataAnnotationsValidator />
-                                <div class="row g-2 align-items-end">
-                                    <div class="col-12 col-md-6">
-                                        <label for="formType" class="form-label">File a Motion</label>
-                                    <select class="form-select" @bind="createAction.FormTypeId" @bind:after="FormTypeBindAfter">
-                                            <option value="">-- Select Form Type --</option>
-                                            @foreach (var formType in FilteredFormTypeList)
-                                            {
-                                                <option value="@formType.Id">@formType.Name @(formType.BillAmount != null ? $"- (${formType.BillAmount}) " : "")</option>
-                                            }
-                                        </select>
-                                    <ValidationMessage For="() => createAction.FormTypeId" />
-                                    </div>
-                                    <div class="col-auto">
-                                        <div class=" input-group" style="width:140px">
-                                            <span class="input-group-text">$</span>
-                                        <input class="form-control" type="number" @bind="createAction.BillAmount">
+
+                            @if (Files.Count > 0)
+                            {
+                                <ul class="google-upload-list mt-3">
+                                    @foreach (var item in UploadItems)
+                                    {
+                                        <li class="google-upload-item">
+
+                                            <div class="file-info">
+                                                <div class="file-icon">📄</div>
+
+                                                <div class="file-meta">
+                                                    <div class="file-name">@item.File.Name</div>
+
+                                                    <div class="d-flex" style="width:100px">
+                                                        <div class="progress-container">
+                                                            <div class="progress-bar" style="width:@item.Progress%"></div>
+                                                        </div>
+
+                                                        <div class="progress-text">@item.Progress%</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <button class="btn-close delete-btn"
+                                                    @onclick="() => RemoveUploadItem(item)">
+                                            </button>
+
+                                        </li>
+                                    }
+                                </ul>
+                            }
+
+
+                            <div class="modal-footer mt-3" style="padding: 5px !important; border-top: none !important; ">
+                                <button type="submit" class="btn btn-primary base" @onclick="SaveFiles">Upload</button>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="notes" role="tabpanel" aria-labelledby="notes-tab">
+                            <!-- CONTENT for Add Notes -->
+                            <div class="modal-body mb-3">
+                                @* <div class="card border-0">
+                                    <div class="card-body p-0">
+
+                                        <!-- Search + Add Section -->
+                                        <!-- Add/Edit Fields -->
+
+                                        <div class="border rounded-3 p-3 mb-3 position-relative">
+
+                                            @*  <button type="button" class=" position-absolute top-0 end-0 m-2"
+                                                        aria-label="Reset" style="cursor:pointer; background:none;"
+                                                        @onclick="OnBindHearingCancel"> Reset
+                                                </button> *
+
+                                            <div class=" g-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label required-label">Date </label>
+                                                    <InputDate class="form-control" @bind-Value="caseHearing.HearingDate" placeholder="Select Date" />
+                                                </div>
+
+                                                <div class="col-md-6 mt-2 ">
+                                                    <label class="form-label required-label">Time</label>
+                                                    <input type="time" class="form-control" @bind="caseHearing.HearingTime" />
+                                                </div>
+
+
+
+                                            </div>
                                         </div>
-                                    <ValidationMessage For="() => createAction.BillAmount" />
                                     </div>
-                                    <div class="col-auto">
-                                        <button class="btn bg-brand-primary base">  @(isEditMode ? "Update" : "Generate")</button>
+                                </div> *@
+                                <InputTextArea class="form-control" placeholder="Enter Notes" @bind-Value="legalcaseDto.Notes" />
+
+                            </div>
+
+                            <div class="modal-footer" style="padding: 5px !important; border-top: none !important;">
+                                <button type="submit" class="btn btn-primary base" @onclick="SaveHearingChanges">Save</button>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="hearing" role="tabpanel" aria-labelledby="hearing-tab">
+                            <!-- CONTENT for Add Hearing -->
+                            <EditForm Model="@caseHearing">
+                                <DataAnnotationsValidator />
+                                <div class="modal-body">
+                                    <div class="card border-0">
+                                        <div class="card-body p-0">
+
+                                            <!-- Search + Add Section -->
+                                            <!-- Add/Edit Fields -->
+
+                                            <div class="border rounded-3 p-3 mb-3 position-relative">
+
+                                               @*  <button type="button" class=" position-absolute top-0 end-0 m-2"
+                                                        aria-label="Reset" style="cursor:pointer; background:none;"
+                                                        @onclick="OnBindHearingCancel"> Reset
+                                                </button> *@
+
+                                                <div class=" g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label required-label">Date </label>
+                                                        <InputDate class="form-control" @bind-Value="caseHearing.HearingDate" placeholder="Select Date" />
+                                                    </div>
+
+                                                    <div class="col-md-6 mt-2 ">
+                                                        <label class="form-label required-label">Time</label>
+                                                        <input type="time" class="form-control" @bind="caseHearing.HearingTime" />
+                                                    </div>
+
+
+
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                            </EditForm> 
+                                <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                                    <button type="button" class="btn btn-secondary me-2" @onclick="OnBindHearingCancel">Reset</button>
+                                    <button type="submit" class="btn btn-primary base" @onclick="SaveHearingChanges">Save</button>
+                                </div>
+                            </EditForm>
                         </div>
-                      
-
                     </div>
+                    <EditForm Model="createAction" FormName="NoticeForm" OnValidSubmit="GenerateNotice">
+                        <DataAnnotationsValidator />
+                        <div class="row g-2 align-items-end">
+                            <div class="col-12 col-md-6">
+                                <label for="formType" class="form-label">File a Motion</label>
+                                <select class="form-select" @bind="createAction.FormTypeId" @bind:after="FormTypeBindAfter">
+                                    <option value="">-- Select Form Type --</option>
+                                    @foreach (var formType in FilteredFormTypeList)
+                                    {
+                                        <option value="@formType.Id">@formType.Name @(formType.BillAmount != null ? $"- (${formType.BillAmount}) " : "")</option>
+                                    }
+                                </select>
+                                <ValidationMessage For="() => createAction.FormTypeId" />
+                            </div>
+                            <div class="col-auto">
+                                <div class=" input-group" style="width:140px">
+                                    <span class="input-group-text">$</span>
+                                    <input class="form-control" type="number" @bind="createAction.BillAmount">
+                                </div>
+                                <ValidationMessage For="() => createAction.BillAmount" />
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn bg-brand-primary base">  @(isEditMode ? "Update" : "Generate")</button>
+                            </div>
+                        </div>
+
+                    </EditForm>
+
+                </div>
 
 
-             
+
 
             </div>
 
-           
+
         </div>
 
     </div>
@@ -173,23 +514,59 @@
 
 
 </div>
+<script>
+    window.fileupload = {
+        triggerInput: function (element) {
+            element.click();
+        },
+
+         registerDropHandler: function (dropZoneElement, inputElement) {
+
+        dropZoneElement.addEventListener("drop", function (event) {
+            event.preventDefault();
+
+            const dt = new DataTransfer();
+            for (let i = 0; i < event.dataTransfer.files.length; i++) {
+                dt.items.add(event.dataTransfer.files[i]);
+            }
+
+            inputElement.files = dt.files;
+            inputElement.dispatchEvent(new Event("change"));
+        });
+
+        dropZoneElement.addEventListener("dragover", function (event) {
+            event.preventDefault();
+        });
+    }
+    };
+</script>
+
 
 @code {
     [Parameter] public GenrateNoticeModel createAction { get; set; } = new();
     public Guid caseId { get; set; }
     private List<FormAddEditViewModelDto> FilteredFormTypeList = new();
-    private IntakeModel legalcaseDto = new IntakeModel();
+    [Parameter] public IntakeModel legalcaseDto { get; set; } = new();
     private string? loggedInUserId;
     private bool isAdmin = false;
     private bool isEditMode = false;
     private GenrateNoticeModel caseForm = new();
+    private List<CaseHearingDto> CaseHearings = new();
+    private CaseHearingDto CaseHearing = new();
     private List<GenrateNoticeModel> caseFormDto = new();
     [Parameter] public Guid? CurrentCaseId { get; set; }
-    
+
     [Parameter]
     public EventCallback OnClose { get; set; }
     // [Parameter] public EventCallback<CreateToClientDto> Submit { get; set; }
+    public CaseHearingDto caseHearing = new CaseHearingDto();
+    public class UploadItem
+    {
+        public IBrowserFile File { get; set; }
+        public int Progress { get; set; } = 0;
+    }
 
+    private List<UploadItem> UploadItems = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -201,11 +578,143 @@
             loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
         }
-        FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
-       
+        FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.Id);
+
+        caseHearing = new CaseHearingDto();
+        caseHearing.HearingDate = DateTime.Now;
+        caseHearing.HearingTime = TimeOnly.FromTimeSpan(TimeSpan.FromHours(10));
+
+        spinnerservice.Hide();
+    }
+    private void OnBindHearingCancel()
+    {
+        caseHearing = new CaseHearingDto();
+        caseHearing.HearingDate = DateTime.Now;
+        caseHearing.HearingTime = TimeOnly.FromTimeSpan(TimeSpan.FromHours(10));
+    }
+    private async Task SaveHearingChanges()
+    {
+        spinnerservice.Show();
+
+        var newHearing = new CaseHearingDto()
+        {
+            Caption = caseHearing.Caption,
+            LegalCaseId = legalcaseDto.Id,
+            CourtId = legalcaseDto.CourtId,
+            HearingDate = caseHearing.HearingDate,
+            HearingTime = caseHearing.HearingTime,
+            CreatedBy = Guid.Parse(loggedInUserId),
+            // CallIn = caseHearing.CallIn,
+            // Phone = caseHearing.Phone,
+            // VirtualLink = caseHearing.VirtualLink,
+            // Notes = caseHearing.Notes
+        };
+
+        var CourtId = await _caseHearingService.AddHearing(newHearing);
+
+        if (CourtId)
+        {
+            ToastService.ShowSuccess("Hearing details Added successfully!");
+
+        }
+        else
+        {
+            ToastService.ShowError("Failed to create Hearing details.");
+        }
+        LoadHearing();
         spinnerservice.Hide();
     }
 
+
+    private async Task SaveCaseNotes()
+    {
+        spinnerservice.Show();
+
+        var result = await _service.UpdateNotesAsync(legalcaseDto);
+
+        if (result)
+        {
+            ToastService.ShowSuccess("Hearing details Added successfully!");
+            // await LoadCaseDetails();
+        }
+        else
+        {
+            ToastService.ShowError("Failed to create Hearing details.");
+        }
+        StateHasChanged();
+        spinnerservice.Hide();
+    }
+
+    private ElementReference dropZoneRef;
+    private InputFile? fileInput;
+    private List<IBrowserFile> Files = new();
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("fileupload.registerDropHandler", dropZoneRef, fileInput!.Element);
+        }
+    }
+
+    private async Task OpenFileDialog()
+    {
+        await JS!.InvokeVoidAsync("fileupload.triggerInput", fileInput!.Element);
+    }
+
+    private void OnDragOver(DragEventArgs e)
+    {
+        e.DataTransfer.DropEffect = "copy";
+    }
+
+    private async Task OnDrop(DragEventArgs e)
+    {
+        // send dropped files to <input type="file">
+        await JS!.InvokeVoidAsync("fileupload.addDroppedFiles", fileInput!.Element);
+    }
+    private void OnInputChanged(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles())
+        {
+            var item = new UploadItem
+            {
+                File = file,
+                Progress = 0
+            };
+
+            UploadItems.Add(item);
+            Files.Add(file);
+
+            // Simulate upload progress (replace with real API upload later)
+            _ = SimulateProgressAsync(item);
+        }
+    }
+
+    private async Task SimulateProgressAsync(UploadItem item)
+    {
+        while (item.Progress < 100)
+        {
+            item.Progress += 5;
+            await Task.Delay(100);
+            StateHasChanged();
+        }
+    }
+
+    private void RemoveUploadItem(UploadItem item)
+    {
+        UploadItems.Remove(item);
+        Files.Remove(item.File);
+        StateHasChanged();
+    }
+
+    private async Task LoadHearing()
+    {
+        CaseHearings = await _caseHearingService.GetAllCaseHeariingByCaseIdAsync(CurrentCaseId.Value);
+        if (CaseHearings.Any())
+        {
+            CaseHearing = CaseHearings.FirstOrDefault()!;
+        }
+
+    }
     private async Task GenerateNotice()
     {
         spinnerservice.Show();
@@ -278,6 +787,63 @@
 
         spinnerservice.Hide();
     }
+    private async Task SaveFiles()
+    {
+        if (legalcaseDto.Id == null || legalcaseDto.Id == Guid.Empty)
+        {
+            ToastService.ShowError("Invalid Case ID.");
+            return;
+        }
+
+        var uploadPath = Path.Combine(Environment.CurrentDirectory, "wwwroot", "uploads");
+
+        if (!Directory.Exists(uploadPath))
+            Directory.CreateDirectory(uploadPath);
+        var DocList = new List<CaseDocument>();
+        foreach (var file in Files)
+        {
+            var extension = Path.GetExtension(file.Name);
+            var baseName = Path.GetFileNameWithoutExtension(file.Name);
+
+            // Add DateTime stamp to filename
+            var dateStamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            var newFileName = $"{baseName}_{dateStamp}{extension}";
+
+            var physicalPath = Path.Combine(uploadPath, newFileName);
+
+            // Save the file physically
+            await using var stream = file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 200);
+            await using var fs = new FileStream(physicalPath, FileMode.Create);
+            await stream.CopyToAsync(fs);
+
+            // Save DB record
+            var document = new CaseDocument
+            {
+                Id = Guid.NewGuid(),
+                LegalCaseId = CurrentCaseId.Value,
+                Name = newFileName,
+                Path = $"uploads/{newFileName}",   // Relative path for web access,
+                
+            };
+
+            DocList.Add(document);
+
+        }
+        var result = await _service.AddDocumentAsync(DocList);
+        if(result)
+        {
+            ToastService.ShowSuccess("Documents saved successfully!");
+            Files.Clear();
+            UploadItems.Clear();
+        }
+        else
+        {
+            ToastService.ShowError("An Error Occured during Saving!");
+        }
+
+        
+    }
+
 
     private async Task LoadCaseForms()
     {
@@ -330,5 +896,5 @@
         await OnClose.InvokeAsync();
         StateHasChanged();
     }
-  
+
 }
