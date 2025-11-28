@@ -196,6 +196,7 @@ namespace EvictionFiler.Domain.Entities
         public string? TenantName { get; set; }
         public TimeOnly? AppearanceTime { get; set; }
 
+		public string Notes { get; set; } = string.Empty;
 
     }
 }

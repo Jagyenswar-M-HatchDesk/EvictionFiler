@@ -132,6 +132,7 @@ builder.Services.AddScoped<IAdditionalTenantService, AdditionalTenantService>();
 builder.Services.AddScoped<ICourtpartServices, CourtpartServices>();
 builder.Services.AddScoped<ICourtpartRepository, CourtpartRepository>();
 builder.Services.AddScoped<IUnitRepository, UnitRepository>();
+builder.Services.AddScoped<ICaseDocument, CaseDocumentRepository>();
 //builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 //    .AddIdentityCookies();
 

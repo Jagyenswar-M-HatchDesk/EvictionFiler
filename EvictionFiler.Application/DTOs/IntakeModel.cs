@@ -198,6 +198,7 @@ namespace EvictionFiler.Application.DTOs
         public DateOnly? PerDiemDate { get; set; }
        
         public string? SpecialInstruction { get; set; }
+        public string? Notes { get; set; }
 
 
     }
