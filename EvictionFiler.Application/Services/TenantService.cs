@@ -88,7 +88,7 @@ namespace EvictionFiler.Application.Services
         }
 
 
-        public async Task<Guid?> AddTenantfromCase(CreateToTenantDto t)
+        public async Task<Guid?> AddTenantfromCase(CreateToTenantDto e)
         {
             //var newtenant = new List<Tenant>();
 
@@ -112,34 +112,10 @@ namespace EvictionFiler.Application.Services
             {
 
                 TenantCode = code,
-                FirstName = t.FirstName,
-                LastName = t.LastName,
-                SSN = t.SSN,
-                Phone = t.Phone,
-                Email = t.Email,
-                LanguageId = t.LanguageId,
-
-                HasPossession = t.HasPossession,
-                HasRegulatedTenancy = t.HasRegulatedTenancy,
-                //Name_Relation = t.Name_Relation,
-                OtherOccupants = t.OtherOccupants,
-
-                TenantRecord = t.TenantRecord,
-                HasPriorCase = t.HasPriorCase,
-                TenancyTypeId = t.TenancyTypeId,
-                RenewalOffer = t.RenewalOffer,
-                //RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek,
-                SocialServices = t.SocialServices,
-                MonthlyRent = t.MonthlyRent,
-
-                TenantShare = t.TenantShare,
-                ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
-                UnitOrApartmentNumber = t.UnitOrApartmentNumber,
-
-                IsUnitIllegalId = t.IsUnitIllegalId,
-                BuildinId = t.BuildingId,
-                MoveInDate = t.MoveInDate,
-                RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId
+                FirstName = e.FirstName,
+                LastName = e.LastName,
+                UnitOrApartmentNumber = e.UnitOrApartmentNumber,
+                BuildinId = e.BuildingId,
 
             };
             //newtenant.Add(tenant);
