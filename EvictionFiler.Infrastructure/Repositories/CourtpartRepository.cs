@@ -91,6 +91,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Judge = e.Judge,
                 Part = e.Part,
                 CourtId = e.CourtId,
+                Tollfree = e.Tollfree,
             });
 
             _mainDbContext.CourtPart.AddRange(courtdata);

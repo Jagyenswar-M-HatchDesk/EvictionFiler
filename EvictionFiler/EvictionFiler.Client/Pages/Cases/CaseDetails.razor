@@ -1,4 +1,4 @@
-﻿@page "/CaseDetails/{caseId:guid}"
+﻿@page "/legalcase/details/{caseId:guid}"
 @using Blazored.Toast
 @using Blazored.Toast.Services
 @using EvictionFiler.Application.DTOs
@@ -878,7 +878,7 @@
                                                 <option value="">-- Select Form Type --</option>
                                                 @foreach (var formType in FilteredFormTypeList)
                                                 {
-                                                    <option value="@formType.Id">@formType.Name @(formType.BillAmount != null ? $"- (${formType.BillAmount}) " : "")</option>
+                                                    <option value="@formType.Id">@formType.Name @(formType.Rate != null ? $"- (${formType.Rate}) " : "")</option>
                                                 }
                                             </select>
                                             <ValidationMessage For="() => noticeModel.FormTypeId" />
@@ -1642,16 +1642,16 @@
 
         }
 
-        feecatalogDto = await _feeCatalogService.GetAllAsync();
-        var feeLookup = feecatalogDto.ToDictionary(f => f.Label.ToLower(), f => f.Rate);
+        // feecatalogDto = await _feeCatalogService.GetAllAsync();
+        // var feeLookup = feecatalogDto.ToDictionary(f => f.Label.ToLower(), f => f.Rate);
 
-        foreach (var form in FilteredFormTypeList)
-        {
-            if (feeLookup.TryGetValue(form.Name.ToLower(), out var rate))
-            {
-                form.BillAmount = rate;
-            }
-        }
+        // foreach (var form in FilteredFormTypeList)
+        // {
+        //     if (feeLookup.TryGetValue(form.Name.ToLower(), out var rate))
+        //     {
+        //         form.BillAmount = rate;
+        //     }
+        // }
 
         CurrentCaseId = caseId;
         if (legalcaseDto != null)
@@ -1784,7 +1784,7 @@
             .FirstOrDefault(f => f.Id == noticeModel.FormTypeId);
 
         if (selectedForm != null)
-            noticeModel.BillAmount = selectedForm.BillAmount;
+            noticeModel.BillAmount = Convert.ToDecimal(selectedForm.Rate);
         else
             noticeModel.BillAmount = null;
 
