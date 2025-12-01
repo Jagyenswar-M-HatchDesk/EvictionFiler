@@ -22,7 +22,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<CourtPartDto> GetCourtByIdAsync(Guid id);
         Task UpdateCourtAsync(CourtPartDto dto);
         Task DeleteCourtAsync(Guid id);
-        Task<bool> AddCourtPartListAsync(List<CourtPartDto> courtInfosDto);
+        Task<List<Guid>?> AddCourtPartListAsync(List<CourtPartDto> courtInfosDto);
         Task<bool> SaveCourtPartList(List<CourtPartDto> dto, Guid id);
     }
 }

@@ -78,12 +78,11 @@ namespace EvictionFiler.Infrastructure.Repositories
             return null;
         }
 
-        public async Task<bool> AddCourtPartListAsync(List<CourtPartDto> courtInfosDto)
+        public async Task<List<Guid>?> AddCourtPartListAsync(List<CourtPartDto> courtInfosDto)
         {
-            var courtdata = courtInfosDto.Select(e=> new CourtPart
+            var courtdata = courtInfosDto.Select(e => new CourtPart
             {
-                Id = e.Id,
-
+                Id = e.Id == Guid.Empty ? Guid.NewGuid() : e.Id,
                 RoomNo = e.RoomNo,
                 ConferenceId = e.ConferenceId,
                 CallIn = e.CallIn,
@@ -92,14 +91,17 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Part = e.Part,
                 CourtId = e.CourtId,
                 Tollfree = e.Tollfree,
-            });
+            }).ToList();
 
             _mainDbContext.CourtPart.AddRange(courtdata);
             var result = await _mainDbContext.SaveChangesAsync();
-            if (result > 0) return true;
 
-            return false;
+            // Return saved IDs
+            if(result > 0) return courtdata.Select(x => x.Id).ToList();
+
+            return null;
         }
+
         public async Task<CourtPart> GetCourtByIdAsync(Guid id)
         {
 

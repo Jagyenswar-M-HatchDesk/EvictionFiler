@@ -30,5 +30,6 @@ namespace EvictionFiler.Application.DTOs.CourtDto
         public string Judge { get; set; } = string.Empty;
 
         public List<CourtPartDto> CourtPart { get; set; } = new List<CourtPartDto>();
+        public CourtPartDto SelectedCourtPart { get; set; } = new CourtPartDto();
     }
 }

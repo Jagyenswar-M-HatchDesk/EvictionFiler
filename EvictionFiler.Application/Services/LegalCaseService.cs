@@ -1048,6 +1048,24 @@ namespace EvictionFiler.Application.Services
             _caseDocument.AddRangeAsync(document);
             return await _unitOfWork.SaveChangesAsync() > 0;
         }
+
+        public async Task<IEnumerable<CaseDocument>> CaseDocumentList(Guid Id)
+        {
+            var doclist =  _caseDocument.GetAllQuerable();
+            var returnlist = doclist.Where(e=>e.LegalCaseId == Id).OrderByDescending(e=>e.CreatedOn);
+            return returnlist;
+        }
+
+        public async Task<bool> DeleteCaseDocument(Guid Id)
+        {
+            var doclist = await _caseDocument.DeleteAsync(Id);
+            if(doclist)
+            {
+                await Task.Delay(200);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            return doclist;
+        }
     }
 
 
