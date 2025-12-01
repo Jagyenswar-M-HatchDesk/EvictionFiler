@@ -12,6 +12,8 @@ namespace EvictionFiler.Application.Interfaces.IRepository
 		Task<List<EditToClientDto>> SearchClient(string searchTerm);
 
 		Task<string> GenerateClientCodeAsync();
+        Task<bool> IsEmailExists(string email);
 
-	}
+
+    }
 }

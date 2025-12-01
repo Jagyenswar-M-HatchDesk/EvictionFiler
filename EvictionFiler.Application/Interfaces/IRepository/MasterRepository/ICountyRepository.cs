@@ -1,6 +1,7 @@
 ﻿using EvictionFiler.Application.DTOs.MasterDtos.ApperenceTypeDto;
 using EvictionFiler.Application.DTOs.MasterDtos.CaseTypeHPDDto;
 using EvictionFiler.Application.DTOs.MasterDtos.CaseTypePerDiemDto;
+using EvictionFiler.Application.DTOs.MasterDtos.CountyDto;
 using EvictionFiler.Application.DTOs.MasterDtos.DefenseTypeDto;
 using EvictionFiler.Application.DTOs.MasterDtos.DocumentInstructionPerDiemDto;
 using EvictionFiler.Application.DTOs.MasterDtos.HarassmentTypeDto;
@@ -21,9 +22,9 @@ namespace EvictionFiler.Application.Interfaces.IRepository.MasterRepository
 	public interface ICountyRepository : IRepository<County>
     {
 
-       
 
 
+        Task<List<EditToCountyDto>> SearchCounty(string searchTerm);
 
 
     }

@@ -780,5 +780,12 @@ namespace EvictionFiler.Application.Services
 			return true;
 		}
 
-	}
+        public async Task<bool> IsEmailExists(string email)
+        {
+            var existemail = await _clientRepo.IsEmailExists(email);
+			return existemail;
+        }
+
+
+    }
 }

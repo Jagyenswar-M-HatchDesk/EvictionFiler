@@ -5,6 +5,7 @@ using EvictionFiler.Application.DTOs.FormTypeDto;
 using EvictionFiler.Application.DTOs.MasterDtos.CaseTypeDto;
 using EvictionFiler.Application.DTOs.MasterDtos.CountyDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
+using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Application.Interfaces.IServices.Master;
 using EvictionFiler.Domain.Entities.Master;
@@ -148,6 +149,12 @@ namespace EvictionFiler.Application.Services.Master
             await _unitOfWork.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<List<EditToCountyDto>> SearchCounty(string searchTerm)
+        {
+            var counties = await _repository.SearchCounty(searchTerm);
+            return counties;
         }
     }
 }

@@ -22,6 +22,7 @@ namespace EvictionFiler.Application.Interfaces.IServices.Master
         Task<EditToCountyDto?> GetCountyByIdAsync(Guid? id);
         Task<bool> DeleteCountyAsync(Guid id);
         Task<List<EditToCountyDto>> GetAllCounty();
+        Task<List<EditToCountyDto>> SearchCounty(string searchTerm);
 
 
     }

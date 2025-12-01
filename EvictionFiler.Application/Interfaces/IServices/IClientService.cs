@@ -19,7 +19,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 
 		Task<Guid> CreateOnlyClient(CreateToClientDto client);
 		Task<bool> UpdateClientformCase(EditToClientDto client);
-        
+		Task<bool> IsEmailExists(string email);
 
 
 

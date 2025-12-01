@@ -103,6 +103,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 			string newCode = "CC" + nextNumber.ToString("D10"); // D10 = 10 digits
 			return newCode;
 		}
-	}
+
+        public async Task<bool> IsEmailExists(string email)
+        {
+            return await _context.Clients
+                       .AnyAsync(c => c.Email.ToLower() == email.ToLower());
+        }
+    }
 
 }
