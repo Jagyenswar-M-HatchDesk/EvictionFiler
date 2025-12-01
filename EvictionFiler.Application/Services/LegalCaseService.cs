@@ -35,7 +35,8 @@ namespace EvictionFiler.Application.Services
         private readonly ITenantRepository _tenantRepo;
         private readonly IAdditionalOccupantsRepository _additionalOccupantsRepo;
         private readonly IUnitOfWork _unitOfWork;
-        public LegalCaseService(ICasesRepository repository,IReliefPetitionerTypeRepository reliefPetitionerTypeRepository , IReliefRespondenTypeRepository reliefRespondenTypeRepository, IAppearanceTypeRepository appearanceTypeRepository,IDefenseTypeRepository defenseTypeRepository,IHarassmentTypeRepository harassmentTypeRepository,ICaseTypeHPDRepository caseTypeHPDRepository ,ITenantRepository tenantRepo, ILandLordRepository landlordrepo, ICaseTypeRepository caseTypeRepository, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
+        private readonly ICaseDocument _caseDocument;
+        public LegalCaseService(ICasesRepository repository, ICaseDocument caseDocument, IReliefPetitionerTypeRepository reliefPetitionerTypeRepository , IReliefRespondenTypeRepository reliefRespondenTypeRepository, IAppearanceTypeRepository appearanceTypeRepository,IDefenseTypeRepository defenseTypeRepository,IHarassmentTypeRepository harassmentTypeRepository,ICaseTypeHPDRepository caseTypeHPDRepository ,ITenantRepository tenantRepo, ILandLordRepository landlordrepo, ICaseTypeRepository caseTypeRepository, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
         {
             _repository = repository;
             _tenantRepo = tenantRepo;
@@ -50,6 +51,7 @@ namespace EvictionFiler.Application.Services
             _defenseTypeRepository = defenseTypeRepository;
             _unitOfWork = unitOfWork;
             _additionalOccupantsRepo = additionalOccupantsRepo;
+            _caseDocument = caseDocument;
 
         }
 
@@ -925,6 +927,28 @@ namespace EvictionFiler.Application.Services
 
         }
 
+        public async Task<bool> UpdateNotesAsync(IntakeModel legalCase)
+        {
+            try
+            {
+                var existingCase = await _repository.GetAsync(legalCase.Id);
+                if (existingCase == null) return false;
+
+                existingCase.Notes = legalCase.Notes!;
+               
+                var result = await _unitOfWork.SaveChangesAsync();
+
+                if (result > 0) return true;
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+            }
+
+
+        }
 
         public async Task<bool> UpdateAsync(CreateToEditLegalCaseModel legalCase)
         {
@@ -1018,5 +1042,13 @@ namespace EvictionFiler.Application.Services
                 return true;
             return false;
         }
+
+        public async Task<bool> AddDocumentAsync(List<CaseDocument> document)
+        {
+            _caseDocument.AddRangeAsync(document);
+            return await _unitOfWork.SaveChangesAsync() > 0;
+        }
     }
+
+
 }
