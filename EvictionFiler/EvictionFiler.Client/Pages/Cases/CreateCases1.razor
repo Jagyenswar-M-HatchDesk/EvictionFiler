@@ -402,7 +402,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                
 
-                                                <div class="col-5">
+                                                <div class="col-6">
                                                     <label class="form-label required-label">Email</label>
                                                     <InputText class="form-control"
                                                                placeholder="Enter Email"
@@ -470,7 +470,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     </InputSelect>
                                                     <ValidationMessage For="() => legalcaseDto.ClientTypeId" />
                                                 </div>
-                                                <div class="col-5">
+                                                <div class="col-6">
                                                     <label class="form-label required-label">Email</label>
                                                     <InputText class="form-control"
                                                                placeholder="Enter Email"
@@ -1350,7 +1350,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
 
 
-                                                <div class="col-5">
+                                                <div class="col-6">
                                                     <label class="form-label required-label">Email</label>
                                                     <InputText class="form-control"
                                                                placeholder="Enter Email"
@@ -1418,7 +1418,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     </InputSelect>
                                                     <ValidationMessage For="() => legalcaseDto.ClientTypeId" />
                                                 </div>
-                                                <div class="col-5">
+                                                <div class="col-6">
                                                     <label class="form-label required-label">Email</label>
                                                     <InputText class="form-control"
                                                                placeholder="Enter Email"
@@ -2890,7 +2890,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
 
 
-    private bool ValidateCurrentStep()
+    private async Task <bool> ValidateCurrentStep()
     {
         messageStore.Clear();
        
@@ -2903,15 +2903,44 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 if (Steps[CurrentStep].Name == "CaseAndclient")
                 {
                     Require(() => legalcaseDto.CaseTypeId, nameof(legalcaseDto.CaseTypeId), "Case type required");
+
                     if (!IsNewClient)
                     {
                         Require(() => legalcaseDto.ClientId, nameof(legalcaseDto.ClientId), "Client is required");
                     }
+
                     Require(() => legalcaseDto.ClientName, nameof(legalcaseDto.ClientName), "Client Name is required");
-                    Require(() => legalcaseDto.ClientEmail, nameof(legalcaseDto.ClientEmail), "Client Email is required");
                     Require(() => legalcaseDto.ClientTypeId, nameof(legalcaseDto.ClientTypeId), "Client Type is required");
 
+                    // Email required
+                    Require(() => legalcaseDto.ClientEmail, nameof(legalcaseDto.ClientEmail), "Client Email is required");
+
+                    // ❌ WRONG email format check
+                    var email = legalcaseDto.ClientEmail;
+                    if (!string.IsNullOrWhiteSpace(email))
+                    {
+                        // Simple regex for email validation
+                        var emailRegex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+
+                        if (!System.Text.RegularExpressions.Regex.IsMatch(email, emailRegex))
+                        {
+                            messageStore.Add(() => legalcaseDto.ClientEmail, "Invalid email format");
+                            return false;
+                        }
+                    }
+
+                    
+
+                    // ❌ Duplicate email check
+                    var isEmailExists = await _clientService.IsEmailExists(legalcaseDto.ClientEmail);
+
+                    if (isEmailExists)
+                    {
+                        messageStore.Add(() => legalcaseDto.ClientEmail, "Email already exists");
+                        return false;
+                    }
                 }
+
                 else if (Steps[CurrentStep].Name == "Landlord")
                 {
                     
@@ -3018,14 +3047,42 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 if (Steps[CurrentStep].Name == "CaseAndclient")
                 {
                     Require(() => legalcaseDto.CaseTypeId, nameof(legalcaseDto.CaseTypeId), "Case type required");
+
                     if (!IsNewClient)
                     {
                         Require(() => legalcaseDto.ClientId, nameof(legalcaseDto.ClientId), "Client is required");
                     }
-                    Require(() => legalcaseDto.ClientName, nameof(legalcaseDto.ClientName), " Name is required");
-                    Require(() => legalcaseDto.ClientEmail, nameof(legalcaseDto.ClientEmail), " Email is required");
-                    Require(() => legalcaseDto.ClientTypeId, nameof(legalcaseDto.ClientTypeId), " Type is required");
 
+                    Require(() => legalcaseDto.ClientName, nameof(legalcaseDto.ClientName), "Client Name is required");
+                    Require(() => legalcaseDto.ClientTypeId, nameof(legalcaseDto.ClientTypeId), "Client Type is required");
+
+                    // Email required
+                    Require(() => legalcaseDto.ClientEmail, nameof(legalcaseDto.ClientEmail), "Client Email is required");
+
+                    // ❌ WRONG email format check
+                    var email = legalcaseDto.ClientEmail;
+                    if (!string.IsNullOrWhiteSpace(email))
+                    {
+                        // Simple regex for email validation
+                        var emailRegex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+
+                        if (!System.Text.RegularExpressions.Regex.IsMatch(email, emailRegex))
+                        {
+                            messageStore.Add(() => legalcaseDto.ClientEmail, "Invalid email format");
+                            return false;
+                        }
+                    }
+
+
+
+                    // ❌ Duplicate email check
+                    var isEmailExists = await _clientService.IsEmailExists(legalcaseDto.ClientEmail);
+
+                    if (isEmailExists)
+                    {
+                        messageStore.Add(() => legalcaseDto.ClientEmail, "Email already exists");
+                        return false;
+                    }
                 }
                 else if (Steps[CurrentStep].Name == "CaseInfo")
                 {
@@ -3156,14 +3213,42 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 if (Steps[CurrentStep].Name == "CaseAndclient")
                 {
                     Require(() => legalcaseDto.CaseTypeId, nameof(legalcaseDto.CaseTypeId), "Case type required");
+
                     if (!IsNewClient)
                     {
                         Require(() => legalcaseDto.ClientId, nameof(legalcaseDto.ClientId), "Client is required");
                     }
-                    Require(() => legalcaseDto.ClientPhone, nameof(legalcaseDto.ClientName), "Client Name is required");
-                    Require(() => legalcaseDto.ClientEmail, nameof(legalcaseDto.ClientEmail), "Client Email is required");
+
+                    Require(() => legalcaseDto.ClientName, nameof(legalcaseDto.ClientName), "Client Name is required");
                     Require(() => legalcaseDto.ClientTypeId, nameof(legalcaseDto.ClientTypeId), "Client Type is required");
 
+                    // Email required
+                    Require(() => legalcaseDto.ClientEmail, nameof(legalcaseDto.ClientEmail), "Client Email is required");
+
+                    // ❌ WRONG email format check
+                    var email = legalcaseDto.ClientEmail;
+                    if (!string.IsNullOrWhiteSpace(email))
+                    {
+                        // Simple regex for email validation
+                        var emailRegex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+
+                        if (!System.Text.RegularExpressions.Regex.IsMatch(email, emailRegex))
+                        {
+                            messageStore.Add(() => legalcaseDto.ClientEmail, "Invalid email format");
+                            return false;
+                        }
+                    }
+
+
+
+                    // ❌ Duplicate email check
+                    var isEmailExists = await _clientService.IsEmailExists(legalcaseDto.ClientEmail);
+
+                    if (isEmailExists)
+                    {
+                        messageStore.Add(() => legalcaseDto.ClientEmail, "Email already exists");
+                        return false;
+                    }
                 }
                 else if (Steps[CurrentStep].Name == "Attorney")
                 {
@@ -3537,7 +3622,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
     private async Task Next()
     {
-        if (!ValidateCurrentStep()) return;
+        if (!await ValidateCurrentStep()) return;
 
         //legalcaseDto.LandLordTypeName = LandLordTypeList.FirstOrDefault(x => x.Id == legalcaseDto.LandLordTypeId)?.Name;
         //legalcaseDto.RegulationStatusName = RegulationList.FirstOrDefault(x => x.Id == legalcaseDto.RegulationStatusId)?.Name;
