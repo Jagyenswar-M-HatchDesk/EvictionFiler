@@ -53,6 +53,8 @@ namespace EvictionFiler.Application.DTOs
         public string RegulationStatusName { get; set; }
         public string? CourtName { get; set; }
 
+        public string? CountyName { get; set; }
+
         public string? TenantName { get; set; }
         public string? UnitNumber { get; set; }
         public bool? TenantRecord { get; set; }

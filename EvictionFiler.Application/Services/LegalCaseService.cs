@@ -23,9 +23,13 @@ namespace EvictionFiler.Application.Services
         private readonly ICasesRepository _repository;
        private readonly ICaseTypeRepository _caseTypeRepository;
         private readonly ICaseTypeHPDRepository _caseTypeHPDRepository;
+        private readonly ICaseTypePerDiemRepository _caseTypePerDiemRepository;
         private readonly IHarassmentTypeRepository _harassmentTypeRepository;
         private readonly IDefenseTypeRepository _defenseTypeRepository;
         private readonly IAppearanceTypeRepository _appearanceTypeRepository;
+        private readonly IDocumentIntructionsTypesRepository _documentIntructionsTypesRepository;
+        private readonly IReportingTypePerDiemRepository _reportingTypePerDiemRepository;
+        private readonly IAppearanceTypePerDiemRepository _appearanceTypePerDiemRepository;
         private readonly IReliefPetitionerTypeRepository _reliefPetitionerTypeRepository;
         private readonly IReliefRespondenTypeRepository _reliefRespondenTypeRepository;
 
@@ -36,7 +40,7 @@ namespace EvictionFiler.Application.Services
         private readonly IAdditionalOccupantsRepository _additionalOccupantsRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICaseDocument _caseDocument;
-        public LegalCaseService(ICasesRepository repository, ICaseDocument caseDocument, IReliefPetitionerTypeRepository reliefPetitionerTypeRepository , IReliefRespondenTypeRepository reliefRespondenTypeRepository, IAppearanceTypeRepository appearanceTypeRepository,IDefenseTypeRepository defenseTypeRepository,IHarassmentTypeRepository harassmentTypeRepository,ICaseTypeHPDRepository caseTypeHPDRepository ,ITenantRepository tenantRepo, ILandLordRepository landlordrepo, ICaseTypeRepository caseTypeRepository, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
+        public LegalCaseService(ICasesRepository repository, IReportingTypePerDiemRepository reportingTypePerDiemRepository,IDocumentIntructionsTypesRepository documentIntructionsTypesRepository,IAppearanceTypePerDiemRepository appearanceTypePerDiemRepository,ICaseTypePerDiemRepository caseTypePerDiemRepository,ICaseDocument caseDocument, IReliefPetitionerTypeRepository reliefPetitionerTypeRepository , IReliefRespondenTypeRepository reliefRespondenTypeRepository, IAppearanceTypeRepository appearanceTypeRepository,IDefenseTypeRepository defenseTypeRepository,IHarassmentTypeRepository harassmentTypeRepository,ICaseTypeHPDRepository caseTypeHPDRepository ,ITenantRepository tenantRepo, ILandLordRepository landlordrepo, ICaseTypeRepository caseTypeRepository, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
         {
             _repository = repository;
             _tenantRepo = tenantRepo;
@@ -44,11 +48,15 @@ namespace EvictionFiler.Application.Services
             _buildingrepo = buildingrepo;
             _caseTypeRepository = caseTypeRepository;
             _caseTypeHPDRepository = caseTypeHPDRepository;
+            _caseTypePerDiemRepository = caseTypePerDiemRepository;
             _harassmentTypeRepository = harassmentTypeRepository;
             _appearanceTypeRepository = appearanceTypeRepository;
             _reliefRespondenTypeRepository = reliefRespondenTypeRepository;
             _reliefPetitionerTypeRepository = reliefPetitionerTypeRepository;
+            _documentIntructionsTypesRepository = documentIntructionsTypesRepository;
             _defenseTypeRepository = defenseTypeRepository;
+            _reportingTypePerDiemRepository = reportingTypePerDiemRepository;
+            _appearanceTypePerDiemRepository = appearanceTypePerDiemRepository;
             _unitOfWork = unitOfWork;
             _additionalOccupantsRepo = additionalOccupantsRepo;
             _caseDocument = caseDocument;
@@ -355,9 +363,8 @@ namespace EvictionFiler.Application.Services
                      c => c.BilingType,
                        c => c.ReportingTypePerDiems,
                      c => c.DocumentIntructionsTypse,
-                     c => c.CourtLocation
-
-
+                     c => c.CourtLocation,
+                       c => c.CourtLocation.County
 
 
     )
@@ -456,6 +463,8 @@ namespace EvictionFiler.Application.Services
                         AttrneyContactInfo = caseEntity.AttrneyContactInfo,
                         AttrneyEmail = caseEntity.AttrneyEmail,
                         CourtLocationId = caseEntity.CourtLocationId,
+                        //CountyId = caseEntity.CourtLocation.CountyId,
+                        //CountyName = caseEntity.County != null ? $"{caseEntity.CourtLocation.County.Name}" : "",
                         CourtName = caseEntity.CourtLocation != null ? $"{caseEntity.CourtLocation.Court}" : "",
                         CourtRoom = caseEntity.CourtRoom,
                         Index = caseEntity.Index,
@@ -538,13 +547,15 @@ namespace EvictionFiler.Application.Services
                         CourtName = caseEntity.CourtLocation != null ? $"{caseEntity.CourtLocation.Court}" : "",
                         CourtRoom = caseEntity.CourtRoom,
                         Index = caseEntity.Index,
-                        County = caseEntity.County,
+                        
 
                         OpposingCounsel = caseEntity.OpposingCounsel,
                         Partynames = caseEntity.Partynames,
                         CaseBackground = caseEntity.CaseBackground,
                         SpecialInstruction = caseEntity.SpecialInstruction,
-                        CountyId = caseEntity.CourtLocation.CountyId,
+                        CountyId = caseEntity.CourtLocation?.CountyId,
+                        CountyName = caseEntity.CourtLocation?.County?.Name ?? string.Empty,
+
 
                         TravelExpense = caseEntity.TravelExpense,
                         BilingTypeId = caseEntity.BilingTypeId,
@@ -800,9 +811,25 @@ namespace EvictionFiler.Application.Services
                 existingCase.AppearanceTime = legalCase.AppearanceTime; 
                 existingCase.InvoiceTo = legalCase.InvoiceTo;
                 existingCase.DateTenantMoved = legalCase.DateTenantMoved;
+                existingCase.Attrney = legalCase.Attrney;
+                existingCase.AttrneyContactInfo = legalCase.AttrneyContactInfo;
+                existingCase.AttrneyEmail = legalCase.AttrneyEmail;
+                existingCase.CourtLocationId = legalCase.CourtLocationId;
+                existingCase.Index = legalCase.Index;
+                existingCase.Partynames = legalCase.Partynames;
+                existingCase.CaseBackground = legalCase.CaseBackground;
+                existingCase.TravelExpense = legalCase.TravelExpense;
+                existingCase.PerDiemAttorneyname = legalCase.PerDiemAttorneyname;
+                existingCase.PerDiemDate = legalCase.PerDiemDate;
+                existingCase.PerDiemSignature = legalCase.PerDiemSignature;
+
                 
 
+                if (legalCase.PartyRepresentPerDiemId != null && legalCase.PartyRepresentPerDiemId != Guid.Empty)
+                {
+                    existingCase.PartyRepresentPerDiemId = legalCase.PartyRepresentPerDiemId;
 
+                }
 
                 if (legalCase.PartyRepresentId != null && legalCase.PartyRepresentId != Guid.Empty)
                 {
@@ -816,7 +843,11 @@ namespace EvictionFiler.Application.Services
 
                 }
 
+                if (legalCase.PaymentMethodId != null && legalCase.PaymentMethodId != Guid.Empty)
+                {
+                    existingCase.PaymentMethodId = legalCase.PaymentMethodId;
 
+                }
 
                 if (legalCase.CaseProgramId != null && legalCase.CaseProgramId != Guid.Empty)
                 {
@@ -834,11 +865,51 @@ namespace EvictionFiler.Application.Services
 
 
                 existingCase.CaseTypeHPDs.Clear();
+                existingCase.CaseTypePerDiems.Clear();
                 existingCase.HarassmentTypse.Clear();
                 existingCase.DefenseTypse.Clear();
                 existingCase.AppearanceType.Clear();
+                existingCase.AppearanceTypePerDiem.Clear();
+                existingCase.DocumentIntructionsTypse.Clear();
+                existingCase.ReportingTypePerDiems.Clear();
                 existingCase.ReliefRespondentType.Clear();
                 existingCase.ReliefPetitionerType.Clear();
+
+                if (legalCase.SelectedCaseTypePerDiemIds != null)
+                {
+                    foreach (var id in legalCase.SelectedCaseTypePerDiemIds)
+                    {
+                        var ct = await _caseTypePerDiemRepository.GetAsync(id);
+                        if (ct != null)
+                        {
+                            existingCase.CaseTypePerDiems.Add(ct);
+                        }
+                    }
+                }
+
+                if (legalCase.SelectedDocumentInstructionPerDiemIds != null)
+                {
+                    foreach (var id in legalCase.SelectedDocumentInstructionPerDiemIds)
+                    {
+                        var ct = await _documentIntructionsTypesRepository.GetAsync(id);
+                        if (ct != null)
+                        {
+                            existingCase.DocumentIntructionsTypse.Add(ct);
+                        }
+                    }
+                }
+
+                if (legalCase.SelectedReportingRequirementPerDiemIds != null)
+                {
+                    foreach (var id in legalCase.SelectedReportingRequirementPerDiemIds)
+                    {
+                        var ct = await _reportingTypePerDiemRepository.GetAsync(id);
+                        if (ct != null)
+                        {
+                            existingCase.ReportingTypePerDiems.Add(ct);
+                        }
+                    }
+                }
 
                 if (legalCase.SelectedCaseTypeHPDIds != null)
                 {
@@ -860,6 +931,18 @@ namespace EvictionFiler.Application.Services
                         if (hpd != null)
                         {
                             existingCase.AppearanceType.Add(hpd);
+                        }
+                    }
+                }
+
+                if (legalCase.SelectedAppearanceTypePerDiemIds != null)
+                {
+                    foreach (var id in legalCase.SelectedAppearanceTypePerDiemIds)
+                    {
+                        var hpd = await _appearanceTypePerDiemRepository.GetAsync(id);
+                        if (hpd != null)
+                        {
+                            existingCase.AppearanceTypePerDiem.Add(hpd);
                         }
                     }
                 }
