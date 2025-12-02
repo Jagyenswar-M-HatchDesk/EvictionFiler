@@ -564,6 +564,19 @@
         content: " *";
         color: red;
     }
+
+    .blazored-toast-container {
+        z-index: 999 !important;
+        position: fixed !important;
+    }
+
+    .blazored-toast {
+        animation-duration: 8s !important; /* increase to 8 seconds */
+    }
+
+    .blazored-toast-progress {
+        animation-duration: 8s !important;
+    }
 </style>
 <style>
     #activityTable th,
@@ -694,7 +707,7 @@
                                                         if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingState)) partBuilding.Add(legalcaseDto.BuildingState);
                                                         if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingZip)) partBuilding.Add(legalcaseDto.BuildingZip);
 
-                                                        var fullBuildingAddress = partBuilding.Any() ? string.Join(", ", partBuilding) : "--";
+                                                        var fullBuildingAddress = partBuilding.Count() > 0 ? string.Join(", ", partBuilding) : "--";
                                                     }
                                                     @fullBuildingAddress
                                                 </span>
@@ -726,7 +739,7 @@
                                                         if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingState)) partlandlord.Add(legalcaseDto.BuildingState);
                                                         if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingZip)) partlandlord.Add(legalcaseDto.BuildingZip);
 
-                                                        var fulllandlordAddress = partlandlord.Any() ? string.Join(", ", partlandlord) : "--";
+                                                        var fulllandlordAddress = partlandlord.Count() > 0 ? string.Join(", ", partlandlord) : "--";
                                                     }
                                                     @fulllandlordAddress
                                                 </span>
@@ -803,7 +816,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @if (caseFormDto != null && caseFormDto.Any())
+                                            @if (caseFormDto != null && caseFormDto.Count() > 0)
                                             {
                                                 int index = 1;
                                                 @foreach (var form in caseFormDto)
@@ -965,7 +978,7 @@
                                         if (!string.IsNullOrWhiteSpace(legalcaseDto.StateName)) partclient.Add(legalcaseDto.StateName);
                                         if (!string.IsNullOrWhiteSpace(legalcaseDto.ZipCode)) partclient.Add(legalcaseDto.ZipCode);
 
-                                        var fulllClientAddress = partclient.Any() ? string.Join(", ", partclient) : "--";
+                                        var fulllClientAddress = partclient.Count() > 0 ? string.Join(", ", partclient) : "--";
                                     }
                                     @fulllClientAddress
                                 </span>
@@ -1008,7 +1021,7 @@
                                     </thead>
 
                                     <tbody>
-                                        @if (caseDocuments is not null && caseDocuments.Any())
+                                        @if (caseDocuments is not null && caseDocuments.Count() > 0)
                                         {
                                             @foreach (var doc in caseDocuments)
                                             {
@@ -1086,7 +1099,7 @@
                                                placeholder="Enter Unit / Apt"
                                                @bind-value="searchTenantText"
                                                @oninput="OnSearchTenantInput" @onblur="SelectTenant" />
-                                        @if (filteredTenant?.Any() == true)
+                                        @if (filteredTenant?.Count() > 0)
                                         {
                                             <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
                                                 @foreach (var c in filteredTenant)
@@ -1185,7 +1198,7 @@
                                                    placeholder="Search by Building Address or code..."
                                                    @bind-value="searchBuildingText"
                                                    @oninput="OnSearchBuildingInput" />
-                                            @if (filteredBuildings?.Any() == true)
+                                            @if (filteredBuildings?.Count() > 0)
                                             {
                                                 <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
                                                     @foreach (var c in filteredBuildings)
@@ -1325,7 +1338,7 @@
                                                        @bind-value="searchText"
                                                        @oninput="OnSearchInput" />
 
-                                            @if (filteredClients?.Any() == true)
+                                            @if (filteredClients?.Count() > 0)
                                             {
                                                 <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
                                                     @foreach (var c in filteredClients)
@@ -1423,23 +1436,24 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <EditForm Model="@court">
+                <EditForm Model="@court" OnValidSubmit="SaveCourtChanges">
                     <DataAnnotationsValidator />
+                    <ValidationSummary />
                     <div class="modal-body">
                         <div class="card border-0">
                             <div class="card-body p-0">
 
                                 <!-- Search + Add Section -->
                                 <div class="row mt-2">
-                                    @if (!isNewCourt)
+                                    @if (!showCourtFields)
                                     {
                                         <div class="col-md-6 position-relative">
                                             <label class="form-label  required-label">Court</label>
                                             <input type="text" class="form-control"
                                                    placeholder="Search by court Address / Name / Part / Room"
                                                    @bind-value="searchCourtText"
-                                                   @oninput="OnSearchCourtInput" />
-                                            @if (filteredCourts?.Any() == true)
+                                                   @oninput="OnSearchCourtInput" @onfocusin="() => ShowCourtDropdown = true" @onfocusout="OnFocusOutCourt" />
+                                            @if (filteredCourts?.Count() > 0 && ShowCourtDropdown)
                                             {
                                                 <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
                                                     @foreach (var c in filteredCourts)
@@ -1479,6 +1493,7 @@
                                                 <label class="form-label required-label">Court </label>
                                                 <InputText class="form-control" @bind-Value="court.Court" placeholder="Enter Court" />
                                             </div>
+                                            <ValidationMessage For="() => court.Court"></ValidationMessage>
                                             @if(isNewCourt)
                                             {
                                                 <div class="col-md-6">
@@ -1490,11 +1505,13 @@
                                             {
                                                 <div class="col-md-6 position-relative">
                                                     <label class="form-label  required-label">Part</label>
+                                                    <InputText class="form-control d-none"
+                                                               @bind-Value="court.SelectedCourtPart.Part" />
                                                     <input type="text" class="form-control"
                                                            placeholder="Search by court Part"
-                                                           @bind-value="searchCourtPartText"
-                                                           @oninput="OnSearchCourtPartInput" />
-                                                    @if (filteredCourtsPart?.Any() == true)
+                                                           @bind-value="searchCourtPartText" @bind-value:after="BindPart"
+                                                           @oninput="OnSearchCourtPartInput" @onfocusin="() => ShowCourtPartDropdown = true" @onfocusout="OnFocusOutCourtPart" />
+                                                    @if (filteredCourtsPart?.Count() > 0 && ShowCourtPartDropdown)
                                                     {
                                                         <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
                                                             @foreach (var c in filteredCourtsPart)
@@ -1507,13 +1524,14 @@
                                                     }
 
                                                 </div>
+                                                <ValidationMessage For="() => court.SelectedCourtPart.Part"></ValidationMessage>
                                             }
 
                                             <div class="col-md-6">
                                                 <label class="form-label required-label">Room No.</label>
                                                 <InputText class="form-control" @bind-Value="court.SelectedCourtPart.RoomNo" placeholder="Enter Room No." />
                                             </div>
-
+                                            <ValidationMessage For="() => court.SelectedCourtPart.RoomNo"></ValidationMessage>
                                             
                                             <div class="col-md-6">
                                                 <label class="form-label ">Index</label>
@@ -1521,7 +1539,7 @@
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Judge</label>
-                                                <InputText class="form-control" @bind-Value="court.Judge" placeholder="Enter Judge" />
+                                                <InputText class="form-control" @bind-Value="court.SelectedCourtPart.Judge" placeholder="Enter Judge" />
                                             </div>
 
                                             <div class="col-md-6">
@@ -1538,7 +1556,7 @@
 
                     <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary base" @onclick="SaveCourtChanges">Save</button>
+                        <button type="submit" class="btn btn-primary base" >Save</button>
                     </div>
                 </EditForm>
             </div>
@@ -1641,7 +1659,7 @@
     {
         <GenrateAction createAction="noticeModel"
                        OnClose="HandleCloseCreateAction"
-                       CurrentCaseId="CurrentCaseId" legalcaseDto="legalcaseDto" CaseForms="caseFormDto" />
+                       CurrentCaseId="CurrentCaseId" legalcaseDto="legalcaseDto" CaseForms="caseFormDto" OnFormCreate="HandleInvokeAction" />
     }
 
 
@@ -1716,6 +1734,37 @@
     private int AnimatedProgress { get; set; } = 0;  // Animating value
     private System.Timers.Timer animationTimer;
 
+    private EditToBuildingDto editBuildingModel = new();
+    private bool showBuildingFields = false;
+    private bool showCourtFields = false;
+    private bool IsNewBuilding = false;
+    private bool ShowCourtDropdown = false;
+    private bool ShowCourtPartDropdown = false;
+    private string searchBuildingText;
+    private string searchCourtText;
+    private string? searchCourtPartText;
+    private string searchTenantText;
+    private List<EditToBuildingDto> filteredBuildings = new();
+    private List<EditToTenantDto> filteredTenant = new();
+    private List<State> StateList = new();
+    private List<RegulationStatus> RegulationList = new();
+    private List<EditToBuildingDto> BuildingList = new();
+    private List<EditToTenantDto> TenantList = new();
+    private List<string> Tenants = new();
+    private List<string> UnderTenants = new() { "John Doe", "John Doe" };
+    private List<AdditioanlTenants> AdditionalTenantfromDbList = new();
+    private List<AddtionalTenantDto> AdditionalTenantList = new();
+    private List<AdditionalOccupantDto> AdditionalOccupantsList = new();
+    private bool showCourtInfoAlert = false;
+    private bool IsFormGenerated = false;
+    public EditToTenantDto selectedTenant = new EditToTenantDto();
+    public EditToTenantDto ViewTenant = new EditToTenantDto();
+    public CourtDto court = new CourtDto();
+    public CaseHearingDto caseHearing = new CaseHearingDto();
+    public List<CourtDto> courts = new();
+    public List<CourtDto> filteredCourts = new List<CourtDto>();
+    public List<CourtPartDto> filteredCourtsPart = new List<CourtPartDto>();
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await _authStateProvider.GetAuthenticationStateAsync();
@@ -1734,6 +1783,10 @@
             isNewCourt = true;
             showCourtFields = true;
         }
+        else
+        {
+            filteredCourts = courts;
+        }
 
         spinnerservice.Show();
         await LoadCaseDetails();
@@ -1742,9 +1795,24 @@
         await LoadCaseDocument();
         CalculateCaseProgress();
         StartProgressAnimation();
+        StateHasChanged();
         spinnerservice.Hide();
     }
+    private async Task OnFocusOutCourt(FocusEventArgs e)
+    {
+        await Task.Delay(200);
+        ShowCourtDropdown = false;
+    }
+    private async Task BindPart()
+    {
 
+        court.SelectedCourtPart.Part = searchCourtPartText;
+    }
+    private async Task OnFocusOutCourtPart(FocusEventArgs e)
+    {
+        await Task.Delay(200);
+        ShowCourtPartDropdown = false;
+    }
     private void CalculateCaseProgress()
     {
         int progress = 0;
@@ -1755,7 +1823,7 @@
         if (caseFormDto.Any())
             progress += 10;
 
-        if (legalcaseDto.CourtId != null && legalcaseDto.CourtId != Guid.Empty)
+        if (legalcaseDto!.CourtLocationId != null && legalcaseDto.CourtLocationId != Guid.Empty)
             progress += 15;
 
         if (CaseHearings.Any())
@@ -1797,6 +1865,13 @@
     private void HandleCloseCreateAction()
     {
         _showCreateAction = false;
+    }
+    private async Task HandleInvokeAction()
+    {
+        await LoadCaseForms();
+
+        await LoadCaseDetails();
+        await LoadHearing();
     }
     private async Task LoadCaseDetails()
     {
@@ -1900,17 +1975,20 @@
                 SocialService = legalcaseDto.SocialService,
                 LastRentPaid = legalcaseDto.LastRentPaid,
 
+                CourtLocationId = legalcaseDto.CourtLocationId,
                 CourtId = legalcaseDto.CourtId,
                 Court = legalcaseDto.Court,
+                CourtPartId = legalcaseDto.CourtPartId,
                 CourtAddress = legalcaseDto.CourtAddress,
                 CourtConferenceId = legalcaseDto.CourtConferenceId,
                 CourtCallIn = legalcaseDto.CourtCallIn,
                 CourtNotes = legalcaseDto.CourtNotes,
+                CourtRoom = legalcaseDto.CourtRoom,
                 CourtPart = legalcaseDto.CourtPart,
                 CourtPhone = legalcaseDto.CourtPhone,
-                CourtRoomNo = legalcaseDto.CourtRoomNo,
+                CourtRoomNo = legalcaseDto.CourtRoom!,
                 CourtVirtualLink = legalcaseDto.CourtVirtualLink,
-
+                Judge = legalcaseDto.Judge,
                 BillAmount = legalcaseDto.BillAmount,
 
             };
@@ -1918,7 +1996,13 @@
         }
         ;
 
-
+        courts = await _courtService.GetAllCourtDataAsync();
+        //courts = new List<CourtDto>();
+        if (!courts.Any())
+        {
+            isNewCourt = true;
+            showCourtFields = true;
+        }
     }
 
     public async Task EditCaseDetail(Guid id)
@@ -1981,7 +2065,6 @@
             if (isEditMode)
             {
                 // UPDATE existing notice
-                await Task.Delay(200);
                 success = await _CaseFormService.UpdateCaseFormAsync(new GenrateNoticeModel
                 {
                     Id = noticeModel.Id,
@@ -2000,7 +2083,6 @@
             else
             {
                 // CREATE new notice
-                await Task.Delay(200);
                 success = await CaseFormRepository.GenerateNoticeAsync(
                     CurrentCaseId.Value,
                     noticeModel.FormTypeId.Value,
@@ -2015,7 +2097,6 @@
 
             if (success)
             {
-                await Task.Delay(200);
                 await LoadCaseForms();
 
                 // Reset form
@@ -2057,7 +2138,9 @@
         {
             IsFormGenerated = false;
         }
+        await JS.InvokeVoidAsync("openTab", "activity");
     }
+
     private async Task LoadHearing()
     {
         CaseHearings = await _caseHearingService.GetAllCaseHeariingByCaseIdAsync(CurrentCaseId.Value);
@@ -2186,34 +2269,7 @@
 
     }
 
-    private EditToBuildingDto editBuildingModel = new();
-    private bool showBuildingFields = false;
-    private bool showCourtFields = false;
-    private bool IsNewBuilding = false;
-    private string searchBuildingText;
-    private string searchCourtText;
-    private string? searchCourtPartText;
-    private string searchTenantText;
-    private List<EditToBuildingDto> filteredBuildings = new();
-    private List<EditToTenantDto> filteredTenant = new();
-    private List<State> StateList = new();
-    private List<RegulationStatus> RegulationList = new();
-    private List<EditToBuildingDto> BuildingList = new();
-    private List<EditToTenantDto> TenantList = new();
-    private List<string> Tenants = new();
-    private List<string> UnderTenants = new() { "John Doe", "John Doe" };
-    private List<AdditioanlTenants> AdditionalTenantfromDbList = new();
-    private List<AddtionalTenantDto> AdditionalTenantList = new();
-    private List<AdditionalOccupantDto> AdditionalOccupantsList = new();
-    private bool showCourtInfoAlert = false;
-    private bool IsFormGenerated = false;
-    public EditToTenantDto selectedTenant = new EditToTenantDto();
-    public EditToTenantDto ViewTenant = new EditToTenantDto();
-    public CourtDto court = new CourtDto();
-    public CaseHearingDto caseHearing = new CaseHearingDto();
-    public List<CourtDto> courts = new List<CourtDto>();
-    public List<CourtDto> filteredCourts = new List<CourtDto>();
-    public List<CourtPartDto> filteredCourtsPart = new List<CourtPartDto>();
+
 
 
     private async Task ShowBuildingModal()
@@ -2230,14 +2286,14 @@
     }
     private async Task ShowCourtModal()
     {
-        if (legalcaseDto.CourtId == Guid.Empty && !isNewCourt)
+        if ((legalcaseDto.CourtLocationId == Guid.Empty || legalcaseDto.CourtLocationId == null ) && !isNewCourt)
         {
             showCourtFields = false;
             searchCourtText = "";
         }
-        else if (legalcaseDto.CourtId != Guid.Empty && !isNewCourt)
+        else if ((legalcaseDto.CourtLocationId != Guid.Empty || legalcaseDto.CourtLocationId != null) && !isNewCourt)
         {
-            court = await _courtService.GetCourtByIdAsync(legalcaseDto.CourtId.Value);
+            court = await _courtService.GetCourtByIdAsync(legalcaseDto!.CourtLocationId!.Value);
             searchCourtText = court.Court;
             showCourtFields = true; searchCourtPartText = "";
             if (legalcaseDto.CourtPartId != Guid.Empty && legalcaseDto.CourtPartId != null)
@@ -2245,7 +2301,12 @@
                 court.SelectedCourtPart = court.CourtPart.Where(e => e.Id == legalcaseDto.CourtPartId).FirstOrDefault()!;
                 searchCourtPartText = court.SelectedCourtPart.Part;
             }
+            else
+            {
+                filteredCourtsPart = court.CourtPart;
+            }
         }
+
 
         await JS.InvokeVoidAsync("showModal", "courtModal");
     }
@@ -2272,20 +2333,14 @@
     private async Task OnSearchCourtInput(ChangeEventArgs e)
     {
         searchCourtText = e.Value?.ToString() ?? "";
-        if (!string.IsNullOrWhiteSpace(searchCourtText))
+        if (!string.IsNullOrWhiteSpace(searchCourtText) && searchCourtText.Length >= 3)
         {
-            filteredCourts = courts
-                .Where(c => c.Judge.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase)
-                            || c.RoomNo.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase)
-                            || c.Part.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase)
-                            || c.Court.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase)
-                            || c.Address.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            filteredCourts = await _courtService.SearchCourt(searchCourtText);
         }
-        else
-        {
-            filteredCourts.Clear();
-        }
+
+        StateHasChanged();
+
+
     }
     private async Task OnSearchCourtPartInput(ChangeEventArgs e)
     {
@@ -2302,6 +2357,8 @@
         {
             filteredCourtsPart.Clear();
         }
+        StateHasChanged();
+
     }
 
     // Select building from list
@@ -2326,10 +2383,19 @@
     {
         court = selected;
         filteredCourts.Clear();
-        searchCourtText = selected.Court ?? selected.RoomNo;
+        searchCourtText = selected.Court ;
         showCourtFields = true;
-        filteredCourtsPart = court.CourtPart;
+        if(court.CourtPart.Count > 0)
+        {
+            filteredCourtsPart = court.CourtPart;
+        }
+        searchCourtPartText = null;
         legalcaseDto.CourtId = selected.Id;
+        legalcaseDto.CourtLocationId = selected.Id;
+        filteredCourts = courts;
+
+        StateHasChanged();
+
     }
     private void SelectCourtPart(CourtPartDto selected)
     {
@@ -2339,6 +2405,9 @@
         showCourtFields = true;
         // filteredCourtsPart = court.CourtPart;
         legalcaseDto.CourtPartId = selected.Id;
+
+        StateHasChanged();
+
     }
     // Toggle "Add New" section
     private void OnBindBuildingAfter()
@@ -2741,7 +2810,7 @@
                     legalcaseDto.CourtPartId = courtpartid.FirstOrDefault();
                 }
             }
-                addorupdate = true;
+            addorupdate = true;
             legalcaseDto.CourtId = CourtId;
 
         }
@@ -2768,8 +2837,14 @@
         //         addorupdate = true;
         //     }
         // }
-
-       
+        else
+        {
+            legalcaseDto.CourtPartId = court.SelectedCourtPart.Id != Guid.Empty ? court.SelectedCourtPart.Id :null ;
+            legalcaseDto.CourtRoomNo = court.SelectedCourtPart.RoomNo!;
+            legalcaseDto.CourtPart = court.SelectedCourtPart.Part!;
+            legalcaseDto.CourtId = court.Id;
+        }
+        
 
 
             var success = await _service.UpdateCaseAsync(legalcaseDto);
@@ -2778,7 +2853,7 @@
             {
                 ToastService.ShowSuccess("Court details updated successfully!");
                 await JS.InvokeVoidAsync("hideModal", "courtModal");
-                await Task.Delay(200);
+                // await Task.Delay(200);
                 await LoadCaseDetails();
             }
             else
@@ -2799,7 +2874,7 @@
         {
             Caption = caseHearing.Caption,
             LegalCaseId = legalcaseDto.Id,
-            CourtId = legalcaseDto.CourtId,
+            CourtId = legalcaseDto.CourtLocationId,
             HearingDate = caseHearing.HearingDate,
             HearingTime = caseHearing.HearingTime,
             CreatedBy = Guid.Parse(loggedInUserId),
@@ -2990,7 +3065,7 @@
     }
     private async Task OpenHearingPopup()
     {
-        if (legalcaseDto.CourtId == null || legalcaseDto.CourtId == Guid.Empty)
+        if (legalcaseDto.CourtLocationId == null || legalcaseDto.CourtLocationId == Guid.Empty)
         {
             showCourtInfoAlert = true;
             return;

@@ -451,7 +451,7 @@
 
                         <div class="tab-pane fade" id="hearing" role="tabpanel" aria-labelledby="hearing-tab">
                             <!-- CONTENT for Add Hearing -->
-                            @if ((legalcaseDto.CourtId != null && legalcaseDto.CourtId != Guid.Empty) && !CaseForms.Any())
+                            @if ((legalcaseDto.CourtLocationId == null || legalcaseDto.CourtLocationId == Guid.Empty) && !CaseForms.Any())
                             {
                             <div class="modal-body mb-3 courthearing">
                                 <ul>
@@ -472,7 +472,7 @@
 
                                 </div>
                             }
-                            else if (legalcaseDto.CourtId == null || legalcaseDto.CourtId == Guid.Empty)
+                            else if (legalcaseDto.CourtLocationId == null || legalcaseDto.CourtLocationId == Guid.Empty)
                             {
                                 <div class="modal-body mb-3 courthearing">
 
@@ -542,7 +542,7 @@
                                     <option value="">-- Select Form Type --</option>
                                     @foreach (var formType in FilteredFormTypeList)
                                     {
-                                        <option value="@formType.Id">@formType.Name @(formType.BillAmount != null ? $"- (${formType.BillAmount}) " : "")</option>
+                                        <option value="@formType.Id">@formType.Name @(formType.Rate != null ? $"- (${formType.Rate}) " : "")</option>
                                     }
                                 </select>
                                 <ValidationMessage For="() => createAction.FormTypeId" />
@@ -612,6 +612,7 @@
     private List<FormAddEditViewModelDto> FilteredFormTypeList = new();
     [Parameter] public IntakeModel legalcaseDto { get; set; } = new();
     [Parameter] public List<GenrateNoticeModel> CaseForms { get; set; } = new();
+    [Parameter] public EventCallback OnFormCreate { get; set; } = new();
     private string? loggedInUserId;
     private string? MarshalName;
     private bool isAdmin = false;
@@ -644,7 +645,7 @@
             loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
         }
-        FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.Id);
+        FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
 
         caseHearing = new CaseHearingDto();
         caseHearing.HearingDate = DateTime.Now;
@@ -666,7 +667,7 @@
         {
             Caption = caseHearing.Caption,
             LegalCaseId = legalcaseDto.Id,
-            CourtId = legalcaseDto.CourtId,
+            CourtId = legalcaseDto.CourtLocationId,
             HearingDate = caseHearing.HearingDate,
             HearingTime = caseHearing.HearingTime,
             CreatedBy = Guid.Parse(loggedInUserId),
@@ -681,7 +682,7 @@
         if (CourtId)
         {
             ToastService.ShowSuccess("Hearing details Added successfully!");
-
+            await OnFormCreate.InvokeAsync();
         }
         else
         {
@@ -842,7 +843,7 @@
                 createAction = new GenrateNoticeModel();
                 isEditMode = false;
                 CurrentCaseId = caseId;
-
+                await OnFormCreate.InvokeAsync();
                 await JS.InvokeVoidAsync("openTab", "activity");
             }
         }
@@ -902,6 +903,7 @@
             ToastService.ShowSuccess("Documents saved successfully!");
             Files.Clear();
             UploadItems.Clear();
+            await OnFormCreate.InvokeAsync();
         }
         else
         {
@@ -949,7 +951,7 @@
             .FirstOrDefault(f => f.Id == createAction.FormTypeId);
 
         if (selectedForm != null)
-            createAction.BillAmount = selectedForm.BillAmount;
+            createAction.BillAmount =Convert.ToDecimal(selectedForm.Rate);
         else
             createAction.BillAmount = null;
 
