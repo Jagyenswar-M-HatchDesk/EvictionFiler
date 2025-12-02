@@ -21,7 +21,7 @@ namespace EvictionFiler.Application.Services
     public class LegalCaseService : ILegalCaseService
     {
         private readonly ICasesRepository _repository;
-       private readonly ICaseTypeRepository _caseTypeRepository;
+        private readonly ICaseTypeRepository _caseTypeRepository;
         private readonly ICaseTypeHPDRepository _caseTypeHPDRepository;
         private readonly IHarassmentTypeRepository _harassmentTypeRepository;
         private readonly IDefenseTypeRepository _defenseTypeRepository;
@@ -36,7 +36,7 @@ namespace EvictionFiler.Application.Services
         private readonly IAdditionalOccupantsRepository _additionalOccupantsRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICaseDocument _caseDocument;
-        public LegalCaseService(ICasesRepository repository, ICaseDocument caseDocument, IReliefPetitionerTypeRepository reliefPetitionerTypeRepository , IReliefRespondenTypeRepository reliefRespondenTypeRepository, IAppearanceTypeRepository appearanceTypeRepository,IDefenseTypeRepository defenseTypeRepository,IHarassmentTypeRepository harassmentTypeRepository,ICaseTypeHPDRepository caseTypeHPDRepository ,ITenantRepository tenantRepo, ILandLordRepository landlordrepo, ICaseTypeRepository caseTypeRepository, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
+        public LegalCaseService(ICasesRepository repository, ICaseDocument caseDocument, IReliefPetitionerTypeRepository reliefPetitionerTypeRepository, IReliefRespondenTypeRepository reliefRespondenTypeRepository, IAppearanceTypeRepository appearanceTypeRepository, IDefenseTypeRepository defenseTypeRepository, IHarassmentTypeRepository harassmentTypeRepository, ICaseTypeHPDRepository caseTypeHPDRepository, ITenantRepository tenantRepo, ILandLordRepository landlordrepo, ICaseTypeRepository caseTypeRepository, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
         {
             _repository = repository;
             _tenantRepo = tenantRepo;
@@ -55,9 +55,9 @@ namespace EvictionFiler.Application.Services
 
         }
 
-        public async Task<Guid?> CreateCasesAsync(IntakeModel legalCase )
+        public async Task<Guid?> CreateCasesAsync(IntakeModel legalCase)
         {
-           
+
             var legalCases = new LegalCase();
 
             var caseType = await _caseTypeRepository.GetAsync(legalCase.CaseTypeId);
@@ -73,7 +73,7 @@ namespace EvictionFiler.Application.Services
 
             if (caseType != null)
             {
-                if (caseType.Name.Equals("Holdover", StringComparison.OrdinalIgnoreCase)||
+                if (caseType.Name.Equals("Holdover", StringComparison.OrdinalIgnoreCase) ||
                      caseType.Name.Equals("NonPayment", StringComparison.OrdinalIgnoreCase) ||
                       caseType.Name.Equals("Non-Payment", StringComparison.OrdinalIgnoreCase) ||
                       caseType.Name.Equals("Non Payment", StringComparison.OrdinalIgnoreCase)
@@ -193,7 +193,7 @@ namespace EvictionFiler.Application.Services
                     legalCases.AppearanceTypePerDiem = await _repository.GetApperenceTypePerDiemIdAsync(legalCase.SelectedAppearanceTypePerDiemIds);
                     legalCases.DocumentIntructionsTypse = await _repository.GetDocumentIntructionsTypsIdAsync(legalCase.SelectedDocumentInstructionPerDiemIds);
                     legalCases.ReportingTypePerDiems = await _repository.GetReportingTypePerDiemsIdAsync(legalCase.SelectedReportingRequirementPerDiemIds);
-                   
+
                 }
 
                 legalCases.CreatedBy = legalCase.CreatedBy;
@@ -205,8 +205,8 @@ namespace EvictionFiler.Application.Services
                 if (result != null) return addedcase.Id;
             }
 
-                return null;
-            
+            return null;
+
         }
 
 
@@ -318,7 +318,7 @@ namespace EvictionFiler.Application.Services
 
         }
 
-      
+
 
         public async Task<IntakeModel> GetCaseByIdAsync(Guid caseId)
         {
@@ -327,53 +327,51 @@ namespace EvictionFiler.Application.Services
 
                 var caseEntity = await _repository.GetAllQuerable(
         predicate: c => c.Id == caseId,
-        (Expression<Func<LegalCase, object>>)(c => c.Clients),
-        c => c.Buildings,
-        c => c.CaseType,
-        c => c.LandLords,
-        c => c.Tenants,
-        c => c.RegulationStatus,
-        c => c.TenancyType,
-        c => c.RenewalStatus,
-        c => c.ReasonHoldover,
-        c => c.ClientRole,
-        c => c.Buildings.State,
-        c => c.Addoccupants,
-        c => c.Buildings.Landlord.State,
-        c => c.Buildings.Landlord.LandlordType,
+        (Expression<Func<LegalCase, object>>)(c => c.Clients!),
+        c => c.Buildings!,
+        c => c.CaseType!,
+        c => c.LandLords!,
+        c => c.Tenants!,
+        c => c.RegulationStatus!,
+        c => c.TenancyType!,
+        c => c.RenewalStatus!,
+        c => c.ReasonHoldover!,
+        c => c.ClientRole!,
+        c => c.Buildings!.State!,
+        c => c.Addoccupants!,
+        c => c.Buildings!.Landlord!.State!,
+        c => c.Buildings!.Landlord!.LandlordType!,
         c => c.CaseTypeHPDs,
-          c => c.CaseTypePerDiems,
-        c => c.PartyRepresents,
-         c => c.Buildings.BuildingType,
-          c => c.Buildings.RegistrationStatus,
-           c => c.HarassmentTypse,
-            c => c.DefenseTypse,
-               c => c.ReliefPetitionerType,
-                  c => c.ReliefRespondentType,
-                     c => c.AppearanceType,
-                      c => c.AppearanceTypePerDiem,
-                     c => c.BilingType,
-                       c => c.ReportingTypePerDiems,
-                     c => c.DocumentIntructionsTypse,
-                     c => c.CourtLocation
-
-
-
-
+        c => c.CaseTypePerDiems,
+        c => c.PartyRepresents!,
+        c => c.Buildings!.BuildingType!,
+        c => c.Buildings!.RegistrationStatus!,
+        c => c.HarassmentTypse,
+        c => c.DefenseTypse,
+        c => c.ReliefPetitionerType,
+        c => c.ReliefRespondentType,
+        c => c.AppearanceType,
+        c => c.AppearanceTypePerDiem,
+        c => c.BilingType!,
+        c => c.ReportingTypePerDiems,
+        c => c.DocumentIntructionsTypse,
+        c => c.CourtLocation!,
+        c => c.CourtPart!,
+        c => c.Courts!
     )
     .FirstOrDefaultAsync();
 
                 if (caseEntity == null)
-                    return null;
+                    return null!;
 
-                if (caseEntity.CaseType.Name == "Holdover" || caseEntity.CaseType.Name == "NonPayment" || caseEntity.CaseType.Name == "HPD")
+                if (caseEntity.CaseType!.Name == "Holdover" || caseEntity.CaseType.Name == "NonPayment" || caseEntity.CaseType.Name == "HPD")
                 {
                     var intakeModel = new IntakeModel
                     {
                         // for Case
                         Id = caseEntity.Id,
                         Casecode = caseEntity.Casecode,
-                        ClientId = caseEntity.Clients.Id,
+                        ClientId = caseEntity!.Clients!.Id,
                         CaseTypeName = caseEntity.CaseType.Name,
                         CaseTypeId = caseEntity.CaseTypeId,
                         CreatedOn = caseEntity.CreatedOn,
@@ -393,7 +391,7 @@ namespace EvictionFiler.Application.Services
 
                         // Landlord
                         LandlordId = caseEntity.LandLordId,
-                        landlordName = $"{caseEntity.LandLords.FirstName} {caseEntity.LandLords.LastName}",
+                        landlordName = $"{caseEntity.LandLords!.FirstName} {caseEntity.LandLords.LastName}",
                         ContactPersonName = caseEntity.LandLords.ContactPersonName,
                         LawFirm = caseEntity.LandLords.LawFirm,
                         AttorneyOfRecord = caseEntity.LandLords.AttorneyOfRecord,
@@ -409,9 +407,9 @@ namespace EvictionFiler.Application.Services
 
                         Borough = caseEntity.Buildings?.City,
                         Units = caseEntity.Buildings?.BuildingUnits,
-                        BuildingState = caseEntity.Buildings.State != null ? caseEntity.Buildings.State.Name : string.Empty,
-                        BuildingAddress = caseEntity.Buildings?.Address1,
-                        BuildingZip = caseEntity.Buildings.Zipcode,
+                        BuildingState = caseEntity.Buildings!.State != null ? caseEntity.Buildings.State.Name : string.Empty,
+                        BuildingAddress = caseEntity.Buildings?.Address1!,
+                        BuildingZip = caseEntity.Buildings!.Zipcode,
                         //RegulationStatusId = caseEntity.Buildings?.RegulationStatusId ?? Guid.Empty,
                         BuildingTypeId = caseEntity.Buildings.BuildingTypeId,
                         RegistrationStatusTypeId = caseEntity.Buildings.RegistrationStatusId,
@@ -442,9 +440,15 @@ namespace EvictionFiler.Application.Services
                         LastRentPaid = caseEntity.LastRentPaid,
 
 
-                        CourtId = caseEntity.CourtId != null ? caseEntity.CourtId : Guid.Empty,
-                        Court = caseEntity.Courts != null ? caseEntity.Courts.Court : "",
-                        CourtAddress = caseEntity.Courts != null ? caseEntity.Courts.Address : "",
+                        //CourtId = caseEntity.CourtId != null ? caseEntity.CourtId : Guid.Empty,
+                        Court = caseEntity.CourtLocation != null ? caseEntity.CourtLocation.Court! : "",
+                        CourtAddress = caseEntity.CourtLocation != null ? caseEntity.CourtLocation.Address! : "",
+                        CourtPartId = caseEntity.CourtPart != null ? caseEntity.CourtPartId : Guid.Empty,
+                        CourtPart = caseEntity.CourtPart != null ? caseEntity.CourtPart.Part : string.Empty,
+                        CourtRoom = caseEntity.CourtPart != null ? caseEntity.CourtPart.RoomNo : string.Empty,
+                        CourtLocationId = caseEntity.CourtLocationId,
+                        CourtName = caseEntity.CourtLocation != null ? $"{caseEntity.CourtLocation.Court}" : "",
+                        Judge = caseEntity.CourtPart != null ? caseEntity.CourtPart.Judge : string.Empty,
                         //CourtConferenceId = caseEntity.Courts != null ? caseEntity.Courts.ConferenceId : "",
                         //CourtCallIn = caseEntity.Courts != null ? caseEntity.Courts.CallIn : "",
                         //CourtNotes = caseEntity.Courts != null ? caseEntity.Courts.Notes : "",
@@ -455,9 +459,8 @@ namespace EvictionFiler.Application.Services
                         Attrney = caseEntity.Attrney,
                         AttrneyContactInfo = caseEntity.AttrneyContactInfo,
                         AttrneyEmail = caseEntity.AttrneyEmail,
-                        CourtLocationId = caseEntity.CourtLocationId,
-                        CourtName = caseEntity.CourtLocation != null ? $"{caseEntity.CourtLocation.Court}" : "",
-                        CourtRoom = caseEntity.CourtRoom,
+                       
+
                         Index = caseEntity.Index,
                         County = caseEntity.County,
                         ManagingAgent = caseEntity.ManagingAgent,
@@ -488,7 +491,7 @@ namespace EvictionFiler.Application.Services
                                               .Select(x => x.Id)
                                               .ToList(),
                         PartyRepresentId = caseEntity.PartyRepresentId,
-                        PremiseTypeId =  caseEntity.Buildings.PremiseTypeId,
+                        PremiseTypeId = caseEntity.Buildings.PremiseTypeId,
 
 
                         UnitOrApartmentNumber = caseEntity.Tenants.UnitOrApartmentNumber,
@@ -513,7 +516,7 @@ namespace EvictionFiler.Application.Services
                         // for Case
                         Id = caseEntity.Id,
                         Casecode = caseEntity.Casecode,
-                        ClientId = caseEntity.Clients.Id,
+                        ClientId = caseEntity.Clients!.Id,
                         CaseTypeName = caseEntity.CaseType.Name,
                         CaseTypeId = caseEntity.CaseTypeId,
                         CreatedOn = caseEntity.CreatedOn,
@@ -544,7 +547,7 @@ namespace EvictionFiler.Application.Services
                         Partynames = caseEntity.Partynames,
                         CaseBackground = caseEntity.CaseBackground,
                         SpecialInstruction = caseEntity.SpecialInstruction,
-                        CountyId = caseEntity.CourtLocation.CountyId,
+                        CountyId = caseEntity.CourtLocation!.CountyId,
 
                         TravelExpense = caseEntity.TravelExpense,
                         BilingTypeId = caseEntity.BilingTypeId,
@@ -571,8 +574,8 @@ namespace EvictionFiler.Application.Services
                                               .Select(x => x.Id)
                                               .ToList(),
                         PartyRepresentPerDiemId = caseEntity.PartyRepresentPerDiemId,
-                       
-                      
+
+
                         PaymentMethodId = caseEntity.PaymentMethodId,
 
                     };
@@ -594,7 +597,7 @@ namespace EvictionFiler.Application.Services
                 }
 
 
-                return null;
+                return null!;
 
 
             }
@@ -681,10 +684,10 @@ namespace EvictionFiler.Application.Services
                     Id = legalcaseEntity.Clients.Id,
                     FirstName = legalcaseEntity.Clients.FirstName,
                     LastName = legalcaseEntity.Clients.LastName,
-                   
+
                     Email = legalcaseEntity.Clients.Email,
                     ClientTypeId = legalcaseEntity.ClientRoleId,
-                    Reference= legalcaseEntity.Reference,
+                    Reference = legalcaseEntity.Reference,
                 },
 
 
@@ -800,8 +803,9 @@ namespace EvictionFiler.Application.Services
                 existingCase.AppearanceTime = legalCase.AppearanceTime; 
                 existingCase.InvoiceTo = legalCase.InvoiceTo;
                 existingCase.DateTenantMoved = legalCase.DateTenantMoved;
-                
 
+
+                existingCase.CourtPartId = legalCase.CourtPartId != Guid.Empty ? legalCase.CourtPartId : null;
 
 
                 if (legalCase.PartyRepresentId != null && legalCase.PartyRepresentId != Guid.Empty)
@@ -944,7 +948,7 @@ namespace EvictionFiler.Application.Services
                 if (existingCase == null) return false;
 
                 existingCase.Notes = legalCase.Notes!;
-               
+
                 var result = await _unitOfWork.SaveChangesAsync();
 
                 if (result > 0) return true;
@@ -1056,6 +1060,24 @@ namespace EvictionFiler.Application.Services
         {
             _caseDocument.AddRangeAsync(document);
             return await _unitOfWork.SaveChangesAsync() > 0;
+        }
+
+        public async Task<IEnumerable<CaseDocument>> CaseDocumentList(Guid Id)
+        {
+            var doclist = _caseDocument.GetAllQuerable();
+            var returnlist = await doclist.Where(e => e.LegalCaseId == Id).OrderByDescending(e => e.CreatedOn).ToListAsync();
+            return returnlist;
+        }
+
+        public async Task<bool> DeleteCaseDocument(Guid Id)
+        {
+            var doclist = await _caseDocument.DeleteAsync(Id);
+            if (doclist)
+            {
+                await Task.Delay(200);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            return doclist;
         }
     }
 

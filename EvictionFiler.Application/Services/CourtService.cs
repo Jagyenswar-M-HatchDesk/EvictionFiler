@@ -42,6 +42,18 @@ namespace EvictionFiler.Application.Services
                 //Part = c.Part,
                 //VirtualLink = c.VirtualLink,
                   CountyId = c.CountyId,
+                  CourtPart = c.CourtParts.Select(e => new CourtPartDto
+                  {
+                      Id = e.Id,
+                      CallIn = e.CallIn,
+                      ConferenceId = e.ConferenceId,
+                      RoomNo = e.RoomNo,
+                      Part = e.Part,
+                      Judge = e.Judge,
+                      Tollfree = e.Tollfree,
+                      VirtualLink = e.VirtualLink,
+                      CourtId = e.CourtId,
+                  }).ToList(),
             }).ToList();
 
             return courtDtos;
@@ -170,6 +182,20 @@ namespace EvictionFiler.Application.Services
                 //ConferenceId = court.ConferenceId,
                 //CallIn = court.CallIn,
                 //Part = court.Part,
+                CountyName = court.County != null ? court.County.Name : string.Empty,
+                CountyId = court.CountyId != null ? court.CountyId.Value : Guid.Empty,
+                CourtPart = court.CourtParts.Select(e => new CourtPartDto
+                {
+                    Id = e.Id,
+                    CallIn = e.CallIn,
+                    ConferenceId = e.ConferenceId,
+                    RoomNo = e.RoomNo,
+                    Part = e.Part,
+                    Judge = e.Judge,
+                    Tollfree = e.Tollfree,
+                    VirtualLink = e.VirtualLink,
+                    CourtId = e.CourtId,
+                }).ToList(),
             };
         }
         public async Task<bool> UpdateCourtAsync(CourtDto dto)

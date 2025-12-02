@@ -3,6 +3,7 @@
 @using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.CaseHearing
 @using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.DTOs.CourtDto
 @using EvictionFiler.Application.DTOs.FormTypeDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.OccupantDto
@@ -94,10 +95,10 @@
     }
 
     /* .form-wrapper.hidden {
-                    transform: translateX(-100%);
-                    opacity: 0;
-                    pointer-events: none;
-                    } */
+                            transform: translateX(-100%);
+                            opacity: 0;
+                            pointer-events: none;
+                            } */
 
     .overlay-form {
         animation: slideIn 1.0s ease forwards;
@@ -203,7 +204,7 @@
     .file-info {
         display: flex;
         align-items: center;
-        width:100%;
+        width: 100%;
     }
 
     .file-icon {
@@ -212,8 +213,8 @@
 
     .file-meta {
         display: flex;
-       justify-content:space-between;
-       align-items:center;
+        justify-content: space-between;
+        align-items: center;
         width: 89%;
         margin-top: 6px;
     }
@@ -231,7 +232,6 @@
     .progress-container {
         display: flex;
         align-items: center;
-        
         width: 65%;
         border-radius: 3px;
         overflow: hidden;
@@ -254,23 +254,30 @@
         border: none;
         opacity: 0.5;
         transition: opacity 0.2s;
-        margin-top:5px;
+        margin-top: 5px;
     }
 
         .delete-btn:hover {
             opacity: 1;
         }
 
-        .tab-content
-        {
+    .tab-content {
         padding: 20px 20px;
         border-bottom: 1px solid;
-        }
+    }
 
-    .dropzonecontent
-    {
-        display:flex;
-        justify-content:center;
+    .dropzonecontent {
+        display: flex;
+        justify-content: center;
+    }
+
+    .courthearing {
+        align-items: center;
+        justify-content: center;
+        display: flex;
+        height: 120px;
+        border: 1px solid;
+        border-radius: 7px;
     }
 </style>
 @using System.Collections.Generic
@@ -296,7 +303,7 @@
 
 
                 <div class="row">
-                    
+
                     <ul class="nav nav-tabs" id="actionTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="marshal-tab" data-bs-toggle="tab" data-bs-target="#marshal" type="button" role="tab">Marshal</button>
@@ -323,11 +330,28 @@
 
                         <div class="tab-pane fade show active" id="marshal" role="tabpanel" aria-labelledby="marshal-tab">
                             <!-- CONTENT for Send to Marshal -->
+                            <div class="row mb-3">
+                                <label class="form-label color-text col-auto" style="display:flex; align-items:center;">Assign Marshal</label>
+                                <div class="input-group mb-3 col">
 
+                                    <InputText class="form-control col" style="border-right:none;" @bind-Value="MarshalName" placeholder="Search Marshal" />
+                                    <span class="input-group-text" style="background:none;"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                </div>
+
+                            </div>
                         </div>
 
                         <div class="tab-pane fade" id="server" role="tabpanel" aria-labelledby="server-tab">
                             <!-- CONTENT for Process Server -->
+                            <div class="row mb-3">
+                                <label class="form-label color-text col-auto" style="display:flex; align-items:center;">Process Server</label>
+                                <div class="input-group mb-3 col">
+
+                                    <InputText class="form-control col" style="border-right:none;" @bind-Value="MarshalName" placeholder="Search Process Server" />
+                                    <span class="input-group-text" style="background:none;"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                </div>
+
+                            </div>
                         </div>
 
                         <div class="tab-pane fade" id="documents" role="tabpanel" aria-labelledby="documents-tab">
@@ -338,11 +362,11 @@
                                  @ref="dropZoneRef"
                                  @onclick="OpenFileDialog">
 
-                                 <div class="row">
+                                <div class="row">
                                     <div class="dropzonecontent">Upload Documents</div>
                                     <div class="dropzonecontent"><span style="text-decoration:underline; cursor:pointer; color:#00a7ff;margin-right:5px;">Click</span> or drag & drop file(s) here</div>
-                                 </div>
-                               
+                                </div>
+
                             </div>
 
                             @if (Files.Count > 0)
@@ -416,7 +440,7 @@
                                         </div>
                                     </div>
                                 </div> *@
-                                <InputTextArea class="form-control" placeholder="Enter Notes" @bind-Value="legalcaseDto.Notes" />
+                                <InputTextArea style="height:200px" class="form-control" placeholder="Enter Notes" @bind-Value="legalcaseDto.Notes" />
 
                             </div>
 
@@ -427,46 +451,86 @@
 
                         <div class="tab-pane fade" id="hearing" role="tabpanel" aria-labelledby="hearing-tab">
                             <!-- CONTENT for Add Hearing -->
-                            <EditForm Model="@caseHearing">
-                                <DataAnnotationsValidator />
-                                <div class="modal-body">
-                                    <div class="card border-0">
-                                        <div class="card-body p-0">
+                            @if ((legalcaseDto.CourtLocationId == null || legalcaseDto.CourtLocationId == Guid.Empty) && !CaseForms.Any())
+                            {
+                            <div class="modal-body mb-3 courthearing">
+                                <ul>
+                                    <li>Please Generate Form before Adding Case Hearing</li>
+                                    <li>Please Add Court Details before Adding Case Hearing</li>
+                                </ul>
+                            </div>
+                            }
+                            else if (!CaseForms.Any())
+                            {
+                                <div class="modal-body mb-3 courthearing">
 
-                                            <!-- Search + Add Section -->
-                                            <!-- Add/Edit Fields -->
+                                    <ul>
+                                        <li>
+                                            Please Generate Form before Adding Case Hearing
+                                        </li>
+                                    </ul>
 
-                                            <div class="border rounded-3 p-3 mb-3 position-relative">
+                                </div>
+                            }
+                            else if (legalcaseDto.CourtLocationId == null || legalcaseDto.CourtLocationId == Guid.Empty)
+                            {
+                                <div class="modal-body mb-3 courthearing">
 
-                                               @*  <button type="button" class=" position-absolute top-0 end-0 m-2"
+                                    <ul>
+                                        <li>
+                                            Please Add Court Details before Adding Case Hearing
+                                        </li>
+                                    </ul>
+
+                                </div>
+                            }
+                            
+                            else
+                            {
+                                <EditForm Model="@caseHearing">
+                                    <DataAnnotationsValidator />
+                                    <div class="modal-body">
+
+                                        <div class="card border-0">
+                                            <div class="card-body p-0">
+
+                                                <!-- Search + Add Section -->
+                                                <!-- Add/Edit Fields -->
+
+                                                <div class="border rounded-3 p-3 mb-3 position-relative">
+
+                                                    @*  <button type="button" class=" position-absolute top-0 end-0 m-2"
                                                         aria-label="Reset" style="cursor:pointer; background:none;"
                                                         @onclick="OnBindHearingCancel"> Reset
                                                 </button> *@
 
-                                                <div class=" g-3">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label required-label">Date </label>
-                                                        <InputDate class="form-control" @bind-Value="caseHearing.HearingDate" placeholder="Select Date" />
+                                                    <div class=" g-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label required-label">Date </label>
+                                                            <InputDate class="form-control" @bind-Value="caseHearing.HearingDate" placeholder="Select Date" />
+                                                        </div>
+
+                                                        <div class="col-md-6 mt-2 ">
+                                                            <label class="form-label required-label">Time</label>
+                                                            <input type="time" class="form-control" @bind="caseHearing.HearingTime" />
+                                                        </div>
+
+
+
                                                     </div>
-
-                                                    <div class="col-md-6 mt-2 ">
-                                                        <label class="form-label required-label">Time</label>
-                                                        <input type="time" class="form-control" @bind="caseHearing.HearingTime" />
-                                                    </div>
-
-
-
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
-                                    <button type="button" class="btn btn-secondary me-2" @onclick="OnBindHearingCancel">Reset</button>
-                                    <button type="submit" class="btn btn-primary base" @onclick="SaveHearingChanges">Save</button>
-                                </div>
-                            </EditForm>
+                                    <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                                        <button type="button" class="btn btn-secondary me-2" @onclick="OnBindHearingCancel">Reset</button>
+                                        <button type="submit" class="btn btn-primary base" @onclick="SaveHearingChanges">Save</button>
+                                    </div>
+                                </EditForm>
+                            }
+
+
                         </div>
                     </div>
                     <EditForm Model="createAction" FormName="NoticeForm" OnValidSubmit="GenerateNotice">
@@ -478,7 +542,7 @@
                                     <option value="">-- Select Form Type --</option>
                                     @foreach (var formType in FilteredFormTypeList)
                                     {
-                                        <option value="@formType.Id">@formType.Name @(formType.BillAmount != null ? $"- (${formType.BillAmount}) " : "")</option>
+                                        <option value="@formType.Id">@formType.Name @(formType.Rate != null ? $"- (${formType.Rate}) " : "")</option>
                                     }
                                 </select>
                                 <ValidationMessage For="() => createAction.FormTypeId" />
@@ -547,7 +611,10 @@
     public Guid caseId { get; set; }
     private List<FormAddEditViewModelDto> FilteredFormTypeList = new();
     [Parameter] public IntakeModel legalcaseDto { get; set; } = new();
+    [Parameter] public List<GenrateNoticeModel> CaseForms { get; set; } = new();
+    [Parameter] public EventCallback OnFormCreate { get; set; } = new();
     private string? loggedInUserId;
+    private string? MarshalName;
     private bool isAdmin = false;
     private bool isEditMode = false;
     private GenrateNoticeModel caseForm = new();
@@ -578,7 +645,7 @@
             loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
         }
-        FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.Id);
+        FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
 
         caseHearing = new CaseHearingDto();
         caseHearing.HearingDate = DateTime.Now;
@@ -600,7 +667,7 @@
         {
             Caption = caseHearing.Caption,
             LegalCaseId = legalcaseDto.Id,
-            CourtId = legalcaseDto.CourtId,
+            CourtId = legalcaseDto.CourtLocationId,
             HearingDate = caseHearing.HearingDate,
             HearingTime = caseHearing.HearingTime,
             CreatedBy = Guid.Parse(loggedInUserId),
@@ -615,7 +682,7 @@
         if (CourtId)
         {
             ToastService.ShowSuccess("Hearing details Added successfully!");
-
+            await OnFormCreate.InvokeAsync();
         }
         else
         {
@@ -776,7 +843,7 @@
                 createAction = new GenrateNoticeModel();
                 isEditMode = false;
                 CurrentCaseId = caseId;
-
+                await OnFormCreate.InvokeAsync();
                 await JS.InvokeVoidAsync("openTab", "activity");
             }
         }
@@ -823,25 +890,27 @@
                 LegalCaseId = CurrentCaseId.Value,
                 Name = newFileName,
                 Path = $"uploads/{newFileName}",   // Relative path for web access,
-                
+                CreatedOn = DateTime.Now
+
             };
 
             DocList.Add(document);
 
         }
         var result = await _service.AddDocumentAsync(DocList);
-        if(result)
+        if (result)
         {
             ToastService.ShowSuccess("Documents saved successfully!");
             Files.Clear();
             UploadItems.Clear();
+            await OnFormCreate.InvokeAsync();
         }
         else
         {
             ToastService.ShowError("An Error Occured during Saving!");
         }
 
-        
+
     }
 
 
@@ -882,7 +951,7 @@
             .FirstOrDefault(f => f.Id == createAction.FormTypeId);
 
         if (selectedForm != null)
-            createAction.BillAmount = selectedForm.BillAmount;
+            createAction.BillAmount =Convert.ToDecimal(selectedForm.Rate);
         else
             createAction.BillAmount = null;
 

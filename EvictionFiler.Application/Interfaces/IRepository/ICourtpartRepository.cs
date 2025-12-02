@@ -17,7 +17,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
         Task<CourtPart> GetCourtByIdAsync(Guid id);
         Task UpdateCourtAsync(CourtPartDto courtInfosDto);
         Task DeleteCourtAsync(Guid id);
-        Task<bool> AddCourtPartListAsync(List<CourtPartDto> courtInfosDto);
+        Task<List<Guid>?> AddCourtPartListAsync(List<CourtPartDto> courtInfosDto);
         Task<bool> SaveCourtPartListAsync(List<CourtPartDto> parts, Guid courtId);
     }
 }

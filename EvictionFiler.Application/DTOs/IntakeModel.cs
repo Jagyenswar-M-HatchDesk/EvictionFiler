@@ -200,6 +200,7 @@ namespace EvictionFiler.Application.DTOs
         public string? SpecialInstruction { get; set; }
         public string? Notes { get; set; }
 
+        public Guid? CourtPartId { get; set; }
 
     }
 }

@@ -29,7 +29,8 @@ namespace EvictionFiler.Application.Interfaces.IServices
 
         Task<bool> UpdateNotesAsync(IntakeModel cases);
         Task<bool> AddDocumentAsync(List<CaseDocument> document);
-
+        Task<IEnumerable<CaseDocument>> CaseDocumentList(Guid Id);
+        Task<bool> DeleteCaseDocument(Guid Id);
 
     }
 }

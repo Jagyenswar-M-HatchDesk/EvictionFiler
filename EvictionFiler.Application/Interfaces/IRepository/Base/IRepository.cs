@@ -16,5 +16,6 @@ namespace EvictionFiler.Application.Interfaces.IRepository.Base
 		IQueryable<T> GetAllQuerable(Expression<Func<T, bool>>? predicate = null, params Expression<Func<T, object>>[]? includes);
 		Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
 		Task<bool> AnyAsync(Expression<Func<T, bool>>? predicate = null);
-	}
+
+    }
 }

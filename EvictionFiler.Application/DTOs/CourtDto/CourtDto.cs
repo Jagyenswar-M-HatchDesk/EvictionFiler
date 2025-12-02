@@ -12,7 +12,8 @@ namespace EvictionFiler.Application.DTOs.CourtDto
     {
 
         public Guid Id { get; set; }
-        //[Required(ErrorMessage = "Court Name is required")]
+        [Required(ErrorMessage = "Court Name is required")]
+       
         public string Court { get; set; } = string.Empty;
         //[Required(ErrorMessage = "Address is required")]
         public string Address { get; set; } = string.Empty;
@@ -30,5 +31,6 @@ namespace EvictionFiler.Application.DTOs.CourtDto
         public string Judge { get; set; } = string.Empty;
 
         public List<CourtPartDto> CourtPart { get; set; } = new List<CourtPartDto>();
+        public CourtPartDto SelectedCourtPart { get; set; } = new CourtPartDto();
     }
 }

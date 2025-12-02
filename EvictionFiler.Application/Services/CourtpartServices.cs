@@ -139,7 +139,7 @@ namespace EvictionFiler.Application.Services
 
 
         }
-        public async Task<bool> AddCourtPartListAsync(List<CourtPartDto> courtInfosDto)
+        public async Task<List<Guid>?> AddCourtPartListAsync(List<CourtPartDto> courtInfosDto)
         {
             return await _courtRepository.AddCourtPartListAsync(courtInfosDto);
 
