@@ -119,7 +119,7 @@ namespace EvictionFiler.Infrastructure.Repositories
         {
             // 1️⃣ Get BuildingIds for the selected Client
             var buildingIds = await _dbContext.Buildings
-                .Where(b => b.Landlord.ClientId == clientId)
+                .Where(b => b.Id == clientId)
                 .Select(b => b.Id)
                 .ToListAsync();
 

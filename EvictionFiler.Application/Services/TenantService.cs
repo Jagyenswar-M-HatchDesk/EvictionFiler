@@ -299,6 +299,7 @@ namespace EvictionFiler.Application.Services
             {
 
                 if (entity.FirstName != tenants.FirstName) entity.FirstName = tenants.FirstName;
+                if (entity.UnitOrApartmentNumber != tenants.UnitOrApartmentNumber) entity.UnitOrApartmentNumber = tenants.UnitOrApartmentNumber;
                 if (entity.LastName != tenants.LastName) entity.LastName = tenants.LastName;
                 if (entity.BuildinId != tenants.BuildingId) entity.BuildinId = tenants.BuildingId;
 

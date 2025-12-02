@@ -404,7 +404,8 @@ namespace EvictionFiler.Application.Services
                         BuildingId = caseEntity.BuildingId,
                         Buildingcode = caseEntity.Buildings.BuildingCode,
                         Mdr = caseEntity.Buildings?.MDRNumber,
-                        UnitOrApartmentNumber = caseEntity.Buildings.ApartmentCode,
+                        
+                        
 
                         Borough = caseEntity.Buildings?.City,
                         Units = caseEntity.Buildings?.BuildingUnits,
@@ -422,6 +423,7 @@ namespace EvictionFiler.Application.Services
                         ApartmentNumber = caseEntity.Tenants?.UnitOrApartmentNumber,
 
                         WrittenLease = caseEntity.WrittenLease,
+                        
                         OralAgreeMent = caseEntity.OralAgreeMent,
                         CaseProgramId = caseEntity.CaseProgramId,
                         GoodCauseApplies = caseEntity.GoodCauseApplies,
@@ -489,6 +491,9 @@ namespace EvictionFiler.Application.Services
                         PremiseTypeId =  caseEntity.Buildings.PremiseTypeId,
 
 
+                        UnitOrApartmentNumber = caseEntity.Tenants.UnitOrApartmentNumber,
+                        FirstName = caseEntity.Tenants.FirstName,
+                        LastName = caseEntity.Tenants.LastName,
                         BillAmount = caseEntity.BillAmount ?? 0,
                     };
                     return intakeModel;
@@ -793,7 +798,11 @@ namespace EvictionFiler.Application.Services
                 existingCase.OpposingCounsel = legalCase.OpposingCounsel;
                 existingCase.AppearanceDate = legalCase.AppearanceDate;
                 existingCase.AppearanceTime = legalCase.AppearanceTime; 
-                existingCase.InvoiceTo = legalCase.InvoiceTo;   
+                existingCase.InvoiceTo = legalCase.InvoiceTo;
+                existingCase.DateTenantMoved = legalCase.DateTenantMoved;
+                
+
+
 
                 if (legalCase.PartyRepresentId != null && legalCase.PartyRepresentId != Guid.Empty)
                 {
