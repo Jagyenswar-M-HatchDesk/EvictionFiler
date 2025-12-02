@@ -6,6 +6,7 @@
 @using EvictionFiler.Application.DTOs.CaseHearing
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.CourtDto
+@using EvictionFiler.Application.DTOs.CourtPart
 @using EvictionFiler.Application.DTOs.FormTypeDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
@@ -17,6 +18,7 @@
 @inject NavigationManager Navigation
 @inject ILegalCaseService _service
 @* @using EvictionFiler.Client.Jwt *@
+@using EvictionFiler.Application.Services
 @using EvictionFiler.Client.Pages.Actions
 @using EvictionFiler.Client.SpinnerService
 @using EvictionFiler.Domain.Entities.Master
@@ -38,9 +40,11 @@
 @inject IFeesCatalogService _feeCatalogService
 @inject IToastService ToastService
 @inject IJSRuntime JS
+@inject ICourtpartServices courtpartService
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization;
 @using EvictionFiler.Domain.Entities
+
 @attribute [Authorize]
 
 @using System.Security.Claims
@@ -339,136 +343,136 @@
     }
 
     /*
-        .card {
-        background: var(--card);
-        border: 1px solid var(--line);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow)
-        }
+                .card {
+                background: var(--card);
+                border: 1px solid var(--line);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow)
+                }
 
-        .card > header {
-        padding: 18px 20px;
-        border-bottom: 1px solid var(--line);
-        display: flex;
-        gap: 12px;
-        align-items: flex-start
-        }
+                .card > header {
+                padding: 18px 20px;
+                border-bottom: 1px solid var(--line);
+                display: flex;
+                gap: 12px;
+                align-items: flex-start
+                }
 
-        .k {
-        width: 28px;
-        height: 28px;
-        border-radius: 12px;
-        background: #0f172a;
-        color: #fff;
-        display: grid;
-        place-items: center;
-        font-size: 12px;
-        font-weight: 700
-        }
+                .k {
+                width: 28px;
+                height: 28px;
+                border-radius: 12px;
+                background: #0f172a;
+                color: #fff;
+                display: grid;
+                place-items: center;
+                font-size: 12px;
+                font-weight: 700
+                }
 
-        .card .body {
-        padding: 20px
-        }
+                .card .body {
+                padding: 20px
+                }
 
-        .fields {
-        display: grid;
-        gap: 16px
-        }
+                .fields {
+                display: grid;
+                gap: 16px
+                }
 
-        .cols-2 {
-        grid-template-columns: repeat(2, minmax(0, 1fr))
-        }
+                .cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr))
+                }
 
-        .cols-3 {
-        grid-template-columns: repeat(3, minmax(0, 1fr))
-        }
+                .cols-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr))
+                }
 
-        @@media (max-width:820px) {
-        .cols-2, .cols-3 {
-        grid-template-columns: 1fr
-        }
-        }
+                @@media (max-width:820px) {
+                .cols-2, .cols-3 {
+                grid-template-columns: 1fr
+                }
+                }
 
-        label.lbl {
-        display: block;
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: .04em;
-        font-weight: 700;
-        color: #475569;
-        margin-bottom: 6px
-        }
+                label.lbl {
+                display: block;
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: .04em;
+                font-weight: 700;
+                color: #475569;
+                margin-bottom: 6px
+                }
 
-        input.txt,
-        select.sel {
-        width: 100%;
-        padding: 12px 14px;
-        border: 1px solid #cbd5e1;
-        border-radius: 12px;
-        background: #fff;
-        color: #0f172a;
-        outline: none
-        }
+                input.txt,
+                select.sel {
+                width: 100%;
+                padding: 12px 14px;
+                border: 1px solid #cbd5e1;
+                border-radius: 12px;
+                background: #fff;
+                color: #0f172a;
+                outline: none
+                }
 
-        input.txt:focus,
-        select.sel:focus {
-        border-color: #6366f1;
-        box-shadow: 0 0 0 6px #eef2ff
-        }
+                input.txt:focus,
+                select.sel:focus {
+                border-color: #6366f1;
+                box-shadow: 0 0 0 6px #eef2ff
+                }
 
-        .hint {
-        font-size: 12px;
-        color: #64748b;
-        margin-top: 4px
-        }
+                .hint {
+                font-size: 12px;
+                color: #64748b;
+                margin-top: 4px
+                }
 
-        .pill {
-        display: inline-block;
-        padding: 8px 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 12px;
-        background: #fff;
-        font-size: 13px
-        }
+                .pill {
+                display: inline-block;
+                padding: 8px 12px;
+                border: 1px solid #cbd5e1;
+                border-radius: 12px;
+                background: #fff;
+                font-size: 13px
+                }
 
-        .aside.card {
-        position: sticky;
-        top: 106px;
-        height: fit-content
-        }
+                .aside.card {
+                position: sticky;
+                top: 106px;
+                height: fit-content
+                }
 
-        .kv {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px
-        }
+                .kv {
+                display: flex;
+                justify-content: space-between;
+                gap: 12px
+                }
 
-        .kv .k {
-        background: none;
-        color: #64748b;
-        width: auto;
-        height: auto;
-        border-radius: 0;
-        font-weight: 600
-        }
+                .kv .k {
+                background: none;
+                color: #64748b;
+                width: auto;
+                height: auto;
+                border-radius: 0;
+                font-weight: 600
+                }
 
-        .actions {
-        position: sticky;
-        bottom: 0;
-        z-index: 10;
-        background: rgba(255, 255, 255, .9);
-        border-top: 1px solid var(--line)
-        }
+                .actions {
+                position: sticky;
+                bottom: 0;
+                z-index: 10;
+                background: rgba(255, 255, 255, .9);
+                border-top: 1px solid var(--line)
+                }
 
-        .actions .row {
-        max-width: 1200px;
-        margin: auto;
-        padding: 12px 24px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center
-        }
-        */
+                .actions .row {
+                max-width: 1200px;
+                margin: auto;
+                padding: 12px 24px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center
+                }
+                */
 
     .btn {
         padding: 10px 16px;
@@ -519,37 +523,59 @@
         cursor: pointer
     }
     /*
-        .pre {
-        white-space: pre-wrap;
-        background: #0b1020;
-        color: #e2e8f0;
-        border-radius: 12px;
-        padding: 14px;
-        overflow: auto;
-        max-height: 360px
-        }
+                .pre {
+                white-space: pre-wrap;
+                background: #0b1020;
+                color: #e2e8f0;
+                border-radius: 12px;
+                padding: 14px;
+                overflow: auto;
+                max-height: 360px
+                }
 
-        @@media (max-width:560px) {
-        .logo {
-        width: 36px;
-        height: 36px
-        }
+                @@media (max-width:560px) {
+                .logo {
+                width: 36px;
+                height: 36px
+                }
 
-        .brand h1 {
-        font-size: 16px
-        }
+                .brand h1 {
+                font-size: 16px
+                }
 
-        .secure {
-        display: none
-        }
-        }
+                .secure {
+                display: none
+                }
+                }
 
-        .form-check-input {
-        cursor: pointer;
-        }  */
+                .form-check-input {
+                cursor: pointer;
+                }  */
 
     .btn-tenant:hover {
         background: #1F365D !important;
+    }
+
+    .nowrap {
+        white-space: nowrap;
+    }
+
+    .required-label::after {
+        content: " *";
+        color: red;
+    }
+
+    .blazored-toast-container {
+        z-index: 999 !important;
+        position: fixed !important;
+    }
+
+    .blazored-toast {
+        animation-duration: 8s !important; /* increase to 8 seconds */
+    }
+
+    .blazored-toast-progress {
+        animation-duration: 8s !important;
     }
 </style>
 <style>
@@ -634,10 +660,15 @@
                     <div class="card shadow-sm border-0 h-100">
                         <div class="card-body">
                             <div class="text-secondary text-uppercase small mb-1">Case Progress</div>
-                            <div class="progress" role="progressbar" aria-label="Case progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar bg-success" id="progressBar" style="width: 0%">0%</div>
+
+                            <div class="progress" role="progressbar">
+                                <div class="progress-bar bg-success"
+                                     style="width:@AnimatedProgress%; transition: width 0.5s ease-out;">
+                                    @AnimatedProgress%
+                                </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </section>
@@ -676,7 +707,7 @@
                                                         if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingState)) partBuilding.Add(legalcaseDto.BuildingState);
                                                         if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingZip)) partBuilding.Add(legalcaseDto.BuildingZip);
 
-                                                        var fullBuildingAddress = partBuilding.Any() ? string.Join(", ", partBuilding) : "--";
+                                                        var fullBuildingAddress = partBuilding.Count() > 0 ? string.Join(", ", partBuilding) : "--";
                                                     }
                                                     @fullBuildingAddress
                                                 </span>
@@ -708,7 +739,7 @@
                                                         if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingState)) partlandlord.Add(legalcaseDto.BuildingState);
                                                         if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingZip)) partlandlord.Add(legalcaseDto.BuildingZip);
 
-                                                        var fulllandlordAddress = partlandlord.Any() ? string.Join(", ", partlandlord) : "--";
+                                                        var fulllandlordAddress = partlandlord.Count() > 0 ? string.Join(", ", partlandlord) : "--";
                                                     }
                                                     @fulllandlordAddress
                                                 </span>
@@ -760,9 +791,7 @@
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#timeline" type="button" role="tab" aria-controls="timeline" aria-selected="false">Timeline</button>
                                 </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="actions-tab" data-bs-toggle="tab" data-bs-target="#actions" type="button" role="tab" aria-controls="actions" aria-selected="false">Actions</button>
-                                </li>
+                                
                             </ul>
                         </div>
                         <div class="card-body tab-content">
@@ -785,7 +814,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @if (caseFormDto != null && caseFormDto.Any())
+                                            @if (caseFormDto != null && caseFormDto.Count() > 0)
                                             {
                                                 int index = 1;
                                                 @foreach (var form in caseFormDto)
@@ -839,12 +868,29 @@
                                         <div class="fw-semibold mx-2">Notice Served</div>
                                         <div class="text-secondary small mx-2">Written Demand to Terminate (move out)</div>
                                     </div>
-                                    <div class="item" data-status="current">
-                                        <span class="dot bg-brand-primary"></span>
-                                        <div class="text-secondary small mx-2">@(CaseHearing.HearingDate.ToString("dd/MM/yyyy") ?? "---")</div>
-                                        <div class="fw-semibold mx-2">Hearing Scheduled</div>
-                                        <div class="text-secondary small mx-2">Awaiting confirmation from court</div>
-                                    </div>
+                                    @if (CaseHearings.Count() > 0)
+                                    {
+                                        @foreach (var item in CaseHearings)
+                                        {
+                                            <div class="item" data-status="current">
+                                                <span class="dot bg-brand-primary"></span>
+                                                <div class="text-secondary small mx-2">@(item.HearingDate.ToString("dd/MM/yyyy") ?? "--")</div>
+                                                <div class="fw-semibold mx-2">Hearing Scheduled</div>
+                                                <div class="text-secondary small mx-2">Awaiting confirmation from court</div>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        
+                                        <div class="item" data-status="current">
+                                            <span class="dot bg-brand-primary"></span>
+                                            <div class="text-secondary small mx-2">--</div>
+                                            <div class="fw-semibold mx-2">Hearing Scheduled</div>
+                                            <div class="text-secondary small mx-2">Awaiting confirmation from court</div>
+                                        </div>
+                                    }
+
                                     <div class="item" data-status="upcoming">
                                         <span class="dot"></span>
                                         <div class="text-secondary small mx-2">--</div>
@@ -943,7 +989,7 @@
                                         if (!string.IsNullOrWhiteSpace(legalcaseDto.StateName)) partclient.Add(legalcaseDto.StateName);
                                         if (!string.IsNullOrWhiteSpace(legalcaseDto.ZipCode)) partclient.Add(legalcaseDto.ZipCode);
 
-                                        var fulllClientAddress = partclient.Any() ? string.Join(", ", partclient) : "--";
+                                        var fulllClientAddress = partclient.Count() > 0 ? string.Join(", ", partclient) : "--";
                                     }
                                     @fulllClientAddress
                                 </span>
@@ -967,6 +1013,60 @@
                                 <div class="col-12 col-md-6"><div class="border rounded-3 p-3"><div class="text-secondary">Additional Charges</div><div class="fw-medium" id="rentAddtl">--</div></div></div>
                                 <div class="col-12 col-md-6"><div class="border rounded-3 p-3"><div class="text-secondary">Legal Print</div><div class="fw-medium" id="rentLegal">--</div></div></div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-transparent">
+                            <div class="fw-semibold">Case Documents</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table  table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="nowrap">File Name</th>
+                                            <th class="nowrap">Uploaded On</th>
+                                            <th class="text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        @if (caseDocuments is not null && caseDocuments.Count() > 0)
+                                        {
+                                            @foreach (var doc in caseDocuments)
+                                            {
+                                                <tr>
+                                                    <td class="nowrap">@doc.Name</td>
+                                                    <td class="nowrap">@doc.CreatedOn.ToString("MM/dd/yyyy")</td>
+
+                                                    <td class="text-center" style="display:flex">
+
+                                                        <i class="fa-solid fa-eye text-navy me-2" style="cursor:pointer"
+                                                           @onclick="@(() => PreviewDocument(doc.Path))"
+                                                           title="Preview"></i>
+
+                                                        <i class="fa-solid fa-trash-can text-navy me-2" style="cursor:pointer"
+                                                           @onclick="@(() => DeleteCaseDocument(doc.Id))"
+                                                           title="Delete"></i>
+
+
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted">
+                                                    No documents uploaded for this case.
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -1010,7 +1110,7 @@
                                                placeholder="Enter Unit / Apt"
                                                @bind-value="searchTenantText"
                                                @oninput="OnSearchTenantInput" @onblur="SelectTenant" />
-                                        @if (filteredTenant?.Any() == true)
+                                        @if (filteredTenant?.Count() > 0)
                                         {
                                             <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
                                                 @foreach (var c in filteredTenant)
@@ -1109,7 +1209,7 @@
                                                    placeholder="Search by Building Address or code..."
                                                    @bind-value="searchBuildingText"
                                                    @oninput="OnSearchBuildingInput" />
-                                            @if (filteredBuildings?.Any() == true)
+                                            @if (filteredBuildings?.Count() > 0)
                                             {
                                                 <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
                                                     @foreach (var c in filteredBuildings)
@@ -1249,7 +1349,7 @@
                                                        @bind-value="searchText"
                                                        @oninput="OnSearchInput" />
 
-                                            @if (filteredClients?.Any() == true)
+                                            @if (filteredClients?.Count() > 0)
                                             {
                                                 <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
                                                     @foreach (var c in filteredClients)
@@ -1347,29 +1447,30 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <EditForm Model="@court">
+                <EditForm Model="@court" OnValidSubmit="SaveCourtChanges">
                     <DataAnnotationsValidator />
+                    <ValidationSummary />
                     <div class="modal-body">
                         <div class="card border-0">
                             <div class="card-body p-0">
 
                                 <!-- Search + Add Section -->
                                 <div class="row mt-2">
-                                    @if (!isNewCourt)
+                                    @if (!showCourtFields)
                                     {
                                         <div class="col-md-6 position-relative">
                                             <label class="form-label  required-label">Court</label>
                                             <input type="text" class="form-control"
                                                    placeholder="Search by court Address / Name / Part / Room"
                                                    @bind-value="searchCourtText"
-                                                   @oninput="OnSearchCourtInput" />
-                                            @if (filteredCourts?.Any() == true)
+                                                   @oninput="OnSearchCourtInput" @onfocusin="() => ShowCourtDropdown = true" @onfocusout="OnFocusOutCourt" />
+                                            @if (filteredCourts?.Count() > 0 && ShowCourtDropdown)
                                             {
                                                 <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
                                                     @foreach (var c in filteredCourts)
                                                     {
                                                         <li class="dropdown-item" @onclick="() => SelectCourt(c)">
-                                                            @c.Part @c.RoomNo / @c.Court
+                                                             @c.Court
                                                         </li>
                                                     }
                                                 </ul>
@@ -1403,27 +1504,57 @@
                                                 <label class="form-label required-label">Court </label>
                                                 <InputText class="form-control" @bind-Value="court.Court" placeholder="Enter Court" />
                                             </div>
+                                            <ValidationMessage For="() => court.Court"></ValidationMessage>
+                                            @if(isNewCourt)
+                                            {
+                                                <div class="col-md-6">
+                                                    <label class="form-label required-label">Part</label>
+                                                    <InputText class="form-control" @bind-Value="court.SelectedCourtPart.RoomNo" placeholder="Enter Part" />
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="col-md-6 position-relative">
+                                                    <label class="form-label  required-label">Part</label>
+                                                    <InputText class="form-control d-none"
+                                                               @bind-Value="court.SelectedCourtPart.Part" />
+                                                    <input type="text" class="form-control"
+                                                           placeholder="Search by court Part"
+                                                           @bind-value="searchCourtPartText" @bind-value:after="BindPart"
+                                                           @oninput="OnSearchCourtPartInput" @onfocusin="() => ShowCourtPartDropdown = true" @onfocusout="OnFocusOutCourtPart" />
+                                                    @if (filteredCourtsPart?.Count() > 0 && ShowCourtPartDropdown)
+                                                    {
+                                                        <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
+                                                            @foreach (var c in filteredCourtsPart)
+                                                            {
+                                                                <li class="dropdown-item" @onclick="() => SelectCourtPart(c)">
+                                                                    @c.Part / @c.RoomNo
+                                                                </li>
+                                                            }
+                                                        </ul>
+                                                    }
+
+                                                </div>
+                                                <ValidationMessage For="() => court.SelectedCourtPart.Part"></ValidationMessage>
+                                            }
 
                                             <div class="col-md-6">
                                                 <label class="form-label required-label">Room No.</label>
-                                                <InputText class="form-control" @bind-Value="court.RoomNo" placeholder="Enter Room No." />
+                                                <InputText class="form-control" @bind-Value="court.SelectedCourtPart.RoomNo" placeholder="Enter Room No." />
                                             </div>
-
+                                            <ValidationMessage For="() => court.SelectedCourtPart.RoomNo"></ValidationMessage>
+                                            
                                             <div class="col-md-6">
-                                                <label class="form-label required-label">Part</label>
-                                                <InputText class="form-control" @bind-Value="court.Part" placeholder="Enter Part" />
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label required-label">Index</label>
+                                                <label class="form-label ">Index</label>
                                                 <input class="form-control" placeholder="Enter Index" />
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label required-label">Judge</label>
-                                                <InputText class="form-control" @bind-Value="court.Judge" placeholder="Enter Judge" />
+                                                <label class="form-label">Judge</label>
+                                                <InputText class="form-control" @bind-Value="court.SelectedCourtPart.Judge" placeholder="Enter Judge" />
                                             </div>
 
                                             <div class="col-md-6">
-                                                <label class="form-label required-label">Docket No.</label>
+                                                <label class="form-label ">Docket No.</label>
                                                 <input class="form-control" placeholder="Enter Docket No." />
                                             </div>
 
@@ -1436,7 +1567,7 @@
 
                     <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary base" @onclick="SaveCourtChanges">Save</button>
+                        <button type="submit" class="btn btn-primary base" >Save</button>
                     </div>
                 </EditForm>
             </div>
@@ -1539,7 +1670,7 @@
     {
         <GenrateAction createAction="noticeModel"
                        OnClose="HandleCloseCreateAction"
-                       CurrentCaseId="CurrentCaseId" legalcaseDto="legalcaseDto" />
+                       CurrentCaseId="CurrentCaseId" legalcaseDto="legalcaseDto" CaseForms="caseFormDto" OnFormCreate="HandleInvokeAction" />
     }
 
 
@@ -1566,6 +1697,21 @@
             }
         };
 
+
+                window.downloadFile = (fileName, byteBase64, contentType) => {
+            const link = document.createElement('a');
+            link.download = fileName;
+
+            const bytes = Uint8Array.from(atob(byteBase64), c => c.charCodeAt(0));
+            const blob = new Blob([bytes], { type: contentType });
+
+            link.href = URL.createObjectURL(blob);
+            link.click();
+
+            URL.revokeObjectURL(link.href);
+        };
+
+
     </script>
 
 </body>
@@ -1583,6 +1729,7 @@
     private GenrateNoticeModel caseForm = new();
     private List<FeesCatalogDto> feecatalogDto = new();
     private List<CaseHearingDto> CaseHearings = new();
+    private IEnumerable<CaseDocument> caseDocuments = new List<CaseDocument>();
     private CaseHearingDto CaseHearing = new();
     private CaseForms CaseForm = new();
     private string? loggedInUserId;
@@ -1591,7 +1738,43 @@
     private bool isEditMode = false;
     private bool isNewCourt = false;
     private bool _showCreateAction = false;
+    private bool _showCourtPartList = false;
+    private bool _showCourtList = false;
 
+    private int FinalProgress { get; set; } = 0;     // Total calculated progress
+    private int AnimatedProgress { get; set; } = 0;  // Animating value
+    private System.Timers.Timer animationTimer;
+
+    private EditToBuildingDto editBuildingModel = new();
+    private bool showBuildingFields = false;
+    private bool showCourtFields = false;
+    private bool IsNewBuilding = false;
+    private bool ShowCourtDropdown = false;
+    private bool ShowCourtPartDropdown = false;
+    private string searchBuildingText;
+    private string searchCourtText;
+    private string? searchCourtPartText;
+    private string searchTenantText;
+    private List<EditToBuildingDto> filteredBuildings = new();
+    private List<EditToTenantDto> filteredTenant = new();
+    private List<State> StateList = new();
+    private List<RegulationStatus> RegulationList = new();
+    private List<EditToBuildingDto> BuildingList = new();
+    private List<EditToTenantDto> TenantList = new();
+    private List<string> Tenants = new();
+    private List<string> UnderTenants = new() { "John Doe", "John Doe" };
+    private List<AdditioanlTenants> AdditionalTenantfromDbList = new();
+    private List<AddtionalTenantDto> AdditionalTenantList = new();
+    private List<AdditionalOccupantDto> AdditionalOccupantsList = new();
+    private bool showCourtInfoAlert = false;
+    private bool IsFormGenerated = false;
+    public EditToTenantDto selectedTenant = new EditToTenantDto();
+    public EditToTenantDto ViewTenant = new EditToTenantDto();
+    public CourtDto court = new CourtDto();
+    public CaseHearingDto caseHearing = new CaseHearingDto();
+    public List<CourtDto> courts = new();
+    public List<CourtDto> filteredCourts = new List<CourtDto>();
+    public List<CourtPartDto> filteredCourtsPart = new List<CourtPartDto>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -1611,15 +1794,76 @@
             isNewCourt = true;
             showCourtFields = true;
         }
+        else
+        {
+            filteredCourts = courts;
+        }
 
         spinnerservice.Show();
         await LoadCaseDetails();
         await LoadCaseForms();
         await LoadHearing();
+        await LoadCaseDocument();
+        CalculateCaseProgress();
+        StartProgressAnimation();
+        StateHasChanged();
         spinnerservice.Hide();
     }
+    private async Task OnFocusOutCourt(FocusEventArgs e)
+    {
+        await Task.Delay(200);
+        ShowCourtDropdown = false;
+    }
+    private async Task BindPart()
+    {
 
-   
+        court.SelectedCourtPart.Part = searchCourtPartText;
+    }
+    private async Task OnFocusOutCourtPart(FocusEventArgs e)
+    {
+        await Task.Delay(200);
+        ShowCourtPartDropdown = false;
+    }
+    private void CalculateCaseProgress()
+    {
+        int progress = 0;
+
+        if (legalcaseDto != null && legalcaseDto.Id != Guid.Empty)
+            progress += 10;
+
+        if (caseFormDto.Any())
+            progress += 10;
+
+        if (legalcaseDto!.CourtLocationId != null && legalcaseDto.CourtLocationId != Guid.Empty)
+            progress += 15;
+
+        if (CaseHearings.Any())
+            progress += 15;
+
+        FinalProgress = progress;
+    }
+    private void StartProgressAnimation()
+    {
+        AnimatedProgress = 0;
+
+        animationTimer = new System.Timers.Timer(40); // update every 40ms (smooth)
+        animationTimer.Elapsed += (sender, args) =>
+        {
+            if (AnimatedProgress < FinalProgress)
+            {
+                AnimatedProgress += 1;      // increase gradually
+                InvokeAsync(StateHasChanged);
+            }
+            else
+            {
+                animationTimer.Stop();
+                animationTimer.Dispose();
+            }
+        };
+
+        animationTimer.Start();
+    }
+
 
 
 
@@ -1632,6 +1876,13 @@
     private void HandleCloseCreateAction()
     {
         _showCreateAction = false;
+    }
+    private async Task HandleInvokeAction()
+    {
+        await LoadCaseForms();
+
+        await LoadCaseDetails();
+        await LoadHearing();
     }
     private async Task LoadCaseDetails()
     {
@@ -1658,101 +1909,111 @@
         {
 
             legalcaseDto = new IntakeModel
-                {
-                    Id = legalcaseDto.Id,
-                    ClientId = legalcaseDto.ClientId,
-                    Casecode = legalcaseDto.Casecode,
-                    CaseTypeId = legalcaseDto.CaseTypeId,
-                    CaseTypeName = legalcaseDto.CaseTypeName,
-                    IsERAPPaymentReceived = legalcaseDto.IsERAPPaymentReceived,
-                    MonthlyRent = legalcaseDto.MonthlyRent,
-                    TotalOwed = legalcaseDto.TotalOwed,
-                    TenantShare = legalcaseDto.TenantShare,
-                    RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
-                    OralStart = legalcaseDto.OralStart,
-                    OralEnd = legalcaseDto.OralEnd,
-                    WrittenLease = legalcaseDto.WrittenLease,
-                    DateTenantMoved = legalcaseDto.DateTenantMoved,
-                    TenancyTypeId = legalcaseDto.TenancyTypeId,
-                    CreatedOn = legalcaseDto.CreatedOn,
-                    Status = legalcaseDto.IsActive ? "Active" : "Inactive",
+            {
+                Id = legalcaseDto.Id,
+                ClientId = legalcaseDto.ClientId,
+                Casecode = legalcaseDto.Casecode,
+                CaseTypeId = legalcaseDto.CaseTypeId,
+                CaseTypeName = legalcaseDto.CaseTypeName,
+                IsERAPPaymentReceived = legalcaseDto.IsERAPPaymentReceived,
+                MonthlyRent = legalcaseDto.MonthlyRent,
+                TotalOwed = legalcaseDto.TotalOwed,
+                TenantShare = legalcaseDto.TenantShare,
+                RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                OralStart = legalcaseDto.OralStart,
+                OralEnd = legalcaseDto.OralEnd,
+                WrittenLease = legalcaseDto.WrittenLease,
+                DateTenantMoved = legalcaseDto.DateTenantMoved,
+                TenancyTypeId = legalcaseDto.TenancyTypeId,
+                CreatedOn = legalcaseDto.CreatedOn,
+                Status = legalcaseDto.IsActive ? "Active" : "Inactive",
 
-                    // for client
-                    ClientCode = legalcaseDto.ClientCode,
-                    FirstName = legalcaseDto.FirstName,
-                    LastName = legalcaseDto.LastName,
-                    Address1 = legalcaseDto.Address1,
-                    Address2 = legalcaseDto.Address2,
-                    StateName = legalcaseDto.StateName,
-                    ZipCode = legalcaseDto.ZipCode,
-                    ClientEmail = legalcaseDto.ClientEmail,
-                    ClientPhone = legalcaseDto.ClientPhone,
+                // for client
+                ClientCode = legalcaseDto.ClientCode,
+                FirstName = legalcaseDto.FirstName,
+                LastName = legalcaseDto.LastName,
+                Address1 = legalcaseDto.Address1,
+                Address2 = legalcaseDto.Address2,
+                StateName = legalcaseDto.StateName,
+                ZipCode = legalcaseDto.ZipCode,
+                ClientEmail = legalcaseDto.ClientEmail,
+                ClientPhone = legalcaseDto.ClientPhone,
 
-                    // Landlord
-                    FullName = legalcaseDto.FullName,
-                    Phone = legalcaseDto.Phone,
-                    Email = legalcaseDto.Email,
-                    LandLordTypeId = legalcaseDto.LandLordTypeId ?? Guid.Empty,
-                    LandlordId = legalcaseDto.LandlordId,
+                // Landlord
+                FullName = legalcaseDto.FullName,
+                Phone = legalcaseDto.Phone,
+                Email = legalcaseDto.Email,
+                LandLordTypeId = legalcaseDto.LandLordTypeId ?? Guid.Empty,
+                LandlordId = legalcaseDto.LandlordId,
 
-                    // Building
-                    BuildingId = legalcaseDto.BuildingId,
-                    Mdr = legalcaseDto.Mdr,
-                    Units = legalcaseDto.Units,
-                    BuildingAddress = legalcaseDto.BuildingAddress,
-                    RegulationStatusId = legalcaseDto.RegulationStatusId ?? Guid.Empty,
-                    Borough = legalcaseDto.Borough,
-                    BuildingState = legalcaseDto.BuildingState,
-                    BuildingZip = legalcaseDto.BuildingZip,
+                // Building
+                BuildingId = legalcaseDto.BuildingId,
+                Mdr = legalcaseDto.Mdr,
+                Units = legalcaseDto.Units,
+                BuildingAddress = legalcaseDto.BuildingAddress,
+                RegulationStatusId = legalcaseDto.RegulationStatusId ?? Guid.Empty,
+                Borough = legalcaseDto.Borough,
+                BuildingState = legalcaseDto.BuildingState,
+                BuildingZip = legalcaseDto.BuildingZip,
 
-                    // RegulationStatusName = legalcaseDto.RegulationStatusName,
+                // RegulationStatusName = legalcaseDto.RegulationStatusName,
 
-                    // Tenant
-                    TenantId = legalcaseDto.TenantId,
-                    TenantName = legalcaseDto.TenantName,
-                    UnitNumber = legalcaseDto.UnitNumber,
-                    IsUnitIllegalId = legalcaseDto.IsUnitIllegalId,
-                    TenantRecord = legalcaseDto.TenantRecord,
-                    HasPossession = legalcaseDto.HasPossession,
-                    OtherOccupants = legalcaseDto.OtherOccupants,
-                    ApartmentNumber = legalcaseDto.ApartmentNumber,
+                // Tenant
+                TenantId = legalcaseDto.TenantId,
+                TenantName = legalcaseDto.TenantName,
+                UnitNumber = legalcaseDto.UnitNumber,
+                IsUnitIllegalId = legalcaseDto.IsUnitIllegalId,
+                TenantRecord = legalcaseDto.TenantRecord,
+                HasPossession = legalcaseDto.HasPossession,
+                OtherOccupants = legalcaseDto.OtherOccupants,
+                ApartmentNumber = legalcaseDto.ApartmentNumber,
 
-                    //WrittenLease = legalcaseDto.WrittenLease,
-                    OralAgreeMent = legalcaseDto.OralAgreeMent,
-                    CaseProgramId = legalcaseDto.CaseProgramId,
-                    GoodCauseApplies = legalcaseDto.GoodCauseApplies,
-                    //DateTenantMoved = legalcaseDto.DateTenantMoved,
-                    LeaseEnd = legalcaseDto.LeaseEnd,
-                    //TenancyTypeId = legalcaseDto.TenancyTypeId,
-                    DateNoticeServed = legalcaseDto.DateNoticeServed,
-                    CalculatedNoticeLength = legalcaseDto.CalculatedNoticeLength,
-                    ExpirationDate = legalcaseDto.ExpirationDate,
-                    PredicateNotice = legalcaseDto.PredicateNotice,
-                    //RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
-                    //MonthlyRent = legalcaseDto.MonthlyRent,
-                    //TotalOwed = legalcaseDto.TotalOwed,
-                    //TenantShare = legalcaseDto.TenantShare,
-                    SocialService = legalcaseDto.SocialService,
-                    LastRentPaid = legalcaseDto.LastRentPaid,
+                //WrittenLease = legalcaseDto.WrittenLease,
+                OralAgreeMent = legalcaseDto.OralAgreeMent,
+                CaseProgramId = legalcaseDto.CaseProgramId,
+                GoodCauseApplies = legalcaseDto.GoodCauseApplies,
+                //DateTenantMoved = legalcaseDto.DateTenantMoved,
+                LeaseEnd = legalcaseDto.LeaseEnd,
+                //TenancyTypeId = legalcaseDto.TenancyTypeId,
+                DateNoticeServed = legalcaseDto.DateNoticeServed,
+                CalculatedNoticeLength = legalcaseDto.CalculatedNoticeLength,
+                ExpirationDate = legalcaseDto.ExpirationDate,
+                PredicateNotice = legalcaseDto.PredicateNotice,
+                //RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                //MonthlyRent = legalcaseDto.MonthlyRent,
+                //TotalOwed = legalcaseDto.TotalOwed,
+                //TenantShare = legalcaseDto.TenantShare,
+                SocialService = legalcaseDto.SocialService,
+                LastRentPaid = legalcaseDto.LastRentPaid,
 
-                    CourtId = legalcaseDto.CourtId,
-                    Court = legalcaseDto.Court,
-                    CourtAddress = legalcaseDto.CourtAddress,
-                    CourtConferenceId = legalcaseDto.CourtConferenceId,
-                    CourtCallIn = legalcaseDto.CourtCallIn,
-                    CourtNotes = legalcaseDto.CourtNotes,
-                    CourtPart = legalcaseDto.CourtPart,
-                    CourtPhone = legalcaseDto.CourtPhone,
-                    CourtRoomNo = legalcaseDto.CourtRoomNo,
-                    CourtVirtualLink = legalcaseDto.CourtVirtualLink,
+                CourtLocationId = legalcaseDto.CourtLocationId,
+                CourtId = legalcaseDto.CourtId,
+                Court = legalcaseDto.Court,
+                CourtPartId = legalcaseDto.CourtPartId,
+                CourtAddress = legalcaseDto.CourtAddress,
+                CourtConferenceId = legalcaseDto.CourtConferenceId,
+                CourtCallIn = legalcaseDto.CourtCallIn,
+                CourtNotes = legalcaseDto.CourtNotes,
+                CourtRoom = legalcaseDto.CourtRoom,
+                CourtPart = legalcaseDto.CourtPart,
+                CourtPhone = legalcaseDto.CourtPhone,
+                CourtRoomNo = legalcaseDto.CourtRoom!,
+                CourtVirtualLink = legalcaseDto.CourtVirtualLink,
+                Judge = legalcaseDto.Judge,
+                BillAmount = legalcaseDto.BillAmount,
 
-                    BillAmount = legalcaseDto.BillAmount,
+            };
 
-                };
+        }
+        ;
 
-        };
-
-
+        courts = await _courtService.GetAllCourtDataAsync();
+        //courts = new List<CourtDto>();
+        if (!courts.Any())
+        {
+            isNewCourt = true;
+            showCourtFields = true;
+        }
     }
 
     public async Task EditCaseDetail(Guid id)
@@ -1763,13 +2024,13 @@
         if (result != null)
         {
             noticeModel = new GenrateNoticeModel
-                {
-                    Id = result.Id,
-                    FormTypeId = result.FormTypeId,
-                    File = result.File,
-                    HTML = result.HTML,
-                    CreatedOn = result.CreatedOn,
-                };
+            {
+                Id = result.Id,
+                FormTypeId = result.FormTypeId,
+                File = result.File,
+                HTML = result.HTML,
+                CreatedOn = result.CreatedOn,
+            };
             isEditMode = true;
 
         }
@@ -1816,14 +2077,14 @@
             {
                 // UPDATE existing notice
                 success = await _CaseFormService.UpdateCaseFormAsync(new GenrateNoticeModel
-                    {
-                        Id = noticeModel.Id,
-                        LegalCaseId = CurrentCaseId.Value,
-                        FormTypeId = noticeModel.FormTypeId,
-                        File = noticeModel.File,
-                        HTML = noticeModel.HTML,
-                        CreatedOn = noticeModel.CreatedOn
-                    });
+                {
+                    Id = noticeModel.Id,
+                    LegalCaseId = CurrentCaseId.Value,
+                    FormTypeId = noticeModel.FormTypeId,
+                    File = noticeModel.File,
+                    HTML = noticeModel.HTML,
+                    CreatedOn = noticeModel.CreatedOn
+                });
 
                 if (success)
                 {
@@ -1884,7 +2145,13 @@
         {
             caseForm = caseFormDto.FirstOrDefault()!;
         }
+        else
+        {
+            IsFormGenerated = false;
+        }
+        await JS.InvokeVoidAsync("openTab", "activity");
     }
+
     private async Task LoadHearing()
     {
         CaseHearings = await _caseHearingService.GetAllCaseHeariingByCaseIdAsync(CurrentCaseId.Value);
@@ -1892,6 +2159,12 @@
         {
             CaseHearing = CaseHearings.FirstOrDefault()!;
         }
+
+    }
+
+    private async Task LoadCaseDocument()
+    {
+        caseDocuments = await _service.CaseDocumentList(legalcaseDto.Id);
 
     }
 
@@ -2007,32 +2280,7 @@
 
     }
 
-    private EditToBuildingDto editBuildingModel = new();
-    private bool showBuildingFields = false;
-    private bool showCourtFields = false;
-    private bool IsNewBuilding = false;
-    private string searchBuildingText;
-    private string searchCourtText;
-    private string searchTenantText;
-    private List<EditToBuildingDto> filteredBuildings = new();
-    private List<EditToTenantDto> filteredTenant = new();
-    private List<State> StateList = new();
-    private List<RegulationStatus> RegulationList = new();
-    private List<EditToBuildingDto> BuildingList = new();
-    private List<EditToTenantDto> TenantList = new();
-    private List<string> Tenants = new();
-    private List<string> UnderTenants = new() { "John Doe", "John Doe" };
-    private List<AdditioanlTenants> AdditionalTenantfromDbList = new();
-    private List<AddtionalTenantDto> AdditionalTenantList = new();
-    private List<AdditionalOccupantDto> AdditionalOccupantsList = new();
-    private bool showCourtInfoAlert = false;
-    private bool IsFormGenerated = false;
-    public EditToTenantDto selectedTenant = new EditToTenantDto();
-    public EditToTenantDto ViewTenant = new EditToTenantDto();
-    public CourtDto court = new CourtDto();
-    public CaseHearingDto caseHearing = new CaseHearingDto();
-    public List<CourtDto> courts = new List<CourtDto>();
-    public List<CourtDto> filteredCourts = new List<CourtDto>();
+
 
 
     private async Task ShowBuildingModal()
@@ -2049,17 +2297,27 @@
     }
     private async Task ShowCourtModal()
     {
-        if (legalcaseDto.CourtId == Guid.Empty && !isNewCourt)
+        if ((legalcaseDto.CourtLocationId == Guid.Empty || legalcaseDto.CourtLocationId == null ) && !isNewCourt)
         {
             showCourtFields = false;
             searchCourtText = "";
         }
-        else if (legalcaseDto.CourtId != Guid.Empty && !isNewCourt)
+        else if ((legalcaseDto.CourtLocationId != Guid.Empty || legalcaseDto.CourtLocationId != null) && !isNewCourt)
         {
-            court = await _courtService.GetCourtByIdAsync(legalcaseDto.CourtId.Value);
-            searchCourtText = court.Court ?? court.RoomNo;
-            showCourtFields = true;
+            court = await _courtService.GetCourtByIdAsync(legalcaseDto!.CourtLocationId!.Value);
+            searchCourtText = court.Court;
+            showCourtFields = true; searchCourtPartText = "";
+            if (legalcaseDto.CourtPartId != Guid.Empty && legalcaseDto.CourtPartId != null)
+            {
+                court.SelectedCourtPart = court.CourtPart.Where(e => e.Id == legalcaseDto.CourtPartId).FirstOrDefault()!;
+                searchCourtPartText = court.SelectedCourtPart.Part;
+            }
+            else
+            {
+                filteredCourtsPart = court.CourtPart;
+            }
         }
+
 
         await JS.InvokeVoidAsync("showModal", "courtModal");
     }
@@ -2086,20 +2344,32 @@
     private async Task OnSearchCourtInput(ChangeEventArgs e)
     {
         searchCourtText = e.Value?.ToString() ?? "";
-        if (!string.IsNullOrWhiteSpace(searchCourtText))
+        if (!string.IsNullOrWhiteSpace(searchCourtText) && searchCourtText.Length >= 3)
         {
-            filteredCourts = courts
+            filteredCourts = await _courtService.SearchCourt(searchCourtText);
+        }
+
+        StateHasChanged();
+
+
+    }
+    private async Task OnSearchCourtPartInput(ChangeEventArgs e)
+    {
+        searchCourtPartText = e.Value?.ToString() ?? "";
+        if (!string.IsNullOrWhiteSpace(searchCourtPartText))
+        {
+            filteredCourtsPart = court.CourtPart
                 .Where(c => c.Judge.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase)
                             || c.RoomNo.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase)
-                            || c.Part.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase)
-                            || c.Court.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase)
-                            || c.Address.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase))
+                            || c.Part.Contains(searchCourtText, StringComparison.OrdinalIgnoreCase))
                 .ToList();
         }
         else
         {
-            filteredCourts.Clear();
+            filteredCourtsPart.Clear();
         }
+        StateHasChanged();
+
     }
 
     // Select building from list
@@ -2124,10 +2394,31 @@
     {
         court = selected;
         filteredCourts.Clear();
-        searchCourtText = selected.Court ?? selected.RoomNo;
+        searchCourtText = selected.Court ;
         showCourtFields = true;
-
+        if(court.CourtPart.Count > 0)
+        {
+            filteredCourtsPart = court.CourtPart;
+        }
+        searchCourtPartText = null;
         legalcaseDto.CourtId = selected.Id;
+        legalcaseDto.CourtLocationId = selected.Id;
+        filteredCourts = courts;
+
+        StateHasChanged();
+
+    }
+    private void SelectCourtPart(CourtPartDto selected)
+    {
+        court.SelectedCourtPart = selected;
+        filteredCourtsPart.Clear();
+        searchCourtPartText = selected.Part;
+        showCourtFields = true;
+        // filteredCourtsPart = court.CourtPart;
+        legalcaseDto.CourtPartId = selected.Id;
+
+        StateHasChanged();
+
     }
     // Toggle "Add New" section
     private void OnBindBuildingAfter()
@@ -2182,18 +2473,18 @@
         if (editBuildingModel.Id == null || editBuildingModel.Id == Guid.Empty)
         {
             var newBuilding = new CreateToBuildingDto()
-                {
-                    Address1 = editBuildingModel.Address1,
-                    //Address2 = address2,
-                    City = editBuildingModel.City,
-                    StateId = editBuildingModel.StateId,
-                    Zipcode = editBuildingModel.Zipcode,
-                    BuildingUnits = editBuildingModel.BuildingUnits,
-                    ApartmentCode = editBuildingModel.ApartmentCode,
-                    MDRNumber = editBuildingModel.MDRNumber,
-                    RegulationStatusId = editBuildingModel.RegulationStatusId,
-                    LandlordId = legalcaseDto.LandlordId
-                };
+            {
+                Address1 = editBuildingModel.Address1,
+                //Address2 = address2,
+                City = editBuildingModel.City,
+                StateId = editBuildingModel.StateId,
+                Zipcode = editBuildingModel.Zipcode,
+                BuildingUnits = editBuildingModel.BuildingUnits,
+                ApartmentCode = editBuildingModel.ApartmentCode,
+                MDRNumber = editBuildingModel.MDRNumber,
+                RegulationStatusId = editBuildingModel.RegulationStatusId,
+                LandlordId = legalcaseDto.LandlordId
+            };
 
             var buildingId = await _buildingService.AddOnlyApartmentfromCase(newBuilding);
             addorupdate = true;
@@ -2206,19 +2497,19 @@
             {
 
                 var updateBuilding = new EditToBuildingDto()
-                    {
-                        Id = editBuildingModel.Id,
-                        Address1 = editBuildingModel.Address1,
-                        BuildingCode = editBuildingModel.BuildingCode,
-                        //Address2 = address2,
-                        City = editBuildingModel.City,
-                        StateId = editBuildingModel.StateId,
-                        Zipcode = editBuildingModel.Zipcode,
-                        BuildingUnits = editBuildingModel.BuildingUnits,
-                        ApartmentCode = editBuildingModel.ApartmentCode,
-                        MDRNumber = editBuildingModel.MDRNumber,
-                        RegulationStatusId = editBuildingModel.RegulationStatusId,
-                    };
+                {
+                    Id = editBuildingModel.Id,
+                    Address1 = editBuildingModel.Address1,
+                    BuildingCode = editBuildingModel.BuildingCode,
+                    //Address2 = address2,
+                    City = editBuildingModel.City,
+                    StateId = editBuildingModel.StateId,
+                    Zipcode = editBuildingModel.Zipcode,
+                    BuildingUnits = editBuildingModel.BuildingUnits,
+                    ApartmentCode = editBuildingModel.ApartmentCode,
+                    MDRNumber = editBuildingModel.MDRNumber,
+                    RegulationStatusId = editBuildingModel.RegulationStatusId,
+                };
 
                 await _buildingService.UpdateonlyBuildingfromCase(updateBuilding);
                 addorupdate = true;
@@ -2263,19 +2554,19 @@
         if (client.Id == null || client.Id == Guid.Empty)
         {
             var newClient = new CreateToClientDto()
-                {
-                    Address1 = client.Address1,
-                    //Address2 = address2,
-                    City = client.City,
-                    StateId = client.StateId,
-                    ZipCode = client.ZipCode,
-                    FirstName = client.FirstName,
-                    LastName = client.LastName,
-                    Reference = client.Reference,
-                    ClientTypeId = client.ClientTypeId,
-                    Phone = client.Phone,
-                    Email = client.Email,
-                };
+            {
+                Address1 = client.Address1,
+                //Address2 = address2,
+                City = client.City,
+                StateId = client.StateId,
+                ZipCode = client.ZipCode,
+                FirstName = client.FirstName,
+                LastName = client.LastName,
+                Reference = client.Reference,
+                ClientTypeId = client.ClientTypeId,
+                Phone = client.Phone,
+                Email = client.Email,
+            };
 
             var clientId = await _clientService.CreateOnlyClient(newClient);
             addorupdate = true;
@@ -2288,22 +2579,22 @@
             {
 
                 var updateBuilding = new EditToClientDto()
-                    {
-                        Id = client.Id,
-                        Address1 = client.Address1,
-                        ClientCode = client.ClientCode,
-                        //Address2 = address2,
-                        ClientTypeId = client.ClientTypeId,
-                        City = client.City,
-                        StateId = client.StateId,
-                        ZipCode = client.ZipCode,
-                        Phone = client.Phone,
-                        Email = client.Email,
-                        Reference = client.Reference,
-                        FirstName = client.FirstName,
-                        LastName = client.LastName,
+                {
+                    Id = client.Id,
+                    Address1 = client.Address1,
+                    ClientCode = client.ClientCode,
+                    //Address2 = address2,
+                    ClientTypeId = client.ClientTypeId,
+                    City = client.City,
+                    StateId = client.StateId,
+                    ZipCode = client.ZipCode,
+                    Phone = client.Phone,
+                    Email = client.Email,
+                    Reference = client.Reference,
+                    FirstName = client.FirstName,
+                    LastName = client.LastName,
 
-                    };
+                };
 
                 await _clientService.UpdateClientformCase(updateBuilding);
                 addorupdate = true;
@@ -2357,19 +2648,19 @@
                 var lastName = parts.Length > 1 ? parts[1] : "";
 
                 var newTenant = new CreateToTenantDto()
-                    {
-                        FirstName = firstName,
-                        LastName = lastName,
-                        UnitOrApartmentNumber = legalcaseDto.ApartmentNumber,
-                        BuildingId = legalcaseDto.BuildingId,
-                        MoveInDate = legalcaseDto.DateTenantMoved,
-                        MonthlyRent = legalcaseDto.MonthlyRent,
-                        TenantShare = legalcaseDto.TenantShare,
-                        RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
-                        TotalRentOwed = legalcaseDto.TotalOwed,
-                        TenancyTypeId = legalcaseDto.TenancyTypeId,
-                        SocialServices = legalcaseDto.SocialService,
-                    };
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    UnitOrApartmentNumber = legalcaseDto.ApartmentNumber,
+                    BuildingId = legalcaseDto.BuildingId,
+                    MoveInDate = legalcaseDto.DateTenantMoved,
+                    MonthlyRent = legalcaseDto.MonthlyRent,
+                    TenantShare = legalcaseDto.TenantShare,
+                    RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                    TotalRentOwed = legalcaseDto.TotalOwed,
+                    TenancyTypeId = legalcaseDto.TenancyTypeId,
+                    SocialServices = legalcaseDto.SocialService,
+                };
                 var tenantId = await _tenantService.AddTenantfromCase(newTenant);
 
                 legalcaseDto.TenantId = tenantId;
@@ -2391,21 +2682,21 @@
                     // Only update if anything actually changed
 
                     var updateTenant = new EditToTenantDto
-                        {
-                            Id = legalcaseDto.TenantId ?? Guid.Empty,
-                            FirstName = firstName,
-                            LastName = lastName,
-                            BuildingId = legalcaseDto.BuildingId,
-                            UnitOrApartmentNumber = legalcaseDto.ApartmentNumber,
-                            MonthlyRent = legalcaseDto.MonthlyRent,
-                            TenantShare = legalcaseDto.TenantShare,
-                            RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
-                            TotalRentOwed = legalcaseDto.TotalOwed,
-                            TenancyTypeId = legalcaseDto.TenancyTypeId,
-                            SocialServices = legalcaseDto.SocialService,
-                            UpdatedOn = DateTime.Now,
+                    {
+                        Id = legalcaseDto.TenantId ?? Guid.Empty,
+                        FirstName = firstName,
+                        LastName = lastName,
+                        BuildingId = legalcaseDto.BuildingId,
+                        UnitOrApartmentNumber = legalcaseDto.ApartmentNumber,
+                        MonthlyRent = legalcaseDto.MonthlyRent,
+                        TenantShare = legalcaseDto.TenantShare,
+                        RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                        TotalRentOwed = legalcaseDto.TotalOwed,
+                        TenancyTypeId = legalcaseDto.TenancyTypeId,
+                        SocialServices = legalcaseDto.SocialService,
+                        UpdatedOn = DateTime.Now,
 
-                        };
+                    };
 
                     await _tenantService.UpdateTenantAsync(updateTenant);
                     addorupdate = true;
@@ -2428,13 +2719,13 @@
                 if (i - 1 < AdditionalTenantfromDbList.Count)
                 {
                     var existingList = AdditionalTenantfromDbList.Select(e => new AddtionalTenantDto
-                        {
-                            Id = e.Id,
-                            FirstName = e.FirstName,
-                            LastName = e.LastName,
-                            TenantId = e.TenantId,
+                    {
+                        Id = e.Id,
+                        FirstName = e.FirstName,
+                        LastName = e.LastName,
+                        TenantId = e.TenantId,
 
-                        }).ToList();
+                    }).ToList();
                     var existing = existingList[i - 1];
 
                     existing.FirstName = firstName;
@@ -2447,15 +2738,15 @@
                 {
                     // New Additional Tenant
                     var newAdditional = new AddtionalTenantDto
-                        {
-                            TenantId = legalcaseDto.TenantId,
-                            FirstName = firstName,
-                            LastName = lastName,
-                            CreatedOn = DateTime.Now,
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsVisible = true
-                        };
+                    {
+                        TenantId = legalcaseDto.TenantId,
+                        FirstName = firstName,
+                        LastName = lastName,
+                        CreatedOn = DateTime.Now,
+                        IsActive = true,
+                        IsDeleted = false,
+                        IsVisible = true
+                    };
 
                     await _additionalTenantService.AddAdditionalTenantAsync(new List<AddtionalTenantDto> { newAdditional });
                 }
@@ -2503,51 +2794,68 @@
         var addorupdate = false;
         if (court.Id == null || court.Id == Guid.Empty)
         {
-            var newCourt = new CourtDto()
-                {
-                    Address = court.Address,
-                    Part = court.Part,
-                    RoomNo = court.RoomNo,
-                    Judge = court.Judge,
-                    Court = court.Court,
-                    ConferenceId = court.ConferenceId,
-                    CallIn = court.CallIn,
-                    Phone = court.Phone,
-                    VirtualLink = court.VirtualLink,
-                    Notes = court.Notes
-                };
+            var newCourt = new CourtDto();
+            // {
+            //     Address = court.Address,
+            //     // Part = court.Part,
+            //     // RoomNo = court.RoomNo,
+            //     // Judge = court.Judge,
+            //     Court = court.Court,
+            //     // ConferenceId = court.ConferenceId,
+            //     // CallIn = court.CallIn,
+            //     Phone = court.Phone,
+            //     // VirtualLink = court.VirtualLink,
+            //     Notes = court.Notes,
+            //     SelectedCourtPart = court
+
+            // };
+
+            newCourt = court;
 
             var CourtId = await _courtService.AddCourtAsync(newCourt);
+            if (CourtId != null && CourtId != Guid.Empty)
+            {
+                var courtpartid = await courtpartService.AddCourtPartListAsync(new List<CourtPartDto> { court.SelectedCourtPart });
+                if (courtpartid != null)
+                {
+                    legalcaseDto.CourtPartId = courtpartid.FirstOrDefault();
+                }
+            }
             addorupdate = true;
             legalcaseDto.CourtId = CourtId;
 
         }
+        // else
+        // {
+        //     if (court.Id != null)
+        //     {
+
+        //         var updateCourt = new CourtDto()
+        //         {
+        //             Address = court.Address,
+        //             Part = court.Part,
+        //             RoomNo = court.RoomNo,
+        //             Judge = court.Judge,
+        //             Court = court.Court,
+        //             ConferenceId = court.ConferenceId,
+        //             CallIn = court.CallIn,
+        //             Phone = court.Phone,
+        //             VirtualLink = court.VirtualLink,
+        //             Notes = court.Notes
+        //         };
+
+        //         await _courtService.UpdateCourtAsync(updateCourt);
+        //         addorupdate = true;
+        //     }
+        // }
         else
         {
-            if (court.Id != null)
-            {
-
-                var updateCourt = new CourtDto()
-                    {
-                        Address = court.Address,
-                        Part = court.Part,
-                        RoomNo = court.RoomNo,
-                        Judge = court.Judge,
-                        Court = court.Court,
-                        ConferenceId = court.ConferenceId,
-                        CallIn = court.CallIn,
-                        Phone = court.Phone,
-                        VirtualLink = court.VirtualLink,
-                        Notes = court.Notes
-                    };
-
-                await _courtService.UpdateCourtAsync(updateCourt);
-                addorupdate = true;
-            }
+            legalcaseDto.CourtPartId = court.SelectedCourtPart.Id != Guid.Empty ? court.SelectedCourtPart.Id :null ;
+            legalcaseDto.CourtRoomNo = court.SelectedCourtPart.RoomNo!;
+            legalcaseDto.CourtPart = court.SelectedCourtPart.Part!;
+            legalcaseDto.CourtId = court.Id;
         }
-
-        if (addorupdate)
-        {
+        
 
 
             var success = await _service.UpdateCaseAsync(legalcaseDto);
@@ -2556,14 +2864,14 @@
             {
                 ToastService.ShowSuccess("Court details updated successfully!");
                 await JS.InvokeVoidAsync("hideModal", "courtModal");
-
+                // await Task.Delay(200);
                 await LoadCaseDetails();
             }
             else
             {
                 ToastService.ShowError("Failed to update Court details.");
             }
-        }
+        
         // Map edited fields
 
 
@@ -2574,18 +2882,18 @@
         spinnerservice.Show();
 
         var newHearing = new CaseHearingDto()
-            {
-                Caption = caseHearing.Caption,
-                LegalCaseId = legalcaseDto.Id,
-                CourtId = legalcaseDto.CourtId,
-                HearingDate = caseHearing.HearingDate,
-                HearingTime = caseHearing.HearingTime,
-                CreatedBy = Guid.Parse(loggedInUserId),
-                // CallIn = caseHearing.CallIn,
-                // Phone = caseHearing.Phone,
-                // VirtualLink = caseHearing.VirtualLink,
-                // Notes = caseHearing.Notes
-            };
+        {
+            Caption = caseHearing.Caption,
+            LegalCaseId = legalcaseDto.Id,
+            CourtId = legalcaseDto.CourtLocationId,
+            HearingDate = caseHearing.HearingDate,
+            HearingTime = caseHearing.HearingTime,
+            CreatedBy = Guid.Parse(loggedInUserId),
+            // CallIn = caseHearing.CallIn,
+            // Phone = caseHearing.Phone,
+            // VirtualLink = caseHearing.VirtualLink,
+            // Notes = caseHearing.Notes
+        };
 
         var CourtId = await _caseHearingService.AddHearing(newHearing);
 
@@ -2690,15 +2998,15 @@
             else
             {
                 var additional = new AddtionalTenantDto()
-                    {
-                        FirstName = splittedname[0],
-                        LastName = splittedname[1],
-                        TenantId = TenantList.Select(e => e.Id).FirstOrDefault(),
-                        CreatedOn = DateTime.Now,
-                        IsActive = true,
-                        IsDeleted = false, // better to keep false
-                        IsVisible = true
-                    };
+                {
+                    FirstName = splittedname[0],
+                    LastName = splittedname[1],
+                    TenantId = TenantList.Select(e => e.Id).FirstOrDefault(),
+                    CreatedOn = DateTime.Now,
+                    IsActive = true,
+                    IsDeleted = false, // better to keep false
+                    IsVisible = true
+                };
 
                 AdditionalTenantList.Add(additional);
             }
@@ -2753,13 +3061,13 @@
         else
         {
             var additional = new AdditionalOccupantDto()
-                {
-                    Name = name,
-                    CreatedOn = DateTime.Now,
-                    IsActive = true,
-                    IsDeleted = false, // better to keep false
-                    IsVisible = true
-                };
+            {
+                Name = name,
+                CreatedOn = DateTime.Now,
+                IsActive = true,
+                IsDeleted = false, // better to keep false
+                IsVisible = true
+            };
 
             AdditionalOccupantsList.Add(additional);
         }
@@ -2768,7 +3076,7 @@
     }
     private async Task OpenHearingPopup()
     {
-        if (legalcaseDto.CourtId == null || legalcaseDto.CourtId == Guid.Empty)
+        if (legalcaseDto.CourtLocationId == null || legalcaseDto.CourtLocationId == Guid.Empty)
         {
             showCourtInfoAlert = true;
             return;
@@ -2828,5 +3136,63 @@
         IsFormGenerated = false;
     }
 
+    private async Task DownloadDocument(CaseDocument doc)
+    {
+        // 1. Read bytes from file path
+        byte[] fileBytes = await File.ReadAllBytesAsync(doc.Path);
 
+        // 2. Convert to Base64 for JS
+        string base64 = Convert.ToBase64String(fileBytes);
+
+        // 3. Detect MIME type (optional, safe fallback is octet-stream)
+        string contentType = GetMimeType(doc.Path);
+
+        await JS.InvokeVoidAsync(
+            "downloadFile",
+            doc.Name,      // file name
+            base64,        // file bytes
+            contentType    // MIME type
+        );
+    }
+    private string GetMimeType(string filePath)
+    {
+        var ext = Path.GetExtension(filePath).ToLower();
+
+        return ext switch
+        {
+            ".pdf" => "application/pdf",
+            ".doc" => "application/msword",
+            ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ".png" => "image/png",
+            ".jpg" => "image/jpeg",
+            ".jpeg" => "image/jpeg",
+            ".txt" => "text/plain",
+            _ => "application/octet-stream"
+        };
+    }
+
+
+    private async Task PreviewDocument(string filePath)
+    {
+        if (!string.IsNullOrWhiteSpace(filePath))
+        {
+            var fullUrl = Navigation.BaseUri + filePath;
+            // Navigation.NavigateTo(fullUrl, forceLoad: true);
+            await JS.InvokeVoidAsync("open", fullUrl, "_blank");
+        }
+    }
+
+    public async Task DeleteCaseDocument(Guid id)
+    {
+        spinnerservice.Show();
+        bool isDeleted = await _service.DeleteCaseDocument(id);
+
+        if (isDeleted)
+        {
+            await LoadCaseDocument();
+            ToastService.ShowSuccess("File  has been Deleted successfully!");
+            StateHasChanged();
+        }
+        spinnerservice.Hide();
+    }
 }

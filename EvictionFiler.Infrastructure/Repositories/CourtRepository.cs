@@ -1,5 +1,6 @@
 ﻿using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.CourtDto;
+using EvictionFiler.Application.DTOs.CourtPart;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
@@ -25,7 +26,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<Courts>> GetAllCourtDataAsync()
         {
-            return await _mainDbContext.Courts.ToListAsync();
+            return await _mainDbContext.Courts.Include(e => e.CourtParts).OrderBy(e=>e.Court).Take(10).ToListAsync();
         }
         public async Task<PaginationDto<Courts>> GetPagedCourtsAsync(int pageNumber, int pageSize, string searchTerm)
         {
@@ -83,7 +84,7 @@ namespace EvictionFiler.Infrastructure.Repositories
         public async Task<Courts> GetCourtByIdAsync(Guid id)
         {
 
-            return await _mainDbContext.Courts.FindAsync(id);
+            return await _mainDbContext.Courts.Include(e=>e.CourtParts).Where(e=>e.Id == id).FirstOrDefaultAsync();
 
 
         }
@@ -98,17 +99,37 @@ namespace EvictionFiler.Infrastructure.Repositories
            
 
             var court = await _mainDbContext.Courts
-                .Where(e =>
-                    (e.Court != null && e.Court.ToLower().Contains(searchTerm))
+                .Where(a =>
+                    (a.Court != null && a.Court.ToLower().Contains(searchTerm))
                    
                 )
-                .Select(e => new CourtDto
+                .Select(c => new CourtDto
                 {
-                    Id = e.Id,
-                    Court = e.Court,
-                   
-                })
-                .ToListAsync();
+                    Id = c.Id,
+                    Court = c.Court,
+                    Address = c.Address,
+                    Phone = c.Phone,
+                    Notes = c.Notes,
+                    //CallIn = c.CallIn,
+                    //ConferenceId = c.ConferenceId,
+                    //RoomNo = c.RoomNo,
+                    //Judge = c.Judge,
+                    //Part = c.Part,
+                    //VirtualLink = c.VirtualLink,
+                    CountyId = c.CountyId,
+                    CourtPart = c.CourtParts.Select(e => new CourtPartDto
+                    {
+                        Id = e.Id,
+                        CallIn = e.CallIn,
+                        ConferenceId = e.ConferenceId,
+                        RoomNo = e.RoomNo,
+                        Part = e.Part,
+                        Judge = e.Judge,
+                        Tollfree = e.Tollfree,
+                        VirtualLink = e.VirtualLink,
+                        CourtId = e.CourtId,
+                    }).ToList(),
+                }).ToListAsync();
 
             return court ?? new List<CourtDto>();
         }

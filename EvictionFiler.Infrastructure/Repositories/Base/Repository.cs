@@ -5,12 +5,13 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using EvictionFiler.Application.Interfaces.IRepository.Base;
+using EvictionFiler.Domain.Entities.Base.Base;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 
 namespace EvictionFiler.Infrastructure.Repositories.Base
 {
-	public abstract class Repository<T> : IRepository<T> where T : class
+	public abstract class Repository<T> : IRepository<T> where T : DeletableBaseEntity
 	{
 		private readonly MainDbContext _context;
 		private readonly DbSet<T> _dbSet;
@@ -139,7 +140,7 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 			return entity;
 		}
 
+        
 
-		
-	}
+    }
 }
