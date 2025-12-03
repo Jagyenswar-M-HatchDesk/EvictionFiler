@@ -358,6 +358,28 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             };
         }
 
+        public static IEnumerable<FilingMethod> GetFilingMethod()
+        {
+            var now = DateTime.UtcNow;
+            return new List<FilingMethod>
+            {
+                new FilingMethod() { Name = "Electronic", CreatedOn = now },
+                new FilingMethod() { Name = "In Person", CreatedOn = now },
+            };
+        }
+
+        public static IEnumerable<ServiceMethod> GetServiceMethod()
+        {
+            var now = DateTime.UtcNow;
+            return new List<ServiceMethod>
+            {
+                new ServiceMethod() { Name = "Personal", CreatedOn = now },
+                new ServiceMethod() { Name = "Overnight", CreatedOn = now },
+                new ServiceMethod() { Name = "Mail", CreatedOn = now },
+                new ServiceMethod() { Name = "Posting + Mail", CreatedOn = now },
+            };
+        }
+
         public static IEnumerable<PremiseType> GetPremiseType()
         {
             var now = DateTime.UtcNow;

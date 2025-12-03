@@ -53,9 +53,12 @@ namespace EvictionFiler.Domian.Enums
         Landlord = 1,
         Building = 2,
         Tenant = 3,
-        Terms = 4,
-        Rent = 5,
+        Lease = 4,
+        Arrears = 5,
         Notice = 6,
+        GoodCause = 7,
+        Filing = 8,
+        Review = 9,
     }
 
     public enum StepHPD
