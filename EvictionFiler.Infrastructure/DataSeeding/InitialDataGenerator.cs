@@ -19,6 +19,33 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new Language() { Name = "Chienese", CreatedOn = now },
             };
         }
+        public static IEnumerable<RemainderType> GetRemainderTypes()
+        {
+            var now = DateTime.UtcNow;
+            return new List<RemainderType>
+    {
+        new RemainderType { Name = "End of predicate notice", CreatedOn = now },
+        new RemainderType { Name = "Notice of Petition filing", CreatedOn = now },
+        new RemainderType { Name = "Petition filing", CreatedOn = now },
+        new RemainderType { Name = "Affidavit of Service", CreatedOn = now },
+        new RemainderType { Name = "Warrant eligible", CreatedOn = now },
+        new RemainderType { Name = "Opposition Due (motion)", CreatedOn = now },
+        new RemainderType { Name = "Reply Due (motion)", CreatedOn = now },
+        new RemainderType { Name = "Cross-Motion Deadline", CreatedOn = now },
+        new RemainderType { Name = "OSC Opposition Due", CreatedOn = now },
+        new RemainderType { Name = "Temporary Stay Expires", CreatedOn = now },
+        new RemainderType { Name = "Undertaking / U&O Payment Due", CreatedOn = now },
+        new RemainderType { Name = "Adjournment Cut-Off", CreatedOn = now },
+        new RemainderType { Name = "Decision Tickler (D+30)", CreatedOn = now },
+        new RemainderType { Name = "Decision Tickler (D+60)", CreatedOn = now },
+        new RemainderType { Name = "Decision Tickler (D+90)", CreatedOn = now },
+        new RemainderType { Name = "Certificate of Service Filing", CreatedOn = now },
+        new RemainderType { Name = "Marshal: Day of", CreatedOn = now },
+         new RemainderType { Name = "Appeal Notice Deadline", CreatedOn = now },
+        new RemainderType { Name = "New filing by opposing counsel", CreatedOn = now }
+    };
+        }
+
 
         public static IEnumerable<BilingType> GetBilingTypes()
         {

@@ -34,7 +34,8 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<AppearanceTypePerDiem> MstAppearanceTypesPerDiems { get; set; }
         public DbSet<ReliefPetitionerType> MstReliefPetitionerTypes { get; set; }
         public DbSet<ReliefRespondentType> MstReliefRespondentTypes { get; set; }
-
+        public DbSet<RemainderType> MstRemainderTypes { get; set; }
+        public DbSet<RemainderCenter> TblRemainderCenter { get; set; }
         public DbSet<BilingType> MstBilingTypes { get; set; }
         public DbSet<DefenseType> MstDefenseTypes { get; set; }
         public DbSet<County> MstCounties { get; set; }

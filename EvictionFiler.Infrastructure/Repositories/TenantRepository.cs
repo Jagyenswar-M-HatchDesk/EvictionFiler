@@ -52,10 +52,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 				.FirstOrDefaultAsync();
 		}
 
-		public async Task<List<CreateToTenantDto>> SearchTenantByCode(string code)
+		public async Task<List<EditToTenantDto>> SearchTenantByname(string name)
 		{
-			var tenant = await _dbContext.Tenants.Where(e => e.TenantCode.Contains(code)).Select(dto => new CreateToTenantDto
-			{
+			var tenant = await _dbContext.Tenants.Where(e => e.TenantCode.Contains(name)).Select(dto => new EditToTenantDto
+            {
 
 				TenantCode = dto.TenantCode,
 				FirstName = dto.FirstName,
@@ -79,7 +79,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			}).ToListAsync();
 			if (tenant == null)
-				return new List<CreateToTenantDto>();
+				return new List<EditToTenantDto>();
 			return tenant;
 		}
 

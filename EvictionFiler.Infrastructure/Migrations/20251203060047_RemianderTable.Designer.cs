@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251203060047_RemianderTable")]
+    partial class RemianderTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -3034,9 +3037,9 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<Guid?>("CountyId")
+                    b.Property<string>("CountyName")
                         .HasMaxLength(50)
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
@@ -3067,9 +3070,9 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<Guid?>("RemainderTypeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("TenantId")
+                    b.Property<string>("TenantName")
                         .HasMaxLength(50)
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
@@ -3082,11 +3085,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CountyId");
-
                     b.HasIndex("RemainderTypeId");
-
-                    b.HasIndex("TenantId");
 
                     b.ToTable("TblRemainderCenter");
                 });
@@ -4123,23 +4122,11 @@ namespace EvictionFiler.Infrastructure.Migrations
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.RemainderCenter", b =>
                 {
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.County", "County")
-                        .WithMany()
-                        .HasForeignKey("CountyId");
-
                     b.HasOne("EvictionFiler.Domain.Entities.Master.RemainderType", "RemainderType")
                         .WithMany()
                         .HasForeignKey("RemainderTypeId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId");
-
-                    b.Navigation("County");
-
                     b.Navigation("RemainderType");
-
-                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Tenant", b =>

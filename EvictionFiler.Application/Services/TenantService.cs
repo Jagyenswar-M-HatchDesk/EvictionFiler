@@ -129,9 +129,9 @@ namespace EvictionFiler.Application.Services
             return null;
         }
 
-        public async Task<List<CreateToTenantDto>> SearchTenantbyCode(string code)
+        public async Task<List<EditToTenantDto>> SearchTenantbyname(string name)
         {
-            var newtenant = await _repo.SearchTenantByCode(code);
+            var newtenant = await _repo.SearchTenantByname(name);
             return newtenant;
         }
 

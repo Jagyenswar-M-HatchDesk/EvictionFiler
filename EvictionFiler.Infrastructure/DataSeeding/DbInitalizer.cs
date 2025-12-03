@@ -38,8 +38,8 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 await SeedRate(context);
                 await SeedPaymentMethod(context);
                 await SeedReportingTypePerDiem(context);
-                
 
+                await SeedRemainderTypes(context);
                 await SeedTypeOfOwner(context);
                 await context.SaveChangesAsync();
 
@@ -73,6 +73,18 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 if (context.MstPaymentMethods.FirstOrDefault(d => d.Name == type.Name) == null)
                 {
                     await context.MstPaymentMethods.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedRemainderTypes(MainDbContext context)
+        {
+            var remainderTypes = InitialDataGenerator.GetRemainderTypes();
+            foreach (var type in remainderTypes)
+            {
+                if (context.MstRemainderTypes.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstRemainderTypes.AddAsync(type);
                 }
             }
         }
