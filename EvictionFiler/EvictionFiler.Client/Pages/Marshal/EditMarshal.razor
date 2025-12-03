@@ -1,0 +1,131 @@
+﻿@using EvictionFiler.Application.DTOs.MarshalsDto
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Client.SpinnerService
+@inject IJSRuntime JS
+@inject SpinnerService spinnerservice
+@inject IMarshalService _marshalService
+
+<style>
+    .offcanvas.show {
+        transform: translateX(0%);
+    }
+
+    .offcanvas {
+        transform: translateX(100%);
+        width: 500px !important;
+    }
+
+    .color-text {
+        color: #1F365D;
+    }
+</style>
+
+<div class="offcanvas offcanvas-end show border-start shadow" tabindex="-1" id="editUser"
+     style="visibility:@(IsVisible ? "visible" : "hidden"); transition: transform 0.9s ease-in-out;"
+     aria-labelledby="editUserLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="createUserLabel">Edit Marshal</h5>
+        <button type="button" class="btn-close text-reset" @onclick="Hide"></button>
+    </div>
+    <div class="offcanvas-body">
+        <EditForm Model="@marshalDto" OnValidSubmit="SubmitEdit">
+            <DataAnnotationsValidator />
+            @*<ValidationSummary />*@
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label color-text">Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
+                        <InputText class="form-control" @bind-Value="marshalDto.Name" placeholder="Enter Name" />
+                    </div>
+                    <ValidationMessage For="@(()=>marshalDto.Name)" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label color-text">Telephone</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
+                        <InputText class="form-control" @bind-Value="marshalDto.Telephone" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label color-text">Fax</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-regular fa-at color-text"></i></span>
+                        <InputText class="form-control" @bind-Value="marshalDto.Fax" placeholder="Enter Fax" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label color-text">Badge Number</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-regular fa-at color-text"></i></span>
+                        <InputNumber class="form-control" @bind-Value="marshalDto.BadgeNumber" placeholder="" />
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="mb-4">
+                <label class="form-label color-text">Office Address</label>
+                <InputText class="form-control" @bind-Value="marshalDto.OfficeAddress" />
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+            </div>
+
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public MarshalDto marshalDto { get; set; } = new MarshalDto();
+    [Parameter] public EventCallback<MarshalDto> Submit { get; set; }
+
+    private bool IsVisible = false;
+
+    public Task ShowAsync(MarshalDto dto)
+    {
+        marshalDto = new MarshalDto
+        {
+            Id = dto.Id,
+            Name = dto.Name,
+            Telephone = dto.Telephone,
+            Fax = dto.Fax,
+            OfficeAddress = dto.OfficeAddress,
+            BadgeNumber = dto.BadgeNumber
+        };
+
+        IsVisible = true;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    public void Hide()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task SubmitEdit()
+    {
+        spinnerservice.Show();
+
+        var updated = await _marshalService.UpdateMarshalAsync(marshalDto);
+
+        if (updated != null)
+        {
+            IsVisible = false;
+            await Submit.InvokeAsync(updated);
+        }
+
+        spinnerservice.Hide();
+    }
+
+
+}
