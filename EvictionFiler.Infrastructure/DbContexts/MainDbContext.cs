@@ -70,6 +70,9 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<CaseHearing> CaseHearings { get; set; }
         public DbSet<Unit> MstUnits { get; set; }
         public DbSet<CaseDocument> CaseDocument { get; set; }
+        public DbSet<FilingMethod> MstFilingMethod { get; set; }
+        public DbSet<ServiceMethod> MstServiceMethod { get; set; }
+        public DbSet<ArrearLedger> ArrearLedgers { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

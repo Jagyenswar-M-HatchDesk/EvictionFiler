@@ -46,6 +46,7 @@ namespace EvictionFiler.Application.DTOs
 
         public Guid? BuildingId { get; set; }
         public Guid? CourtLocationId{ get; set; }
+        public Guid? FilingMethodId{ get; set; }
         public Guid? BuildingStateId { get; set; }
         public string? BuildingState { get; set; }
         public string BuildingAddress { get; set; }
@@ -68,10 +69,21 @@ namespace EvictionFiler.Application.DTOs
         public string? TenancyTypeName { get; set; }
         public bool? WrittenLease { get; set; }
         public DateOnly? LeaseEnd { get; set; }
+        public DateOnly? LeaseStart { get; set; }
+        public DateOnly? LastPaymentDate { get; set; }
+        public double? LastPayment { get; set; }
+
         public DateOnly? DateNoticeServed { get; set; }
         public bool? IsERAPPaymentReceived { get; set; }
         public DateOnly? DateTenantMoved { get; set; }
         public Guid? RentDueEachMonthOrWeekId { get; set; }
+        public Guid? NoticeId { get; set; }
+        public bool leasedAttached { get; set; } = false;
+        public bool ledgerAttached { get; set; } = false;
+        public bool NoticeproofAttached { get; set; } = false;
+        public bool RegistrationRentAttached { get; set; } = false;
+        public string AdditionalComments { get; set; }
+        public Guid? ServiceMethodId { get; set; }
         public Guid? TenantId { get; set; }
         public double? TenantShare { get; set; }
         public DateOnly? OralStart { get; set; }
@@ -79,7 +91,10 @@ namespace EvictionFiler.Application.DTOs
         public DateOnly? OralEnd { get; set; }
         public DateOnly? ExpirationDate { get; set; }
         public string? PredicateNotice { get; set; }
+        public string? Assistance { get; set; }
         public string? SocialService { get; set; }
+        public string? DeemedService { get; set; }
+        public string? Expiry { get; set; }
         public string? LastRentPaid { get; set; }
         public string? Reference { get; set; }
         public string? Borough { get; set; }
