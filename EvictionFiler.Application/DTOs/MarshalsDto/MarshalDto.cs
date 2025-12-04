@@ -8,7 +8,7 @@ namespace EvictionFiler.Application.DTOs.MarshalsDto
 
         [Required(ErrorMessage = "Name is required")]
         public string Name { get; set; } = string.Empty;
-        public int BadgeNumber { get; set; }
+        public string BadgeNumber { get; set; }
 
         public string Telephone { get; set; } = string.Empty;
         public string Fax { get; set; } = string.Empty;

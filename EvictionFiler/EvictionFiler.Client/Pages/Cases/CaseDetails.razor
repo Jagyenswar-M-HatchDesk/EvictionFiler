@@ -28,6 +28,7 @@
 @inject IClientService _clientService
 @inject IClientRoleRepository _clientRoleRepository
 @inject IFormTypesRepository FormTypesRepository
+@inject ICasesRepository _casesRepository
 @inject ICaseFormService _CaseFormService
 @inject IRegulationStatusRepository _regulationStatusRepository
 @inject IStateRepository _stateRepository
@@ -37,6 +38,7 @@
 @inject ITenantService _tenantService
 @inject ICourtService _courtService
 @inject ICaseHearingService _caseHearingService
+@inject ILegalCaseService _CaseService
 @inject IFeesCatalogService _feeCatalogService
 @inject IToastService ToastService
 @inject IJSRuntime JS
@@ -44,6 +46,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization;
 @using EvictionFiler.Domain.Entities
+@inject IJSRuntime JS
 
 @attribute [Authorize]
 
@@ -565,18 +568,10 @@
         color: red;
     }
 
-    .blazored-toast-container {
-        z-index: 999 !important;
-        position: fixed !important;
-    }
+    
 
-    .blazored-toast {
-        animation-duration: 8s !important; /* increase to 8 seconds */
-    }
-
-    .blazored-toast-progress {
-        animation-duration: 8s !important;
-    }
+   
+    
 </style>
 <style>
     #activityTable th,
@@ -791,6 +786,10 @@
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#timeline" type="button" role="tab" aria-controls="timeline" aria-selected="false">Timeline</button>
                                 </li>
+
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="Warrant-tab" data-bs-toggle="tab" data-bs-target="#Warrant" type="button" role="tab" aria-controls="Warrant" aria-selected="false">Warrant</button>
+                                </li>
                                 
                             </ul>
                         </div>
@@ -1003,9 +1002,16 @@
 
                     <!-- Rent Description -->
                     <div class="card shadow-sm border-0">
-                        <div class="card-header bg-transparent">
-                            <div class="fw-semibold">Rent Description</div>
+                        <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                            <div class="fw-semibold  gap-2"><i class="bi bi-hammer"></i> Rent Description</div>
+                            <button type="button" class="btn btn-sm normal p-1" title="Edit Rent" @onclick="ShowRentModal">
+                               
+                                    <i class="bi bi-pencil"></i>
+
+                                
+                            </button>
                         </div>
+
                         <div class="card-body">
                             <div class="row g-3 small" id="rentGrid">
                                 <div class="col-12 col-md-6 "><div class="border rounded-3 p-3"><div class="text-secondary">Monthly Rent</div><div class="fw-medium" id="rentMonthly">$@(legalcaseDto.MonthlyRent == null ? "--" : $"{legalcaseDto.MonthlyRent.Value:N2}")</div></div></div>
@@ -1319,6 +1325,69 @@
         </div>
     </div>
 
+    <!-- Rent Edit Modal -->
+    <div class="modal fade" id="rentModal" tabindex="-1" aria-labelledby="rentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="rentModalLabel">Edit Rent Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <EditForm Model="@legalcaseDto">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        <div class="card border-0">
+                            <div class="card-body p-0">
+
+                         
+                                <!-- Add/Edit Fields -->
+                               
+                                    <div class="border rounded-3 p-3 mt-4 position-relative">
+
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                            <label class="form-label required-label">Monthly Rent </label>
+                                                <InputNumber class="form-control" @bind-Value="legalcaseDto.MonthlyRent" placeholder="Enter Monthly rent" />
+                                            <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Distribution Total</label>
+                                                <input class="form-control" placeholder="Enter Distribution Total" />
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Additional Charges</label>
+                                                <input class="form-control"  placeholder="Enter Additional Charges" />
+                                                <ValidationMessage For="() => editBuildingModel.City" />
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Legal Print</label>
+                                                <input class="form-control" placeholder="Enter Legal Print" />
+                                            </div>
+                                           
+
+
+                                          
+                                        </div>
+                                    </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary base" @onclick="SaveRentChanges">Save</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+
     <!-- client Edit Modal -->
     <div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -1494,10 +1563,16 @@
                                 @if (showCourtFields)
                                 {
                                     <div class="border rounded-3 p-3 mt-4 position-relative">
-                                        <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
-                                                aria-label="Clear"
-                                                @onclick="OnBindCourtCancel">
-                                        </button>
+                                       
+                                        <div>
+                                            <button type="button"
+                                                    class=" m-2"
+                                                    style="background: transparent; border: none; z-index: 9999; position:absolute; top:-2px ; right:0px"
+                                                    @onclick="OnBindCourtCancel">
+                                                <i class="fa-solid fa-arrow-left"></i> Back
+                                            </button>
+                                        </div>
+
 
                                         <div class="row g-3">
                                             <div class="col-md-6">
@@ -1509,7 +1584,8 @@
                                             {
                                                 <div class="col-md-6">
                                                     <label class="form-label required-label">Part</label>
-                                                    <InputText class="form-control" @bind-Value="court.SelectedCourtPart.RoomNo" placeholder="Enter Part" />
+                                                    <InputText class="form-control" @bind-Value="court.SelectedCourtPart.Part" placeholder="Enter Part" />
+                                                    <ValidationMessage For="() => court.SelectedCourtPart.Part"></ValidationMessage>
                                                 </div>
                                             }
                                             else
@@ -1534,13 +1610,14 @@
                                                         </ul>
                                                     }
 
-                                                </div>
                                                 <ValidationMessage For="() => court.SelectedCourtPart.Part"></ValidationMessage>
+                                                </div>
                                             }
 
                                             <div class="col-md-6">
                                                 <label class="form-label required-label">Room No.</label>
                                                 <InputText class="form-control" @bind-Value="court.SelectedCourtPart.RoomNo" placeholder="Enter Room No." />
+                                         
                                             </div>
                                             <ValidationMessage For="() => court.SelectedCourtPart.RoomNo"></ValidationMessage>
                                             
@@ -1746,6 +1823,7 @@
     private System.Timers.Timer animationTimer;
 
     private EditToBuildingDto editBuildingModel = new();
+    private IntakeModel editRentModel = new();
     private bool showBuildingFields = false;
     private bool showCourtFields = false;
     private bool IsNewBuilding = false;
@@ -1786,6 +1864,9 @@
             loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
         }
+
+        court.SelectedCourtPart ??= new CourtPartDto();
+
         ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
         courts = await _courtService.GetAllCourtDataAsync();
         //courts = new List<CourtDto>();
@@ -1880,7 +1961,7 @@
     private async Task HandleInvokeAction()
     {
         await LoadCaseForms();
-
+        await LoadCaseDocument();
         await LoadCaseDetails();
         await LoadHearing();
     }
@@ -2322,6 +2403,14 @@
         await JS.InvokeVoidAsync("showModal", "courtModal");
     }
 
+    private async Task ShowRentModal()
+    {
+       
+        editRentModel = await _CaseService.GetCaseByIdAsync(legalcaseDto.Id);
+
+        await JS.InvokeVoidAsync("showModal", "rentModal");
+    }
+
     // Search handler
     private async Task OnSearchBuildingInput(ChangeEventArgs e)
     {
@@ -2356,6 +2445,7 @@
     private async Task OnSearchCourtPartInput(ChangeEventArgs e)
     {
         searchCourtPartText = e.Value?.ToString() ?? "";
+       
         if (!string.IsNullOrWhiteSpace(searchCourtPartText))
         {
             filteredCourtsPart = court.CourtPart
@@ -2366,11 +2456,18 @@
         }
         else
         {
+            // filteredCourtsPart = court.CourtPart.ToList();
+            // ShowCourtPartDropdown = true;
+            // StateHasChanged();
+            // return;
             filteredCourtsPart.Clear();
         }
         StateHasChanged();
 
     }
+
+   
+
 
     // Select building from list
     private void SelectBuilding(EditToBuildingDto selected)
@@ -2408,6 +2505,9 @@
         StateHasChanged();
 
     }
+
+  
+
     private void SelectCourtPart(CourtPartDto selected)
     {
         court.SelectedCourtPart = selected;
@@ -2440,6 +2540,12 @@
         searchBuildingText = null;
         editBuildingModel = new EditToBuildingDto();
     }
+
+    private void OnBindRentCancel()
+    {
+        
+        editRentModel = new IntakeModel();
+    }
     private void OnBindCourtCancel()
     {
         showCourtFields = false;
@@ -2462,6 +2568,39 @@
         legalcaseDto.TenantName = null;
         AdditionalTenantfromDbList = new List<AdditioanlTenants>();
         AdditionalTenantList = new List<AddtionalTenantDto>();
+    }
+
+  
+
+    private async Task SaveRentChanges()
+    {
+        spinnerservice.Show();
+
+        var addorupdate = false;
+        if (legalcaseDto.Id != null)
+        {
+            
+               
+
+            var success = await _CaseService.UpdateCaseAsync(legalcaseDto);
+                addorupdate = true;
+
+            if (success != null)
+            {
+                ToastService.ShowSuccess("Rent details updated successfully!");
+                await JS.InvokeVoidAsync("hideModal", "rentModal");
+
+                // await LoadCaseDetails();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to update building details.");
+            }
+        }
+        // Map edited fields
+
+
+        spinnerservice.Hide();
     }
 
     // Save
@@ -2787,96 +2926,202 @@
         spinnerservice.Hide();
     }
 
+    // private async Task SaveCourtChanges()
+    // {
+    //     spinnerservice.Show();
+
+    //     var addorupdate = false;
+    //     if (court.Id == null || court.Id == Guid.Empty)
+    //     {
+    //         var newCourt = new CourtDto();
+    //         // {
+    //         //     Address = court.Address,
+    //         //     // Part = court.Part,
+    //         //     // RoomNo = court.RoomNo,
+    //         //     // Judge = court.Judge,
+    //         //     Court = court.Court,
+    //         //     // ConferenceId = court.ConferenceId,
+    //         //     // CallIn = court.CallIn,
+    //         //     Phone = court.Phone,
+    //         //     // VirtualLink = court.VirtualLink,
+    //         //     Notes = court.Notes,
+    //         //     SelectedCourtPart = court
+
+    //         // };
+
+    //         newCourt = court;
+
+    //         var CourtId = await _courtService.AddCourtAsync(newCourt);
+    //         if (CourtId != null && CourtId != Guid.Empty)
+    //         {
+    //             var courtpartid = await courtpartService.AddCourtPartListAsync(new List<CourtPartDto> { court.SelectedCourtPart });
+    //             if (courtpartid != null)
+    //             {
+    //                 legalcaseDto.CourtPartId = courtpartid.FirstOrDefault();
+    //             }
+    //         }
+    //         addorupdate = true;
+    //         legalcaseDto.CourtId = CourtId;
+
+    //     }
+    //     // else
+    //     // {
+    //     //     if (court.Id != null)
+    //     //     {
+
+    //     //         var updateCourt = new CourtDto()
+    //     //         {
+    //     //             Address = court.Address,
+    //     //             Part = court.Part,
+    //     //             RoomNo = court.RoomNo,
+    //     //             Judge = court.Judge,
+    //     //             Court = court.Court,
+    //     //             ConferenceId = court.ConferenceId,
+    //     //             CallIn = court.CallIn,
+    //     //             Phone = court.Phone,
+    //     //             VirtualLink = court.VirtualLink,
+    //     //             Notes = court.Notes
+    //     //         };
+
+    //     //         await _courtService.UpdateCourtAsync(updateCourt);
+    //     //         addorupdate = true;
+    //     //     }
+    //     // }
+    //     else
+    //     {
+    //         legalcaseDto.CourtPartId = court.SelectedCourtPart.Id != Guid.Empty ? court.SelectedCourtPart.Id :null ;
+    //         legalcaseDto.CourtRoomNo = court.SelectedCourtPart.RoomNo!;
+    //         legalcaseDto.CourtPart = court.SelectedCourtPart.Part!;
+    //         legalcaseDto.CourtId = court.Id;
+    //     }
+        
+
+
+    //         var success = await _service.UpdateCaseAsync(legalcaseDto);
+
+    //         if (success.HasValue)
+    //         {
+    //             ToastService.ShowSuccess("Court details updated successfully!");
+    //             await JS.InvokeVoidAsync("hideModal", "courtModal");
+    //             // await Task.Delay(200);
+    //             await LoadCaseDetails();
+    //         }
+    //         else
+    //         {
+    //             ToastService.ShowError("Failed to update Court details.");
+    //         }
+        
+    //     // Map edited fields
+
+
+    //     spinnerservice.Hide();
+    // }
     private async Task SaveCourtChanges()
     {
         spinnerservice.Show();
 
-        var addorupdate = false;
+        bool addOrUpdate = false;
+      
+
+     
+
+if (string.IsNullOrWhiteSpace(court.SelectedCourtPart.Part))
+        {
+            await JS.InvokeVoidAsync("alert" ,"Part is Required");
+            await JS.InvokeVoidAsync("hideModal", "courtModal");
+            await JS.InvokeVoidAsync("showModal", "courtModal");
+            spinnerservice.Hide();
+            return;
+        }
+
+
+
+        // ============= ADD COURT =============
         if (court.Id == null || court.Id == Guid.Empty)
         {
-            var newCourt = new CourtDto();
-            // {
-            //     Address = court.Address,
-            //     // Part = court.Part,
-            //     // RoomNo = court.RoomNo,
-            //     // Judge = court.Judge,
-            //     Court = court.Court,
-            //     // ConferenceId = court.ConferenceId,
-            //     // CallIn = court.CallIn,
-            //     Phone = court.Phone,
-            //     // VirtualLink = court.VirtualLink,
-            //     Notes = court.Notes,
-            //     SelectedCourtPart = court
-
-            // };
-
-            newCourt = court;
-
-            var CourtId = await _courtService.AddCourtAsync(newCourt);
-            if (CourtId != null && CourtId != Guid.Empty)
+            var newCourt = new CourtDto
             {
-                var courtpartid = await courtpartService.AddCourtPartListAsync(new List<CourtPartDto> { court.SelectedCourtPart });
-                if (courtpartid != null)
+                Court = court.Court,
+                Address = court.Address,
+                Phone = court.Phone,
+                Notes = court.Notes
+            };
+
+            // 1️⃣ Insert Court
+            var courtId = await _courtService.AddCourtAsync(newCourt);
+
+            if (courtId != Guid.Empty)
+            {
+                // 2️⃣ Ensure CourtPart has CourtId
+                court.SelectedCourtPart.CourtId = courtId;
+
+                // 3️⃣ Insert CourtPart
+                var courtPartIds = await courtpartService.AddCourtPartListAsync(
+                                         new List<CourtPartDto> { court.SelectedCourtPart });
+
+                if (courtPartIds != null)
                 {
-                    legalcaseDto.CourtPartId = courtpartid.FirstOrDefault();
+                    legalcaseDto.CourtPartId = courtPartIds.First();
                 }
+
+                // 4️⃣ Assign CourtId to Case
+                legalcaseDto.CourtId = courtId;
+
+                addOrUpdate = true;
             }
-            addorupdate = true;
-            legalcaseDto.CourtId = CourtId;
-
         }
-        // else
-        // {
-        //     if (court.Id != null)
-        //     {
-
-        //         var updateCourt = new CourtDto()
-        //         {
-        //             Address = court.Address,
-        //             Part = court.Part,
-        //             RoomNo = court.RoomNo,
-        //             Judge = court.Judge,
-        //             Court = court.Court,
-        //             ConferenceId = court.ConferenceId,
-        //             CallIn = court.CallIn,
-        //             Phone = court.Phone,
-        //             VirtualLink = court.VirtualLink,
-        //             Notes = court.Notes
-        //         };
-
-        //         await _courtService.UpdateCourtAsync(updateCourt);
-        //         addorupdate = true;
-        //     }
-        // }
+        // ============= UPDATE COURT =============
         else
         {
-            legalcaseDto.CourtPartId = court.SelectedCourtPart.Id != Guid.Empty ? court.SelectedCourtPart.Id :null ;
-            legalcaseDto.CourtRoomNo = court.SelectedCourtPart.RoomNo!;
-            legalcaseDto.CourtPart = court.SelectedCourtPart.Part!;
+            // If NEW CourtPart added under existing COURT
+            if (court.SelectedCourtPart.Id == Guid.Empty)
+            {
+                court.SelectedCourtPart.CourtId = court.Id;
+
+                var newPartList = await courtpartService.AddCourtPartListAsync(
+                                      new List<CourtPartDto> { court.SelectedCourtPart });
+
+                if (newPartList != null)
+                {
+                    legalcaseDto.CourtPartId = newPartList.First();
+                }
+            }
+            else
+            {
+                // Existing part selected
+                legalcaseDto.CourtPartId = court.SelectedCourtPart.Id;
+            }
+
+            legalcaseDto.CourtRoomNo = court.SelectedCourtPart.RoomNo;
+            legalcaseDto.CourtPart = court.SelectedCourtPart.Part;
             legalcaseDto.CourtId = court.Id;
+
+            addOrUpdate = true;
         }
-        
 
 
+        // ============= UPDATE CASE =============
+        if (addOrUpdate)
+        {
             var success = await _service.UpdateCaseAsync(legalcaseDto);
 
             if (success.HasValue)
             {
                 ToastService.ShowSuccess("Court details updated successfully!");
                 await JS.InvokeVoidAsync("hideModal", "courtModal");
-                // await Task.Delay(200);
+              
                 await LoadCaseDetails();
             }
             else
             {
                 ToastService.ShowError("Failed to update Court details.");
             }
-        
-        // Map edited fields
-
+        }
 
         spinnerservice.Hide();
     }
+
+
     private async Task SaveHearingChanges()
     {
         spinnerservice.Show();
