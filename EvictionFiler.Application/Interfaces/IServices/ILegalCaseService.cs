@@ -1,12 +1,14 @@
-﻿using System;
+﻿using EvictionFiler.Application.DTOs;
+using EvictionFiler.Application.DTOs.ArrearLedgerDtos;
+using EvictionFiler.Application.DTOs.LegalCaseDto;
+using EvictionFiler.Application.DTOs.PaginationDto;
+using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities.Master;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EvictionFiler.Application.DTOs;
-using EvictionFiler.Application.DTOs.LegalCaseDto;
-using EvictionFiler.Application.DTOs.PaginationDto;
-using EvictionFiler.Domain.Entities;
 
 namespace EvictionFiler.Application.Interfaces.IServices
 {
@@ -14,7 +16,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
     {
         Task<bool> AddLegalCasesAsync(CreateToEditLegalCaseModel dto);
         //Task<PaginationDto<LegalCase>> GetAllAsync(int pageNumber, int pageSize , string searchTerm);
-        Task<PaginationDto<LegalCase>> GetAllAsync(int pageNumber, int pageSize, CaseFilterDto Filters , string userId, bool isAdmin);
+        Task<PaginationDto<LegalCase>> GetAllAsync(int pageNumber, int pageSize, CaseFilterDto Filters, string userId, bool isAdmin);
 
         Task<int> GetTotalCasesCountAsync(string userid, bool isAdmin);
         Task<CreateToEditLegalCaseModel?> GetByIdAsync(Guid id);
@@ -23,7 +25,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<bool> DeleteAsync(Guid id, bool isAdmin);
         Task<List<LegalCase>> GetTodayCasesAsync();
         Task<int> GetActiveCasesCountAsync(string userId, bool isAdmin);
-        Task<Guid?> CreateCasesAsync(IntakeModel legalCase );
+        Task<Guid?> CreateCasesAsync(IntakeModel legalCase);
         Task<IntakeModel> GetCaseByIdAsync(Guid caseId);
         Task<Guid?> UpdateCaseAsync(IntakeModel legalCase);
 
@@ -31,6 +33,14 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<bool> AddDocumentAsync(List<CaseDocument> document);
         Task<IEnumerable<CaseDocument>> CaseDocumentList(Guid Id);
         Task<bool> DeleteCaseDocument(Guid Id);
+
+        Task<IEnumerable<FilingMethod>> FilingMethodList();
+
+        Task<IEnumerable<ServiceMethod>> ServiceMethodList();
+
+        Task<bool> AddArrearLedgerAsync(List<ArrearLedgerDto> Ledger);
+        Task<bool> UpdateArrearLedgerAsync(List<ArrearLedgerDto> Ledger);
+        Task<bool> DeleteArrearLedger(Guid Id);
 
     }
 }
