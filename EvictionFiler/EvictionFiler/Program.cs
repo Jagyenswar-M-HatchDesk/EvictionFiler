@@ -142,6 +142,9 @@ builder.Services.AddScoped<ICaseDocument, CaseDocumentRepository>();
 //builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 //    .AddIdentityCookies();
 builder.Services.AddScoped<IMarshalRepositroy, MarshalRepository>();
+builder.Services.AddScoped<IFilingMethodRepository, FilingMethodRepository>();
+builder.Services.AddScoped<IServiceMethodRepository, ServiceMethodRepository>();
+builder.Services.AddScoped<IArrearLedgerRepository, ArrearRepository>();
 builder.Services.AddScoped<IMarshalService, MarshalService>();
 
 builder.Services.AddAuthorization();

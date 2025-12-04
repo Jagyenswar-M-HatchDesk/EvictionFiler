@@ -59,6 +59,7 @@ namespace EvictionFiler.Domain.Entities
 		public DateRent? RentDueEachMonthOrWeek { get; set; }
 
 		public double? MonthlyRent { get; set; }
+		public double? LastPayment { get; set; }
 		public double? TenantShare { get; set; }
 
 		[MaxLength(250)]
@@ -96,14 +97,25 @@ namespace EvictionFiler.Domain.Entities
 
 		public bool? tenantReceive { get; set; }
 		public string? ExplainTenancyReceiveDescription { get; set; }
+		public string? Assistance { get; set; }
 
 		//new Property add 
 		public bool? WrittenLease { get; set; }
+		public bool? NextBussinessday { get; set; }
+		public bool? leasedAttached { get; set; }
+		public bool? ledgerAttached { get; set; }
+		public bool? NoticeproofAttached { get; set; }
+		public bool? RegistrationRentAttached { get; set; }
+		public bool? GoodCauseExempt { get; set; }
+		public bool? CourtDraftNop { get; set; }
 		public DateOnly? DateTenantMoved { get; set; }
 
 		public DateOnly? OralStart { get; set; }
+		public DateOnly? LeaseStart { get; set; }
+		public DateOnly? PlannedServiceDate { get; set; }
 
 		public DateOnly? OralEnd { get; set; }
+		public DateOnly? LastPaymentDate { get; set; }
 		public Guid? RenewalStatusId { get; set; }
 		[ForeignKey("RenewalStatusId")]
 		public RenewalStatus? RenewalStatus { get; set; }
@@ -113,11 +125,16 @@ namespace EvictionFiler.Domain.Entities
 		public string? CreatedByName { get; set; }
 
 		public string? UnitOrApartmentNumber { get; set; }
+		public string? DeemedService { get; set; }
+		public string? Expiry { get; set; }
+		public string? AdditionalComments { get; set; }
+		public string? AffidavitofService { get; set; }
 
 
 		public DateOnly? LeaseEnd { get; set; }
 		public DateOnly? DateNoticeServed { get; set; }
 		public DateOnly? ExpirationDate { get; set; }
+		public DateOnly? PreferedFilingDate { get; set; }
 		public string? PredicateNotice { get; set; }
 		public string? SocialService { get; set; }
 		public string? LastRentPaid { get; set; }
@@ -132,6 +149,9 @@ namespace EvictionFiler.Domain.Entities
         public Guid? CourtId { get; set; }
         [ForeignKey("CourtId")]
         public Courts? Courts { get; set; }
+        public Guid? FilingMethodId { get; set; }
+        [ForeignKey("FilingMethodId")]
+        public FilingMethod? FilingMethods { get; set; }
 
         public decimal? BillAmount { get; set; }
 
@@ -144,8 +164,17 @@ namespace EvictionFiler.Domain.Entities
         public ICollection<AppearanceTypePerDiem> AppearanceTypePerDiem { get; set; } = new List<AppearanceTypePerDiem>();
         public ICollection<ReliefRespondentType> ReliefRespondentType { get; set; } = new List<ReliefRespondentType>();
         public ICollection<ReliefPetitionerType> ReliefPetitionerType { get; set; } = new List<ReliefPetitionerType>();
+        public ICollection<ArrearLedger> ArrearLedgers { get; set; } = new List<ArrearLedger>();
+
+        public Guid? NoticeId { get; set; }
+		[ForeignKey("NoticeId")]
+        public FormTypes? FormTypes { get; set; }
+        public Guid? ServiceMethodId { get; set; }
+		[ForeignKey("ServiceMethodId")]
+        public ServiceMethod? ServiceMethods { get; set; }
 
         public Guid? PartyRepresentPerDiemId { get; set; }
+        
         [ForeignKey("PartyRepresentPerDiemId")]
         public PartyRepresentPerDiem? PartyRepresentPerDiems { get; set; }
 
