@@ -11,7 +11,6 @@ using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Application.Services;
 using EvictionFiler.Application.Services.Helper;
 using EvictionFiler.Application.Services.Master;
-
 using EvictionFiler.Client.SpinnerService;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure;
@@ -22,12 +21,12 @@ using EvictionFiler.Server.Components;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Radzen;
 using Syncfusion.Licensing;
-using Microsoft.AspNetCore.Components.Server;
 
 
 
@@ -142,6 +141,8 @@ builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 builder.Services.AddScoped<ICaseDocument, CaseDocumentRepository>();
 //builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 //    .AddIdentityCookies();
+builder.Services.AddScoped<IMarshalRepositroy, MarshalRepository>();
+builder.Services.AddScoped<IMarshalService, MarshalService>();
 
 builder.Services.AddAuthorization();
 
@@ -157,19 +158,19 @@ builder.Services.ConfigureApplicationCookie(options =>
 
     options.Cookie.HttpOnly = true;  // OK
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.Cookie.SameSite = SameSiteMode.None;  
+    options.Cookie.SameSite = SameSiteMode.None;
 });
 
 builder.Services.AddScoped<SpinnerService>();
-builder.Services.AddScoped<IUserservices , UserService>();
+builder.Services.AddScoped<IUserservices, UserService>();
 builder.Services.AddScoped<ICaseFormService, CaseFormService>();
 builder.Services.AddScoped<ILegalCaseService, LegalCaseService>();
 builder.Services.AddScoped<IClientService, ClientServices>();
 builder.Services.AddScoped<ITenantService, TenantService>();
-builder.Services.AddScoped<IBuildingService , BuildingService>();
-builder.Services.AddScoped<ILandlordSevice  , LandlordService>();
+builder.Services.AddScoped<IBuildingService, BuildingService>();
+builder.Services.AddScoped<ILandlordSevice, LandlordService>();
 builder.Services.AddScoped<IManageFormService, ManageFormService>();
-builder.Services.AddScoped<ICaseTypeService , CaseTypeService>();
+builder.Services.AddScoped<ICaseTypeService, CaseTypeService>();
 builder.Services.AddScoped<ILandlordTypeService, LandlordTypeService>();
 builder.Services.AddScoped<ICalanderService, CalanderService>();
 builder.Services.AddScoped<ICountyService, CountyService>();
@@ -183,7 +184,7 @@ builder.Services.AddScoped<IRenewalStatusService, RenewalStatusService>();
 builder.Services.AddScoped<IRentRegulationService, RentRegulationService>();
 builder.Services.AddScoped<IStateService, StateService>();
 builder.Services.AddScoped<ITenancyTypeService, TenancyTypeService>();
-builder.Services.AddScoped<IUnitIllegalService  , UnitIllegalService>();
+builder.Services.AddScoped<IUnitIllegalService, UnitIllegalService>();
 builder.Services.AddScoped<NavigationDataService>();
 builder.Services.AddSingleton<SuccessMessageService>();
 builder.Services.AddBlazoredToast();
@@ -238,13 +239,13 @@ using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
 try
 {
-	var identityContext = services.GetRequiredService<MainDbContext>();
-	await identityContext.Database.MigrateAsync();
+    var identityContext = services.GetRequiredService<MainDbContext>();
+    await identityContext.Database.MigrateAsync();
 }
 catch (Exception ex)
 {
-	var logger = services.GetRequiredService<ILogger<Program>>();
-	logger.LogError(ex, "An error occursed during migration");
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex, "An error occursed during migration");
 }
 
 
