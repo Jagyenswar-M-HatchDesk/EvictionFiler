@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.LegalCaseDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
+using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Interfaces.IRepository
 {
@@ -27,6 +28,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
         Task<List<AppearanceTypePerDiem>> GetApperenceTypePerDiemIdAsync(List<Guid> ids);
         Task<List<DocumentTypePerDiem>> GetDocumentIntructionsTypsIdAsync(List<Guid> ids);
         Task<List<ReportingTypePerDiem>> GetReportingTypePerDiemsIdAsync(List<Guid> ids);
+        Task<List<IntakeModel>> SearchCasebyCode(string code);
 
 
     }

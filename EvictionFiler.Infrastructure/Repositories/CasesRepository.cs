@@ -1,6 +1,8 @@
-﻿using EvictionFiler.Application.DTOs.LegalCaseDto;
+﻿using EvictionFiler.Application.DTOs;
+using EvictionFiler.Application.DTOs.LegalCaseDto;
 using EvictionFiler.Application.DTOs.MasterDtos.HarassmentTypeDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
+using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
@@ -20,6 +22,21 @@ namespace EvictionFiler.Infrastructure.Repositories
 		{
             _context = context;
             _userRepo = userRepo;
+        }
+
+
+        public async Task<List<IntakeModel>> SearchCasebyCode(string code)
+        {
+            var cases = await _context.LegalCases.Where(e => e.Casecode.Contains(code)).Select(dto => new IntakeModel
+            {
+
+                Casecode = dto.Casecode,
+              
+
+            }).ToListAsync();
+            if (cases == null)
+                return new List<IntakeModel>();
+            return cases;
         }
 
         public async Task<int> GetTotalCasesCountAsync(string userId , bool isAdmin)

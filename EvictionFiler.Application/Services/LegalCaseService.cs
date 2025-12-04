@@ -63,6 +63,29 @@ namespace EvictionFiler.Application.Services
 
         }
 
+        public async Task<List<IntakeModel>> SearchCasebyCode(string code)
+        {
+            var newcase = await _repository.SearchCasebyCode(code);
+            return newcase;
+        }
+        public async Task<List<IntakeModel>> GetAllCase()
+        {
+            var cases = await _repository.GetAllAsync();
+
+            var result = cases.Select(x => new IntakeModel
+            {
+                Id = x.Id,
+             
+                Casecode = x.Casecode,
+                
+            })
+             .ToList();
+
+            return result;
+
+
+        }
+
         public async Task<Guid?> CreateCasesAsync(IntakeModel legalCase)
         {
 

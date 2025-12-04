@@ -24,6 +24,7 @@
 <PageTitle> Calender - Housing Court Filer</PageTitle>
 @inject ICaseTypeRepository CaseTypeRepository
 @inject ITenantService _tenantService
+@inject ILegalCaseService LegalCaseService
 @inject IRemainderTypeRepository RemainderTypeRepository
 
 @inject IRemianderCenterService RemianderCenterService
@@ -162,10 +163,28 @@
         <div class="card-body">
              <EditForm EditContext="_editContext">
                 <div class="row g-3">
-                    <div class="col-md-4">
-                        <label for="f-county" class="form-label">Case</label>
-                        <InputText id="f-from" class="form-control" placeholder="EF0000000001" @bind-Value="remainderDto.CaseName" />
-                    </div>
+                 
+                        <div class="col-md-4 position-relative" @onfocusout="HideCaseDropDown">
+                            <label class="form-label  required-label">Case</label>
+                            <InputText type="text" class="form-control"
+                                       placeholder="EF0000000001"
+                                       @bind-value="searchCaseText"
+                                       @oninput="OnSearchCaseInput" @onclick="ShowAllCase" />
+                            @if (filteredCase?.Any() == true)
+                            {
+                                <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
+                                    @foreach (var c in filteredCase)
+                                    {
+                                        <li class="dropdown-item" @onclick="() => SelectedCase(c)">
+                                            @c.Casecode
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            @* <ValidationMessage For="() => remainderDto.TenantId" /> *@
+                        </div>
+                        
+                    
                     <div class="col-md-4">
                         <label for="f-part" class="form-label">County</label>
                         <InputSelect class="form-select" @bind-Value="remainderDto.CountyId">
@@ -188,7 +207,7 @@
                                 @foreach (var c in filteredTenant)
                                 {
                                     <li class="dropdown-item" @onclick="() => SelectedTenant(c)">
-                                        @c.UnitOrApartmentNumber / @c.FirstName @c.LastName
+                                         @c.FirstName @c.LastName
                                     </li>
                                 }
                             </ul>
@@ -214,25 +233,24 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label  required-label">When</label>
-                        <InputDate class="form-control"
+                        <input type="datetime-local" class="form-control"
                                    placeholder="mm/dd/yyyy --:-- --"
                                    @bind-value="remainderDto.When"/>
    
                     </div>       
                 </div> 
 
-                <div class="row mt-2 "
-                style="padding:0px 10px">
+                <div class="row mt-2 ">
 
-                    <label>Note</label>
-                    <InputTextArea  style="border-radius:5px"id="rcNote" rows="3" placeholder="Notes..." @bind-Value="remainderDto.Notes"></InputTextArea>
+                    <label class="form-label">Note</label>
+                    <InputTextArea class="form-control"  rows="3" placeholder="Notes..." @bind-Value="remainderDto.Notes"></InputTextArea>
 
                 </div>
                 <div class="row">
                     <div class="col-12">
                         
                             <button class=" btn btn-primary m-2 ms-0" style="padding:4px 8px ; border-radius:10px ; font-size:12px" id="rcAdd" @onclick="SubmitAsync" >Add Reminder</button>
-                            <button class="btn m-2 ms-0" style="padding:4px 6px ; border-radius:10px; background-color:#f3f4f6 ; font-size:13px" id="rcExport">Export .ics</button>
+                        <button class=" m-2 ms-0" style="padding:4px 6px ; border-radius:10px; background-color:#f3f4f6 ; font-size:13px;border: 1px solid #cac6c6">Export .ics</button>
                             
                       
                     </div>
@@ -248,7 +266,7 @@
     <section class="card" style="margin-top:14px">  
         <div class="d-flex justify-content-between align-items-center m-3">
             <h2 style="margin:0;font-size:1rem;">All Reminders</h2>
-            <button class="btn" style="padding:6px 8px; border-radius:10px; background-color:#f3f4f6;font-size:13px" id="">Clear All</button>
+            <button style="padding:6px 8px; border-radius:10px; background-color:#f3f4f6;font-size:13px ;border: 1px solid #cac6c6;" id="" @onclick="ClearAll">Clear All</button>
         </div>
         <div class="card-body table-wrap">
             <table class="table" id="table">
@@ -263,7 +281,7 @@
                         <th></th>
                     </tr>
                 </thead>
-                <tbody id="tbody">
+                <tbody id="tbody" style="font-size:11px">
                     @if (Remiandercenters != null && Remiandercenters.Any())
                     {
                         foreach (var c in Remiandercenters)
@@ -275,11 +293,16 @@
                                 <td>@c.RemainderTypeName</td>
                                 <td>@c.Notes</td>
                                 <td>
-
+                                    <button class=" m-2 ms-0" style="padding:4px 6px ; border-radius:10px; background-color:#f3f4f6 ; font-size:13px;border: 1px solid #cac6c6">Demo Push</button>
+                                    <button class=" m-2 ms-0" style="padding:4px 6px ; border-radius:10px; background-color:#f3f4f6 ; font-size:13px;border: 1px solid #cac6c6">Demo Email</button>
+                                    <button class=" m-2 ms-0" style="padding:4px 6px ; border-radius:10px; background-color:#f3f4f6 ; font-size:13px;border: 1px solid #cac6c6">Demo Done</button>
                                 </td>
                                 <td class="sticky">
+                                    <button class=" m-2 ms-0" @onclick=" ()=>Deleteremainer(c.Id)" style="padding:4px 6px ; border-radius:10px; background-color:#f3f4f6 ; font-size:13px;border: 1px solid #cac6c6">Delete</button>
+
+
                                    
-                                    <i class="fa-solid fa-trash-can text-danger " @onclick=" ()=>Deleteremainer(c.Id)" style="cursor: pointer;" title="Delete">Delete </i>
+                                   
                                 </td>
                                
                             </tr>
@@ -309,11 +332,14 @@
     private string? loggedInUserId;
     private bool isAdmin = false;
     private EditToTenantDto selectedtenant;
+    private IntakeModel selectedCase;
     private List<EditToRemainderCenterDto> Remiandercenters { get; set; }
 
     private string searchTenantText;
+    private string searchCaseText;
     private CancellationTokenSource _cts;
     private List<EditToTenantDto> filteredTenant = new();
+    private List<IntakeModel> filteredCase = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -340,6 +366,12 @@
         Remiandercenters = await RemianderCenterService.GetAllRemainderCenterAsync();
     }
 
+    private void ClearAll()
+    {
+        Remiandercenters.Clear();
+    }
+
+
     private async void SelectedTenant(EditToTenantDto tenant)
     {
 
@@ -356,6 +388,56 @@
 
 
     }
+
+    private async Task SelectedCase(IntakeModel selected)
+    {
+        selectedCase = selected;
+        searchCaseText = selected.Casecode ?? string.Empty;
+
+        // Agar filteredCase null nahi hai to clear kar do
+        filteredCase?.Clear();
+
+        // UI refresh
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnSearchCaseInput(ChangeEventArgs e)
+    {
+        searchCaseText = e.Value?.ToString() ?? "";
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        try
+        {
+
+            await Task.Delay(300, _cts.Token);
+            // ⭐ Empty input → load all tenants (ONLY here)
+            if (string.IsNullOrWhiteSpace(searchCaseText))
+            {
+                await ShowAllCase();
+                return;
+            }
+
+            // ⭐ 1st & 2nd character → DO NOTHING (keep list unchanged)
+            if (searchCaseText.Length < 3)
+            {
+                // ❗ No reload here (important)
+                return;
+            }
+
+            else
+            {
+                // ⭐ 3+ characters → server search
+                filteredCase = await LegalCaseService.SearchCasebyCode(searchCaseText);
+            }
+
+        }
+        catch (TaskCanceledException)
+        {
+            // Old task cancelled → ignore
+        }
+
+    }
+
 
     private async Task OnSearchTenantInput(ChangeEventArgs e)
     {
@@ -383,13 +465,8 @@
             else
             {
                 // ⭐ 3+ characters → server search
-                filteredTenant = await _tenantService.SearchTenantbyname(searchTenantText);
-
-                   
+                filteredTenant = await _tenantService.SearchTenantbyname(searchTenantText);       
             }
-
-
-
 
         }
         catch (TaskCanceledException)
@@ -406,6 +483,24 @@
         
     }
 
+    private async Task ShowAllCase()
+    {
+
+        filteredCase= await LegalCaseService.GetAllCase();
+
+    }
+
+    async Task HideCaseDropDown(FocusEventArgs e)
+    {
+        // Small delay to allow click on dropdown item to register before hiding
+        await Task.Delay(500);
+        if (filteredCase.Any())
+        {
+            filteredCase.Clear();
+
+        }
+        StateHasChanged();
+    }
 
     async Task HideTenantDropDown(FocusEventArgs e)
     {

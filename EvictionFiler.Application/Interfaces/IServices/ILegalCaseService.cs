@@ -31,6 +31,8 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<bool> AddDocumentAsync(List<CaseDocument> document);
         Task<IEnumerable<CaseDocument>> CaseDocumentList(Guid Id);
         Task<bool> DeleteCaseDocument(Guid Id);
+        Task<List<IntakeModel>> SearchCasebyCode(string code);
+        Task<List<IntakeModel>> GetAllCase();
 
     }
 }
