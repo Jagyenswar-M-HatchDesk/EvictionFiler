@@ -38,7 +38,7 @@ namespace EvictionFiler.Application.Services
             {
                 Id = dto.Id,
                 When = dto.When,
-                CaseName = dto.CaseName,
+                CaseId = dto.CaseId,
                 CountyId = dto.CountyId,
                 TenantId = dto.TenantId,
                 RemainderTypeId = dto.RemainderTypeId,
@@ -66,14 +66,14 @@ namespace EvictionFiler.Application.Services
         public async Task<List<EditToRemainderCenterDto>> GetAllRemainderCenterAsync()
         {
             var calanders = await _remainderCenterRepo
-                .GetAllQuerable(x => x.IsDeleted != true, x => x.RemainderType , x=>x.County , x=>x.Tenant)
+                .GetAllQuerable(x => x.IsDeleted != true, x => x.RemainderType , x=>x.County , x=>x.Tenant , x=>x.Case)
                 .ToListAsync();
 
             var result = calanders.Select(dto => new EditToRemainderCenterDto
             {
                 Id = dto.Id,
                 When = dto.When,
-                CaseName = dto.CaseName,
+                CaseId = dto.CaseId,
                 CountyId = dto.CountyId,
                 TenantId = dto.TenantId,
                 RemainderTypeId = dto.RemainderTypeId,
@@ -82,6 +82,9 @@ namespace EvictionFiler.Application.Services
                RemainderTypeName = dto.RemainderType?.Name ?? "Unknown",
                 CountyName = dto.County?.Name ?? "Unknown",
                 TenantName = dto.Tenant?.FirstName ?? "Unknown",
+                 CaseCode= dto.Case?.Casecode ?? "Unknown",
+
+
 
             }).ToList();
 
@@ -101,7 +104,7 @@ namespace EvictionFiler.Application.Services
             {
                 Id = dto.Id,
                 When = dto.When,
-                CaseName = dto.CaseName,
+                CaseId = dto.CaseId,
                 CountyId = dto.CountyId,
                 TenantId = dto.TenantId,
                 RemainderTypeId = dto.RemainderTypeId,
@@ -127,7 +130,7 @@ namespace EvictionFiler.Application.Services
 
 
             existing.When = dto.When;
-                existing.CaseName = dto.CaseName;
+                existing.CaseId = dto.CaseId;
             existing.CountyId = dto.CountyId;
             existing.TenantId = dto.TenantId;
             existing.RemainderTypeId = dto.RemainderTypeId;

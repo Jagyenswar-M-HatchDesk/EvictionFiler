@@ -12,8 +12,8 @@ namespace EvictionFiler.Application.DTOs.RemainderCenterDto
 {
     public class CreateToRemainderCenterDto : DeletableBaseEntity
     {
-        public string CaseName { get; set; } = string.Empty;
-
+        public string CaseCode{ get; set; } = string.Empty;
+        public Guid? CaseId { get; set; }
         public Guid? TenantId { get; set; }
         public string? TenantName { get; set; }
 
