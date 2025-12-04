@@ -6,6 +6,7 @@
 @using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.CourtDto
+@using EvictionFiler.Application.DTOs.FormTypeDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
 @using EvictionFiler.Application.DTOs.MasterDtos.ApperanceTypePerDiemDto
@@ -53,6 +54,8 @@
 @inject IAdditionalTenantService _additionalTenant
 @inject IAdditionalOccupantsService _additionalOccupant
 @inject IStateRepository _stateRepository
+@inject ICaseFormService _CaseFormService
+@inject IFormTypesRepository _FormService
 
 
 @using EvictionFiler.Client.SpinnerService
@@ -65,6 +68,7 @@
 @using EvictionFiler.Domain.Entities
 @attribute [Authorize]
 @using System.Security.Claims
+@using System.Globalization
 @inject AuthenticationStateProvider _authStateProvider
 <!--
 EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
@@ -79,148 +83,495 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 <PageTitle>Create Case - Housing Court Filer</PageTitle>
 
 <style>
-    .required-label::after { content: " *"; color: red; }
+    .required-label::after {
+        content: " *";
+        color: red;
+    }
 
-    :root { --bg: #f7f9fc; --card: #ffffff; --ink: #0f172a; --muted: #64748b; --line: #e2e8f0; --brand: #4f46e5; --brand-2: #4338ca; --ok: #059669; --warn: #b45309; --danger: #b91c1c; --radius: 16px; --shadow: 0 6px 24px rgba(2, 6, 23, .08); }
+    :root {
+        --bg: #f7f9fc;
+        --card: #ffffff;
+        --ink: #0f172a;
+        --muted: #64748b;
+        --line: #e2e8f0;
+        --brand: #4f46e5;
+        --brand-2: #4338ca;
+        --ok: #059669;
+        --warn: #b45309;
+        --danger: #b91c1c;
+        --radius: 16px;
+        --shadow: 0 6px 24px rgba(2, 6, 23, .08);
+    }
 
-    * { box-sizing: border-box }
+    * {
+        box-sizing: border-box
+    }
 
     html,
-    body { height: 100% }
+    body {
+        height: 100%
+    }
 
-    body { margin: 0; font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; background: radial-gradient(70% 120% at 50% -10%, #eef2ff 0%, var(--bg) 60%); color: var(--ink) }
+    body {
+        margin: 0;
+        font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+        background: radial-gradient(70% 120% at 50% -10%, #eef2ff 0%, var(--bg) 60%);
+        color: var(--ink)
+    }
 
-    .wrap { max-width: 1200px; margin: auto; padding: 24px }
+    .wrap {
+        max-width: 1200px;
+        margin: auto;
+        padding: 24px
+    }
 
-    header.top { position: sticky; top: 0; z-index: 10; background: rgba(255, 255, 255, .9); backdrop-filter: saturate(180%) blur(6px); border-bottom: 1px solid var(--line) }
+    header.top {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: rgba(255, 255, 255, .9);
+        backdrop-filter: saturate(180%) blur(6px);
+        border-bottom: 1px solid var(--line)
+    }
 
-        header.top .bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; max-width: 1200px; margin: auto }
+        header.top .bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            max-width: 1200px;
+            margin: auto
+        }
 
-    .brand { display: flex; gap: 12px; align-items: center }
+    .brand {
+        display: flex;
+        gap: 12px;
+        align-items: center
+    }
 
-    .logo { width: 40px; height: 40px; border-radius: 14px; background: #0f172a; color: #fff; display: grid; place-items: center; font-weight: 700 }
+    .logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 14px;
+        background: #0f172a;
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-weight: 700
+    }
 
-    .secure { display: inline-flex; gap: 8px; align-items: center; border-radius: 999px; padding: 6px 10px; border: 1px solid #d1fae5; background: #ecfdf5; color: #065f46; font-size: 12px }
+    .secure {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        border-radius: 999px;
+        padding: 6px 10px;
+        border: 1px solid #d1fae5;
+        background: #ecfdf5;
+        color: #065f46;
+        font-size: 12px
+    }
 
-    .stepper { padding: 0 24px 14px; max-width: 1200px; margin: auto }
+    .stepper {
+        padding: 0 24px 14px;
+        max-width: 1200px;
+        margin: auto
+    }
 
-    .track { height: 6px; background: #e5e7eb; border-radius: 999px; overflow: hidden }
+    .track {
+        height: 6px;
+        background: #e5e7eb;
+        border-radius: 999px;
+        overflow: hidden
+    }
 
-    .meter { height: 100%; background: linear-gradient(90deg, var(--brand), var(--brand-2)); width: 40% }
+    .meter {
+        height: 100%;
+        background: linear-gradient(90deg, var(--brand), var(--brand-2));
+        width: 40%
+    }
 
-    .steps { display: flex; gap: 12px; flex-wrap: wrap; margin: 8px 0 }
+    .steps {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 8px 0
+    }
 
-    .btn-tenant:hover { background: #1F365D !important; }
+    .btn-tenant:hover {
+        background: #1F365D !important;
+    }
 
-    .check { display: flex; gap: 8px; align-items: center; color: #475569 }
+    .check {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        color: #475569
+    }
 
-    .dot { width: 10px; height: 10px; border-radius: 999px; background: #cbd5e1 }
+    .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: #cbd5e1
+    }
 
-        .dot.active { background: #818cf8 }
+        .dot.active {
+            background: #818cf8
+        }
 
-        .dot.done { background: #4f46e5 }
+        .dot.done {
+            background: #4f46e5
+        }
 
-    .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px }
+    .grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px
+    }
 
     @@media (max-width:1024px) {
-        .grid { grid-template-columns: 1fr }
+        .grid {
+            grid-template-columns: 1fr
+        }
     }
 
-    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow) }
+    .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow)
+    }
 
-        .card > header { padding: 18px 20px; border-bottom: 1px solid var(--line); display: flex; gap: 12px; align-items: flex-start }
+        .card > header {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            gap: 12px;
+            align-items: flex-start
+        }
 
-    .k { width: 28px; height: 28px; border-radius: 12px; background: #0f172a; color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 700 }
+    .k {
+        width: 28px;
+        height: 28px;
+        border-radius: 12px;
+        background: #0f172a;
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        font-weight: 700
+    }
 
-    .card .body { padding: 20px }
+    .card .body {
+        padding: 20px
+    }
 
-    .fields { display: grid; gap: 16px }
+    .fields {
+        display: grid;
+        gap: 16px
+    }
 
-    .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+    .cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
 
-    .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+    .cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr))
+    }
 
     @@media (max-width:820px) {
-        .cols-2, .cols-3 { grid-template-columns: 1fr }
+        .cols-2, .cols-3 {
+            grid-template-columns: 1fr
+        }
     }
 
-    label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: #475569; margin-bottom: 6px }
+    label {
+        display: block;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        font-weight: 700;
+        color: #475569;
+        margin-bottom: 6px
+    }
 
     input.txt,
-    select.sel { width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 12px; background: #fff; color: #0f172a; outline: none }
-
-        input.txt:focus,
-        select.sel:focus { border-color: #6366f1; box-shadow: 0 0 0 6px #eef2ff }
-
-    .hint { font-size: 12px; color: #64748b; margin-top: 4px }
-
-    .pill { display: inline-block; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 12px; background: #fff; font-size: 13px }
-
-    .aside.card { position: sticky; top: 106px; height: fit-content }
-
-    .kv { display: flex; justify-content: space-between; gap: 12px }
-
-        .kv .k { background: none; color: #64748b; width: auto; height: auto; border-radius: 0; font-weight: 600 }
-
-    .actions { position: sticky; bottom: 0; z-index: 10; background: rgba(255, 255, 255, .9); border-top: 1px solid var(--line) }
-
-        .actions .row { max-width: 1200px; margin: auto; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center }
-
-    .btn { border-radius: 12px; border: 1px solid #cbd5e1; background: #fff; color: #0f172a }
-
-        .btn.primary { background: var(--brand); border-color: transparent; color: #fff }
-
-        .btn.danger { background: #fee2e2; border-color: #fecaca; color: #991b1b }
-
-    .list { display: flex; flex-direction: column; gap: 8px }
-
-        .list .row { display: flex; gap: 8px }
-
-    .iconbtn { border: 1px solid #cbd5e1; background: #fff; border-radius: 10px; padding: 8px 10px; cursor: pointer }
-
-    .pre { white-space: pre-wrap; background: #0b1020; color: #e2e8f0; border-radius: 12px; padding: 14px; overflow: auto; max-height: 360px }
-
-    @@media (max-width:560px) {
-        .logo { width: 36px; height: 36px }
-
-        .brand h1 { font-size: 16px }
-
-        .secure { display: none }
+    select.sel {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        background: #fff;
+        color: #0f172a;
+        outline: none
     }
 
-    .form-check-input { cursor: pointer; width: 17px;
-    height: 17px; margin-top:10px}
+        input.txt:focus,
+        select.sel:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 6px #eef2ff
+        }
 
-    .tooltiptext { visibility: hidden; /* Hidden by default */ width: 130px; background-color: black; color: #fffffff; text-align: center; padding: 5px 0; border-radius: 6px; position: absolute; z-index: 1; /* Ensure tooltip is displayed above content */ }
+    .hint {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 4px
+    }
 
-    .tooltip { position: relative; cursor: pointer; }
+    .pill {
+        display: inline-block;
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        background: #fff;
+        font-size: 13px
+    }
 
-        .tooltip:hover .tooltiptext { visibility: visible; }
+    .aside.card {
+        position: sticky;
+        top: 106px;
+        height: fit-content
+    }
 
-    .rz-inputtext { box-shadow: none !important; }
+    .kv {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px
+    }
 
-    .dropdown-item { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .kv .k {
+            background: none;
+            color: #64748b;
+            width: auto;
+            height: auto;
+            border-radius: 0;
+            font-weight: 600
+        }
 
-    .head { font-size: 16px; }
+    .actions {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        background: rgba(255, 255, 255, .9);
+        border-top: 1px solid var(--line)
+    }
+
+        .actions .row {
+            max-width: 1200px;
+            margin: auto;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+    .btn {
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #0f172a
+    }
+
+        .btn.primary {
+            background: var(--brand);
+            border-color: transparent;
+            color: #fff
+        }
+
+        .btn.danger {
+            background: #fee2e2;
+            border-color: #fecaca;
+            color: #991b1b
+        }
+
+    .list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px
+    }
+
+        .list .row {
+            display: flex;
+            gap: 8px
+        }
+
+    .iconbtn {
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        border-radius: 10px;
+        padding: 8px 10px;
+        cursor: pointer
+    }
+
+    .pre {
+        white-space: pre-wrap;
+        background: #0b1020;
+        color: #e2e8f0;
+        border-radius: 12px;
+        padding: 14px;
+        overflow: auto;
+        max-height: 360px
+    }
+
+    @@media (max-width:560px) {
+        .logo {
+            width: 36px;
+            height: 36px
+        }
+
+        .brand h1 {
+            font-size: 16px
+        }
+
+        .secure {
+            display: none
+        }
+    }
+
+    .form-check-input {
+        cursor: pointer;
+        width: 17px;
+        height: 17px;
+        margin-top: 10px
+    }
+
+    .tooltiptext {
+        visibility: hidden; /* Hidden by default */
+        width: 130px;
+        background-color: black;
+        color: #fffffff;
+        text-align: center;
+        padding: 5px 0;
+        border-radius: 6px;
+        position: absolute;
+        z-index: 1; /* Ensure tooltip is displayed above content */
+    }
+
+    .tooltip {
+        position: relative;
+        cursor: pointer;
+    }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+        }
+
+    .rz-inputtext {
+        box-shadow: none !important;
+    }
+
+    .dropdown-item {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .head {
+        font-size: 16px;
+    }
 
     /* Remove ugly blue selection inside dropdown */
     .holdover-form option:checked,
     .holdover-form option:hover,
-    .holdover-form option:focus { background-color: #f5f5f5 !important; /* Light grey */ color: #000 !important; }
+    .holdover-form option:focus {
+        background-color: #f5f5f5 !important; /* Light grey */
+        color: #000 !important;
+    }
 
     /* Remove black border line at left */
-    .holdover-form { border: 1px solid #d1d5db !important; box-shadow: none !important; }
+    .holdover-form {
+        border: 1px solid #d1d5db !important;
+        box-shadow: none !important;
+    }
 
         /* Remove highlight outline when opening */
-        .holdover-form:focus { border-color: #1F365D !important; box-shadow: 0 0 0 0 !important; outline: none !important; }
-    .step-disabled { cursor: not-allowed; opacity: 0.5; pointer-events: none; }
-    .step-active { cursor: pointer; }
+        .holdover-form:focus {
+            border-color: #1F365D !important;
+            box-shadow: 0 0 0 0 !important;
+            outline: none !important;
+        }
 
-    .bigger-checkbox { width: 17px !important; height: 17px !important; cursor: pointer; }
+    .step-disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+        pointer-events: none;
+    }
 
-    .form-check { display: flex; align-items: center; /* Center vertically */ gap: 8px; /* Checkbox aur text me spacing */ }
+    .step-active {
+        cursor: pointer;
+    }
 
-    .form-check-label { margin-top: 9px; /* Slight alignment tweak */ }
+    .bigger-checkbox {
+        width: 17px !important;
+        height: 17px !important;
+        cursor: pointer;
+    }
+
+    .form-check {
+        display: flex;
+        /* align-items: center; /* Center vertically */ 
+        gap: 8px; /* Checkbox aur text me spacing */
+    }
+
+    .form-check-label {
+        margin-top: 9px; /* Slight alignment tweak */
+    }
+
+    .row-item {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1.2fr 120px;
+        column-gap: 18px;
+        row-gap: 8px;
+        padding: 15px 0;
+        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 10px;
+    }
+
+    .form-label-arrear {
+        grid-column: span 4;
+        font-size: 14px;
+        margin-bottom: 4px;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        font-size: 15px;
+    }
+
+    .remove-btn {
+        border: 1px solid #d1d5db;
+        background: #fff;
+        border-radius: 10px;
+        cursor: pointer;
+        padding: 10px 15px;
+        align-self: end;
+    }
+
+    .add-btn {
+        margin-top: 15px;
+        padding: 12px 22px;
+        background: #f9fafb;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 15px;
+    }
+
+    .total-box {
+        background: #f3f4f6;
+        padding: 14px 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
 </style>
 
 
@@ -237,7 +588,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                     <div class="d-flex align-items-center gap-2">
                         <span class="rounded-circle d-inline-block"
                               style="width:14px; height:14px; border: 1px solid #ecf0f2; background-color:@bgColor;"></span>
-                      @*   @if (step.Name == "CaseAndclient")
+                        @*   @if (step.Name == "CaseAndclient")
                         {
                             <span style="@(i <= Tracker ? "cursor:pointer;" : "not-allowed")" @onclick="@(() => OnStepClick(step.Id))">Case & Client</span>
 
@@ -280,7 +631,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     <EditForm EditContext="_editContext">
         <DataAnnotationsValidator />
 
-       
+
 
         @if (legalcaseDto.CaseTypeName == "Holdover" || legalcaseDto.CaseTypeName == "NonPayment")
         {
@@ -301,7 +652,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <InputSelect class="form-select holdover-form"
                                                          @bind-Value="legalcaseDto.CaseTypeId"
                                                          @bind-Value:after="BuildSteps">
-                                             
+
                                                 @foreach (var l in CaseTypeList)
                                                 {
                                                     <option value="@l.Id">@l.Name</option>
@@ -346,7 +697,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                         <!-- ADD BUTTON -->
                                         <div class="col-3 d-flex  align-items-center">
-                                             <label class="form-label "></label>
+                                            <label class="form-label "></label>
                                             @if (!showClientTextbox)
                                             {
                                                 <div class="w-100 d-flex gap-3 align-items-center">
@@ -363,7 +714,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     }
 
 
-                                    @if (!showClientTextbox &&   legalcaseDto.ClientId.HasValue
+                                    @if (!showClientTextbox && legalcaseDto.ClientId.HasValue
                                                                 && legalcaseDto.CaseTypeId.HasValue)
                                     {
                                         <div class="card p-3 position-relative mt-3">
@@ -399,9 +750,9 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     <ValidationMessage For="() => legalcaseDto.ClientTypeId" />
                                                 </div>
 
-                                              
 
-                                               
+
+
 
                                                 <div class="col-6">
                                                     <label class="form-label required-label">Email</label>
@@ -417,7 +768,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                @bind-Value="legalcaseDto.Reference" />
                                                 </div>
 
-                                                
+
 
                                                 @if (IsNewClient)
                                                 {
@@ -436,7 +787,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <!-- NEW CLIENT TEXTBOX FORM -->
                                     @if (showClientTextbox)
                                     {
-                                      
+
 
                                         <div class="card p-3 position-relative">
                                             <button type="button"
@@ -450,19 +801,19 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     <label class="form-label required-label">Client Name</label>
                                                     <InputText class="form-control"
                                                                placeholder="Enter Name"
-                                                               @bind-Value="legalcaseDto.ClientName"  />
+                                                               @bind-Value="legalcaseDto.ClientName" />
                                                     <ValidationMessage For="() => legalcaseDto.ClientName" />
                                                 </div>
                                                 <div class="col-4">
                                                     <label class="form-label">Phone</label>
                                                     <InputText class="form-control"
                                                                placeholder="Enter Number"
-                                                               @bind-Value="legalcaseDto.ClientPhone"  />
+                                                               @bind-Value="legalcaseDto.ClientPhone" />
                                                 </div>
                                                 <div class="col-4">
                                                     <label class="form-label required-label">Client Type</label>
                                                     <InputSelect class="form-select"
-                                                                 @bind-Value="legalcaseDto.ClientTypeId" >
+                                                                 @bind-Value="legalcaseDto.ClientTypeId">
                                                         <option value="">-- Select Type --</option>
                                                         @foreach (var Own in ClientTypeList)
                                                         {
@@ -475,7 +826,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     <label class="form-label required-label">Email</label>
                                                     <InputText class="form-control"
                                                                placeholder="Enter Email"
-                                                               @bind-Value="legalcaseDto.ClientEmail"  />
+                                                               @bind-Value="legalcaseDto.ClientEmail" />
                                                     <ValidationMessage For="() => legalcaseDto.ClientEmail" />
                                                 </div>
                                                 <div class="col-4">
@@ -572,10 +923,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 }
                                             </ul>
                                         }
-                                         <div style="min-height:1.5em; margin-top:4px">
-                                                        <ValidationMessage For="() => legalcaseDto.LandlordId" />
-                                         </div>
-                                        
+                                        <div style="min-height:1.5em; margin-top:4px">
+                                            <ValidationMessage For="() => legalcaseDto.LandlordId" />
+                                        </div>
+
                                     </div>
 
                                     <div class="col-md-4 d-flex align-items-end">
@@ -591,20 +942,20 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 </button>
                                             </div>
                                         }
-                                       
+
                                     </div>
                                 </div>
 
-                               
+
 
                                 @if (showLandlordfields)
                                 {
                                     <div class=@(selectedlandlord != null ? "card p-3 position-relative " : " position-relative")>
-                                       
+
                                         <div class="row mt-1">
                                             <div class="col-md-6">
                                                 <label class="form-label  required-label">Contact Person </label>
-                                                <InputText class="form-control" @bind-Value="legalcaseDto.ContactPersonName" placeholder="Enter Contact Person"   disabled="@IsLandlordSelected" />
+                                                <InputText class="form-control" @bind-Value="legalcaseDto.ContactPersonName" placeholder="Enter Contact Person" disabled="@IsLandlordSelected" />
                                                 @if (!IsLandlordSelected)
                                                 {
                                                     <ValidationMessage For="() => legalcaseDto.ContactPersonName" />
@@ -645,7 +996,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
 
                                 <div class="row mt-2">
-                                    
+
                                     @if (!IsNewBuilding && !isBuildingSelected)
                                     {
                                         <div class="col-md-6 position-relative" @onfocusout="HideBuildingDropdown">
@@ -653,8 +1004,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <input type="text" class="form-control"
                                                    placeholder="Search by Building Address or code..."
                                                    @bind-value="searchBuildingText"
-                                                   @oninput="OnSearchBuildingInput" 
-                                                   @onclick="ShowAllBuildings"/>
+                                                   @oninput="OnSearchBuildingInput"
+                                                   @onclick="ShowAllBuildings" />
                                             @if (filteredBuildings?.Any() == true)
                                             {
                                                 <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
@@ -667,35 +1018,35 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 </ul>
                                             }
                                             <div style="min-height:1.5em; margin-top:4px">
-                                              
+
                                                 <ValidationMessage For="() => legalcaseDto.BuildingId" />
                                             </div>
-                                            
+
                                         </div>
-                                         <div class="col-md-4 d-flex align-items-center">
-                                        <!-- bottom align -->
-                                        @if (!showBuildingfields)
-                                        {
-                                            <div class="w-100 d-flex gap-3  align-items-center">
-                                                <span class="fw-bold mt-1">OR</span>
-                                                <button type="button" class="btn"
-                                                        style="background-color:#1F365D; color:white"
-                                                        @onclick="OnBindBuldingAfter">
-                                                    + ADD
-                                                </button>
-                                            </div>
-                                        }
-                                    </div>
+                                        <div class="col-md-4 d-flex align-items-center">
+                                            <!-- bottom align -->
+                                            @if (!showBuildingfields)
+                                            {
+                                                <div class="w-100 d-flex gap-3  align-items-center">
+                                                    <span class="fw-bold mt-1">OR</span>
+                                                    <button type="button" class="btn"
+                                                            style="background-color:#1F365D; color:white"
+                                                            @onclick="OnBindBuldingAfter">
+                                                        + ADD
+                                                    </button>
+                                                </div>
+                                            }
+                                        </div>
 
                                     }
 
 
-                   
+
                                 </div>
 
                                 @if (showBuildingfields || isBuildingSelected)
                                 {
-                                    <div class="card p-2 position-relative" >
+                                    <div class="card p-2 position-relative">
                                         @if (showBuildingfields)
                                         {
                                             <button type="button" class="btn-close position-absolute top-3 end-0 m-2 fs-6"
@@ -706,7 +1057,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <div class="row mt-2">
                                             <div class="col-6">
                                                 <label class="form-label  required-label">Street Address </label>
-                                                <InputText class="form-control" @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter Address"  disabled="@isBuildingSelected" />
+                                                <InputText class="form-control" @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter Address" disabled="@isBuildingSelected" />
 
                                                 @if (!isBuildingSelected)
                                                 {
@@ -716,9 +1067,9 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                             <div class="col-md-6">
                                                 <label class="form-label  required-label">MDR Number </label>
-                                                <InputText class="form-control" @bind-Value="legalcaseDto.Mdr" placeholder="Enter MDR Number"  disabled="@isBuildingSelected" />
-                                               
-                                                     @if (!isBuildingSelected)
+                                                <InputText class="form-control" @bind-Value="legalcaseDto.Mdr" placeholder="Enter MDR Number" disabled="@isBuildingSelected" />
+
+                                                @if (!isBuildingSelected)
                                                 {
                                                     <ValidationMessage For="() => legalcaseDto.Mdr" />
                                                 }
@@ -728,8 +1079,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <div class="row mt-4">
                                             <div class="col-md-4">
                                                 <label class="form-label  required-label">Borough / City </label>
-                                                <InputText class="form-control" @bind-Value="legalcaseDto.Borough" placeholder="Enter Borough / City"   disabled="@isBuildingSelected"/>
-                                               
+                                                <InputText class="form-control" @bind-Value="legalcaseDto.Borough" placeholder="Enter Borough / City" disabled="@isBuildingSelected" />
+
                                                 @if (!isBuildingSelected)
                                                 {
                                                     <ValidationMessage For="() => legalcaseDto.Borough" />
@@ -739,8 +1090,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <div class="col-md-4">
                                                 <label class="form-label required-label">Units </label>
                                                 <InputText class="form-control" @bind-Value="legalcaseDto.Units" placeholder="Enter Units" disabled="@isBuildingSelected" />
-                                               
-                                                     @if (!isBuildingSelected)
+
+                                                @if (!isBuildingSelected)
                                                 {
                                                     <ValidationMessage For="() => legalcaseDto.Units" />
                                                 }
@@ -754,11 +1105,11 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <option value="@l.Id">@l.Name</option>
                                                     }
                                                 </InputSelect>
-                                                 @if (!isBuildingSelected)
+                                                @if (!isBuildingSelected)
                                                 {
                                                     <ValidationMessage For="() => legalcaseDto.RegulationStatusId" />
                                                 }
-                                              
+
                                             </div>
                                         </div>
                                         @if (IsNewBuilding)
@@ -766,7 +1117,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <div class="row mt-4">
                                                 <div class="col-md-6">
                                                     <label class="form-label  required-label">State </label>
-                                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.BuildingStateId" style="cursor:pointer;"  disabled="@isBuildingSelected">
+                                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.BuildingStateId" style="cursor:pointer;" disabled="@isBuildingSelected">
                                                         <option value="">-- Select State --</option>
                                                         @foreach (var s in StateList)
                                                         {
@@ -777,12 +1128,12 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label  required-label">Zipcode </label>
-                                                    <InputText class="form-control" @bind-Value="legalcaseDto.BuildingZip" placeholder="Enter ZipCode"  disabled="@isBuildingSelected"/>
+                                                    <InputText class="form-control" @bind-Value="legalcaseDto.BuildingZip" placeholder="Enter ZipCode" disabled="@isBuildingSelected" />
                                                     <ValidationMessage For="() => legalcaseDto.BuildingZip" />
                                                 </div>
                                             </div>
                                         }
-                                       
+
                                     </div>
                                 }
                             </div>
@@ -820,7 +1171,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                 <div class="row">
                                     @if (Tenants.Count > 0)
                                     {
-                                        
+
                                         <button type="button" class="btn-close position-absolute top-3 end-0 m-2 fs-6"
                                                 aria-label="Close"
                                                 @onclick="ClearSelecteedTenant" title="Click here for tenant reset">
@@ -843,7 +1194,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 }
                                             </ul>
                                         }
-                                         <ValidationMessage For="() => legalcaseDto.TenantId" /> 
+                                        <ValidationMessage For="() => legalcaseDto.TenantId" />
                                     </div>
                                 </div>
 
@@ -860,7 +1211,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                        @bind-value="Tenants[tenant.i]"
                                                        @onblur="() => OnchangeAdditionalTenant(tenant.i)" />
                                             }
-                                            
+
 
                                         }
                                         <ValidationMessage For="() => legalcaseDto.TenantName" />
@@ -927,11 +1278,11 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <div class="d-flex justify-content-start align-items-center  gap-2">
                                             <InputRadioGroup @bind-Value="legalcaseDto.WrittenLease">
                                                 <div class="form-check d-flex justify-content-center gap-2">
-                                                    <InputRadio class="form-check-input" Value="true" style="font-size:15px"/>
+                                                    <InputRadio class="form-check-input" Value="true" style="font-size:15px" />
                                                     <label class="form-check-label">Yes</label>
                                                 </div>
                                                 <div class="form-check  d-flex justify-content-center gap-2">
-                                                    <InputRadio class="form-check-input " Value="false"  style="font-size:15px"/>
+                                                    <InputRadio class="form-check-input " Value="false" style="font-size:15px" />
                                                     <label class="form-check-label">No</label>
                                                 </div>
                                             </InputRadioGroup>
@@ -957,7 +1308,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <div class="d-flex justify-content-start align-items-center  gap-2" style="cursor:pointer;">
                                             <InputRadioGroup @bind-Value="legalcaseDto.OralAgreeMent">
                                                 <div class="form-check d-flex justify-content-center gap-2">
-                                                    <InputRadio class="form-check-input" Value="true"  style="font-size:15px"/>
+                                                    <InputRadio class="form-check-input" Value="true" style="font-size:15px" />
                                                     <label class="form-check-label">Yes</label>
                                                 </div>
                                                 <div class="form-check  d-flex justify-content-center gap-2">
@@ -998,7 +1349,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <label class="form-label required-label ">Move In Date </label>
                                         <RadzenDatePicker Style="width:100%" @bind-Value="legalcaseDto.DateTenantMoved" Max="@DateTime.Today" @bind-Value:after="CalcNoticeDays" />
                                         <ValidationMessage For="() => legalcaseDto.DateTenantMoved" />
-                                    </div> 
+                                    </div>
 
                                     <!-- Monthly Rent -->
                                     <div class="col-md-4">
@@ -1188,7 +1539,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
             }
 
             @* Notice *@
-            @if (Steps[CurrentStep].Name == "Notice")
+            @if (Steps[CurrentStep].Name == "Notice" && legalcaseDto.CaseTypeName == "Holdover")
             {
                 <div class="row">
                     <div class="col-md-12">
@@ -1230,8 +1581,597 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
 
             }
+
+            @* Lease Nonpayement*@
+            @if (Steps[CurrentStep].Name == "Lease")
+            {
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <div style="font-weight:700" class="head"> Lease & Assistance</div>
+                                <div class="hint">Used to populate petition & notices</div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-2 mb-3">
+
+                                    <!-- Written Lease -->
+                                    <div class="col-md-4">
+                                        <label class="form-label ">Lease Start </label>
+                                        <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.LeaseStart" />
+
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label ">Lease End </label>
+                                        <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.LeaseEnd" />
+
+                                    </div>
+
+
+                                    <!-- Monthly Rent -->
+                                    <div class="col-md-4">
+                                        <label class="form-label ">Monthly Rent ($) </label>
+                                        <InputNumber class="form-control" @bind-Value="legalcaseDto.MonthlyRent" />
+                                        <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label ">Date Rent  Due (Month/Week) </label>
+                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" style="cursor:pointer;">
+                                            <option value="">-- Select Type --</option>
+                                            @foreach (var l in DateRentList)
+                                            {
+                                                <option value="@l.Id">@l.Name</option>
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="() => legalcaseDto.RentDueEachMonthOrWeekId" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label ">Date of Last Payment </label>
+                                        <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.LastPaymentDate" @bind-Value:after="GenerateMonths" />
+
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Amount of Last Payment ($)</label>
+                                        <InputNumber class="form-control" @bind-Value="legalcaseDto.LastPayment"  min="0" />
+
+                                    </div>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <label class="form-label" style="align-items: center;display: flex;height: 36px;">Written Lease?</label>
+                                        <div class="d-flex justify-content-start align-items-center  gap-2">
+                                            <InputRadioGroup @bind-Value="legalcaseDto.WrittenLease">
+                                                <div class="form-check d-flex justify-content-center gap-2">
+                                                    <InputRadio class="form-check-input" Value="true" style="font-size:15px" />
+                                                    <label class="form-check-label">Yes</label>
+                                                </div>
+                                                <div class="form-check  d-flex justify-content-center gap-2">
+                                                    <InputRadio class="form-check-input " Value="false" style="font-size:15px" />
+                                                    <label class="form-check-label">No</label>
+                                                </div>
+                                            </InputRadioGroup>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label " style="align-items: center;display: flex;height: 36px;">Tenancy Type</label>
+                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays" style="cursor:pointer;">
+                                            <option value="">-- Select Type --</option>
+                                            @foreach (var l in TenancyTypeList)
+                                            {
+                                                <option value="@l.Id">@l.Name</option>
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="() => legalcaseDto.TenancyTypeId" />
+                                    </div>
+                                    <!-- Oral Start -->
+                                    <div class="col-md-4">
+                                        <label class="form-label ">Assistance (Section 8 / SCRIE/DRIE / other) </label>
+                                        <InputText class="form-control" @bind-Value="legalcaseDto.Assistance" />
+
+                                    </div>
+
+
+                                </div>
+                               
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-4">
+                        <CasesSummary LegalCase="legalcaseDto"
+                                      TenancyTypeList="TenancyTypeList"
+                                      DateRentList="DateRentList"
+                                      CaseProgramList="CaseProgramList"
+                                      CurrentStep="CurrentStep"
+                                      Steps="Steps" />
+                        <TipsSummary />
+                    </div>
+                </div>
+
+
+            }
+
+            @if (Steps[CurrentStep].Name == "Arrears")
+            {
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <div style="font-weight:700" class="head"> Arrears Ledger</div>
+                                <div class="hint">List unpaid months and amounts</div>
+                            </div>
+                            <div class="card-body">
+
+                                <div class="total-box">
+                                    <label class="form-label " style="font-size:14px; font-weight:300; margin-bottom:0px;">Total Owed: $ @(legalcaseDto.TotalOwed ?? 00)</label>
+                                </div>
+
+                                @foreach (var item in Rows)
+                                {
+                                    <div class="row mb-3">
+                                        <div class="col-3">
+                                            <label class="form-label ">Month (YYYY-MM) </label>
+                                            <InputSelect class="form-select holdover-form"
+                                                         @bind-Value="item.Month"
+                                                         @bind-Value:after="(() => OnMonthChanged(item))">
+
+                                                <option value="">Select month</option>
+
+                                                @foreach (var m in MonthOptions)
+                                                {
+                                                    <option value="@m.Value">@m.Display</option>
+                                                }
+
+                                            </InputSelect>
+                                        </div>
+                                        <div class="col-3">
+                                            <label class="form-label  ">Amount ($) </label>
+                                            <InputNumber @bind-Value="item.Amount" @bind-Value:after="RecalculateTotal"
+                                                         class="form-control" />
+                                        </div>
+
+                                        <div class="col-3">
+                                            <label class="form-label  ">Notes </label>
+                                            <InputText @bind-Value="item.Notes"
+                                                       class="form-control" placeholder="Partial, vouchers, etc." />
+                                        </div>
+
+                                        <div class="col-3" style="justify-content:end; display:flex;">
+                                            <button class="remove-btn" @onclick="(() => RemoveRow(item))">
+                                                × Remove
+                                            </button>
+                                        </div>
+
+
+                                    </div>
+                                }
+
+                                <button class="add-btn" @onclick="AddRow">
+                                    + Add Month
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-4">
+                        <CasesSummary LegalCase="legalcaseDto"
+                                      TenancyTypeList="TenancyTypeList"
+                                      DateRentList="DateRentList"
+                                      CaseProgramList="CaseProgramList"
+                                      CurrentStep="CurrentStep"
+                                      Steps="Steps" />
+                        <TipsSummary />
+                    </div>
+                </div>
+
+
+            }
+
+            @if (Steps[CurrentStep].Name == "Notice" && legalcaseDto.CaseTypeName == "NonPayment")
+            {
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <div style="font-weight:700" class="head"> Predicate Notice Planner</div>
+                                <div class="hint">Select notice, service, and compute expiry</div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-2 mb-3">
+
+                                    <!-- Notice type -->
+                                    <div class="col-md-4">
+                                        <label class="form-label ">Notice Type </label>
+                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.NoticeId" style="cursor:pointer;">
+                                            <option value="">-- Select Type --</option>
+                                            @foreach (var l in FilteredFormTypeList)
+                                            {
+                                                <option value="@l.Id">@l.Name</option>
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="() => legalcaseDto.RentDueEachMonthOrWeekId" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label ">Service Method </label>
+                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.ServiceMethodId" style="cursor:pointer;">
+                                            <option value="">-- Select Type --</option>
+                                            @foreach (var l in ServiceMethodList)
+                                            {
+                                                <option value="@l.Id">@l.Name</option>
+                                            }
+                                        </InputSelect>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label ">Planned Service Date </label>
+                                        <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.LeaseStart" />
+
+                                    </div>
+
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label ">Deemed Service (Auto) </label>
+                                        <InputText class="form-control" @bind-Value="legalcaseDto.DeemedService" style="cursor:pointer;" />
+
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label ">Expiry (auto) </label>
+                                        <InputText class="form-control" Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.Expiry" />
+
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Roll to Next Business Day</label>
+                                        <div class="d-flex justify-content-start align-items-center  gap-2">
+                                            <InputRadioGroup @bind-Value="legalcaseDto.WrittenLease">
+                                                <div class="form-check d-flex justify-content-center gap-2">
+                                                    <InputRadio class="form-check-input" Value="true" style="font-size:15px" />
+                                                    <label class="form-check-label">Yes</label>
+                                                </div>
+                                                <div class="form-check  d-flex justify-content-center gap-2">
+                                                    <InputRadio class="form-check-input " Value="false" style="font-size:15px" />
+                                                    <label class="form-check-label">No</label>
+                                                </div>
+                                            </InputRadioGroup>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="hint">Add-ons: Personal +0 • Overnight +1 • Mail +5 • Posting+Mail +5. Expiry counts from deemed date.</div>
+                                    <div class="col-auto">
+                                        <label class="form-label" style="    padding: 10px;
+                                                                                    border: 1px solid;
+                                                                                    border-radius: 25px;
+                                                                                    align-items: center;
+                                                                                    display: flex;
+                                                                                    height: 36px;">Live Expiry : --</label>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-4">
+                        <CasesSummary LegalCase="legalcaseDto"
+                                      TenancyTypeList="TenancyTypeList"
+                                      DateRentList="DateRentList"
+                                      CaseProgramList="CaseProgramList"
+                                      CurrentStep="CurrentStep"
+                                      Steps="Steps" />
+                        <TipsSummary />
+                    </div>
+                </div>
+
+
+            }
+
+            @if (Steps[CurrentStep].Name == "GoodCause")
+            {
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <div style="font-weight:700" class="head">Documents & Remarks</div>
+                                <div class="hint">Uploads & flags</div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-2 mb-3">
+
+                                    <!-- Notice type -->
+                                    <div class="col-md-3">
+                                        
+                                        <div class="form-check d-flex justify-content-center gap-2">
+                                            <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.leasedAttached" />
+                                            <label class="form-check-label"> Leased Attached </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-check d-flex justify-content-center gap-2">
+                                            <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.ledgerAttached" />
+                                            <label class="form-check-label"> Ledger attached </label>
+                                            </div>
+                                        
+                                    </div>
+                                    <div class="col-md-3">
+                                        
+                                        <div class="form-check d-flex justify-content-center gap-2">
+                                            <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.NoticeproofAttached" />
+                                            <label class="form-check-label"> Notices proof attached </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        
+                                        <div class="form-check d-flex justify-content-center gap-2">
+                                            <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.RegistrationRentAttached" />
+                                            <label class="form-check-label">Registration/Rent history attached</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row g-2 mb-3">
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Good Cause Exemption Notice attached</label>
+                                        <div class="d-flex justify-content-start align-items-center  gap-2">
+                                            <InputRadioGroup @bind-Value="legalcaseDto.WrittenLease">
+                                                <div class="form-check d-flex justify-content-center gap-2">
+                                                    <InputRadio class="form-check-input" Value="true" style="font-size:15px" />
+                                                    <label class="form-check-label">Yes</label>
+                                                </div>
+                                                <div class="form-check  d-flex justify-content-center gap-2">
+                                                    <InputRadio class="form-check-input " Value="false" style="font-size:15px" />
+                                                    <label class="form-check-label">No</label>
+                                                </div>
+                                            </InputRadioGroup>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label ">Additional Comments </label>
+                                        <InputText class="form-control" @bind-Value="legalcaseDto.AdditionalComments" style="cursor:pointer;" />
+
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-4">
+                        <CasesSummary LegalCase="legalcaseDto"
+                                      TenancyTypeList="TenancyTypeList"
+                                      DateRentList="DateRentList"
+                                      CaseProgramList="CaseProgramList"
+                                      CurrentStep="CurrentStep"
+                                      Steps="Steps" />
+                        <TipsSummary />
+                    </div>
+                </div>
+
+
+            }
+
+            @if (Steps[CurrentStep].Name == "Filing")
+            {
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <div style="font-weight:700" class="head">Filing</div>
+                                <div class="hint">Preps Petition (UCS‑LTN2) & Notice of Petition</div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-2 mb-3">
+
+                                    <!-- Notice type -->
+                                    <div class="col-md-4">
+                                        <label class="form-label " style="align-items: center;
+                                                                            display: flex;
+                                                                            height: 36px;">County</label>
+                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.CountyId" style="cursor:pointer;">
+                                            <option value="">-- Select Type --</option>
+                                            @foreach (var l in CountyList)
+                                            {
+                                                <option value="@l.Id">@l.Name</option>
+                                            }
+                                        </InputSelect>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label " style="align-items: center;
+                                                                                    display: flex;
+                                                                                    height: 36px;">Court Location</label>
+                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtLocationId" style="cursor:pointer;">
+                                            <option value="">-- Select Type --</option>
+                                            @foreach (var l in CourtLocationList)
+                                            {
+                                                <option value="@l.Id">@l.Court</option>
+                                            }
+                                        </InputSelect>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label ">Affidavit of Service (Predicate) – file key </label>
+                                        <InputText class="form-control" @bind-Value="legalcaseDto.AdditionalComments" style="cursor:pointer;" />
+
+                                        <ValidationMessage For="() => legalcaseDto.RentDueEachMonthOrWeekId" />
+                                    </div>
+
+                                </div>
+                                <div class="row g-2 mb-3">
+
+                                    
+                                    <div class="col-md-4">
+                                        <label class="form-label">Court to draft NoP & Petition?</label>
+                                        <div class="d-flex justify-content-start align-items-center  gap-2">
+                                            <InputRadioGroup @bind-Value="legalcaseDto.WrittenLease">
+                                                <div class="form-check d-flex justify-content-center gap-2">
+                                                    <InputRadio class="form-check-input" Value="true" style="font-size:15px" />
+                                                    <label class="form-check-label">Yes</label>
+                                                </div>
+                                                <div class="form-check  d-flex justify-content-center gap-2">
+                                                    <InputRadio class="form-check-input " Value="false" style="font-size:15px" />
+                                                    <label class="form-check-label">No</label>
+                                                </div>
+                                            </InputRadioGroup>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label ">Filing Method</label>
+                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.FilingMethodId" style="cursor:pointer;">
+                                            <option value="">-- Select Type --</option>
+                                            @foreach (var l in DateRentList)
+                                            {
+                                                <option value="@l.Id">@l.Name</option>
+                                            }
+                                        </InputSelect>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label ">Preferred Filing Date </label>
+                                        <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.LeaseEnd" />
+                                    </div>
+                                    
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-4">
+                        <CasesSummary LegalCase="legalcaseDto"
+                                      TenancyTypeList="TenancyTypeList"
+                                      DateRentList="DateRentList"
+                                      CaseProgramList="CaseProgramList"
+                                      CurrentStep="CurrentStep"
+                                      Steps="Steps" />
+                        <TipsSummary />
+                    </div>
+                </div>
+
+
+            }
+
+            @if (Steps[CurrentStep].Name == "Review")
+            {
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <div style="font-weight:700" class="head">Filing</div>
+                                <div class="hint">Preps Petition (UCS‑LTN2) & Notice of Petition</div>
+                            </div>
+                            <div class="card-body">
+                              @*   <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="card mb-3">
+                                            <div class="card-header">
+                                                <div style="font-weight:700" class="head">Filing</div>
+                                                <div class="hint">Preps Petition (UCS‑LTN2) & Notice of Petition</div>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row g-2 mb-3">
+
+                                                    <!-- Notice type -->
+                                                    <div class="col-md-4">
+                                                        <label class="form-label ">County</label>
+                                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.CountyId" style="cursor:pointer;">
+                                                            <option value="">-- Select Type --</option>
+                                                            @foreach (var l in DateRentList)
+                                                            {
+                                                                <option value="@l.Id">@l.Name</option>
+                                                            }
+                                                        </InputSelect>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label ">Court Location</label>
+                                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtLocationId" style="cursor:pointer;">
+                                                            <option value="">-- Select Type --</option>
+                                                            @foreach (var l in DateRentList)
+                                                            {
+                                                                <option value="@l.Id">@l.Name</option>
+                                                            }
+                                                        </InputSelect>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label ">Affidavit of Service (Predicate) – file key </label>
+                                                        <InputText class="form-control" @bind-Value="legalcaseDto.AdditionalComments" style="cursor:pointer;" />
+
+                                                        <ValidationMessage For="() => legalcaseDto.RentDueEachMonthOrWeekId" />
+                                                    </div>
+
+                                                </div>
+                                                <div class="row g-2 mb-3">
+
+                                                    <div class="col-md-4">
+                                                        <label class="form-label ">
+                                                            Court to draft NoP & Petition?
+                                                        </label>
+                                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtLocationId" style="cursor:pointer;">
+                                                            <option value="">-- Select Type --</option>
+                                                            @foreach (var l in DateRentList)
+                                                            {
+                                                                <option value="@l.Id">@l.Name</option>
+                                                            }
+                                                        </InputSelect>
+                                                    </div>
+
+
+                                                    <div class="col-md-4">
+                                                        <label class="form-label ">Filing Method</label>
+                                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.FilingMethodId" style="cursor:pointer;">
+                                                            <option value="">-- Select Type --</option>
+                                                            @foreach (var l in DateRentList)
+                                                            {
+                                                                <option value="@l.Id">@l.Name</option>
+                                                            }
+                                                        </InputSelect>
+                                                    </div>
+
+                                                    <div class="col-md-4">
+                                                        <label class="form-label ">Preferred Filing Date </label>
+                                                        <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.LeaseEnd" />
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div> *@
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-4">
+                        <CasesSummary LegalCase="legalcaseDto"
+                                      TenancyTypeList="TenancyTypeList"
+                                      DateRentList="DateRentList"
+                                      CaseProgramList="CaseProgramList"
+                                      CurrentStep="CurrentStep"
+                                      Steps="Steps" />
+                        <TipsSummary />
+                    </div>
+                </div>
+
+
+            }
+
         }
-         @if (legalcaseDto.CaseTypeName == "HPD" || legalcaseDto.CaseTypeName == "Per Diem")
+        @if (legalcaseDto.CaseTypeName == "HPD" || legalcaseDto.CaseTypeName == "Per Diem")
         {
             @if (Steps[CurrentStep].Name == "CaseAndclient")
             {
@@ -1581,26 +2521,26 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                 <div class="row g-3 mt-2">
 
                                     <!-- Court Location -->
-                                    <div class="col-md-6" >
+                                    <div class="col-md-6">
                                         <div class="position-relative" @onfocusout="HideCourtDropDown">
-                                        <label class="form-label fw-semibold">Court Location (Borough) <span class="text-danger">*</span></label>
-                                        <InputText type="text" name="courtLocation" class="form-control" placeholder="Search by Court Location..."
-                                                   @bind-value="searchCourtText" @oninput="OnSearchCourtInput" @onclick="ShowAllCourts"  />
-                                        @if (filteredCourts?.Any() == true)
-                                        {
-                                            <ul class="dropdown-menu show"
-                                                style="position: absolute; width:100%; cursor:pointer;">
-                                                @foreach (var c in filteredCourts)
-                                                {
-                                                    <li class="dropdown-item" @onclick="() => SelectCourt(c)">
-                                                        @c.Court
-                                                    </li>
-                                                }
-                                            </ul>
-                                        }
+                                            <label class="form-label fw-semibold">Court Location (Borough) <span class="text-danger">*</span></label>
+                                            <InputText type="text" name="courtLocation" class="form-control" placeholder="Search by Court Location..."
+                                                       @bind-value="searchCourtText" @oninput="OnSearchCourtInput" @onclick="ShowAllCourts" />
+                                            @if (filteredCourts?.Any() == true)
+                                            {
+                                                <ul class="dropdown-menu show"
+                                                    style="position: absolute; width:100%; cursor:pointer;">
+                                                    @foreach (var c in filteredCourts)
+                                                    {
+                                                        <li class="dropdown-item" @onclick="() => SelectCourt(c)">
+                                                            @c.Court
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
 
-                                        <ValidationMessage For="() => legalcaseDto.CourtLocationId" />
-                                            </div>
+                                            <ValidationMessage For="() => legalcaseDto.CourtLocationId" />
+                                        </div>
                                     </div>
 
                                     <!-- Part / Room # -->
@@ -1618,26 +2558,26 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <!-- County / Borough -->
                                     <div class="col-md-6">
                                         <div class="position-relative" @onfocusout="HideCountyDropDown">
-                                        <label class="form-label fw-semibold">County / Borough <span class="text-danger">*</span></label>
-                                        <InputText type="text" name="county" class="form-control" placeholder="Search by County..."
-                                                   @bind-value="searchCountyText" @oninput="OnSearchCountyInput" @onclick="ShowAllCounty" />
-                                        @if (filteredCounties?.Any() == true)
-                                        {
-                                            <ul class="dropdown-menu show" style="position: absolute; width:100% !important; cursor:pointer;">
-                 
-                                                @foreach (var c in filteredCounties)
-                                                {
-                                                    <li class="dropdown-item" @onclick="() => SelectCounty(c)">
-                                                        @c.Name
+                                            <label class="form-label fw-semibold">County / Borough <span class="text-danger">*</span></label>
+                                            <InputText type="text" name="county" class="form-control" placeholder="Search by County..."
+                                                       @bind-value="searchCountyText" @oninput="OnSearchCountyInput" @onclick="ShowAllCounty" />
+                                            @if (filteredCounties?.Any() == true)
+                                            {
+                                                <ul class="dropdown-menu show" style="position: absolute; width:100% !important; cursor:pointer;">
 
-                                                    </li>
+                                                    @foreach (var c in filteredCounties)
+                                                    {
+                                                        <li class="dropdown-item" @onclick="() => SelectCounty(c)">
+                                                            @c.Name
 
-                                                }
-                                            </ul>
+                                                        </li>
 
-                                        }
-                                        <ValidationMessage For="() => legalcaseDto.CountyId" />
-                                            </div>
+                                                    }
+                                                </ul>
+
+                                            }
+                                            <ValidationMessage For="() => legalcaseDto.CountyId" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1723,7 +2663,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                 <div class="row g-3">
                                     @if (legalcaseDto.CaseTypeName == "HPD")
                                     {
-                                        
+
 
                                         <div class="col-md-12">
                                             <label class="form-label fw-semibold">Petitioner / Tenant Name(s)  <span class="text-danger">*</span></label>
@@ -1743,7 +2683,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <InputText type="text" class="form-control"
                                                                    placeholder="Enter Tenant name"
                                                                    @bind-value="searchTenantText"
-                                                                   @onblur="saveTenantName"  style="font-size:13px"/>
+                                                                   @onblur="saveTenantName" style="font-size:13px" />
                                                     }
                                                     else
                                                     {
@@ -1807,7 +2747,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <InputText type="text" class="form-control"
                                                                    placeholder="Enter Landlord name"
                                                                    @bind-value="searchlandlordText"
-                                                                   @onblur="saveLandLordName" style="font-size:13px"/>
+                                                                   @onblur="saveLandLordName" style="font-size:13px" />
                                                     }
                                                     else
                                                     {
@@ -1836,7 +2776,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 {
 
 
-                                                    <div class="col-md-1 d-flex justify-content-center align-items-center" >
+                                                    <div class="col-md-1 d-flex justify-content-center align-items-center">
                                                         <div>
                                                             OR
                                                         </div>
@@ -1914,7 +2854,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                    placeholder="Search by Building Address or code..."
                                                    @bind-value="searchBuildingText"
                                                    @oninput="OnSearchBuildingInput" />
-                                        
+
                                             @if (filteredBuildings?.Any() == true)
                                             {
                                                 <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
@@ -1948,10 +2888,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 </button>
                                             </div>
                                         }
-                                       
+
                                     </div>
 
-                    
+
                                 </div>
 
                                 @if (showBuildingfields)
@@ -1969,7 +2909,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <div class="row">
                                             <div class="col-6">
                                                 <label class="form-label  required-label">BuildingAddress </label>
-                                                <InputText class="form-control" @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter BuildingAddress"  disabled="@IsExistingBuildingSelected"/>
+                                                <InputText class="form-control" @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter BuildingAddress" disabled="@IsExistingBuildingSelected" />
 
 
                                                 @if (!IsExistingBuildingSelected)
@@ -1980,8 +2920,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <div class="col-6">
                                                 <label class="form-label  required-label">Units </label>
                                                 <InputText class="form-control" @bind-Value="legalcaseDto.Units" placeholder="Enter Units" disabled="@IsExistingBuildingSelected" />
-                                         
-                                                            @if (!IsExistingBuildingSelected)
+
+                                                @if (!IsExistingBuildingSelected)
                                                 {
                                                     <ValidationMessage For="() => legalcaseDto.Units" />
                                                 }
@@ -1991,7 +2931,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         </div>
 
                                         <div class="row mt-4">
-                                            
+
                                             <div class="col-md-6">
 
                                                 <label class="form-label fw-semibold">
@@ -1999,29 +2939,29 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 </label>
                                                 @if (PremiseTypesList != null && PremiseTypesList.Any())
                                                 {
-                                                    <div  style="display: flex;flex-wrap: wrap; column-gap: 33px;">
-                                                        <InputRadioGroup @bind-Value="legalcaseDto.PremiseTypeId" class="d-flex gap-4 flex-wrap mt-2" >
+                                                    <div style="display: flex;flex-wrap: wrap; column-gap: 33px;">
+                                                        <InputRadioGroup @bind-Value="legalcaseDto.PremiseTypeId" class="d-flex gap-4 flex-wrap mt-2">
 
-                                                        @foreach (var Type in PremiseTypesList)
-                                                        {
-                                                            <div class="form-check d-flex align-items-center gap-1">
-                                                                <InputRadio class="form-check-input"
-                                                                            id="@($"Type_{Type.Id}")"
+                                                            @foreach (var Type in PremiseTypesList)
+                                                            {
+                                                                <div class="form-check d-flex align-items-center gap-1">
+                                                                    <InputRadio class="form-check-input"
+                                                                                id="@($"Type_{Type.Id}")"
                                                                                 Value="@Type.Id" disabled="@IsExistingBuildingSelected" />
 
-                                                                <label class="form-check-label" for="@($"Type_{Type.Id}")">@Type.Name</label>
-                                                            </div>
-                                                        }
+                                                                    <label class="form-check-label" for="@($"Type_{Type.Id}")">@Type.Name</label>
+                                                                </div>
+                                                            }
 
-                                                    </InputRadioGroup>
+                                                        </InputRadioGroup>
 
                                                         @if (!IsExistingBuildingSelected)
                                                         {
                                                             <ValidationMessage For="() => legalcaseDto.PremiseTypeId" />
                                                         }
 
-                                                         
-                                                        </div>
+
+                                                    </div>
                                                 }
                                             </div>
 
@@ -2033,27 +2973,27 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 <div class="row mt-1">
                                                     @if (RegistrationstatusList != null && RegistrationstatusList.Any())
                                                     {
-                                                          <div  style="display: flex;flex-wrap: wrap; column-gap: 33px;">
+                                                        <div style="display: flex;flex-wrap: wrap; column-gap: 33px;">
                                                             <InputRadioGroup @bind-Value="legalcaseDto.RegistrationStatusTypeId" class="d-flex flex-wrap">
-                                                            @foreach (var Type in RegistrationstatusList)
-                                                            {
-                                                                <div class="col-12">
-                                                                    <div class="form-check">
-                                                                        <InputRadio class="form-check-input"
-                                                                                    id="@($"RegStatus_{Type.Id}")"
-                                                                                    Value="@Type.Id" />
-                                                                        <label class="form-check-label" for="@($"RegStatus_{Type.Id}")">@Type.Name</label>
+                                                                @foreach (var Type in RegistrationstatusList)
+                                                                {
+                                                                    <div class="col-12">
+                                                                        <div class="form-check">
+                                                                            <InputRadio class="form-check-input"
+                                                                                        id="@($"RegStatus_{Type.Id}")"
+                                                                                        Value="@Type.Id" />
+                                                                            <label class="form-check-label" for="@($"RegStatus_{Type.Id}")">@Type.Name</label>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            }
-                                                        </InputRadioGroup>
+                                                                }
+                                                            </InputRadioGroup>
                                                             <ValidationMessage For="() => legalcaseDto.RegistrationStatusTypeId" />
-                                               @*                         @if (!IsExistingBuildingSelected)
+                                                            @*                         @if (!IsExistingBuildingSelected)
                                                 {
                                                                 
                                                 } *@
-                                                 
-                                                            </div>
+
+                                                        </div>
                                                     }
                                                 </div>
                                             </div>
@@ -2089,7 +3029,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                             <div class="card-body">
                                 <label class="form-label fw-semibold">
-                                    Please select applicable Harassment 
+                                    Please select applicable Harassment
                                 </label>
                                 <div class="mb-3" id="allegationsGroup">
                                     <!-- Repeated interruptions -->
@@ -2135,7 +3075,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                             <div class="card-body">
                                 <label class="form-label fw-semibold">
-                                    Please select applicable defenses 
+                                    Please select applicable defenses
                                 </label>
 
                                 <div id="defensesGroup" class="mb-3">
@@ -2527,7 +3467,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                             <div class="card-header fw-bold head">
                                 Documents & Instructions
                             </div>
-                         
+
 
 
                             <div class="card-body">
@@ -2716,6 +3656,73 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 </div>
 
 @code {
+    public class ArrearsRow
+    {
+        public string? Month { get; set; }
+        public double Amount { get; set; }
+        public string? Notes { get; set; }
+    }
+    public record MonthItem(string Value, string Display);
+    private List<MonthItem> MonthOptions = new();
+    private List<ArrearsRow> Rows = new();
+    private List<FilingMethod> FilingMethodList = new();
+    private List<ServiceMethod> ServiceMethodList = new();
+    // private decimal TotalOwed => Rows.Sum(x => x.Amount);
+    private void OnMonthChanged(ArrearsRow row)
+    {
+        StateHasChanged();
+    }
+    private void GenerateMonths()
+    {
+        MonthOptions.Clear();
+
+        if (legalcaseDto.LastPaymentDate is null)
+            return;
+
+        DateTime start = new DateTime(
+            legalcaseDto.LastPaymentDate.Value.Year,
+            legalcaseDto.LastPaymentDate.Value.Month,
+            1);
+
+        DateTime end = new DateTime(
+            DateTime.Today.Year,
+            DateTime.Today.Month,
+            1);
+
+        // Iterate month-by-month
+        for (DateTime dt = start.AddMonths(1); dt <= end; dt = dt.AddMonths(1))
+        {
+            string value = $"{dt:yyyy-MM}"; // stored value
+            string display = $"{dt:yyyy}-{CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(dt.Month)}";
+
+            MonthOptions.Add(new MonthItem(value, display));
+        }
+
+        Rows.Add(new ArrearsRow());
+    }
+    private void RecalculateTotal()
+    {
+        legalcaseDto.TotalOwed = Rows.Sum(x => x.Amount);
+        StateHasChanged();
+    }
+
+    private void AddRow()
+    {
+        Rows.Add(new ArrearsRow());
+    }
+
+    private void RemoveRow(ArrearsRow row)
+    {
+        Rows.Remove(row);
+    }
+
+    private void OnAmountChanged(ArrearsRow row, double value)
+    {
+
+        row.Amount = value;
+        StateHasChanged();
+    }
+
 
     public class StepItem
     {
@@ -2743,7 +3750,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     public int CurrentStep { get; set; }
 
 
-    public int Tracker { get; set; }
+    public int Tracker { get; set; } = 10;
 
     private EditContext _editContext;
     private ValidationMessageStore messageStore;
@@ -2758,7 +3765,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     private List<CaseProgram> CaseProgramList = new();
     private List<EditToClientDto> ClientList = new();
     private List<EditToCountyDto> CountyList = new();
-   private List<CourtDto> CourtLocationList  = new ();
+    private List<CourtDto> CourtLocationList = new();
     private List<EditToLandlordDto> LandlordList = new();
     private List<EditToBuildingDto> BuildingList = new List<EditToBuildingDto>();
     private List<EditToTenantDto> TenantList = new();
@@ -2795,6 +3802,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     private List<DocumentInstructionPerDiemDto> DocumentInstructionPerDiemList = new();
     private List<ReportingRequirementPerDiemDto> ReportingRequirementPerDiemList = new();
     private List<PaymentMethod> PaymentMethodDtoList = new();
+    private List<FormAddEditViewModelDto> FilteredFormTypeList = new();
 
     public List<Guid> SelectedHPDCaseTypeIds { get; set; } = new();
     public List<Guid> SelectedPerDiemCaseTypeIds { get; set; } = new();
@@ -2802,7 +3810,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     public List<Guid> SelectedHPDCaseAppreanceTypeIds { get; set; } = new();
     public List<Guid> SelectedPerDiemDocInstructionIds { get; set; } = new();
     public List<Guid> SelectedReportingRequirementIds { get; set; } = new();
-  
+
     bool IsLandlordSelected => selectedlandlord != null;
     bool isBuildingSelected = false;
     private CancellationTokenSource _cts;
@@ -2849,6 +3857,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         legalcaseDto.DateTenantMoved = null;
         legalcaseDto.LeaseEnd = null;
         await BuildSteps();
+        // GenerateMonths();
         spinnerservice.Hide();
 
     }
@@ -2880,6 +3889,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         LandLordTypeList = await LandlordTypeRepository.GetAllLandLordType();
         IsUnitIllegalList = await UnitIllegalRepository.GetAllUnitIllegal();
         RegulationList = await RegulationStatusRepository.GetAllRegulationStatus();
+        if(legalcaseDto.CaseTypeId != null || legalcaseDto.CaseTypeId != Guid.Empty)
+        {
+            FilteredFormTypeList = await _FormService.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
+        }
     }
 
     bool HideCaseAndClientSection =>
@@ -2887,15 +3900,15 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     && legalcaseDto.CaseTypeId != Guid.Empty
     && legalcaseDto.ClientId != null
     && legalcaseDto.ClientId != Guid.Empty;
-   
 
 
 
 
-    private async Task <bool> ValidateCurrentStep()
+
+    private async Task<bool> ValidateCurrentStep()
     {
         messageStore.Clear();
-       
+
         var caseTypeName = CaseTypeList
     .FirstOrDefault(x => x.Id == legalcaseDto.CaseTypeId)?.Name;
 
@@ -2931,7 +3944,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                         }
                     }
 
-                    
+
 
                     // ❌ Duplicate email check
                     // var isEmailExists = await _clientService.IsEmailExists(legalcaseDto.ClientEmail);
@@ -2945,46 +3958,46 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                 else if (Steps[CurrentStep].Name == "Landlord")
                 {
-                    
+
                     bool islandlordIdSelected = legalcaseDto.LandlordId.HasValue && legalcaseDto.LandlordId.Value != Guid.Empty;
                     bool islandlordTextEntered = !string.IsNullOrWhiteSpace(searchlandlordText);
 
                     // ✔ Validation trigger only when both are empty
-                    if (!islandlordIdSelected && !islandlordTextEntered )
+                    if (!islandlordIdSelected && !islandlordTextEntered)
                     {
                         Require(() => legalcaseDto.LandlordId, nameof(legalcaseDto.LandlordId), "Landlord name is required");
                     }
-                   
-                    if(!IsLandlordSelected)
+
+                    if (!IsLandlordSelected)
                     {
 
-                    Require(() => legalcaseDto.ContactPersonName, nameof(legalcaseDto.ContactPersonName), "Contact Person is required");
+                        Require(() => legalcaseDto.ContactPersonName, nameof(legalcaseDto.ContactPersonName), "Contact Person is required");
                     }
-                    if(!IsLandlordSelected)
+                    if (!IsLandlordSelected)
                     {
                         Require(() => legalcaseDto.LandlordAddress, nameof(legalcaseDto.LandlordAddress), "Address is required");
                     }
-                  
-                   
+
+
                 }
                 else if (Steps[CurrentStep].Name == "Building")
                 {
-                    if(!isBuildingSelected)
+                    if (!isBuildingSelected)
                     {
-                          Require(() => legalcaseDto.Mdr, nameof(legalcaseDto.Mdr), "MDR is required");                        
+                        Require(() => legalcaseDto.Mdr, nameof(legalcaseDto.Mdr), "MDR is required");
                     }
-                  
+
                     if (!IsNewBuilding)
                     {
                         Require(() => legalcaseDto.BuildingId, nameof(legalcaseDto.BuildingId), "Building is required");
 
                     }
-                    if (IsNewBuilding )
+                    if (IsNewBuilding)
                     {
                         Require(() => legalcaseDto.BuildingZip, nameof(legalcaseDto.BuildingZip), "Zipcode is Required");
                         Require(() => legalcaseDto.BuildingStateId, nameof(legalcaseDto.BuildingStateId), "Please select a state");
                     }
-                        
+
                     if (!isBuildingSelected)
                     {
                         Require(() => legalcaseDto.Borough, nameof(legalcaseDto.Borough), "City is required");
@@ -2998,15 +4011,15 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                     {
                         Require(() => legalcaseDto.BuildingAddress, nameof(legalcaseDto.BuildingAddress), "Address is required");
                     }
-                     if (!isBuildingSelected)
+                    if (!isBuildingSelected)
                     {
                         Require(() => legalcaseDto.RegulationStatusId, nameof(legalcaseDto.RegulationStatusId), "Please select a regulation");
                     }
-                   
-                   
-                   
+
+
+
                 }
-               
+
 
                 else if (Steps[CurrentStep].Name == "Tenant")
                 {
@@ -3019,7 +4032,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                         Require(() => legalcaseDto.TenantId, nameof(legalcaseDto.TenantId), "Unit/Apt is required");
                     }
 
-                   
+
                     Require(() => legalcaseDto.TenantName, nameof(legalcaseDto.TenantName), "Tenant Name is required");
                 }
 
@@ -3119,7 +4132,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                     if (!isExistingLandlordSelected && !isNewLandlordEntered)
                     {
                         Require(() => legalcaseDto.LandlordId, nameof(legalcaseDto.LandlordId), "Landlord Name is required");
-                        
+
                     }
 
                     // TENANT VALIDATION (Require se)
@@ -3145,19 +4158,19 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                     }
                     if (!IsExistingBuildingSelected)
                     {
-                            Require(() => legalcaseDto.Units, nameof(legalcaseDto.Units), "Units required");
+                        Require(() => legalcaseDto.Units, nameof(legalcaseDto.Units), "Units required");
                     }
-                     if (!IsExistingBuildingSelected)
+                    if (!IsExistingBuildingSelected)
                     {
                         Require(() => legalcaseDto.BuildingAddress, nameof(legalcaseDto.BuildingAddress), "Address required");
                     }
-                     if (!IsExistingBuildingSelected)
+                    if (!IsExistingBuildingSelected)
                     {
                         Require(() => legalcaseDto.PremiseTypeId, nameof(legalcaseDto.PremiseTypeId), "Select Building Type");
                     }
-                   
-                        Require(() => legalcaseDto.RegistrationStatusTypeId, nameof(legalcaseDto.RegistrationStatusTypeId), "Select Registration Status");
-                    
+
+                    Require(() => legalcaseDto.RegistrationStatusTypeId, nameof(legalcaseDto.RegistrationStatusTypeId), "Select Registration Status");
+
                 }
 
                 else if (Steps[CurrentStep].Name == "PetitionerTenant")
@@ -3478,15 +4491,15 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
     private async Task OnStepClick(int step)
     {
-        if (step <= Tracker)
-        {
+        // if (step <= Tracker)
+        // {
 
-            CurrentStep = step;
-            await InvokeAsync(StateHasChanged);
-        }
+        CurrentStep = step;
+        await InvokeAsync(StateHasChanged);
+        // }
     }
 
-   
+
 
 
     private void HandleCaseTypeChange(ChangeEventArgs e)
@@ -4041,7 +5054,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                         StateId = legalcaseDto.BuildingStateId,
                         Zipcode = legalcaseDto.BuildingZip,
                         BuildingUnits = legalcaseDto.Units,
-                      
+
                         MDRNumber = legalcaseDto.Mdr,
                         RegulationStatusId = legalcaseDto.RegulationStatusId,
                         LandlordId = legalcaseDto.LandlordId
@@ -4066,7 +5079,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                             LandlordId = legalcaseDto.LandlordId,
 
                             BuildingUnits = legalcaseDto.Units,
-                            
+
                             MDRNumber = legalcaseDto.Mdr,
                             RegulationStatusId = legalcaseDto.RegulationStatusId,
                         };
@@ -4088,7 +5101,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                         LastName = e.LastName,
                         UnitOrApartmentNumber = e.UnitorApartmentNumber,
                         BuildingId = e.BuildingId,
-                       
+
                     }).FirstOrDefault();
                     var tenantId = await _tenantService.AddTenantfromCase(newTenant);
                     IsNewTenant = true;
@@ -4655,35 +5668,35 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         return 1;
     }
 
-    // private void CalcExpireAligned() 
-    // { 
-    //     int dueDay = ParseDueDay(DateRentList.FirstOrDefault(x => x.Id == legalcaseDto.RentDueEachMonthOrWeekId)?.Name); 
-    //     int? days = legalcaseDto.CalculatedNoticeLength; 
+    // private void CalcExpireAligned()
+    // {
+    //     int dueDay = ParseDueDay(DateRentList.FirstOrDefault(x => x.Id == legalcaseDto.RentDueEachMonthOrWeekId)?.Name);
+    //     int? days = legalcaseDto.CalculatedNoticeLength;
 
-    //     var servedISO = ToDateTime(legalcaseDto.DateNoticeServed); 
-    //     if (!servedISO.HasValue || days == 0) 
-    //     { 
-    //         legalcaseDto.ExpirationDate = null; // use null for DateOnly? 
+    //     var servedISO = ToDateTime(legalcaseDto.DateNoticeServed);
+    //     if (!servedISO.HasValue || days == 0)
+    //     {
+    //         legalcaseDto.ExpirationDate = null; // use null for DateOnly?
     //         return;
-    //     } 
+    //     }
     //     var target ;
 
     //     if(days != null)
     //     {
 
-    //           target = servedISO.Value.AddDays((double)days); 
+    //           target = servedISO.Value.AddDays((double)days);
 
     //     }
     //          DateOnly expiration;
 
 
     //         if (dueDay == 1)
-    //        { 
+    //        {
     //            expiration = new DateOnly(target.Year, target.Month, DateTime.DaysInMonth(target.Year, target.Month));
-    //        } else 
-    //        { 
-    //            expiration = new DateOnly(target.Year, target.Month, dueDay - 1); 
-    //        } 
+    //        } else
+    //        {
+    //            expiration = new DateOnly(target.Year, target.Month, dueDay - 1);
+    //        }
     //        legalcaseDto.ExpirationDate = expiration;
     //    }
 
@@ -4911,8 +5924,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
             {
                 filteredTenant = new List<EditToTenantDto>();
                 return;
-            } 
-            else 
+            }
+            else
             {
                 // ⭐ 3+ characters → server search
                 filteredTenant = await _tenantService.SearchTenantsAsync(
@@ -4944,7 +5957,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
             await Task.Delay(300, _cts.Token);
             if (string.IsNullOrWhiteSpace(searchBuildingText))
             {
-                await ShowAllBuildings();   
+                await ShowAllBuildings();
                 return;
             }
 
@@ -4959,7 +5972,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
             {
                 filteredBuildings = new List<EditToBuildingDto>();
                 return;
-            } 
+            }
             else
             {
                 // ⭐ 3 characters → server search
@@ -4994,14 +6007,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
             if (string.IsNullOrWhiteSpace(searchCourtText))
             {
                 searchCountyText = null;
-                await ShowAllCourts();  
+                await ShowAllCourts();
                 return;
             }
 
             // ⭐ Jab tak 3 characters nahi — full court list dikhado
             if (searchCourtText.Length < 3)
             {
-               
+
                 await ShowAllCourts();   // <-- yeh method bana lenge niche
                 return;
             }
@@ -5034,20 +6047,20 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 legalcaseDto.CountyId = Guid.Empty;
                 // searchCourtText = null;
                 await ShowAllCounty();
-                  await ShowAllCourts();
+                await ShowAllCourts();
                 return;
-           
-        }
 
-        // ⭐ Jab tak 3 characters nahi — full court list dikhado
-        if (searchCountyText.Length < 3)
-        {
-            await ShowAllCounty();   // <-- yeh method bana lenge niche
-            return;
-        }
+            }
 
-        // ⭐ 3 characters hote hi — server search
-        filteredCounties = await _countyService.SearchCounty(searchCountyText);
+            // ⭐ Jab tak 3 characters nahi — full court list dikhado
+            if (searchCountyText.Length < 3)
+            {
+                await ShowAllCounty();   // <-- yeh method bana lenge niche
+                return;
+            }
+
+            // ⭐ 3 characters hote hi — server search
+            filteredCounties = await _countyService.SearchCounty(searchCountyText);
         }
         catch (TaskCanceledException)
         {
@@ -5122,8 +6135,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
             {
                 filteredLandlords = new List<EditToLandlordDto>();
                 return;
-            } 
-            else 
+            }
+            else
             {
                 filteredLandlords = await _landlordService.SearchLandlordsAsync(
               searchlandlordText,
@@ -5222,7 +6235,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
         if (!tenantLoadedFromLandlord)
         {
-            filteredTenant = new List<EditToTenantDto>();   
+            filteredTenant = new List<EditToTenantDto>();
         }
 
         StateHasChanged();
@@ -5300,7 +6313,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         showLandlordfields = true;
         searchlandlordText = null;
         selectedlandlord = null;
-        legalcaseDto.LandlordId=null;
+        legalcaseDto.LandlordId = null;
 
         legalcaseDto.landlordName = searchlandlordText;
         legalcaseDto.ContactPersonName = null;
@@ -5309,11 +6322,11 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         legalcaseDto.LawFirm = null;
 
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.landlordName)));
-          messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.LandlordId)));
+        messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.LandlordId)));
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.ContactPersonName)));
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.LandlordAddress)));
         _editContext.NotifyValidationStateChanged();
-       
+
 
     }
 
@@ -5409,15 +6422,15 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         legalcaseDto.TenantId = null;
         legalcaseDto.AttorneyOfRecord = null;
         legalcaseDto.AttrneyEmail = null;
-legalcaseDto.AttrneyContactInfo = null;
-legalcaseDto.Attrney = null;
+        legalcaseDto.AttrneyContactInfo = null;
+        legalcaseDto.Attrney = null;
 
-legalcaseDto.CourtLocationId = null;
-legalcaseDto.CountyId = null;
-legalcaseDto.Index = null;
+        legalcaseDto.CourtLocationId = null;
+        legalcaseDto.CountyId = null;
+        legalcaseDto.Index = null;
         legalcaseDto.CourtPart = null;
         searchCourtText = null;
-         searchCountyText = null;
+        searchCountyText = null;
 
 
         StateHasChanged();
@@ -5553,7 +6566,7 @@ legalcaseDto.Index = null;
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.Units)));
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.PremiseTypeId)));
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.RegulationStatusId)));
-   messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.RegistrationStatusTypeId)));
+        messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.RegistrationStatusTypeId)));
 
         _editContext.NotifyValidationStateChanged();
 
@@ -5683,9 +6696,9 @@ legalcaseDto.Index = null;
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.Mdr)));
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.Borough)));
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.Units)));
-          messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.StateId)));
+        messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.StateId)));
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.RegulationStatusId)));
-                messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.ZipCode)));
+        messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.ZipCode)));
         _editContext.NotifyValidationStateChanged();
 
 
@@ -5791,7 +6804,7 @@ legalcaseDto.Index = null;
         searchCountyText = county?.Name;
         legalcaseDto.County = county?.Name;
 
-      
+
 
         filteredCourts = new List<CourtDto>();
         filteredCounties = new List<EditToCountyDto>();
@@ -5888,7 +6901,7 @@ legalcaseDto.Index = null;
 
     private async Task ShowAllCourts()
     {
-        if (legalcaseDto.CountyId != null )
+        if (legalcaseDto.CountyId != null)
         {
             // Sirf selected county ke courts dikhao
             filteredCourts = CourtLocationList
@@ -5897,10 +6910,10 @@ legalcaseDto.Index = null;
         }
         else
         {
-           
-        filteredCourts = await _courtService.GetAllCourtDataAsync();
+
+            filteredCourts = await _courtService.GetAllCourtDataAsync();
         }
-       
+
     }
 
     private async Task ShowAllCounty()
@@ -5943,10 +6956,11 @@ legalcaseDto.Index = null;
         {
             filteredLandlords = new List<EditToLandlordDto>();
             return;
-        } else
+        }
+        else
         {
 
-        filteredLandlords = await _landlordService.GetLandlordsByClientIdAsync(legalcaseDto.ClientId);
+            filteredLandlords = await _landlordService.GetLandlordsByClientIdAsync(legalcaseDto.ClientId);
         }
     }
 
@@ -5956,10 +6970,11 @@ legalcaseDto.Index = null;
         {
             filteredBuildings = new List<EditToBuildingDto>();
             return;
-        } 
-        else {
+        }
+        else
+        {
 
-        filteredBuildings = await _buildingService.GetBuildingsByLandlordIdAsync(legalcaseDto.LandlordId.Value);
+            filteredBuildings = await _buildingService.GetBuildingsByLandlordIdAsync(legalcaseDto.LandlordId.Value);
         }
 
     }
@@ -5970,12 +6985,14 @@ legalcaseDto.Index = null;
         {
             filteredTenant = new List<EditToTenantDto>();
             return;
-        } else {
-        filteredTenant = await _tenantService.GetTenantsByBuildingIdAsync(legalcaseDto.BuildingId.Value);
+        }
+        else
+        {
+            filteredTenant = await _tenantService.GetTenantsByBuildingIdAsync(legalcaseDto.BuildingId.Value);
 
         }
     }
-    
+
 
     // private enum Step { Landlord = 0, Building = 1, Tenant = 2, Rent = 3, Case = 4, Review = 5 }
 }

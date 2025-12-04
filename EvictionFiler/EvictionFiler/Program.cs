@@ -118,10 +118,12 @@ builder.Services.AddScoped<IDocumentIntructionsTypesRepository, DocumentIntructi
 builder.Services.AddScoped<IAppearanceTypePerDiemRepository, AppearanceTypePerDiemRepository>();
 builder.Services.AddScoped<IHarassmentTypeRepository, HarassmentTypeRepository>();
 builder.Services.AddScoped<IReportingTypePerDiemRepository, ReportingTypePerDiemRepository>();
+builder.Services.AddScoped<IRemainderCenterRepository, RemainderCenterRepository>();
 builder.Services.AddScoped<IDefenseTypeRepository, DefenseTypeRepository>();
 builder.Services.AddScoped<IReliefPetitionerTypeRepository, ReliefPetitionerTypeRepository>();
 builder.Services.AddScoped<IReliefRespondenTypeRepository, ReliefRespondenTypeRepository>();
 builder.Services.AddScoped<IAppearanceTypeRepository, AppearanceTypeRepository>();
+builder.Services.AddScoped<IRemainderTypeRepository, RemainderTypeRepository>();
 builder.Services.AddScoped<IDefenseTypeRepository, DefenseTypeRepository>();
 builder.Services.AddScoped<IManageFormRepository, ManageFormRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -132,6 +134,7 @@ builder.Services.AddScoped<IAdditionalOccupantsService, AdditionalOccupantsServi
 builder.Services.AddScoped<IAdditionalTenantsRepository, AdditionalTenantsRepository>();
 builder.Services.AddScoped<ICaseTypeHPDRepository, CaseTypeHPDRepository>();
 builder.Services.AddScoped<IAdditionalTenantService, AdditionalTenantService>();
+builder.Services.AddScoped<IRemianderCenterService, RemianderCenterService>();
 builder.Services.AddScoped<ICourtpartServices, CourtpartServices>();
 builder.Services.AddScoped<ICourtpartRepository, CourtpartRepository>();
 builder.Services.AddScoped<IUnitRepository, UnitRepository>();

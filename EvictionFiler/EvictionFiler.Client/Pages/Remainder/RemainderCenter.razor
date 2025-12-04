@@ -1,0 +1,471 @@
+﻿@page "/remainder-center"
+
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.CalanderDto
+@using EvictionFiler.Application.DTOs.CaseHearing
+@using EvictionFiler.Application.DTOs.RemainderCenterDto
+@using EvictionFiler.Application.Services
+@using EvictionFiler.Domain.Entities.Master
+@using System.ComponentModel.DataAnnotations
+@using System.Linq.Expressions
+@using EvictionFiler.Application.DTOs.ApartmentDto
+@using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Application.DTOs.LegalCaseDto
+@using EvictionFiler.Application.DTOs.PaginationDto
+@using EvictionFiler.Application.DTOs.TenantDto
+
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Client.Components.Cases
+@* @using EvictionFiler.Client.Jwt *@
+@attribute [Authorize]
+
+<PageTitle> Calender - Housing Court Filer</PageTitle>
+@inject ICaseTypeRepository CaseTypeRepository
+@inject ITenantService _tenantService
+@inject IRemainderTypeRepository RemainderTypeRepository
+
+@inject IRemianderCenterService RemianderCenterService
+@using EvictionFiler.Client.SpinnerService
+@using EvictionFiler.Domian.Enums
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject SpinnerService spinnerservice
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization;
+@using EvictionFiler.Domain.Entities
+
+@using System.Security.Claims
+@inject AuthenticationStateProvider _authStateProvider
+
+<style>
+    /* ===== EvictionFiler Light Theme (cards + rounded + blue/yellow accents) ===== */
+    :root { --bg: #f5f7fb; --card: #ffffff; --ink: #0e1726; --muted: #5c6a82; --line: #e5eaf3; --chip: #f1f4fa; --accent: #2463eb; /* blue */ --accent-2: #0ea5e9; /* teal-blue */ --accent-ink: #0b1a34; --warn: #f5b500; /* golden */ --good: #16a34a; --shadow: 0 2px 10px rgba(8, 15, 35, .06); --radius: 16px; }
+
+    * { box-sizing: border-box }
+
+    html,
+    body { height: 100% }
+
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 500 15px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
+
+    .wrap { max-width: 1280px; margin: auto; padding: 22px }
+
+    /* Top bar */
+    header { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin: 4px 0 16px }
+
+    .brand { display: flex; align-items: center; gap: 12px }
+
+    .logo { width: 34px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, #0b3a91, #2b6be6) }
+
+    h1 { font-size: 20px; margin: 0 }
+
+    .sub { color: var(--muted) }
+
+    /* Card */
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow) }
+
+    .card-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); background: #fbfdff; border-top-left-radius: var(--radius); border-top-right-radius: var(--radius); color: #3b4a66 }
+
+    .card-body { padding: 14px }
+
+    /* Filters */
+    .panel .filters { display: grid; grid-template-columns: repeat(6, minmax(170px, 1fr)); gap: 12px }
+
+    .control label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 2px 0 6px }
+
+    .control input,
+    .control select { width: 100%; background: #fff; color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; outline: none; box-shadow: 0 1px 0 rgba(10, 20, 40, .02); }
+
+        .control input:focus,
+        .control select:focus { border-color: #cdd7ee; box-shadow: 0 0 0 3px rgba(36, 99, 235, .08) }
+
+    /* Buttons */
+    .bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px }
+
+    .btn { background: var(--accent); color: #fff; border: 0; border-radius: 12px; padding: 10px 14px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(36, 99, 235, .22); border: 1px solid #d1d5db; }
+
+        .btn.secondary { background: #fff; color: var(--accent-ink); border: 1px solid var(--line); box-shadow: none }
+
+        .btn.ghost { background: var(--chip); color: var(--accent-ink); border: 1px dashed var(--line); box-shadow: none }
+
+    .badge { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line); padding: 8px 10px; border-radius: 12px; color: var(--muted) }
+
+    /* Stats */
+    .stats { display: flex; gap: 12px; flex-wrap: wrap }
+
+    .stat { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; color: var(--muted); box-shadow: var(--shadow) }
+
+        .stat b { color: var(--ink) }
+
+    /* Table */
+    .table-wrap { overflow: auto; max-height: 70vh }
+
+    .table { width: 100%; border-collapse: separate; border-spacing: 0 }
+
+        .table thead th { position: sticky; top: 0; background: #fbfdff; color: #7383a1; text-align: left; padding: 12px; border-bottom: 1px solid var(--line); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+
+        .table tbody td { padding: 12px; border-bottom: 1px solid var(--line); vertical-align: top }
+
+    .caption { font-weight: 700 }
+
+    .label { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; background: #fff5d6; color: #8a6400; border: 1px solid #ffe9a3 }
+
+        .label.holdover { background: #e8f0ff; color: #153e91; border-color: #d7e5ff }
+
+        .label.np { background: #e6fbff; color: #055d66; border-color: #c8f5ff }
+
+    /* Responsive */
+    @@media (max-width:1100px) {
+        .panel .filters { grid-template-columns: repeat(3, minmax(170px, 1fr)) }
+    }
+
+    @@media (max-width:640px) {
+        .panel .filters { grid-template-columns: 1fr }
+
+        .table .hide-sm { display: none }
+    }
+
+    /* Print */
+    @@media print {
+        body { background: #fff; color: #000 }
+
+        header,
+        .panel .bar .btn.secondary,
+        .panel .bar .btn.ghost { display: none !important }
+
+        .wrap { max-width: none; padding: 0 }
+
+        .card { border: 0; box-shadow: none }
+
+        .table thead th { background: #fff; color: #000; border-color: #ccc }
+
+        .table tbody td { border-color: #ddd }
+
+        .label { border-color: #ccc; background: #fff; color: #000 }
+    }
+
+    /* Optional strict 5 rows per page */
+    @@media print {
+        body .per5 .table tbody tr { page-break-inside: avoid }
+
+        body.per5 .table tbody tr:nth-child(5n) { page-break-after: always }
+    }
+</style>
+
+<div class="wrap">
+  
+    <!-- Filters -->
+    <section class="card panel p-3">
+     <h2 style="font-size:16px; font-weight: 700"> Reminders Center</h2>
+        <div class="card-body">
+             <EditForm EditContext="_editContext">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="f-county" class="form-label">Case</label>
+                        <InputText id="f-from" class="form-control" placeholder="EF0000000001" @bind-Value="remainderDto.CaseName" />
+                    </div>
+                    <div class="col-md-4">
+                        <label for="f-part" class="form-label">County</label>
+                        <InputSelect class="form-select" @bind-Value="remainderDto.CountyId">
+                            <option value="">-- Select type --</option>
+                            @foreach (var l in CountyList)
+                            {
+                                <option value="@l.Id">@l.Name</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-4 position-relative" @onfocusout="HideTenantDropDown">
+                        <label class="form-label  required-label">Tenant</label>
+                        <InputText type="text" class="form-control"
+                                   placeholder="Search tenant name .."
+                                   @bind-value="searchTenantText"
+                                   @oninput="OnSearchTenantInput" @onclick="ShowAllTenant" />
+                        @if (filteredTenant?.Any() == true)
+                        {
+                            <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
+                                @foreach (var c in filteredTenant)
+                                {
+                                    <li class="dropdown-item" @onclick="() => SelectedTenant(c)">
+                                        @c.UnitOrApartmentNumber / @c.FirstName @c.LastName
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        <ValidationMessage For="() => remainderDto.TenantId" />
+                    </div>
+                </div>
+                  
+                <div class="row mt-2 g-3">
+                    <div class="col-md-4">
+                        <label for="f-index" class="form-label">Index</label>
+                        <InputText id="f-from" class="form-control" placeholder="LT-31168/24 QU" @bind-Value="remainderDto.Index" />
+                    </div>
+                    <div class="col-md-4">
+                        <label for="f-part" class="form-label">Type</label>
+                        <InputSelect class="form-select" @bind-Value="remainderDto.RemainderTypeId">
+                            <option value="">-- Select type --</option>
+                            @foreach (var l in RemainderTypeList)
+                            {
+                                <option value="@l.Id">@l.Name</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label  required-label">When</label>
+                        <InputDate class="form-control"
+                                   placeholder="mm/dd/yyyy --:-- --"
+                                   @bind-value="remainderDto.When"/>
+   
+                    </div>       
+                </div> 
+
+                <div class="row mt-2 "
+                style="padding:0px 10px">
+
+                    <label>Note</label>
+                    <InputTextArea  style="border-radius:5px"id="rcNote" rows="3" placeholder="Notes..." @bind-Value="remainderDto.Notes"></InputTextArea>
+
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        
+                            <button class=" btn btn-primary m-2 ms-0" style="padding:4px 8px ; border-radius:10px ; font-size:12px" id="rcAdd" @onclick="SubmitAsync" >Add Reminder</button>
+                            <button class="btn m-2 ms-0" style="padding:4px 6px ; border-radius:10px; background-color:#f3f4f6 ; font-size:13px" id="rcExport">Export .ics</button>
+                            
+                      
+                    </div>
+                </div>
+                
+
+            </EditForm> 
+        </div>
+    </section>
+
+
+    <!-- Results -->
+    <section class="card" style="margin-top:14px">  
+        <div class="d-flex justify-content-between align-items-center m-3">
+            <h2 style="margin:0;font-size:1rem;">All Reminders</h2>
+            <button class="btn" style="padding:6px 8px; border-radius:10px; background-color:#f3f4f6;font-size:13px" id="">Clear All</button>
+        </div>
+        <div class="card-body table-wrap">
+            <table class="table" id="table">
+                <thead>
+                    <tr>
+                        <th>When</th>
+                        <th>Case</th>
+                        <th>County</th>
+                        <th>Type</th>
+                        <th>Note</th>
+                        <th>Demo Actions</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tbody">
+                    @if (Remiandercenters != null && Remiandercenters.Any())
+                    {
+                        foreach (var c in Remiandercenters)
+                        {
+                            <tr>
+                                <td>@c.When</td>
+                                <td>@c.CaseName</td>
+                                <td>@c.CountyName</td>
+                                <td>@c.RemainderTypeName</td>
+                                <td>@c.Notes</td>
+                                <td>
+
+                                </td>
+                                <td class="sticky">
+                                   
+                                    <i class="fa-solid fa-trash-can text-danger " @onclick=" ()=>Deleteremainer(c.Id)" style="cursor: pointer;" title="Delete">Delete </i>
+                                </td>
+                               
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="10" class="text-center">No data available</td></tr>
+                    } 
+                </tbody>
+
+            </table>
+        </div>
+    </section>
+</div>
+
+
+
+@code {
+
+    private EditToRemainderCenterDto remainderDto = new EditToRemainderCenterDto();
+    private EditContext _editContext;
+    private ValidationMessageStore _messages;
+    private List<RemainderType> RemainderTypeList = new();
+    private List<County> CountyList = new();
+
+    private string? loggedInUserId;
+    private bool isAdmin = false;
+    private EditToTenantDto selectedtenant;
+    private List<EditToRemainderCenterDto> Remiandercenters { get; set; }
+
+    private string searchTenantText;
+    private CancellationTokenSource _cts;
+    private List<EditToTenantDto> filteredTenant = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        remainderDto = new EditToRemainderCenterDto();
+
+        _editContext = new EditContext(remainderDto);
+        _messages = new ValidationMessageStore(_editContext);
+
+
+        RemainderTypeList = await RemainderTypeRepository.GetAllRemainderTypes();
+
+        CountyList = await CaseTypeRepository.GetAllCounty();
+
+
+        var authState = await _authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+        }
+
+        Remiandercenters = await RemianderCenterService.GetAllRemainderCenterAsync();
+    }
+
+    private async void SelectedTenant(EditToTenantDto tenant)
+    {
+
+        selectedtenant = tenant;
+        searchTenantText = tenant.FirstName!;
+
+        remainderDto.TenantId = tenant.Id;
+
+
+        filteredTenant?.Clear();
+
+
+        StateHasChanged();
+
+
+    }
+
+    private async Task OnSearchTenantInput(ChangeEventArgs e)
+    {
+        searchTenantText = e.Value?.ToString() ?? "";
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        try
+        {
+
+            await Task.Delay(300, _cts.Token);
+            // ⭐ Empty input → load all tenants (ONLY here)
+            if (string.IsNullOrWhiteSpace(searchTenantText))
+            {
+                await ShowAllTenant();
+                return;
+            }
+
+            // ⭐ 1st & 2nd character → DO NOTHING (keep list unchanged)
+            if (searchTenantText.Length < 3)
+            {
+                // ❗ No reload here (important)
+                return;
+            }
+
+            else
+            {
+                // ⭐ 3+ characters → server search
+                filteredTenant = await _tenantService.SearchTenantbyname(searchTenantText);
+
+                   
+            }
+
+
+
+
+        }
+        catch (TaskCanceledException)
+        {
+            // Old task cancelled → ignore
+        }
+
+    }
+
+    private async Task ShowAllTenant()
+    {
+        
+            filteredTenant = await _tenantService.GetAlltenant();
+        
+    }
+
+
+    async Task HideTenantDropDown(FocusEventArgs e)
+    {
+        // Small delay to allow click on dropdown item to register before hiding
+        await Task.Delay(500);
+        if (filteredTenant.Any())
+        {
+            filteredTenant.Clear();
+
+        }
+        StateHasChanged();
+    }
+
+    private async Task SubmitAsync()
+    {
+        spinnerservice.Show();
+        if (remainderDto == null)
+            return;
+
+
+        var authState = await _authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userGuid))
+        {
+            remainderDto.CreatedBy = userGuid;
+        }
+        else
+        {
+            // unauthenticated user
+            remainderDto.CreatedBy = Guid.Empty;
+        }
+
+        // Save the full nested object
+        var isSaved = await RemianderCenterService.Create(remainderDto);
+        if (isSaved)
+        {
+            Navigation.NavigateTo("/remainder-center", true);
+        }
+    }
+
+    public async Task Deleteremainer(Guid id)
+    {
+       
+        bool isDeleted = await RemianderCenterService.DeleteRemainderCenterAsync(id);
+
+        if (isDeleted)
+        {
+
+            Remiandercenters = await RemianderCenterService.GetAllRemainderCenterAsync();
+            StateHasChanged();
+        }
+        
+    }
+
+
+}
+
+
+
+

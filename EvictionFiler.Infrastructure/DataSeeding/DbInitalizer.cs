@@ -38,8 +38,8 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 await SeedRate(context);
                 await SeedPaymentMethod(context);
                 await SeedReportingTypePerDiem(context);
-                
 
+                await SeedRemainderTypes(context);
                 await SeedTypeOfOwner(context);
                 await context.SaveChangesAsync();
 
@@ -56,7 +56,9 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				await SeedCaseStatus(context);
 				await SeedCounty(context);
 				await SeedCategory(context);
-				await SeedUnitType(context);
+                await SeedUnitType(context);
+                await SeedFilingMethod(context);
+                await SeedServiceMethod(context);   
                 await context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -73,6 +75,18 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 if (context.MstPaymentMethods.FirstOrDefault(d => d.Name == type.Name) == null)
                 {
                     await context.MstPaymentMethods.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedRemainderTypes(MainDbContext context)
+        {
+            var remainderTypes = InitialDataGenerator.GetRemainderTypes();
+            foreach (var type in remainderTypes)
+            {
+                if (context.MstRemainderTypes.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstRemainderTypes.AddAsync(type);
                 }
             }
         }
@@ -385,8 +399,8 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				{
 					await context.MstLanguages.AddAsync(l);
 				}
-			}
-		}
+            }
+        }
 
         private static async Task SeedRenewalStatus(MainDbContext context)
         {
@@ -401,6 +415,30 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             }
         }
 
+        private static async Task SeedFilingMethod(MainDbContext context)
+        {
+
+            var renewal = InitialDataGenerator.GetFilingMethod();
+            foreach (var r in renewal)
+            {
+                if (context.MstFilingMethod.FirstOrDefault(d => d.Name == r.Name) == null)
+                {
+                    await context.MstFilingMethod.AddAsync(r);
+                }
+            }
+        }
+        private static async Task SeedServiceMethod(MainDbContext context)
+        {
+
+            var renewal = InitialDataGenerator.GetServiceMethod();
+            foreach (var r in renewal)
+            {
+                if (context.MstServiceMethod.FirstOrDefault(d => d.Name == r.Name) == null)
+                {
+                    await context.MstServiceMethod.AddAsync(r);
+                }
+            }
+        }
         private static async Task SeedFormTypes(MainDbContext context)
 		{
 			var formTypes = InitialDataGenerator.GetFormTypes();
