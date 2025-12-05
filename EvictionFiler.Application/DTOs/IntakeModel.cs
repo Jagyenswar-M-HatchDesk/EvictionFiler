@@ -105,6 +105,7 @@ namespace EvictionFiler.Application.DTOs
         public string? LastRentPaid { get; set; }
         public string? Reference { get; set; }
         public string? Borough { get; set; }
+        public Guid? BoroughorCityId { get; set; }
 
         public bool? OralAgreeMent { get; set; }
         public bool? GoodCauseApplies { get; set; } = false;
@@ -116,6 +117,7 @@ namespace EvictionFiler.Application.DTOs
 
         //[Required(ErrorMessage = "Type is required")]
         public Guid? CaseTypeId { get; set; }
+        public Guid? SubCaseTypeId { get; set; }
         public string CaseTypeName { get; set; }
         public Guid? CaseProgramId { get; set; }
 

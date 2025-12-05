@@ -6,33 +6,7 @@ using System.Threading.Tasks;
 
 namespace EvictionFiler.Domian.Enums
 {
-    public enum Step
-    {
-        CaseAndclient = 0,
-        Landlord = 1,
-        Building = 2,
-        Tenant = 3,
-        Terms = 4,
-        Case = 5,
-        Rent = 6,
-        Notice =7,
-        Attorney = 8,
-        CaseInfo = 9,
-        Party = 10,
-        BuildingInfo = 11,
-        PetitionerTenant = 12,
-        RespondentLandlord = 13,
-        Appearance = 14,
-        Relief = 15,
-        Billing = 16,
-        CasebackGround = 17,
-        DocumentInstructions = 18,
-        Reporting = 19,
-        Acknowledgment = 20,
-
-
-    }
-
+    
     public enum StepHoldover
     {
         CaseAndclient = 0,
@@ -42,8 +16,9 @@ namespace EvictionFiler.Domian.Enums
         Terms = 4,
         Case = 5,
         Rent = 6,
-        Notice = 7,
-       
+        //Notice = 8,
+        Review = 7,
+
 
     }
 
@@ -54,11 +29,11 @@ namespace EvictionFiler.Domian.Enums
         Building = 2,
         Tenant = 3,
         Lease = 4,
-        Arrears = 5,
-        Notice = 6,
-        GoodCause = 7,
-        Filing = 8,
-        Review = 9,
+        //Arrears = 5,
+        Notice = 5,
+        GoodCause = 6,
+        //Filing = 8,
+        Review = 7,
     }
 
     public enum StepHPD

@@ -19,6 +19,27 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new Language() { Name = "Chienese", CreatedOn = now },
             };
         }
+        public static IEnumerable<SubCaseType> GetSubCaseTypes()
+        {
+            var now = DateTime.UtcNow;
+            return new List<SubCaseType>
+            {
+                new SubCaseType() { Name = "Commercial", CreatedOn = now },
+                new SubCaseType() { Name = "Residential Cases", CreatedOn = now },
+            };
+        }
+        public static IEnumerable<City> GetCities()
+        {
+            var now = DateTime.UtcNow;
+            return new List<City>
+            {
+                new City() { Name = "New York", CreatedOn = now },
+                new City() { Name = "Kings", CreatedOn = now },
+                new City() { Name = "Queens", CreatedOn = now },
+                new City() { Name = "Bronx", CreatedOn = now },
+                new City() { Name = "Richmond", CreatedOn = now },
+            };
+        }
         public static IEnumerable<RemainderType> GetRemainderTypes()
         {
             var now = DateTime.UtcNow;
@@ -323,22 +344,12 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new County() { Name = "Kings", CreatedOn = now },
                 new County() { Name = "Queens", CreatedOn = now },
                 new County() { Name = "Bronx", CreatedOn = now },
+                new County() { Name = "Richmond", CreatedOn = now },
 
             };
         }
+       
 
-        //public static IEnumerable<CourtPart> GetCourtPart()
-        //{
-        //    var now = DateTime.UtcNow;
-        //    return new List<CourtPart>
-        //    {
-        //        new CourtPart() { Name = "Intake 1", CreatedOn = now },
-        //        new CourtPart() { Name = "Part A", CreatedOn = now },
-        //        new CourtPart() { Name = "Part B", CreatedOn = now },
-        //        new CourtPart() { Name = "Part C", CreatedOn = now },
-
-        //    };
-        //}
         public static IEnumerable<CaseStatus> GetCaseStatus()
         {
             var now = DateTime.UtcNow;

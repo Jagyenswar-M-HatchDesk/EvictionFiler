@@ -106,7 +106,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 					Id = b.Id,
 					BuildingCode = b.BuildingCode,
 					ApartmentCode = b.ApartmentCode,
-					City = b.City,
+					CityId = b.CityId,
 					StateId = b.StateId,
 					StateName = b.State.Name,
 					PremiseTypeId = b.PremiseTypeId,

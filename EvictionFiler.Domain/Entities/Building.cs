@@ -28,8 +28,10 @@ namespace EvictionFiler.Domain.Entities
 		public string Address1 { get; set; } = string.Empty;
 		[MaxLength(500)]
 		public string? Address2 { get; set; }
-		public string? City { get; set; } = string.Empty;
-		public Guid? StateId { get; set; }
+        public Guid? CityId { get; set; }
+        [ForeignKey("CityId")]
+        public City? Cities { get; set; }
+        public Guid? StateId { get; set; }
 		[ForeignKey("StateId")]
 		public State ?State { get; set; }
 		[MaxLength(20)]

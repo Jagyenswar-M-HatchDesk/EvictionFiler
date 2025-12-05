@@ -95,7 +95,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 					Id = appartment.Id,
 					BuildingCode = appartment.BuildingCode,
 					ApartmentCode = appartment.ApartmentCode,
-					City = appartment.City,
+					CityId = appartment.CityId,
 					StateId = appartment.StateId,
 					PremiseTypeId = appartment.PremiseTypeId,
 					Address1 = appartment.Address1,
@@ -125,7 +125,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                         b.BuildingCode.StartsWith(searchText) ||
                         b.Address1.Contains(searchText) ||
                         b.Address2.Contains(searchText) ||
-                        b.City.Contains(searchText)
+                        b.Cities.Name.Contains(searchText)
                     )
                 )
                 .Select(b => new EditToBuildingDto
@@ -133,7 +133,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     Id = b.Id,
                     BuildingCode = b.BuildingCode,
                     ApartmentCode = b.ApartmentCode,
-                    City = b.City,
+                    CityId = b.CityId,
                     StateId = b.StateId,
                     PremiseTypeId = b.PremiseTypeId,
                     Address1 = b.Address1,
@@ -166,7 +166,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Id = appartment.Id,
 				BuildingCode = appartment.BuildingCode,
 				ApartmentCode = appartment.ApartmentCode,
-				City = appartment.City,
+				CityId = appartment.CityId,
 				StateId = appartment.StateId,
 				StateName = appartment.State?.Name,
 				PremiseTypeId = appartment.PremiseTypeId,
@@ -203,7 +203,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 				Id = appartment.Id,
 				BuildingCode = appartment.BuildingCode,
 				ApartmentCode = appartment.ApartmentCode,
-				City = appartment.City,
+				CityId = appartment.CityId,
 				StateId = appartment.StateId,
 				StateName = appartment.State?.Name,
 				PremiseTypeId = appartment.PremiseTypeId,

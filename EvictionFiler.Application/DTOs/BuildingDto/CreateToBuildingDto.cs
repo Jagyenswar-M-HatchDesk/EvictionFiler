@@ -27,8 +27,10 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 
 		public string Address1 { get; set; } = string.Empty;
 		public string? Address2 { get; set; }
-		public string? City { get; set; } = string.Empty;
-		public Guid? StateId { get; set; }
+		public string? CityName { get; set; } = string.Empty;
+        public Guid? CityId { get; set; }
+
+        public Guid? StateId { get; set; }
 		public string? StateName { get; set; }
 		public string? Zipcode { get; set; } = string.Empty;
 		[Required(ErrorMessage = "Select LandLord")]
@@ -42,7 +44,7 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 		{
 			get
 			{
-				var parts = new List<string> { Address1, Address2, City, StateName, Zipcode };
+				var parts = new List<string> { Address1, Address2, CityName, StateName, Zipcode };
 				return string.Join(", ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
 			}
 			

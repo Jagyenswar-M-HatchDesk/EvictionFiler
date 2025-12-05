@@ -30,7 +30,7 @@ namespace EvictionFiler.Application.Services
 
                 BuildingCode = appartment.BuildingCode,
                 ApartmentCode = appartment.ApartmentCode,
-                City = appartment.City,
+                CityId = appartment.CityId,
                 StateId = appartment.StateId,
                 RegulationStatusId = appartment.RegulationStatusId,
                 PremiseTypeId = appartment.PremiseTypeId,
@@ -70,7 +70,7 @@ namespace EvictionFiler.Application.Services
                 {
                     BuildingCode = appartment.BuildingCode,
                     ApartmentCode = appartment.ApartmentCode,
-                    City = appartment.City,
+                    CityId = appartment.CityId,
                     StateId = appartment.StateId,
                     RegulationStatusId = appartment.RegulationStatusId,
                     PremiseTypeId = appartment.PremiseTypeId,
@@ -116,7 +116,7 @@ namespace EvictionFiler.Application.Services
             {
                 BuildingCode = code,
                 ApartmentCode = appartment.ApartmentCode,
-                City = appartment.City,
+                CityId = appartment.CityId,
                 StateId = appartment.StateId,
                 RegulationStatusId = appartment.RegulationStatusId,
                 PremiseTypeId = appartment.PremiseTypeId,
@@ -145,7 +145,7 @@ namespace EvictionFiler.Application.Services
 
         public async Task<CreateToBuildingDto> GetByIdAsync(Guid id)
         {
-            var appartment = await _repository.GetAsync(id);
+            var appartment = await _repository.FindAsync(e=>e.Id ==id, includes: [u=>u.Cities]);
 
             if (appartment == null)
                 return null;
@@ -154,7 +154,8 @@ namespace EvictionFiler.Application.Services
             {
                 BuildingCode = appartment.BuildingCode,
                 ApartmentCode = appartment.ApartmentCode,
-                City = appartment.City,
+                CityId = appartment.CityId,
+                CityName = appartment.Cities != null ? appartment.Cities.Name : null,
                 StateId = appartment.StateId,
                 RegulationStatusId = appartment.RegulationStatusId,
                 PremiseTypeId = appartment.PremiseTypeId,
@@ -199,7 +200,7 @@ namespace EvictionFiler.Application.Services
 
                     entity.ApartmentCode = appartment.ApartmentCode;
                     entity.BuildingCode = appartment.BuildingCode;
-                    entity.City = appartment.City;
+                    entity.CityId = appartment.CityId;
                     entity.StateId = appartment.StateId;
                     entity.PremiseTypeId = appartment.PremiseTypeId;
                     entity.Address1 = appartment.Address1;
@@ -228,7 +229,7 @@ namespace EvictionFiler.Application.Services
             {
 
                 if(entity.ApartmentCode != appartment.ApartmentCode) entity.ApartmentCode = appartment.ApartmentCode;
-                if(entity.City != appartment.City) entity.City = appartment.City;
+                if(entity.CityId != appartment.CityId) entity.CityId = appartment.CityId;
                 if (entity.Address1 != appartment.Address1)  entity.Address1 = appartment.Address1;
                 if (entity.Address2 != appartment.Address2) entity.Address2 = appartment.Address2;
                 if (entity.StateId != appartment.StateId) entity.StateId = appartment.StateId;

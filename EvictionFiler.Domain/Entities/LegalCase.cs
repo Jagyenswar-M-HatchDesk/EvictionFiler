@@ -93,7 +93,12 @@ namespace EvictionFiler.Domain.Entities
 		[MaxLength(50)]
 		public string? Firm { get; set; }
 
-		public string? OtherPropertiesBuildingId { get; set; }
+        public Guid? SubCaseTypeId { get; set; }
+        [ForeignKey("SubCaseTypeId")]
+        public SubCaseType? SubCaseTypes { get; set; }
+       
+
+        public string? OtherPropertiesBuildingId { get; set; }
 
 		public bool? tenantReceive { get; set; }
 		public string? ExplainTenancyReceiveDescription { get; set; }

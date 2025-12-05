@@ -573,6 +573,21 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         font-weight: 600;
     }
 
+    .lookup-link {
+        color: #00a7ff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .lookup-link:hover {
+            color: #015dff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: underline;
+            cursor: pointer;
+        }
 </style>
 
 
@@ -648,7 +663,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     @if (!HideCaseAndClientSection)
                                     {
                                         <!-- CASE TYPE -->
-                                        <div class="col-3 ">
+                                        <div class="col-5 ">
                                             <label class="form-label required-label">Case Type</label>
                                             <InputSelect class="form-select holdover-form"
                                                          @bind-Value="legalcaseDto.CaseTypeId"
@@ -660,6 +675,19 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 }
                                             </InputSelect>
                                             <ValidationMessage For="() => legalcaseDto.CaseTypeId" />
+                                        </div>
+
+                                        <div class="col-5 ">
+                                            <label class="form-label required-label">Sub Case Type</label>
+                                            <InputSelect class="form-select holdover-form"
+                                                         @bind-Value="legalcaseDto.SubCaseTypeId">
+
+                                                @foreach (var l in SubCaseTypeList)
+                                                {
+                                                    <option value="@l.Id">@l.Name</option>
+                                                }
+                                            </InputSelect>
+                                            <ValidationMessage For="() => legalcaseDto.SubCaseTypeId" />
                                         </div>
 
                                         <!-- CLIENT SEARCH BOX -->
@@ -878,7 +906,12 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 <div class="row">
                     <div class="col-8">
                         <div class="card mb-3">
-                            <div class="card-header fw-bold head">Landlord Information</div>
+                            <div class="card-header d-flex justify-content-between ">
+                                <div class="fw-bold head">
+                                    Landlord Information
+                                </div>
+                                <a href="https://a836-acris.nyc.gov/CP/" target="_blank" class="lookup-link">lookup</a>
+                            </div>
                             <div class="card-body ">
 
 
@@ -992,7 +1025,12 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 <div class="row">
                     <div class="col-8">
                         <div class="card mb-3">
-                            <div class="card-header fw-bold head ">Building Information</div>
+                            <div class="card-header d-flex justify-content-between">
+                                <div class="fw-bold head">
+                                    Building Information
+                                </div>
+                                <a href=" https://hpdonline.nyc.gov/hpdonline/" target="_blank" class="lookup-link">lookup</a>
+                            </div>
                             <div class="card-body row ">
 
 
@@ -1080,11 +1118,17 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <div class="row mt-4">
                                             <div class="col-md-4">
                                                 <label class="form-label  required-label">Borough / City </label>
-                                                <InputText class="form-control" @bind-Value="legalcaseDto.Borough" placeholder="Enter Borough / City" disabled="@isBuildingSelected" />
 
+                                                <InputSelect class="form-select" @bind-Value="legalcaseDto.BoroughorCityId" style="cursor:pointer;" disabled="@isBuildingSelected">
+                                                    <option value="">-- Select Borough/City --</option>
+                                                    @foreach (var s in CityList)
+                                                    {
+                                                        <option value="@s.Id">@s.Name</option>
+                                                    }
+                                                </InputSelect>
                                                 @if (!isBuildingSelected)
                                                 {
-                                                    <ValidationMessage For="() => legalcaseDto.Borough" />
+                                                    <ValidationMessage For="() => legalcaseDto.BoroughorCityId" />
                                                 }
                                             </div>
 
@@ -1116,7 +1160,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         @if (IsNewBuilding)
                                         {
                                             <div class="row mt-4">
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <label class="form-label  required-label">State </label>
                                                     <InputSelect class="form-select" @bind-Value="legalcaseDto.BuildingStateId" style="cursor:pointer;" disabled="@isBuildingSelected">
                                                         <option value="">-- Select State --</option>
@@ -1127,13 +1171,93 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     </InputSelect>
                                                     <ValidationMessage For="() => legalcaseDto.BuildingStateId" />
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <label class="form-label  required-label">Zipcode </label>
                                                     <InputText class="form-control" @bind-Value="legalcaseDto.BuildingZip" placeholder="Enter ZipCode" disabled="@isBuildingSelected" />
                                                     <ValidationMessage For="() => legalcaseDto.BuildingZip" />
                                                 </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label required-label">Agent </label>
+                                                    <InputText class="form-control" @bind-Value="legalcaseDto.ManagingAgent" placeholder="Enter Agent" disabled="@isBuildingSelected" />
+
+                                                    @if (!isBuildingSelected)
+                                                    {
+                                                        <ValidationMessage For="() => legalcaseDto.ManagingAgent" />
+                                                    }
+                                                </div>
                                             </div>
+
                                         }
+                                        <div class="row mt-4">
+
+                                            <div class="col-md-6">
+
+                                                <label class="form-label fw-semibold">
+                                                    Building Type <span class="text-danger">*</span>
+                                                </label>
+                                                @if (PremiseTypesList != null && PremiseTypesList.Any())
+                                                {
+                                                    <div style="display: flex;flex-wrap: wrap; column-gap: 33px;">
+                                                        <InputRadioGroup @bind-Value="legalcaseDto.PremiseTypeId" class="d-flex gap-4 flex-wrap mt-2">
+
+                                                            @foreach (var Type in PremiseTypesList)
+                                                            {
+                                                                <div class="form-check d-flex align-items-center gap-1">
+                                                                    <InputRadio class="form-check-input"
+                                                                                id="@($"Type_{Type.Id}")"
+                                                                                Value="@Type.Id" disabled="@IsExistingBuildingSelected" />
+
+                                                                    <label class="form-check-label" for="@($"Type_{Type.Id}")">@Type.Name</label>
+                                                                </div>
+                                                            }
+
+                                                        </InputRadioGroup>
+
+                                                        @if (!IsExistingBuildingSelected)
+                                                        {
+                                                            <ValidationMessage For="() => legalcaseDto.PremiseTypeId" />
+                                                        }
+
+
+                                                    </div>
+                                                }
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">
+                                                    Registration Status (HPD/DOF) <span class="text-danger">*</span>
+                                                </label>
+
+                                                <div class="row mt-1">
+                                                    @if (RegistrationstatusList != null && RegistrationstatusList.Any())
+                                                    {
+                                                        <div style="display: flex;flex-wrap: wrap; column-gap: 33px;">
+                                                            <InputRadioGroup @bind-Value="legalcaseDto.RegistrationStatusTypeId" class="d-flex flex-wrap">
+                                                                @foreach (var Type in RegistrationstatusList)
+                                                                {
+                                                                    <div class="col-12">
+                                                                        <div class="form-check">
+                                                                            <InputRadio class="form-check-input"
+                                                                                        id="@($"RegStatus_{Type.Id}")"
+                                                                                        Value="@Type.Id" />
+                                                                            <label class="form-check-label" for="@($"RegStatus_{Type.Id}")">@Type.Name</label>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                            </InputRadioGroup>
+                                                            <ValidationMessage For="() => legalcaseDto.RegistrationStatusTypeId" />
+                                                            @*                         @if (!IsExistingBuildingSelected)
+                                                {
+                                                                
+                                                } *@
+
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+
+
+                                        </div>
 
                                     </div>
                                 }
@@ -1425,21 +1549,82 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                 <div class="row g-2 mt-2">
                                     <!-- Expiration Date -->
                                     <div class="col-md-4">
-                                        <label class="form-label">Expiration Date (Auto)</label>
+                                        <label class="form-label" style="height: 36px;
+                                                                                        display: flex;
+                                                                                        align-items: center;">Expiration Date (Auto)</label>
                                         <RadzenDatePicker Style="width:100%;" @bind-Value="legalcaseDto.ExpirationDate" />
 
                                     </div>
 
                                     <!-- Predicate -->
-                                    <div class="col-md-6">
-                                        <label class="form-label ">Predicate Notice (Auto) </label>
+                                    <div class="col-md-4">
+                                        <label class="form-label " style="height: 36px;
+                                                                                                display: flex;
+                                                                                                align-items: center;">Predicate Notice (Auto) </label>
                                         <InputText class="form-control" @bind-Value="legalcaseDto.PredicateNotice" />
 
                                     </div>
-
+                                    <div class="col-md-4">
+                                        <label class="form-label">Good Cause Exemption Notice attached</label>
+                                        <div class="d-flex justify-content-start align-items-center  gap-2">
+                                            <InputRadioGroup @bind-Value="legalcaseDto.GoodCauseExempt">
+                                                <div class="form-check d-flex justify-content-center gap-2">
+                                                    <InputRadio class="form-check-input" Value="true" style="font-size:15px" />
+                                                    <label class="form-check-label">Yes</label>
+                                                </div>
+                                                <div class="form-check  d-flex justify-content-center gap-2">
+                                                    <InputRadio class="form-check-input " Value="false" style="font-size:15px" />
+                                                    <label class="form-check-label">No</label>
+                                                </div>
+                                            </InputRadioGroup>
+                                        </div>
+                                    </div>
 
                                 </div>
+                                <div class="row g-2 mb-3 mt-3">
 
+                                    <!-- Notice type -->
+                                    <div class="col-md-3">
+
+                                        <div class="form-check d-flex justify-content-center gap-2">
+                                            <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.leasedAttached" />
+                                            <label class="form-check-label"> Leased Attached </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-check d-flex justify-content-center gap-2">
+                                            <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.ledgerAttached" />
+                                            <label class="form-check-label"> Ledger attached </label>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-3">
+
+                                        <div class="form-check d-flex justify-content-center gap-2">
+                                            <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.NoticeproofAttached" />
+                                            <label class="form-check-label"> Notices proof attached </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+
+                                        <div class="form-check d-flex justify-content-center gap-2">
+                                            <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.RegistrationRentAttached" />
+                                            <label class="form-check-label">Registration/Rent history attached</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row g-2 mb-3">
+
+
+
+                                    <div class="col">
+                                        <label class="form-label ">Additional Comments </label>
+                                        <InputText class="form-control" @bind-Value="legalcaseDto.AdditionalComments" style="cursor:pointer;" />
+
+                                    </div>
+                                </div>
 
                             </div>
                         </div>
@@ -1470,7 +1655,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                 <div class="row g-2">
 
                                     <!-- Rent Due Day -->
-                                    <div class="col-md-5">
+                                    <div class="col-md-4">
                                         <label class="form-label  required-label">Date Rent  Due (Month/Week) </label>
                                         <InputSelect class="form-select" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" style="cursor:pointer;">
                                             <option value="">-- Select Type --</option>
@@ -1483,7 +1668,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     </div>
 
                                     <!-- Monthly Rent -->
-                                    <div class="col-md-3">
+                                    <div class="col-md-4">
                                         <label class="form-label  required-label">Monthly Rent ($) </label>
                                         <InputNumber class="form-control" @bind-Value="legalcaseDto.MonthlyRent" placeholder="Enter Monthly Rent" />
                                         <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
@@ -1506,7 +1691,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                     </div>
 
-                                    <div class="col-md-4">
+                                    @* <div class="col-md-4">
                                         <label class="form-label">Unpaid Rent (Months) </label>
                                         <InputText class="form-control"
                                                    @bind-Value="legalcaseDto.LastRentPaid"
@@ -1517,11 +1702,70 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <label class="form-label">Total Rent Owed ($)</label>
                                         <InputNumber class="form-control" @bind-Value="legalcaseDto.TotalOwed" placeholder="Enter Total Rent" min="0" />
 
+                                    </div> *@
+                                    <div class="col-md-4">
+                                        <label class="form-label ">Date of Last Payment </label>
+                                        <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.LastPaymentDate" @bind-Value:after="GenerateMonths" />
+
                                     </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Amount of Last Payment ($)</label>
+                                        <InputNumber class="form-control" @bind-Value="legalcaseDto.LastPayment" min="0" />
 
+                                    </div>
                                 </div>
+                                <div class="row g-2 mt-2">
+                                    <div class="col">
+                                        <label class="form-label">Rent Breakup</label>
+                                        <div class="total-box mt-1">
+                                            <label class="form-label " style="font-size:14px; font-weight:300; margin-bottom:0px;">Total Owed: $ @(legalcaseDto.TotalOwed ?? 00)</label>
+                                        </div>
+
+                                        @foreach (var item in Rows)
+                                        {
+                                            <div class="row mb-3">
+                                                <div class="col-3">
+                                                    <label class="form-label ">Month (YYYY-MM) </label>
+                                                    <InputSelect class="form-select holdover-form"
+                                                                 @bind-Value="item.Month"
+                                                                 @bind-Value:after="(() => OnMonthChanged(item))">
+
+                                                        <option value="">Select month</option>
+
+                                                        @foreach (var m in MonthOptions)
+                                                        {
+                                                            <option value="@m.Value">@m.Display</option>
+                                                        }
+
+                                                    </InputSelect>
+                                                </div>
+                                                <div class="col-3">
+                                                    <label class="form-label  ">Amount ($) </label>
+                                                    <InputNumber @bind-Value="item.Amount" @bind-Value:after="RecalculateTotal"
+                                                                 class="form-control" />
+                                                </div>
+
+                                                <div class="col-3">
+                                                    <label class="form-label  ">Notes </label>
+                                                    <InputText @bind-Value="item.Notes"
+                                                               class="form-control" placeholder="Partial, vouchers, etc." />
+                                                </div>
+
+                                                <div class="col-3" style="justify-content:end; display:flex;">
+                                                    <button class="remove-btn" @onclick="(() => RemoveRow(item))">
+                                                        × Remove
+                                                    </button>
+                                                </div>
 
 
+                                            </div>
+                                        }
+
+                                        <button class="add-btn" @onclick="AddRow">
+                                            + Add Month
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1676,7 +1920,59 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                 </div>
 
+                                <div class="row g-2 mt-2">
+                                    <div class="col">
+                                        <label class="form-label">Arrear Ledger</label>
+                                        <div class="total-box mt-2">
+                                            <label class="form-label " style="font-size:14px; font-weight:300; margin-bottom:0px;">Total Owed: $ @(legalcaseDto.TotalOwed ?? 00)</label>
+                                        </div>
 
+                                        @foreach (var item in Rows)
+                                        {
+                                            <div class="row mb-3">
+                                                <div class="col-3">
+                                                    <label class="form-label ">Month (YYYY-MM) </label>
+                                                    <InputSelect class="form-select holdover-form"
+                                                                 @bind-Value="item.Month"
+                                                                 @bind-Value:after="(() => OnMonthChanged(item))">
+
+                                                        <option value="">Select month</option>
+
+                                                        @foreach (var m in MonthOptions)
+                                                        {
+                                                            <option value="@m.Value">@m.Display</option>
+                                                        }
+
+                                                    </InputSelect>
+                                                </div>
+                                                <div class="col-3">
+                                                    <label class="form-label  ">Amount ($) </label>
+                                                    <InputNumber @bind-Value="item.Amount" @bind-Value:after="RecalculateTotal"
+                                                                 class="form-control" />
+                                                </div>
+
+                                                <div class="col-3">
+                                                    <label class="form-label  ">Notes </label>
+                                                    <InputText @bind-Value="item.Notes"
+                                                               class="form-control" placeholder="Partial, vouchers, etc." />
+                                                </div>
+
+                                                <div class="col-3" style="justify-content:end; display:flex;">
+                                                    <button class="remove-btn" @onclick="(() => RemoveRow(item))">
+                                                        × Remove
+                                                    </button>
+                                                </div>
+
+
+                                            </div>
+                                        }
+
+                                        <button class="add-btn" @onclick="AddRow">
+                                            + Add Month
+                                        </button>
+
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1843,11 +2139,11 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <div class="hint">Add-ons: Personal +0 • Overnight +1 • Mail +5 • Posting+Mail +5. Expiry counts from deemed date.</div>
                                     <div class="col-auto">
                                         <label class="form-label" style="    padding: 10px;
-                                                                                            border: 1px solid;
-                                                                                            border-radius: 25px;
-                                                                                            align-items: center;
-                                                                                            display: flex;
-                                                                                            height: 36px;">Live Expiry : --</label>
+                                                                                                                            border: 1px solid;
+                                                                                                                            border-radius: 25px;
+                                                                                                                            align-items: center;
+                                                                                                                            display: flex;
+                                                                                                                            height: 36px;">Live Expiry : --</label>
 
                                     </div>
 
@@ -1977,8 +2273,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <div class="col-md-4">
                                         <div class="position-relative" @onfocusout="HideCountyDropDown">
                                             <label class="form-label fw-semibold" style="align-items: center;
-                                                                                            display: flex;
-                                                                                            height: 36px;">County </label>
+                                                                                                                            display: flex;
+                                                                                                                            height: 36px;">County </label>
                                             <InputText type="text" name="county" class="form-control" placeholder="Search by County..."
                                                        @bind-value="searchCountyText" @oninput="OnSearchCountyInput" @onclick="ShowAllCounty" />
                                             @if (filteredCounties?.Any() == true)
@@ -2002,8 +2298,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <div class="col-md-4">
                                         <div class="position-relative" @onfocusout="HideCourtDropDown">
                                             <label class="form-label fw-semibold" style="align-items: center;
-                                                                                                    display: flex;
-                                                                                                    height: 36px;">Court Location </label>
+                                                                                                                                    display: flex;
+                                                                                                                                    height: 36px;">Court Location </label>
                                             <InputText type="text" name="courtLocation" class="form-control" placeholder="Search by Court Location..."
                                                        @bind-value="searchCourtText" @oninput="OnSearchCourtInput" @onclick="ShowAllCourts" />
                                             @if (filteredCourts?.Any() == true)
@@ -2107,7 +2403,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     {
                                                         <!-- CASE TYPE -->
                                                         <div class="col-3 ">
-                                                            <label class="form-label required-label">Case Type</label>
+                                                            <label class="form-label  ">Case Type</label>
                                                             <InputSelect class="form-select holdover-form"
                                                                          @bind-Value="legalcaseDto.CaseTypeId"
                                                                          @bind-Value:after="BuildSteps">
@@ -2125,7 +2421,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             @if (!IsNewClient)
                                                             {
                                                                 <div class="position-relative" @onfocusout="HideClientDropDown">
-                                                                    <label class="form-label required-label">Client</label>
+                                                                    <label class="form-label  ">Client</label>
 
                                                                     <InputText type="text" class="form-control"
                                                                                placeholder="Search by client name or code..."
@@ -2179,7 +2475,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                         <div class="row g-3">
                                                             <div class="col-4">
-                                                                <label class="form-label required-label">Client Name</label>
+                                                                <label class="form-label  ">Client Name</label>
                                                                 <InputText class="form-control"
                                                                            placeholder="Enter Name"
                                                                            @bind-Value="legalcaseDto.ClientName" disabled />
@@ -2192,7 +2488,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                            @bind-Value="legalcaseDto.ClientPhone" disabled />
                                                             </div>
                                                             <div class="col-4">
-                                                                <label class="form-label required-label">Client Type</label>
+                                                                <label class="form-label  ">Client Type</label>
                                                                 <InputSelect class="form-select"
                                                                              @bind-Value="legalcaseDto.ClientTypeId" disabled>
                                                                     <option value="">-- Select Type --</option>
@@ -2209,7 +2505,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
 
                                                             <div class="col-6">
-                                                                <label class="form-label required-label">Email</label>
+                                                                <label class="form-label  ">Email</label>
                                                                 <InputText class="form-control"
                                                                            placeholder="Enter Email"
                                                                            @bind-Value="legalcaseDto.ClientEmail" disabled />
@@ -2252,7 +2548,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <div class="row g-3">
 
                                                                 <div class="col-4">
-                                                                    <label class="form-label required-label">Client Name</label>
+                                                                    <label class="form-label  ">Client Name</label>
                                                                     <InputText class="form-control"
                                                                                placeholder="Enter Name"
                                                                                @bind-Value="legalcaseDto.ClientName" />
@@ -2265,7 +2561,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                                @bind-Value="legalcaseDto.ClientPhone" />
                                                                 </div>
                                                                 <div class="col-4">
-                                                                    <label class="form-label required-label">Client Type</label>
+                                                                    <label class="form-label  ">Client Type</label>
                                                                     <InputSelect class="form-select"
                                                                                  @bind-Value="legalcaseDto.ClientTypeId">
                                                                         <option value="">-- Select Type --</option>
@@ -2277,7 +2573,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                     <ValidationMessage For="() => legalcaseDto.ClientTypeId" />
                                                                 </div>
                                                                 <div class="col-6">
-                                                                    <label class="form-label required-label">Email</label>
+                                                                    <label class="form-label  ">Email</label>
                                                                     <InputText class="form-control"
                                                                                placeholder="Enter Email"
                                                                                @bind-Value="legalcaseDto.ClientEmail" />
@@ -2328,7 +2624,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                     <!-- align-items-end vertically bottom align -->
                                                     <div class="col-md-6 position-relative" @onfocusout="HideLandlordsDropDown">
-                                                        <label class="form-label required-label">Landlord / Owner Name</label>
+                                                        <label class="form-label  ">Landlord / Owner Name</label>
 
                                                         <InputText type="text" class="form-control"
                                                                    placeholder="Enter Landlord name"
@@ -2343,7 +2639,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                     <div class="row mt-1">
                                                         <div class="col-md-6">
-                                                            <label class="form-label  required-label">Contact Person </label>
+                                                            <label class="form-label   ">Contact Person </label>
                                                             <InputText class="form-control" @bind-Value="legalcaseDto.ContactPersonName" placeholder="Enter Contact Person" disabled />
                                                             @if (!IsLandlordSelected)
                                                             {
@@ -2351,7 +2647,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             }
                                                         </div>
                                                         <div class="col-md-6 ">
-                                                            <label class="form-label  required-label">Landlord Address </label>
+                                                            <label class="form-label   ">Landlord Address </label>
                                                             <InputText class="form-control" @bind-Value="legalcaseDto.LandlordAddress" placeholder="Enter Address" disabled />
                                                             @if (!IsLandlordSelected)
                                                             {
@@ -2383,7 +2679,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     @if (!IsNewBuilding && !isBuildingSelected)
                                                     {
                                                         <div class="col-md-6 position-relative" @onfocusout="HideBuildingDropdown">
-                                                            <label class="form-label  required-label">Building</label>
+                                                            <label class="form-label   ">Building</label>
                                                             <input type="text" class="form-control"
                                                                    placeholder="Search by Building Address or code..."
                                                                    @bind-value="searchBuildingText"
@@ -2432,7 +2728,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                     <div class="row mt-2">
                                                         <div class="col-6">
-                                                            <label class="form-label  required-label">Street Address </label>
+                                                            <label class="form-label   ">Street Address </label>
                                                             <InputText class="form-control" @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter Address" disabled />
 
                                                             @if (!isBuildingSelected)
@@ -2442,7 +2738,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         </div>
 
                                                         <div class="col-md-6">
-                                                            <label class="form-label  required-label">MDR Number </label>
+                                                            <label class="form-label   ">MDR Number </label>
                                                             <InputText class="form-control" @bind-Value="legalcaseDto.Mdr" placeholder="Enter MDR Number" disabled />
 
                                                             @if (!isBuildingSelected)
@@ -2454,17 +2750,22 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                     <div class="row mt-4">
                                                         <div class="col-md-4">
-                                                            <label class="form-label  required-label">Borough / City </label>
-                                                            <InputText class="form-control" @bind-Value="legalcaseDto.Borough" placeholder="Enter Borough / City" disabled />
-
+                                                            <label class="form-label   ">Borough / City </label>
+                                                            <InputSelect class="form-select" @bind-Value="legalcaseDto.BoroughorCityId" style="cursor:pointer;" disabled="@isBuildingSelected">
+                                                                <option value="">-- Select Borough/City --</option>
+                                                                @foreach (var s in CityList)
+                                                                {
+                                                                    <option value="@s.Id">@s.Name</option>
+                                                                }
+                                                            </InputSelect>
                                                             @if (!isBuildingSelected)
                                                             {
-                                                                <ValidationMessage For="() => legalcaseDto.Borough" />
+                                                                <ValidationMessage For="() => legalcaseDto.BoroughorCityId" />
                                                             }
                                                         </div>
 
                                                         <div class="col-md-4">
-                                                            <label class="form-label required-label">Units </label>
+                                                            <label class="form-label  ">Units </label>
                                                             <InputText class="form-control" @bind-Value="legalcaseDto.Units" placeholder="Enter Units" disabled />
 
                                                             @if (!isBuildingSelected)
@@ -2473,7 +2774,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             }
                                                         </div>
                                                         <div class="col-4">
-                                                            <label class="form-label  required-label">Rent Regulation </label>
+                                                            <label class="form-label   ">Rent Regulation </label>
                                                             <InputSelect class="form-select" @bind-Value="legalcaseDto.RegulationStatusId" style="cursor:pointer;" disabled>
                                                                 <option value="">-- Select Type --</option>
                                                                 @foreach (var l in RegulationList)
@@ -2492,7 +2793,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     {
                                                         <div class="row mt-4">
                                                             <div class="col-md-6">
-                                                                <label class="form-label  required-label">State </label>
+                                                                <label class="form-label   ">State </label>
                                                                 <InputSelect class="form-select" @bind-Value="legalcaseDto.BuildingStateId" style="cursor:pointer;" disabled>
                                                                     <option value="">-- Select State --</option>
                                                                     @foreach (var s in StateList)
@@ -2503,7 +2804,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                 <ValidationMessage For="() => legalcaseDto.BuildingStateId" />
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <label class="form-label  required-label">Zipcode </label>
+                                                                <label class="form-label   ">Zipcode </label>
                                                                 <InputText class="form-control" @bind-Value="legalcaseDto.BuildingZip" placeholder="Enter ZipCode" disabled />
                                                                 <ValidationMessage For="() => legalcaseDto.BuildingZip" />
                                                             </div>
@@ -2530,7 +2831,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 <div class="row">
 
                                                     <div class="col-md-6 position-relative" @onfocusout="HideTenantDropDown">
-                                                        <label class="form-label  required-label">Unit / Apt # (confirm)</label>
+                                                        <label class="form-label   ">Unit / Apt # (confirm)</label>
                                                         <InputText type="text" class="form-control"
                                                                    placeholder="Search or Enter Unit / Apt"
                                                                    @bind-value="searchTenantText"
@@ -2541,7 +2842,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                 <div class="row mt-3">
                                                     <div class="col-12">
-                                                        <label class="lbl required-label">Tenants</label>
+                                                        <label class="lbl  ">Tenants</label>
                                                         @if (Tenants.Count > 0)
                                                         {
 
@@ -2586,420 +2887,822 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     </div>
 
                                 </div>
-
-                                <!--Lease-->
-                                <div class="row mt-3">
-                                    <div class="col">
-                                        <div class="card mb-3">
-                                            <div class="card-header">
-                                                <div style="font-weight:700" class="head"> Lease & Assistance</div>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row g-2 mb-3">
-
-                                                    <!-- Written Lease -->
-                                                    <div class="col-md-4">
-                                                        <label class="form-label ">Lease Start </label>
-                                                        <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.LeaseStart" disabled />
-
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label class="form-label ">Lease End </label>
-                                                        <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.LeaseEnd" disabled />
-
-                                                    </div>
-
-
-                                                    <!-- Monthly Rent -->
-                                                    <div class="col-md-4">
-                                                        <label class="form-label ">Monthly Rent ($) </label>
-                                                        <InputNumber class="form-control" @bind-Value="legalcaseDto.MonthlyRent" disabled />
-                                                        <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
-                                                    </div>
+                                @if (legalcaseDto.CaseTypeName == "NonPayment")
+                                {
+                                    <!--Lease-->
+                                    <div class="row mt-2">
+                                        <div class="col">
+                                            <div class="card mb-3">
+                                                <div class="card-header">
+                                                    <div style="font-weight:700" class="head"> Lease & Assistance</div>
+                                                    @* <div class="hint">Used to populate petition & notices</div> *@
                                                 </div>
-                                                <div class="row g-2 mb-3">
-                                                    <div class="col-md-4">
-                                                        <label class="form-label ">Date Rent  Due (Month/Week) </label>
-                                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" style="cursor:pointer;" disabled>
-                                                            <option value="">-- Select Type --</option>
-                                                            @foreach (var l in DateRentList)
-                                                            {
-                                                                <option value="@l.Id">@l.Name</option>
-                                                            }
-                                                        </InputSelect>
-                                                        <ValidationMessage For="() => legalcaseDto.RentDueEachMonthOrWeekId" />
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label class="form-label ">Date of Last Payment </label>
-                                                        <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.LastPaymentDate" @bind-Value:after="GenerateMonths" disabled />
+                                                <div class="card-body">
+                                                    <div class="row g-2 mb-3">
 
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label class="form-label">Amount of Last Payment ($)</label>
-                                                        <InputNumber class="form-control" @bind-Value="legalcaseDto.LastPayment" min="0" disabled />
+                                                        <!-- Written Lease -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Lease Start </label>
+                                                            <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.LeaseStart" />
 
-                                                    </div>
-                                                </div>
-                                                <div class="row g-2">
-                                                    <div class="col-md-4">
-                                                        <label class="form-label" style="align-items: center;display: flex;height: 36px;">Written Lease?</label>
-                                                        <div class="d-flex justify-content-start align-items-center  gap-2">
-                                                            <InputRadioGroup @bind-Value="legalcaseDto.WrittenLease" disabled>
-                                                                <div class="form-check d-flex justify-content-center gap-2">
-                                                                    <InputRadio class="form-check-input" Value="true" style="font-size:15px" disabled />
-                                                                    <label class="form-check-label">Yes</label>
-                                                                </div>
-                                                                <div class="form-check  d-flex justify-content-center gap-2">
-                                                                    <InputRadio class="form-check-input " Value="false" style="font-size:15px" disabled />
-                                                                    <label class="form-check-label">No</label>
-                                                                </div>
-                                                            </InputRadioGroup>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Lease End </label>
+                                                            <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.LeaseEnd" />
+
+                                                        </div>
+
+
+                                                        <!-- Monthly Rent -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Monthly Rent ($) </label>
+                                                            <InputNumber class="form-control" @bind-Value="legalcaseDto.MonthlyRent" />
+                                                            <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-4">
-                                                        <label class="form-label " style="align-items: center;display: flex;height: 36px;">Tenancy Type</label>
-                                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays" style="cursor:pointer;" disabled>
-                                                            <option value="">-- Select Type --</option>
-                                                            @foreach (var l in TenancyTypeList)
+                                                    <div class="row g-2 mb-3">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Date Rent  Due (Month/Week) </label>
+                                                            <InputSelect class="form-select" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" style="cursor:pointer;">
+                                                                <option value="">-- Select Type --</option>
+                                                                @foreach (var l in DateRentList)
+                                                                {
+                                                                    <option value="@l.Id">@l.Name</option>
+                                                                }
+                                                            </InputSelect>
+                                                            <ValidationMessage For="() => legalcaseDto.RentDueEachMonthOrWeekId" />
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Date of Last Payment </label>
+                                                            <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.LastPaymentDate" @bind-Value:after="GenerateMonths" />
+
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">Amount of Last Payment ($)</label>
+                                                            <InputNumber class="form-control" @bind-Value="legalcaseDto.LastPayment" min="0" />
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="row g-2">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label" style="align-items: center;display: flex;height: 36px;">Written Lease?</label>
+                                                            <div class="d-flex justify-content-start align-items-center  gap-2">
+                                                                <InputRadioGroup @bind-Value="legalcaseDto.WrittenLease">
+                                                                    <div class="form-check d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input" Value="true" style="font-size:15px" />
+                                                                        <label class="form-check-label">Yes</label>
+                                                                    </div>
+                                                                    <div class="form-check  d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input " Value="false" style="font-size:15px" />
+                                                                        <label class="form-check-label">No</label>
+                                                                    </div>
+                                                                </InputRadioGroup>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label " style="align-items: center;display: flex;height: 36px;">Tenancy Type</label>
+                                                            <InputSelect class="form-select" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays" style="cursor:pointer;">
+                                                                <option value="">-- Select Type --</option>
+                                                                @foreach (var l in TenancyTypeList)
+                                                                {
+                                                                    <option value="@l.Id">@l.Name</option>
+                                                                }
+                                                            </InputSelect>
+                                                            <ValidationMessage For="() => legalcaseDto.TenancyTypeId" />
+                                                        </div>
+                                                        <!-- Oral Start -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Assistance (Section 8 / SCRIE/DRIE / other) </label>
+                                                            <InputText class="form-control" @bind-Value="legalcaseDto.Assistance" />
+
+                                                        </div>
+
+
+                                                    </div>
+
+                                                    <div class="row g-2 mt-2">
+                                                        <div class="col">
+                                                            <label class="form-label">Arrear Ledger</label>
+                                                            <div class="total-box mt-2">
+                                                                <label class="form-label " style="font-size:14px; font-weight:300; margin-bottom:0px;">Total Owed: $ @(legalcaseDto.TotalOwed ?? 00)</label>
+                                                            </div>
+
+                                                            @foreach (var item in Rows)
                                                             {
-                                                                <option value="@l.Id">@l.Name</option>
+                                                                <div class="row mb-3">
+                                                                    <div class="col-3">
+                                                                        <label class="form-label ">Month (YYYY-MM) </label>
+                                                                        <InputSelect class="form-select holdover-form"
+                                                                                     @bind-Value="item.Month"
+                                                                                     @bind-Value:after="(() => OnMonthChanged(item))">
+
+                                                                            <option value="">Select month</option>
+
+                                                                            @foreach (var m in MonthOptions)
+                                                                            {
+                                                                                <option value="@m.Value">@m.Display</option>
+                                                                            }
+
+                                                                        </InputSelect>
+                                                                    </div>
+                                                                    <div class="col-3">
+                                                                        <label class="form-label  ">Amount ($) </label>
+                                                                        <InputNumber @bind-Value="item.Amount" @bind-Value:after="RecalculateTotal"
+                                                                                     class="form-control" />
+                                                                    </div>
+
+                                                                    <div class="col-3">
+                                                                        <label class="form-label  ">Notes </label>
+                                                                        <InputText @bind-Value="item.Notes"
+                                                                                   class="form-control" placeholder="Partial, vouchers, etc." />
+                                                                    </div>
+
+                                                                    @* <div class="col-3" style="justify-content:end; display:flex;">
+                                                                        <button class="remove-btn" @onclick="(() => RemoveRow(item))">
+                                                                            × Remove
+                                                                        </button>
+                                                                    </div> *@
+
+
+                                                                </div>
                                                             }
-                                                        </InputSelect>
-                                                        <ValidationMessage For="() => legalcaseDto.TenancyTypeId" />
+
+                                                            @* <button class="add-btn" @onclick="AddRow">
+                                                                + Add Month
+                                                            </button> *@
+
+                                                        </div>
                                                     </div>
-                                                    <!-- Oral Start -->
-                                                    <div class="col-md-4">
-                                                        <label class="form-label ">Assistance (Section 8 / SCRIE/DRIE / other) </label>
-                                                        <InputText class="form-control" @bind-Value="legalcaseDto.Assistance" disabled />
-
-                                                    </div>
-
-
                                                 </div>
-
-
                                             </div>
                                         </div>
+
+
+                                        
                                     </div>
 
 
-
-                                </div>
-
-                                <!--Arrear-->
-                                <div class="row">
-                                    <div class="col">
-                                        <div class="card mb-3">
-                                            <div class="card-header">
-                                                <div style="font-weight:700" class="head"> Arrears Ledger</div>
-                                            </div>
-                                            <div class="card-body">
-
-                                                <div class="total-box">
-                                                    <label class="form-label " style="font-size:14px; font-weight:300; margin-bottom:0px;">Total Owed: $ @(legalcaseDto.TotalOwed ?? 00)</label>
+                                    <!--Arrear-->
+                                   @*  <div class="row">
+                                        <div class="col">
+                                            <div class="card mb-3">
+                                                <div class="card-header">
+                                                    <div style="font-weight:700" class="head"> Arrears Ledger</div>
                                                 </div>
+                                                <div class="card-body">
 
-                                                @foreach (var item in Rows)
-                                                {
-                                                    <div class="row mb-3">
-                                                        <div class="col-3">
-                                                            <label class="form-label ">Month (YYYY-MM) </label>
-                                                            <InputSelect class="form-select holdover-form"
-                                                                         @bind-Value="item.Month"
-                                                                         @bind-Value:after="(() => OnMonthChanged(item))" disabled>
+                                                    <div class="total-box">
+                                                        <label class="form-label " style="font-size:14px; font-weight:300; margin-bottom:0px;">Total Owed: $ @(legalcaseDto.TotalOwed ?? 00)</label>
+                                                    </div>
 
-                                                                <option value="">Select month</option>
+                                                    @foreach (var item in Rows)
+                                                    {
+                                                        <div class="row mb-3">
+                                                            <div class="col-3">
+                                                                <label class="form-label ">Month (YYYY-MM) </label>
+                                                                <InputSelect class="form-select holdover-form"
+                                                                             @bind-Value="item.Month"
+                                                                             @bind-Value:after="(() => OnMonthChanged(item))" disabled>
 
-                                                                @foreach (var m in MonthOptions)
-                                                                {
-                                                                    <option value="@m.Value">@m.Display</option>
-                                                                }
+                                                                    <option value="">Select month</option>
 
-                                                            </InputSelect>
-                                                        </div>
-                                                        <div class="col-3">
-                                                            <label class="form-label  ">Amount ($) </label>
-                                                            <InputNumber @bind-Value="item.Amount" @bind-Value:after="RecalculateTotal"
-                                                                         class="form-control" disabled />
-                                                        </div>
+                                                                    @foreach (var m in MonthOptions)
+                                                                    {
+                                                                        <option value="@m.Value">@m.Display</option>
+                                                                    }
 
-                                                        <div class="col-3">
-                                                            <label class="form-label  ">Notes </label>
-                                                            <InputText @bind-Value="item.Notes"
-                                                                       class="form-control" placeholder="Partial, vouchers, etc." disabled />
-                                                        </div>
+                                                                </InputSelect>
+                                                            </div>
+                                                            <div class="col-3">
+                                                                <label class="form-label  ">Amount ($) </label>
+                                                                <InputNumber @bind-Value="item.Amount" @bind-Value:after="RecalculateTotal"
+                                                                             class="form-control" disabled />
+                                                            </div>
 
-                                                        @* <div class="col-3" style="justify-content:end; display:flex;">
+                                                            <div class="col-3">
+                                                                <label class="form-label  ">Notes </label>
+                                                                <InputText @bind-Value="item.Notes"
+                                                                           class="form-control" placeholder="Partial, vouchers, etc." disabled />
+                                                            </div>
+
+                                                            @* <div class="col-3" style="justify-content:end; display:flex;">
                                                             <button class="remove-btn" @onclick="(() => RemoveRow(item))">
                                                                 × Remove
                                                             </button>
-                                                        </div> *@
+                                                        </div> *
 
 
-                                                    </div>
-                                                }
+                                                        </div>
+                                                    }
 
-                                                @* <button class="add-btn" @onclick="AddRow">
+                                                    @* <button class="add-btn" @onclick="AddRow">
                                                     + Add Month
-                                                </button> *@
+                                                </button> *
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
 
 
-                                </div>
+                                    </div> *@
 
-                                <!--notices-->
-                                <div class="row">
-                                    <div class="col">
-                                        <div class="card mb-3">
-                                            <div class="card-header">
-                                                <div style="font-weight:700" class="head"> Predicate Notice Planner</div>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row g-2 mb-3">
+                                    <!--notices-->
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="card mb-3">
+                                                <div class="card-header">
+                                                    <div style="font-weight:700" class="head"> Predicate Notice Planner</div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row g-2 mb-3">
 
-                                                    <!-- Notice type -->
-                                                    <div class="col-md-4">
-                                                        <label class="form-label ">Notice Type </label>
-                                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.NoticeId" style="cursor:pointer;" disabled>
-                                                            <option value="">-- Select Type --</option>
-                                                            @foreach (var l in FilteredFormTypeList)
-                                                            {
-                                                                <option value="@l.Id">@l.Name</option>
-                                                            }
-                                                        </InputSelect>
+                                                        <!-- Notice type -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Notice Type </label>
+                                                            <InputSelect class="form-select" @bind-Value="legalcaseDto.NoticeId" style="cursor:pointer;" disabled>
+                                                                <option value="">-- Select Type --</option>
+                                                                @foreach (var l in FilteredFormTypeList)
+                                                                {
+                                                                    <option value="@l.Id">@l.Name</option>
+                                                                }
+                                                            </InputSelect>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Service Method </label>
+                                                            <InputSelect class="form-select" @bind-Value="legalcaseDto.ServiceMethodId" style="cursor:pointer;" disabled>
+                                                                <option value="">-- Select Type --</option>
+                                                                @foreach (var l in ServiceMethodList)
+                                                                {
+                                                                    <option value="@l.Id">@l.Name</option>
+                                                                }
+                                                            </InputSelect>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Planned Service Date </label>
+                                                            <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.PlannedServiceDate" disabled />
+
+                                                        </div>
+
                                                     </div>
-                                                    <div class="col-md-4">
-                                                        <label class="form-label ">Service Method </label>
-                                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.ServiceMethodId" style="cursor:pointer;" disabled>
-                                                            <option value="">-- Select Type --</option>
-                                                            @foreach (var l in ServiceMethodList)
-                                                            {
-                                                                <option value="@l.Id">@l.Name</option>
-                                                            }
-                                                        </InputSelect>
+                                                    <div class="row g-2 mb-3">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Deemed Service (Auto) </label>
+                                                            <InputText class="form-control" @bind-Value="legalcaseDto.DeemedService" style="cursor:pointer;" disabled />
+
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Expiry (auto) </label>
+                                                            <InputText class="form-control" Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.Expiry" disabled />
+
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">Roll to Next Business Day</label>
+                                                            <div class="d-flex justify-content-start align-items-center  gap-2">
+                                                                <InputRadioGroup @bind-Value="legalcaseDto.NextBussinessday" disabled>
+                                                                    <div class="form-check d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input" Value="true" style="font-size:15px" disabled />
+                                                                        <label class="form-check-label">Yes</label>
+                                                                    </div>
+                                                                    <div class="form-check  d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input " Value="false" style="font-size:15px" disabled />
+                                                                        <label class="form-check-label">No</label>
+                                                                    </div>
+                                                                </InputRadioGroup>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div class="col-md-4">
-                                                        <label class="form-label ">Planned Service Date </label>
-                                                        <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.PlannedServiceDate" disabled />
+                                                    <div class="row g-2">
+                                                        <div class="hint">Add-ons: Personal +0 • Overnight +1 • Mail +5 • Posting+Mail +5. Expiry counts from deemed date.</div>
+                                                        <div class="col-auto">
+                                                            <label class="form-label" style="    padding: 10px;
+                                                                                                                                                        border: 1px solid;
+                                                                                                                                                        border-radius: 25px;
+                                                                                                                                                        align-items: center;
+                                                                                                                                                        display: flex;
+                                                                                                                                                         ">Live Expiry : --</label>
+
+                                                        </div>
 
                                                     </div>
 
                                                 </div>
-                                                <div class="row g-2 mb-3">
-                                                    <div class="col-md-4">
-                                                        <label class="form-label ">Deemed Service (Auto) </label>
-                                                        <InputText class="form-control" @bind-Value="legalcaseDto.DeemedService" style="cursor:pointer;" disabled />
-
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label class="form-label ">Expiry (auto) </label>
-                                                        <InputText class="form-control" Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.Expiry" disabled />
-
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label class="form-label">Roll to Next Business Day</label>
-                                                        <div class="d-flex justify-content-start align-items-center  gap-2">
-                                                            <InputRadioGroup @bind-Value="legalcaseDto.NextBussinessday" disabled>
-                                                                <div class="form-check d-flex justify-content-center gap-2">
-                                                                    <InputRadio class="form-check-input" Value="true" style="font-size:15px" disabled />
-                                                                    <label class="form-check-label">Yes</label>
-                                                                </div>
-                                                                <div class="form-check  d-flex justify-content-center gap-2">
-                                                                    <InputRadio class="form-check-input " Value="false" style="font-size:15px" disabled />
-                                                                    <label class="form-check-label">No</label>
-                                                                </div>
-                                                            </InputRadioGroup>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row g-2">
-                                                    <div class="hint">Add-ons: Personal +0 • Overnight +1 • Mail +5 • Posting+Mail +5. Expiry counts from deemed date.</div>
-                                                    <div class="col-auto">
-                                                        <label class="form-label" style="    padding: 10px;
-                                                                                                    border: 1px solid;
-                                                                                                    border-radius: 25px;
-                                                                                                    align-items: center;
-                                                                                                    display: flex;
-                                                                                                    height: 36px;">Live Expiry : --</label>
-
-                                                    </div>
-
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-
-                                </div>
-
-                                <!-- good cause-->
-                                <div class="row">
-                                    <div class="col">
-                                        <div class="card mb-3">
-                                            <div class="card-header">
-                                                <div style="font-weight:700" class="head">Documents & Remarks</div>
-
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row g-2 mb-3">
-
-                                                    <!-- Notice type -->
-                                                    <div class="col-md-3">
-
-                                                        <div class="form-check d-flex justify-content-center gap-2">
-                                                            <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.leasedAttached" disabled />
-                                                            <label class="form-check-label"> Leased Attached </label>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-md-3">
-                                                        <div class="form-check d-flex justify-content-center gap-2">
-                                                            <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.ledgerAttached" disabled />
-                                                            <label class="form-check-label"> Ledger attached </label>
-                                                        </div>
-
-                                                    </div>
-                                                    <div class="col-md-3">
-
-                                                        <div class="form-check d-flex justify-content-center gap-2">
-                                                            <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.NoticeproofAttached" disabled />
-                                                            <label class="form-check-label"> Notices proof attached </label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-3">
-
-                                                        <div class="form-check d-flex justify-content-center gap-2">
-                                                            <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.RegistrationRentAttached" disabled />
-                                                            <label class="form-check-label">Registration/Rent history attached</label>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                                <div class="row g-2 mb-3">
-
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Good Cause Exemption Notice attached</label>
-                                                        <div class="d-flex justify-content-start align-items-center  gap-2">
-                                                            <InputRadioGroup @bind-Value="legalcaseDto.GoodCauseExempt" disabled>
-                                                                <div class="form-check d-flex justify-content-center gap-2">
-                                                                    <InputRadio class="form-check-input" Value="true" style="font-size:15px" disabled />
-                                                                    <label class="form-check-label">Yes</label>
-                                                                </div>
-                                                                <div class="form-check  d-flex justify-content-center gap-2">
-                                                                    <InputRadio class="form-check-input " Value="false" style="font-size:15px" disabled />
-                                                                    <label class="form-check-label">No</label>
-                                                                </div>
-                                                            </InputRadioGroup>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-md-6">
-                                                        <label class="form-label ">Additional Comments </label>
-                                                        <InputText class="form-control" @bind-Value="legalcaseDto.AdditionalComments" style="cursor:pointer;" disabled />
-
-                                                    </div>
-                                                </div>
-
                                             </div>
                                         </div>
+
+
+
                                     </div>
 
+                                    <!-- good cause-->
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="card mb-3">
+                                                <div class="card-header">
+                                                    <div style="font-weight:700" class="head">Documents & Remarks</div>
 
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row g-2 mb-3">
 
-                                </div>
+                                                        <!-- Notice type -->
+                                                        <div class="col-md-3">
 
-                                <!-- filing -->
-                                <div class="row">
-                                    <div class="col">
-                                        <div class="card mb-3">
-                                            <div class="card-header">
-                                                <div style="font-weight:700" class="head">Filing</div>
+                                                            <div class="form-check d-flex justify-content-center gap-2">
+                                                                <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.leasedAttached" disabled />
+                                                                <label class="form-check-label"> Leased Attached </label>
+                                                            </div>
+                                                        </div>
 
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row g-2 mb-3">
+                                                        <div class="col-md-3">
+                                                            <div class="form-check d-flex justify-content-center gap-2">
+                                                                <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.ledgerAttached" disabled />
+                                                                <label class="form-check-label"> Ledger attached </label>
+                                                            </div>
 
-                                                    <!-- Notice type -->
+                                                        </div>
+                                                        <div class="col-md-3">
 
-                                                    <div class="col-md-4">
-                                                        <div class="position-relative" @onfocusout="HideCountyDropDown">
-                                                            <label class="form-label fw-semibold" style="align-items: center;
-                                                                                                    display: flex;
-                                                                                                    height: 36px;">County </label>
-                                                            <InputText type="text" name="county" class="form-control" placeholder="Search by County..."
-                                                                       @bind-value="searchCountyText" @oninput="OnSearchCountyInput" @onclick="ShowAllCounty" disabled />
+                                                            <div class="form-check d-flex justify-content-center gap-2">
+                                                                <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.NoticeproofAttached" disabled />
+                                                                <label class="form-check-label"> Notices proof attached </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+
+                                                            <div class="form-check d-flex justify-content-center gap-2">
+                                                                <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.RegistrationRentAttached" disabled />
+                                                                <label class="form-check-label">Registration/Rent history attached</label>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="row g-2 mb-3">
+
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Good Cause Exemption Notice attached</label>
+                                                            <div class="d-flex justify-content-start align-items-center  gap-2">
+                                                                <InputRadioGroup @bind-Value="legalcaseDto.GoodCauseExempt" disabled>
+                                                                    <div class="form-check d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input" Value="true" style="font-size:15px" disabled />
+                                                                        <label class="form-check-label">Yes</label>
+                                                                    </div>
+                                                                    <div class="form-check  d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input " Value="false" style="font-size:15px" disabled />
+                                                                        <label class="form-check-label">No</label>
+                                                                    </div>
+                                                                </InputRadioGroup>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label class="form-label ">Additional Comments </label>
+                                                            <InputText class="form-control" @bind-Value="legalcaseDto.AdditionalComments" style="cursor:pointer;" disabled />
 
                                                         </div>
                                                     </div>
 
-                                                    <div class="col-md-4">
-                                                        <div class="position-relative" @onfocusout="HideCourtDropDown">
-                                                            <label class="form-label fw-semibold" style="align-items: center;
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+
+                                    <!-- filing -->
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="card mb-3">
+                                                <div class="card-header">
+                                                    <div style="font-weight:700" class="head">Filing</div>
+
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row g-2 mb-3">
+
+                                                        <!-- Notice type -->
+
+                                                        <div class="col-md-4">
+                                                            <div class="position-relative" @onfocusout="HideCountyDropDown">
+                                                                <label class="form-label fw-semibold" style="align-items: center;
+                                                                                                                                                        display: flex;
+                                                                                                                                                         ">County </label>
+                                                                <InputText type="text" name="county" class="form-control" placeholder="Search by County..."
+                                                                           @bind-value="searchCountyText" @oninput="OnSearchCountyInput" @onclick="ShowAllCounty" disabled />
+
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="position-relative" @onfocusout="HideCourtDropDown">
+                                                                <label class="form-label fw-semibold" style="align-items: center;
+                                                                                                                                                                display: flex;
+                                                                                                                                                                 ">Court Location </label>
+                                                                <InputText type="text" name="courtLocation" class="form-control" placeholder="Search by Court Location..."
+                                                                           @bind-value="searchCourtText" @oninput="OnSearchCourtInput" @onclick="ShowAllCourts" disabled />
+
+
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Affidavit of Service (Predicate) – file key </label>
+                                                            <InputText class="form-control" @bind-Value="legalcaseDto.AffidavitofService" style="cursor:pointer;" disabled />
+
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="row g-2 mb-3">
+
+
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">Court to draft NoP & Petition?</label>
+                                                            <div class="d-flex justify-content-start align-items-center  gap-2">
+                                                                <InputRadioGroup @bind-Value="legalcaseDto.CourtDraftNop" disabled>
+                                                                    <div class="form-check d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input" Value="true" style="font-size:15px" disabled />
+                                                                        <label class="form-check-label">Yes</label>
+                                                                    </div>
+                                                                    <div class="form-check  d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input " Value="false" style="font-size:15px" disabled />
+                                                                        <label class="form-check-label">No</label>
+                                                                    </div>
+                                                                </InputRadioGroup>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Filing Method</label>
+                                                            <InputSelect class="form-select" @bind-Value="legalcaseDto.FilingMethodId" style="cursor:pointer;" disabled>
+                                                                <option value="">-- Select Type --</option>
+                                                                @foreach (var l in FilingMethodList)
+                                                                {
+                                                                    <option value="@l.Id">@l.Name</option>
+                                                                }
+                                                            </InputSelect>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Preferred Filing Date </label>
+                                                            <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.PreferedFilingDate" disabled />
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+                                }
+                                @if (legalcaseDto.CaseTypeName == "Holdover")
+                                {
+                                    <!--Term-->
+                                    <div class="row mt-3">
+                                        <div class="col">
+                                            <div class="card mb-3">
+                                                <div class="card-header">
+                                                    <div style="font-weight:700" class="head">Terms</div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row g-2">
+
+                                                        <!-- Written Lease -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">Written Lease?</label>
+                                                            <div class="d-flex justify-content-start align-items-center  gap-2">
+                                                                <InputRadioGroup @bind-Value="legalcaseDto.WrittenLease">
+                                                                    <div class="form-check d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input" Value="true" style="font-size:15px" disabled />
+                                                                        <label class="form-check-label">Yes</label>
+                                                                    </div>
+                                                                    <div class="form-check  d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input " Value="false" style="font-size:15px" disabled />
+                                                                        <label class="form-check-label">No</label>
+                                                                    </div>
+                                                                </InputRadioGroup>
+                                                            </div>
+                                                        </div>
+
+
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">Oral Aggrement</label>
+                                                            <div class="d-flex justify-content-start align-items-center  gap-2" style="cursor:pointer;">
+                                                                <InputRadioGroup @bind-Value="legalcaseDto.OralAgreeMent">
+                                                                    <div class="form-check d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input" Value="true" style="font-size:15px" disabled />
+                                                                        <label class="form-check-label">Yes</label>
+                                                                    </div>
+                                                                    <div class="form-check  d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input " Value="false" style="font-size:15px" disabled />
+                                                                        <label class="form-check-label">No</label>
+                                                                    </div>
+                                                                </InputRadioGroup>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Oral End -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">Program</label>
+                                                            <InputSelect class="form-select" @bind-Value="legalcaseDto.CaseProgramId" style="cursor:pointer;" disabled>
+                                                                <option value="">-- Select Type --</option>
+                                                                @foreach (var l in CaseProgramList)
+                                                                {
+                                                                    <option value="@l.Id">@l.Name</option>
+                                                                }
+                                                            </InputSelect>
+                                                            <ValidationMessage For="() => legalcaseDto.CaseProgramId" />
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="row g-2 mt-2">
+                                                        <!-- Date Tenant Moved -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">Good Cause Applies?</label>
+                                                            <InputSelect class="form-select" @bind-Value="legalcaseDto.GoodCauseApplies" style="cursor:pointer;" disabled>
+                                                                <option value="false">No (Exempt)</option>
+                                                                <option value="true">Yes (Owner ≥ 10)</option>
+                                                            </InputSelect>
+
+                                                        </div>
+
+                                                        <!-- Rent Due Day -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Move In Date </label>
+                                                            <RadzenDatePicker Style="width:100%" @bind-Value="legalcaseDto.DateTenantMoved" Max="@DateTime.Today" @bind-Value:after="CalcNoticeDays" disabled />
+                                                            <ValidationMessage For="() => legalcaseDto.DateTenantMoved" />
+                                                        </div>
+
+                                                        <!-- Monthly Rent -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Lease End (If any) </label>
+                                                            <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.LeaseEnd" disabled />
+
+                                                        </div>
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+                                    <!--Case-->
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="card mb-3">
+                                                <div class="card-header">
+                                                    <div style="font-weight:700" class="head">Case</div>
+
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row g-2">
+                                                        <!-- Tenancy Type -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label required-label">Tenancy Type</label>
+                                                            <InputSelect class="form-select" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays" style="cursor:pointer;" disabled>
+                                                                <option value="">-- Select Type --</option>
+                                                                @foreach (var l in TenancyTypeList)
+                                                                {
+                                                                    <option value="@l.Id">@l.Name</option>
+                                                                }
+                                                            </InputSelect>
+                                                            <ValidationMessage For="() => legalcaseDto.TenancyTypeId" />
+                                                        </div>
+
+
+
+                                                        <!-- Oral Start -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label required-label">Date Notice Served</label>
+                                                            <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.DateNoticeServed" @bind-Value:after="CalcExpireAligned" disabled />
+                                                            <ValidationMessage For="() => legalcaseDto.DateNoticeServed" />
+
+                                                        </div>
+
+                                                        <!-- Oral End -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">Calculated Notice Length</label>
+                                                            <InputNumber class="form-control" @bind-Value="legalcaseDto.CalculatedNoticeLength" disabled />
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="row g-2 mt-2">
+                                                        <!-- Expiration Date -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label" style="height: 36px;
                                                                                                             display: flex;
-                                                                                                            height: 36px;">Court Location </label>
-                                                            <InputText type="text" name="courtLocation" class="form-control" placeholder="Search by Court Location..."
-                                                                       @bind-value="searchCourtText" @oninput="OnSearchCourtInput" @onclick="ShowAllCourts" disabled />
+                                                                                                            align-items: center;">Expiration Date (Auto)</label>
+                                                            <RadzenDatePicker Style="width:100%;" @bind-Value="legalcaseDto.ExpirationDate" disabled />
+
+                                                        </div>
+
+                                                        <!-- Predicate -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label " style="height: 36px;
+                                                                                                                    display: flex;
+                                                                                                                    align-items: center;">Predicate Notice (Auto) </label>
+                                                            <InputText class="form-control" @bind-Value="legalcaseDto.PredicateNotice" disabled />
+
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">Good Cause Exemption Notice attached</label>
+                                                            <div class="d-flex justify-content-start align-items-center  gap-2">
+                                                                <InputRadioGroup @bind-Value="legalcaseDto.GoodCauseExempt">
+                                                                    <div class="form-check d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input" Value="true" style="font-size:15px" disabled />
+                                                                        <label class="form-check-label">Yes</label>
+                                                                    </div>
+                                                                    <div class="form-check  d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input " Value="false" style="font-size:15px" disabled />
+                                                                        <label class="form-check-label">No</label>
+                                                                    </div>
+                                                                </InputRadioGroup>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="row g-2 mb-3 mt-3">
+
+                                                        <!-- Notice type -->
+                                                        <div class="col-md-3">
+
+                                                            <div class="form-check d-flex justify-content-center gap-2">
+                                                                <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.leasedAttached" disabled />
+                                                                <label class="form-check-label"> Leased Attached </label>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-3">
+                                                            <div class="form-check d-flex justify-content-center gap-2">
+                                                                <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.ledgerAttached" disabled />
+                                                                <label class="form-check-label"> Ledger attached </label>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="col-md-3">
+
+                                                            <div class="form-check d-flex justify-content-center gap-2">
+                                                                <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.NoticeproofAttached" disabled />
+                                                                <label class="form-check-label"> Notices proof attached </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+
+                                                            <div class="form-check d-flex justify-content-center gap-2">
+                                                                <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.RegistrationRentAttached" disabled />
+                                                                <label class="form-check-label">Registration/Rent history attached</label>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="row g-2 mb-3">
 
 
+
+                                                        <div class="col">
+                                                            <label class="form-label ">Additional Comments </label>
+                                                            <InputText class="form-control" @bind-Value="legalcaseDto.AdditionalComments" style="cursor:pointer;" disabled />
 
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-4">
-                                                        <label class="form-label ">Affidavit of Service (Predicate) – file key </label>
-                                                        <InputText class="form-control" @bind-Value="legalcaseDto.AffidavitofService" style="cursor:pointer;" disabled />
-
-                                                    </div>
 
                                                 </div>
-                                                <div class="row g-2 mb-3">
-
-
-                                                    <div class="col-md-4">
-                                                        <label class="form-label">Court to draft NoP & Petition?</label>
-                                                        <div class="d-flex justify-content-start align-items-center  gap-2">
-                                                            <InputRadioGroup @bind-Value="legalcaseDto.CourtDraftNop" disabled>
-                                                                <div class="form-check d-flex justify-content-center gap-2">
-                                                                    <InputRadio class="form-check-input" Value="true" style="font-size:15px" disabled />
-                                                                    <label class="form-check-label">Yes</label>
-                                                                </div>
-                                                                <div class="form-check  d-flex justify-content-center gap-2">
-                                                                    <InputRadio class="form-check-input " Value="false" style="font-size:15px" disabled />
-                                                                    <label class="form-check-label">No</label>
-                                                                </div>
-                                                            </InputRadioGroup>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-md-4">
-                                                        <label class="form-label ">Filing Method</label>
-                                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.FilingMethodId" style="cursor:pointer;" disabled>
-                                                            <option value="">-- Select Type --</option>
-                                                            @foreach (var l in FilingMethodList)
-                                                            {
-                                                                <option value="@l.Id">@l.Name</option>
-                                                            }
-                                                        </InputSelect>
-                                                    </div>
-
-                                                    <div class="col-md-4">
-                                                        <label class="form-label ">Preferred Filing Date </label>
-                                                        <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.PreferedFilingDate" disabled />
-                                                    </div>
-
-                                                </div>
-
                                             </div>
                                         </div>
+
+
+
+                                    </div>
+                                    <!--Rent-->
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="card mb-3">
+                                                <div class="card-header fw-bold head">Rent Details</div>
+                                                <div class="card-body">
+                                                    <div class="row g-2">
+
+                                                        <!-- Rent Due Day -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label  required-label">Date Rent  Due (Month/Week) </label>
+                                                            <InputSelect class="form-select" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" style="cursor:pointer;" disabled>
+                                                                <option value="">-- Select Type --</option>
+                                                                @foreach (var l in DateRentList)
+                                                                {
+                                                                    <option value="@l.Id">@l.Name</option>
+                                                                }
+                                                            </InputSelect>
+                                                            <ValidationMessage For="() => legalcaseDto.RentDueEachMonthOrWeekId" />
+                                                        </div>
+
+                                                        <!-- Monthly Rent -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label  required-label">Monthly Rent ($) </label>
+                                                            <InputNumber class="form-control" @bind-Value="legalcaseDto.MonthlyRent" placeholder="Enter Monthly Rent" disabled />
+                                                            <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
+                                                        </div>
+
+                                                        <!-- Tenant's Share -->
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">Tenant's Share ($)</label>
+                                                            <InputNumber class="form-control" @bind-Value="legalcaseDto.TenantShare" placeholder="Enter Total Share" min="0" disabled />
+
+                                                        </div>
+
+
+                                                    </div>
+
+                                                    <div class="row g-2 mt-2">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">Social Services (If any)</label>
+                                                            <InputText class="form-control" @bind-Value="legalcaseDto.SocialService" placeholder="Enter Social Service" disabled />
+
+                                                        </div>
+
+                                                        @* <div class="col-md-4">
+                                        <label class="form-label">Unpaid Rent (Months) </label>
+                                        <InputText class="form-control"
+                                                   @bind-Value="legalcaseDto.LastRentPaid"
+                                                   placeholder="Enter  unpaid months" @bind-Value:after="FormatLastRentPaid" />
                                     </div>
 
+                                    <div class="col-md-4">
+                                        <label class="form-label">Total Rent Owed ($)</label>
+                                        <InputNumber class="form-control" @bind-Value="legalcaseDto.TotalOwed" placeholder="Enter Total Rent" min="0" />
+
+                                    </div> *@
+                                                        <div class="col-md-4">
+                                                            <label class="form-label ">Date of Last Payment </label>
+                                                            <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.LastPaymentDate" @bind-Value:after="GenerateMonths" disabled />
+
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">Amount of Last Payment ($)</label>
+                                                            <InputNumber class="form-control" @bind-Value="legalcaseDto.LastPayment" min="0" disabled />
+
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row g-2 mt-2">
+                                                        <div class="col">
+                                                            <label class="form-label">Rent Breakup</label>
+                                                    <div class="total-box mt-3">
+                                                        <label class="form-label " style="font-size:14px; font-weight:300; margin-bottom:0px;">Total Owed: $ @(legalcaseDto.TotalOwed ?? 00)</label>
+                                                    </div>
+
+                                                    @foreach (var item in Rows)
+                                                    {
+                                                        <div class="row mb-3">
+                                                            <div class="col-3">
+                                                                <label class="form-label ">Month (YYYY-MM) </label>
+                                                                <InputSelect class="form-select holdover-form"
+                                                                             @bind-Value="item.Month"
+                                                                             @bind-Value:after="(() => OnMonthChanged(item))" disabled>
+
+                                                                    <option value="">Select month</option>
+
+                                                                    @foreach (var m in MonthOptions)
+                                                                    {
+                                                                        <option value="@m.Value">@m.Display</option>
+                                                                    }
+
+                                                                </InputSelect>
+                                                            </div>
+                                                            <div class="col-3">
+                                                                <label class="form-label  ">Amount ($) </label>
+                                                                <InputNumber @bind-Value="item.Amount" @bind-Value:after="RecalculateTotal"
+                                                                             class="form-control" disabled />
+                                                            </div>
+
+                                                            <div class="col-3">
+                                                                <label class="form-label  ">Notes </label>
+                                                                <InputText @bind-Value="item.Notes"
+                                                                           class="form-control" placeholder="Partial, vouchers, etc." disabled />
+                                                            </div>
 
 
-                                </div>
+
+
+                                                        </div>
+                                                    }
+
+                                                    </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+
+                                }
+
 
 
                             </div>
@@ -3712,7 +4415,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     @foreach (var c in filteredBuildings)
                                                     {
                                                         <li class="dropdown-item" @onclick="() => SelectBuilding(c)">
-                                                            @c.ApartmentCode @c.City / @c.BuildingCode
+                                                            @c.ApartmentCode @c.CityName / @c.BuildingCode
                                                         </li>
                                                     }
                                                 </ul>
@@ -4453,7 +5156,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         {
             <div class="d-flex justify-content-between border-top pt-3 mt-3">
                 <button type="button" class="btn btn-outline-secondary" @onclick="Prev" disabled="@( Steps[CurrentStep].Name == "CaseAndclient")">← Back</button>
-                @if (Steps[CurrentStep].Name != "Notice")
+                @if (Steps[CurrentStep].Name != "Review")
 
                 {
                     <button type="button" class="btn" style="background-color:#1F365D !important; color:white" @onclick="Next">Next →</button>
@@ -4614,7 +5317,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     public int CurrentStep { get; set; }
 
 
-    public int Tracker { get; set; }
+    public int Tracker { get; set; } = 10;
 
     private EditContext _editContext;
     private ValidationMessageStore messageStore;
@@ -4622,8 +5325,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     private List<RegulationStatus> RegulationList = new();
     private List<LandlordType> LandLordTypeList = new();
     private List<State> StateList = new();
+    private IEnumerable<City> CityList = new List<City>();
     private List<ClientRole> ClientTypeList = new();
     private List<CaseType> CaseTypeList = new();
+    private IEnumerable<SubCaseType> SubCaseTypeList = new List<SubCaseType>();
     private List<TenancyType> TenancyTypeList = new();
     private List<DateRent> DateRentList = new();
     private List<CaseProgram> CaseProgramList = new();
@@ -4691,16 +5396,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         legalcaseDto = new IntakeModel();
         _editContext = new EditContext(legalcaseDto);
         messageStore = new ValidationMessageStore(_editContext);
-        CaseTypeList = await CaseTypeRepository.GetAllCaseType();
 
-        var defaultCaseType = CaseTypeList.FirstOrDefault(x =>
-                     x.Name.Equals("Holdover", StringComparison.OrdinalIgnoreCase));
-
-        if (defaultCaseType != null)
-        {
-            legalcaseDto.CaseTypeId = defaultCaseType.Id;
-            legalcaseDto.CaseTypeName = defaultCaseType.Name;
-        }
 
 
 
@@ -4716,17 +5412,36 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         }
         //LandlordList = await _landlordService.GetAllLandLordsAsync();
         //_editContext.OnFieldChanged += HandleFieldChanged;
-        ClientTypeList = await ClientRoleRepository.GetAllClientRole();
 
         legalcaseDto.DateTenantMoved = null;
         legalcaseDto.LeaseEnd = null;
-        await BuildSteps();
         // GenerateMonths();
         spinnerservice.Hide();
 
     }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await GetAllLists();
+        }
+    }
     public async Task GetAllLists()
     {
+        CaseTypeList = await CaseTypeRepository.GetAllCaseType();
+        SubCaseTypeList = await _legalCaseService.GetSubCaseList();
+        var defaultCaseType = CaseTypeList.FirstOrDefault(x =>
+                     x.Name.Equals("Holdover", StringComparison.OrdinalIgnoreCase));
+
+        if (defaultCaseType != null)
+        {
+            legalcaseDto.CaseTypeId = defaultCaseType.Id;
+            legalcaseDto.CaseTypeName = defaultCaseType.Name;
+        }
+        await BuildSteps();
+
+        ClientTypeList = await ClientRoleRepository.GetAllClientRole();
+
         CaseProgramList = await _caseprogram.GetAllCaseProgram();
         CountyList = await _countyService.GetAllCounty();
         CourtLocationList = await _courtService.GetAllCourtDataAsync();
@@ -4753,13 +5468,13 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         LandLordTypeList = await LandlordTypeRepository.GetAllLandLordType();
         IsUnitIllegalList = await UnitIllegalRepository.GetAllUnitIllegal();
         RegulationList = await RegulationStatusRepository.GetAllRegulationStatus();
-        if (legalcaseDto.CaseTypeId != null || legalcaseDto.CaseTypeId != Guid.Empty)
-        {
-            FilteredFormTypeList = await _FormService.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
-        }
+
         FilingMethodList = await _legalCaseService.FilingMethodList();
         ServiceMethodList = await _legalCaseService.ServiceMethodList();
+        CityList = await _legalCaseService.GetAllCitiesList();
 
+        legalcaseDto.StateId = StateList.Where(e => e.Name.Contains("New York")).Select(e => e.Id).FirstOrDefault();
+        legalcaseDto.BuildingStateId = StateList.Where(e => e.Name.Contains("New York")).Select(e => e.Id).FirstOrDefault();
     }
 
     bool HideCaseAndClientSection =>
@@ -4867,7 +5582,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                     if (!isBuildingSelected)
                     {
-                        Require(() => legalcaseDto.Borough, nameof(legalcaseDto.Borough), "City is required");
+                        Require(() => legalcaseDto.BoroughorCityId, nameof(legalcaseDto.BoroughorCityId), "City is required");
                     }
                     if (!isBuildingSelected)
                     {
@@ -5513,7 +6228,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
         //CalcNoticeLength = CalcNoticeDays(Tenancy, MovedIn);
         var dueDay = ParseDueDay(RentDueDate);
-        await GetAllLists();
+        // await GetAllLists();
 
         @if (legalcaseDto.CaseTypeName == "Holdover" || legalcaseDto.CaseTypeName == "NonPayment")
         {
@@ -5559,62 +6274,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
 
     }
-    // public async Task BuildSteps()
-    // {
-    //     spinnerservice.Show();
-    //     if (Steps.Any() && !Steps.Contains(CurrentStep))
-    //         CurrentStep = Steps.First();
 
-    //     // Pehle CaseType ka naam nikal lo
-    //     var caseTypeName = CaseTypeList
-    //         .FirstOrDefault(x => x.Id == legalcaseDto.CaseTypeId)?.Name;
-
-    //     // List initialize kar lo
-    //     Steps = new List<Step>();
-
-    //     if (caseTypeName == "Holdover" || caseTypeName == "NonPayment")
-    //     {
-    //         Steps.Add(Step.CaseAndclient);
-    //         Steps.Add(Step.Landlord);
-    //         Steps.Add(Step.Building);
-    //         Steps.Add(Step.Tenant);
-    //         Steps.Add(Step.Terms);
-    //         @if (caseTypeName == "Holdover")
-    //         {
-    //             Steps.Add(Step.Case);
-    //         }
-    //         Steps.Add(Step.Rent);
-    //         Steps.Add(Step.Notice);
-    //     }
-    //     else if (caseTypeName == "HPD")
-    //     {
-    //         Steps.Add(Step.CaseAndclient);
-    //         Steps.Add(Step.Attorney);
-    //         Steps.Add(Step.CaseInfo);
-    //         Steps.Add(Step.Party);
-    //         Steps.Add(Step.BuildingInfo);
-    //         Steps.Add(Step.PetitionerTenant);
-    //         Steps.Add(Step.RespondentLandlord);
-    //         Steps.Add(Step.Appearance);
-    //         Steps.Add(Step.Relief);
-    //         Steps.Add(Step.Billing);
-    //     }
-    //     else if (caseTypeName == "Per Diem")
-    //     {
-
-    //         Steps.Add(Step.CaseAndclient);
-    //         Steps.Add(Step.Attorney);
-    //         Steps.Add(Step.CaseInfo);
-    //         Steps.Add(Step.Party);
-    //         Steps.Add(Step.Appearance);
-    //         Steps.Add(Step.CasebackGround);
-    //         Steps.Add(Step.DocumentInstructions);
-    //         Steps.Add(Step.Reporting);
-    //         Steps.Add(Step.Billing);
-    //         Steps.Add(Step.Acknowledgment);
-    //     }
-
-    // }
     public async Task BuildSteps()
     {
         spinnerservice.Show();
@@ -5631,12 +6291,22 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
             Steps = Enum.GetValues<StepHoldover>()
                         .Select(x => new StepItems { Id = (int)x, Name = x.ToString() })
                         .ToList();
+
+            if (legalcaseDto.CaseTypeId != null || legalcaseDto.CaseTypeId != Guid.Empty)
+            {
+                FilteredFormTypeList = await _FormService.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
+            }
         }
         else if (caseTypeName == "NonPayment")
         {
             Steps = Enum.GetValues<StepNonPayment>()
                         .Select(x => new StepItems { Id = (int)x, Name = x.ToString() })
                         .ToList();
+
+            if (legalcaseDto.CaseTypeId != null || legalcaseDto.CaseTypeId != Guid.Empty)
+            {
+                FilteredFormTypeList = await _FormService.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
+            }
         }
         else if (caseTypeName == "HPD")
         {
@@ -5917,7 +6587,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                     {
                         Address1 = legalcaseDto.BuildingAddress,
                         //Address2 = address2,
-                        City = legalcaseDto.Borough,
+                        CityId = legalcaseDto.BoroughorCityId,
                         StateId = legalcaseDto.BuildingStateId,
                         Zipcode = legalcaseDto.BuildingZip,
                         BuildingUnits = legalcaseDto.Units,
@@ -5942,13 +6612,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                             Address1 = legalcaseDto.BuildingAddress,
                             RegistrationStatusId = legalcaseDto.RegistrationStatusTypeId,
                             BuildingTypeId = legalcaseDto.BuildingTypeId,
-                            City = legalcaseDto.Borough,
+                            CityId = legalcaseDto.BoroughorCityId,
                             LandlordId = legalcaseDto.LandlordId,
 
                             BuildingUnits = legalcaseDto.Units,
 
                             MDRNumber = legalcaseDto.Mdr,
                             RegulationStatusId = legalcaseDto.RegulationStatusId,
+                            PremiseTypeId = legalcaseDto.PremiseTypeId,
                         };
 
                         await _buildingService.UpdateonlyBuildingfromCase(updateBuilding);
@@ -6040,7 +6711,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                         await _additionalOccupant.AddAdditionalOccupantsAsync(AdditionalOccupantsList);
                     }
 
-                    nav.NavigateTo("/dashboard?success=true");
+                    nav.NavigateTo("/legalcases?success=true");
 
                 }
             }
@@ -6207,7 +6878,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                             Address1 = legalcaseDto.BuildingAddress,
                             RegistrationStatusId = legalcaseDto.RegistrationStatusTypeId,
                             PremiseTypeId = legalcaseDto.PremiseTypeId,
-                            City = legalcaseDto.Borough,
+                            CityId = legalcaseDto.BoroughorCityId,
 
                             BuildingUnits = legalcaseDto.Units,
                             ApartmentCode = legalcaseDto.UnitOrApartmentNumber,
@@ -6264,7 +6935,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                     if (result != null)
                     {
-                        nav.NavigateTo("/dashboard?success=true");
+                        nav.NavigateTo("/legalcases?success=true");
                     }
                 }
             }
@@ -6367,7 +7038,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                     if (result != null)
                     {
-                        nav.NavigateTo("/dashboard?success=true");
+                        nav.NavigateTo("/legalcases?success=true");
                     }
                 }
             }
@@ -6399,7 +7070,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
     private bool HasBuildingChanged(EditToBuildingDto existing, IntakeModel dto)
     {
-        return existing.City != dto.City
+        return existing.CityId != dto.BoroughorCityId
             || !dto.BuildingAddress.Contains(existing.Address1)
             || existing.ApartmentCode != dto.UnitOrApartmentNumber
             || existing.MDRNumber != dto.Mdr
@@ -7449,16 +8120,16 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         legalcaseDto.BuildingAddress = building.Address1;
         legalcaseDto.Units = building.BuildingUnits;
         legalcaseDto.UnitOrApartmentNumber = building.ApartmentCode;
-        legalcaseDto.Borough = building.City;
+        legalcaseDto.BoroughorCityId = building.CityId;
         legalcaseDto.Mdr = building.MDRNumber;
         legalcaseDto.RegulationStatusId = building.RegulationStatusId;
-        legalcaseDto.BuildingTypeId = building.BuildingTypeId;
+        legalcaseDto.PremiseTypeId = building.PremiseTypeId;
         legalcaseDto.RegistrationStatusTypeId = building.RegistrationStatusId;
 
 
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.BuildingAddress)));
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.Mdr)));
-        messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.Borough)));
+        messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.BoroughorCityId)));
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.Units)));
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.PremiseTypeId)));
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.RegulationStatusId)));

@@ -58,7 +58,9 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				await SeedCategory(context);
                 await SeedUnitType(context);
                 await SeedFilingMethod(context);
-                await SeedServiceMethod(context);   
+                await SeedServiceMethod(context);
+                await SeedSubCaseType(context);
+                await SeedCities(context);
                 await context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -78,7 +80,28 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 }
             }
         }
-
+        private static async Task SeedSubCaseType(MainDbContext context)
+        {
+            var casetypes = InitialDataGenerator.GetSubCaseTypes();
+            foreach (var type in casetypes)
+            {
+                if (context.MstSubCaseTypes.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstSubCaseTypes.AddAsync(type);
+                }
+            }
+        }
+        private static async Task SeedCities(MainDbContext context)
+        {
+            var casetypes = InitialDataGenerator.GetCities();
+            foreach (var type in casetypes)
+            {
+                if (context.MstCities.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstCities.AddAsync(type);
+                }
+            }
+        }
         private static async Task SeedRemainderTypes(MainDbContext context)
         {
             var remainderTypes = InitialDataGenerator.GetRemainderTypes();
@@ -328,6 +351,8 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 }
             }
         }
+
+       
         private static async Task SeedCaseStatus(MainDbContext context)
         {
             var casetypes = InitialDataGenerator.GetCaseStatus();
