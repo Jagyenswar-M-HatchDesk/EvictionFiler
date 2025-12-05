@@ -37,7 +37,9 @@ namespace EvictionFiler.Infrastructure.Repositories
             if (existing == null)
                 return null;
 
-            existing.Name = marshal.Name;
+            existing.FirstName = marshal.FirstName;
+            existing.LastName = marshal.LastName;
+            existing.Email = marshal.Email;
             existing.BadgeNumber = marshal.BadgeNumber;
             existing.Telephone = marshal.Telephone;
             existing.Fax = marshal.Fax;
