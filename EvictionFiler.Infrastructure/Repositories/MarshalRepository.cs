@@ -24,10 +24,11 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<MarshalDto>> SearchMarshalbyname(string name)
         {
-            var tenant = await _db.Marshal.Where(e => e.Name.Contains(name)).Select(dto => new MarshalDto
+            var tenant = await _db.Marshal.Where(e => e.FirstName.Contains(name)).Select(dto => new MarshalDto
             {
 
-               Name = dto.Name,
+               FirstName = dto.FirstName,
+                LastName = dto.LastName,
 
 
             }).ToListAsync();
