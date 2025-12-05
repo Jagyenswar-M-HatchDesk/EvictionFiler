@@ -1,21 +1,9 @@
-﻿using EvictionFiler.Application.DTOs.CalanderDto;
-using EvictionFiler.Application.DTOs.ClientDto;
-using EvictionFiler.Application.DTOs.FormTypeDto;
-using EvictionFiler.Application.DTOs.PaginationDto;
-using EvictionFiler.Application.DTOs.RemainderCenterDto;
-using EvictionFiler.Application.Interfaces.IRepository;
+﻿using EvictionFiler.Application.DTOs.RemainderCenterDto;
 using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
-using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Azure.Core.HttpHeader;
 
 namespace EvictionFiler.Application.Services
 {
@@ -25,7 +13,7 @@ namespace EvictionFiler.Application.Services
         private readonly IRemainderCenterRepository _remainderCenterRepo;
         private readonly IUserRepository _userRepo;
 
-        public RemianderCenterService(IRemainderCenterRepository RemainderCenterRepo, IUnitOfWork unitOfWork , IUserRepository userRepo)
+        public RemianderCenterService(IRemainderCenterRepository RemainderCenterRepo, IUnitOfWork unitOfWork, IUserRepository userRepo)
         {
             _unitOfWork = unitOfWork;
             _remainderCenterRepo = RemainderCenterRepo;
@@ -62,11 +50,21 @@ namespace EvictionFiler.Application.Services
             return false;
         }
 
+        public async Task<bool> DeleteAllRemainderAsync()
+        {
+            var result = await _remainderCenterRepo.DeleteAllAsync();
+            if (!result)
+                return false;
+
+            var saved = await _unitOfWork.SaveChangesAsync();
+            return saved > 0;
+        }
+
 
         public async Task<List<EditToRemainderCenterDto>> GetAllRemainderCenterAsync()
         {
             var calanders = await _remainderCenterRepo
-                .GetAllQuerable(x => x.IsDeleted != true, x => x.RemainderType , x=>x.County , x=>x.Tenant , x=>x.Case)
+                .GetAllQuerable(x => x.IsDeleted != true, x => x.RemainderType, x => x.County, x => x.Tenant, x => x.Case)
                 .ToListAsync();
 
             var result = calanders.Select(dto => new EditToRemainderCenterDto
@@ -79,10 +77,10 @@ namespace EvictionFiler.Application.Services
                 RemainderTypeId = dto.RemainderTypeId,
                 Index = dto.Index,
                 Notes = dto.Notes,
-               RemainderTypeName = dto.RemainderType?.Name ?? "Unknown",
+                RemainderTypeName = dto.RemainderType?.Name ?? "Unknown",
                 CountyName = dto.County?.Name ?? "Unknown",
                 TenantName = dto.Tenant?.FirstName ?? "Unknown",
-                 CaseCode= dto.Case?.Casecode ?? "Unknown",
+                CaseCode = dto.Case?.Casecode ?? "Unknown",
 
 
 
@@ -92,7 +90,7 @@ namespace EvictionFiler.Application.Services
         }
 
 
-        public async  Task<EditToRemainderCenterDto?> GetRemainderCenterByIdAsync(Guid? id)
+        public async Task<EditToRemainderCenterDto?> GetRemainderCenterByIdAsync(Guid? id)
         {
             var dto = await _remainderCenterRepo.GetAsync(id);
 
@@ -130,7 +128,7 @@ namespace EvictionFiler.Application.Services
 
 
             existing.When = dto.When;
-                existing.CaseId = dto.CaseId;
+            existing.CaseId = dto.CaseId;
             existing.CountyId = dto.CountyId;
             existing.TenantId = dto.TenantId;
             existing.RemainderTypeId = dto.RemainderTypeId;

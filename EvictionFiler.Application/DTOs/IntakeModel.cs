@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Domain.Entities.Base.Base;
+﻿using EvictionFiler.Application.DTOs.ArrearLedgerDtos;
+using EvictionFiler.Domain.Entities.Base.Base;
 using EvictionFiler.Domain.Entities.Master;
 using System;
 using System.Collections.Generic;
@@ -69,9 +70,14 @@ namespace EvictionFiler.Application.DTOs
 
         public string? TenancyTypeName { get; set; }
         public bool? WrittenLease { get; set; }
+        public bool? CourtDraftNop { get; set; }
+        public bool? NextBussinessday { get; set; }
+        public bool? GoodCauseExempt { get; set; }
         public DateOnly? LeaseEnd { get; set; }
         public DateOnly? LeaseStart { get; set; }
+        public DateOnly? PlannedServiceDate { get; set; }
         public DateOnly? LastPaymentDate { get; set; }
+        public DateOnly? PreferedFilingDate { get; set; }
         public double? LastPayment { get; set; }
 
         public DateOnly? DateNoticeServed { get; set; }
@@ -83,7 +89,8 @@ namespace EvictionFiler.Application.DTOs
         public bool ledgerAttached { get; set; } = false;
         public bool NoticeproofAttached { get; set; } = false;
         public bool RegistrationRentAttached { get; set; } = false;
-        public string AdditionalComments { get; set; }
+        public string? AdditionalComments { get; set; }
+        public string? AffidavitofService { get; set; }
         public Guid? ServiceMethodId { get; set; }
         public Guid? TenantId { get; set; }
         public double? TenantShare { get; set; }
@@ -219,6 +226,9 @@ namespace EvictionFiler.Application.DTOs
         public string? Notes { get; set; }
 
         public Guid? CourtPartId { get; set; }
+
+        public List<ArrearLedgerDto> ArrearLedgers { get; set; } = new List<ArrearLedgerDto>();
+
 
     }
 }

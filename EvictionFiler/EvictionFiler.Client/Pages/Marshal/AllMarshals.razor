@@ -135,7 +135,9 @@
             <table class="table table-hover align-middle text-center" style="margin-bottom: 0px;">
                 <thead>
                     <tr>
-                        <th>Name</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
                         <th>Telephone</th>
                         <th>Fax</th>
                         <th>Badge Number</th>
@@ -156,12 +158,29 @@
                         @foreach (var m in FilteredMarshals)
                         {
                             <tr>
-                                <td>@m.Name</td>
+                                <td>@m.FirstName</td>
+                                <td>@m.LastName</td>
+                                <td>@m.Email</td>
                                 <td>@m.Telephone</td>
                                 <td>@m.Fax</td>
                                 <td>@m.BadgeNumber</td>
                                 <td>@m.OfficeAddress</td>
-                                <td class="sticky"><i class="fa-solid fa-pen-to-square" @onclick="() => ShowEdit(m)" style="cursor: pointer;" title="Edit"></i><span class="status-active ms-2">Active</span></td>
+                                <td class="sticky">
+                                    <i class="fa-solid fa-pen-to-square"
+                                       @onclick="() => ShowEdit(m)"
+                                       style="cursor: pointer; margin-right: 10px;"
+                                       title="Edit">
+                                    </i>
+
+                                    <i class="fa-solid fa-trash-can text-danger "
+                                       @onclick="() => Delete(m.Id)"
+                                       style="cursor: pointer; color: red;"
+                                       title="Delete">
+                                    </i>
+
+                                    <span class="status-active ms-2">Active</span>
+                                </td>
+
                             </tr>
                         }
                     }
@@ -235,6 +254,22 @@
         await editMarshalRef.ShowAsync(dto);
     }
 
+    private async Task Delete(Guid id)
+    {
+        spinnerservice.Show();
+        bool isDeleted = await _marshalService.DeleteMarshalAsync(id);
+        if(isDeleted)
+        {
+            await GetAllMarshal();
+        }
+        else
+        {
+
+        }
+        spinnerservice.Hide();
+
+
+    }
 
     public async Task HandleEdit(MarshalDto dto)
     {
@@ -244,7 +279,7 @@
 
     private IEnumerable<MarshalDto> FilteredMarshals => allMarshals.Where(m =>
      string.IsNullOrWhiteSpace(searchTerm)
-        || (m.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
+        || (m.FirstName?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
         || (m.Telephone?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
         || (m.OfficeAddress?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
         || (m.Fax?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
