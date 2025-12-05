@@ -177,11 +177,15 @@ namespace EvictionFiler.Domain.Entities
 
 
         public Guid? CourtLocationId { get; set; }
-        public Guid? CourtPartId { get; set; }
         [ForeignKey("CourtLocationId")]
         public Courts? CourtLocation { get; set; }
+        public Guid? CourtPartId { get; set; }
         [ForeignKey("CourtPartId")]
         public CourtPart? CourtPart { get; set; }
+
+        public Guid? MarshalId { get; set; }
+        [ForeignKey("MarshalId")]
+        public Marshal? Marshal { get; set; }
         public string? County { get; set; }
         public string? Index { get; set; }
         public string? CourtRoom{ get; set; }

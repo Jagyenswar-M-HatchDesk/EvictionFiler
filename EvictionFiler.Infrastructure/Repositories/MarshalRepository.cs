@@ -1,4 +1,6 @@
-﻿using EvictionFiler.Application.Interfaces.IRepository;
+﻿using EvictionFiler.Application.DTOs.MarshalsDto;
+using EvictionFiler.Application.DTOs.TenantDto;
+using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +21,20 @@ namespace EvictionFiler.Infrastructure.Repositories
             return await _db.Marshal.ToListAsync();
         }
 
+
+        public async Task<List<MarshalDto>> SearchMarshalbyname(string name)
+        {
+            var tenant = await _db.Marshal.Where(e => e.Name.Contains(name)).Select(dto => new MarshalDto
+            {
+
+               Name = dto.Name,
+
+
+            }).ToListAsync();
+            if (tenant == null)
+                return new List<MarshalDto>();
+            return tenant;
+        }
         public async Task<Marshal> GetMarshalByIdAsync(Guid id)
         {
             return await _db.Marshal.FirstOrDefaultAsync(x => x.Id == id) ?? new();

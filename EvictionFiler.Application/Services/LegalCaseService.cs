@@ -420,6 +420,7 @@ namespace EvictionFiler.Application.Services
                         City = caseEntity.Clients.City,
                         StateName = caseEntity.Clients.State != null ? caseEntity.Clients.State.Name : string.Empty,
                         ZipCode = caseEntity.Clients.ZipCode,
+                        MarshalId = caseEntity.MarshalId,
 
                         // Landlord
                         LandlordId = caseEntity.LandLordId,
@@ -565,6 +566,7 @@ namespace EvictionFiler.Application.Services
                         City = caseEntity.Clients.City,
                         StateName = caseEntity.Clients.State != null ? caseEntity.Clients.State.Name : string.Empty,
                         ZipCode = caseEntity.Clients.ZipCode,
+                        MarshalId = caseEntity.MarshalId,
 
                         Attrney = caseEntity.Attrney,
                         AttrneyContactInfo = caseEntity.AttrneyContactInfo,
@@ -1045,14 +1047,14 @@ namespace EvictionFiler.Application.Services
 
         }
 
-        public async Task<bool> UpdateNotesAsync(IntakeModel legalCase)
+        public async Task<bool> UpdateMarshalAsync(IntakeModel legalCase)
         {
             try
             {
                 var existingCase = await _repository.GetAsync(legalCase.Id);
                 if (existingCase == null) return false;
 
-                existingCase.Notes = legalCase.Notes!;
+                existingCase.MarshalId = legalCase.MarshalId!;
 
                 var result = await _unitOfWork.SaveChangesAsync();
 
@@ -1064,7 +1066,6 @@ namespace EvictionFiler.Application.Services
             {
                 throw new Exception();
             }
-
 
         }
 

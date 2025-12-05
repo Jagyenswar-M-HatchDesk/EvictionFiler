@@ -10,5 +10,6 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<MarshalDto> UpdateMarshalAsync(MarshalDto marshal);
 
         Task<bool> DeleteMarshalAsync(Guid id);
+        Task<List<MarshalDto>> SearchMarshalbyname(string name);
     }
 }

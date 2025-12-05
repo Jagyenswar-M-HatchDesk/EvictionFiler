@@ -1,4 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.MarshalsDto;
+using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Domain.Entities;
@@ -31,6 +32,11 @@ namespace EvictionFiler.Application.Services
 
         }
 
+        public async Task<List<MarshalDto>> SearchMarshalbyname(string name)
+        {
+            var newmarshal = await _marshalRepo.SearchMarshalbyname(name);
+            return newmarshal;
+        }
         public async Task<IEnumerable<MarshalDto>> GetAllMarshalAsync()
         {
             var entities = await _marshalRepo.GetAllMarshalAsync();

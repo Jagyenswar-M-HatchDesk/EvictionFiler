@@ -17,6 +17,7 @@ namespace EvictionFiler.Application.DTOs
         public Guid? ClientId { get; set; }
         public Guid? CourtId { get; set; }
         public Guid? CountyId { get; set; }
+        public Guid? MarshalId { get; set; }
 
         public string ?Selectedclient { get; set; }
         public string Status { get; set; }
