@@ -1,33 +1,30 @@
 ﻿using EvictionFiler.Domain.Entities.Base.Base;
-using EvictionFiler.Domain.Entities.Master;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.DTOs.RemainderCenterDto
 {
     public class CreateToRemainderCenterDto : DeletableBaseEntity
     {
-        public string CaseCode{ get; set; } = string.Empty;
+        public string CaseCode { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Case is required.")]
         public Guid? CaseId { get; set; }
+
+        [Required(ErrorMessage = "Tenant is required.")]
         public Guid? TenantId { get; set; }
         public string? TenantName { get; set; }
 
+        [Required(ErrorMessage = "County is required.")]
         public Guid? CountyId { get; set; }
         public string? CountyName { get; set; }
 
         public string? Index { get; set; }
-
         public string? RemainderTypeName { get; set; }
+        [Required(ErrorMessage = "Type is required.")]
         public Guid? RemainderTypeId { get; set; }
-      
+
         public DateTime? When { get; set; }
 
-     
+
         public string? Notes { get; set; }
     }
 }

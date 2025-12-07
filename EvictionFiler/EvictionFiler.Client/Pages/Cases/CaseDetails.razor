@@ -10,6 +10,7 @@
 @using EvictionFiler.Application.DTOs.FormTypeDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
+@using EvictionFiler.Application.DTOs.MarshalsDto
 @using EvictionFiler.Application.DTOs.OccupantDto
 @using EvictionFiler.Application.DTOs.TenantDto
 @using EvictionFiler.Application.Interfaces.IRepository
@@ -41,6 +42,7 @@
 @inject ILegalCaseService _CaseService
 @inject IFeesCatalogService _feeCatalogService
 @inject IToastService ToastService
+@inject IMarshalService _marshalService
 @inject IJSRuntime JS
 @inject ICourtpartServices courtpartService
 @using Microsoft.AspNetCore.Authorization
@@ -568,7 +570,14 @@
         color: red;
     }
 
-    
+    .search-box { width: 100%; padding-right: 3rem; /* space for the button */ padding-left: 1rem; /* border-radius: 1.5rem; */ border: 2px solid #020336; background-color: #FFF; /* dark background */ color: black; height: 2.5rem; font-size: 14px; }
+
+        .search-box::placeholder { color: darkgrey; }
+
+        .search-box:focus { border: 2px solid #020336 !important; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2); background: #F5F5F5; }
+    .search-btn { position: absolute; right: 1.7rem; top: 50%; transform: translateY(-50%); border: none; background: none; color: #020336; cursor: pointer; padding: 0; font-size: 1.2rem; }
+
+        .search-btn:hover { color: #1F365D; }
 
    
     
@@ -788,7 +797,7 @@
                                 </li>
 
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="Warrant-tab" data-bs-toggle="tab" data-bs-target="#Warrant" type="button" role="tab" aria-controls="Warrant" aria-selected="false">Warrant</button>
+                                    <button class="nav-link" id="warrant-tab" data-bs-toggle="tab" data-bs-target="#warrant" type="button" role="tab" aria-controls="warrant" aria-selected="false">Warrant</button>
                                 </li>
                                 
                             </ul>
@@ -901,6 +910,87 @@
                                         <div class="text-secondary small mx-2">--</div>
                                         <div class="fw-semibold mx-2">Warrant/Enforcement</div>
                                         <div class="text-secondary small mx-2">To be requested if applicable</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Warrant -->
+                            <div class="tab-pane fade" id="warrant" role="tabpanel" aria-labelledby="warrant-tab">
+                                <div class="row mb-3 d-flex align-items-center">
+
+                                    <div class="fw-semibold col-12">Assign Marshal</div>
+                                </div>
+                                <div class="row mt-2">
+
+                                    <div class="col-6 position-relative" @onfocusout="HideMarshalDropDown">
+
+                                        @if (!isMarshalAssigned)
+                                        {
+                                            <!-- Search Box -->
+
+                                            <InputText class="form-control search-box" placeholder="Search by marshal name.." @bind-value="searchmarshalText" @oninput="OnSearchMarshalInput"
+                                                       @onclick="ShowAllmarshal" />
+                                            <button class="search-btn" type="button">
+                                                <i class="fa fa-search"></i>
+                                            </button>
+
+
+
+
+                                            @if (filteredmarshal?.Any() == true)
+                                            {
+                                                <ul class="dropdown-menu show" style="position:absolute; width:94%; cursor:pointer;">
+                                                    @foreach (var c in filteredmarshal)
+                                                    {
+                                                        <li class="dropdown-item" @onclick="() => Selectedmarshal(c)">
+                                                            @c.FirstName  @c.LastName
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            <!-- Selected Marshal -->
+                                            <label class="form-control bg-light fw-bold d-flex align-items-center">
+                                                @(selectedmarshal != null ? selectedmarshal.FirstName + " " + selectedmarshal.LastName : "")
+                                            </label>
+
+                                        }
+
+                                    </div>
+
+                                    <div class="col-6">
+                                        @if (!isMarshalAssigned)
+                                        {
+                                            <button class="btn bg-brand-primary base text-white" @onclick="SubmitMarshal">Assign</button>
+
+                                        }
+                                        else
+                                        {
+                                            <button class="btn bg-brand-primary base text-white" @onclick="ResetMarshal">Reset</button>
+                                            
+                                        }
+
+
+                                        <button class="btn bg-brand-primary base text-white ms-2"
+                                                @onclick="GenrateMarshalForm"
+                                                disabled="@(isMarshalAssigned == false)">
+                                            Generate
+                                        </button>
+
+
+                                    </div>
+                                   
+
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-12">
+                                        @if (showMarshalError)
+                                        {
+                                            <div class="text-danger small mt-1">Please select a marshal.</div>
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -1852,6 +1942,15 @@
     public List<CourtDto> courts = new();
     public List<CourtDto> filteredCourts = new List<CourtDto>();
     public List<CourtPartDto> filteredCourtsPart = new List<CourtPartDto>();
+    private List<MarshalDto> filteredmarshal = new();
+    private MarshalDto selectedmarshal;
+    private string searchmarshalText;
+    private CancellationTokenSource _cts;
+    private bool isMarshalAssigned = false;
+    [Parameter] public GenrateNoticeModel createAction { get; set; } = new();
+    private bool showMarshalError = false;
+    [Parameter] public EventCallback OnFormCreate { get; set; } = new();
+   
 
     protected override async Task OnInitializedAsync()
     {
@@ -1879,6 +1978,7 @@
             filteredCourts = courts;
         }
 
+       
         spinnerservice.Show();
         await LoadCaseDetails();
         await LoadCaseForms();
@@ -1888,6 +1988,160 @@
         StartProgressAnimation();
         StateHasChanged();
         spinnerservice.Hide();
+    }
+
+
+    async Task HideMarshalDropDown(FocusEventArgs e)
+    {
+        // Small delay to allow click on dropdown item to register before hiding
+        await Task.Delay(500);
+        if (filteredmarshal.Any())
+        {
+            filteredmarshal.Clear();
+
+        }
+        StateHasChanged();
+    }
+
+    private async Task OnSearchMarshalInput(ChangeEventArgs e)
+    {
+        searchmarshalText = e.Value?.ToString() ?? "";
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        try
+        {
+
+            await Task.Delay(300, _cts.Token);
+            // ⭐ Empty input → load all tenants (ONLY here)
+            if (string.IsNullOrWhiteSpace(searchmarshalText))
+            {
+                await ShowAllmarshal();
+                return;
+            }
+
+            // ⭐ 1st & 2nd character → DO NOTHING (keep list unchanged)
+            if (searchmarshalText.Length < 3)
+            {
+                // ❗ No reload here (important)
+                return;
+            }
+
+            else
+            {
+                // ⭐ 3+ characters → server search
+
+                filteredmarshal = await _marshalService.SearchMarshalbyname(searchmarshalText);
+            }
+
+        }
+        catch (TaskCanceledException)
+        {
+            // Old task cancelled → ignore
+        }
+
+    }
+
+    private async void Selectedmarshal(MarshalDto marshal)
+    {
+
+        selectedmarshal = marshal;
+        // searchmarshalText = marshal.Name!;
+        searchmarshalText = $"{marshal.FirstName} {marshal.LastName}";
+
+
+        legalcaseDto.MarshalId = marshal.Id;
+
+
+        filteredmarshal?.Clear();
+        // isMarshalAssigned = true;
+
+        StateHasChanged();
+
+
+    }
+
+    
+
+    private void ResetMarshal()
+    {
+        spinnerservice.Show();
+        isMarshalAssigned = false;
+        selectedmarshal = null;
+        legalcaseDto.MarshalId = null;     // Marshal unassign
+        searchmarshalText = "";            // Clear search box
+        filteredmarshal?.Clear();
+        showMarshalError = false;// Clear list
+
+        StateHasChanged();
+        spinnerservice.Hide();
+    }
+
+    private async Task GenrateMarshalForm() 
+    {
+   
+        spinnerservice.Show();     
+        if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty)
+        {
+            bool success = false;
+
+           
+                // CREATE new notice
+            success = await CaseFormRepository.GenerateWarrantNoticeAsync(
+                    CurrentCaseId.Value,
+                    "Request for Warrant (CIV-LT-100)",
+                    // "Written Demand to Terminate (move out)",
+                       Guid.Parse(loggedInUserId)
+                );
+
+                if (success)
+                {
+                    ToastService.ShowSuccess("Warrant Notice  has been generated successfully!");
+                await LoadCaseForms();
+                   await JS.InvokeVoidAsync("openTab", "activity");
+                }
+            }
+
+         
+        
+        
+
+        spinnerservice.Hide();
+    
+    }
+
+    private async Task SubmitMarshal()
+    {
+        showMarshalError = false; // reset old errors
+
+        if (legalcaseDto.MarshalId == null || legalcaseDto.MarshalId == Guid.Empty)
+        {
+            showMarshalError = true;
+            StateHasChanged();
+            return;
+        }
+        spinnerservice.Show();
+
+        var result = await _service.UpdateMarshalAsync(legalcaseDto);
+
+        if (result)
+        {
+            ToastService.ShowSuccess("Marshal Assign  successfully!");
+            // await LoadCaseDetails();
+            isMarshalAssigned = true;
+        }
+        else
+        {
+            ToastService.ShowError("Failed to asign Marshal .");
+        }
+        StateHasChanged();
+        spinnerservice.Hide();
+
+    }
+
+    private async Task ShowAllmarshal()
+    {
+        filteredmarshal = (await _marshalService.GetAllMarshalAsync()).ToList();
+        StateHasChanged(); // UI refresh karega
     }
     private async Task OnFocusOutCourt(FocusEventArgs e)
     {
@@ -1967,6 +2221,17 @@
     private async Task LoadCaseDetails()
     {
         legalcaseDto = await _service.GetCaseByIdAsync(caseId);
+        if (legalcaseDto.MarshalId != null && legalcaseDto.MarshalId != Guid.Empty)
+        {
+            selectedmarshal = await _marshalService.GetMarshalByIdAsync(legalcaseDto.MarshalId.Value);
+            isMarshalAssigned = true;
+        }
+        else
+        {
+            isMarshalAssigned = false;
+            selectedmarshal = null;
+            searchmarshalText = string.Empty;
+        }
         if (legalcaseDto != null && legalcaseDto.CaseTypeId != null)
         {
             FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
@@ -2018,6 +2283,7 @@
                 ZipCode = legalcaseDto.ZipCode,
                 ClientEmail = legalcaseDto.ClientEmail,
                 ClientPhone = legalcaseDto.ClientPhone,
+                MarshalId = legalcaseDto.MarshalId,
 
                 // Landlord
                 FullName = legalcaseDto.FullName,

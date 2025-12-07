@@ -1,4 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.MarshalsDto;
+using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Domain.Entities;
@@ -22,7 +23,9 @@ namespace EvictionFiler.Application.Services
             return new MarshalDto
             {
                 Id = entity.Id,
-                Name = entity.Name,
+                FirstName = entity.FirstName,
+                LastName = entity.LastName,
+                Email = entity.Email,
                 BadgeNumber = entity.BadgeNumber,
                 Telephone = entity.Telephone,
                 Fax = entity.Fax,
@@ -31,6 +34,11 @@ namespace EvictionFiler.Application.Services
 
         }
 
+        public async Task<List<MarshalDto>> SearchMarshalbyname(string name)
+        {
+            var newmarshal = await _marshalRepo.SearchMarshalbyname(name);
+            return newmarshal;
+        }
         public async Task<IEnumerable<MarshalDto>> GetAllMarshalAsync()
         {
             var entities = await _marshalRepo.GetAllMarshalAsync();
@@ -38,7 +46,9 @@ namespace EvictionFiler.Application.Services
             return entities.Select(e => new MarshalDto
             {
                 Id = e.Id,
-                Name = e.Name,
+                FirstName = e.FirstName,
+                LastName = e.LastName,
+                Email = e.Email,
                 BadgeNumber = e.BadgeNumber,
                 Telephone = e.Telephone,
                 Fax = e.Fax,
@@ -51,7 +61,9 @@ namespace EvictionFiler.Application.Services
             var entity = new Marshal
             {
                 Id = Guid.NewGuid(),
-                Name = dto.Name,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Email = dto.Email,
                 BadgeNumber = dto.BadgeNumber,
                 Telephone = dto.Telephone,
                 Fax = dto.Fax,
@@ -63,7 +75,9 @@ namespace EvictionFiler.Application.Services
             return new MarshalDto
             {
                 Id = saved.Id,
-                Name = saved.Name,
+                FirstName = saved.FirstName,
+                LastName = saved.LastName,
+                Email = saved.Email,
                 BadgeNumber = saved.BadgeNumber,
                 Telephone = saved.Telephone,
                 Fax = saved.Fax,
@@ -75,7 +89,9 @@ namespace EvictionFiler.Application.Services
             var entity = new Marshal
             {
                 Id = dto.Id,
-                Name = dto.Name,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Email = dto.Email,
                 BadgeNumber = dto.BadgeNumber,
                 Telephone = dto.Telephone,
                 Fax = dto.Fax,
@@ -87,7 +103,9 @@ namespace EvictionFiler.Application.Services
             return new MarshalDto
             {
                 Id = updated.Id,
-                Name = updated.Name,
+                FirstName = updated.FirstName,
+                LastName = updated.LastName,
+                Email = updated.Email,
                 BadgeNumber = updated.BadgeNumber,
                 Telephone = updated.Telephone,
                 Fax = updated.Fax,

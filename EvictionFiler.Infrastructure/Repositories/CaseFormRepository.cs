@@ -29,7 +29,129 @@ namespace EvictionFiler.Infrastructure.Repositories
             _config = config;
         }
 
-        
+        public async Task<bool> GenerateWarrantNoticeAsync(Guid legalCaseId, string formTypeName, Guid createdBy)
+        {
+            try
+            {
+                string logFile = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "pdf_errors.log");
+
+                void Log(string msg)
+                {
+                    File.AppendAllText(logFile, $"[{DateTime.UtcNow}] {msg}\n");
+                    Console.WriteLine(msg);
+                }
+
+                Log("=== GenerateNoticeAsync STARTED ===");
+
+                // --------------------
+                // LOAD TEMPLATE
+                // --------------------
+                var template = await _context.MstFormTypes
+    .Where(f => f.Name.Trim().ToLower() == formTypeName.Trim().ToLower())
+
+       .Select(f => new { f.HTML, f.Id, f.Name })
+       .FirstOrDefaultAsync();
+
+                if (template == null)
+                    throw new Exception("Form Type not found by name.");
+
+                var caseDetails = await (
+                 from lc in _context.LegalCases
+                 
+                 where lc.Id == legalCaseId
+
+                 select new
+                 {
+                     CaseCode = lc.Casecode,
+                    
+                 }
+             ).FirstOrDefaultAsync();
+
+                if (caseDetails == null)
+                    throw new Exception("Case details not found.");
+
+
+                string filledHtml = template.HTML;
+  
+
+                // ----------------------------------------------------------------------
+                // ADD CSS TO REMOVE SCROLLBARS (IRONPDF limitation fix)
+                // ----------------------------------------------------------------------
+                string cssPatch = @"
+        <style>
+            html, body { overflow: visible !important; height: auto !important; }
+            * { overflow: visible !important; }
+        </style>
+    ";
+
+                filledHtml = filledHtml.Replace("</head>", cssPatch + "</head>");
+
+                // --------------------
+                // CREATE FOLDER
+                // --------------------
+                string root = Directory.GetCurrentDirectory();
+                string caseFolder = Path.Combine(root, "CaseForms", caseDetails.CaseCode);
+                Directory.CreateDirectory(caseFolder);
+
+                string fileName = $"{Guid.NewGuid()}.pdf";
+                string filePath = Path.Combine(caseFolder, fileName);
+
+                // --------------------
+                // IRONPDF GENERATION
+                // --------------------
+                Log("IronPDF Rendering Start...");
+
+                var renderer = new ChromePdfRenderer();
+                renderer.RenderingOptions.MarginTop = 0;
+                renderer.RenderingOptions.MarginBottom = 0;
+                renderer.RenderingOptions.MarginLeft = 0;
+                renderer.RenderingOptions.MarginRight = 0;
+               
+                renderer.RenderingOptions.EnableJavaScript = true;
+                renderer.RenderingOptions.Timeout = 60000; // 60 seconds
+               
+                renderer.RenderingOptions.PaperSize = IronPdf.Rendering.PdfPaperSize.A4;
+
+                // Convert HTML → PDF
+                await Task.Delay(200);
+                var pdf = renderer.RenderHtmlAsPdf(filledHtml);
+
+                Log("IronPDF Rendering Success.");
+
+                pdf.SaveAs(filePath);
+                Log($"PDF Saved: {filePath}");
+                // --------------------
+                // SAVE DB ENTRY
+                // --------------------
+                var caseForm = new CaseForms
+                {
+                    Id = Guid.NewGuid(),
+                    LegalCaseId = legalCaseId,
+                    FormTypeId = template.Id,
+                    HTML = filledHtml,
+                    File = $"/CaseForms/{caseDetails.CaseCode}/{fileName}",
+                    CreatedOn = DateTime.UtcNow,
+                    CreatedBy = createdBy,
+                    IsDeleted = false
+                };
+
+                _context.CaseForms.Add(caseForm);
+                await _context.SaveChangesAsync();
+
+                Log("DB Save Success.");
+                Log("=== GenerateNoticeAsync COMPLETED ===");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                string finalLog = $"ERROR in GenerateNoticeAsync: {ex}";
+                File.AppendAllText(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "pdf_errors.log"), finalLog);
+                Console.WriteLine(finalLog);
+                return false;
+            }
+        }
+
         public async Task<bool> GenerateNoticeAsync(Guid legalCaseId, Guid formTypeId, Guid createdBy)
         {
             try
