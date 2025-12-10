@@ -28,6 +28,10 @@ namespace EvictionFiler.Domain.Entities
         [ForeignKey("CountyId")]
         public County? County { get; set; }
 
+        public Guid? CourtTypeId { get; set; }
+        [ForeignKey("CourtTypeId")]
+        public CourtType? CourtTypes { get; set; }
+
         public ICollection<CourtPart> CourtParts { get; set; } = new List<CourtPart>();
     }
 }

@@ -61,6 +61,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 await SeedServiceMethod(context);
                 await SeedSubCaseType(context);
                 await SeedCities(context);
+                await SeedCourtType(context);
                 await context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -88,6 +89,17 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 if (context.MstSubCaseTypes.FirstOrDefault(d => d.Name == type.Name) == null)
                 {
                     await context.MstSubCaseTypes.AddAsync(type);
+                }
+            }
+        }
+        private static async Task SeedCourtType(MainDbContext context)
+        {
+            var casetypes = InitialDataGenerator.GetCourtTypes();
+            foreach (var type in casetypes)
+            {
+                if (context.MstCourtType.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstCourtType.AddAsync(type);
                 }
             }
         }

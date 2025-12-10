@@ -77,6 +77,9 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<Marshal> Marshal { get; set; }
         public DbSet<SubCaseType> MstSubCaseTypes { get; set; }
         public DbSet<City> MstCities { get; set; }
+        public DbSet<CourtType> MstCourtType { get; set; }
+        public DbSet<CaseAdditionalPetitioner> CaseAdditionalPetitioners { get; set; }
+        public DbSet<CaseAdditionalRespondent> CaseAdditionalResondents { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

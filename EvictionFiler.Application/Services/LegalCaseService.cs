@@ -47,7 +47,10 @@ namespace EvictionFiler.Application.Services
         private readonly IServiceMethodRepository _serviceMethod;
         private readonly ICityRepository _cityRepository;
         private readonly ISubCaseTypeRepository _subCaseTypeRepository;
-        public LegalCaseService(ICasesRepository repository, ICityRepository cityRepository, ISubCaseTypeRepository subCaseTypeRepository, IServiceMethodRepository serviceMethod, IFilingMethodRepository filingMethod, IArrearLedgerRepository arrearLedger, IReportingTypePerDiemRepository reportingTypePerDiemRepository, IDocumentIntructionsTypesRepository documentIntructionsTypesRepository, IAppearanceTypePerDiemRepository appearanceTypePerDiemRepository, ICaseTypePerDiemRepository caseTypePerDiemRepository, ICaseDocument caseDocument, IReliefPetitionerTypeRepository reliefPetitionerTypeRepository, IReliefRespondenTypeRepository reliefRespondenTypeRepository, IAppearanceTypeRepository appearanceTypeRepository, IDefenseTypeRepository defenseTypeRepository, IHarassmentTypeRepository harassmentTypeRepository, ICaseTypeHPDRepository caseTypeHPDRepository, ITenantRepository tenantRepo, ILandLordRepository landlordrepo, ICaseTypeRepository caseTypeRepository, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
+        private readonly ICourtTypeRepository _courtTypeRepository;
+        private readonly ICaseRespondentRepository _respondantRepository;
+        private readonly ICasePetitionerRepository _petitionerRepository;
+        public LegalCaseService(ICasesRepository repository, ICaseRespondentRepository respondantRepository, ICasePetitionerRepository petitionerRepository, ICourtTypeRepository courtTypeRepository, ICityRepository cityRepository, ISubCaseTypeRepository subCaseTypeRepository, IServiceMethodRepository serviceMethod, IFilingMethodRepository filingMethod, IArrearLedgerRepository arrearLedger, IReportingTypePerDiemRepository reportingTypePerDiemRepository, IDocumentIntructionsTypesRepository documentIntructionsTypesRepository, IAppearanceTypePerDiemRepository appearanceTypePerDiemRepository, ICaseTypePerDiemRepository caseTypePerDiemRepository, ICaseDocument caseDocument, IReliefPetitionerTypeRepository reliefPetitionerTypeRepository, IReliefRespondenTypeRepository reliefRespondenTypeRepository, IAppearanceTypeRepository appearanceTypeRepository, IDefenseTypeRepository defenseTypeRepository, IHarassmentTypeRepository harassmentTypeRepository, ICaseTypeHPDRepository caseTypeHPDRepository, ITenantRepository tenantRepo, ILandLordRepository landlordrepo, ICaseTypeRepository caseTypeRepository, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
         {
             _repository = repository;
             _tenantRepo = tenantRepo;
@@ -71,7 +74,10 @@ namespace EvictionFiler.Application.Services
             _filingMethod = filingMethod;
             _serviceMethod = serviceMethod;
             _cityRepository = cityRepository;
-            _subCaseTypeRepository  = subCaseTypeRepository;
+            _subCaseTypeRepository = subCaseTypeRepository;
+            _courtTypeRepository = courtTypeRepository;
+            _respondantRepository = respondantRepository;
+            _petitionerRepository = petitionerRepository;
 
         }
 
@@ -1171,7 +1177,7 @@ namespace EvictionFiler.Application.Services
             // Pehle existing legal case fields update karo (already hai)
             existing.TenantId = legalCase.TenantId;
             existing.ClientId = legalCase.ClientId;
-            
+
             existing.ReasonHoldoverId = legalCase.ReasonHoldoverId;
             existing.ExplainDescription = legalCase.ExplainDescription;
             existing.ReasonDescription = legalCase.ReasonDescription;
@@ -1295,6 +1301,12 @@ namespace EvictionFiler.Application.Services
             return returnlist;
         }
 
+        public async Task<IEnumerable<CourtType>> CourtTypeList()
+        {
+            var doclist = _courtTypeRepository.GetAllQuerable();
+            var returnlist = await doclist.OrderBy(e => e.Name).ToListAsync();
+            return returnlist;
+        }
         public async Task<bool> AddArrearLedgerAsync(List<ArrearLedgerDto> Ledger)
         {
             try
@@ -1363,6 +1375,32 @@ namespace EvictionFiler.Application.Services
             var doclist = _subCaseTypeRepository.GetAllQuerable();
             var returnlist = await doclist.OrderBy(e => e.Name).ToListAsync();
             return returnlist;
+        }
+
+        public async Task<bool> AddAdditionalrespondent(List<CaseAdditionalRespondent> respondent)
+        {
+            await _respondantRepository.AddRangeAsync(respondent);
+            return await _unitOfWork.SaveChangesAsync() > 0;
+        }
+
+        public async Task<List<CaseAdditionalRespondent>> GetAdditionalrespondent(Guid respondentid)
+        {
+            var respondant = _respondantRepository.GetAllQuerable();
+            var result = await respondant.Where(e => e.LandlordId == respondentid).ToListAsync();
+            return result;
+        }
+
+        public async Task<List<CaseAdditionalPetitioner>> GetAdditionalpetitioner(Guid Petitionerid)
+        {
+            var respondant = _petitionerRepository.GetAllQuerable();
+            var result = await respondant.Where(e => e.TenantId == Petitionerid).ToListAsync();
+            return result;
+        }
+
+        public async Task<bool> AddAdditionalpetitioner(List<CaseAdditionalPetitioner> petitioner)
+        {
+            await _petitionerRepository.AddRangeAsync(petitioner);
+            return await _unitOfWork.SaveChangesAsync() > 0;
         }
     }
 

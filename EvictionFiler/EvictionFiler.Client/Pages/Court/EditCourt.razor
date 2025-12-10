@@ -7,6 +7,8 @@
 @inject ICourtService courtService
 @inject ICourtpartServices courtpartService
 @inject ICaseTypeRepository CaseTypeRepository
+@inject ILegalCaseService LegalCaseService
+
 @inject SpinnerService spinnerservice
 @inject IJSRuntime JS
 
@@ -64,10 +66,21 @@ aria-labelledby="editCourtLabel">
                         <ValidationSummary />
 
                         <div class="row">
-                            <div class="col-4 mb-3">
+                           @*  <div class="col-3 mb-3">
+                                <label class="form-label color-text required-label">Court Type</label>
+                                <InputSelect class="form-select" @bind-Value="courtDto.CourtTypeId" style="cursor:pointer;">
+                                    <option value="emptyGuid">-- Select Type --</option>
+                                    @foreach (var l in AllCourtType)
+                                    {
+                                        <option value="@l.Id">@l.Name</option>
+                                    }
+                                </InputSelect>
+
+                            </div> *@
+                            <div class="col-3 mb-3">
                                 <label class="form-label color-text required-label">County</label>
                                 <InputSelect class="form-select" @bind-Value="courtDto.CountyId" style="cursor:pointer;">
-                                    <option value="emptyGuid">-- Select Type --</option>
+                                    <option value="emptyGuid">-- Select County --</option>
                                     @foreach (var l in AllCounty)
                                     {
                                         <option value="@l.Id">@l.Name</option>
@@ -75,7 +88,7 @@ aria-labelledby="editCourtLabel">
                                 </InputSelect>
 
                             </div>
-                            <div class=" col-8 mb-3">
+                            <div class=" col-6 mb-3">
                                 <label class="form-label color-text required-label">Court Name</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fa fa-landmark color-text"></i></span>
@@ -315,6 +328,8 @@ aria-labelledby="editCourtLabel">
     [Parameter] public CourtDto courtDto { get; set; } = new CourtDto();
     [Parameter] public EventCallback<CourtDto> OnSubmit { get; set; }
     private List<County> AllCounty = new List<County>();
+    private IEnumerable<CourtType> AllCourtType = new List<CourtType>();
+
     private bool IsVisible { get; set; } = false;
 
     public async void Show(CourtDto model)
@@ -322,6 +337,8 @@ aria-labelledby="editCourtLabel">
         spinnerservice.Show();
         await Task.Delay(500);
         AllCounty = await CaseTypeRepository.GetAllCounty();
+        AllCourtType = await LegalCaseService.CourtTypeList();
+
         courtDto = new CourtDto
             {
                 Id = model.Id,
@@ -335,7 +352,8 @@ aria-labelledby="editCourtLabel">
             // VirtualLink = model.VirtualLink,
             // Judge = model.Judge,
             // CallIn = model.CallIn
-                CountyId = model.CountyId
+                CountyId = model.CountyId,
+                CourtTypeId = model.CourtTypeId
             };
 
         saveCourtpartList = model.CourtPart;

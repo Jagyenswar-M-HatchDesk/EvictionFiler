@@ -42,6 +42,7 @@ namespace EvictionFiler.Application.Services
                 Judge = c.Judge,
                 Part = c.Part,
                 VirtualLink = c.VirtualLink,
+                CourtId = c.CourtId,
 
             }).ToList();
 

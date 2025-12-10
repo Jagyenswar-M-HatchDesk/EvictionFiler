@@ -28,6 +28,16 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new SubCaseType() { Name = "Residential Cases", CreatedOn = now },
             };
         }
+        public static IEnumerable<CourtType> GetCourtTypes()
+        {
+            var now = DateTime.UtcNow;
+            return new List<CourtType>
+            {
+                new CourtType() { Name = "Nassau Courts", CreatedOn = now },
+                new CourtType() { Name = "NYC Courts", CreatedOn = now },
+                new CourtType() { Name = "Westchester Courts", CreatedOn = now },
+            };
+        }
         public static IEnumerable<City> GetCities()
         {
             var now = DateTime.UtcNow;
@@ -101,6 +111,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new CaseType() { Name = "NonPayment", CreatedOn = now },
                 new CaseType() { Name = "HPD", CreatedOn = now },
                 new CaseType() { Name = "Per Diem", CreatedOn = now },
+                new CaseType() { Name = "Illegal Lockout", CreatedOn = now },
             };
         }
 
@@ -345,7 +356,6 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new County() { Name = "Queens", CreatedOn = now },
                 new County() { Name = "Bronx", CreatedOn = now },
                 new County() { Name = "Richmond", CreatedOn = now },
-
             };
         }
        

@@ -44,25 +44,43 @@ namespace EvictionFiler.Domian.Enums
         Party = 2,
         Building = 3,
         Petitioner = 4,
-        Respondent= 5,
+        Respondent = 5,
         Appearance = 6,
         Relief = 7,
         Billing = 8,
+        Review = 9,
+
+    }
+
+    public enum StepIllegalLockout
+    {
+        CaseAndclient = 0,
+        //Attorney = 1,
+        CaseInfo = 1,
+        Party = 2,
+        Building = 3,
+        Petitioner = 4,
+        Respondent = 5,
+        Appearance = 6,
+        Relief = 7,
+        Billing = 8,
+        Review = 9,
 
     }
 
     public enum StepPerDiem
     {
         CaseAndclient = 0,
-        Attorney = 1,
-        CaseInfo = 2,
-        Party = 3,
-        Appearance = 4,
-        Background = 5,
-        Document = 6,
-        Reporting = 7,
-        Billing = 8,
-        Acknowledgment = 9,
+        //Attorney = 1,
+        CaseInfo = 1,
+        //Party = 2,
+        //Appearance = 3,
+        Background = 2,
+        Document = 3,
+        Reporting = 4,
+        Billing = 5,
+        //Acknowledgment = 9,
+
     }
 
 

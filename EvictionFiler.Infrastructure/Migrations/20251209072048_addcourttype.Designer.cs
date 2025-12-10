@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251209072048_addcourttype")]
+    partial class addcourttype
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -437,102 +440,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasIndex("CourtPartId");
 
                     b.ToTable("Calanders");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseAdditionalPetitioner", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid?>("LegalcaseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LegalcaseId");
-
-                    b.HasIndex("TenantId");
-
-                    b.ToTable("CaseAdditionalPetitioners");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseAdditionalRespondent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("DateTime");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid?>("LandlordId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("LegalcaseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LandlordId");
-
-                    b.HasIndex("LegalcaseId");
-
-                    b.ToTable("CaseAdditionalResondents");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseDocument", b =>
@@ -4324,36 +4231,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Navigation("County");
 
                     b.Navigation("CourtPart");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseAdditionalPetitioner", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.LegalCase", "LegalCase")
-                        .WithMany()
-                        .HasForeignKey("LegalcaseId");
-
-                    b.HasOne("EvictionFiler.Domain.Entities.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId");
-
-                    b.Navigation("LegalCase");
-
-                    b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseAdditionalRespondent", b =>
-                {
-                    b.HasOne("EvictionFiler.Domain.Entities.LandLord", "LandLord")
-                        .WithMany()
-                        .HasForeignKey("LandlordId");
-
-                    b.HasOne("EvictionFiler.Domain.Entities.LegalCase", "LegalCase")
-                        .WithMany()
-                        .HasForeignKey("LegalcaseId");
-
-                    b.Navigation("LandLord");
-
-                    b.Navigation("LegalCase");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseDocument", b =>

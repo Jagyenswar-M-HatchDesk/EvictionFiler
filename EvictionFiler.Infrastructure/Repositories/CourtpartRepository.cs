@@ -25,7 +25,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<CourtPart>> GetAllCourtDataAsync()
         {
-            return await _mainDbContext.CourtPart.ToListAsync();
+            return await _mainDbContext.CourtPart.Include(e=>e.Courts).ToListAsync();
         }
         public async Task<PaginationDto<CourtPart>> GetPagedCourtsAsync(int pageNumber, int pageSize, string searchTerm)
         {

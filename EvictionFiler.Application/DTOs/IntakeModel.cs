@@ -85,6 +85,7 @@ namespace EvictionFiler.Application.DTOs
         public DateOnly? DateTenantMoved { get; set; }
         public Guid? RentDueEachMonthOrWeekId { get; set; }
         public Guid? NoticeId { get; set; }
+        public Guid? CourtTypeId { get; set; }
         public bool leasedAttached { get; set; } = false;
         public bool ledgerAttached { get; set; } = false;
         public bool NoticeproofAttached { get; set; } = false;

@@ -26,11 +26,11 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<Courts>> GetAllCourtDataAsync()
         {
-            return await _mainDbContext.Courts.Include(e => e.CourtParts).OrderBy(e=>e.Court).Take(10).ToListAsync();
+            return await _mainDbContext.Courts.Include(e => e.CourtParts).Include(e=>e.County).OrderBy(e=>e.Court).Take(10).ToListAsync();
         }
         public async Task<PaginationDto<Courts>> GetPagedCourtsAsync(int pageNumber, int pageSize, string searchTerm)
         {
-            var query = _mainDbContext.Courts.Include(e=>e.County).Include(e=>e.CourtParts).AsQueryable();
+            var query = _mainDbContext.Courts.Include(e=>e.County).Include(e => e.CourtTypes).Include(e=>e.CourtParts).AsQueryable();
 
             // Optional search
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -73,6 +73,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 //Judge = courtInfosDto.Judge,
                 //Part = courtInfosDto.Part,
                 CountyId = courtInfosDto.CountyId,
+                CourtTypeId = courtInfosDto.CourtTypeId,
             };
 
            var court = _mainDbContext.Courts.Add(entity);
@@ -84,7 +85,7 @@ namespace EvictionFiler.Infrastructure.Repositories
         public async Task<Courts> GetCourtByIdAsync(Guid id)
         {
 
-            return await _mainDbContext.Courts.Include(e=>e.CourtParts).Where(e=>e.Id == id).FirstOrDefaultAsync();
+            return await _mainDbContext.Courts.Include(e=>e.CourtParts).Include(e => e.County).Include(e=>e.CourtTypes).Where(e=>e.Id == id).FirstOrDefaultAsync();
 
 
         }
@@ -117,6 +118,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     //Part = c.Part,
                     //VirtualLink = c.VirtualLink,
                     CountyId = c.CountyId,
+                    CourtTypeId = c.CourtTypeId,
                     CourtPart = c.CourtParts.Select(e => new CourtPartDto
                     {
                         Id = e.Id,
@@ -139,6 +141,8 @@ namespace EvictionFiler.Infrastructure.Repositories
             if (entity == null) return false;
 
             entity.Court = dto.Court;
+            entity.CourtTypeId = dto.CourtTypeId;
+            entity.CountyId = dto.CountyId;
             entity.Address = dto.Address;
             entity.Phone = dto.Phone;
             entity.Notes = dto.Notes;

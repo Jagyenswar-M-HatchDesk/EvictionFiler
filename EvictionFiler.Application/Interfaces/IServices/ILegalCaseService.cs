@@ -45,6 +45,13 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<bool> DeleteArrearLedger(Guid Id);
         Task<IEnumerable<SubCaseType>> GetSubCaseList();
         Task<IEnumerable<City>> GetAllCitiesList();
+        Task<IEnumerable<CourtType>> CourtTypeList();
+
+        Task<bool> AddAdditionalrespondent(List<CaseAdditionalRespondent> respondent);
+        Task<bool> AddAdditionalpetitioner(List<CaseAdditionalPetitioner> petitioner);
+
+        Task<List<CaseAdditionalRespondent>> GetAdditionalrespondent(Guid respondentid);
+        Task<List<CaseAdditionalPetitioner>> GetAdditionalpetitioner(Guid Petitionerid);
 
     }
 }
