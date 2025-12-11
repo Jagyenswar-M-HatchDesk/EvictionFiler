@@ -600,6 +600,8 @@ namespace EvictionFiler.Application.Services
                         CountyId = caseEntity.CourtLocation?.CountyId,
                         CountyName = caseEntity.CourtLocation?.County?.Name ?? string.Empty,
 
+                        
+
                         ArrearLedgers = caseEntity.ArrearLedgers != null ? caseEntity.ArrearLedgers.Select(e => new ArrearLedgerDto()
                         {
                             Id = e.Id,
@@ -952,6 +954,14 @@ namespace EvictionFiler.Application.Services
                 existingCase.NoticeId = legalCase.NoticeId;
                 existingCase.ServiceMethodId = legalCase.ServiceMethodId;
                 existingCase.CourtLocationId = legalCase.CourtLocationId;
+
+
+                existingCase.GoodCauseExempt = legalCase.GoodCauseExempt;
+                existingCase.leasedAttached = legalCase.leasedAttached;
+                existingCase.ledgerAttached = legalCase.ledgerAttached;
+                existingCase.NoticeproofAttached = legalCase.NoticeproofAttached;
+                existingCase.RegistrationRentAttached = legalCase.RegistrationRentAttached;
+                existingCase.AdditionalComments = legalCase.AdditionalComments;
 
                 if (legalCase.PartyRepresentPerDiemId != null && legalCase.PartyRepresentPerDiemId != Guid.Empty)
                 {

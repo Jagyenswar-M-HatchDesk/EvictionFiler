@@ -66,6 +66,7 @@ namespace EvictionFiler.Application.DTOs
         public Guid? IsUnitIllegalId { get; set; }
         public string? IsUnitIllegalName { get; set; }
 
+        [Required]
         public Guid? TenancyTypeId { get; set; }
 
         public string? TenancyTypeName { get; set; }
@@ -79,7 +80,7 @@ namespace EvictionFiler.Application.DTOs
         public DateOnly? LastPaymentDate { get; set; }
         public DateOnly? PreferedFilingDate { get; set; }
         public double? LastPayment { get; set; }
-
+        [Required]
         public DateOnly? DateNoticeServed { get; set; }
         public bool? IsERAPPaymentReceived { get; set; }
         public DateOnly? DateTenantMoved { get; set; }

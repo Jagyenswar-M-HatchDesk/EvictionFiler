@@ -47,6 +47,7 @@
 @inject ICaseHearingService _caseHearingService
 @inject IMarshalService _marshalService
 @inject ILegalCaseService _caseService
+@inject ICaseTypeRepository CaseTypeRepository
 
 
 
@@ -98,10 +99,10 @@
     }
 
     /* .form-wrapper.hidden {
-                            transform: translateX(-100%);
-                            opacity: 0;
-                            pointer-events: none;
-                            } */
+                                                transform: translateX(-100%);
+                                                opacity: 0;
+                                                pointer-events: none;
+                                                } */
 
     .overlay-form {
         animation: slideIn 1.0s ease forwards;
@@ -283,15 +284,66 @@
         border-radius: 7px;
     }
     /* wwwroot/css/site.css ya aapke CSS file me add karo */
-    .blazored-toast-container { z-index: 20000 !important; /* Offcanvas se upar */ }
-    .search-box { width: 100%; padding-right: 3rem; /* space for the button */ padding-left: 1rem; /* border-radius: 1.5rem; */ border: 2px solid #020336; background-color: #FFF; /* dark background */ color: black; height: 2.5rem; font-size: 14px; }
+    .blazored-toast-container {
+        z-index: 20000 !important; /* Offcanvas se upar */
+    }
 
-        .search-box::placeholder { color: darkgrey; }
+    .search-box {
+        width: 100%;
+        padding-right: 3rem; /* space for the button */
+        padding-left: 1rem; /* border-radius: 1.5rem; */
+        border: 2px solid #020336;
+        background-color: #FFF; /* dark background */
+        color: black;
+        height: 2.5rem;
+        font-size: 14px;
+    }
 
-        .search-box:focus { border: 2px solid #020336 !important; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2); background: #F5F5F5; }
-    .search-btn { position: absolute; right: 1.7rem; top: 50%; transform: translateY(-50%); border: none; background: none; color: #020336; cursor: pointer; padding: 0; font-size: 1.2rem; }
+        .search-box::placeholder {
+            color: darkgrey;
+        }
 
-        .search-btn:hover { color: #1F365D; }
+        .search-box:focus {
+            border: 2px solid #020336 !important;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+            background: #F5F5F5;
+        }
+
+    .search-btn {
+        position: absolute;
+        right: 1.7rem;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: none;
+        color: #020336;
+        cursor: pointer;
+        padding: 0;
+        font-size: 1.2rem;
+    }
+
+        .search-btn:hover {
+            color: #1F365D;
+        }
+
+    .form-check-input {
+        border-color: black;
+        cursor: pointer;
+    }
+
+    .hint {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 4px
+    }
+
+    .rz-inputtext {
+        box-shadow: none !important;
+        min-height: 44px;
+        border-radius: 12px !important;
+    font-size: 16px !important;
+    }
+
 </style>
 @using System.Collections.Generic
 
@@ -327,7 +379,7 @@
                         </li>
 
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab"> Documents</button>
+                            <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab">Uploads</button>
                         </li>
 
                         <li class="nav-item" role="presentation">
@@ -337,6 +389,32 @@
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="hearing-tab" data-bs-toggle="tab" data-bs-target="#hearing" type="button" role="tab">Hearing</button>
                         </li>
+                        @if (legalcaseDto.CaseTypeName == "NonPayment")
+                        {
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="pedicate-tab" data-bs-toggle="tab" data-bs-target="#predicate" type="button" role="tab">Predicate Notice</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="remark-tab" data-bs-toggle="tab" data-bs-target="#remarks" type="button" role="tab">Document & Remarks</button>
+                            </li>
+
+                        }
+                        @if (legalcaseDto.CaseTypeName == "Holdover")
+                        {
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="remark-tab" data-bs-toggle="tab" data-bs-target="#remarks" type="button" role="tab">Document & Remarks</button>
+                            </li>
+
+                        }
+                        @if (legalcaseDto.CaseTypeName == "Per Diem")
+                        {
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="billing-tab" data-bs-toggle="tab" data-bs-target="#billing" type="button" role="tab">Billing</button>
+                            </li>
+
+                        }
+
+
                     </ul>
 
                     <div class="tab-content mb-3" id="actionTabsContent">
@@ -385,15 +463,15 @@
                                     @if (!isMarshalAssigned)
                                     {
                                         <!-- Search Box -->
-                                       
-                                            <InputText class="form-control search-box" placeholder="Search by marshal name.." @bind-value="searchmarshalText" @oninput="OnSearchMarshalInput"
-                                                       @onclick="ShowAllmarshal" />
-                                            <button class="search-btn" type="button">
-                                                <i class="fa fa-search"></i>
-                                            </button>
-                                      
 
-                                    
+                                        <InputText class="form-control search-box" placeholder="Search by marshal name.." @bind-value="searchmarshalText" @oninput="OnSearchMarshalInput"
+                                                   @onclick="ShowAllmarshal" />
+                                        <button class="search-btn" type="button">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+
+
+
 
                                         @if (filteredmarshal?.Any() == true)
                                         {
@@ -406,7 +484,7 @@
                                                 }
                                             </ul>
                                         }
-                                        
+
                                     }
                                     else
                                     {
@@ -423,11 +501,11 @@
                                     @if (!isMarshalAssigned)
                                     {
                                         <button class="btn bg-brand-primary base text-white" @onclick="SubmitMarshal">Save</button>
-                                    
+
                                     }
                                     else
                                     {
-                                      
+
                                         <button class="btn bg-brand-primary base text-white" @onclick="ResetMarshal">Reset</button>
                                     }
                                 </div>
@@ -442,8 +520,6 @@
                                 </div>
                             </div>
                         </div>
-
-
 
                         <div class="tab-pane fade" id="server" role="tabpanel" aria-labelledby="server-tab">
                             <!-- CONTENT for Process Server -->
@@ -472,9 +548,9 @@
                                         <span style="text-decoration:underline; cursor:pointer; color:#00a7ff; margin-right:5px;">Click</span>
                                         or drag & drop file(s) here
                                     </div>
-                                    
+
                                 </div>
-                              
+
 
                             </div>
                             <div class="dropzonecontent" style="color:red; font-size:0.9rem; margin-top:5px;">
@@ -565,12 +641,12 @@
                             <!-- CONTENT for Add Hearing -->
                             @if ((legalcaseDto.CourtLocationId == null || legalcaseDto.CourtLocationId == Guid.Empty) && !CaseForms.Any())
                             {
-                            <div class="modal-body mb-3 courthearing">
-                                <ul>
-                                    <li>Please Generate Form before Adding Case Hearing</li>
-                                    <li>Please Add Court Details before Adding Case Hearing</li>
-                                </ul>
-                            </div>
+                                <div class="modal-body mb-3 courthearing">
+                                    <ul>
+                                        <li>Please Generate Form before Adding Case Hearing</li>
+                                        <li>Please Add Court Details before Adding Case Hearing</li>
+                                    </ul>
+                                </div>
                             }
                             else if (!CaseForms.Any())
                             {
@@ -596,7 +672,7 @@
 
                                 </div>
                             }
-                            
+
                             else
                             {
                                 <EditForm Model="@caseHearing">
@@ -644,8 +720,479 @@
 
 
                         </div>
+
+                        <div class="tab-pane fade" id="predicate" role="tabpanel" aria-labelledby="predicate-tab">
+                            <!-- CONTENT for Add Hearing -->
+
+                            <EditForm Model="legalcaseDto" FormName="PredicateNotices" OnValidSubmit="UpdateCase">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class=" mb-3">
+                                            @* <div class="card-header">
+                                                <div style="font-weight:700" class="head"> Predicate Notice Planner</div>
+                                            </div> *@
+                                            <div class="card-body">
+                                                <div class="row g-2 mb-3" style="gap: 40px;">
+
+                                                    <!-- Notice type -->
+                                                    <div class="col-md-5">
+                                                        <label class="form-label " style="font-weight:600;">Notice Type </label>
+                                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.NoticeId" style="cursor:pointer;">
+                                                            <option value="">-- Select Type --</option>
+                                                            @foreach (var l in FilteredFormTypeList)
+                                                            {
+                                                                <option value="@l.Id">@l.Name</option>
+                                                            }
+                                                        </InputSelect>
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        <label class="form-label " style="font-weight:600;">Service Method </label>
+                                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.ServiceMethodId" style="cursor:pointer;">
+                                                            <option value="">-- Select Type --</option>
+                                                            @foreach (var l in ServiceMethodList)
+                                                            {
+                                                                <option value="@l.Id">@l.Name</option>
+                                                            }
+                                                        </InputSelect>
+                                                    </div>
+                                                </div>
+                                                <div class="row g-2 mb-3" style="gap: 40px;">
+                                                    <div class="col-md-5">
+                                                        <label class="form-label " style="font-weight:600;">Planned Service Date </label>
+                                                        <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.PlannedServiceDate" />
+
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        <label class="form-label" style="font-weight:600;">Roll to Next Business Day</label>
+                                                        <div class="d-flex justify-content-start align-items-center  gap-2">
+                                                            <InputRadioGroup @bind-Value="legalcaseDto.NextBussinessday">
+                                                                <div class="form-check d-flex justify-content-center gap-2">
+                                                                    <InputRadio class="form-check-input" Value="true" style="font-size:15px" />
+                                                                    <label class="form-check-label">Yes</label>
+                                                                </div>
+                                                                <div class="form-check  d-flex justify-content-center gap-2">
+                                                                    <InputRadio class="form-check-input " Value="false" style="font-size:15px" />
+                                                                    <label class="form-check-label">No</label>
+                                                                </div>
+                                                            </InputRadioGroup>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row g-2 mb-3" style="gap: 40px;">
+                                                    <div class="col-md-5">
+                                                        <label class="form-label " style="font-weight:600;">Deemed Service (Auto) </label>
+                                                        <InputText class="form-control" @bind-Value="legalcaseDto.DeemedService" style="cursor:pointer;" />
+
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        <label class="form-label " style="font-weight:600;">Expiry (auto) </label>
+                                                        <InputText class="form-control" Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.Expiry" />
+
+                                                    </div>
+
+                                                </div>
+                                                <div class="row g-2">
+                                                    <div class="hint">Add-ons: Personal +0 • Overnight +1 • Mail +5 • Posting+Mail +5. Expiry counts from deemed date.</div>
+                                                    <div class="col-auto">
+                                                        <label class="form-label" style="border:1px solid; padding: 10px;border-radius: 25px;align-items: center;display: flex;height: 36px;">Live Expiry : --</label>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+
+                                <div style="display:flex; justify-content:end">
+                                    <button type="submit" class="btn bg-navy text-white me-2" style="font-size:14px; background:#1F365D;margin-left:10px">Save</button>
+
+                                </div>
+                            </EditForm>
+
+                        </div>
+
+                        <div class="tab-pane fade" id="remarks" role="tabpanel" aria-labelledby="remarks-tab">
+                            <!-- CONTENT for Add Hearing -->
+                            @if(legalcaseDto.CaseTypeName == "Holdover")
+                            {
+                                <EditForm Model="legalcaseDto" FormName="DocumentRemarks" OnValidSubmit="UpdateCase">
+                                    <DataAnnotationsValidator></DataAnnotationsValidator>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class=" mb-3">
+                                                <div class="card-body">
+                                                    <div class="row g-2 mb-3" style="gap:40px">
+                                                        <!-- Tenancy Type -->
+                                                        <div class="col-md-5">
+                                                            <label class="form-label required-label" style="font-weight:600;">Tenancy Type</label>
+                                                            <InputSelect class="form-select" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays" style="cursor:pointer;">
+                                                                <option value="">-- Select Type --</option>
+                                                                @foreach (var l in TenancyTypeList)
+                                                                {
+                                                                    <option value="@l.Id">@l.Name</option>
+                                                                }
+                                                            </InputSelect>
+                                                            <ValidationMessage For="() => legalcaseDto.TenancyTypeId" />
+                                                        </div>
+
+                                                        <div class="col-md-5">
+                                                            <label class="form-label required-label" style="font-weight:600;">Date Notice Served</label>
+                                                            <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.DateNoticeServed" @bind-Value:after="CalcExpireAligned" />
+                                                            <ValidationMessage For="() => legalcaseDto.DateNoticeServed" />
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="row g-2 mb-3" style="gap:40px">
+                                                        <div class="col-md-5">
+                                                            <label class="form-label" style="font-weight:600;">Calculated Notice Length</label>
+                                                            <InputNumber class="form-control" @bind-Value="legalcaseDto.CalculatedNoticeLength" />
+                                                        </div>
+                                                        <div class="col-md-5">
+                                                            <label class="form-label" style="display: flex; align-items: center;font-weight:600;">Expiration Date (Auto)</label>
+                                                            <RadzenDatePicker Style="width:100%;" @bind-Value="legalcaseDto.ExpirationDate" />
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="row g-2 mb-3" style="gap:40px">
+                                                        <div class="col-md-5">
+                                                            <label class="form-label " style="height: 36px; display: flex;align-items: center;font-weight:600;">Predicate Notice (Auto) </label>
+                                                            <InputText class="form-control" @bind-Value="legalcaseDto.PredicateNotice" />
+
+                                                        </div>
+                                                        <div class="col-md-5">
+                                                            <label class="form-label" style="font-weight:600;">Good Cause Exemption Notice attached</label>
+                                                            <div class="d-flex justify-content-start align-items-center  gap-2">
+                                                                <InputRadioGroup @bind-Value="legalcaseDto.GoodCauseExempt">
+                                                                    <div class="form-check d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input" Value="true" style="font-size:15px" />
+                                                                        <label class="form-check-label">Yes</label>
+                                                                    </div>
+                                                                    <div class="form-check  d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input " Value="false" style="font-size:15px" />
+                                                                        <label class="form-check-label">No</label>
+                                                                    </div>
+                                                                </InputRadioGroup>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+
+
+                                                    <div class="row g-2 mb-3">
+                                                        <div class="col-6">
+                                                            <div class="form-check gap-2">
+                                                                <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.leasedAttached" />
+                                                                <label class="form-check-label"> Leased Attached </label>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-6">
+                                                            <div class="form-check  gap-2">
+                                                                <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.ledgerAttached" />
+                                                                <label class="form-check-label"> Ledger attached </label>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="col-6">
+
+                                                            <div class="form-check  gap-2">
+                                                                <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.NoticeproofAttached" />
+                                                                <label class="form-check-label"> Notices proof attached </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+
+                                                            <div class="form-check  gap-2">
+                                                                <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.RegistrationRentAttached" />
+                                                                <label class="form-check-label">Registration/Rent history attached</label>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="row g-2 mb-3">
+
+                                                        @* <div class="col-12">
+                                                            <label class="form-label" style="font-weight:600;">Good Cause Exemption Notice attached</label>
+                                                            <div class="d-flex justify-content-start align-items-center  gap-2">
+                                                                <InputRadioGroup @bind-Value="legalcaseDto.GoodCauseExempt">
+                                                                    <div class="form-check d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input" Value="true" style="font-size:15px" />
+                                                                        <label class="form-check-label">Yes</label>
+                                                                    </div>
+                                                                    <div class="form-check  d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input " Value="false" style="font-size:15px" />
+                                                                        <label class="form-check-label">No</label>
+                                                                    </div>
+                                                                </InputRadioGroup>
+                                                            </div>
+                                                        </div> *@
+
+                                                        <div class="col-9">
+                                                            <label class="form-label " style="font-weight:600;">Additional Comments </label>
+                                                            <InputText class="form-control" @bind-Value="legalcaseDto.AdditionalComments" style="cursor:pointer;" />
+
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+                                    <div style="display:flex; justify-content:end">
+                                        <button type="submit" class="btn bg-navy text-white me-2" style="font-size:14px; background:#1F365D;margin-left:10px">Save</button>
+
+                                    </div>
+                                </EditForm>
+                            }
+                            else
+                            {
+                                <EditForm Model="legalcaseDto" FormName="DocumentRemarks" OnValidSubmit="UpdateCase">
+                                    
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class=" mb-3">
+                                                @* <div class="card-header">
+                                                <div style="font-weight:700" class="head">Documents & Remarks</div>
+                                            </div> *@
+                                                <div class="card-body">
+
+                                                    <div class="row g-2 mb-3">
+
+                                                        <!-- Notice type -->
+                                                        <div class="col-6">
+
+                                                            <div class="form-check gap-2">
+                                                                <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.leasedAttached" />
+                                                                <label class="form-check-label"> Leased Attached </label>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-6">
+                                                            <div class="form-check  gap-2">
+                                                                <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.ledgerAttached" />
+                                                                <label class="form-check-label"> Ledger attached </label>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="col-6">
+
+                                                            <div class="form-check  gap-2">
+                                                                <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.NoticeproofAttached" />
+                                                                <label class="form-check-label"> Notices proof attached </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+
+                                                            <div class="form-check  gap-2">
+                                                                <InputCheckbox class="form-check-input" style="font-size:15px" @bind-Value="legalcaseDto.RegistrationRentAttached" />
+                                                                <label class="form-check-label">Registration/Rent history attached</label>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="row g-2 mb-3">
+
+                                                        <div class="col-12">
+                                                            <label class="form-label" style="font-weight:600;">Good Cause Exemption Notice attached</label>
+                                                            <div class="d-flex justify-content-start align-items-center  gap-2">
+                                                                <InputRadioGroup @bind-Value="legalcaseDto.GoodCauseExempt">
+                                                                    <div class="form-check d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input" Value="true" style="font-size:15px" />
+                                                                        <label class="form-check-label">Yes</label>
+                                                                    </div>
+                                                                    <div class="form-check  d-flex justify-content-center gap-2">
+                                                                        <InputRadio class="form-check-input " Value="false" style="font-size:15px" />
+                                                                        <label class="form-check-label">No</label>
+                                                                    </div>
+                                                                </InputRadioGroup>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-9">
+                                                            <label class="form-label " style="font-weight:600;">Additional Comments </label>
+                                                            <InputText class="form-control" @bind-Value="legalcaseDto.AdditionalComments" style="cursor:pointer;" />
+
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+                                    <div style="display:flex; justify-content:end">
+                                        <button type="submit" class="btn bg-navy text-white me-2" style="font-size:14px; background:#1F365D;margin-left:10px">Save</button>
+
+                                    </div>
+                                </EditForm>
+                            }
+                            
+
+                        </div>
+
+                        <div class="tab-pane fade" id="billing" role="tabpanel" aria-labelledby="billing-tab">
+                            <!-- CONTENT for Add Hearing -->
+                            <EditForm Model="legalcaseDto" FormName="billing" OnValidSubmit="UpdateCase">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class=" mb-3">
+                                            <div class="card-body">
+                                                <!-- Billing Type -->
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-semibold">
+                                                        @(legalcaseDto.CaseTypeName == "HPD" || legalcaseDto.CaseTypeName == "Illegal Lockout"
+                                                                                                                ? "Billing Type"
+                                                                                                                : "Rate / Compensation")  <span class="text-danger">*</span>
+                                                    </label>
+
+                                                    @if (legalcaseDto.CaseTypeName == "HPD" || legalcaseDto.CaseTypeName == "Illegal Lockout")
+                                                    {
+                                                        <div id="billingRadio" class="d-flex flex-wrap align-items-center gap-3">
+                                                            @if (BilingTypesList != null && BilingTypesList.Any())
+                                                            {
+                                                                <InputRadioGroup @bind-Value="legalcaseDto.BilingTypeId" class="d-flex flex-wrap">
+                                                                    <div class="d-flex align-items-center gap-4">
+
+                                                                        @foreach (var Type in BilingTypesList)
+                                                                        {
+                                                                            <div class="d-flex align-items-center">
+
+                                                                                <!-- Radio -->
+                                                                                <InputRadio class="form-check-input me-2"
+                                                                                            Value="@Type.Id"
+                                                                                            id="@($"Type_{Type.Id}")" />
+
+                                                                                <!-- Label -->
+                                                                                <label class="form-check-label me-3" for="@($"Type_{Type.Id}")">
+                                                                                    @Type.Name
+                                                                                </label>
+                                                                            </div>
+                                                                        }
+
+                                                                    </div>
+                                                                </InputRadioGroup>
+                                                                <ValidationMessage For="() => legalcaseDto.BilingTypeId" />
+                                                            }
+
+                                                        </div>
+
+
+                                                        <!-- Invoice To -->
+                                                        <div class="row mt-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold">Invoice To</label>
+                                                                <InputText type="text" class="form-control" name="invoiceTo" placeholder="Name or Organization" @bind-Value="legalcaseDto.InvoiceTo" />
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                @if (BilingTypesList != null && BilingTypesList.Any())
+                                                                {
+                                                                    <InputRadioGroup @bind-Value="legalcaseDto.BilingTypeId" class="d-flex flex-wrap">
+                                                                        <div class="d-flex align-items-center gap-4">
+
+                                                                            @foreach (var Type in BilingTypesList)
+                                                                            {
+                                                                                <div class="d-flex align-items-center">
+
+                                                                                    <!-- Radio -->
+                                                                                    <InputRadio class="form-check-input me-2"
+                                                                                                Value="@Type.Id"
+                                                                                                id="@($"Type_{Type.Id}")"
+                                                                                                @onclick="@(() => OnBillingTypeChanged(Type.Id))" />
+
+                                                                                    <!-- Label -->
+                                                                                    <label class="form-check-label me-3" for="@($"Type_{Type.Id}")">
+                                                                                        @Type.Name
+                                                                                    </label>
+
+                                                                                    <!-- Input box (same horizontal line) -->
+                                                                                    @if (legalcaseDto.BilingTypeId == Type.Id)
+                                                                                    {
+                                                                                        <input type="number"
+                                                                                               class="form-control"
+                                                                                               style="width: 180px;"
+                                                                                               placeholder="@(Type.Name == "Flat Rate" ? "$" : "$ / hr")"
+                                                                                               @bind="legalcaseDto.BilingTypeInputValue" />
+                                                                                    }
+
+                                                                                </div>
+                                                                            }
+
+                                                                        </div>
+
+
+                                                                    </InputRadioGroup>
+                                                                    <ValidationMessage For="() => legalcaseDto.BilingTypeId" />
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mt-3">
+                                                            <div class="col-5">
+                                                                <label class="form-label fw-semibold">Travel / Other Expenses </label>
+                                                                <InputText class="form-control" placeholder="Optional" @bind-Value="legalcaseDto.TravelExpense" />
+                                                            </div>
+                                                            <div class="col-md-7">
+                                                                <label class="form-label fw-semibold">Payment Method  <span class="text-danger">*</span></label>
+
+                                                                <div id="reliefRespondentGroup" class="row">
+                                                                    @if (PaymentMethodDtoList != null && PaymentMethodDtoList.Any())
+                                                                    {
+                                                                        <InputRadioGroup @bind-Value="legalcaseDto.PaymentMethodId" class="d-flex flex-wrap">
+                                                                            @foreach (var method in PaymentMethodDtoList)
+                                                                            {
+                                                                                <div class="col-auto">
+                                                                                    <div class="form-check mb-2">
+                                                                                        <InputRadio class="form-check-input"
+                                                                                                    id="@($"partyType_{method.Id}")"
+                                                                                                    Value="@method.Id" />
+                                                                                        <label class="form-check-label"
+                                                                                               for="@($"method{method.Id}")">@method.Name</label>
+                                                                                    </div>
+                                                                                </div>
+                                                                            }
+                                                                        </InputRadioGroup>
+                                                                        <ValidationMessage For="() => legalcaseDto.PaymentMethodId" />
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    }
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+
+                                <div style="display:flex; justify-content:end">
+                                    <button type="submit" class="btn bg-navy text-white me-2" style="font-size:14px; background:#1F365D;margin-left:10px">Save</button>
+
+                                </div>
+                            </EditForm>
+
+                        </div>
                     </div>
-                    
+
 
                 </div>
 
@@ -699,6 +1246,12 @@
     [Parameter] public IntakeModel legalcaseDto { get; set; } = new();
     [Parameter] public List<GenrateNoticeModel> CaseForms { get; set; } = new();
     [Parameter] public EventCallback OnFormCreate { get; set; } = new();
+    private IEnumerable<ServiceMethod> ServiceMethodList = new List<ServiceMethod>();
+    private List<BilingType> BilingTypesList = new();
+    private List<PaymentMethod> PaymentMethodDtoList = new();
+    private List<TenancyType> TenancyTypeList = new();
+    private List<DateRent> DateRentList = new();
+
     private string? loggedInUserId;
     private string? MarshalName;
     private bool isAdmin = false;
@@ -706,7 +1259,7 @@
     private MarshalDto selectedmarshal;
     private string searchmarshalText;
     private bool isMarshalAssigned = false;
-    private List<MarshalDto> filteredmarshal= new();
+    private List<MarshalDto> filteredmarshal = new();
     private GenrateNoticeModel caseForm = new();
     private List<CaseHearingDto> CaseHearings = new();
     private CaseHearingDto CaseHearing = new();
@@ -737,20 +1290,130 @@
             isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
         }
         FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
-      
+
         caseHearing = new CaseHearingDto();
         caseHearing.HearingDate = DateTime.Now;
         caseHearing.HearingTime = TimeOnly.FromTimeSpan(TimeSpan.FromHours(10));
-
+        if (!ServiceMethodList.Any()) ServiceMethodList = await _caseService.ServiceMethodList();
+        if (!BilingTypesList.Any()) BilingTypesList = await CaseTypeRepository.GetAllBilingTypes();
+        PaymentMethodDtoList = await CaseTypeRepository.GetAllPaymentMethod();
+        if (!TenancyTypeList.Any()) TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
+        if (!DateRentList.Any()) DateRentList = await DateRentRepository.GetAllDateRent();
         spinnerservice.Hide();
     }
+    void OnBillingTypeChanged(Guid id)
+    {
+        legalcaseDto.BilingTypeId = id;
 
+        // Input reset jab Flat → Hourly switch hota hai
+        legalcaseDto.BilingTypeInputValue = null;
+    }
     private async Task OnMarshalTabOpen()
     {
 
         await LoadMarshalUI();
 
         StateHasChanged();
+    }
+    private int ParseDueDay(string str)
+    {
+        if (string.IsNullOrWhiteSpace(str)) return 1;
+        if (int.TryParse(str, out var d)) return Math.Clamp(d, 1, 31);
+        return 1;
+    }
+    private void CalcExpireAligned()
+    {
+        int dueDay = ParseDueDay(
+            DateRentList.FirstOrDefault(x => x.Id == legalcaseDto.RentDueEachMonthOrWeekId)?.Name
+        );
+
+        int? days = legalcaseDto.CalculatedNoticeLength;
+        var servedISO = ToDateTime(legalcaseDto.DateNoticeServed);
+
+        // Null check
+        if (!servedISO.HasValue || !days.HasValue || days.Value <= 0)
+        {
+            legalcaseDto.ExpirationDate = null;
+            return;
+        }
+
+        // *** FIX: Initialize target here ***
+        DateTime target = servedISO.Value.AddDays(days.Value);
+
+        DateOnly expiration;
+
+        if (dueDay == 1)
+        {
+            expiration = new DateOnly(
+                target.Year,
+                target.Month,
+                DateTime.DaysInMonth(target.Year, target.Month)
+            );
+        }
+        else
+        {
+            expiration = new DateOnly(target.Year, target.Month, dueDay - 1);
+        }
+
+        legalcaseDto.ExpirationDate = expiration;
+    }
+    private DateTime? ToDateTime(DateOnly? date)
+    {
+        return date.HasValue ? date.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
+    }
+
+    private void CalcNoticeDays()
+    {
+        if (legalcaseDto.CaseTypeName == "Holdover")
+        {
+            Console.WriteLine("1");
+            if (legalcaseDto.DateTenantMoved != null && legalcaseDto.TenancyTypeId != null)
+            {
+                Console.WriteLine("2");
+
+                int length = 0;
+
+                var type = TenancyTypeList
+                    .Where(a => a.Id == legalcaseDto.TenancyTypeId)
+                    .Select(e => e.Name?.ToLower())
+                    .FirstOrDefault();
+
+                // ✅ Special case tenancy types get fixed 10 days
+                if (new[] { "squatter", "licensee", "referee" }.Contains(type))
+                {
+                    length = 10;
+                }
+                else
+                {
+                    // ✅ Otherwise calculate by years
+                    var yrs = DiffYears(legalcaseDto.DateTenantMoved?.ToDateTime(TimeOnly.MinValue), DateTime.Today);
+
+                    if (yrs < 1)
+                        length = 30;
+                    else if (yrs < 2)
+                        length = 60;
+                    else
+                        length = 90;
+                }
+
+                legalcaseDto.CalculatedNoticeLength = length;
+
+                // ✅ Set PredicateNotice text
+                legalcaseDto.PredicateNotice = type switch
+                {
+                    "licensee" => "10 Days Notice - Tenant Of Record Vacated (Licensee)",
+                    "referee" => "10 Days Notice - Referee Deed / Prior Owner",
+                    "squatter" => "10 Days Notice - Squatter / Intruder",
+                    "month-to-month" => $"{length} Days Notice - Month to Month",
+                    _ => ""
+                };
+            }
+        }
+    }
+    private int DiffYears(DateTime? from, DateTime? to)
+    {
+        if (!from.HasValue || !to.HasValue) return 0;
+        return (int)((to.Value - from.Value).TotalDays / 365);
     }
 
     private async Task LoadMarshalUI()
@@ -806,7 +1469,7 @@
         selectedmarshal = null;
         legalcaseDto.MarshalId = null;     // Marshal unassign
         searchmarshalText = "";            // Clear search box
-        filteredmarshal?.Clear(); 
+        filteredmarshal?.Clear();
         showMarshalError = false;// Clear list
 
         StateHasChanged();
@@ -877,7 +1540,7 @@
         {
             ToastService.ShowSuccess("Marshal Assign  successfully!");
             // await LoadCaseDetails();
-             isMarshalAssigned = true;
+            isMarshalAssigned = true;
         }
         else
         {
@@ -885,12 +1548,12 @@
         }
         StateHasChanged();
         spinnerservice.Hide();
-        
+
     }
 
     private List<UploadItem> UploadItems = new();
 
- 
+
     private void OnBindHearingCancel()
     {
         caseHearing = new CaseHearingDto();
@@ -1170,7 +1833,24 @@
             ToastService.ShowError("An error occurred during saving!");
         }
     }
+    private async Task UpdateCase()
+    {
+        spinnerservice.Show();
 
+        legalcaseDto.BillAmount = (legalcaseDto.BillAmount ?? 0) + (createAction.BillAmount ?? 0);
+
+        var successcase = await _service.UpdateCaseAsync(legalcaseDto);
+        if(successcase.HasValue)
+        {
+            ToastService.ShowSuccess("Case updated successfully!");
+        }
+        else
+        {
+            ToastService.ShowError("An error occurred during updating!");
+        }
+
+        spinnerservice.Hide();
+    }
 
 
     private async Task LoadCaseForms()
@@ -1210,7 +1890,7 @@
             .FirstOrDefault(f => f.Id == createAction.FormTypeId);
 
         if (selectedForm != null)
-            createAction.BillAmount =Convert.ToDecimal(selectedForm.Rate);
+            createAction.BillAmount = Convert.ToDecimal(selectedForm.Rate);
         else
             createAction.BillAmount = null;
 
@@ -1225,4 +1905,5 @@
         StateHasChanged();
     }
 
-}
+}
+

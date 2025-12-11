@@ -14,10 +14,10 @@ namespace EvictionFiler.Domian.Enums
         Building = 2,
         Tenant = 3,
         Terms = 4,
-        Case = 5,
-        Rent = 6,
+        //Case = 6,
+        Rent = 5,
         //Notice = 8,
-        Review = 7,
+        Review = 6,
 
 
     }
@@ -30,10 +30,10 @@ namespace EvictionFiler.Domian.Enums
         Tenant = 3,
         Lease = 4,
         //Arrears = 5,
-        Notice = 5,
-        GoodCause = 6,
+        //Notice = 5,
+        //GoodCause = 6,
         //Filing = 8,
-        Review = 7,
+        Review = 5,
     }
 
     public enum StepHPD
@@ -78,7 +78,7 @@ namespace EvictionFiler.Domian.Enums
         Background = 2,
         Document = 3,
         Reporting = 4,
-        Billing = 5,
+        //Billing = 5,
         //Acknowledgment = 9,
 
     }
