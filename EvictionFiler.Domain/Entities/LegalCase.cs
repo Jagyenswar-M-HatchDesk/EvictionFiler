@@ -48,7 +48,11 @@ namespace EvictionFiler.Domain.Entities
 		[ForeignKey("IsUnitIllegalId")]
 		public IsUnitIllegal? IsUnitIllegal { get; set; }
 
-		public bool? TenantRecord { get; set; }
+        public Guid? CourtTypeId { get; set; }
+        [ForeignKey("CourtTypeId")]
+        public CourtType? CourtTypes { get; set; }
+
+        public bool? TenantRecord { get; set; }
 		public bool? RenewalOffer { get; set; }
 		public bool? HasPossession { get; set; }
 

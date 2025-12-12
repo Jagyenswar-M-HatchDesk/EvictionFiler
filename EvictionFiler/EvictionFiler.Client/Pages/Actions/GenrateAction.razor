@@ -346,6 +346,7 @@
 
 </style>
 @using System.Collections.Generic
+@using System.Linq.Expressions
 
 
 <div class="offcanvas offcanvas-end show border-start shadow bg-white"
@@ -820,7 +821,7 @@
                             <!-- CONTENT for Add Hearing -->
                             @if(legalcaseDto.CaseTypeName == "Holdover")
                             {
-                                <EditForm Model="legalcaseDto" FormName="DocumentRemarks" OnValidSubmit="UpdateCase">
+                                <EditForm EditContext="_editContext" FormName="DocumentRemarks" OnSubmit="UpdateCase">
                                     <DataAnnotationsValidator></DataAnnotationsValidator>
                                     <div class="row">
                                         <div class="col">
@@ -955,7 +956,7 @@
                             }
                             else
                             {
-                                <EditForm Model="legalcaseDto" FormName="DocumentRemarks" OnValidSubmit="UpdateCase">
+                                <EditForm EditContext="_editContext" FormName="DocumentRemarks" OnSubmit="UpdateCase">
                                     
                                     <div class="row">
                                         <div class="col">
@@ -1043,7 +1044,7 @@
 
                         <div class="tab-pane fade" id="billing" role="tabpanel" aria-labelledby="billing-tab">
                             <!-- CONTENT for Add Hearing -->
-                            <EditForm Model="legalcaseDto" FormName="billing" OnValidSubmit="UpdateCase">
+                            <EditForm EditContext="_editContext" FormName="billing" OnSubmit="UpdateCase">
                                 <div class="row">
                                     <div class="col">
                                         <div class=" mb-3">
@@ -1267,7 +1268,8 @@
     [Parameter] public Guid? CurrentCaseId { get; set; }
     private CancellationTokenSource _cts;
     private bool showMarshalError = false;
-
+    private ValidationMessageStore messageStore;
+    private EditContext _editContext;
 
     [Parameter]
     public EventCallback OnClose { get; set; }
@@ -1289,6 +1291,10 @@
             loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
         }
+
+        _editContext = new EditContext(legalcaseDto);
+        messageStore = new ValidationMessageStore(_editContext);
+
         FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
 
         caseHearing = new CaseHearingDto();
@@ -1550,6 +1556,50 @@
         spinnerservice.Hide();
 
     }
+    private async Task<bool> ValidateCurrentStep()
+    {
+        messageStore.Clear();
+
+        if (legalcaseDto.CaseTypeName == "Holdover")
+        {
+            Require(() => legalcaseDto.TenancyTypeId, nameof(legalcaseDto.TenancyTypeId), "Tenancy type required");
+            Require(() => legalcaseDto.DateNoticeServed, nameof(legalcaseDto.DateNoticeServed), "Notice Serve Date required");
+        }
+       
+
+        _editContext.NotifyValidationStateChanged();
+
+        // Get current validation messages (optional: for logging)
+        var errors = _editContext.GetValidationMessages().ToList();
+        Console.WriteLine($"Validation errors : {string.Join(", ", errors)}");
+
+        // Check if form is valid
+        bool isValid = !_editContext.GetValidationMessages().Any();
+
+        // Return validity
+        return isValid;
+    }
+    private void Require<T>(Expression<Func<T>> accessor, string fieldName, string message)
+    {
+        var value = accessor.Compile().Invoke();
+        var fieldIdentifier = new FieldIdentifier(legalcaseDto, fieldName);
+
+        // Clear old message first
+        messageStore.Clear(fieldIdentifier);
+
+        // Add message if invalid
+        bool isEmpty = value == null ||
+                       (value is string s && string.IsNullOrWhiteSpace(s)) ||
+                       (value is Guid g && g == Guid.Empty);
+
+        if (isEmpty)
+        {
+            messageStore.Add(fieldIdentifier, message);
+        }
+
+        _editContext.NotifyValidationStateChanged();
+    }
+
 
     private List<UploadItem> UploadItems = new();
 
@@ -1835,7 +1885,9 @@
     }
     private async Task UpdateCase()
     {
+        if (!await ValidateCurrentStep()) return;
         spinnerservice.Show();
+
 
         legalcaseDto.BillAmount = (legalcaseDto.BillAmount ?? 0) + (createAction.BillAmount ?? 0);
 

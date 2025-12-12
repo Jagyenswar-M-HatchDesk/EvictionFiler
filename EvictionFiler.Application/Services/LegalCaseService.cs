@@ -185,6 +185,8 @@ namespace EvictionFiler.Application.Services
                     legalCases.NoticeId = legalCase.NoticeId;
                     legalCases.ServiceMethodId = legalCase.ServiceMethodId;
                     legalCases.CourtLocationId = legalCase.CourtLocationId;
+                    legalCases.CourtTypeId = legalCase.CourtTypeId;
+                    legalCases.SubCaseTypeId = legalCase.SubCaseTypeId;
 
                 }
                 else if (caseType.Name.Equals("HPD", StringComparison.OrdinalIgnoreCase))
@@ -210,7 +212,7 @@ namespace EvictionFiler.Application.Services
                     legalCases.AppearanceDate = legalCase.AppearanceDate;
                     legalCases.AppearanceTime = legalCase.AppearanceTime;
                     legalCases.TenantName = legalCase.TenantName;
-
+                    legalCases.CourtTypeId = legalCase.CourtTypeId;
                     legalCases.BilingTypeId = legalCase.BilingTypeId;
                     legalCases.InvoiceTo = legalCase.InvoiceTo;
                     legalCases.CaseTypeHPDs = await _repository.GetHPDByIdsAsync(legalCase.SelectedCaseTypeHPDIds);
@@ -231,6 +233,8 @@ namespace EvictionFiler.Application.Services
                     legalCases.AttrneyContactInfo = legalCase.AttrneyContactInfo;
                     legalCases.AttrneyEmail = legalCase.AttrneyEmail;
                     legalCases.CourtLocationId = legalCase.CourtLocationId;
+                    legalCases.CourtPartId = legalCase.CourtPartId;
+                    legalCases.CourtTypeId = legalCase.CourtTypeId;
                     legalCases.CourtRoom = legalCase.CourtRoom;
                     legalCases.Index = legalCase.Index;
                     legalCases.County = legalCase.County;
@@ -496,7 +500,7 @@ namespace EvictionFiler.Application.Services
                         // Tenant
                         TenantId = caseEntity.TenantId,
                         TenantName = $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}",
-                        ApartmentNumber = caseEntity.Tenants?.UnitOrApartmentNumber,
+                        ApartmentNumber = caseEntity.Buildings?.ApartmentCode,
 
                         WrittenLease = caseEntity.WrittenLease,
 
@@ -521,7 +525,7 @@ namespace EvictionFiler.Application.Services
                         //CourtId = caseEntity.CourtId != null ? caseEntity.CourtId : Guid.Empty,
                         Court = caseEntity.CourtLocation != null ? caseEntity.CourtLocation.Court! : "",
                         CourtAddress = caseEntity.CourtLocation != null ? caseEntity.CourtLocation.Address! : "",
-                        CourtPartId = caseEntity.CourtPart != null ? caseEntity.CourtPartId : Guid.Empty,
+                        CourtPartId = caseEntity.CourtPartId != null ? caseEntity.CourtPartId : Guid.Empty,
                         CourtPart = caseEntity.CourtPart != null ? caseEntity.CourtPart.Part : string.Empty,
                         CourtRoom = caseEntity.CourtPart != null ? caseEntity.CourtPart.RoomNo : string.Empty,
                         CourtLocationId = caseEntity.CourtLocationId,
@@ -598,6 +602,7 @@ namespace EvictionFiler.Application.Services
                         NoticeId = caseEntity.NoticeId,
                         ServiceMethodId = caseEntity.ServiceMethodId,
                         CountyId = caseEntity.CourtLocation?.CountyId,
+                        CourtTypeId = caseEntity.CourtTypeId,
                         CountyName = caseEntity.CourtLocation?.County?.Name ?? string.Empty,
 
                         
@@ -654,13 +659,15 @@ namespace EvictionFiler.Application.Services
                         CourtName = caseEntity.CourtLocation != null ? $"{caseEntity.CourtLocation.Court}" : "",
                         CourtRoom = caseEntity.CourtRoom,
                         Index = caseEntity.Index,
+                        CourtTypeId = caseEntity.CourtTypeId,
+                        CourtPartId = caseEntity.CourtPartId,
+                        CountyId = caseEntity.CourtLocation != null ? caseEntity.CourtLocation.CountyId : null,
 
 
                         OpposingCounsel = caseEntity.OpposingCounsel,
                         Partynames = caseEntity.Partynames,
                         CaseBackground = caseEntity.CaseBackground,
                         SpecialInstruction = caseEntity.SpecialInstruction,
-                        CountyId = caseEntity.CourtLocation?.CountyId,
                         CountyName = caseEntity.CourtLocation?.County?.Name ?? string.Empty,
 
 
@@ -931,7 +938,7 @@ namespace EvictionFiler.Application.Services
                 existingCase.PerDiemAttorneyname = legalCase.PerDiemAttorneyname;
                 existingCase.PerDiemDate = legalCase.PerDiemDate;
                 existingCase.PerDiemSignature = legalCase.PerDiemSignature;
-                existingCase.CourtPartId = legalCase.CourtPartId != Guid.Empty ? legalCase.CourtPartId : null;
+                existingCase.CourtPartId = legalCase.CourtPartId != Guid.Empty  ? legalCase.CourtPartId : null;
 
                 existingCase.LastPayment = legalCase.LastPayment;
                 existingCase.Assistance = legalCase.Assistance;
@@ -1392,6 +1399,11 @@ namespace EvictionFiler.Application.Services
             await _respondantRepository.AddRangeAsync(respondent);
             return await _unitOfWork.SaveChangesAsync() > 0;
         }
+        public async Task<bool> DeleteAdditionalrespondent(CaseAdditionalRespondent respondent)
+        {
+            await _respondantRepository.DeleteAsync(respondent.Id);
+            return await _unitOfWork.SaveChangesAsync() > 0;
+        }
 
         public async Task<List<CaseAdditionalRespondent>> GetAdditionalrespondent(Guid respondentid)
         {
@@ -1410,6 +1422,11 @@ namespace EvictionFiler.Application.Services
         public async Task<bool> AddAdditionalpetitioner(List<CaseAdditionalPetitioner> petitioner)
         {
             await _petitionerRepository.AddRangeAsync(petitioner);
+            return await _unitOfWork.SaveChangesAsync() > 0;
+        }
+        public async Task<bool> DeleteAdditionalpetitioner(CaseAdditionalPetitioner petitioner)
+        {
+            await _petitionerRepository.DeleteAsync(petitioner.Id);
             return await _unitOfWork.SaveChangesAsync() > 0;
         }
     }

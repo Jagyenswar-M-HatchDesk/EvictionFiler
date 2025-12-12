@@ -52,6 +52,8 @@ namespace EvictionFiler.Application.Interfaces.IServices
 
         Task<List<CaseAdditionalRespondent>> GetAdditionalrespondent(Guid respondentid);
         Task<List<CaseAdditionalPetitioner>> GetAdditionalpetitioner(Guid Petitionerid);
-
+        Task<bool> DeleteAdditionalrespondent(CaseAdditionalRespondent respondent);
+        Task<bool> DeleteAdditionalpetitioner(CaseAdditionalPetitioner petitioner);
+        
     }
 }
