@@ -455,6 +455,8 @@
     private string? loggedInUserId;
     private bool isAdmin = false;
     private bool IsClearbtndisable = true;
+    private CancellationTokenSource _cts;
+
     // private void EditCase(Guid caseId)
     // {
     //     navManager.NavigateTo($"/EditCase/{caseId}");
@@ -585,34 +587,45 @@
     private async Task OnSearchChanged(ChangeEventArgs e, string field)
     {
         var value = e.Value?.ToString() ?? string.Empty;
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
 
-        switch (field)
+        try
         {
-            case "CaseCode":
-                searchcasecode = value;
-                break;
-            case "Client":
-                searchTermClient = value;
-                break;
-            case "Tenant":
-                searchTermTenant = value;
-                break;
-            case "Landlord":
-                searchTermLandLord = value;
-                break;
-            case "ReasonHoldover":
-                searchTermResonHoldover = value;
-                break;
-            case "ActionDate":
-                searchTermDate = value;
-                break;
-            case "Status":
-                searchTermStatus = value;
-                break;
+            await Task.Delay(300, _cts.Token);
+
+            switch (field)
+            {
+                case "CaseCode":
+                    searchcasecode = value;
+                    break;
+                case "Client":
+                    searchTermClient = value;
+                    break;
+                case "Tenant":
+                    searchTermTenant = value;
+                    break;
+                case "Landlord":
+                    searchTermLandLord = value;
+                    break;
+                case "ReasonHoldover":
+                    searchTermResonHoldover = value;
+                    break;
+                case "ActionDate":
+                    searchTermDate = value;
+                    break;
+                case "Status":
+                    searchTermStatus = value;
+                    break;
+            }
+            IsClearbtndisable = false;
+            currentPage = 1; // new search ke time page reset ho jaye
+            await GetAllCases();
         }
-        IsClearbtndisable = false;
-        currentPage = 1; // new search ke time page reset ho jaye
-        await GetAllCases();
+        catch (TaskCanceledException)
+        {
+            
+        }
     }
 
 
