@@ -1508,8 +1508,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <!-- Expiration Date -->
                                     <div class="col-md-4">
                                         <label class="form-label" style="height: 36px;
-                                                                                                                        display: flex;
-                                                                                                                        align-items: center;">Expiration Date (Auto)</label>
+                                                                                                                                display: flex;
+                                                                                                                                align-items: center;">Expiration Date (Auto)</label>
                                         <RadzenDatePicker Style="width:100%;" @bind-Value="legalcaseDto.ExpirationDate" />
 
                                     </div>
@@ -1517,8 +1517,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <!-- Predicate -->
                                     <div class="col-md-4">
                                         <label class="form-label " style="height: 36px;
-                                                                                                                                display: flex;
-                                                                                                                                align-items: center;">Predicate Notice (Auto) </label>
+                                                                                                                                        display: flex;
+                                                                                                                                        align-items: center;">Predicate Notice (Auto) </label>
                                         <InputText class="form-control" @bind-Value="legalcaseDto.PredicateNotice" />
 
                                     </div>
@@ -2097,11 +2097,11 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <div class="hint">Add-ons: Personal +0 • Overnight +1 • Mail +5 • Posting+Mail +5. Expiry counts from deemed date.</div>
                                     <div class="col-auto">
                                         <label class="form-label" style="    padding: 10px;
-                                                                                                                                                            border: 1px solid;
-                                                                                                                                                            border-radius: 25px;
-                                                                                                                                                            align-items: center;
-                                                                                                                                                            display: flex;
-                                                                                                                                                            height: 36px;">Live Expiry : --</label>
+                                                                                                                                                                    border: 1px solid;
+                                                                                                                                                                    border-radius: 25px;
+                                                                                                                                                                    align-items: center;
+                                                                                                                                                                    display: flex;
+                                                                                                                                                                    height: 36px;">Live Expiry : --</label>
 
                                     </div>
 
@@ -5860,7 +5860,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         {
             <div class="d-flex justify-content-between border-top pt-3 mt-3">
                 <button type="button" class="btn btn-outline-secondary" @onclick="Prev" disabled="@( Steps[CurrentStep].Name == "CaseAndclient")">← Back</button>
-                @if (Steps[CurrentStep].Name != "Notice")
+                @if (Steps[CurrentStep].Name != "Review")
                 {
                     <button type="button" class="btn" style="background-color:#1F365D !important; color:white" @onclick="Next">Next →</button>
                 }
@@ -5937,7 +5937,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     bool IsDisabled = true;
     // public List<Step> Steps { get; set; } = Enum.GetValues<Step>().ToList();
     public List<StepItems> Steps { get; set; } = new();
-    public int Tracker { get; set; } 
+    public int Tracker { get; set; }
 
     private string ClientName { get; set; } = "";
     private string Tenancy { get; set; } = "";
@@ -6400,6 +6400,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
             {
                 Undertenants.AddRange(AdditionalOccupantsList.Select(e => e.Name).ToList());
             }
+            var undertanants = new List<string>() { "John Doe", "Jane Doe" };
+            Undertenants.AddRange(undertanants);
             searchTenantText = $"{legalcaseDto?.UnitOrApartmentNumber} / {legalcaseDto?.TenantName} ";
 
             tenantStepLoaded = true;
@@ -7124,7 +7126,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     public string UnitNumber { get; set; }
 
     public List<string> Tenants { get; set; } = new();
-    public List<string> Undertenants { get; set; } = new() { "John Doe", "Jane Doe" };
+    public List<string> Undertenants { get; set; } = new() ;
 
     public string UnitNo { get; set; } = "";
 
@@ -7181,34 +7183,36 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     }
     void OnchangeAdditionalTenant(int index)
     {
-        if (index > 0)
+        var name = Tenants[index];
+        var splittedname = name.Split(' ');
+        if (string.IsNullOrWhiteSpace(name))
         {
-            var name = Tenants[index];
-            var splittedname = name.Split(' ');
-            // If cleared, remove from AdditionalTenantList
-            if (string.IsNullOrWhiteSpace(name))
+            var existing = AdditionalTenantList.ElementAtOrDefault(index);
+            if (existing != null)
             {
-                var existing = AdditionalTenantList.ElementAtOrDefault(index - 1);
-                if (existing != null)
-                {
-                    AdditionalTenantList.RemoveAt(index - 1);
-                }
-                return;
+                AdditionalTenantList.RemoveAt(index);
             }
+            return;
+        }
 
-            // Update or add
-            if (index - 1 < AdditionalTenantList.Count)
-            {
-                AdditionalTenantList[index - 1].FirstName = splittedname[0];
-                AdditionalTenantList[index - 1].LastName = splittedname[1];
-            }
-            else
+        if (index < AdditionalTenantList.Count)
+        {
+            AdditionalTenantList[index].FirstName = splittedname.Count() > 0 ? splittedname[0] : string.Empty;
+            AdditionalTenantList[index].LastName = splittedname.Count() > 1 ? splittedname[splittedname.Count() - 1] : string.Empty;
+            AdditionalTenantList[index].BuildingId = legalcaseDto.BuildingId;
+            AdditionalTenantList[index].UnitorApartmentNumber = legalcaseDto.UnitOrApartmentNumber;
+        }
+        else
+        {
+            if (splittedname.Count() > 0)
             {
                 var additional = new AddtionalTenantDto()
                 {
-                    FirstName = splittedname[0],
-                    LastName = splittedname[1],
-                    TenantId = TenantList.Select(e => e.Id).FirstOrDefault(),
+                    FirstName = splittedname.Count() > 0 ? splittedname[0] : string.Empty,
+                    LastName = splittedname.Count() > 1 ? splittedname[splittedname.Count() - 1] : string.Empty,
+                    TenantId = selectedtenant != null ? selectedtenant.Id : Guid.Empty,
+                    BuildingId = legalcaseDto.BuildingId,
+                    UnitorApartmentNumber = searchTenantText,
                     CreatedOn = DateTime.Now,
                     IsActive = true,
                     IsDeleted = false, // better to keep false
@@ -7218,20 +7222,12 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 AdditionalTenantList.Add(additional);
             }
 
-            // Update legalcaseDto
-            if (legalcaseDto.TenantName == null)
-            {
-                legalcaseDto.TenantName = AdditionalTenantList.Select(e => $"{e.FirstName} {e.LastName}").FirstOrDefault() ?? "";
-            }
         }
-        else
+
+        if (legalcaseDto.TenantName == null)
         {
-            var name = Tenants[index];
-            var splittedname = name.Split(' ');
-            legalcaseDto.TenantName = name;
-
+            legalcaseDto.TenantName = AdditionalTenantList.Select(e => $"{e.FirstName} {e.LastName}").FirstOrDefault() ?? "";
         }
-
     }
 
     int defaultCount = 2;
