@@ -45,7 +45,7 @@ namespace EvictionFiler.Application.Services
         {
             foreach (var todelete in occupant)
             {
-                await _additionalOccupantsRepository.DeleteAsync(todelete.Id);
+                await _additionalOccupantsRepository.DeleteOccupants(todelete.Id);
             }
             return true;
         }

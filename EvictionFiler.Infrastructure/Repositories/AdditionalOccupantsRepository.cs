@@ -80,6 +80,16 @@ namespace EvictionFiler.Infrastructure.Repositories
             var occupants = await _context.AdditionalOccupants.Where(e => e.Id == Id).FirstOrDefaultAsync();
             return occupants;
         }
-
+        public async Task<bool> DeleteOccupants(Guid Id)
+        {
+            var occupants = await _context.AdditionalOccupants.FindAsync(Id);
+            if (occupants == null)
+            {
+                return false;
+            }
+            _context.AdditionalOccupants.Remove(occupants);
+            var result = await _context.SaveChangesAsync();
+            return result > 0 ? true : false;
+        }
     }
 }
