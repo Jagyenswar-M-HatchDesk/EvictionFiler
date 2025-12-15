@@ -501,7 +501,7 @@ namespace EvictionFiler.Application.Services
                         TenantId = caseEntity.TenantId,
                         TenantName = $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}",
                         ApartmentNumber = caseEntity.Buildings?.ApartmentCode,
-
+                        
                         WrittenLease = caseEntity.WrittenLease,
 
                         OralAgreeMent = caseEntity.OralAgreeMent,
@@ -961,7 +961,7 @@ namespace EvictionFiler.Application.Services
                 existingCase.NoticeId = legalCase.NoticeId;
                 existingCase.ServiceMethodId = legalCase.ServiceMethodId;
                 existingCase.CourtLocationId = legalCase.CourtLocationId;
-
+                existingCase.CourtTypeId = legalCase.CourtTypeId;
 
                 existingCase.GoodCauseExempt = legalCase.GoodCauseExempt;
                 existingCase.leasedAttached = legalCase.leasedAttached;

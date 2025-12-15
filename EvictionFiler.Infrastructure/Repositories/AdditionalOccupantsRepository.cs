@@ -43,17 +43,21 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         }
 
-        public async Task<bool> UpdateAdditionalOccupant(AdditionalOccupantDto occupant)
+        public async Task<bool> UpdateAdditionalOccupant(List<AdditionalOccupantDto> occupant)
         {
             try
             {
-                var existing = await GetAllOccupantsById(occupant.Id);
-                if (existing == null) return false;
+                foreach(var toupdate in occupant)
+                {
+                    var existing = await GetAllOccupantsById(toupdate.Id);
+                    if (existing == null) return false;
 
-                existing.Name = occupant.Name;
+                    existing.Name = toupdate.Name;
 
-                _context.AdditionalOccupants.Update(existing);
-                var result =await _context.SaveChangesAsync();
+                    _context.AdditionalOccupants.Update(existing);
+                    
+                }
+                var result = await _context.SaveChangesAsync();
                 if (result > 0) return true;
 
                 return false;

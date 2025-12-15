@@ -36,10 +36,18 @@ namespace EvictionFiler.Application.Services
             }).ToList();
         }
 
-        public async Task<bool> UpdateAdditionalOccupantsAsync(AdditionalOccupantDto occupant)
+        public async Task<bool> UpdateAdditionalOccupantsAsync(List<AdditionalOccupantDto> occupant)
         {
 
             return await _additionalOccupantsRepository.UpdateAdditionalOccupant(occupant);
+        }
+        public async Task<bool> DeleteAdditionalOccupants (List<AdditionalOccupantDto> occupant)
+        {
+            foreach (var todelete in occupant)
+            {
+                await _additionalOccupantsRepository.DeleteAsync(todelete.Id);
+            }
+            return true;
         }
     }
 }

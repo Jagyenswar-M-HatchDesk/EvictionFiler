@@ -11,6 +11,7 @@
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
 @using EvictionFiler.Application.DTOs.MarshalsDto
+@using EvictionFiler.Application.DTOs.MasterDtos.CountyDto
 @using EvictionFiler.Application.DTOs.OccupantDto
 @using EvictionFiler.Application.DTOs.TenantDto
 @using EvictionFiler.Application.Interfaces.IRepository
@@ -19,6 +20,7 @@
 @inject NavigationManager Navigation
 @inject ILegalCaseService _service
 @* @using EvictionFiler.Client.Jwt *@
+@using EvictionFiler.Application.Interfaces.IServices.Master
 @using EvictionFiler.Application.Services
 @using EvictionFiler.Client.Pages.Actions
 @using EvictionFiler.Client.SpinnerService
@@ -36,6 +38,7 @@
 @inject IBuildingRepository _buildingRepository
 @inject IBuildingService _buildingService
 @inject IAdditionalTenantService _additionalTenantService
+@inject IAdditionalOccupantsService _additionalOccupantService
 @inject ITenantService _tenantService
 @inject ICourtService _courtService
 @inject ICaseHearingService _caseHearingService
@@ -43,8 +46,8 @@
 @inject IFeesCatalogService _feeCatalogService
 @inject IToastService ToastService
 @inject IMarshalService _marshalService
-@inject IJSRuntime JS
 @inject ICourtpartServices courtpartService
+@inject ICountyService countyService
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization;
 @using EvictionFiler.Domain.Entities
@@ -53,6 +56,7 @@
 @attribute [Authorize]
 
 @using System.Security.Claims
+@using System.Linq.Expressions
 @inject AuthenticationStateProvider _authStateProvider
 <PageTitle>Case Details - Housing Court Filer</PageTitle>
 <style>
@@ -348,136 +352,136 @@
     }
 
     /*
-                .card {
-                background: var(--card);
-                border: 1px solid var(--line);
-                border-radius: var(--radius);
-                box-shadow: var(--shadow)
-                }
+                            .card {
+                            background: var(--card);
+                            border: 1px solid var(--line);
+                            border-radius: var(--radius);
+                            box-shadow: var(--shadow)
+                            }
 
-                .card > header {
-                padding: 18px 20px;
-                border-bottom: 1px solid var(--line);
-                display: flex;
-                gap: 12px;
-                align-items: flex-start
-                }
+                            .card > header {
+                            padding: 18px 20px;
+                            border-bottom: 1px solid var(--line);
+                            display: flex;
+                            gap: 12px;
+                            align-items: flex-start
+                            }
 
-                .k {
-                width: 28px;
-                height: 28px;
-                border-radius: 12px;
-                background: #0f172a;
-                color: #fff;
-                display: grid;
-                place-items: center;
-                font-size: 12px;
-                font-weight: 700
-                }
+                            .k {
+                            width: 28px;
+                            height: 28px;
+                            border-radius: 12px;
+                            background: #0f172a;
+                            color: #fff;
+                            display: grid;
+                            place-items: center;
+                            font-size: 12px;
+                            font-weight: 700
+                            }
 
-                .card .body {
-                padding: 20px
-                }
+                            .card .body {
+                            padding: 20px
+                            }
 
-                .fields {
-                display: grid;
-                gap: 16px
-                }
+                            .fields {
+                            display: grid;
+                            gap: 16px
+                            }
 
-                .cols-2 {
-                grid-template-columns: repeat(2, minmax(0, 1fr))
-                }
+                            .cols-2 {
+                            grid-template-columns: repeat(2, minmax(0, 1fr))
+                            }
 
-                .cols-3 {
-                grid-template-columns: repeat(3, minmax(0, 1fr))
-                }
+                            .cols-3 {
+                            grid-template-columns: repeat(3, minmax(0, 1fr))
+                            }
 
-                @@media (max-width:820px) {
-                .cols-2, .cols-3 {
-                grid-template-columns: 1fr
-                }
-                }
+                            @@media (max-width:820px) {
+                            .cols-2, .cols-3 {
+                            grid-template-columns: 1fr
+                            }
+                            }
 
-                label.lbl {
-                display: block;
-                font-size: 12px;
-                text-transform: uppercase;
-                letter-spacing: .04em;
-                font-weight: 700;
-                color: #475569;
-                margin-bottom: 6px
-                }
+                            label.lbl {
+                            display: block;
+                            font-size: 12px;
+                            text-transform: uppercase;
+                            letter-spacing: .04em;
+                            font-weight: 700;
+                            color: #475569;
+                            margin-bottom: 6px
+                            }
 
-                input.txt,
-                select.sel {
-                width: 100%;
-                padding: 12px 14px;
-                border: 1px solid #cbd5e1;
-                border-radius: 12px;
-                background: #fff;
-                color: #0f172a;
-                outline: none
-                }
+                            input.txt,
+                            select.sel {
+                            width: 100%;
+                            padding: 12px 14px;
+                            border: 1px solid #cbd5e1;
+                            border-radius: 12px;
+                            background: #fff;
+                            color: #0f172a;
+                            outline: none
+                            }
 
-                input.txt:focus,
-                select.sel:focus {
-                border-color: #6366f1;
-                box-shadow: 0 0 0 6px #eef2ff
-                }
+                            input.txt:focus,
+                            select.sel:focus {
+                            border-color: #6366f1;
+                            box-shadow: 0 0 0 6px #eef2ff
+                            }
 
-                .hint {
-                font-size: 12px;
-                color: #64748b;
-                margin-top: 4px
-                }
+                            .hint {
+                            font-size: 12px;
+                            color: #64748b;
+                            margin-top: 4px
+                            }
 
-                .pill {
-                display: inline-block;
-                padding: 8px 12px;
-                border: 1px solid #cbd5e1;
-                border-radius: 12px;
-                background: #fff;
-                font-size: 13px
-                }
+                            .pill {
+                            display: inline-block;
+                            padding: 8px 12px;
+                            border: 1px solid #cbd5e1;
+                            border-radius: 12px;
+                            background: #fff;
+                            font-size: 13px
+                            }
 
-                .aside.card {
-                position: sticky;
-                top: 106px;
-                height: fit-content
-                }
+                            .aside.card {
+                            position: sticky;
+                            top: 106px;
+                            height: fit-content
+                            }
 
-                .kv {
-                display: flex;
-                justify-content: space-between;
-                gap: 12px
-                }
+                            .kv {
+                            display: flex;
+                            justify-content: space-between;
+                            gap: 12px
+                            }
 
-                .kv .k {
-                background: none;
-                color: #64748b;
-                width: auto;
-                height: auto;
-                border-radius: 0;
-                font-weight: 600
-                }
+                            .kv .k {
+                            background: none;
+                            color: #64748b;
+                            width: auto;
+                            height: auto;
+                            border-radius: 0;
+                            font-weight: 600
+                            }
 
-                .actions {
-                position: sticky;
-                bottom: 0;
-                z-index: 10;
-                background: rgba(255, 255, 255, .9);
-                border-top: 1px solid var(--line)
-                }
+                            .actions {
+                            position: sticky;
+                            bottom: 0;
+                            z-index: 10;
+                            background: rgba(255, 255, 255, .9);
+                            border-top: 1px solid var(--line)
+                            }
 
-                .actions .row {
-                max-width: 1200px;
-                margin: auto;
-                padding: 12px 24px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center
-                }
-                */
+                            .actions .row {
+                            max-width: 1200px;
+                            margin: auto;
+                            padding: 12px 24px;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center
+                            }
+                            */
 
     .btn {
         padding: 10px 16px;
@@ -528,34 +532,34 @@
         cursor: pointer
     }
     /*
-                .pre {
-                white-space: pre-wrap;
-                background: #0b1020;
-                color: #e2e8f0;
-                border-radius: 12px;
-                padding: 14px;
-                overflow: auto;
-                max-height: 360px
-                }
+                            .pre {
+                            white-space: pre-wrap;
+                            background: #0b1020;
+                            color: #e2e8f0;
+                            border-radius: 12px;
+                            padding: 14px;
+                            overflow: auto;
+                            max-height: 360px
+                            }
 
-                @@media (max-width:560px) {
-                .logo {
-                width: 36px;
-                height: 36px
-                }
+                            @@media (max-width:560px) {
+                            .logo {
+                            width: 36px;
+                            height: 36px
+                            }
 
-                .brand h1 {
-                font-size: 16px
-                }
+                            .brand h1 {
+                            font-size: 16px
+                            }
 
-                .secure {
-                display: none
-                }
-                }
+                            .secure {
+                            display: none
+                            }
+                            }
 
-                .form-check-input {
-                cursor: pointer;
-                }  */
+                            .form-check-input {
+                            cursor: pointer;
+                            }  */
 
     .btn-tenant:hover {
         background: #1F365D !important;
@@ -570,17 +574,49 @@
         color: red;
     }
 
-    .search-box { width: 100%; padding-right: 3rem; /* space for the button */ padding-left: 1rem; /* border-radius: 1.5rem; */ border: 2px solid #020336; background-color: #FFF; /* dark background */ color: black; height: 2.5rem; font-size: 14px; }
+    .btn-delete:hover {
+        background-color: #1F365D;
+        color: white;
+    }
 
-        .search-box::placeholder { color: darkgrey; }
+    .search-box {
+        width: 100%;
+        padding-right: 3rem; /* space for the button */
+        padding-left: 1rem; /* border-radius: 1.5rem; */
+        border: 2px solid #020336;
+        background-color: #FFF; /* dark background */
+        color: black;
+        height: 2.5rem;
+        font-size: 14px;
+    }
 
-        .search-box:focus { border: 2px solid #020336 !important; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2); background: #F5F5F5; }
-    .search-btn { position: absolute; right: 1.7rem; top: 50%; transform: translateY(-50%); border: none; background: none; color: #020336; cursor: pointer; padding: 0; font-size: 1.2rem; }
+        .search-box::placeholder {
+            color: darkgrey;
+        }
 
-        .search-btn:hover { color: #1F365D; }
+        .search-box:focus {
+            border: 2px solid #020336 !important;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+            background: #F5F5F5;
+        }
 
-   
-    
+    .search-btn {
+        position: absolute;
+        right: 1.7rem;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: none;
+        color: #020336;
+        cursor: pointer;
+        padding: 0;
+        font-size: 1.2rem;
+    }
+
+        .search-btn:hover {
+            color: #1F365D;
+        }
+
 </style>
 <style>
     #activityTable th,
@@ -699,7 +735,7 @@
                                         </div>
                                         <div class="text-secondary small">
                                             <div><span class="text-body">Name:</span> <span id="tenantName2">@(string.IsNullOrWhiteSpace(legalcaseDto.TenantName) ? "--" : legalcaseDto.TenantName)</span></div>
-                                            <div><span class="text-body">Apartment:</span> <span id="tenantApt">@(string.IsNullOrWhiteSpace(legalcaseDto.ApartmentNumber) ? "--" : legalcaseDto.ApartmentNumber)</span></div>
+                                            <div><span class="text-body">Apartment:</span> <span id="tenantApt">@(string.IsNullOrWhiteSpace(legalcaseDto.UnitOrApartmentNumber) ? "--" : legalcaseDto.UnitOrApartmentNumber)</span></div>
                                             <div>
                                                 <span class="text-body">Address:</span> <span id="tenantAddr">
                                                     @{
@@ -799,7 +835,7 @@
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="warrant-tab" data-bs-toggle="tab" data-bs-target="#warrant" type="button" role="tab" aria-controls="warrant" aria-selected="false">Warrant</button>
                                 </li>
-                                
+
                             </ul>
                         </div>
                         <div class="card-body tab-content">
@@ -890,7 +926,7 @@
                                     }
                                     else
                                     {
-                                        
+
                                         <div class="item" data-status="current">
                                             <span class="dot bg-brand-primary"></span>
                                             <div class="text-secondary small mx-2">--</div>
@@ -970,7 +1006,7 @@
                                         else
                                         {
                                             <button class="btn bg-brand-primary base text-white" @onclick="ResetMarshal">Reset</button>
-                                            
+
                                         }
 
 
@@ -982,7 +1018,7 @@
 
 
                                     </div>
-                                   
+
 
                                 </div>
                                 <div class="row mt-2">
@@ -1095,10 +1131,10 @@
                         <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
                             <div class="fw-semibold  gap-2"><i class="bi bi-hammer"></i> Rent Description</div>
                             <button type="button" class="btn btn-sm normal p-1" title="Edit Rent" @onclick="ShowRentModal">
-                               
-                                    <i class="bi bi-pencil"></i>
 
-                                
+                                <i class="bi bi-pencil"></i>
+
+
                             </button>
                         </div>
 
@@ -1240,21 +1276,33 @@
 
                                     </div>
 
-                                    <div class="col-12 mt-3">
+                                    <div class="col-12 row mt-3">
                                         <label class="lbl">Undertenants / Other Occupants</label>
                                         @if (UnderTenants.Count > 0)
                                         {
 
                                             @foreach (var undertenant in UnderTenants.Select((t, i) => new { t, i }))
                                             {
-                                                <input class="form-control mb-2"
-                                                       placeholder="Other Occupant Name"
-                                                       @bind-value="UnderTenants[undertenant.i]"
-                                                       @onblur="() => OnchangeAdditionalOccupants(undertenant.i)" />
+                                                <div class="col-11">
+                                                    <input class="form-control mb-2"
+                                                           placeholder="Other Occupant Name"
+                                                           @bind-value="UnderTenants[undertenant.i]"
+                                                           @onblur="() => OnchangeAdditionalOccupants(undertenant.i)" />
+                                                </div>
+                                                <div class="col-1">
+                                                    <button type="button"
+                                                            class="btn btn-delete" style="border :none;"
+                                                            @onclick="@(() => DeleteAdditionalOccupant(undertenant.i))">
+                                                        <i class="fa-solid fa-xmark"></i>
+                                                    </button>
+                                                </div>
+
                                             }
                                         }
+                                        <div class="col-5">
+                                            <button class=" btn btn-sm btn-primary btn-tenant mt-2" @onclick="AddUnder">＋ Add Undertenant/Occupant</button>
 
-                                        <button class="btn btn-sm btn-primary btn-tenant mt-2" @onclick="AddUnder">＋ Add Undertenant/Occupant</button>
+                                        </div>
 
                                     </div>
                                 </div>
@@ -1430,40 +1478,40 @@
                         <div class="card border-0">
                             <div class="card-body p-0">
 
-                         
+
                                 <!-- Add/Edit Fields -->
-                               
-                                    <div class="border rounded-3 p-3 mt-4 position-relative">
+
+                                <div class="border rounded-3 p-3 mt-4 position-relative">
 
 
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
                                             <label class="form-label required-label">Monthly Rent </label>
-                                                <InputNumber class="form-control" @bind-Value="legalcaseDto.MonthlyRent" placeholder="Enter Monthly rent" />
+                                            <InputNumber class="form-control" @bind-Value="legalcaseDto.MonthlyRent" placeholder="Enter Monthly rent" />
                                             <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label class="form-label required-label">Distribution Total</label>
-                                                <input class="form-control" placeholder="Enter Distribution Total" />
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label class="form-label required-label">Additional Charges</label>
-                                                <input class="form-control"  placeholder="Enter Additional Charges" />
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label class="form-label required-label">Legal Print</label>
-                                                <input class="form-control" placeholder="Enter Legal Print" />
-                                            </div>
-                                           
-
-
-                                          
                                         </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label required-label">Distribution Total</label>
+                                            <input class="form-control" placeholder="Enter Distribution Total" />
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label required-label">Additional Charges</label>
+                                            <input class="form-control" placeholder="Enter Additional Charges" />
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label required-label">Legal Print</label>
+                                            <input class="form-control" placeholder="Enter Legal Print" />
+                                        </div>
+
+
+
+
                                     </div>
-                                
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -1605,135 +1653,119 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <EditForm Model="@court" OnValidSubmit="SaveCourtChanges">
+                <EditForm EditContext="_editContext" OnValidSubmit="SaveCourtChanges">
                     <DataAnnotationsValidator />
-                    <ValidationSummary />
                     <div class="modal-body">
-                        <div class="card border-0">
-                            <div class="card-body p-0">
+                        <div class="">
+                            <div class=" p-0">
 
                                 <!-- Search + Add Section -->
-                                <div class="row mt-2">
-                                    @if (!showCourtFields)
-                                    {
-                                        <div class="col-md-6 position-relative">
-                                            <label class="form-label  required-label">Court</label>
-                                            <input type="text" class="form-control"
-                                                   placeholder="Search by court Address / Name / Part / Room"
-                                                   @bind-value="searchCourtText"
-                                                   @oninput="OnSearchCourtInput" @onfocusin="() => ShowCourtDropdown = true" @onfocusout="OnFocusOutCourt" />
-                                            @if (filteredCourts?.Count() > 0 && ShowCourtDropdown)
-                                            {
-                                                <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
-                                                    @foreach (var c in filteredCourts)
-                                                    {
-                                                        <li class="dropdown-item" @onclick="() => SelectCourt(c)">
-                                                             @c.Court
-                                                        </li>
-                                                    }
-                                                </ul>
-                                            }
-
-                                        </div>
-                                    }
-
-                                    @if (!showCourtFields)
-                                    {
-                                        <div class="col-md-1 d-flex justify-content-center align-items-end pb-2">
-                                            <span>OR</span>
-                                        </div>
-                                        <div class="col-md-2 d-flex align-items-end">
-                                            <button type="button" class="btn btn-primary base" @onclick="OnBindCourtAfter">+ Add</button>
-                                        </div>
-                                    }
-                                </div>
-
                                 <!-- Add/Edit Fields -->
-                                @if (showCourtFields)
-                                {
-                                    <div class="border rounded-3 p-3 mt-4 position-relative">
-                                       
+
+                                <div class=" rounded-3 p-3 position-relative">
+                                    @if (ShowClearBtn)
+                                    {
                                         <div>
                                             <button type="button"
                                                     class=" m-2"
-                                                    style="background: transparent; border: none; z-index: 9999; position:absolute; top:-2px ; right:0px"
+                                                    style="background: transparent; border: none; z-index: 9999; position:absolute; top:-15px ; right:0px"
                                                     @onclick="OnBindCourtCancel">
-                                                <i class="fa-solid fa-arrow-left"></i> Back
+                                                <i class="fa-solid fa-xmark"></i> Clear
                                             </button>
                                         </div>
+                                    }
 
 
-                                        <div class="row g-3">
+
+                                    <div class="row g-3" style="margin:0px;">
+                                        <div class=@(showCountyDropdown ? "col-md-4" : "col-md-6")>
+                                            <label class="form-label ">Court Type </label>
+                                            <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtTypeId" style="cursor:pointer;" @bind-Value:after="SelectCourtType">
+                                                <option value="">-- Select Type --</option>
+                                                @foreach (var l in CourtTypeList)
+                                                {
+                                                    <option value="@l.Id">@l.Name</option>
+                                                }
+                                            </InputSelect>
+                                        </div>
+                                        <!-- Court Location -->
+
+                                        <div class=@(showCountyDropdown ? "col-md-4" : "d-none")>
+
+                                            <label class="form-label fw-semibold">County / Borough </label>
+                                            <InputSelect class="form-select" @bind-Value="legalcaseDto.CountyId" style="cursor:pointer;" @bind-Value:after="SelectCounty">
+                                                <option value="">-- Select Location --</option>
+                                                @foreach (var l in CountyList)
+                                                {
+                                                    <option value="@l.Id">@l.Name</option>
+                                                }
+                                            </InputSelect>
+                                        </div>
+                                        <div class=@(showCountyDropdown ? "col-md-4" : "col-md-6")>
+                                            <label class="form-label fw-semibold">Court Location (Borough) <span class="text-danger">*</span></label>
+                                            <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtLocationId" style="cursor:pointer;" @onmousedown="ShowAllCourts" @bind-Value:after="SelectCourt">
+                                                <option value="">-- Select Type --</option>
+                                                @foreach (var l in filteredCourts)
+                                                {
+                                                    <option value="@l.Id">@l.Court</option>
+                                                }
+                                            </InputSelect>
+                                            <ValidationMessage For="() => legalcaseDto.CourtLocationId" />
+                                        </div>
+                                        
+                                        <!-- Part / Room # -->
+                                        @if (!showCourtPartDropdown)
+                                        {
                                             <div class="col-md-6">
-                                                <label class="form-label required-label">Court </label>
-                                                <InputText class="form-control" @bind-Value="court.Court" placeholder="Enter Court" />
-                                            </div>
-                                            <ValidationMessage For="() => court.Court"></ValidationMessage>
-                                            @if(isNewCourt)
-                                            {
-                                                <div class="col-md-6">
-                                                    <label class="form-label required-label">Part</label>
-                                                    <InputText class="form-control" @bind-Value="court.SelectedCourtPart.Part" placeholder="Enter Part" />
-                                                    <ValidationMessage For="() => court.SelectedCourtPart.Part"></ValidationMessage>
-                                                </div>
-                                            }
-                                            else
-                                            {
-                                                <div class="col-md-6 position-relative">
-                                                    <label class="form-label  required-label">Part</label>
-                                                    <InputText class="form-control d-none"
-                                                               @bind-Value="court.SelectedCourtPart.Part" />
-                                                    <input type="text" class="form-control"
-                                                           placeholder="Search by court Part"
-                                                           @bind-value="searchCourtPartText" @bind-value:after="BindPart"
-                                                           @oninput="OnSearchCourtPartInput" @onfocusin="() => ShowCourtPartDropdown = true" @onfocusout="OnFocusOutCourtPart" />
-                                                    @if (filteredCourtsPart?.Count() > 0 && ShowCourtPartDropdown)
-                                                    {
-                                                        <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
-                                                            @foreach (var c in filteredCourtsPart)
-                                                            {
-                                                                <li class="dropdown-item" @onclick="() => SelectCourtPart(c)">
-                                                                    @c.Part / @c.RoomNo
-                                                                </li>
-                                                            }
-                                                        </ul>
-                                                    }
-
-                                                <ValidationMessage For="() => court.SelectedCourtPart.Part"></ValidationMessage>
-                                                </div>
-                                            }
-
-                                            <div class="col-md-6">
-                                                <label class="form-label required-label">Room No.</label>
-                                                <InputText class="form-control" @bind-Value="court.SelectedCourtPart.RoomNo" placeholder="Enter Room No." />
-                                         
-                                            </div>
-                                            <ValidationMessage For="() => court.SelectedCourtPart.RoomNo"></ValidationMessage>
-                                            
-                                            <div class="col-md-6">
-                                                <label class="form-label ">Index</label>
-                                                <input class="form-control" placeholder="Enter Index" />
+                                                <label class="form-label fw-semibold">Part / Room #</label>
+                                                <InputText type="text" name="partRoom" class="form-control" @bind-Value="legalcaseDto.CourtRoom" />
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Judge</label>
-                                                <InputText class="form-control" @bind-Value="court.SelectedCourtPart.Judge" placeholder="Enter Judge" />
+                                                <InputText class="form-control" @bind-Value="legalcaseDto.Judge" placeholder="Enter Judge" />
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Part / Room #</label>
+                                                <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtPartId" style="cursor:pointer;" @bind-Value:after="SelectCourtPart">
+                                                    <option value="">-- Select Part --</option>
+                                                    @foreach (var l in CourtPartList)
+                                                    {
+                                                        <option value="@l.Id">@l.Part - @l.RoomNo</option>
+                                                    }
+                                                </InputSelect>
                                             </div>
 
                                             <div class="col-md-6">
-                                                <label class="form-label ">Docket No.</label>
-                                                <input class="form-control" placeholder="Enter Docket No." />
+                                                <label class="form-label">Judge</label>
+                                                <InputText class="form-control" @bind-Value="legalcaseDto.Judge" placeholder="Enter Judge" />
                                             </div>
+                                        }
 
+
+                                        <div class="col-md-6">
+                                            <label class="form-label ">Index</label>
+                                            <InputText class="form-control" placeholder="Enter Index" @bind-Value="legalcaseDto.Index"/>
                                         </div>
+
+
+                                        <div class="col-md-6">
+                                            <label class="form-label ">Docket No.</label>
+                                            <input class="form-control" placeholder="Enter Docket No." />
+                                        </div>
+
                                     </div>
-                                }
+                                </div>
+
                             </div>
                         </div>
                     </div>
 
                     <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary base" >Save</button>
+                        <button type="submit" class="btn btn-primary base">Save</button>
                     </div>
                 </EditForm>
             </div>
@@ -1929,10 +1961,11 @@
     private List<EditToBuildingDto> BuildingList = new();
     private List<EditToTenantDto> TenantList = new();
     private List<string> Tenants = new();
-    private List<string> UnderTenants = new() { "John Doe", "John Doe" };
+    private List<string> UnderTenants = new();
     private List<AdditioanlTenants> AdditionalTenantfromDbList = new();
     private List<AddtionalTenantDto> AdditionalTenantList = new();
     private List<AdditionalOccupantDto> AdditionalOccupantsList = new();
+    private List<AdditionalOccupantDto> AdditionalOccupantsFromDbList = new();
     private bool showCourtInfoAlert = false;
     private bool IsFormGenerated = false;
     public EditToTenantDto selectedTenant = new EditToTenantDto();
@@ -1950,7 +1983,7 @@
     [Parameter] public GenrateNoticeModel createAction { get; set; } = new();
     private bool showMarshalError = false;
     [Parameter] public EventCallback OnFormCreate { get; set; } = new();
-   
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -1962,23 +1995,15 @@
             loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
         }
+        _editContext = new EditContext(legalcaseDto);
+        messageStore = new ValidationMessageStore(_editContext);
 
         court.SelectedCourtPart ??= new CourtPartDto();
 
         ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
-        courts = await _courtService.GetAllCourtDataAsync();
-        //courts = new List<CourtDto>();
-        if (!courts.Any())
-        {
-            isNewCourt = true;
-            showCourtFields = true;
-        }
-        else
-        {
-            filteredCourts = courts;
-        }
 
-       
+
+
         spinnerservice.Show();
         await LoadCaseDetails();
         await LoadCaseForms();
@@ -2002,7 +2027,68 @@
         }
         StateHasChanged();
     }
+    private async Task SelectCourtType()
+    {
+        var CourtType = CourtTypeList.FirstOrDefault(ty => ty.Id == legalcaseDto.CourtTypeId);
+        var query = CourtLocationList.ToList();
+        if (CourtType!.Name.Contains("NYC"))
+        {
+            legalcaseDto.CountyId = null;
+            showCountyDropdown = true;
+            showCourtPartDropdown = true;
+            filteredCourts = query.Where(x => !x.CountyName.Contains("Nassau") && !x.CountyName.Contains("Westchester"))
+                                   .ToList();
+        }
+        else if (CourtType.Name.Contains("Nassau"))
+        {
+            showCountyDropdown = false;
+            showCourtPartDropdown = false;
+            var county = CountyList.Where(e => e.Name.Contains("Nassau")).FirstOrDefault();
+            legalcaseDto.CountyId = county.Id;
+            filteredCourts = query.Where(x => x.CountyName.Contains("Nassau"))
+                                   .ToList();
 
+        }
+        else if (CourtType.Name.Contains("Westchester"))
+        {
+            showCountyDropdown = false;
+            showCourtPartDropdown = false;
+            var county = CountyList.Where(e => e.Name.Contains("Westchester")).FirstOrDefault();
+            legalcaseDto.CountyId = county.Id;
+            filteredCourts = query.Where(x => x.CountyName.Contains("Westchester"))
+                                   .ToList();
+        }
+
+        ShowClearBtn = true;
+        StateHasChanged();
+    }
+    private void SelectCounty()
+    {
+
+        if (legalcaseDto.CountyId != null && legalcaseDto.CountyId != Guid.Empty)
+        {
+            filteredCourts = CourtLocationList.Where(x => x.CountyId == legalcaseDto.CountyId)
+                                .ToList();
+        }
+        ShowClearBtn = true;
+        StateHasChanged();
+    }
+    private void SelectCourtPart()
+    {
+
+        if (legalcaseDto.CourtPartId != null && legalcaseDto.CourtPartId != Guid.Empty)
+        {
+            var courtpart = CourtPartList.Where(x => x.Id == legalcaseDto.CourtPartId)
+                                .FirstOrDefault();
+            legalcaseDto.Judge = courtpart.Judge;
+
+            legalcaseDto.CourtRoom = courtpart.RoomNo;
+            legalcaseDto.CourtRoomNo = courtpart.RoomNo;
+            legalcaseDto.CourtPart = courtpart.Part;
+        }
+        ShowClearBtn = true;
+        StateHasChanged();
+    }
     private async Task OnSearchMarshalInput(ChangeEventArgs e)
     {
         searchmarshalText = e.Value?.ToString() ?? "";
@@ -2060,7 +2146,7 @@
 
     }
 
-    
+
 
     private void ResetMarshal()
     {
@@ -2076,37 +2162,37 @@
         spinnerservice.Hide();
     }
 
-    private async Task GenrateMarshalForm() 
+    private async Task GenrateMarshalForm()
     {
-   
-        spinnerservice.Show();     
+
+        spinnerservice.Show();
         if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty)
         {
             bool success = false;
 
-           
-                // CREATE new notice
+
+            // CREATE new notice
             success = await CaseFormRepository.GenerateWarrantNoticeAsync(
                     CurrentCaseId.Value,
                     "Request for Warrant (CIV-LT-100)",
-                    // "Written Demand to Terminate (move out)",
+                       // "Written Demand to Terminate (move out)",
                        Guid.Parse(loggedInUserId)
                 );
 
-                if (success)
-                {
-                    ToastService.ShowSuccess("Warrant Notice  has been generated successfully!");
+            if (success)
+            {
+                ToastService.ShowSuccess("Warrant Notice  has been generated successfully!");
                 await LoadCaseForms();
-                   await JS.InvokeVoidAsync("openTab", "activity");
-                }
+                await JS.InvokeVoidAsync("openTab", "activity");
             }
+        }
 
-         
-        
-        
+
+
+
 
         spinnerservice.Hide();
-    
+
     }
 
     private async Task SubmitMarshal()
@@ -2308,6 +2394,7 @@
                 TenantId = legalcaseDto.TenantId,
                 TenantName = legalcaseDto.TenantName,
                 UnitNumber = legalcaseDto.UnitNumber,
+                UnitOrApartmentNumber = legalcaseDto.UnitOrApartmentNumber,
                 IsUnitIllegalId = legalcaseDto.IsUnitIllegalId,
                 TenantRecord = legalcaseDto.TenantRecord,
                 HasPossession = legalcaseDto.HasPossession,
@@ -2351,7 +2438,7 @@
                 LastPayment = legalcaseDto.LastPayment,
                 Assistance = legalcaseDto.Assistance,
                 NextBussinessday = legalcaseDto.NextBussinessday,
-                leasedAttached = legalcaseDto.leasedAttached != null ? legalcaseDto.leasedAttached: false,
+                leasedAttached = legalcaseDto.leasedAttached != null ? legalcaseDto.leasedAttached : false,
                 ledgerAttached = legalcaseDto.ledgerAttached != null ? legalcaseDto.ledgerAttached : false,
                 NoticeproofAttached = legalcaseDto.NoticeproofAttached != null ? legalcaseDto.NoticeproofAttached : false,
                 RegistrationRentAttached = legalcaseDto.RegistrationRentAttached != null ? legalcaseDto.RegistrationRentAttached : false,
@@ -2369,7 +2456,9 @@
                 NoticeId = legalcaseDto.NoticeId,
                 ServiceMethodId = legalcaseDto.ServiceMethodId,
                 CountyId = legalcaseDto.CountyId,
+                CourtTypeId = legalcaseDto.CourtTypeId,
                 CountyName = legalcaseDto.CountyName ?? string.Empty,
+
             };
 
         }
@@ -2568,12 +2657,19 @@
     {
         // Copy current data into editable model
         Tenants.Clear();
+        UnderTenants.Clear();
         TenantList = await _tenantService.GetTenantsByClientIdAsync(legalcaseDto.BuildingId!.Value);
         ViewTenant = await _tenantService.GetByIdAsync(legalcaseDto.TenantId!.Value);
         AdditionalTenantfromDbList = await _additionalTenantService.GetAllAdditionalTenantsAsync(legalcaseDto.TenantId);
+        AdditionalOccupantsFromDbList = await _additionalOccupantService.GetAllAdditionalOccupantsAsync(legalcaseDto.Id);
+        AdditionalOccupantsList = AdditionalOccupantsFromDbList.ToList();
         searchTenantText = ViewTenant.UnitOrApartmentNumber!;
         Tenants.Add(legalcaseDto.TenantName);
         Tenants.AddRange(AdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}"));
+        UnderTenants.AddRange(AdditionalOccupantsFromDbList.Select(e => $"{e.Name}"));
+        var undertenaants = new List<string>() { "John Doe", "John Doe" };
+        UnderTenants.AddRange(undertenaants);
+
         StateHasChanged();
         JS.InvokeVoidAsync("showModal", "tenantModal");
     }
@@ -2585,6 +2681,16 @@
     public string searchText { get; set; }
     public bool showClientTextbox = false;
     public bool newClient = false;
+    bool showCountyDropdown = false;
+    bool ShowClearBtn = false;
+    bool showCourtPartDropdown = false;
+    private IEnumerable<CourtType> CourtTypeList = new List<CourtType>();
+    private List<EditToCountyDto> CountyList = new();
+    private List<CourtPartDto> CourtPartList = new();
+    private List<CourtDto> CourtLocationList = new();
+    private ValidationMessageStore messageStore;
+    private EditContext _editContext;
+
     private async void ShowClientModal()
     {
         // Copy current data into editable model
@@ -2665,34 +2771,54 @@
     }
     private async Task ShowCourtModal()
     {
-        if ((legalcaseDto.CourtLocationId == Guid.Empty || legalcaseDto.CourtLocationId == null ) && !isNewCourt)
+       // var selectedCourtId = legalcaseDto.CourtLocationId;
+        // if ((legalcaseDto.CourtLocationId == Guid.Empty || legalcaseDto.CourtLocationId == null) && !isNewCourt)
+        // {
+        //     showCourtFields = false;
+        //     searchCourtText = "";
+        // }
+        // else if ((legalcaseDto.CourtLocationId != Guid.Empty || legalcaseDto.CourtLocationId != null) && !isNewCourt)
+        // {
+        //     court = await _courtService.GetCourtByIdAsync(legalcaseDto!.CourtLocationId!.Value);
+        //     searchCourtText = court.Court;
+        //     showCourtFields = true; searchCourtPartText = "";
+        //     if (legalcaseDto.CourtPartId != Guid.Empty && legalcaseDto.CourtPartId != null)
+        //     {
+        //         court.SelectedCourtPart = court.CourtPart.Where(e => e.Id == legalcaseDto.CourtPartId).FirstOrDefault()!;
+        //         searchCourtPartText = court.SelectedCourtPart.Part;
+        //     }
+        //     else
+        //     {
+        //         filteredCourtsPart = court.CourtPart;
+        //     }
+        // }
+        if (!CourtTypeList.Any()) CourtTypeList = await _service.CourtTypeList();
+        if (!CountyList.Any()) CountyList = await countyService.GetAllCounty();
+        if (!CourtLocationList.Any()) CourtLocationList = await _courtService.GetAllCourtDataAsync();
+        if (legalcaseDto.CourtLocationId != null && legalcaseDto.CourtLocationId != Guid.Empty)
         {
-            showCourtFields = false;
-            searchCourtText = "";
+            if (!CourtPartList.Any()) CourtPartList = CourtLocationList.Where(e => e.Id == legalcaseDto.CourtLocationId).FirstOrDefault().CourtPart;
         }
-        else if ((legalcaseDto.CourtLocationId != Guid.Empty || legalcaseDto.CourtLocationId != null) && !isNewCourt)
+        if (legalcaseDto.CourtTypeId != null && legalcaseDto.CourtTypeId != Guid.Empty)
         {
-            court = await _courtService.GetCourtByIdAsync(legalcaseDto!.CourtLocationId!.Value);
-            searchCourtText = court.Court;
-            showCourtFields = true; searchCourtPartText = "";
-            if (legalcaseDto.CourtPartId != Guid.Empty && legalcaseDto.CourtPartId != null)
+            var casetype = CourtTypeList.Where(e => e.Id == legalcaseDto.CourtTypeId).FirstOrDefault();
+            if (casetype.Name.Contains("NYC"))
             {
-                court.SelectedCourtPart = court.CourtPart.Where(e => e.Id == legalcaseDto.CourtPartId).FirstOrDefault()!;
-                searchCourtPartText = court.SelectedCourtPart.Part;
-            }
-            else
-            {
-                filteredCourtsPart = court.CourtPart;
+                showCountyDropdown = true;
+                showCourtPartDropdown = true;
+                ShowClearBtn = true;
             }
         }
-
+        await ShowAllCourts();
+        // CaseTypeStepLoaded = true;
+        
 
         await JS.InvokeVoidAsync("showModal", "courtModal");
     }
 
     private async Task ShowRentModal()
     {
-       
+
         editRentModel = await _CaseService.GetCaseByIdAsync(legalcaseDto.Id);
 
         await JS.InvokeVoidAsync("showModal", "rentModal");
@@ -2732,7 +2858,7 @@
     private async Task OnSearchCourtPartInput(ChangeEventArgs e)
     {
         searchCourtPartText = e.Value?.ToString() ?? "";
-       
+
         if (!string.IsNullOrWhiteSpace(searchCourtPartText))
         {
             filteredCourtsPart = court.CourtPart
@@ -2753,7 +2879,7 @@
 
     }
 
-   
+
 
 
     // Select building from list
@@ -2774,26 +2900,95 @@
         IsNewBuilding = false;
         legalcaseDto.BuildingId = selected.Id;
     }
-    private void SelectCourt(CourtDto selected)
+    private async Task SelectCourt()
     {
-        court = selected;
-        filteredCourts.Clear();
-        searchCourtText = selected.Court ;
-        showCourtFields = true;
-        if(court.CourtPart.Count > 0)
+        var selectedCourtId = legalcaseDto.CourtLocationId;
+
+        var court = CourtLocationList.Where(ct => ct.Id == legalcaseDto.CourtLocationId).FirstOrDefault();
+        var Courttype = CourtTypeList.Where(cts => cts.Name.Contains(court.CountyName)).FirstOrDefault();
+        if (Courttype == null)
         {
-            filteredCourtsPart = court.CourtPart;
+            Courttype = CourtTypeList.Where(cts => cts.Name.Contains("NYC")).FirstOrDefault();
         }
-        searchCourtPartText = null;
-        legalcaseDto.CourtId = selected.Id;
-        legalcaseDto.CourtLocationId = selected.Id;
-        filteredCourts = courts;
+        if (court.CourtPart.Any())
+        {
+            showCourtPartDropdown = true;
+            CourtPartList = court.CourtPart.ToList();
+        }
+
+
+
+
+        if ((legalcaseDto.CourtTypeId == null || legalcaseDto.CourtTypeId == Guid.Empty) && legalcaseDto.CourtTypeId != Courttype.Id)
+        {
+
+            var CourtType = new CourtType();
+            var query = CourtTypeList.ToList();
+            if (court.CountyName.Contains("Nassau") || court.CountyName.Contains("Westchester"))
+            {
+                CourtType = query.Where(x => x.Name.Contains(legalcaseDto.County))
+                                  .FirstOrDefault();
+            }
+            else
+            {
+                showCountyDropdown = true;
+                CourtType = query.Where(x => !x.Name.Contains("Nassau") && !x.Name.Contains("Westchester"))
+                                    .FirstOrDefault();
+            }
+            legalcaseDto.CourtTypeId = CourtType.Id;
+            await SelectCourtType();
+        }
+
+        if ((legalcaseDto.CountyId == null || legalcaseDto.CountyId == Guid.Empty) && legalcaseDto.CountyId != court.CountyId)
+        {
+            var county = CountyList.FirstOrDefault(cts => cts.Id == court.CountyId);
+            // if (court.CountyName.Contains("Nassau") || court.CountyName.Contains("Westchester"))
+            // {
+            legalcaseDto.CountyId = county.Id;
+            legalcaseDto.County = county?.Name;
+
+            // }
+            SelectCounty();
+        }
+
+        await InvokeAsync(StateHasChanged);
+        legalcaseDto.CourtLocationId = null;
+        await Task.Delay(10);
+
+        if (filteredCourts.Any(x => x.Id == selectedCourtId))
+        {
+            legalcaseDto.CourtLocationId = selectedCourtId;
+            legalcaseDto.Court = court.Court;
+            legalcaseDto.CourtLocation = court.Court;
+
+            ShowClearBtn = true;
+        }
+        else
+        {
+            // Optional: clear the selection if invalid
+            legalcaseDto.CourtLocationId = Guid.Empty;
+        }
 
         StateHasChanged();
+    }
+
+    private async Task ShowAllCourts()
+    {
+        if (legalcaseDto.CountyId != null)
+        {
+            // Sirf selected county ke courts dikhao
+            filteredCourts = CourtLocationList
+                                .Where(x => x.CountyId == legalcaseDto.CountyId)
+                                .ToList();
+        }
+        else
+        {
+
+            filteredCourts = await _courtService.GetAllCourtDataAsync();
+        }
 
     }
 
-  
 
     private void SelectCourtPart(CourtPartDto selected)
     {
@@ -2830,15 +3025,25 @@
 
     private void OnBindRentCancel()
     {
-        
+
         editRentModel = new IntakeModel();
     }
     private void OnBindCourtCancel()
     {
-        showCourtFields = false;
-        isNewCourt = false;
-        searchCourtText = null;
-        court = new CourtDto();
+        legalcaseDto.CourtLocationId = null;
+        legalcaseDto.CourtTypeId = null;
+        legalcaseDto.CountyId = null;
+        showCountyDropdown = false;
+        showCourtPartDropdown = false;
+        legalcaseDto.CourtPartId = null;
+        legalcaseDto.Judge = null;
+        legalcaseDto.Court = null;
+        legalcaseDto.CourtRoom = null;
+        legalcaseDto.CourtRoomNo = null;
+        legalcaseDto.CourtPart = null;
+
+        ShowClearBtn = false;
+
     }
     private void OnBindHearingCancel()
     {
@@ -2857,7 +3062,7 @@
         AdditionalTenantList = new List<AddtionalTenantDto>();
     }
 
-  
+
 
     private async Task SaveRentChanges()
     {
@@ -2866,11 +3071,11 @@
         var addorupdate = false;
         if (legalcaseDto.Id != null)
         {
-            
-               
+
+
 
             var success = await _CaseService.UpdateCaseAsync(legalcaseDto);
-                addorupdate = true;
+            addorupdate = true;
 
             if (success != null)
             {
@@ -3193,6 +3398,35 @@
 
             if (success.HasValue)
             {
+                if (AdditionalOccupantsList.Any())
+                {
+                    foreach (var occupant in AdditionalOccupantsList)
+                    {
+                        occupant.LegalCaseId = success;
+                    }
+
+                    var toAdd = AdditionalOccupantsList
+                        .Where(o => o.IsDeleted != true && (o.Id == null || o.Id == Guid.Empty))
+                        .ToList();
+
+                    var toUpdate = AdditionalOccupantsList
+                    .Where(o => o.IsDeleted != true && (o.Id != null && o.Id != Guid.Empty))
+                    .ToList();
+
+                    var toDelete = AdditionalOccupantsList
+                        .Where(o => o.IsDeleted == true && (o.Id != Guid.Empty && o.Id != null))
+                        .ToList();
+
+                    if (toUpdate.Any())
+                        await _additionalOccupantService.UpdateAdditionalOccupantsAsync(toUpdate);
+
+                    if (toAdd.Any())
+                        await _additionalOccupantService.AddAdditionalOccupantsAsync(toAdd);
+
+                    if (toDelete.Any())
+                        await _additionalOccupantService.DeleteAdditionalOccupants(toDelete);
+                }
+
                 ToastService.ShowSuccess("Tenant details updated successfully!");
                 await JS.InvokeVoidAsync("hideModal", "tenantModal");
 
@@ -3213,197 +3447,145 @@
         spinnerservice.Hide();
     }
 
-    // private async Task SaveCourtChanges()
-    // {
-    //     spinnerservice.Show();
 
-    //     var addorupdate = false;
-    //     if (court.Id == null || court.Id == Guid.Empty)
-    //     {
-    //         var newCourt = new CourtDto();
-    //         // {
-    //         //     Address = court.Address,
-    //         //     // Part = court.Part,
-    //         //     // RoomNo = court.RoomNo,
-    //         //     // Judge = court.Judge,
-    //         //     Court = court.Court,
-    //         //     // ConferenceId = court.ConferenceId,
-    //         //     // CallIn = court.CallIn,
-    //         //     Phone = court.Phone,
-    //         //     // VirtualLink = court.VirtualLink,
-    //         //     Notes = court.Notes,
-    //         //     SelectedCourtPart = court
-
-    //         // };
-
-    //         newCourt = court;
-
-    //         var CourtId = await _courtService.AddCourtAsync(newCourt);
-    //         if (CourtId != null && CourtId != Guid.Empty)
-    //         {
-    //             var courtpartid = await courtpartService.AddCourtPartListAsync(new List<CourtPartDto> { court.SelectedCourtPart });
-    //             if (courtpartid != null)
-    //             {
-    //                 legalcaseDto.CourtPartId = courtpartid.FirstOrDefault();
-    //             }
-    //         }
-    //         addorupdate = true;
-    //         legalcaseDto.CourtId = CourtId;
-
-    //     }
-    //     // else
-    //     // {
-    //     //     if (court.Id != null)
-    //     //     {
-
-    //     //         var updateCourt = new CourtDto()
-    //     //         {
-    //     //             Address = court.Address,
-    //     //             Part = court.Part,
-    //     //             RoomNo = court.RoomNo,
-    //     //             Judge = court.Judge,
-    //     //             Court = court.Court,
-    //     //             ConferenceId = court.ConferenceId,
-    //     //             CallIn = court.CallIn,
-    //     //             Phone = court.Phone,
-    //     //             VirtualLink = court.VirtualLink,
-    //     //             Notes = court.Notes
-    //     //         };
-
-    //     //         await _courtService.UpdateCourtAsync(updateCourt);
-    //     //         addorupdate = true;
-    //     //     }
-    //     // }
-    //     else
-    //     {
-    //         legalcaseDto.CourtPartId = court.SelectedCourtPart.Id != Guid.Empty ? court.SelectedCourtPart.Id :null ;
-    //         legalcaseDto.CourtRoomNo = court.SelectedCourtPart.RoomNo!;
-    //         legalcaseDto.CourtPart = court.SelectedCourtPart.Part!;
-    //         legalcaseDto.CourtId = court.Id;
-    //     }
-        
+    private async Task<bool> ValidateCurrentStep()
+    {
+        messageStore.Clear();
 
 
-    //         var success = await _service.UpdateCaseAsync(legalcaseDto);
-
-    //         if (success.HasValue)
-    //         {
-    //             ToastService.ShowSuccess("Court details updated successfully!");
-    //             await JS.InvokeVoidAsync("hideModal", "courtModal");
-    //             // await Task.Delay(200);
-    //             await LoadCaseDetails();
-    //         }
-    //         else
-    //         {
-    //             ToastService.ShowError("Failed to update Court details.");
-    //         }
-        
-    //     // Map edited fields
+        Require(() => legalcaseDto.CourtLocationId, nameof(legalcaseDto.CourtLocationId), "Court Location is required");
+        // Require(() => legalcaseDto.DateNoticeServed, nameof(legalcaseDto.DateNoticeServed), "Notice Serve Date required");
 
 
-    //     spinnerservice.Hide();
-    // }
+
+        _editContext.NotifyValidationStateChanged();
+
+        // Get current validation messages (optional: for logging)
+        var errors = _editContext.GetValidationMessages().ToList();
+        Console.WriteLine($"Validation errors : {string.Join(", ", errors)}");
+
+        // Check if form is valid
+        bool isValid = !_editContext.GetValidationMessages().Any();
+
+        // Return validity
+        return isValid;
+    }
+    private void Require<T>(Expression<Func<T>> accessor, string fieldName, string message)
+    {
+        var value = accessor.Compile().Invoke();
+        var fieldIdentifier = new FieldIdentifier(legalcaseDto, fieldName);
+
+        // Clear old message first
+        messageStore.Clear(fieldIdentifier);
+
+        // Add message if invalid
+        bool isEmpty = value == null ||
+                       (value is string s && string.IsNullOrWhiteSpace(s)) ||
+                       (value is Guid g && g == Guid.Empty);
+
+        if (isEmpty)
+        {
+            messageStore.Add(fieldIdentifier, message);
+        }
+
+        _editContext.NotifyValidationStateChanged();
+    }
+
     private async Task SaveCourtChanges()
     {
+        if (!await ValidateCurrentStep()) return;
         spinnerservice.Show();
 
-        bool addOrUpdate = false;
-      
+        // bool addOrUpdate = false;
 
-     
+        // // if (string.IsNullOrWhiteSpace(court.SelectedCourtPart.Part))
+        // // {
+        // //     await JS.InvokeVoidAsync("alert", "Part is Required");
+        // //     await JS.InvokeVoidAsync("hideModal", "courtModal");
+        // //     await JS.InvokeVoidAsync("showModal", "courtModal");
+        // //     spinnerservice.Hide();
+        // //     return;
+        // // }
 
-if (string.IsNullOrWhiteSpace(court.SelectedCourtPart.Part))
-        {
-            await JS.InvokeVoidAsync("alert" ,"Part is Required");
-            await JS.InvokeVoidAsync("hideModal", "courtModal");
-            await JS.InvokeVoidAsync("showModal", "courtModal");
-            spinnerservice.Hide();
-            return;
-        }
+        // // ============= ADD COURT =============
+        // if (court.Id == null || court.Id == Guid.Empty)
+        // {
+        //     var newCourt = new CourtDto
+        //     {
+        //         Court = court.Court,
+        //         Address = court.Address,
+        //         Phone = court.Phone,
+        //         Notes = court.Notes
+        //     };
 
+        //     // 1️⃣ Insert Court
+        //     var courtId = await _courtService.AddCourtAsync(newCourt);
 
+        //     if (courtId != Guid.Empty)
+        //     {
+        //         // 2️⃣ Ensure CourtPart has CourtId
+        //         court.SelectedCourtPart.CourtId = courtId;
 
-        // ============= ADD COURT =============
-        if (court.Id == null || court.Id == Guid.Empty)
-        {
-            var newCourt = new CourtDto
-            {
-                Court = court.Court,
-                Address = court.Address,
-                Phone = court.Phone,
-                Notes = court.Notes
-            };
+        //         // 3️⃣ Insert CourtPart
+        //         var courtPartIds = await courtpartService.AddCourtPartListAsync(
+        //                                  new List<CourtPartDto> { court.SelectedCourtPart });
 
-            // 1️⃣ Insert Court
-            var courtId = await _courtService.AddCourtAsync(newCourt);
+        //         if (courtPartIds != null)
+        //         {
+        //             legalcaseDto.CourtPartId = courtPartIds.First();
+        //         }
 
-            if (courtId != Guid.Empty)
-            {
-                // 2️⃣ Ensure CourtPart has CourtId
-                court.SelectedCourtPart.CourtId = courtId;
+        //         // 4️⃣ Assign CourtId to Case
+        //         legalcaseDto.CourtId = courtId;
 
-                // 3️⃣ Insert CourtPart
-                var courtPartIds = await courtpartService.AddCourtPartListAsync(
-                                         new List<CourtPartDto> { court.SelectedCourtPart });
+        //         addOrUpdate = true;
+        //     }
+        // }
+        // // ============= UPDATE COURT =============
+        // else
+        // {
+        //     // If NEW CourtPart added under existing COURT
+        //     if (court.SelectedCourtPart.Id == Guid.Empty)
+        //     {
+        //         court.SelectedCourtPart.CourtId = court.Id;
 
-                if (courtPartIds != null)
-                {
-                    legalcaseDto.CourtPartId = courtPartIds.First();
-                }
+        //         var newPartList = await courtpartService.AddCourtPartListAsync(
+        //                               new List<CourtPartDto> { court.SelectedCourtPart });
 
-                // 4️⃣ Assign CourtId to Case
-                legalcaseDto.CourtId = courtId;
+        //         if (newPartList != null)
+        //         {
+        //             legalcaseDto.CourtPartId = newPartList.First();
+        //         }
+        //     }
+        //     else
+        //     {
+        //         // Existing part selected
+        //         legalcaseDto.CourtPartId = court.SelectedCourtPart.Id;
+        //     }
 
-                addOrUpdate = true;
-            }
-        }
-        // ============= UPDATE COURT =============
-        else
-        {
-            // If NEW CourtPart added under existing COURT
-            if (court.SelectedCourtPart.Id == Guid.Empty)
-            {
-                court.SelectedCourtPart.CourtId = court.Id;
+        //     legalcaseDto.CourtRoomNo = court.SelectedCourtPart.RoomNo;
+        //     legalcaseDto.CourtPart = court.SelectedCourtPart.Part;
+        //     legalcaseDto.CourtId = court.Id;
 
-                var newPartList = await courtpartService.AddCourtPartListAsync(
-                                      new List<CourtPartDto> { court.SelectedCourtPart });
-
-                if (newPartList != null)
-                {
-                    legalcaseDto.CourtPartId = newPartList.First();
-                }
-            }
-            else
-            {
-                // Existing part selected
-                legalcaseDto.CourtPartId = court.SelectedCourtPart.Id;
-            }
-
-            legalcaseDto.CourtRoomNo = court.SelectedCourtPart.RoomNo;
-            legalcaseDto.CourtPart = court.SelectedCourtPart.Part;
-            legalcaseDto.CourtId = court.Id;
-
-            addOrUpdate = true;
-        }
-
+        //     addOrUpdate = true;
+        // }
 
         // ============= UPDATE CASE =============
-        if (addOrUpdate)
-        {
-            var success = await _service.UpdateCaseAsync(legalcaseDto);
 
-            if (success.HasValue)
-            {
-                ToastService.ShowSuccess("Court details updated successfully!");
-                await JS.InvokeVoidAsync("hideModal", "courtModal");
-              
-                await LoadCaseDetails();
-            }
-            else
-            {
-                ToastService.ShowError("Failed to update Court details.");
-            }
+        var success = await _service.UpdateCaseAsync(legalcaseDto);
+
+        if (success.HasValue)
+        {
+            ToastService.ShowSuccess("Court details updated successfully!");
+            await JS.InvokeVoidAsync("hideModal", "courtModal");
+
+            await LoadCaseDetails();
         }
+        else
+        {
+            ToastService.ShowError("Failed to update Court details.");
+        }
+
 
         spinnerservice.Hide();
     }
@@ -3563,11 +3745,41 @@ if (string.IsNullOrWhiteSpace(court.SelectedCourtPart.Part))
         Tenants.Add(string.Empty);
     }
 
+
+    int defaultCount = 2;
     void AddUnder()
     {
-        UnderTenants.Add(string.Empty);
+        int insertIndex = UnderTenants.Count - defaultCount;
+        UnderTenants.Insert(insertIndex, string.Empty);
     }
+    void DeleteAdditionalOccupant(int index)
+    {
+        // Safety check
+        if (index < 0 || index <= UnderTenants.Count)
+            return;
 
+        // Remove from UI text list
+        UnderTenants.RemoveAt(index);
+
+        // Remove or mark deleted in DTO list
+        if (index < AdditionalOccupantsList.Count)
+        {
+            var occupant = AdditionalOccupantsList[index];
+
+            // If it already exists in DB → soft delete
+            if (occupant.Id != Guid.Empty)
+            {
+                occupant.IsDeleted = true;
+                occupant.IsActive = false;
+                occupant.IsVisible = false;
+            }
+            else
+            {
+                // New, unsaved → remove completely
+                AdditionalOccupantsList.RemoveAt(index);
+            }
+        }
+    }
 
 
     void OnchangeAdditionalOccupants(int index)
@@ -3581,6 +3793,7 @@ if (string.IsNullOrWhiteSpace(court.SelectedCourtPart.Part))
             if (existing != null)
             {
                 AdditionalOccupantsList.RemoveAt(index);
+                UnderTenants.RemoveAt(index);
             }
             return;
         }

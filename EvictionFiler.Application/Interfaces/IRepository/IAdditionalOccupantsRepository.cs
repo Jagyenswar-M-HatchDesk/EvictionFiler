@@ -14,7 +14,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
         Task AddAdditionalOccupant(List<AdditionalOccupantDto> tenant);
         Task<List<AdditionalOccupants>> GetAllOccupantsByCaseId(Guid legalcaseId);
         Task<AdditionalOccupants> GetAllOccupantsById(Guid Id);
-        Task<bool> UpdateAdditionalOccupant(AdditionalOccupantDto occupant);
+        Task<bool> UpdateAdditionalOccupant(List<AdditionalOccupantDto> occupant);
 
     }
 }

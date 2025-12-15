@@ -220,7 +220,9 @@ namespace EvictionFiler.Infrastructure.Repositories
                         BuildingCity = building.Cities.Name,
                         BuildingState = building.State.Name,
                         BuildingZip = building.Zipcode,
-                        BuildindAptno = tenant.UnitOrApartmentNumber
+                        BuildindAptno = tenant.UnitOrApartmentNumber,
+                        leaseExpired = lc.DateNoticeServed,
+                        MoveOutdate = lc.ExpirationDate,
                     }
                 ).FirstOrDefaultAsync();
 
@@ -303,6 +305,10 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{Building_AptNo}}", caseDetails.BuildindAptno ?? "")
     .Replace("{{Building_Zip}}", caseDetails.BuildingZip ?? "")
     .Replace("{{Building_City}}", caseDetails.BuildingCity ?? "")
+    .Replace("{{LeaseExpiredDate}}", caseDetails.leaseExpired.ToString() ?? "")
+    .Replace("{{RentalExpiredDate}}", "")
+    .Replace("{{MoveOutDate}}", "")
+    .Replace("{{Floors}}", "")
     .Replace("{{Tenant_Names}}", firstTenantName);
 
 
