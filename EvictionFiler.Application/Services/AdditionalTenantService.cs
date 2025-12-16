@@ -29,7 +29,7 @@ namespace EvictionFiler.Application.Services
             return additional;
         }
 
-        public async Task<bool> UpdateAdditionalTenantAsync(AddtionalTenantDto tenant)
+        public async Task<bool> UpdateAdditionalTenantAsync(List<AddtionalTenantDto> tenant)
         {
             return await _additionalTenantsRepository.UpdateAdditionalTenant(tenant);
         }

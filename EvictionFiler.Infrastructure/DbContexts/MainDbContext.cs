@@ -63,6 +63,7 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<State> MstStates { get; set; }
         public DbSet<CaseProgram> MstCaseProgram { get; set; }
         public DbSet<Courts> Courts { get; set; }
+        public DbSet<CaseAdditionalTenants> CaseAdditionalTenants { get; set; }
 
         public DbSet<FeesCatalog> FeesCatalogs { get; set; }
         public DbSet<FeesCatalogCourtAppearance> FeesCatalogCourtAppearances { get; set; }
@@ -80,6 +81,7 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<CourtType> MstCourtType { get; set; }
         public DbSet<CaseAdditionalPetitioner> CaseAdditionalPetitioners { get; set; }
         public DbSet<CaseAdditionalRespondent> CaseAdditionalResondents { get; set; }
+        public DbSet<CaseNoticeInfo> CaseNoticeInfo { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

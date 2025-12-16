@@ -128,7 +128,7 @@ namespace EvictionFiler.Application.Services
                 BuildingUnits = appartment.BuildingUnits,
                 BuildingTypeId = appartment.BuildingTypeId,
                 RegistrationStatusId = appartment.RegistrationStatusId,
-
+                ManagingAgent = appartment.ManagingAgent,
 
                 LandlordId = appartment.LandlordId,
             };
@@ -239,6 +239,7 @@ namespace EvictionFiler.Application.Services
                 if (entity.BuildingTypeId != appartment.BuildingTypeId) entity.BuildingTypeId = appartment.BuildingTypeId;
                 if (entity.PremiseTypeId != appartment.PremiseTypeId) entity.PremiseTypeId = appartment.PremiseTypeId;
                 if (entity.RegistrationStatusId != appartment.RegistrationStatusId) entity.RegistrationStatusId = appartment.RegistrationStatusId;
+                if (entity.ManagingAgent != appartment.ManagingAgent) entity.ManagingAgent = appartment.ManagingAgent;
 
                 _repository.UpdateAsync(entity);
                 await _unitOfWork.SaveChangesAsync();

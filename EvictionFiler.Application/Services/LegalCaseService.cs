@@ -1,6 +1,7 @@
 ﻿using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.ArrearLedgerDtos;
+using EvictionFiler.Application.DTOs.CaseNoticeInfoDtos;
 using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.LegalCaseDto;
@@ -50,7 +51,8 @@ namespace EvictionFiler.Application.Services
         private readonly ICourtTypeRepository _courtTypeRepository;
         private readonly ICaseRespondentRepository _respondantRepository;
         private readonly ICasePetitionerRepository _petitionerRepository;
-        public LegalCaseService(ICasesRepository repository, ICaseRespondentRepository respondantRepository, ICasePetitionerRepository petitionerRepository, ICourtTypeRepository courtTypeRepository, ICityRepository cityRepository, ISubCaseTypeRepository subCaseTypeRepository, IServiceMethodRepository serviceMethod, IFilingMethodRepository filingMethod, IArrearLedgerRepository arrearLedger, IReportingTypePerDiemRepository reportingTypePerDiemRepository, IDocumentIntructionsTypesRepository documentIntructionsTypesRepository, IAppearanceTypePerDiemRepository appearanceTypePerDiemRepository, ICaseTypePerDiemRepository caseTypePerDiemRepository, ICaseDocument caseDocument, IReliefPetitionerTypeRepository reliefPetitionerTypeRepository, IReliefRespondenTypeRepository reliefRespondenTypeRepository, IAppearanceTypeRepository appearanceTypeRepository, IDefenseTypeRepository defenseTypeRepository, IHarassmentTypeRepository harassmentTypeRepository, ICaseTypeHPDRepository caseTypeHPDRepository, ITenantRepository tenantRepo, ILandLordRepository landlordrepo, ICaseTypeRepository caseTypeRepository, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
+        private readonly ICaseNoticeInfoRepository _caseNoticeInfoRepository;
+        public LegalCaseService(ICasesRepository repository, ICaseNoticeInfoRepository caseNoticeInfoRepository, ICaseRespondentRepository respondantRepository, ICasePetitionerRepository petitionerRepository, ICourtTypeRepository courtTypeRepository, ICityRepository cityRepository, ISubCaseTypeRepository subCaseTypeRepository, IServiceMethodRepository serviceMethod, IFilingMethodRepository filingMethod, IArrearLedgerRepository arrearLedger, IReportingTypePerDiemRepository reportingTypePerDiemRepository, IDocumentIntructionsTypesRepository documentIntructionsTypesRepository, IAppearanceTypePerDiemRepository appearanceTypePerDiemRepository, ICaseTypePerDiemRepository caseTypePerDiemRepository, ICaseDocument caseDocument, IReliefPetitionerTypeRepository reliefPetitionerTypeRepository, IReliefRespondenTypeRepository reliefRespondenTypeRepository, IAppearanceTypeRepository appearanceTypeRepository, IDefenseTypeRepository defenseTypeRepository, IHarassmentTypeRepository harassmentTypeRepository, ICaseTypeHPDRepository caseTypeHPDRepository, ITenantRepository tenantRepo, ILandLordRepository landlordrepo, ICaseTypeRepository caseTypeRepository, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
         {
             _repository = repository;
             _tenantRepo = tenantRepo;
@@ -78,6 +80,7 @@ namespace EvictionFiler.Application.Services
             _courtTypeRepository = courtTypeRepository;
             _respondantRepository = respondantRepository;
             _petitionerRepository = petitionerRepository;
+            _caseNoticeInfoRepository = caseNoticeInfoRepository;
 
         }
 
@@ -501,7 +504,7 @@ namespace EvictionFiler.Application.Services
                         TenantId = caseEntity.TenantId,
                         TenantName = $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}",
                         ApartmentNumber = caseEntity.Buildings?.ApartmentCode,
-                        
+
                         WrittenLease = caseEntity.WrittenLease,
 
                         OralAgreeMent = caseEntity.OralAgreeMent,
@@ -605,7 +608,7 @@ namespace EvictionFiler.Application.Services
                         CourtTypeId = caseEntity.CourtTypeId,
                         CountyName = caseEntity.CourtLocation?.County?.Name ?? string.Empty,
 
-                        
+
 
                         ArrearLedgers = caseEntity.ArrearLedgers != null ? caseEntity.ArrearLedgers.Select(e => new ArrearLedgerDto()
                         {
@@ -938,7 +941,7 @@ namespace EvictionFiler.Application.Services
                 existingCase.PerDiemAttorneyname = legalCase.PerDiemAttorneyname;
                 existingCase.PerDiemDate = legalCase.PerDiemDate;
                 existingCase.PerDiemSignature = legalCase.PerDiemSignature;
-                existingCase.CourtPartId = legalCase.CourtPartId != Guid.Empty  ? legalCase.CourtPartId : null;
+                existingCase.CourtPartId = legalCase.CourtPartId != Guid.Empty ? legalCase.CourtPartId : null;
 
                 existingCase.LastPayment = legalCase.LastPayment;
                 existingCase.Assistance = legalCase.Assistance;
@@ -1429,6 +1432,45 @@ namespace EvictionFiler.Application.Services
             await _petitionerRepository.DeleteAsync(petitioner.Id);
             return await _unitOfWork.SaveChangesAsync() > 0;
         }
+
+        public async Task<bool> AddCaseNoticeInfo(CaseNoticeInfoDto dto)
+        {
+            try
+            {
+                var Casenoticeinfo =  new CaseNoticeInfo()
+                {
+                    LegalCaseId = dto.LegalCaseId,
+                    DateNoticeServed = dto.DateNoticeServed,
+                    AdditionalComments  = dto.AdditionalComments,
+                    CalcNoticeLength = dto.CalcNoticeLength,
+                    DateofLastPayment = dto.DateofLastPayment,
+                    DateRentId = dto.DateRentId,
+                    ExpirationDate = dto.ExpirationDate,
+                    FormtypeId = dto.FormTypeId,
+                    TenancyTypeId = dto.TenancyTypeId,
+                    GoodCauseExempt = dto.GoodCauseExempt,
+                    LastPaidAmt = dto.LastPaidAmt,
+                    LeasedAttached = dto.LeasedAttached,
+                    LedgerAttached = dto.LedgerAttached,
+                    MonthlyRent = dto.MonthlyRent,
+                    NoticeProofattached = dto.NoticeProofattached,
+                    PredicateNotice = dto.PredicateNotice,
+                    RegistrationRentHistory = dto.RegistrationRentHistory,
+                    SocialService = dto.SocialService,
+                    TenantShare = dto.TenantShare,
+                    Totalowed = dto.Totalowed,
+                    CreatedOn = DateTime.Now,
+                };
+                await _caseNoticeInfoRepository.AddAsync(Casenoticeinfo);
+                return await _unitOfWork.SaveChangesAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
+        }
+
     }
 
 

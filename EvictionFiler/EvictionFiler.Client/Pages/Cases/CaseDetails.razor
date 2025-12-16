@@ -48,6 +48,7 @@
 @inject IMarshalService _marshalService
 @inject ICourtpartServices courtpartService
 @inject ICountyService countyService
+@inject ICaseAdditionalTenantService _caseAdditionalTenant
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization;
 @using EvictionFiler.Domain.Entities
@@ -1257,22 +1258,37 @@
                                 </div>
 
                                 <div class="row mt-3">
-                                    <div class="col-12">
+                                    <div class="col-12 row">
                                         <label class="lbl">Tenants</label>
                                         @if (Tenants.Count > 0)
                                         {
 
                                             @foreach (var tenant in Tenants.Select((t, i) => new { t, i }))
                                             {
-                                                <input class="form-control mb-2"
-                                                       placeholder="Tenant Name"
-                                                       @bind-value="Tenants[tenant.i]"
-                                                       @onblur="() => OnchangeAdditionalTenant(tenant.i)" />
+                                                <div class="col-11">
+                                                    <input class="form-control mb-2"
+                                                           placeholder="Tenant Full Name"
+                                                           @bind-value="Tenants[tenant.i]"
+                                                           @onblur="() => OnchangeAdditionalTenant(tenant.i)" />
+                                                </div>
+                                                if (tenant.i > 0)
+                                                {
+                                                    <div class="col-1">
+                                                        <button type="button"
+                                                                class="btn btn-delete" style="border :none;"
+                                                                @onclick="@(() => DeleteAdditionalTenant(tenant.i))">
+                                                            <i class="fa-solid fa-xmark"></i>
+                                                        </button>
+                                                    </div>
+                                                }
+
                                             }
 
-                                        }
-                                        <button class="btn btn-sm btn-primary btn-tenant mt-2" @onclick="AddTenant">＋ Add Tenant</button>
 
+                                        }
+                                        <div class="col-5">
+                                            <button class="btn btn-sm btn-primary btn-tenant mt-2" @onclick="AddTenant">＋ Add Tenant</button>
+                                        </div>
 
                                     </div>
 
@@ -1402,8 +1418,14 @@
 
                                             <div class="col-md-6">
                                                 <label class="form-label required-label">Borough / City</label>
-                                                <InputText class="form-control" @bind-Value="editBuildingModel.CityName" placeholder="Enter Borough / City" />
-                                                <ValidationMessage For="() => editBuildingModel.CityName" />
+                                                <InputSelect class="form-select" @bind-Value="editBuildingModel.CityId">
+                                                    <option value="">-- Select State --</option>
+                                                    @foreach (var s in CityList)
+                                                    {
+                                                        <option value="@s.Id">@s.Name</option>
+                                                    }
+                                                </InputSelect>
+                                                <ValidationMessage For="() => editBuildingModel.CityId" />
                                             </div>
 
                                             <div class="col-md-6">
@@ -1958,11 +1980,13 @@
     private List<EditToTenantDto> filteredTenant = new();
     private List<State> StateList = new();
     private List<RegulationStatus> RegulationList = new();
+    private IEnumerable<City> CityList = new List<City>();
     private List<EditToBuildingDto> BuildingList = new();
     private List<EditToTenantDto> TenantList = new();
     private List<string> Tenants = new();
     private List<string> UnderTenants = new();
     private List<AdditioanlTenants> AdditionalTenantfromDbList = new();
+    private List<CaseAdditionalTenants> CaseAdditionalTenantfromDbList = new();
     private List<AddtionalTenantDto> AdditionalTenantList = new();
     private List<AdditionalOccupantDto> AdditionalOccupantsList = new();
     private List<AdditionalOccupantDto> AdditionalOccupantsFromDbList = new();
@@ -2001,7 +2025,7 @@
         court.SelectedCourtPart ??= new CourtPartDto();
 
         ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
-
+        if (!CityList.Any()) CityList = await _service.GetAllCitiesList();
 
 
         spinnerservice.Show();
@@ -2660,12 +2684,14 @@
         UnderTenants.Clear();
         TenantList = await _tenantService.GetTenantsByClientIdAsync(legalcaseDto.BuildingId!.Value);
         ViewTenant = await _tenantService.GetByIdAsync(legalcaseDto.TenantId!.Value);
-        AdditionalTenantfromDbList = await _additionalTenantService.GetAllAdditionalTenantsAsync(legalcaseDto.TenantId);
+        if (!CaseAdditionalTenantfromDbList.Any()) CaseAdditionalTenantfromDbList = await _caseAdditionalTenant.GetAllAdditionalCaseTenantsAsync(legalcaseDto.Id);
+
+        // AdditionalTenantfromDbList = await _additionalTenantService.GetAllAdditionalTenantsAsync(legalcaseDto.TenantId);
         AdditionalOccupantsFromDbList = await _additionalOccupantService.GetAllAdditionalOccupantsAsync(legalcaseDto.Id);
         AdditionalOccupantsList = AdditionalOccupantsFromDbList.ToList();
         searchTenantText = ViewTenant.UnitOrApartmentNumber!;
         Tenants.Add(legalcaseDto.TenantName);
-        Tenants.AddRange(AdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}"));
+        Tenants.AddRange(CaseAdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}"));
         UnderTenants.AddRange(AdditionalOccupantsFromDbList.Select(e => $"{e.Name}"));
         var undertenaants = new List<string>() { "John Doe", "John Doe" };
         UnderTenants.AddRange(undertenaants);
@@ -2771,7 +2797,7 @@
     }
     private async Task ShowCourtModal()
     {
-       // var selectedCourtId = legalcaseDto.CourtLocationId;
+        // var selectedCourtId = legalcaseDto.CourtLocationId;
         // if ((legalcaseDto.CourtLocationId == Guid.Empty || legalcaseDto.CourtLocationId == null) && !isNewCourt)
         // {
         //     showCourtFields = false;
@@ -2811,7 +2837,7 @@
         }
         await ShowAllCourts();
         // CaseTypeStepLoaded = true;
-        
+
 
         await JS.InvokeVoidAsync("showModal", "courtModal");
     }
@@ -3362,7 +3388,7 @@
                     existing.FirstName = firstName;
                     existing.LastName = lastName;
                     existing.UpdatedOn = DateTime.Now;
-                    await _additionalTenantService.UpdateAdditionalTenantAsync(existing);
+                    await _additionalTenantService.UpdateAdditionalTenantAsync(new List<AddtionalTenantDto>() { existing });
 
                 }
                 else
@@ -3686,59 +3712,101 @@
 
     }
 
-    void OnchangeAdditionalTenant(int index)
+    void DeleteAdditionalTenant(int index)
     {
-        if (index > 0)
+        // Index 0 = primary tenant → never delete
+        if (index <= 0 || index >= Tenants.Count)
+            return;
+
+        var name = Tenants[index]?.Trim();
+
+        // Remove UI row
+        Tenants.RemoveAt(index);
+
+        if (string.IsNullOrWhiteSpace(name))
+            return;
+
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var firstName = parts.FirstOrDefault() ?? "";
+        var lastName = parts.Length > 1 ? parts.Last() : "";
+
+        var occupant = AdditionalTenantList
+            .FirstOrDefault(x =>
+                x.FirstName == firstName &&
+                x.LastName == lastName &&
+                x.IsDeleted != true);
+
+        if (occupant == null)
+            return;
+
+        // Persisted → soft delete
+        if (occupant.Id != Guid.Empty)
         {
-            var name = Tenants[index];
-            var splittedname = name.Split(' ');
-            // If cleared, remove from AdditionalTenantList
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                var existing = AdditionalTenantList.ElementAtOrDefault(index - 1);
-                if (existing != null)
-                {
-                    AdditionalTenantList.RemoveAt(index - 1);
-                }
-                return;
-            }
-
-            // Update or add
-            if (index - 1 < AdditionalTenantList.Count)
-            {
-                AdditionalTenantList[index - 1].FirstName = splittedname[0];
-                AdditionalTenantList[index - 1].LastName = splittedname[1];
-            }
-            else
-            {
-                var additional = new AddtionalTenantDto()
-                {
-                    FirstName = splittedname[0],
-                    LastName = splittedname[1],
-                    TenantId = TenantList.Select(e => e.Id).FirstOrDefault(),
-                    CreatedOn = DateTime.Now,
-                    IsActive = true,
-                    IsDeleted = false, // better to keep false
-                    IsVisible = true
-                };
-
-                AdditionalTenantList.Add(additional);
-            }
-
-            // Update legalcaseDto
-            if (legalcaseDto.TenantName == null)
-            {
-                legalcaseDto.TenantName = AdditionalTenantList.Select(e => $"{e.FirstName} {e.LastName}").FirstOrDefault() ?? "";
-            }
+            occupant.IsDeleted = true;
+            occupant.IsActive = false;
+            occupant.IsVisible = false;
         }
         else
         {
-            var name = Tenants[index];
-            var splittedname = name.Split(' ');
-            legalcaseDto.TenantName = name;
+            // New → hard delete
+            AdditionalTenantList.Remove(occupant);
+        }
+    }
+
+    void OnchangeAdditionalTenant(int index)
+    {
+        // index 0 = primary tenant
+        if (index <= 0 || index >= Tenants.Count)
+        {
+            if (legalcaseDto.TenantName == null)
+            {
+                legalcaseDto.TenantName = Tenants[0];
+            }
+            return;
 
         }
 
+        var name = Tenants[index]?.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+            return;
+
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var firstName = parts.FirstOrDefault() ?? "";
+        var lastName = parts.Length > 1 ? parts.Last() : "";
+
+        // Map UI row → ACTIVE additional tenants only
+        int activeIndex = index - 1;
+
+        var activeTenants = AdditionalTenantList
+            .Where(x => x.IsDeleted != true)
+            .ToList();
+
+        if (activeIndex < activeTenants.Count)
+        {
+            // RENAME / UPDATE existing tenant
+            var dto = activeTenants[activeIndex];
+
+            dto.FirstName = firstName;
+            dto.LastName = lastName;
+            dto.BuildingId = legalcaseDto.BuildingId;
+            dto.UnitorApartmentNumber = legalcaseDto.UnitOrApartmentNumber;
+        }
+        else
+        {
+            // NEW additional tenant
+            AdditionalTenantList.Add(new AddtionalTenantDto
+            {
+                FirstName = firstName,
+                LastName = lastName,
+                TenantId = legalcaseDto?.TenantId ?? Guid.Empty,
+                BuildingId = legalcaseDto.BuildingId,
+                UnitorApartmentNumber = legalcaseDto.UnitOrApartmentNumber,
+                CreatedOn = DateTime.Now,
+                IsActive = true,
+                IsDeleted = false,
+                IsVisible = true
+            });
+        }
     }
     void AddTenant()
     {

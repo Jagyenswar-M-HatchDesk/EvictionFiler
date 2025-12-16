@@ -1,5 +1,6 @@
 ﻿using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.ArrearLedgerDtos;
+using EvictionFiler.Application.DTOs.CaseNoticeInfoDtos;
 using EvictionFiler.Application.DTOs.LegalCaseDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Domain.Entities;
@@ -54,6 +55,8 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<List<CaseAdditionalPetitioner>> GetAdditionalpetitioner(Guid Petitionerid);
         Task<bool> DeleteAdditionalrespondent(CaseAdditionalRespondent respondent);
         Task<bool> DeleteAdditionalpetitioner(CaseAdditionalPetitioner petitioner);
-        
+
+        Task<bool> AddCaseNoticeInfo(CaseNoticeInfoDto dto);
+
     }
 }

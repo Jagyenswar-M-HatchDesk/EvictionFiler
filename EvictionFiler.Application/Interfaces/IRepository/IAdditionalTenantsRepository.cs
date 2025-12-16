@@ -14,6 +14,6 @@ namespace EvictionFiler.Application.Interfaces.IRepository
         Task AddAdditionalTenant(List<AddtionalTenantDto> tenant);
         Task<List<AdditioanlTenants>> GetAdditionalTenants(Guid? Id);
         Task<AdditioanlTenants> GetAdditionalTenantsById(Guid? Id);
-        Task<bool> UpdateAdditionalTenant(AddtionalTenantDto tenant);
+        Task<bool> UpdateAdditionalTenant(List<AddtionalTenantDto> tenant);
     }
 }

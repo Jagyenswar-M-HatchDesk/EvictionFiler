@@ -165,6 +165,7 @@ namespace EvictionFiler.Application.Services
                             ? userDict[client.CreatedBy]
                             : "Admin",
 					ClientTypeName = client.ClientType !=null ? client.ClientType.Name : string.Empty,
+					ClientTypeId = client.ClientTypeId ,
                 })
                 .ToList();
 
@@ -643,6 +644,8 @@ namespace EvictionFiler.Application.Services
 							MDRNumber = b.MDRNumber,
 							PetitionerInterest = b.PetitionerInterest,
 							RegulationStatusId = b.RegulationStatusId,
+							RegistrationStatusId = b.RegistrationStatusId,
+							ManagingAgent = b.ManagingAgent,
 							BuildingUnits = b.BuildingUnits,
 							LandlordId = landlord.Id
 						};

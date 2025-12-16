@@ -1,0 +1,42 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EvictionFiler.Application.DTOs.CaseNoticeInfoDtos
+{
+    public class CaseNoticeInfoDto
+    {
+        public Guid? Id { get; set; }
+        [Required]
+        public Guid? DateRentId { get; set; }
+        [Required]
+        public Guid? TenancyTypeId { get; set; }
+        [Required]
+        public Guid? FormTypeId { get; set; }
+        [Required]
+        public int? MonthlyRent { get; set; }
+        public Guid? LegalCaseId { get; set; }
+        public int? TenantShare { get; set; }
+        public string? SocialService { get; set; }
+        public string? PredicateNotice { get; set; }
+        public string? AdditionalComments { get; set; }
+        public int? LastPaidAmt { get; set; }
+        public int? Totalowed { get; set; }
+        public int? CalcNoticeLength { get; set; }
+        [Required]
+        public decimal? BillAmount { get; set; }
+        public DateOnly? DateofLastPayment { get; set; }
+        [Required]
+        public DateOnly? DateNoticeServed { get; set; }
+        public DateOnly? ExpirationDate { get; set; }
+        public bool? GoodCauseExempt { get; set; }
+        public bool LeasedAttached { get; set; }
+        public bool LedgerAttached { get; set; }
+        public bool NoticeProofattached { get; set; }
+        public bool RegistrationRentHistory { get; set; }
+
+    }
+}

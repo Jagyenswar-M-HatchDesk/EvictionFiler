@@ -24,17 +24,22 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 		public Guid? RegulationStatusId { get; set; }
 		public string? RegulationStatusName { get; set; }
 		public string? PetitionerInterest { get; set; }
-
-		public string Address1 { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Address is Required")]
+        public string Address1 { get; set; } = string.Empty;
 		public string? Address2 { get; set; }
+        [Required(ErrorMessage = "Agent is Required")]
+        public string? ManagingAgent { get; set; }
 		public string? CityName { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Select City")]
         public Guid? CityId { get; set; }
-
+        [Required(ErrorMessage = "Select State")]
         public Guid? StateId { get; set; }
 		public string? StateName { get; set; }
-		public string? Zipcode { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Zipcode is Required")]
+        public string? Zipcode { get; set; } = string.Empty;
 		[Required(ErrorMessage = "Select LandLord")]
 		public Guid? LandlordId { get; set; }
+        [Required(ErrorMessage = "Select Registration Status")]
         public Guid? RegistrationStatusId { get; set; }
         public Guid? BuildingTypeId { get; set; }
 

@@ -77,6 +77,7 @@ SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JFaF1cX2hIf0x3T
 string ironKey = builder.Configuration["IronPdf:Key"]!;
 License.LicenseKey = ironKey;
 builder.Services.AddScoped<DialogService>();
+builder.Services.AddScoped<NavigationStateMessage>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<TooltipService>();
 builder.Services.AddScoped<ContextMenuService>();
@@ -148,6 +149,9 @@ builder.Services.AddScoped<ICityRepository, CityRepository>();
 builder.Services.AddScoped<ISubCaseTypeRepository, SubCaseTypeRepository>();
 builder.Services.AddScoped<IArrearLedgerRepository, ArrearRepository>();
 builder.Services.AddScoped<IMarshalService, MarshalService>();
+builder.Services.AddScoped<ICaseAdditionalTenantRepository, CaseAdditionalTenantRepository>();
+builder.Services.AddScoped<ICaseAdditionalTenantService, CaseAdditionalTenantService>();
+builder.Services.AddScoped<ICaseNoticeInfoRepository, CaseNoticeInfoRepository>();
 
 builder.Services.AddAuthorization();
 
@@ -193,7 +197,6 @@ builder.Services.AddScoped<IUnitIllegalService, UnitIllegalService>();
 builder.Services.AddScoped<ICourtTypeRepository, CourtTypeRepository>();
 builder.Services.AddScoped<ICasePetitionerRepository, CasePetitionerRepository>();
 builder.Services.AddScoped<ICaseRespondentRepository, CaseRespondentRepository>();
-builder.Services.AddScoped<NavigationDataService>();
 builder.Services.AddSingleton<SuccessMessageService>();
 builder.Services.AddBlazoredToast();
 

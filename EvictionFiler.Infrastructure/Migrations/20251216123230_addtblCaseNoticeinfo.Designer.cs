@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251216123230_addtblCaseNoticeinfo")]
+    partial class addtblCaseNoticeinfo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -788,14 +791,14 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateOnly?>("DateNoticeServed")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("DateNoticeServed")
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid?>("DateRentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateOnly?>("DateofLastPayment")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("DateofLastPayment")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("DateTime");
@@ -803,11 +806,8 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateOnly?>("ExpirationDate")
-                        .HasColumnType("date");
-
-                    b.Property<Guid?>("FormtypeId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<DateTime?>("ExpirationDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool?>("GoodCauseExempt")
                         .HasColumnType("bit");
@@ -827,11 +827,8 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<bool?>("LedgerAttached")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("LegalCaseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("MonthlyRent")
-                        .HasColumnType("int");
+                    b.Property<string>("MonthlyRent")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool?>("NoticeProofattached")
                         .HasColumnType("bit");
@@ -848,8 +845,8 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<Guid?>("TenancyTypeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("TenantShare")
-                        .HasColumnType("int");
+                    b.Property<string>("TenantShare")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("Totalowed")
                         .HasColumnType("int");
@@ -863,12 +860,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DateRentId");
-
-                    b.HasIndex("FormtypeId");
-
-                    b.HasIndex("LegalCaseId");
-
-                    b.HasIndex("TenancyTypeId");
 
                     b.ToTable("CaseNoticeInfo");
                 });
@@ -4594,23 +4585,11 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("DateRentId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.FormTypes", "FormType")
-                        .WithMany()
-                        .HasForeignKey("FormtypeId");
-
-                    b.HasOne("EvictionFiler.Domain.Entities.LegalCase", "LegalCaes")
-                        .WithMany()
-                        .HasForeignKey("LegalCaseId");
-
                     b.HasOne("EvictionFiler.Domain.Entities.Master.TenancyType", "TenancyTypes")
                         .WithMany()
-                        .HasForeignKey("TenancyTypeId");
+                        .HasForeignKey("DateRentId");
 
                     b.Navigation("DateRents");
-
-                    b.Navigation("FormType");
-
-                    b.Navigation("LegalCaes");
 
                     b.Navigation("TenancyTypes");
                 });
