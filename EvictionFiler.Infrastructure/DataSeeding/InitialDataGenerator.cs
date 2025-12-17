@@ -25,7 +25,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             return new List<SubCaseType>
             {
                 new SubCaseType() { Name = "Commercial", CreatedOn = now },
-                new SubCaseType() { Name = "Residential Cases", CreatedOn = now },
+                new SubCaseType() { Name = "Residential", CreatedOn = now },
             };
         }
         public static IEnumerable<CourtType> GetCourtTypes()
