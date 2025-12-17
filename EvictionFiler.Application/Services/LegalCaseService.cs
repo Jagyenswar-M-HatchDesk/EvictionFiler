@@ -495,6 +495,7 @@ namespace EvictionFiler.Application.Services
                         BuildingState = caseEntity.Buildings!.State != null ? caseEntity.Buildings.State.Name : string.Empty,
                         BuildingAddress = caseEntity.Buildings?.Address1!,
                         BuildingZip = caseEntity.Buildings!.Zipcode,
+                        BuildingStateId = caseEntity.Buildings! != null ? caseEntity.Buildings.StateId : Guid.Empty,
                         //RegulationStatusId = caseEntity.Buildings?.RegulationStatusId ?? Guid.Empty,
                         BuildingTypeId = caseEntity.Buildings.BuildingTypeId,
                         RegistrationStatusTypeId = caseEntity.Buildings.RegistrationStatusId,

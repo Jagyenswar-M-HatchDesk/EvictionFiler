@@ -1128,7 +1128,7 @@
                     </div>
 
                     <!-- Rent Description -->
-                    <div class="card shadow-sm border-0">
+                    @*<div class="card shadow-sm border-0">
                         <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
                             <div class="fw-semibold  gap-2"><i class="bi bi-hammer"></i> Rent Description</div>
                             <button type="button" class="btn btn-sm normal p-1" title="Edit Rent" @onclick="ShowRentModal">
@@ -1148,7 +1148,7 @@
                             </div>
                         </div>
                     </div>
-
+                    *@
                     <div class="card shadow-sm border-0">
                         <div class="card-header bg-transparent">
                             <div class="fw-semibold">Case Documents</div>
@@ -1233,7 +1233,7 @@
                                 <!-- Unit / Apt -->
                                 <div class="row position-relative">
 
-                                    <div class="col-md-6 ">
+                                    <div class="col-md-6 " @onfocusout="HideTenantDropDown">
                                         <label class="form-label  required-label">Unit / Apt # (confirm)</label>
                                         <button type="button" class="btn-close position-absolute top-0 end-0 m-2 mt-0"
                                                 aria-label="Clear"
@@ -1242,7 +1242,7 @@
                                         <input type="text" class="form-control"
                                                placeholder="Enter Unit / Apt"
                                                @bind-value="searchTenantText"
-                                               @oninput="OnSearchTenantInput" @onblur="SelectTenant" />
+                                               @oninput="OnSearchTenantInput" @onblur="SelectTenant" @onclick="ShowAllTenantForHoldover"/>
                                         @if (filteredTenant?.Count() > 0)
                                         {
                                             <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
@@ -1356,18 +1356,18 @@
                 <EditForm Model="@editBuildingModel">
                     <DataAnnotationsValidator />
                     <div class="modal-body">
-                        <div class="card border-0">
+                        <div class=" border-0">
                             <div class="card-body p-0">
 
                                 <!-- Search + Add Section -->
                                 <div class="row mt-2">
-                                    @if (!IsNewBuilding)
+                                    @if (!showBuildingFields)
                                     {
-                                        <div class="col-md-6 position-relative">
+                                        <div class="col-md-6 position-relative" @onfocusout="HideBuildingDropdown">
                                             <label class="form-label  required-label">Building</label>
                                             <input type="text" class="form-control"
                                                    placeholder="Search by Building Address or code..."
-                                                   @bind-value="searchBuildingText"
+                                                   @bind-value="searchBuildingText" @onclick="ShowAllBuildings"
                                                    @oninput="OnSearchBuildingInput" />
                                             @if (filteredBuildings?.Count() > 0)
                                             {
@@ -1375,7 +1375,7 @@
                                                     @foreach (var c in filteredBuildings)
                                                     {
                                                         <li class="dropdown-item" @onclick="() => SelectBuilding(c)">
-                                                            @c.ApartmentCode @c.CityName / @c.BuildingCode
+                                                             @c.BuildingCode / @c.Address1
                                                         </li>
                                                     }
                                                 </ul>
@@ -1398,10 +1398,12 @@
                                 <!-- Add/Edit Fields -->
                                 @if (showBuildingFields)
                                 {
-                                    <div class="border rounded-3 p-3 mt-4 position-relative">
-                                        <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                                    <div class=" rounded-3 p-3 position-relative">
+                                        <button type="button" 
                                                 aria-label="Clear"
+                                                style="background: transparent; border: none; z-index: 9999; position:absolute; top:-15px ; right:0px"
                                                 @onclick="OnBindBuildingCancel">
+                                            <i class="fa-solid fa-xmark"></i> Clear
                                         </button>
 
                                         <div class="row g-3">
@@ -1417,9 +1419,9 @@
                                             </div>
 
                                             <div class="col-md-6">
-                                                <label class="form-label required-label">Borough / City</label>
+                                                <label class="form-label required-label">County</label>
                                                 <InputSelect class="form-select" @bind-Value="editBuildingModel.CityId">
-                                                    <option value="">-- Select State --</option>
+                                                    <option value="">-- Select County --</option>
                                                     @foreach (var s in CityList)
                                                     {
                                                         <option value="@s.Id">@s.Name</option>
@@ -1437,7 +1439,6 @@
                                                 <div class="col-md-6">
                                                     <label class="form-label required-label">State</label>
                                                     <InputSelect class="form-select" @bind-Value="editBuildingModel.StateId">
-                                                        <option value="">-- Select State --</option>
                                                         @foreach (var s in StateList)
                                                         {
                                                             <option value="@s.Id">@s.Name</option>
@@ -1700,10 +1701,9 @@
 
 
                                     <div class="row g-3" style="margin:0px;">
-                                        <div class=@(showCountyDropdown ? "col-md-4" : "col-md-6")>
+                                        <div class=@(showCountyDropdown ? "col-md-3" : "col-md-6")>
                                             <label class="form-label ">Court Type </label>
                                             <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtTypeId" style="cursor:pointer;" @bind-Value:after="SelectCourtType">
-                                                <option value="">-- Select Type --</option>
                                                 @foreach (var l in CourtTypeList)
                                                 {
                                                     <option value="@l.Id">@l.Name</option>
@@ -1712,21 +1712,20 @@
                                         </div>
                                         <!-- Court Location -->
 
-                                        <div class=@(showCountyDropdown ? "col-md-4" : "d-none")>
+                                        <div class=@(showCountyDropdown ? "col-md-3" : "d-none")>
 
-                                            <label class="form-label fw-semibold">County / Borough </label>
+                                            <label class="form-label ">County </label>
                                             <InputSelect class="form-select" @bind-Value="legalcaseDto.CountyId" style="cursor:pointer;" @bind-Value:after="SelectCounty">
-                                                <option value="">-- Select Location --</option>
                                                 @foreach (var l in CountyList)
                                                 {
                                                     <option value="@l.Id">@l.Name</option>
                                                 }
                                             </InputSelect>
                                         </div>
-                                        <div class=@(showCountyDropdown ? "col-md-4" : "col-md-6")>
-                                            <label class="form-label fw-semibold">Court Location (Borough) <span class="text-danger">*</span></label>
+                                        <div class="col-md-6">
+                                            <label class="form-label ">Court <span class="text-danger">*</span></label>
                                             <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtLocationId" style="cursor:pointer;" @onmousedown="ShowAllCourts" @bind-Value:after="SelectCourt">
-                                                <option value="">-- Select Type --</option>
+                                                <option value="">-- Select Court --</option>
                                                 @foreach (var l in filteredCourts)
                                                 {
                                                     <option value="@l.Id">@l.Court</option>
@@ -1739,7 +1738,7 @@
                                         @if (!showCourtPartDropdown)
                                         {
                                             <div class="col-md-6">
-                                                <label class="form-label fw-semibold">Part / Room #</label>
+                                                <label class="form-label ">Part / Room #</label>
                                                 <InputText type="text" name="partRoom" class="form-control" @bind-Value="legalcaseDto.CourtRoom" />
                                             </div>
                                             <div class="col-md-6">
@@ -1750,9 +1749,9 @@
                                         else
                                         {
                                             <div class="col-md-6">
-                                                <label class="form-label fw-semibold">Part / Room #</label>
+                                                <label class="form-label ">Part / Room #</label>
                                                 <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtPartId" style="cursor:pointer;" @bind-Value:after="SelectCourtPart">
-                                                    <option value="">-- Select Part --</option>
+                                                    <option value="Guid.Empty">-- Select Part --</option>
                                                     @foreach (var l in CourtPartList)
                                                     {
                                                         <option value="@l.Id">@l.Part - @l.RoomNo</option>
@@ -2716,7 +2715,6 @@
     private List<CourtDto> CourtLocationList = new();
     private ValidationMessageStore messageStore;
     private EditContext _editContext;
-
     private async void ShowClientModal()
     {
         // Copy current data into editable model
@@ -2797,34 +2795,16 @@
     }
     private async Task ShowCourtModal()
     {
-        // var selectedCourtId = legalcaseDto.CourtLocationId;
-        // if ((legalcaseDto.CourtLocationId == Guid.Empty || legalcaseDto.CourtLocationId == null) && !isNewCourt)
-        // {
-        //     showCourtFields = false;
-        //     searchCourtText = "";
-        // }
-        // else if ((legalcaseDto.CourtLocationId != Guid.Empty || legalcaseDto.CourtLocationId != null) && !isNewCourt)
-        // {
-        //     court = await _courtService.GetCourtByIdAsync(legalcaseDto!.CourtLocationId!.Value);
-        //     searchCourtText = court.Court;
-        //     showCourtFields = true; searchCourtPartText = "";
-        //     if (legalcaseDto.CourtPartId != Guid.Empty && legalcaseDto.CourtPartId != null)
-        //     {
-        //         court.SelectedCourtPart = court.CourtPart.Where(e => e.Id == legalcaseDto.CourtPartId).FirstOrDefault()!;
-        //         searchCourtPartText = court.SelectedCourtPart.Part;
-        //     }
-        //     else
-        //     {
-        //         filteredCourtsPart = court.CourtPart;
-        //     }
-        // }
+
         if (!CourtTypeList.Any()) CourtTypeList = await _service.CourtTypeList();
         if (!CountyList.Any()) CountyList = await countyService.GetAllCounty();
         if (!CourtLocationList.Any()) CourtLocationList = await _courtService.GetAllCourtDataAsync();
         if (legalcaseDto.CourtLocationId != null && legalcaseDto.CourtLocationId != Guid.Empty)
         {
-            if (!CourtPartList.Any()) CourtPartList = CourtLocationList.Where(e => e.Id == legalcaseDto.CourtLocationId).FirstOrDefault().CourtPart;
+            if (!CourtPartList.Any()) CourtPartList = CourtLocationList.Where(e => e.Id == legalcaseDto.CourtLocationId).FirstOrDefault()!.CourtPart;
         }
+
+
         if (legalcaseDto.CourtTypeId != null && legalcaseDto.CourtTypeId != Guid.Empty)
         {
             var casetype = CourtTypeList.Where(e => e.Id == legalcaseDto.CourtTypeId).FirstOrDefault();
@@ -2833,6 +2813,17 @@
                 showCountyDropdown = true;
                 showCourtPartDropdown = true;
                 ShowClearBtn = true;
+            }
+        }
+        if (legalcaseDto.CourtTypeId == null || legalcaseDto.CourtTypeId == Guid.Empty)
+        {
+            legalcaseDto.CourtTypeId = CourtTypeList.Where(e => e.Name.Contains("NYC")).FirstOrDefault()!.Id;
+            showCountyDropdown = true;
+            showCourtPartDropdown = true;
+            ShowClearBtn = true;
+            if (legalcaseDto.CountyId == null || legalcaseDto.CountyId == Guid.Empty)
+            {
+                legalcaseDto.CountyId = CountyList.Where(e => e.Name.Contains(legalcaseDto.Borough!)).FirstOrDefault()!.Id;
             }
         }
         await ShowAllCourts();
@@ -2849,24 +2840,72 @@
 
         await JS.InvokeVoidAsync("showModal", "rentModal");
     }
-
-    // Search handler
-    private async Task OnSearchBuildingInput(ChangeEventArgs e)
+    async Task HideBuildingDropdown(FocusEventArgs e)
     {
-        searchBuildingText = e.Value?.ToString() ?? "";
-        if (!string.IsNullOrWhiteSpace(searchBuildingText))
+        await Task.Delay(500);
+        if (filteredBuildings.Any())
         {
-            filteredBuildings = BuildingList
-                .Where(c => c.BuildingCode.Contains(searchBuildingText, StringComparison.OrdinalIgnoreCase)
-                            || c.CityName.Contains(searchBuildingText, StringComparison.OrdinalIgnoreCase)
-                            || c.Zipcode.Contains(searchBuildingText, StringComparison.OrdinalIgnoreCase)
-                            || c.CompletedAddress.Contains(searchBuildingText, StringComparison.OrdinalIgnoreCase)
-                            || c.StateName.Contains(searchBuildingText, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            filteredBuildings.Clear();
+        }
+        StateHasChanged();
+    }
+    private async Task ShowAllBuildings()
+    {
+        if (legalcaseDto.LandlordId == null || legalcaseDto.LandlordId == Guid.Empty)
+        {
+            filteredBuildings = new List<EditToBuildingDto>();
+            return;
         }
         else
         {
-            filteredBuildings.Clear();
+
+            filteredBuildings = await _buildingService.GetBuildingsByLandlordIdAsync(legalcaseDto.LandlordId.Value);
+        }
+
+    }
+    // Search handler
+    private async Task OnSearchBuildingInput(ChangeEventArgs e)
+    {
+        searchBuildingText = e.Value.ToString();
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        // ⭐ Empty — show all landlords
+        try
+        {
+
+            await Task.Delay(300, _cts.Token);
+            if (string.IsNullOrWhiteSpace(searchBuildingText))
+            {
+                await ShowAllBuildings();
+                return;
+            }
+
+            // ⭐ Jab tak 3 characters nahi — show all landlords
+            if (searchBuildingText.Length < 3)
+            {
+                await ShowAllBuildings();
+                return;
+            }
+
+            if (legalcaseDto.LandlordId == null || legalcaseDto.LandlordId == Guid.Empty)
+            {
+                filteredBuildings = new List<EditToBuildingDto>();
+                return;
+            }
+            else
+            {
+                // ⭐ 3 characters → server search
+                filteredBuildings = await _buildingService.SearchBuilding(
+                    searchBuildingText,
+                    legalcaseDto.LandlordId.Value
+                );
+            }
+
+
+        }
+        catch (TaskCanceledException)
+        {
+            // Old task cancelled → ignore
         }
     }
     private async Task OnSearchCourtInput(ChangeEventArgs e)
@@ -3047,6 +3086,7 @@
         IsNewBuilding = false;
         searchBuildingText = null;
         editBuildingModel = new EditToBuildingDto();
+        editBuildingModel.StateId = StateList.Where(e => e.Name.Contains("New York")).FirstOrDefault()!.Id;
     }
 
     private void OnBindRentCancel()
@@ -3652,17 +3692,76 @@
         LoadHearing();
         spinnerservice.Hide();
     }
-    // Edit model
-    private void OnSearchTenantInput(ChangeEventArgs e)
+    private async Task ShowAllTenantForHoldover()
     {
-        searchTenantText = e.Value.ToString();
-        filteredTenant = TenantList
-            .Where(c => c.UnitOrApartmentNumber.Contains(searchTenantText, StringComparison.OrdinalIgnoreCase)
-                        || c.FirstName.Contains(searchTenantText, StringComparison.OrdinalIgnoreCase)
-                        || c.LastName.Contains(searchTenantText, StringComparison.OrdinalIgnoreCase)
-                        )
-            .ToList();
+        if (legalcaseDto.BuildingId == null || legalcaseDto.BuildingId == Guid.Empty)
+        {
+            filteredTenant = new List<EditToTenantDto>();
+            return;
+        }
+        else
+        {
+            filteredTenant = await _tenantService.GetTenantsByBuildingIdAsync(legalcaseDto.BuildingId.Value);
+
+        }
     }
+    async Task HideTenantDropDown(FocusEventArgs e)
+    {
+        // Small delay to allow click on dropdown item to register before hiding
+        await Task.Delay(500);
+        if (filteredTenant.Any())
+        {
+            filteredTenant.Clear();
+
+        }
+        StateHasChanged();
+    }
+    private async Task OnSearchTenantInput(ChangeEventArgs e)
+    {
+        searchTenantText = e.Value?.ToString() ?? "";
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        try
+        {
+
+            await Task.Delay(300, _cts.Token);
+            // ⭐ Empty input → load all tenants (ONLY here)
+            if (string.IsNullOrWhiteSpace(searchTenantText))
+            {
+                await ShowAllTenantForHoldover();
+                return;
+            }
+
+            // ⭐ 1st & 2nd character → DO NOTHING (keep list unchanged)
+            if (searchTenantText.Length < 3)
+            {
+                // ❗ No reload here (important)
+                return;
+            }
+            if (legalcaseDto.BuildingId == null || legalcaseDto.BuildingId == Guid.Empty)
+            {
+                filteredTenant = new List<EditToTenantDto>();
+                return;
+            }
+            else
+            {
+                // ⭐ 3+ characters → server search
+                filteredTenant = await _tenantService.SearchTenantsAsync(
+                    searchTenantText,
+                    legalcaseDto.BuildingId.Value);
+            }
+
+
+
+
+        }
+        catch (TaskCanceledException)
+        {
+            // Old task cancelled → ignore
+        }
+
+    }
+
 
     private void SelectTenant()
     {
@@ -3671,31 +3770,19 @@
 
     private async void SelectedTenant(EditToTenantDto tenant)
     {
-        // if (filteredTenant.Count > 0)
-        // {
-        //     Tenants = filteredTenant.Select(e => $"{e.FirstName} {e.LastName}").ToList();
-        // }
-        Tenants.Clear();
+
         selectedTenant = tenant;
+        Tenants.Clear();
+        AdditionalTenantList.Clear();
         Tenants.Add($"{tenant.FirstName} {tenant.LastName}");
 
-        //var firstTenant = filteredTenant.FirstOrDefault();
 
-        searchTenantText = tenant.UnitOrApartmentNumber!;
-        legalcaseDto.ApartmentNumber = tenant.UnitOrApartmentNumber;
+
+        searchTenantText = $"{tenant.UnitOrApartmentNumber} ";
+
+        legalcaseDto.UnitOrApartmentNumber = tenant.UnitOrApartmentNumber;
         legalcaseDto.TenantName = tenant.FirstName + " " + tenant.LastName;
         legalcaseDto.TenantId = tenant.Id;
-        legalcaseDto.TenantRecord = tenant.TenantRecord;
-        legalcaseDto.HasPossession = tenant.HasPossession;
-        legalcaseDto.UnitNumber = tenant.UnitOrApartmentNumber!;
-        legalcaseDto.IsUnitIllegalId = tenant.IsUnitIllegalId;
-        legalcaseDto.DateTenantMoved = tenant.MoveInDate;
-        legalcaseDto.MonthlyRent = tenant.MonthlyRent;
-        legalcaseDto.TenantShare = tenant.TenantShare;
-        legalcaseDto.RentDueEachMonthOrWeekId = tenant.RentDueEachMonthOrWeekId;
-        legalcaseDto.TotalOwed = tenant.TotalRentOwed;
-        legalcaseDto.TenancyTypeId = tenant.TenancyTypeId;
-        legalcaseDto.SocialService = tenant.SocialServices;
 
 
 
@@ -3703,15 +3790,21 @@
         if (AdditionalTenantfromDbList.Count > 0)
         {
             Tenants.AddRange(AdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}").ToList());
-
+            AdditionalTenantList.AddRange(AdditionalTenantfromDbList.Select(e => new AddtionalTenantDto
+            {
+                Id = e.Id,
+                FirstName = e.FirstName,
+                LastName = e.LastName,
+                TenantId = e.TenantId,
+            }));
         }
-        filteredTenant = null;
+        filteredTenant?.Clear();
+
 
         StateHasChanged();
 
 
     }
-
     void DeleteAdditionalTenant(int index)
     {
         // Index 0 = primary tenant → never delete

@@ -33,11 +33,9 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 
 		//Rent Details
 		public bool? RenewalOffer { get; set; }
-        [Required(ErrorMessage = "Date Rent (M/W) is Required")]
         public Guid? RentDueEachMonthOrWeekId { get; set; }
 
         public string? RentDueEachMonthOrWeekName { get; set; }
-        [Required(ErrorMessage = "Monthly Rent is Required")]
         public double? MonthlyRent { get; set; }
 		public double? TenantShare { get; set; }
 		public string? SocialServices { get; set; }
@@ -48,10 +46,8 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public DateOnly? ERAPPaymentReceivedDate { get; set; }
         [Required(ErrorMessage = "Unit/ApartmentNumber is Required")]
         public string? UnitOrApartmentNumber { get; set; }
-		[Required(ErrorMessage = "IsUnitIllegal is Required")]
 		public Guid? IsUnitIllegalId { get; set; }
 		public string? IsUnitIllegalName { get; set; }
-		[Required(ErrorMessage = "Tenancy Type is Required")]
 		public Guid? TenancyTypeId { get; set; }
 
 		public Guid? AdditialTenantsId { get; set; }
