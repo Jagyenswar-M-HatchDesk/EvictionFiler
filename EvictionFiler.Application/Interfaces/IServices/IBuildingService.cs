@@ -22,7 +22,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 		Task<Guid?> AddOnlyApartmentfromCase(CreateToBuildingDto appartment);
 		Task<bool> UpdateonlyBuildingfromCase(EditToBuildingDto appartment);
 
-
+		Task<List<EditToBuildingDto>> GetBuildingsByClientIdAsync(Guid ClientId);
 
 
 

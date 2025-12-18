@@ -12,16 +12,16 @@ namespace EvictionFiler.Application.Interfaces.IServices
 {
     public interface ITenantService
     {
-		Task<bool> AddTenantAsync(List<CreateToTenantDto> dto);
+        Task<bool> AddTenantAsync(List<CreateToTenantDto> dto);
         Task<List<EditToTenantDto>> SearchTenantbyname(string name);
         Task<List<EditToTenantDto>> SearchTenantsAsync(string query, Guid buildingId);
 
         Task<EditToTenantDto> GetByIdAsync(Guid id);
-		Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? clientId);
-		Task<bool> UpdateTenantAsync(EditToTenantDto t);
+        Task<List<EditToTenantDto>> GetTenantsByClientIdAsync(Guid? clientId);
+        Task<bool> UpdateTenantAsync(EditToTenantDto t);
 
         Task<List<CreateToTenantDto>> GetAll();
-		Task<string> GetLastTenantCode();
+        Task<string> GetLastTenantCode();
         Task<List<EditToTenantDto>> GetAlltenant();
         Task<Guid?> AddOnlyTenantfromCase(CreateToTenantDto dto);
         Task<bool> UpdateTenantfromCase(EditToTenantDto tenants);
@@ -31,5 +31,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<Guid?> AddTenantfromCase(CreateToTenantDto t);
         Task<List<EditToTenantDto>> GetTenantsByLandlordIdAsync(Guid landlordId);
         Task<List<EditToTenantDto>> GetTenantsByBuildingIdAsync(Guid buildingId);
+
+        Task<EditToLandlordDto> GetLandlordByBuildingAsync(Guid buildingId);
     }
 }

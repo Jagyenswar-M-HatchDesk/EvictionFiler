@@ -13,5 +13,6 @@ namespace EvictionFiler.Application.DTOs.ArrearLedgerDtos
         public double Amount { get; set; }
         public string? Notes { get; set; }
         public Guid? LegalCaseId { get; set; }
+        public Guid? CaseNoticeId { get; set; }
     }
 }

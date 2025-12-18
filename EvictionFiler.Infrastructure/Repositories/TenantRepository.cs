@@ -147,7 +147,7 @@ namespace EvictionFiler.Infrastructure.Repositories
         public async Task<List<Language>> GetAllLanguage()
 		{
 			return await _dbContext.MstLanguages.ToListAsync();
-		}
+        }
 
         public async Task<(EditToLandlordDto landlord, EditToBuildingDto building)>
 GetLandlordBuildingByTenantAsync(Guid tenantId)
@@ -176,6 +176,26 @@ GetLandlordBuildingByTenantAsync(Guid tenantId)
                 .FirstOrDefaultAsync();
 
             return (data.Landlord, data.Building);
+        }
+        public async Task<EditToLandlordDto>
+GetLandlordByBuildingAsync(Guid buildingId)
+        {
+            var data = await _dbContext.Buildings
+                .Where(t => t.Id == buildingId)
+                .Select(t => new
+                {
+                    Landlord = new EditToLandlordDto
+                    {
+                        Id = t.Landlord.Id,
+                        FirstName = t.Landlord.FirstName,
+                        LastName = t.Landlord.LastName,
+                        LandLordCode = t.Landlord.LandLordCode
+                    },
+                    
+                })
+                .FirstOrDefaultAsync();
+
+            return data.Landlord;
         }
 
         public async Task<List<EditToTenantDto>> GetTenantsByLandlordIdAsync(Guid landlordId)

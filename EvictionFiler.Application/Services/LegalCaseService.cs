@@ -496,7 +496,7 @@ namespace EvictionFiler.Application.Services
                         BuildingAddress = caseEntity.Buildings?.Address1!,
                         BuildingZip = caseEntity.Buildings!.Zipcode,
                         BuildingStateId = caseEntity.Buildings! != null ? caseEntity.Buildings.StateId : Guid.Empty,
-                        //RegulationStatusId = caseEntity.Buildings?.RegulationStatusId ?? Guid.Empty,
+                        RegulationStatusId = caseEntity.Buildings?.RegulationStatusId ?? Guid.Empty,
                         BuildingTypeId = caseEntity.Buildings.BuildingTypeId,
                         RegistrationStatusTypeId = caseEntity.Buildings.RegistrationStatusId,
 
@@ -1336,6 +1336,7 @@ namespace EvictionFiler.Application.Services
                 {
                     Id = e.Id,
                     LegalCaseId = e.LegalCaseId,
+                    CaseNoticeId = e.CaseNoticeId,
                     Amount = e.Amount,
                     Notes = e.Notes,
                     Month = e.Month,
@@ -1434,15 +1435,15 @@ namespace EvictionFiler.Application.Services
             return await _unitOfWork.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> AddCaseNoticeInfo(CaseNoticeInfoDto dto)
+        public async Task<Guid?> AddCaseNoticeInfo(CaseNoticeInfoDto dto)
         {
             try
             {
-                var Casenoticeinfo =  new CaseNoticeInfo()
+                var Casenoticeinfo = new CaseNoticeInfo()
                 {
                     LegalCaseId = dto.LegalCaseId,
                     DateNoticeServed = dto.DateNoticeServed,
-                    AdditionalComments  = dto.AdditionalComments,
+                    AdditionalComments = dto.AdditionalComments,
                     CalcNoticeLength = dto.CalcNoticeLength,
                     DateofLastPayment = dto.DateofLastPayment,
                     DateRentId = dto.DateRentId,
@@ -1460,14 +1461,19 @@ namespace EvictionFiler.Application.Services
                     SocialService = dto.SocialService,
                     TenantShare = dto.TenantShare,
                     Totalowed = dto.Totalowed,
+                    LeaseEnd = dto.LeaseEnd,
+                    LeaseStart = dto.LeaseStart,
+                    WrittenLease = dto.WrittenLease,
+                    Assistance = dto.Assistance,
                     CreatedOn = DateTime.Now,
                 };
-                await _caseNoticeInfoRepository.AddAsync(Casenoticeinfo);
-                return await _unitOfWork.SaveChangesAsync() > 0;
+                var addedcasenoticeinfo = await _caseNoticeInfoRepository.AddAsync(Casenoticeinfo);
+                var result = await _unitOfWork.SaveChangesAsync();
+                return result > 0  ? addedcasenoticeinfo.Id : null;
             }
             catch (Exception ex)
             {
-                return false;
+                return null;
             }
 
         }

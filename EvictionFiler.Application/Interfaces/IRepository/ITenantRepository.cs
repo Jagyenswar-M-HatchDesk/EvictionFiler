@@ -22,6 +22,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
         Task<List<EditToTenantDto>> GetTenantsByBuildingIdAsync(Guid buildingId);
 
 
+        Task<EditToLandlordDto> GetLandlordByBuildingAsync(Guid buildingId);
 
     }
 }

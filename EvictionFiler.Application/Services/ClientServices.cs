@@ -366,6 +366,8 @@ namespace EvictionFiler.Application.Services
 								PetitionerInterest = b.PetitionerInterest,
 								RegulationStatusId = b.RegulationStatusId,
 								BuildingUnits = b.BuildingUnits,
+								ManagingAgent = b.ManagingAgent,
+								RegistrationStatusId = b.RegistrationStatusId,
 								LandlordId = landlord.Id,
 								CreatedOn = landlord.CreatedOn,
                                 CreatedBy = landlord.CreatedBy,

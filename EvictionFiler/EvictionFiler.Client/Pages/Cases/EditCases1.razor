@@ -549,6 +549,26 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
             cursor: pointer;
             text-decoration: underline;
         }
+
+    /* Parent container */
+    .case-form-wrapper {
+        max-height: calc(100vh - 190px); /* adjust if header height changes */
+        overflow-y: auto;
+        padding-bottom: 90px; /* reserve space for footer */
+    }
+
+    /* Sticky footer */
+    .case-footer {
+        position: sticky;
+        bottom: 0;
+        background: #ffffff;
+        border-top: 1px solid #e5e7eb;
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        z-index: 10;
+    }
+
 </style>
 
 
@@ -612,249 +632,249 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         {
             @if (Steps[CurrentStep].Name == "CaseAndclient")
             {
-                <div class="row">
-                    <div class="col-8">
-                        <div class="card mb-3">
-                            <div class="card-header fw-bold head">Case Information</div>
-                            <div class="card-body">
-                                <div class="row g-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="card mb-3">
+                                <div class="card-header fw-bold head">Case Information</div>
+                                <div class="card-body">
+                                    <div class="row g-3">
 
-                                    @if (!HideCaseAndClientSection)
-                                    {
-                                        <!-- CASE TYPE -->
-                                        <div class="col-5 ">
-                                            <label class="form-label required-label">Case Type</label>
-                                            <InputSelect class="form-select holdover-form"
-                                                         @bind-Value="legalcaseDto.CaseTypeId"
-                                                         @bind-Value:after="BuildSteps">
+                                        @if (!HideCaseAndClientSection)
+                                        {
+                                            <!-- CASE TYPE -->
+                                            <div class="col-5 ">
+                                                <label class="form-label required-label">Case Type</label>
+                                                <InputSelect class="form-select holdover-form"
+                                                             @bind-Value="legalcaseDto.CaseTypeId"
+                                                             @bind-Value:after="BuildSteps">
 
-                                                @foreach (var l in CaseTypeList)
+                                                    @foreach (var l in CaseTypeList)
+                                                    {
+                                                        <option value="@l.Id">@l.Name</option>
+                                                    }
+                                                </InputSelect>
+                                                <ValidationMessage For="() => legalcaseDto.CaseTypeId" />
+                                            </div>
+
+                                            <div class="col-5 ">
+                                                <label class="form-label required-label">Sub Case Type</label>
+                                                <InputSelect class="form-select holdover-form"
+                                                             @bind-Value="legalcaseDto.SubCaseTypeId">
+
+                                                    @foreach (var l in SubCaseTypeList)
+                                                    {
+                                                        <option value="@l.Id">@l.Name</option>
+                                                    }
+                                                </InputSelect>
+                                                <ValidationMessage For="() => legalcaseDto.SubCaseTypeId" />
+                                            </div>
+
+                                            <!-- CLIENT SEARCH BOX -->
+                                            <div class="col-6">
+                                                @if (!IsNewClient)
                                                 {
-                                                    <option value="@l.Id">@l.Name</option>
-                                                }
-                                            </InputSelect>
-                                            <ValidationMessage For="() => legalcaseDto.CaseTypeId" />
-                                        </div>
+                                                    <div class="position-relative" @onfocusout="HideClientDropDown">
+                                                        <label class="form-label required-label">Client</label>
 
-                                        <div class="col-5 ">
-                                            <label class="form-label required-label">Sub Case Type</label>
-                                            <InputSelect class="form-select holdover-form"
-                                                         @bind-Value="legalcaseDto.SubCaseTypeId">
-
-                                                @foreach (var l in SubCaseTypeList)
-                                                {
-                                                    <option value="@l.Id">@l.Name</option>
-                                                }
-                                            </InputSelect>
-                                            <ValidationMessage For="() => legalcaseDto.SubCaseTypeId" />
-                                        </div>
-
-                                        <!-- CLIENT SEARCH BOX -->
-                                        <div class="col-6">
-                                            @if (!IsNewClient)
-                                            {
-                                                <div class="position-relative" @onfocusout="HideClientDropDown">
-                                                    <label class="form-label required-label">Client</label>
-
-                                                    <InputText type="text" class="form-control"
+                                                        <input type="text" class="form-control" autocomplete="off"
                                                                placeholder="Search by client name or code..."
                                                                @bind-value="searchText"
-                                                               @bind-value:after="OnBindClientAfter"
                                                                @oninput="OnSearchInput"
                                                                @onclick="ShowAllClients" />
 
-                                                    @if (filteredClients?.Any() == true)
-                                                    {
-                                                        <ul class="dropdown-menu show"
-                                                            style="position:absolute; width:100%; cursor:pointer; z-index:2000;">
-                                                            @foreach (var c in filteredClients)
+                                                        @if (filteredClients?.Any() == true)
+                                                        {
+                                                            <ul class="dropdown-menu show"
+                                                                style="position:absolute; width:100%; cursor:pointer; z-index:2000;">
+                                                                @foreach (var c in filteredClients)
+                                                                {
+                                                                    <li class="dropdown-item"
+                                                                        @onclick="() => SelectClient(c)">
+                                                                        @c.FirstName @c.LastName / @c.ClientCode
+                                                                    </li>
+                                                                }
+                                                            </ul>
+                                                        }
+                                                        <div style="min-height:1.5em;">
+                                                            <ValidationMessage For="() => legalcaseDto.ClientId" />
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+
+                                            <!-- ADD BUTTON -->
+                                            <div class="col-3 d-flex  align-items-center">
+                                                <label class="form-label "></label>
+                                                @if (!showClientTextbox)
+                                                {
+                                                    <div class="w-100 d-flex gap-3 align-items-center">
+                                                        <span class="mt-2 fw-bold">OR</span>
+                                                        <button type="button" class="btn"
+                                                                style="background-color:#1F365D; color:white"
+                                                                @onclick="AddClient">
+                                                            + ADD
+                                                        </button>
+                                                    </div>
+                                                }
+                                            </div>
+
+                                        }
+
+
+                                        @if (!showClientTextbox && legalcaseDto.ClientId.HasValue
+                                                                        && legalcaseDto.CaseTypeId.HasValue)
+                                        {
+                                            <div class="card p-3 position-relative mt-3">
+                                                <button type="button"
+                                                        class="btn-close position-absolute top-0 end-0 m-2"
+                                                        @onclick="ClearSelectedClient" title=" Click here for Client reset">
+                                                </button>
+
+                                                <div class="row g-3">
+                                                    <div class="col-4">
+                                                        <label class="form-label ">Client Name</label>
+                                                        <InputText class="form-control" style="cursor:not-allowed"
+                                                                   placeholder="Enter Name"
+                                                                   @bind-Value="legalcaseDto.ClientName" disabled />
+                                                        <ValidationMessage For="() => legalcaseDto.ClientName" />
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <label class="form-label">Phone</label>
+                                                        <InputText class="form-control" style="cursor:not-allowed"
+                                                                   placeholder="Enter Number"
+                                                                   @bind-Value="legalcaseDto.ClientPhone" disabled />
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <label class="form-label ">Client Type</label>
+                                                        <InputSelect class="form-select" style="cursor:not-allowed"
+                                                                     @bind-Value="legalcaseDto.ClientTypeId" disabled>
+                                                            <option value="">-- Select --</option>
+                                                            @foreach (var Own in ClientTypeList)
                                                             {
-                                                                <li class="dropdown-item"
-                                                                    @onclick="() => SelectClient(c)">
-                                                                    @c.FirstName @c.LastName / @c.ClientCode
-                                                                </li>
+                                                                <option value="@Own.Id">@Own.Name</option>
                                                             }
-                                                        </ul>
+                                                        </InputSelect>
+                                                        <ValidationMessage For="() => legalcaseDto.ClientTypeId" />
+                                                    </div>
+
+
+
+
+
+                                                    <div class="col-6">
+                                                        <label class="form-label ">Email</label>
+                                                        <InputText class="form-control" style="cursor:not-allowed"
+                                                                   placeholder="Enter Email"
+                                                                   @bind-Value="legalcaseDto.ClientEmail" disabled />
+                                                        <ValidationMessage For="() => legalcaseDto.ClientEmail" />
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <label class="form-label">Reference #</label>
+                                                        <InputText class="form-control"
+                                                                   placeholder="Enter Reference"
+                                                                   @bind-Value="legalcaseDto.Reference" />
+                                                    </div>
+
+
+
+                                                    @if (IsNewClient)
+                                                    {
+                                                        <div class="col-9">
+                                                            <label class="form-label">Address</label>
+                                                            <InputText class="form-control"
+                                                                       placeholder="Enter Address"
+                                                                       @bind-Value="legalcaseDto.ClientAddress" />
+                                                        </div>
                                                     }
-                                                    <div style="min-height:1.5em;">
-                                                        <ValidationMessage For="() => legalcaseDto.ClientId" />
-                                                    </div>
                                                 </div>
-                                            }
-                                        </div>
-
-                                        <!-- ADD BUTTON -->
-                                        <div class="col-3 d-flex  align-items-center">
-                                            <label class="form-label "></label>
-                                            @if (!showClientTextbox)
-                                            {
-                                                <div class="w-100 d-flex gap-3 align-items-center">
-                                                    <span class="mt-2 fw-bold">OR</span>
-                                                    <button type="button" class="btn"
-                                                            style="background-color:#1F365D; color:white"
-                                                            @onclick="AddClient">
-                                                        + ADD
-                                                    </button>
-                                                </div>
-                                            }
-                                        </div>
-
-                                    }
-
-
-                                    @if (!showClientTextbox && legalcaseDto.ClientId.HasValue
-                                                                && legalcaseDto.CaseTypeId.HasValue)
-                                    {
-                                        <div class="card p-3 position-relative mt-3">
-                                            <button type="button"
-                                                    class="btn-close position-absolute top-0 end-0 m-2"
-                                                    @onclick="ClearSelectedClient" title=" Click here for Client reset">
-                                            </button>
-
-                                            <div class="row g-3">
-                                                <div class="col-4">
-                                                    <label class="form-label required-label">Client Name</label>
-                                                    <InputText class="form-control"
-                                                               placeholder="Enter Name"
-                                                               @bind-Value="legalcaseDto.ClientName" disabled />
-                                                    <ValidationMessage For="() => legalcaseDto.ClientName" />
-                                                </div>
-                                                <div class="col-4">
-                                                    <label class="form-label">Phone</label>
-                                                    <InputText class="form-control"
-                                                               placeholder="Enter Number"
-                                                               @bind-Value="legalcaseDto.ClientPhone" disabled />
-                                                </div>
-                                                <div class="col-4">
-                                                    <label class="form-label required-label">Client Type</label>
-                                                    <InputSelect class="form-select"
-                                                                 @bind-Value="legalcaseDto.ClientTypeId" disabled>
-                                                        <option value="">-- Select Type --</option>
-                                                        @foreach (var Own in ClientTypeList)
-                                                        {
-                                                            <option value="@Own.Id">@Own.Name</option>
-                                                        }
-                                                    </InputSelect>
-                                                    <ValidationMessage For="() => legalcaseDto.ClientTypeId" />
-                                                </div>
-
-
-
-
-
-                                                <div class="col-6">
-                                                    <label class="form-label required-label">Email</label>
-                                                    <InputText class="form-control"
-                                                               placeholder="Enter Email"
-                                                               @bind-Value="legalcaseDto.ClientEmail" disabled />
-                                                    <ValidationMessage For="() => legalcaseDto.ClientEmail" />
-                                                </div>
-                                                <div class="col-4">
-                                                    <label class="form-label">Reference #</label>
-                                                    <InputText class="form-control"
-                                                               placeholder="Enter Reference"
-                                                               @bind-Value="legalcaseDto.Reference" />
-                                                </div>
-
-
-
-                                                @if (IsNewClient)
-                                                {
-                                                    <div class="col-9">
-                                                        <label class="form-label">Address</label>
-                                                        <InputText class="form-control"
-                                                                   placeholder="Enter Address"
-                                                                   @bind-Value="legalcaseDto.ClientAddress" />
-                                                    </div>
-                                                }
                                             </div>
-                                        </div>
-                                    }
+                                        }
 
 
-                                    <!-- NEW CLIENT TEXTBOX FORM -->
-                                    @if (showClientTextbox)
-                                    {
+                                        <!-- NEW CLIENT TEXTBOX FORM -->
+                                        @if (showClientTextbox)
+                                        {
 
 
-                                        <div class="card p-3 position-relative">
-                                            <button type="button"
-                                                    class="btn-close position-absolute top-0 end-0 m-2"
-                                                    @onclick="ClearSelectedClient" title=" Click here for lanlord reset">
-                                            </button>
+                                            <div class="card p-3 position-relative">
+                                                <button type="button"
+                                                        class="btn-close position-absolute top-0 end-0 m-2"
+                                                        @onclick="ClearSelectedClient" title=" Click here for lanlord reset">
+                                                </button>
 
-                                            <div class="row g-3">
+                                                <div class="row g-3">
 
-                                                <div class="col-4">
-                                                    <label class="form-label required-label">Client Name</label>
-                                                    <InputText class="form-control"
-                                                               placeholder="Enter Name"
-                                                               @bind-Value="legalcaseDto.ClientName" />
-                                                    <ValidationMessage For="() => legalcaseDto.ClientName" />
-                                                </div>
-                                                <div class="col-4">
-                                                    <label class="form-label">Phone</label>
-                                                    <InputText class="form-control"
-                                                               placeholder="Enter Number"
-                                                               @bind-Value="legalcaseDto.ClientPhone" />
-                                                </div>
-                                                <div class="col-4">
-                                                    <label class="form-label required-label">Client Type</label>
-                                                    <InputSelect class="form-select"
-                                                                 @bind-Value="legalcaseDto.ClientTypeId">
-                                                        <option value="">-- Select Type --</option>
-                                                        @foreach (var Own in ClientTypeList)
-                                                        {
-                                                            <option value="@Own.Id">@Own.Name</option>
-                                                        }
-                                                    </InputSelect>
-                                                    <ValidationMessage For="() => legalcaseDto.ClientTypeId" />
-                                                </div>
-                                                <div class="col-6">
-                                                    <label class="form-label required-label">Email</label>
-                                                    <InputText class="form-control"
-                                                               placeholder="Enter Email"
-                                                               @bind-Value="legalcaseDto.ClientEmail" />
-                                                    <ValidationMessage For="() => legalcaseDto.ClientEmail" />
-                                                </div>
-                                                <div class="col-4">
-                                                    <label class="form-label">Reference #</label>
-                                                    <InputText class="form-control"
-                                                               placeholder="Enter Reference"
-                                                               @bind-Value="legalcaseDto.Reference" />
-                                                </div>
-
-                                                @if (IsNewClient)
-                                                {
-                                                    <div class="col-8">
-                                                        <label class="form-label">Address</label>
+                                                    <div class="col-4">
+                                                        <label class="form-label required-label">Client Name</label>
                                                         <InputText class="form-control"
-                                                                   placeholder="Enter Address"
-                                                                   @bind-Value="legalcaseDto.ClientAddress" />
+                                                                   placeholder="Enter Name"
+                                                                   @bind-Value="legalcaseDto.ClientName" />
+                                                        <ValidationMessage For="() => legalcaseDto.ClientName" />
                                                     </div>
-                                                }
+                                                    <div class="col-4">
+                                                        <label class="form-label">Phone</label>
+                                                        <InputText class="form-control"
+                                                                   placeholder="Enter Number"
+                                                                   @bind-Value="legalcaseDto.ClientPhone" />
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <label class="form-label required-label">Client Type</label>
+                                                        <InputSelect class="form-select"
+                                                                     @bind-Value="legalcaseDto.ClientTypeId">
+                                                            <option value="">-- Select --</option>
+                                                            @foreach (var Own in ClientTypeList)
+                                                            {
+                                                                <option value="@Own.Id">@Own.Name</option>
+                                                            }
+                                                        </InputSelect>
+                                                        <ValidationMessage For="() => legalcaseDto.ClientTypeId" />
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label class="form-label required-label">Email</label>
+                                                        <InputText class="form-control"
+                                                                   placeholder="Enter Email"
+                                                                   @bind-Value="legalcaseDto.ClientEmail" />
+                                                        <ValidationMessage For="() => legalcaseDto.ClientEmail" />
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <label class="form-label">Reference #</label>
+                                                        <InputText class="form-control"
+                                                                   placeholder="Enter Reference"
+                                                                   @bind-Value="legalcaseDto.Reference" />
+                                                    </div>
 
+                                                    @if (IsNewClient)
+                                                    {
+                                                        <div class="col-8">
+                                                            <label class="form-label">Address</label>
+                                                            <InputText class="form-control"
+                                                                       placeholder="Enter Address"
+                                                                       @bind-Value="legalcaseDto.ClientAddress" />
+                                                        </div>
+                                                    }
+
+                                                </div>
                                             </div>
-                                        </div>
-                                    }
+                                        }
+
+                                    </div>
+
+
 
                                 </div>
-
-
-
                             </div>
+                        </div>
+
+                        <!-- Right side summary -->
+                        <div class="col-4">
+                            <CasesSummary LegalCase="legalcaseDto"
+                                          ClientList="selectedClient"
+                                          CaseTypeList="CaseTypeList"
+                                          CurrentStep="CurrentStep" Steps="Steps" />
+                            <TipsSummary />
                         </div>
                     </div>
 
-                    <!-- Right side summary -->
-                    <div class="col-4">
-                        <CasesSummary LegalCase="legalcaseDto"
-                                      ClientList="selectedClient"
-                                      CaseTypeList="CaseTypeList"
-                                      CurrentStep="CurrentStep" Steps="Steps" />
-                        <TipsSummary />
-                    </div>
-                </div>
 
 
             }
@@ -884,30 +904,30 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     }
                                     <!-- align-items-end vertically bottom align -->
                                     <div class="col-md-6 position-relative" @onfocusout="HideLandlordsDropDown">
-                                        <label class="form-label required-label">Landlord / Owner Name</label>
+                                        <label class=@(IsLandlordSelected ? "form-label" : "form-label required-label")>Landlord / Owner Name</label>
 
                                         @if (showLandlordfields && selectedlandlord == null)
                                         {
-                                            <InputText type="text" class="form-control"
-                                                       placeholder="Enter Landlord name"
-                                                       @bind-value="searchlandlordText"
-                                                       @onblur="saveLandLordName" />
+                                            <input type="text" class="form-control" autocomplete="off"
+                                                   placeholder="Enter Landlord name"
+                                                   @bind-value="searchlandlordText"
+                                                   @onblur="saveLandLordName" />
                                         }
                                         else
 
                                         {
-                                            <InputText type="text" class="form-control"
-                                                       placeholder="Search by LandLord name or code..."
-                                                       @bind-value="searchlandlordText"
-                                                       @oninput="OnSearchLandlordInput"
-                                                       @onblur="saveLandLordName"
-                                                       disabled="@IsLandlordSelected"
-                                                       @onclick="ShowAlllandlords" />
+                                            <input type="text" class="form-control" style=@(IsLandlordSelected ? "cursor:not-allowed" : "")
+                                                   placeholder="Search by LandLord name or code..."
+                                                   @bind-value="searchlandlordText"
+                                                   @oninput="OnSearchLandlordInput"
+                                                   @onblur="saveLandLordName"
+                                                   disabled="@IsLandlordSelected"
+                                                   @onclick="ShowAlllandlords" />
                                         }
 
                                         @if (filteredLandlords?.Any() == true)
                                         {
-                                            <ul class="dropdown-menu show" style="position: absolute;mt-2 width:95%; cursor:pointer; z-index:2000;">
+                                            <ul class="dropdown-menu show" style="position: absolute; width:95%; cursor:pointer; z-index:2000;">
                                                 @foreach (var c in filteredLandlords)
                                                 {
                                                     <li class="dropdown-item" @onclick="() => SelectLandlord(c)">
@@ -947,16 +967,16 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                         <div class="row mt-1">
                                             <div class="col-md-6">
-                                                <label class="form-label  required-label">Contact Person </label>
-                                                <InputText class="form-control" @bind-Value="legalcaseDto.ContactPersonName" placeholder="Enter Contact Person" disabled="@IsLandlordSelected" />
+                                                <label class=@(IsLandlordSelected ? "form-label" : "form-label required-label")>Contact Person </label>
+                                                <InputText class="form-control" style=@(IsLandlordSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.ContactPersonName" placeholder="Enter Contact Person" disabled="@IsLandlordSelected" />
                                                 @if (!IsLandlordSelected)
                                                 {
                                                     <ValidationMessage For="() => legalcaseDto.ContactPersonName" />
                                                 }
                                             </div>
                                             <div class="col-md-6 ">
-                                                <label class="form-label  required-label">Landlord Address </label>
-                                                <InputText class="form-control" @bind-Value="legalcaseDto.LandlordAddress" placeholder="Enter Address" disabled="@IsLandlordSelected" />
+                                                <label class=@(IsLandlordSelected ? "form-label" : "form-label required-label")>Landlord Address </label>
+                                                <InputText class="form-control" style=@(IsLandlordSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.LandlordAddress" placeholder="Enter Address" disabled="@IsLandlordSelected" />
                                                 @if (!IsLandlordSelected)
                                                 {
                                                     <ValidationMessage For="() => legalcaseDto.LandlordAddress" />
@@ -999,7 +1019,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     {
                                         <div class="col-md-6 position-relative" @onfocusout="HideBuildingDropdown">
                                             <label class="form-label  required-label">Building</label>
-                                            <input type="text" class="form-control"
+                                            <input type="text" class="form-control" autocomplete="off"
                                                    placeholder="Search by Building Address or code..."
                                                    @bind-value="searchBuildingText"
                                                    @oninput="OnSearchBuildingInput"
@@ -1054,8 +1074,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         }
                                         <div class="row mt-2">
                                             <div class="col-6">
-                                                <label class="form-label  required-label">Street Address </label>
-                                                <InputText class="form-control" @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter Address" disabled="@isBuildingSelected" />
+                                                <label class=@(isBuildingSelected ? "form-label" : "form-label required-label")>Street Address </label>
+                                                <InputText class="form-control" style=@(isBuildingSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter Address" disabled="@isBuildingSelected" />
 
                                                 @if (!isBuildingSelected)
                                                 {
@@ -1064,8 +1084,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             </div>
 
                                             <div class="col-md-6">
-                                                <label class="form-label  required-label">MDR Number </label>
-                                                <InputText class="form-control" @bind-Value="legalcaseDto.Mdr" placeholder="Enter MDR Number" disabled="@isBuildingSelected" />
+                                                <label class=@(isBuildingSelected ? "form-label" : "form-label required-label")>MDR Number </label>
+                                                <InputText class="form-control" style=@(isBuildingSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.Mdr" placeholder="Enter MDR Number" disabled="@isBuildingSelected" />
 
                                                 @if (!isBuildingSelected)
                                                 {
@@ -1076,10 +1096,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                         <div class="row mt-4">
                                             <div class="col-md-4">
-                                                <label class="form-label  required-label">County </label>
+                                                <label class=@(isBuildingSelected ? "form-label" : "form-label required-label")>County </label>
 
-                                                <InputSelect class="form-select" @bind-Value="legalcaseDto.BoroughorCityId" style="cursor:pointer;" disabled="@isBuildingSelected">
-                                                    <option value="">-- Select County --</option>
+                                                <InputSelect class="form-select" @bind-Value="legalcaseDto.BoroughorCityId" style=@(isBuildingSelected ? "cursor:not-allowed" : "cursor:pointer") disabled="@isBuildingSelected">
+                                                    <option value="">-- Select --</option>
                                                     @foreach (var s in CityList)
                                                     {
                                                         <option value="@s.Id">@s.Name</option>
@@ -1092,8 +1112,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             </div>
 
                                             <div class="col-md-4">
-                                                <label class="form-label required-label">Units </label>
-                                                <InputText class="form-control" @bind-Value="legalcaseDto.Units" placeholder="Enter Units" disabled="@isBuildingSelected" />
+                                                <label class=@(isBuildingSelected ? "form-label" : "form-label required-label")>Units </label>
+                                                <InputText class="form-control" style=@(isBuildingSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.Units" placeholder="Enter Units" disabled="@isBuildingSelected" />
 
                                                 @if (!isBuildingSelected)
                                                 {
@@ -1101,9 +1121,9 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 }
                                             </div>
                                             <div class="col-4">
-                                                <label class="form-label  required-label">Rent Regulation </label>
-                                                <InputSelect class="form-select" @bind-Value="legalcaseDto.RegulationStatusId" style="cursor:pointer;" disabled="@isBuildingSelected">
-                                                    <option value="">-- Select Type --</option>
+                                                <label class=@(isBuildingSelected ? "form-label" : "form-label required-label")>Rent Regulation </label>
+                                                <InputSelect class="form-select" @bind-Value="legalcaseDto.RegulationStatusId" style=@(isBuildingSelected ? "cursor:not-allowed" : "cursor:pointer") disabled="@isBuildingSelected">
+                                                    <option value="">-- Select  --</option>
                                                     @foreach (var l in RegulationList)
                                                     {
                                                         <option value="@l.Id">@l.Name</option>
@@ -1121,7 +1141,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <div class="row mt-4">
                                                 <div class="col-md-4">
                                                     <label class="form-label  required-label">State </label>
-                                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.BuildingStateId" style="cursor:pointer;" disabled="@isBuildingSelected">
+                                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.BuildingStateId" style="cursor:pointer" disabled="@isBuildingSelected">
                                                         @foreach (var s in StateList)
                                                         {
                                                             <option value="@s.Id">@s.Name</option>
@@ -1146,15 +1166,15 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             </div>
 
                                         }
-                                        <div class="row mt-4">
+                                        <div class="row mt-4 d-flex justify-content-between">
 
-                                            <div class="col-md-6">
+                                            <div class="col-md-5">
 
-                                                <label class="form-label fw-semibold">
-                                                    Building Type <span class="text-danger">*</span>
+                                                <label class=@(isBuildingSelected ? "form-label fw-semibold" : "form-label required-label fw-semibold")>
+                                                    Building Type
                                                 </label>
-                                                <InputSelect class="form-select" @bind-Value="legalcaseDto.PremiseTypeId" style="cursor:pointer;" disabled="@isBuildingSelected">
-                                                    <option value="">-- Select State --</option>
+                                                <InputSelect class="form-select" @bind-Value="legalcaseDto.PremiseTypeId" style=@(isBuildingSelected ? "cursor:not-allowed" : "cursor:pointer") disabled="@isBuildingSelected">
+                                                    <option value="">-- Select --</option>
                                                     @foreach (var s in PremiseTypesList)
                                                     {
                                                         <option value="@s.Id">@s.Name</option>
@@ -1164,11 +1184,37 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 {
                                                     <ValidationMessage For="() => legalcaseDto.PremiseTypeId" />
                                                 }
+                                                @* @if (PremiseTypesList != null && PremiseTypesList.Any())
+                                                {
+                                                    <div class="row" style="display: flex;flex-wrap: wrap; margin-left:10px;">
+                                                        <InputRadioGroup @bind-Value="legalcaseDto.PremiseTypeId" class="d-flex gap-4 flex-wrap mt-2">
+
+                                                            @foreach (var Type in PremiseTypesList)
+                                                            {
+                                                                <div class="form-check d-flex align-items-center gap-1 col-6">
+                                                                    <InputRadio class="form-check-input"
+                                                                                id="@($"Type_{Type.Id}")"
+                                                                                Value="@Type.Id" disabled="@IsExistingBuildingSelected" />
+
+                                                                    <label class="form-check-label" for="@($"Type_{Type.Id}")">@Type.Name</label>
+                                                                </div>
+                                                            }
+
+                                                        </InputRadioGroup>
+
+                                                        @if (!IsExistingBuildingSelected)
+                                                        {
+                                                            <ValidationMessage For="() => legalcaseDto.PremiseTypeId" />
+                                                        }
+
+
+                                                    </div>
+                                                } *@
                                             </div>
 
                                             <div class="col-md-6">
-                                                <label class="form-label fw-semibold">
-                                                    Registration Status (HPD/DOF) <span class="text-danger">*</span>
+                                                <label class=@(isBuildingSelected ? "form-label fw-semibold" : "form-label required-label fw-semibold")>
+                                                    Registration Status (HPD/DOF)
                                                 </label>
 
                                                 <div class="row mt-1">
@@ -1180,9 +1226,9 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                 {
                                                                     <div class="col-12">
                                                                         <div class="form-check">
-                                                                            <InputRadio class="form-check-input"
+                                                                            <InputRadio class="form-check-input" style=@(isBuildingSelected ? "cursor:not-allowed" : "cursor:pointer")
                                                                                         id="@($"RegStatus_{Type.Id}")"
-                                                                                        Value="@Type.Id" />
+                                                                                        Value="@Type.Id" disabled="@IsExistingBuildingSelected" />
                                                                             <label class="form-check-label" for="@($"RegStatus_{Type.Id}")">@Type.Name</label>
                                                                         </div>
                                                                     </div>
@@ -1219,13 +1265,11 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                     </div>
                 </div>
 
-
             }
 
             @* TENANT *@
             @if (Steps[CurrentStep].Name == "Tenant")
             {
-
                 <div class="row">
                     <div class="col-md-8">
                         <div class="card">
@@ -1246,11 +1290,11 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         </button>
                                     }
                                     <div class="col-md-6 position-relative" @onfocusout="HideTenantDropDown">
-                                        <label class="form-label  required-label">Unit / Apt # (confirm)</label>
-                                        <InputText type="text" class="form-control"
-                                                   placeholder="Search or Enter Unit / Apt"
-                                                   @bind-value="searchTenantText"
-                                                   @oninput="OnSearchTenantInput" @onblur="SelectTenant" @onclick="ShowAllTenantForHoldover" />
+                                        <label class=@(selectedtenant == null ? "form-label required-label" : "form-label")>Unit / Apt # (confirm)</label>
+                                        <input type="text" class="form-control" autocomplete="off"
+                                               placeholder="Search or Enter Unit / Apt"
+                                               @bind-value="searchTenantText"
+                                               @oninput="OnSearchTenantInput" @onblur="SelectTenant" @onclick="ShowAllTenantForHoldover" />
                                         @if (filteredTenant?.Any() == true)
                                         {
                                             <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
@@ -1268,12 +1312,13 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                 <div class="row mt-3">
                                     <div class="col-12 row">
-                                        <label class="lbl required-label">Tenants</label>
+                                        <label class=@(selectedtenant == null ? "lbl required-label" : "lbl")>Tenants</label>
                                         @if (Tenants.Count > 0)
                                         {
 
                                             @foreach (var tenant in Tenants.Select((t, i) => new { t, i }))
                                             {
+
                                                 <div class="col-11">
                                                     <input class="form-control mb-2"
                                                            placeholder="Tenant Full Name"
@@ -1290,6 +1335,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         </button>
                                                     </div>
                                                 }
+
+
                                             }
 
 
@@ -1313,6 +1360,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                            @bind-value="Undertenants[undertenant.i]"
                                                            @onblur="() => OnchangeAdditionalOccupants(undertenant.i)" />
                                                 </div>
+
                                                 <div class="col-1">
                                                     <button type="button"
                                                             class="btn btn-delete" style="border :none;"
@@ -1416,7 +1464,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <div class="col-md-4">
                                         <label class="form-label">Program</label>
                                         <InputSelect class="form-select" @bind-Value="legalcaseDto.CaseProgramId" style="cursor:pointer;">
-                                            <option value="">-- Select Type --</option>
+                                            <option value="">-- Select --</option>
                                             @foreach (var l in CaseProgramList)
                                             {
                                                 <option value="@l.Id">@l.Name</option>
@@ -1488,7 +1536,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <div class="col-md-4">
                                         <label class="form-label required-label">Tenancy Type</label>
                                         <InputSelect class="form-select" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays" style="cursor:pointer;">
-                                            <option value="">-- Select Type --</option>
+                                            <option value="">-- Select --</option>
                                             @foreach (var l in TenancyTypeList)
                                             {
                                                 <option value="@l.Id">@l.Name</option>
@@ -1518,8 +1566,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <!-- Expiration Date -->
                                     <div class="col-md-4">
                                         <label class="form-label" style="height: 36px;
-                                                                                                                                        display: flex;
-                                                                                                                                        align-items: center;">Expiration Date (Auto)</label>
+                                                                                                                                                display: flex;
+                                                                                                                                                align-items: center;">Expiration Date (Auto)</label>
                                         <RadzenDatePicker Style="width:100%;" @bind-Value="legalcaseDto.ExpirationDate" />
 
                                     </div>
@@ -1527,8 +1575,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <!-- Predicate -->
                                     <div class="col-md-4">
                                         <label class="form-label " style="height: 36px;
-                                                                                                                                                display: flex;
-                                                                                                                                                align-items: center;">Predicate Notice (Auto) </label>
+                                                                                                                                                        display: flex;
+                                                                                                                                                        align-items: center;">Predicate Notice (Auto) </label>
                                         <InputText class="form-control" @bind-Value="legalcaseDto.PredicateNotice" />
 
                                     </div>
@@ -1626,7 +1674,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <div class="col-md-4">
                                         <label class="form-label  required-label">Date Rent  Due (Month/Week) </label>
                                         <InputSelect class="form-select" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" style="cursor:pointer;">
-                                            <option value="">-- Select Type --</option>
+                                            <option value="">-- Select --</option>
                                             @foreach (var l in DateRentList)
                                             {
                                                 <option value="@l.Id">@l.Name</option>
@@ -1832,7 +1880,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <div class="col-md-4">
                                         <label class="form-label ">Date Rent  Due (Month/Week) </label>
                                         <InputSelect class="form-select" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" style="cursor:pointer;">
-                                            <option value="">-- Select Type --</option>
+                                            <option value="">-- Select --</option>
                                             @foreach (var l in DateRentList)
                                             {
                                                 <option value="@l.Id">@l.Name</option>
@@ -1870,7 +1918,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <div class="col-md-4">
                                         <label class="form-label " style="align-items: center;display: flex;height: 36px;">Tenancy Type</label>
                                         <InputSelect class="form-select" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays" style="cursor:pointer;">
-                                            <option value="">-- Select Type --</option>
+                                            <option value="">-- Select --</option>
                                             @foreach (var l in TenancyTypeList)
                                             {
                                                 <option value="@l.Id">@l.Name</option>
@@ -2052,7 +2100,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <div class="col-md-4">
                                         <label class="form-label ">Notice Type </label>
                                         <InputSelect class="form-select" @bind-Value="legalcaseDto.NoticeId" style="cursor:pointer;">
-                                            <option value="">-- Select Type --</option>
+                                            <option value="">-- Select --</option>
                                             @foreach (var l in FilteredFormTypeList)
                                             {
                                                 <option value="@l.Id">@l.Name</option>
@@ -2062,7 +2110,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <div class="col-md-4">
                                         <label class="form-label ">Service Method </label>
                                         <InputSelect class="form-select" @bind-Value="legalcaseDto.ServiceMethodId" style="cursor:pointer;">
-                                            <option value="">-- Select Type --</option>
+                                            <option value="">-- Select --</option>
                                             @foreach (var l in ServiceMethodList)
                                             {
                                                 <option value="@l.Id">@l.Name</option>
@@ -2107,11 +2155,11 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <div class="hint">Add-ons: Personal +0 • Overnight +1 • Mail +5 • Posting+Mail +5. Expiry counts from deemed date.</div>
                                     <div class="col-auto">
                                         <label class="form-label" style="    padding: 10px;
-                                                                                                                                                                            border: 1px solid;
-                                                                                                                                                                            border-radius: 25px;
-                                                                                                                                                                            align-items: center;
-                                                                                                                                                                            display: flex;
-                                                                                                                                                                            height: 36px;">Live Expiry : --</label>
+                                                                                                                                                                                    border: 1px solid;
+                                                                                                                                                                                    border-radius: 25px;
+                                                                                                                                                                                    align-items: center;
+                                                                                                                                                                                    display: flex;
+                                                                                                                                                                                    height: 36px;">Live Expiry : --</label>
 
                                     </div>
 
@@ -2266,7 +2314,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                 <label class="form-label  ">Client Type</label>
                                                                 <InputSelect class="form-select"
                                                                              @bind-Value="legalcaseDto.ClientTypeId" disabled>
-                                                                    <option value="">-- Select Type --</option>
+                                                                    <option value="">-- Select --</option>
                                                                     @foreach (var Own in ClientTypeList)
                                                                     {
                                                                         <option value="@Own.Id">@Own.Name</option>
@@ -2527,7 +2575,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <div class="col-md-4">
                                                             <label class="form-label   ">County </label>
                                                             <InputSelect class="form-select" @bind-Value="legalcaseDto.BoroughorCityId" style="cursor:pointer;" disabled>
-                                                                <option value="">-- Select County --</option>
+                                                                <option value="">-- Select --</option>
                                                                 @foreach (var s in CityList)
                                                                 {
                                                                     <option value="@s.Id">@s.Name</option>
@@ -2551,7 +2599,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <div class="col-4">
                                                             <label class="form-label   ">Rent Regulation </label>
                                                             <InputSelect class="form-select" @bind-Value="legalcaseDto.RegulationStatusId" style="cursor:pointer;" disabled>
-                                                                <option value="">-- Select Type --</option>
+                                                                <option value="">-- Select --</option>
                                                                 @foreach (var l in RegulationList)
                                                                 {
                                                                     <option value="@l.Id">@l.Name</option>
@@ -2570,7 +2618,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <div class="col-md-6">
                                                                 <label class="form-label   ">State </label>
                                                                 <InputSelect class="form-select" @bind-Value="legalcaseDto.BuildingStateId" style="cursor:pointer;" disabled>
-                                                                    <option value="">-- Select State --</option>
+                                                                    <option value="">-- Select --</option>
                                                                     @foreach (var s in StateList)
                                                                     {
                                                                         <option value="@s.Id">@s.Name</option>
@@ -2705,7 +2753,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <div class="col-md-4">
                                                             <label class="form-label ">Date Rent  Due (Month/Week) </label>
                                                             <InputSelect class="form-select" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" style="cursor:pointer;" disabled>
-                                                                <option value="">-- Select Type --</option>
+                                                                <option value="">-- Select --</option>
                                                                 @foreach (var l in DateRentList)
                                                                 {
                                                                     <option value="@l.Id">@l.Name</option>
@@ -2743,7 +2791,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <div class="col-md-4">
                                                             <label class="form-label " style="align-items: center;display: flex;">Tenancy Type</label>
                                                             <InputSelect class="form-select" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays" style="cursor:pointer;" disabled>
-                                                                <option value="">-- Select Type --</option>
+                                                                <option value="">-- Select --</option>
                                                                 @foreach (var l in TenancyTypeList)
                                                                 {
                                                                     <option value="@l.Id">@l.Name</option>
@@ -3037,7 +3085,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <div class="col-md-4">
                                                             <label class="form-label">Program</label>
                                                             <InputSelect class="form-select" @bind-Value="legalcaseDto.CaseProgramId" style="cursor:pointer;" disabled>
-                                                                <option value="">-- Select Type --</option>
+                                                                <option value="">-- Select --</option>
                                                                 @foreach (var l in CaseProgramList)
                                                                 {
                                                                     <option value="@l.Id">@l.Name</option>
@@ -3081,8 +3129,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
 
                                     </div>
-                                   
-                                    
+
+
 
                                 }
 
@@ -3200,7 +3248,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     <label class="form-label required-label">Client Type</label>
                                                     <InputSelect class="form-select"
                                                                  @bind-Value="legalcaseDto.ClientTypeId" disabled>
-                                                        <option value="">-- Select Type --</option>
+                                                        <option value="">-- Select --</option>
                                                         @foreach (var Own in ClientTypeList)
                                                         {
                                                             <option value="@Own.Id">@Own.Name</option>
@@ -3273,7 +3321,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     <label class="form-label required-label">Client Type</label>
                                                     <InputSelect class="form-select"
                                                                  @bind-Value="legalcaseDto.ClientTypeId">
-                                                        <option value="">-- Select Type --</option>
+                                                        <option value="">-- Select --</option>
                                                         @foreach (var Own in ClientTypeList)
                                                         {
                                                             <option value="@Own.Id">@Own.Name</option>
@@ -3443,10 +3491,9 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                 <!-- Case Details -->
                                 <div class="row g-3 mt-2">
 
-                                    <div class=@(showCountyDropdown ? "col-md-4" : "col-md-6")>
+                                    <div class=@(showCountyDropdown ? "col-md-3" : "col-md-6")>
                                         <label class="form-label ">Court Type </label>
                                         <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtTypeId" style="cursor:pointer;" @bind-Value:after="SelectCourtType">
-                                            <option value="">-- Select Type --</option>
                                             @foreach (var l in CourtTypeList)
                                             {
                                                 <option value="@l.Id">@l.Name</option>
@@ -3455,21 +3502,20 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     </div>
                                     <!-- Court Location -->
 
-                                    <div class=@(showCountyDropdown ? "col-md-4" : "d-none")>
+                                    <div class=@(showCountyDropdown ? "col-md-3" : "d-none")>
 
-                                        <label class="form-label fw-semibold">County / Borough </label>
+                                        <label class="form-label fw-semibold">County </label>
                                         <InputSelect class="form-select" @bind-Value="legalcaseDto.CountyId" style="cursor:pointer;" @bind-Value:after="SelectCounty">
-                                            <option value="">-- Select Location --</option>
                                             @foreach (var l in CountyList)
                                             {
                                                 <option value="@l.Id">@l.Name</option>
                                             }
                                         </InputSelect>
                                     </div>
-                                    <div class=@(showCountyDropdown ? "col-md-4" : "col-md-6")>
-                                        <label class="form-label fw-semibold">Court Location (Borough) <span class="text-danger">*</span></label>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Court <span class="text-danger">*</span></label>
                                         <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtLocationId" style="cursor:pointer;" @onmousedown="ShowAllCourts" @bind-Value:after="SelectCourt">
-                                            <option value="">-- Select Type --</option>
+                                            <option value="">-- Select --</option>
                                             @foreach (var l in filteredCourts)
                                             {
                                                 <option value="@l.Id">@l.Court</option>
@@ -3489,7 +3535,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">Part / Room #</label>
                                             <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtPartId" style="cursor:pointer;">
-                                                <option value="">-- Select Part --</option>
+                                                <option value="">-- Select --</option>
                                                 @foreach (var l in CourtPartList)
                                                 {
                                                     <option value="@l.Id">@l.Part - @l.RoomNo</option>
@@ -4566,7 +4612,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                 <label class="form-label required-label">Client Type</label>
                                                                 <InputSelect class="form-select"
                                                                              @bind-Value="legalcaseDto.ClientTypeId" disabled>
-                                                                    <option value="">-- Select Type --</option>
+                                                                    <option value="">-- Select --</option>
                                                                     @foreach (var Own in ClientTypeList)
                                                                     {
                                                                         <option value="@Own.Id">@Own.Name</option>
@@ -4679,10 +4725,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 <!-- Case Details -->
                                                 <div class="row g-3 mt-2">
 
-                                                    <div class=@(showCountyDropdown ? "col-md-4" : "col-md-6")>
+                                                    <div class=@(showCountyDropdown ? "col-md-3" : "col-md-6")>
                                                         <label class="form-label ">Court Type </label>
                                                         <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtTypeId" style="cursor:pointer;" @bind-Value:after="SelectCourtType" disabled>
-                                                            <option value="">-- Select Type --</option>
+                                                            <option value="">-- Select --</option>
                                                             @foreach (var l in CourtTypeList)
                                                             {
                                                                 <option value="@l.Id">@l.Name</option>
@@ -4691,21 +4737,21 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     </div>
                                                     <!-- Court Location -->
 
-                                                    <div class=@(showCountyDropdown ? "col-md-4" : "d-none")>
+                                                    <div class=@(showCountyDropdown ? "col-md-3" : "d-none")>
 
-                                                        <label class="form-label fw-semibold">County / Borough </label>
+                                                        <label class="form-label fw-semibold">County </label>
                                                         <InputSelect class="form-select" @bind-Value="legalcaseDto.CountyId" style="cursor:pointer;" @bind-Value:after="SelectCounty" disabled>
-                                                            <option value="">-- Select Location --</option>
+                                                            <option value="">-- Select --</option>
                                                             @foreach (var l in CountyList)
                                                             {
                                                                 <option value="@l.Id">@l.Name</option>
                                                             }
                                                         </InputSelect>
                                                     </div>
-                                                    <div class=@(showCountyDropdown ? "col-md-4" : "col-md-6")>
-                                                        <label class="form-label fw-semibold">Court Location (Borough) <span class="text-danger">*</span></label>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Court <span class="text-danger">*</span></label>
                                                         <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtLocationId" style="cursor:pointer;" @onmousedown="ShowAllCourts" @bind-Value:after="SelectCourt" disabled>
-                                                            <option value="">-- Select Type --</option>
+                                                            <option value="">-- Select --</option>
                                                             @foreach (var l in filteredCourts)
                                                             {
                                                                 <option value="@l.Id">@l.Court</option>
@@ -4725,7 +4771,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <div class="col-md-6">
                                                             <label class="form-label fw-semibold">Part / Room #</label>
                                                             <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtPartId" style="cursor:pointer;" disabled>
-                                                                <option value="">-- Select Part --</option>
+                                                                <option value="">-- Select --</option>
                                                                 @foreach (var l in CourtPartList)
                                                                 {
                                                                     <option value="@l.Id">@l.Part - @l.RoomNo</option>
@@ -5627,11 +5673,11 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
         @if (legalcaseDto.CaseTypeName == "Holdover")
         {
-            <div class="d-flex justify-content-between border-top pt-3 mt-3">
-                <button type="button" class="btn btn-outline-secondary" @onclick="Prev" disabled="@( Steps[CurrentStep].Name == "CaseAndclient")">← Back</button>
+            <div class="d-flex justify-content-between border-top pt-3 mt-3" style="position: fixed; bottom: 25px; left: 260px; right: 10px;">
+                <button type="button" class="btn btn-outline-secondary" style="height: 45px; width: 115px;" @onclick="Prev" disabled="@( Steps[CurrentStep].Name == "CaseAndclient")">← Back</button>
                 @if (Steps[CurrentStep].Name != "Review")
                 {
-                    <button type="button" class="btn" style="background-color:#1F365D !important; color:white" @onclick="Next">Next →</button>
+                    <button type="button" class="btn" style="height: 45px; width: 115px;background-color:#1F365D !important; color:white" @onclick="Next">Next →</button>
                 }
                 else
                 {
@@ -5643,16 +5689,16 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         }
         @if (legalcaseDto.CaseTypeName == "NonPayment")
         {
-            <div class="d-flex justify-content-between border-top pt-3 mt-3">
-                <button type="button" class="btn btn-outline-secondary" @onclick="Prev" disabled="@( Steps[CurrentStep].Name == "CaseAndclient")">← Back</button>
+            <div class="d-flex justify-content-between border-top pt-3 mt-3" style="position: fixed; bottom: 25px; left: 260px; right: 10px;">
+                <button type="button" class="btn btn-outline-secondary" style="height: 45px; width: 115px;" @onclick="Prev" disabled="@( Steps[CurrentStep].Name == "CaseAndclient")">← Back</button>
                 @if (Steps[CurrentStep].Name != "Review")
 
                 {
-                    <button type="button" class="btn" style="background-color:#1F365D !important; color:white" @onclick="Next">Next →</button>
+                    <button type="button" class="btn" style="background-color:#1F365D !important; color:white;height: 45px; width: 115px;" @onclick="Next">Next →</button>
                 }
                 else
                 {
-                    <button type="button" class="btn btn-success" @onclick="UpdateAsync">Submit</button>
+                    <button type="button" class="btn btn-success" style="height: 45px; width: 115px;" @onclick="UpdateAsync">Submit</button>
                 }
 
 
@@ -5661,15 +5707,15 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
         @if (legalcaseDto.CaseTypeName == "HPD" || legalcaseDto.CaseTypeName == "Illegal Lockout")
         {
-            <div class="d-flex justify-content-between border-top pt-3 mt-3">
-                <button type="button" class="btn btn-outline-secondary" @onclick="Prev" disabled="@( Steps[CurrentStep].Name == "CaseAndclient")">← Back</button>
+            <div class="d-flex justify-content-between border-top pt-3 mt-3" style="position: fixed; bottom: 25px; left: 260px; right: 10px;">
+                <button type="button" class="btn btn-outline-secondary" style="height: 45px; width: 115px;" @onclick="Prev" disabled="@( Steps[CurrentStep].Name == "CaseAndclient")">← Back</button>
                 @if (Steps[CurrentStep].Name != "Review")
                 {
-                    <button type="button" class="btn" style="background-color:#1F365D !important; color:white" @onclick="Next">Next →</button>
+                    <button type="button" class="btn" style="background-color:#1F365D !important; color:white;height: 45px; width: 115px;" @onclick="Next">Next →</button>
                 }
                 else
                 {
-                    <button type="button" class="btn btn-success" @onclick="UpdateAsync">Submit</button>
+                    <button type="button" class="btn btn-success" style="height: 45px; width: 115px;" @onclick="UpdateAsync">Submit</button>
                 }
 
 
@@ -5681,15 +5727,15 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
         @if (legalcaseDto.CaseTypeName == "Per Diem")
         {
-            <div class="d-flex justify-content-between border-top pt-3 mt-3">
-                <button type="button" class="btn btn-outline-secondary" @onclick="Prev" disabled="@( Steps[CurrentStep].Name == "CaseAndclient")">← Back</button>
+            <div class="d-flex justify-content-between border-top pt-3 mt-3" style="position: fixed; bottom: 25px; left: 260px; right: 10px;">
+                <button type="button" class="btn btn-outline-secondary" style="height: 45px; width: 115px;" @onclick="Prev" disabled="@( Steps[CurrentStep].Name == "CaseAndclient")">← Back</button>
                 @if (Steps[CurrentStep].Name != "Billing")
                 {
-                    <button type="button" class="btn" style="background-color:#1F365D !important; color:white" @onclick="Next">Next →</button>
+                    <button type="button" class="btn" style="background-color:#1F365D !important; color:white;height: 45px; width: 115px;" @onclick="Next">Next →</button>
                 }
                 else
                 {
-                    <button type="button" class="btn btn-success" @onclick="UpdateAsync">Submit</button>
+                    <button type="button" class="btn btn-success" style="height: 45px; width: 115px;" @onclick="UpdateAsync">Submit</button>
                 }
 
 

@@ -1047,7 +1047,7 @@
                                         <div class="col-12 col-md-6">
                                             <label for="formType" class="form-label">File a Motion</label>
                                             <select class="form-select" @bind="noticeModel.FormTypeId" @bind:after="FormTypeBindAfter">
-                                                <option value="">-- Select Form Type --</option>
+                                                <option value="">-- Select --</option>
                                                 @foreach (var formType in FilteredFormTypeList)
                                                 {
                                                     <option value="@formType.Id">@formType.Name @(formType.Rate != null ? $"- (${formType.Rate}) " : "")</option>
@@ -1421,7 +1421,7 @@
                                             <div class="col-md-6">
                                                 <label class="form-label required-label">County</label>
                                                 <InputSelect class="form-select" @bind-Value="editBuildingModel.CityId">
-                                                    <option value="">-- Select County --</option>
+                                                    <option value="">-- Select --</option>
                                                     @foreach (var s in CityList)
                                                     {
                                                         <option value="@s.Id">@s.Name</option>
@@ -1462,7 +1462,7 @@
                                             <div class="col-md-6">
                                                 <label class="form-label required-label">Rent Regulation</label>
                                                 <InputSelect class="form-select" @bind-Value="editBuildingModel.RegulationStatusId">
-                                                    <option value="">-- Select Type --</option>
+                                                    <option value="">-- Select --</option>
                                                     @foreach (var l in RegulationList)
                                                     {
                                                         <option value="@l.Id">@l.Name</option>
@@ -1626,7 +1626,7 @@
                                                 <div class="col-4">
                                                     <label class="form-label">Client Type</label>
                                                     <InputSelect class="form-select" @bind-Value="client.ClientTypeId" style="cursor:pointer;">
-                                                        <option value="">-- Select Type --</option>
+                                                        <option value="">-- Select --</option>
                                                         @foreach (var Own in ClientTypeList)
                                                         {
                                                             <option value="@Own.Id">@Own.Name</option>
@@ -1725,7 +1725,7 @@
                                         <div class="col-md-6">
                                             <label class="form-label ">Court <span class="text-danger">*</span></label>
                                             <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtLocationId" style="cursor:pointer;" @onmousedown="ShowAllCourts" @bind-Value:after="SelectCourt">
-                                                <option value="">-- Select Court --</option>
+                                                <option value="">-- Select --</option>
                                                 @foreach (var l in filteredCourts)
                                                 {
                                                     <option value="@l.Id">@l.Court</option>
@@ -1751,7 +1751,6 @@
                                             <div class="col-md-6">
                                                 <label class="form-label ">Part / Room #</label>
                                                 <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtPartId" style="cursor:pointer;" @bind-Value:after="SelectCourtPart">
-                                                    <option value="Guid.Empty">-- Select Part --</option>
                                                     @foreach (var l in CourtPartList)
                                                     {
                                                         <option value="@l.Id">@l.Part - @l.RoomNo</option>
@@ -2058,7 +2057,7 @@
         {
             legalcaseDto.CountyId = null;
             showCountyDropdown = true;
-            showCourtPartDropdown = true;
+            // showCourtPartDropdown = true;
             filteredCourts = query.Where(x => !x.CountyName.Contains("Nassau") && !x.CountyName.Contains("Westchester"))
                                    .ToList();
         }
@@ -2811,7 +2810,7 @@
             if (casetype.Name.Contains("NYC"))
             {
                 showCountyDropdown = true;
-                showCourtPartDropdown = true;
+                // showCourtPartDropdown = true;
                 ShowClearBtn = true;
             }
         }
@@ -2819,12 +2818,18 @@
         {
             legalcaseDto.CourtTypeId = CourtTypeList.Where(e => e.Name.Contains("NYC")).FirstOrDefault()!.Id;
             showCountyDropdown = true;
-            showCourtPartDropdown = true;
+            // showCourtPartDropdown = true;
             ShowClearBtn = true;
             if (legalcaseDto.CountyId == null || legalcaseDto.CountyId == Guid.Empty)
             {
                 legalcaseDto.CountyId = CountyList.Where(e => e.Name.Contains(legalcaseDto.Borough!)).FirstOrDefault()!.Id;
             }
+        }
+
+        if(legalcaseDto.CourtPartId != null && legalcaseDto.CourtPartId != Guid.Empty)
+        {
+            showCourtPartDropdown = true;
+            filteredCourtsPart = CourtLocationList.Where(e => e.Id == legalcaseDto.CourtLocationId).FirstOrDefault()!.CourtPart.ToList();
         }
         await ShowAllCourts();
         // CaseTypeStepLoaded = true;

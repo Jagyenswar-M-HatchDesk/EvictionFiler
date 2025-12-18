@@ -188,9 +188,44 @@ namespace EvictionFiler.Infrastructure.Repositories
 
 			}).ToList();
 		}
+        public async Task<List<EditToBuildingDto>> GetBuildingsByClientIdAsync(Guid CLientid)
+        {
+            var building = await _context.Buildings
+        .Include(a => a.State)
+        .Include(a => a.PremiseType)
+        .Include(a => a.RegulationStatus)
+        .Where(x => x.Landlord.ClientId == CLientid && x.IsDeleted != true)
+        .ToListAsync();
+
+            return building.Select(appartment => new EditToBuildingDto
+            {
+                Id = appartment.Id,
+                BuildingCode = appartment.BuildingCode,
+                ApartmentCode = appartment.ApartmentCode,
+                CityId = appartment.CityId,
+                StateId = appartment.StateId,
+                StateName = appartment.State?.Name,
+                PremiseTypeId = appartment.PremiseTypeId,
+                PremiseTypeName = appartment.PremiseType?.Name,
+                RegulationStatusId = appartment.RegulationStatusId,
+                RegulationStatusName = appartment.RegulationStatus?.Name,
+                RegistrationStatusId = appartment.RegistrationStatusId,
+                Address1 = appartment.Address1,
+                ManagingAgent = appartment.ManagingAgent,
+                Address2 = appartment.Address2,
+                Zipcode = appartment.Zipcode,
+                MDRNumber = appartment.MDRNumber,
+                PetitionerInterest = appartment.PetitionerInterest,
+                BuildingUnits = appartment.BuildingUnits,
+                LandlordId = appartment.LandlordId,
+                IsActive = appartment.IsActive,
+                IsDeleted = appartment.IsDeleted,
 
 
-		public async Task<EditToBuildingDto> GetBuildingByIdAsync(Guid buildingId)
+            }).ToList();
+        }
+
+        public async Task<EditToBuildingDto> GetBuildingByIdAsync(Guid buildingId)
 		{
 			var appartment = await _context.Buildings
 				.Include(a => a.State)

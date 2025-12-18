@@ -183,8 +183,15 @@ namespace EvictionFiler.Application.Services
         }
         public async Task<List<EditToBuildingDto>> GetBuildingsByLandlordIdAsync(Guid landlordId)
         {
-            var landlords = await _repository.GetBuildingsByLandlordIdAsync(landlordId);
-            return landlords;
+            var buildings = await _repository.GetBuildingsByLandlordIdAsync(landlordId);
+            return buildings;
+
+
+        }
+        public async Task<List<EditToBuildingDto>> GetBuildingsByClientIdAsync(Guid ClientId)
+        {
+            var buildings = await _repository.GetBuildingsByClientIdAsync(ClientId);
+            return buildings;
 
 
         }

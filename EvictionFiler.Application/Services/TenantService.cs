@@ -420,6 +420,14 @@ namespace EvictionFiler.Application.Services
             return lastTenant;
 
         }
+        public async Task<EditToLandlordDto>
+    GetLandlordByBuildingAsync(Guid buildingId)
+        {
+
+            var Landlord = await _repo.GetLandlordByBuildingAsync(buildingId);
+            return Landlord;
+
+        }
 
         public async Task<List<EditToTenantDto>> GetTenantsByLandlordIdAsync(Guid landlordId)
         {
