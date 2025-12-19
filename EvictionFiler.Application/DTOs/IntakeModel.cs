@@ -157,6 +157,7 @@ namespace EvictionFiler.Application.DTOs
 
         public string? County { get; set; }
         public string? Index { get; set; }
+        public string? Docketno { get; set; }
         public string? CourtRoom { get; set; }
         public string? OpposingCounsel { get; set; }
         public string? ManagingAgent { get; set; }

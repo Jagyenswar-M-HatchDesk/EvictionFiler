@@ -91,7 +91,7 @@ namespace EvictionFiler.Application.Services
 
                 CourtId = dto.CourtId,
                 LegalCaseId = dto.LegalCaseId,
-                IndexNo = dto.IndexNo,
+                IndexNo = dto.LegalCase != null ? dto.LegalCase.Index : "",
                 Caption = dto.Caption,
 
                 // CaseType name — safe whether CaseTypeId or LegalCaseId is null
@@ -100,32 +100,32 @@ namespace EvictionFiler.Application.Services
             ? dto.CaseTypes?.Name
             : dto.LegalCase?.CaseType?.Name ?? string.Empty,
 
-                //        // Judge — prefer Hearing Judge, fallback to Court Judge
-                //        Judge = dto.Judge
-                //?? dto.Courts?.Judge
-                //?? string.Empty,
+                // Judge — prefer Hearing Judge, fallback to Court Judge
+                Judge = dto.Judge
+                ?? dto.CourtParts?.Judge
+                ?? string.Empty,
 
-                //        // Court part — from CourtPart or fallback to Court.Part
-                //        CourtPart =
-                //dto.CourtPartId != null
-                //    ? dto.CourtParts?.Part
-                //    : dto.Courts?.Part ?? string.Empty,
+                // Court part — from CourtPart or fallback to Court.Part
+                CourtPart =
+                dto.CourtPartId != null
+                    ? dto.CourtParts?.Part
+                    : dto.CourtParts?.Part ?? string.Empty,
 
-                //        // Case status name — only if present
-                //        CaseStatusName =
-                //dto.CaseStatusId != null
-                //    ? dto.CaseStatus?.Name
-                //    : string.Empty,
+                // Case status name — only if present
+                CaseStatusName =
+                dto.CaseStatusId != null
+                    ? dto.CaseStatus?.Name
+                    : string.Empty,
 
-                //        // Room number — prefer explicit RoomNo, fallback to Court’s RoomNo
-                //        RoomNo = dto.RoomNo
-                //?? dto.Courts?.RoomNo
-                //?? string.Empty,
+                // Room number — prefer explicit RoomNo, fallback to Court’s RoomNo
+                RoomNo = dto.RoomNo
+                ?? dto.CourtParts?.RoomNo
+                ?? string.Empty,
 
                 // County name — safe for null CountyId
                 CountyName =
-        dto.CountyId != null
-            ? dto.Counties?.Name
+        dto.Courts.County.Name != null
+            ? dto.Courts.County.Name
             : string.Empty
             }).ToList();
 
@@ -191,7 +191,7 @@ namespace EvictionFiler.Application.Services
 
                 CreatedOn = dto.CreatedOn,
 
-            }).ToList();
+            }).OrderBy(e=>e.HearingDate).ToList();
 
 
 

@@ -71,6 +71,7 @@ namespace EvictionFiler.Domain.Entities
 
 		[MaxLength(50)]
 		public string? LastMonthWeekRentPaid { get; set; }
+		public string? DocketNo { get; set; }
 		public double? TotalRentOwed { get; set; }
 		public bool? IsERAPPaymentReceived { get; set; }
 		public DateOnly? ERAPPaymentReceivedDate { get; set; }

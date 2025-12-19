@@ -65,7 +65,7 @@ namespace EvictionFiler.Application.Services
                 CreatedByName = userDict.ContainsKey(dto.CreatedBy)
                             ? userDict[dto.CreatedBy]
                             : "Admin",
-            }).ToList();
+            }).OrderBy(e=>e.CreatedOn).ToList();
 
             return result;
         }

@@ -192,7 +192,7 @@ namespace EvictionFiler.Application.Services
                     legalCases.SubCaseTypeId = legalCase.SubCaseTypeId;
 
                 }
-                else if (caseType.Name.Equals("HPD", StringComparison.OrdinalIgnoreCase))
+                else if (caseType.Name.Equals("HPD", StringComparison.OrdinalIgnoreCase) || caseType.Name.Equals("Illegal Lockout", StringComparison.OrdinalIgnoreCase))
                 {
                     // 🟣 HPD specific fields
                     legalCases.Id = Guid.NewGuid();
@@ -446,7 +446,7 @@ namespace EvictionFiler.Application.Services
                 if (caseEntity == null)
                     return null!;
 
-                if (caseEntity.CaseType!.Name == "Holdover" || caseEntity.CaseType.Name == "NonPayment" || caseEntity.CaseType.Name == "HPD")
+                if (caseEntity.CaseType!.Name == "Holdover" || caseEntity.CaseType.Name == "NonPayment" || caseEntity.CaseType.Name == "HPD" || caseEntity.CaseType.Name == "Illegal Lockout")
                 {
                     var intakeModel = new IntakeModel
                     {
@@ -524,7 +524,7 @@ namespace EvictionFiler.Application.Services
                         TenantShare = caseEntity.TenantShare,
                         SocialService = caseEntity.SocialService,
                         LastRentPaid = caseEntity.LastRentPaid,
-
+                        Docketno = caseEntity.DocketNo,
 
                         //CourtId = caseEntity.CourtId != null ? caseEntity.CourtId : Guid.Empty,
                         Court = caseEntity.CourtLocation != null ? caseEntity.CourtLocation.Court! : "",
@@ -681,7 +681,7 @@ namespace EvictionFiler.Application.Services
                         AppearanceDate = caseEntity.AppearanceDate,
                         AppearanceTime = caseEntity.AppearanceTime,
                         PerDiemDate = caseEntity.PerDiemDate,
-
+                        Docketno = caseEntity.DocketNo,
 
 
                         PerDiemSignature = caseEntity.PerDiemSignature,
@@ -973,6 +973,7 @@ namespace EvictionFiler.Application.Services
                 existingCase.NoticeproofAttached = legalCase.NoticeproofAttached;
                 existingCase.RegistrationRentAttached = legalCase.RegistrationRentAttached;
                 existingCase.AdditionalComments = legalCase.AdditionalComments;
+                existingCase.DocketNo = legalCase.Docketno;
 
                 if (legalCase.PartyRepresentPerDiemId != null && legalCase.PartyRepresentPerDiemId != Guid.Empty)
                 {
