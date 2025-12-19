@@ -10,13 +10,13 @@ namespace EvictionFiler.Application.DTOs.CaseNoticeInfoDtos
     public class CaseNoticeInfoDto
     {
         public Guid? Id { get; set; }
-        [Required]
+        //[Required]
         public Guid? DateRentId { get; set; }
-        [Required]
+        //[Required]
         public Guid? TenancyTypeId { get; set; }
-        [Required]
+        //[Required]
         public Guid? FormTypeId { get; set; }
-        [Required]
+        //[Required]
         public int? MonthlyRent { get; set; }
         public Guid? LegalCaseId { get; set; }
         public int? TenantShare { get; set; }
@@ -27,10 +27,10 @@ namespace EvictionFiler.Application.DTOs.CaseNoticeInfoDtos
         public int? LastPaidAmt { get; set; }
         public int? Totalowed { get; set; }
         public int? CalcNoticeLength { get; set; }
-        [Required]
+        //[Required]
         public decimal? BillAmount { get; set; }
         public DateOnly? DateofLastPayment { get; set; }
-        [Required]
+        //[Required]
         public DateOnly? DateNoticeServed { get; set; }
         public DateOnly? LeaseStart { get; set; }
         public DateOnly? LeaseEnd { get; set; }
