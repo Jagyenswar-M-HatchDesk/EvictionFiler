@@ -31,6 +31,12 @@ namespace EvictionFiler.Application.DTOs
             Success = null; // auto-clear like TempData
             return msg;
         }
+        public string? ConsumePage()
+        {
+            string? msg = Page;
+            Page = null; // auto-clear like TempData
+            return msg;
+        }
     }
 
 }

@@ -1,9 +1,11 @@
 ﻿using EvictionFiler.Application.DTOs.CalanderDto;
 using EvictionFiler.Application.DTOs.CaseHearing;
 using EvictionFiler.Application.Interfaces.IRepository;
+using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -17,12 +19,16 @@ namespace EvictionFiler.Application.Services
     {
 
         private readonly ICaseHearingRepository _caseHearingRepository;
+        private readonly IAppearanceModeRepository _modeRepository;
+        private readonly IVirtualPlatformRepository _virtualRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserRepository _userRepo;
 
-        public CaseHearingService(ICaseHearingRepository caseHearingRepository, IUnitOfWork unitOfWork, IUserRepository userRepo)
+        public CaseHearingService(ICaseHearingRepository caseHearingRepository, IAppearanceModeRepository modeRepository, IVirtualPlatformRepository virtualRepository, IUnitOfWork unitOfWork, IUserRepository userRepo)
         {
             _caseHearingRepository = caseHearingRepository;
+            _modeRepository = modeRepository;
+            _virtualRepository = virtualRepository;
             _unitOfWork = unitOfWork;
             _userRepo = userRepo;
         }
@@ -45,6 +51,10 @@ namespace EvictionFiler.Application.Services
                 CaseTypeId = dto.CaseTypeId,
                 CreatedOn = DateTime.Now,
                 CreatedBy = dto.CreatedBy,
+                AppearanceModeId = dto.AppearanceModeId,
+                AppearanceTypeId = dto.AppearanceTypeId,
+                VirtualPlatformId = dto.VirtualPlatformId,
+                
 
 
             };
@@ -90,27 +100,27 @@ namespace EvictionFiler.Application.Services
             ? dto.CaseTypes?.Name
             : dto.LegalCase?.CaseType?.Name ?? string.Empty,
 
-        //        // Judge — prefer Hearing Judge, fallback to Court Judge
-        //        Judge = dto.Judge
-        //?? dto.Courts?.Judge
-        //?? string.Empty,
+                //        // Judge — prefer Hearing Judge, fallback to Court Judge
+                //        Judge = dto.Judge
+                //?? dto.Courts?.Judge
+                //?? string.Empty,
 
-        //        // Court part — from CourtPart or fallback to Court.Part
-        //        CourtPart =
-        //dto.CourtPartId != null
-        //    ? dto.CourtParts?.Part
-        //    : dto.Courts?.Part ?? string.Empty,
+                //        // Court part — from CourtPart or fallback to Court.Part
+                //        CourtPart =
+                //dto.CourtPartId != null
+                //    ? dto.CourtParts?.Part
+                //    : dto.Courts?.Part ?? string.Empty,
 
-        //        // Case status name — only if present
-        //        CaseStatusName =
-        //dto.CaseStatusId != null
-        //    ? dto.CaseStatus?.Name
-        //    : string.Empty,
+                //        // Case status name — only if present
+                //        CaseStatusName =
+                //dto.CaseStatusId != null
+                //    ? dto.CaseStatus?.Name
+                //    : string.Empty,
 
-        //        // Room number — prefer explicit RoomNo, fallback to Court’s RoomNo
-        //        RoomNo = dto.RoomNo
-        //?? dto.Courts?.RoomNo
-        //?? string.Empty,
+                //        // Room number — prefer explicit RoomNo, fallback to Court’s RoomNo
+                //        RoomNo = dto.RoomNo
+                //?? dto.Courts?.RoomNo
+                //?? string.Empty,
 
                 // County name — safe for null CountyId
                 CountyName =
@@ -126,7 +136,7 @@ namespace EvictionFiler.Application.Services
         public async Task<List<CaseHearingDto>> GetAllCaseHeariingByCaseIdAsync(Guid id)
         {
             var calanders = await _caseHearingRepository
-                  .GetAllQuerable(x => x.IsDeleted != true && x.LegalCaseId == id, x => x.LegalCase , x =>x.Courts )
+                  .GetAllQuerable(x => x.IsDeleted != true && x.LegalCaseId == id, x => x.LegalCase, x => x.Courts)
                   .ToListAsync();
 
             var result = calanders.Select(dto => new CaseHearingDto
@@ -151,16 +161,16 @@ namespace EvictionFiler.Application.Services
             ? dto.CaseTypes?.Name
             : dto.LegalCase?.CaseType?.Name ?? string.Empty,
 
-        //        // Judge — prefer Hearing Judge, fallback to Court Judge
-        //        Judge = dto.Judge
-        //?? dto.Courts?.Judge
-        //?? string.Empty,
+                //        // Judge — prefer Hearing Judge, fallback to Court Judge
+                //        Judge = dto.Judge
+                //?? dto.Courts?.Judge
+                //?? string.Empty,
 
-        //        // Court part — from CourtPart or fallback to Court.Part
-        //        CourtPart =
-        //dto.CourtPartId != null
-        //    ? dto.CourtParts?.Part
-        //    : dto.Courts?.Part ?? string.Empty,
+                //        // Court part — from CourtPart or fallback to Court.Part
+                //        CourtPart =
+                //dto.CourtPartId != null
+                //    ? dto.CourtParts?.Part
+                //    : dto.Courts?.Part ?? string.Empty,
 
                 // Case status name — only if present
                 CaseStatusName =
@@ -168,10 +178,10 @@ namespace EvictionFiler.Application.Services
             ? dto.CaseStatus?.Name
             : string.Empty,
 
-        //        // Room number — prefer explicit RoomNo, fallback to Court’s RoomNo
-        //        RoomNo = dto.RoomNo
-        //?? dto.Courts?.RoomNo
-        //?? string.Empty,
+                //        // Room number — prefer explicit RoomNo, fallback to Court’s RoomNo
+                //        RoomNo = dto.RoomNo
+                //?? dto.Courts?.RoomNo
+                //?? string.Empty,
 
                 // County name — safe for null CountyId
                 CountyName =
@@ -186,6 +196,17 @@ namespace EvictionFiler.Application.Services
 
 
             return result;
+        }
+
+        public async Task<IEnumerable<AppearanceMode>> GetAllModes()
+        {
+            var modes = await _modeRepository.GetAllAsync();
+            return modes;
+        }
+        public async Task<IEnumerable<VirtualPlatform>> GetAllPlatform()
+        {
+            var modes = await _virtualRepository.GetAllAsync();
+            return modes;
         }
     }
 }

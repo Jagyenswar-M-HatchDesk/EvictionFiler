@@ -152,6 +152,8 @@ builder.Services.AddScoped<IMarshalService, MarshalService>();
 builder.Services.AddScoped<ICaseAdditionalTenantRepository, CaseAdditionalTenantRepository>();
 builder.Services.AddScoped<ICaseAdditionalTenantService, CaseAdditionalTenantService>();
 builder.Services.AddScoped<ICaseNoticeInfoRepository, CaseNoticeInfoRepository>();
+builder.Services.AddScoped<IAppearanceModeRepository, AppearanceModeRepository>();
+builder.Services.AddScoped<IVirtualPlatformRepository, VirtualPlatformRepository>();
 
 builder.Services.AddAuthorization();
 

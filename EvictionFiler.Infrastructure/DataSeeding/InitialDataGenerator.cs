@@ -28,6 +28,25 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new SubCaseType() { Name = "Residential", CreatedOn = now },
             };
         }
+
+        public static IEnumerable<AppearanceMode> GetAppearanceMode()
+        {
+            var now = DateTime.UtcNow;
+            return new List<AppearanceMode>
+            {
+                new AppearanceMode() { Name = "Physical", CreatedOn = now },
+                new AppearanceMode() { Name = "Virtual", CreatedOn = now },
+            };
+        }
+        public static IEnumerable<VirtualPlatform> GetVirtualPlatform()
+        {
+            var now = DateTime.UtcNow;
+            return new List<VirtualPlatform>
+            {
+                new VirtualPlatform() { Name = "Google Meet", CreatedOn = now },
+                new VirtualPlatform() { Name = "MS Temas", CreatedOn = now },
+            };
+        }
         public static IEnumerable<CourtType> GetCourtTypes()
         {
             var now = DateTime.UtcNow;

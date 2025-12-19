@@ -61,6 +61,8 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 await SeedServiceMethod(context);
                 await SeedSubCaseType(context);
                 await SeedCities(context);
+                await SeedAppreanceMode(context);
+                await SeedVirtualPlatform(context);
                 await SeedCourtType(context);
                 await context.SaveChangesAsync();
 			}
@@ -78,6 +80,28 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 if (context.MstPaymentMethods.FirstOrDefault(d => d.Name == type.Name) == null)
                 {
                     await context.MstPaymentMethods.AddAsync(type);
+                }
+            }
+        }
+        private static async Task SeedAppreanceMode(MainDbContext context)
+        {
+            var modes = InitialDataGenerator.GetAppearanceMode();
+            foreach (var type in modes)
+            {
+                if (context.MstAppearanceModes.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstAppearanceModes.AddAsync(type);
+                }
+            }
+        }
+        private static async Task SeedVirtualPlatform(MainDbContext context)
+        {
+            var casetypes = InitialDataGenerator.GetVirtualPlatform();
+            foreach (var type in casetypes)
+            {
+                if (context.MstVirtualPlatforms.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstVirtualPlatforms.AddAsync(type);
                 }
             }
         }

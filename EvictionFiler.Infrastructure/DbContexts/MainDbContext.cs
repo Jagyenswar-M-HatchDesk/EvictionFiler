@@ -25,6 +25,8 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<ReportingTypePerDiem> MstReportingTypePerDiems { get; set; }
         public DbSet<RateType> MstRateTypes { get; set; }
         public DbSet<PaymentMethod> MstPaymentMethods { get; set; }
+        public DbSet<AppearanceMode> MstAppearanceModes { get; set; }
+        public DbSet<VirtualPlatform> MstVirtualPlatforms { get; set; }
         public DbSet<CourtPart> CourtPart { get; set; }
         public DbSet<CaseStatus> MstCaseStatus { get; set; }
         public DbSet<Registrationstatus> MstRegistrationstatuses { get; set; }

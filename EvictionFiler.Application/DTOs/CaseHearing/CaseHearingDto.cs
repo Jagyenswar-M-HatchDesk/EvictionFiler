@@ -17,14 +17,20 @@ namespace EvictionFiler.Application.DTOs.CaseHearing
         public TimeOnly HearingTime { get; set; }
         public string? Caption { get; set; }
         public string? IndexNo { get; set; }
+        public string? Notes { get; set; }
         public Guid? CourtId { get; set; }
         public string? RoomNo { get; set; }
         public string? Judge { get; set; }
 
         public Guid? LegalCaseId { get; set; }
+        public Guid? AppearanceTypeId { get; set; }
+        public Guid? AppearanceModeId { get; set; }
+        public Guid? VirtualPlatformId { get; set; }
 
         public Guid? CaseTypeId { get; set; }
         public string? CaseTypeName { get; set; }
+        public string? Virtuallink { get; set; }
+        public string? Meetingid { get; set; }
         public Guid? CountyId { get; set; }
         public string? CountyName { get; set; }
 

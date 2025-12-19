@@ -25,6 +25,19 @@ namespace EvictionFiler.Domain.Entities
         [ForeignKey("LegalCaseId")]
         public LegalCase? LegalCase { get; set; }
 
+        public Guid? AppearanceModeId { get; set; }
+
+        [ForeignKey("AppreanceModeId")]
+        public AppearanceMode? AppearanceModes { get; set; }
+        public Guid? AppearanceTypeId { get; set; }
+
+        [ForeignKey("AppearanceTypeId")]
+        public AppearanceType? AppearanceTypes { get; set; }
+        public Guid? VirtualPlatformId { get; set; }
+
+        [ForeignKey("VirtualPlatformId")]
+        public VirtualPlatform? VirtualPlatforms { get; set; }
+
         public string? RoomNo { get; set; }
         public string? Judge { get; set; }
 

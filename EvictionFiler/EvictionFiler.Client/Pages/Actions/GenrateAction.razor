@@ -50,6 +50,8 @@
 @inject IMarshalService _marshalService
 @inject ILegalCaseService _caseService
 @inject ICaseTypeRepository CaseTypeRepository
+@inject IAppearanceTypeRepository appearanceTypeRepository
+@inject ICourtService courtRepository
 
 
 
@@ -101,10 +103,10 @@
     }
 
     /* .form-wrapper.hidden {
-                                                                        transform: translateX(-100%);
-                                                                        opacity: 0;
-                                                                        pointer-events: none;
-                                                                        } */
+                                                                            transform: translateX(-100%);
+                                                                            opacity: 0;
+                                                                            pointer-events: none;
+                                                                            } */
 
     .overlay-form {
         animation: slideIn 1.0s ease forwards;
@@ -407,8 +409,8 @@
     }
 
     /* =========================================================
-               Motion Form – Scoped Styling
-               ========================================================= */
+                   Motion Form – Scoped Styling
+                   ========================================================= */
 
     .motion-form {
         --border-color: #e5e7eb;
@@ -481,20 +483,20 @@
 
         /* Toggle (Bootstrap switch enhancement) */
         /* .motion-form .form-switch .form-check-input {
-                    width: 2.5rem;
-                    height: 1.25rem;
-                    cursor: pointer;
-                } */
+                        width: 2.5rem;
+                        height: 1.25rem;
+                        cursor: pointer;
+                    } */
 
         /* .motion-form .form-switch .form-check-input:checked {
-                        background-color: var(--primary-dark);
-                        border-color: var(--primary-dark);
-                    }
-         */
+                            background-color: var(--primary-dark);
+                            border-color: var(--primary-dark);
+                        }
+             */
         /* Attachments */
         /*  .motion-form .form-check {
-                    margin-bottom: 0.5rem;
-                } */
+                        margin-bottom: 0.5rem;
+                    } */
 
         .motion-form .form-check-label {
             font-size: 14px;
@@ -547,8 +549,8 @@
     }
 
     /* =========================================================
-               Collapsible Motion Sections (Tab-like)
-               ========================================================= */
+                   Collapsible Motion Sections (Tab-like)
+                   ========================================================= */
 
     .motion-section {
         border: 1px solid #e5e7eb;
@@ -664,7 +666,7 @@
                         </li>
                         @if (legalcaseDto.CaseTypeName == "NonPayment")
                         {
-                           @*  <li class="col-auto nav-item center" role="presentation">
+                            @*  <li class="col-auto nav-item center" role="presentation">
                                 <button class="nav-link" id="pedicate-tab" data-bs-toggle="tab" data-bs-target="#predicate" type="button" role="tab">Predicate Notice</button>
                             </li> *@
                             @*  <li class="nav-item" role="presentation">
@@ -1072,7 +1074,7 @@
                                                 </div>
                                             </div>
                                         }
-                                       
+
                                     }
                                     @if (legalcaseDto.CaseTypeName == "Per Diem")
                                     {
@@ -1410,9 +1412,10 @@
 
                             else
                             {
+                                <h5 class="offcanvas-title fw-bold color-text" id="createUserLabel">Appearance Details (@Court.Court)</h5>
                                 <EditForm Model="@caseHearing">
                                     <DataAnnotationsValidator />
-                                    <div class="modal-body">
+                                    @* <div class="modal-body">
 
                                         <div class="card border-0">
                                             <div class="card-body p-0">
@@ -1425,7 +1428,7 @@
                                                     @*  <button type="button" class=" position-absolute top-0 end-0 m-2"
                                                         aria-label="Reset" style="cursor:pointer; background:none;"
                                                         @onclick="OnBindHearingCancel"> Reset
-                                                </button> *@
+                                                </button> *
 
                                                     <div class=" g-3">
                                                         <div class="col-md-6">
@@ -1449,6 +1452,160 @@
                                     <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
                                         <button type="button" class="btn btn-secondary me-2" @onclick="OnBindHearingCancel">Reset</button>
                                         <button type="submit" class="btn btn-primary base" @onclick="SaveHearingChanges">Save</button>
+                                    </div> *@
+
+                                    <div class="motion-section">
+                                        <button type="button"
+                                                class="section-header"
+                                                @onclick="() => Toggle(nameof(IsBasicHearingOpen))">
+                                            <span>Basic Appearance Information</span>
+                                            <i class="chevron @(IsBasicHearingOpen ? "open" : "")"></i>
+                                        </button>
+
+                                        <div class="section-body @(IsBasicHearingOpen ? "open" : "")">
+                                            <div class="card card-body">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label ">Appearance Type </label>
+                                                        <InputSelect class="form-select" @bind-Value="caseHearing.AppearanceTypeId" placeholder="Select Date" >
+                                                            
+                                                            @foreach(var item in AppearanceTypes)
+                                                            {
+                                                                <option value="@item.Id">@item.Name</option>                                                                
+                                                            }
+                                                        </InputSelect>
+                                                    </div>
+
+                                                    <div class="col-md-6 ">
+                                                        <label class="form-label ">Court Part</label>
+                                                        <InputSelect class="form-select" @bind-Value="caseHearing.CourtPartId">
+                                                            <option value="">-- Select --</option>
+                                                            @foreach (var item in Court.CourtPart)
+                                                            {
+                                                                <option value="@item.Id">@item.Court</option>
+                                                            }
+                                                            </InputSelect>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="motion-section">
+                                        <button type="button"
+                                                class="section-header"
+                                                @onclick="() => Toggle(nameof(IsDatetime))">
+                                            <span>Motion Type</span>
+                                            <i class="chevron @(IsDatetime ? "open" : "")"></i>
+                                        </button>
+
+                                        <div class="section-body @(IsDatetime ? "open" : "")">
+                                            <div class="card card-body">
+
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label required-label">Date </label>
+                                                        <InputDate class="form-control" @bind-Value="caseHearing.HearingDate" placeholder="Select Date" />
+                                                    </div>
+
+                                                    <div class="col-md-6  ">
+                                                        <label class="form-label required-label">Time</label>
+                                                        <input type="time" class="form-control" @bind="caseHearing.HearingTime" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                   
+                                    <div class="motion-section">
+                                        <button type="button"
+                                                class="section-header"
+                                                @onclick="() => Toggle(nameof(IsAppearanceformatOpen))">
+                                            <span>Appearance Format</span>
+                                            <i class="chevron @(IsAppearanceformatOpen ? "open" : "")"></i>
+                                        </button>
+
+                                        <div class="section-body @(IsAppearanceformatOpen ? "open" : "")">
+                                            <div class="card card-body">
+
+                                                <div class="row g-3">
+                                                    <div class="col-md-3">
+                                                        <label class="form-label ">Appearance Mode </label>
+                                                        <InputSelect class="form-select" @bind-Value="caseHearing.AppearanceModeId">
+                                                            <option value="">-- Select --</option>
+                                                            @foreach (var item in AppearanceModes)
+                                                            {
+                                                                <option value="@item.Id">@item.Name</option>
+                                                            }
+                                                            </InputSelect>
+                                                    </div>
+
+                                                    <div class="col-md-3 ">
+                                                        <label class="form-label ">Virtual Platform</label>
+                                                        <InputSelect class="form-select" @bind-Value="caseHearing.VirtualPlatformId">
+                                                            <option value="">-- Select --</option>
+                                                            @foreach (var item in VirtualPlatforms)
+                                                            {
+                                                                <option value="@item.Id">@item.Name</option>
+                                                            }
+                                                            </InputSelect>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label ">Virtual Link</label>
+                                                        <InputText  class="form-control" @bind-Value="caseHearing.Virtuallink" placeholder="https://"/>
+                                                    </div>
+                                                @* </div> *@
+                                                @* <div class="row g-3"> *@
+                                                    <div class="col-md-3">
+                                                        @* <label class="form-label required-label">Appearance Mode </label>
+                                                        <InputDate class="form-control" @bind-Value="caseHearing.HearingDate" placeholder="Select Date" /> *@
+                                                    </div>
+
+                                                    <div class="col-md-3 ">
+                                                        <label class="form-label ">Metting ID</label>
+                                                        <InputText  class="form-control" @bind-Value="caseHearing.Meetingid" placeholder="optional" />
+                                                    </div>
+                                                    
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="motion-section">
+                                        <button type="button"
+                                                class="section-header"
+                                                @onclick="() => Toggle(nameof(IsInternalNotes))">
+                                            <span>Internal Notes (Non - Outcomes)</span>
+                                            <i class="chevron @(IsInternalNotes ? "open" : "")"></i>
+                                        </button>
+
+                                        <div class="section-body @(IsInternalNotes ? "open" : "")">
+                                            <div class="card card-body">
+
+                                                <div class="row g-3">
+                                                    <div class="col">
+                                                        <InputTextArea class="form-control" @bind-Value="caseHearing.Notes" placeholder="Taking points, courts instruction, clerk comments" />
+                                                    </div>
+
+                                                   
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                                        <div class="text-warning small">
+                                        </div>
+
+                                        <div style="min-width:40%">
+                                            @* <button type="button" class="btn btn-outline-secondary me-2"
+                                                    @onclick="Cancel">
+                                                Cancel
+                                            </button> *@
+                                            <button type="button" class="btn btn-secondary " style="width:45%" @onclick="OnBindHearingCancel">Reset</button>
+                                            <button type="submit" class="btn btn-primary base" style="width:45%; min-width:none;" @onclick="SaveHearingChanges">Save</button>
+                                            
+                                        </div>
                                     </div>
                                 </EditForm>
                             }
@@ -2134,10 +2291,14 @@
     [Parameter] public List<GenrateNoticeModel> CaseForms { get; set; } = new();
     [Parameter] public EventCallback OnFormCreate { get; set; } = new();
     private IEnumerable<ServiceMethod> ServiceMethodList = new List<ServiceMethod>();
+    private IEnumerable<AppearanceMode> AppearanceModes = new List<AppearanceMode>();
+    private IEnumerable<AppearanceType> AppearanceTypes = new List<AppearanceType>();
+    private IEnumerable<VirtualPlatform> VirtualPlatforms = new List<VirtualPlatform>();
     private List<BilingType> BilingTypesList = new();
     private List<PaymentMethod> PaymentMethodDtoList = new();
     private List<TenancyType> TenancyTypeList = new();
     private List<DateRent> DateRentList = new();
+    private CourtDto Court = new();
 
     private string? loggedInUserId;
     private string? MarshalName;
@@ -2191,10 +2352,21 @@
         PaymentMethodDtoList = await CaseTypeRepository.GetAllPaymentMethod();
         if (!TenancyTypeList.Any()) TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
         if (!DateRentList.Any()) DateRentList = await DateRentRepository.GetAllDateRent();
+        AppearanceModes = await _caseHearingService.GetAllModes();
+        AppearanceTypes = await appearanceTypeRepository.GetAllAsync();
+        VirtualPlatforms = await _caseHearingService.GetAllPlatform();
+        if (legalcaseDto.CourtLocationId != null && legalcaseDto.CourtLocationId != Guid.Empty)
+        {
+            Court = await courtRepository.GetCourtByIdAsync(legalcaseDto.CourtLocationId!.Value);
+        }
         spinnerservice.Hide();
     }
 
     bool IsMotionOpen = true;
+    bool IsBasicHearingOpen = true;
+    bool IsAppearanceformatOpen = false;
+    bool IsDatetime = false;
+    bool IsInternalNotes = false;
     bool IsRentOpen = false;
     bool IsLedgerOpen = false;
     bool LastdateSelected = false;
@@ -2210,6 +2382,10 @@
         {
             case nameof(IsMotionOpen): IsMotionOpen = !IsMotionOpen; break;
             case nameof(IsRentOpen): IsRentOpen = !IsRentOpen; break;
+            case nameof(IsBasicHearingOpen): IsBasicHearingOpen = !IsBasicHearingOpen; break;
+            case nameof(IsAppearanceformatOpen): IsAppearanceformatOpen = !IsAppearanceformatOpen; break;
+            case nameof(IsInternalNotes): IsInternalNotes = !IsInternalNotes; break;
+            case nameof(IsDatetime): IsDatetime = !IsDatetime; break;
             case nameof(IsothersOpen): IsothersOpen = !IsothersOpen; break;
             case nameof(IsBillingopen): IsBillingopen = !IsBillingopen; break;
             case nameof(IsLedgerOpen): IsLedgerOpen = !IsLedgerOpen; break;
@@ -2536,6 +2712,10 @@
             HearingDate = caseHearing.HearingDate,
             HearingTime = caseHearing.HearingTime,
             CreatedBy = Guid.Parse(loggedInUserId),
+            AppearanceModeId = caseHearing.AppearanceModeId,
+            AppearanceTypeId = caseHearing.AppearanceTypeId,
+            VirtualPlatformId = caseHearing.VirtualPlatformId,
+            Virtuallink = caseHearing.Virtuallink
             // CallIn = caseHearing.CallIn,
             // Phone = caseHearing.Phone,
             // VirtualLink = caseHearing.VirtualLink,
