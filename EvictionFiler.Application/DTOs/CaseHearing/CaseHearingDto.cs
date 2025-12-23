@@ -23,13 +23,14 @@ namespace EvictionFiler.Application.DTOs.CaseHearing
         public string? Judge { get; set; }
 
         public Guid? LegalCaseId { get; set; }
-        public Guid? AppearanceTypeId { get; set; }
+        public Guid? AppearanceTypeForHearingId { get; set; }
         public Guid? AppearanceModeId { get; set; }
         public Guid? VirtualPlatformId { get; set; }
 
         public Guid? CaseTypeId { get; set; }
         public string? CaseTypeName { get; set; }
         public string? Virtuallink { get; set; }
+        public string? LastAction { get; set; }
         public string? Meetingid { get; set; }
         public Guid? CountyId { get; set; }
         public string? CountyName { get; set; }
@@ -39,6 +40,14 @@ namespace EvictionFiler.Application.DTOs.CaseHearing
 
         public Guid? CaseStatusId { get; set; }
         public string? CaseStatusName { get; set; }
+        public string LandlordName { get; set; }
+        public string TenantName { get; set; }
+
+        public Guid ? CourtLocationId { get; set; }
+        public string? CourtLocation { get; set; }
+
+
+
 
 
         public DateTime? CreatedOn { get; set; }

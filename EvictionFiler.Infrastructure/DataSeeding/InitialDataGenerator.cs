@@ -19,6 +19,28 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new Language() { Name = "Chienese", CreatedOn = now },
             };
         }
+        
+              public static IEnumerable<AppearanceTypeforHearing> GetAppearanceTypeforHearing()
+        {
+            var now = DateTime.UtcNow;
+            return new List<AppearanceTypeforHearing>
+            {
+                new AppearanceTypeforHearing() { Name = "Virtual", CreatedOn = now },
+                new AppearanceTypeforHearing() { Name = "1st Time", CreatedOn = now },
+                new AppearanceTypeforHearing() { Name = "Motion", CreatedOn = now },
+                new AppearanceTypeforHearing() { Name = "Pre-Trial", CreatedOn = now },
+                new AppearanceTypeforHearing() { Name = "Part X", CreatedOn = now },
+                  new AppearanceTypeforHearing() { Name = "Transverse / Trial", CreatedOn = now },
+                    new AppearanceTypeforHearing() { Name = "Post Evict", CreatedOn = now },
+                      new AppearanceTypeforHearing() { Name = "Harassment", CreatedOn = now },
+                      new AppearanceTypeforHearing() { Name = "HPD", CreatedOn = now },
+                      new AppearanceTypeforHearing() { Name = "Trial", CreatedOn = now },
+                         new AppearanceTypeforHearing() { Name = "Inquest", CreatedOn = now },
+                          new AppearanceTypeforHearing() { Name = "Compliance Status", CreatedOn = now },
+                           new AppearanceTypeforHearing() { Name = "OSC / Emergency", CreatedOn = now },
+            };
+        }
+
         public static IEnumerable<SubCaseType> GetSubCaseTypes()
         {
             var now = DateTime.UtcNow;
@@ -34,7 +56,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             var now = DateTime.UtcNow;
             return new List<AppearanceMode>
             {
-                new AppearanceMode() { Name = "Physical", CreatedOn = now },
+                new AppearanceMode() { Name = "In Person", CreatedOn = now },
                 new AppearanceMode() { Name = "Virtual", CreatedOn = now },
             };
         }
@@ -44,7 +66,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             return new List<VirtualPlatform>
             {
                 new VirtualPlatform() { Name = "Google Meet", CreatedOn = now },
-                new VirtualPlatform() { Name = "MS Temas", CreatedOn = now },
+                new VirtualPlatform() { Name = "MS Teams", CreatedOn = now },
             };
         }
         public static IEnumerable<CourtType> GetCourtTypes()

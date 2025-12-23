@@ -41,6 +41,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 
                 await SeedRemainderTypes(context);
                 await SeedTypeOfOwner(context);
+                await SeedAppearanceTypeforHearing(context);
                 await context.SaveChangesAsync();
 
                 await SeedRenewalStatus(context);
@@ -71,6 +72,18 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				throw;
 			}
 		}
+
+        private static async Task SeedAppearanceTypeforHearing(MainDbContext context)
+        {
+            var appearancetypes = InitialDataGenerator.GetAppearanceTypeforHearing();
+            foreach (var type in appearancetypes)
+            {
+                if (context.MstAppearanceTypesForHearing.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstAppearanceTypesForHearing.AddAsync(type);
+                }
+            }
+        }
 
         private static async Task SeedPaymentMethod(MainDbContext context)
         {

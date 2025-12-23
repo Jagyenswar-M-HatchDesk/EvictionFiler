@@ -17,5 +17,6 @@ namespace EvictionFiler.Application.Interfaces.IServices
 
         Task<IEnumerable<AppearanceMode>> GetAllModes();
         Task<IEnumerable<VirtualPlatform>> GetAllPlatform();
+        Task<IEnumerable<AppearanceTypeforHearing>> GetAllAppearanceTypeForHearing();
     }
 }

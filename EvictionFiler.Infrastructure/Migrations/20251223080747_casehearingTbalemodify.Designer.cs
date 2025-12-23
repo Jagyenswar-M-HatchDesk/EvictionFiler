@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251223080747_casehearingTbalemodify")]
+    partial class casehearingTbalemodify
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -701,7 +704,7 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<Guid?>("AppearanceModeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("AppearanceTypeForHearingId")
+                    b.Property<Guid?>("AppearanceTypeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("AppreanceModeId")
@@ -755,9 +758,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<string>("Judge")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LastAction")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid?>("LegalCaseId")
                         .HasColumnType("uniqueidentifier");
 
@@ -775,7 +775,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AppearanceTypeForHearingId");
+                    b.HasIndex("AppearanceTypeId");
 
                     b.HasIndex("AppreanceModeId");
 
@@ -4717,9 +4717,9 @@ namespace EvictionFiler.Infrastructure.Migrations
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseHearing", b =>
                 {
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.AppearanceTypeforHearing", "AppearanceTypeforHearing")
+                    b.HasOne("EvictionFiler.Domain.Entities.Master.AppearanceType", "AppearanceTypes")
                         .WithMany()
-                        .HasForeignKey("AppearanceTypeForHearingId");
+                        .HasForeignKey("AppearanceTypeId");
 
                     b.HasOne("EvictionFiler.Domain.Entities.Master.AppearanceMode", "AppearanceModes")
                         .WithMany()
@@ -4755,7 +4755,7 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Navigation("AppearanceModes");
 
-                    b.Navigation("AppearanceTypeforHearing");
+                    b.Navigation("AppearanceTypes");
 
                     b.Navigation("CaseStatus");
 

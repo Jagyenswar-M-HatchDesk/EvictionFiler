@@ -1467,9 +1467,9 @@
                                                 <div class="row g-3">
                                                     <div class="col-md-6">
                                                         <label class="form-label ">Appearance Type </label>
-                                                        <InputSelect class="form-select" @bind-Value="caseHearing.AppearanceTypeId" placeholder="Select Date" >
+                                                        <InputSelect class="form-select" @bind-Value="caseHearing.AppearanceTypeForHearingId" placeholder="Select Date" >
                                                             
-                                                            @foreach(var item in AppearanceTypes)
+                                                            @foreach(var item in AppearanceTypeforHearing)
                                                             {
                                                                 <option value="@item.Id">@item.Name</option>                                                                
                                                             }
@@ -1487,22 +1487,9 @@
                                                             </InputSelect>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div class="motion-section">
-                                        <button type="button"
-                                                class="section-header"
-                                                @onclick="() => Toggle(nameof(IsDatetime))">
-                                            <span>Motion Type</span>
-                                            <i class="chevron @(IsDatetime ? "open" : "")"></i>
-                                        </button>
 
-                                        <div class="section-body @(IsDatetime ? "open" : "")">
-                                            <div class="card card-body">
-
-                                                <div class="row g-3">
+                                                <div class="row g-3 mt-2">
                                                     <div class="col-md-6">
                                                         <label class="form-label required-label">Date </label>
                                                         <InputDate class="form-control" @bind-Value="caseHearing.HearingDate" placeholder="Select Date" />
@@ -1516,6 +1503,21 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                  @*   <div class="motion-section">
+                                        <button type="button"
+                                                class="section-header"
+                                                @onclick="() => Toggle(nameof(IsDatetime))">
+                                            <span>Motion Type</span>
+                                            <i class="chevron @(IsDatetime ? "open" : "")"></i>
+                                        </button>
+
+                                        <div class="section-body @(IsDatetime ? "open" : "")">
+                                            <div class="card card-body">
+
+                                            </div>
+                                        </div>
+                                    </div> *@
 
                                    
                                     <div class="motion-section">
@@ -1533,7 +1535,7 @@
                                                     <div class="col-md-3">
                                                         <label class="form-label ">Appearance Mode </label>
                                                         <InputSelect class="form-select" @bind-Value="caseHearing.AppearanceModeId">
-                                                            <option value="">-- Select --</option>
+                                                            
                                                             @foreach (var item in AppearanceModes)
                                                             {
                                                                 <option value="@item.Id">@item.Name</option>
@@ -1541,6 +1543,8 @@
                                                             </InputSelect>
                                                     </div>
 
+                                                    @if(IsVirtualMode){
+                                                  
                                                     <div class="col-md-3 ">
                                                         <label class="form-label ">Virtual Platform</label>
                                                         <InputSelect class="form-select" @bind-Value="caseHearing.VirtualPlatformId">
@@ -1555,17 +1559,13 @@
                                                         <label class="form-label ">Virtual Link</label>
                                                         <InputText  class="form-control" @bind-Value="caseHearing.Virtuallink" placeholder="https://"/>
                                                     </div>
-                                                @* </div> *@
-                                                @* <div class="row g-3"> *@
-                                                    <div class="col-md-3">
-                                                        @* <label class="form-label required-label">Appearance Mode </label>
-                                                        <InputDate class="form-control" @bind-Value="caseHearing.HearingDate" placeholder="Select Date" /> *@
-                                                    </div>
+                                              
 
                                                     <div class="col-md-3 ">
                                                         <label class="form-label ">Metting ID</label>
                                                         <InputText  class="form-control" @bind-Value="caseHearing.Meetingid" placeholder="optional" />
                                                     </div>
+                                                    }
                                                     
                                                 </div>
                                             </div>
@@ -1585,7 +1585,7 @@
 
                                                 <div class="row g-3">
                                                     <div class="col">
-                                                        <InputTextArea class="form-control" @bind-Value="caseHearing.Notes" placeholder="Taking points, courts instruction, clerk comments" />
+                                                        <InputTextArea class="form-control" @bind-Value="caseHearing.LastAction" placeholder="Taking points, courts instruction, clerk comments" />
                                                     </div>
 
                                                    
@@ -2292,6 +2292,7 @@
     [Parameter] public EventCallback OnFormCreate { get; set; } = new();
     private IEnumerable<ServiceMethod> ServiceMethodList = new List<ServiceMethod>();
     private IEnumerable<AppearanceMode> AppearanceModes = new List<AppearanceMode>();
+    private IEnumerable<AppearanceTypeforHearing> AppearanceTypeforHearing = new List<AppearanceTypeforHearing>();
     private IEnumerable<AppearanceType> AppearanceTypes = new List<AppearanceType>();
     private IEnumerable<VirtualPlatform> VirtualPlatforms = new List<VirtualPlatform>();
     private List<BilingType> BilingTypesList = new();
@@ -2317,6 +2318,7 @@
     private bool showMarshalError = false;
     private ValidationMessageStore messageStore;
     private EditContext _editContext;
+    private bool _showCreateAction = false;
 
     [Parameter]
     public EventCallback OnClose { get; set; }
@@ -2327,6 +2329,9 @@
         public IBrowserFile File { get; set; }
         public int Progress { get; set; } = 0;
     }
+
+
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -2353,11 +2358,20 @@
         if (!TenancyTypeList.Any()) TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
         if (!DateRentList.Any()) DateRentList = await DateRentRepository.GetAllDateRent();
         AppearanceModes = await _caseHearingService.GetAllModes();
+        AppearanceTypeforHearing = await _caseHearingService.GetAllAppearanceTypeForHearing();
         AppearanceTypes = await appearanceTypeRepository.GetAllAsync();
         VirtualPlatforms = await _caseHearingService.GetAllPlatform();
         if (legalcaseDto.CourtLocationId != null && legalcaseDto.CourtLocationId != Guid.Empty)
         {
             Court = await courtRepository.GetCourtByIdAsync(legalcaseDto.CourtLocationId!.Value);
+        }
+
+        var virtualMode = AppearanceModes
+      .FirstOrDefault(x => x.Name.Equals("Virtual", StringComparison.OrdinalIgnoreCase));
+
+        if (virtualMode != null )
+        {
+            caseHearing.AppearanceModeId = virtualMode.Id;
         }
         spinnerservice.Hide();
     }
@@ -2394,6 +2408,18 @@
             case nameof(IsCommentsOpen): IsCommentsOpen = !IsCommentsOpen; break;
         }
     }
+
+    private bool IsVirtualMode
+    {
+        get
+        {
+            var selectedMode = AppearanceModes
+                .FirstOrDefault(x => x.Id == caseHearing.AppearanceModeId);
+
+            return selectedMode?.Name?.ToLower() == "virtual";
+        }
+    }
+
 
     void OnBillingTypeChanged(Guid id)
     {
@@ -2714,9 +2740,10 @@
             HearingTime = caseHearing.HearingTime,
             CreatedBy = Guid.Parse(loggedInUserId),
             AppearanceModeId = caseHearing.AppearanceModeId,
-            AppearanceTypeId = caseHearing.AppearanceTypeId,
+            AppearanceTypeForHearingId = caseHearing.AppearanceTypeForHearingId,
             VirtualPlatformId = caseHearing.VirtualPlatformId,
-            Virtuallink = caseHearing.Virtuallink
+            Virtuallink = caseHearing.Virtuallink,
+            LastAction = caseHearing.LastAction,
             // CallIn = caseHearing.CallIn,
             // Phone = caseHearing.Phone,
             // VirtualLink = caseHearing.VirtualLink,
@@ -2735,6 +2762,8 @@
             ToastService.ShowError("Failed to create Hearing details.");
         }
         LoadHearing();
+        HideAsync();
+
         spinnerservice.Hide();
     }
 

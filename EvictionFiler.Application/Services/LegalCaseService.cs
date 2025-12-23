@@ -439,7 +439,8 @@ namespace EvictionFiler.Application.Services
         c => c.CourtPart!,
         c => c.Courts!,
          c => c.CourtLocation!.County!,
-         c => c.ArrearLedgers
+         c => c.ArrearLedgers,
+         c=>c.Marshal
     )
     .FirstOrDefaultAsync();
 
@@ -546,7 +547,7 @@ namespace EvictionFiler.Application.Services
                         AttrneyContactInfo = caseEntity.AttrneyContactInfo,
                         AttrneyEmail = caseEntity.AttrneyEmail,
 
-
+                        MarshalName = $"{caseEntity.Marshal.FirstName} {caseEntity.Marshal.LastName}",
                         Index = caseEntity.Index,
                         County = caseEntity.County,
                         ManagingAgent = caseEntity.ManagingAgent,
@@ -974,6 +975,7 @@ namespace EvictionFiler.Application.Services
                 existingCase.RegistrationRentAttached = legalCase.RegistrationRentAttached;
                 existingCase.AdditionalComments = legalCase.AdditionalComments;
                 existingCase.DocketNo = legalCase.Docketno;
+                
 
                 if (legalCase.PartyRepresentPerDiemId != null && legalCase.PartyRepresentPerDiemId != Guid.Empty)
                 {

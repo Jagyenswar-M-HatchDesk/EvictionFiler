@@ -2,6 +2,8 @@
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.CalanderDto
 @using EvictionFiler.Application.DTOs.CaseHearing
+@using EvictionFiler.Application.DTOs.CourtDto
+@using EvictionFiler.Application.DTOs.CourtPart
 @using EvictionFiler.Domain.Entities.Master
 @using System.ComponentModel.DataAnnotations
 @using System.Linq.Expressions
@@ -30,6 +32,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization;
 @using EvictionFiler.Domain.Entities
+@inject ICourtService _courtService
 
 @using System.Security.Claims
 @inject AuthenticationStateProvider _authStateProvider
@@ -111,6 +114,9 @@
 
     .label.np { background: #e6fbff; color: #055d66; border-color: #c8f5ff }
 
+  
+
+
     /* Responsive */
     @@media (max-width:1100px) { .panel .filters
     { grid-template-columns: repeat(3, minmax(170px, 1fr)) }
@@ -141,11 +147,134 @@
     .label { border-color: #ccc; background: #fff; color: #000 }
     }
 
+
+
     /* Optional strict 5 rows per page */
     @@media print { body .per5 .table tbody tr
     { page-break-inside: avoid }
 
     body.per5 .table tbody tr:nth-child(5n) { page-break-after: always }
+    }
+
+    /* SCREEN */
+    /* #printLayout { display: none; } */
+
+    /* PRINT MODE */
+    @@media print { body *
+    { visibility: hidden; }
+
+    #myPrintableContent, #myPrintableContent * { visibility: visible; }
+
+    #myPrintableContent { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+    .print-container {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+.print-header h2 {
+    margin-bottom: 5px;
+}
+
+.print-header .sub {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    margin-bottom: 25px;
+}
+
+.part-box {
+    background: #f3f4f6;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.part-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.judge {
+    font-size: 14px;
+    color: #444;
+    margin-top: 4px;
+}
+
+.case-box {
+    border-top: 2px solid #000;
+    padding-top: 10px;
+    margin-top: 15px;
+}
+
+.case-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.case-row {
+    
+    gap: 25px;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.last-action {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+    #myPrintableContent{
+        display:none;
+    }
+
+/* PRINT RULES */
+@@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    #myPrintableContent,
+    #myPrintableContent * { display: block; visibility: visible;
+    }
+
+    #myPrintableContent {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+}
+
+    .print-container { font-family: Arial, sans-serif; padding: 20px; }
+
+    .print-header h2 { margin-bottom: 5px; }
+
+    .print-header .sub { display: flex; gap: 20px; font-size: 14px; margin-bottom: 25px; }
+
+    .part-box { background: #f3f4f6; padding: 12px; border-radius: 6px; margin-bottom: 15px; }
+
+    .part-title { font-size: 18px; font-weight: bold; }
+
+    .judge { font-size: 14px; color: #444; margin-top: 4px; }
+
+    .case-box { border-top: 2px solid #000; padding-top: 10px; margin-top: 15px; }
+
+    .case-title { font-size: 16px; font-weight: bold; margin-bottom: 8px; }
+
+    .case-row { display: flex; gap: 25px; font-size: 14px; margin-bottom: 6px; }
+
+    .last-action { margin-top: 10px; font-size: 14px; }
+
+    /* PRINT RULES */
+    @@media print { body *
+    { visibility: hidden; }
+
+    #myPrintableContent,
+    #myPrintableContent * { visibility: visible; }
+
+    #myPrintableContent { position: absolute; top: 0; left: 0; width: 100%; }
     }
 </style>
 
@@ -169,7 +298,7 @@
                 <div class="row g-3">
                     <div class="col-md-2">
                         <label for="f-county" class="form-label">County</label>
-                        <InputSelect class="form-select" @bind-Value="hearingDto.CountyId">
+                        <InputSelect class="form-select" @bind-Value="hearingDto.CountyId" @bind-Value:after="SelectCounty">
                             <option value="">-- Select --</option>
                             @foreach (var l in CountyList)
                             {
@@ -179,15 +308,26 @@
                     </div>
                     <div class="col-md-2">
                         <label for="f-from" class="form-label" >Date From</label>
-                        <InputDate id="f-from" class="form-control" @bind-Value="hearingDto.HearingDate" />
+                        <InputDate id="f-from" class="form-control" @bind-Value="hearingDto.HearingDate" @bind-Value:after="ApplyFilters" />
                     </div>
                     <div class="col-md-2">
                         <label for="f-to" class="form-label">Date To</label>
-                        <InputDate id="f-from" class="form-control" @bind-Value="hearingDto.HearingDateTo" />
+                        <InputDate id="f-from" class="form-control" @bind-Value="hearingDto.HearingDateTo" @bind-Value:after="ApplyFilters" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label ">Court <span class="text-danger">*</span></label>
+                        <InputSelect class="form-select" @bind-Value="hearingDto.CourtLocationId" style="cursor:pointer;" @onmousedown="ShowAllCourts" @bind-Value:after="SelectCourt">
+                            <option value="">-- Select --</option>
+                            @foreach (var l in filteredCourts)
+                            {
+                                <option value="@l.Id">@l.Court</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => hearingDto.CourtLocationId" />
                     </div>
                     <div class="col-md-2">
                         <label for="f-part" class="form-label">Court Part</label>
-                        <InputSelect class="form-select" @bind-Value="hearingDto.CourtPartId">
+                        <InputSelect class="form-select" @bind-Value="hearingDto.CourtPartId" @bind-Value:after="SelectCourtPart">
                             <option value="">-- Select --</option>
                             @foreach (var l in CourtPartList)
                             {
@@ -198,26 +338,27 @@
 
                     <div class="col-md-2">
                         <label for="f-room" class="form-label">Room</label>
-                        <InputText id="f-from" class="form-control" placeholder="Enter Room" @bind-Value="hearingDto.RoomNo" />
+                        <InputText id="f-from" class="form-control" placeholder="Enter Room" @bind-Value="hearingDto.RoomNo" @bind-Value:after="ApplyFilters" />
                     </div>
-                    <div class="col-md-2">
-                        <label for="f-type" class="form-label">Case Type</label>
-                        <InputSelect class="form-select" @bind-Value="hearingDto.CaseTypeId">
-                            <option value="">-- Select --</option>
-                            @foreach (var l in CaseTypeList)
-                            {
-                                <option value="@l.Id">@l.Name</option>
-                            }
-                        </InputSelect>
-                    </div>
+                  
 
                 </div>
                 <div class="row mt-2 g-3">
                     <div class="col-12">
                         <div class="row">
                             <div class="col-md-2">
+                                <label for="f-type" class="form-label">Case Type</label>
+                                <InputSelect class="form-select" @bind-Value="hearingDto.CaseTypeId" @bind-Value:after="ApplyFilters">
+                                    <option value="">-- Select --</option>
+                                    @foreach (var l in CaseTypeList)
+                                    {
+                                        <option value="@l.Id">@l.Name</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class="col-md-2">
                                 <label for="f-judge" class="form-label">Judge</label>
-                                <InputText id="f-from" class="form-control" placeholder="Enter Judge" @bind-Value="hearingDto.Judge" />
+                                <InputText id="f-from" class="form-control" placeholder="Enter Judge" @bind-Value="hearingDto.Judge" @bind-Value:after="ApplyFilters" />
                             </div>
                             <div class="col-md-2">
                                 <label for="f-status" class="form-label">Status</label>
@@ -232,10 +373,11 @@
 
                             <div class="col-md-3">
                                 <label for="f-q" class="form-label">Search</label>
-                                <InputText id="f-from" class="form-control" @bind-Value="hearingDto.Caption" />
+                                <InputText id="f-from" class="form-control" @bind-Value="hearingDto.IndexNo" @bind-Value:after="ApplyFilters" />
                             </div>
 
-                            <div class="col-md-5 d-flex align-items-center">
+
+                            <div class="col-md-3 d-flex align-items-center">
                                 <div class="control">
                                     <label>5 Rows per printed page</label>
                                     <div class="switch"><input id="f-per5" type="checkbox"><span class="sub">Strict page breaks</span></div>
@@ -247,9 +389,9 @@
                 </div>
 
                 <div class="mt-4 d-flex gap-2 flex-wrap align-items-center bar">
-                    <button type="button" class="btn btn-primary" id="btnGenerate" @onclick="SubmitAsync">Generate</button>
+                    <button type="button" class="btn btn-primary" id="btnGenerate">Generate</button>
                     <button type="reset" class="btn secondary" id="btnReset">Reset</button>
-                    <button type="button" class="btn secondary" id="btnPrint">Print</button>
+                    <button type="button" class="btn secondary"  onclick="window.print()">Print</button>
                     <button type="button" class="btn secondary" id="btnExport">Export CSV</button>
                     <span class="ms-auto text-muted" id="countInfo">0 results</span>
                 </div>
@@ -294,12 +436,12 @@
                                 <td>@(c.HearingDate.ToString("yyyy-MM-dd") ?? "")</td>
                                 <td>@c.CourtPart</td>
                                 <td>@c.RoomNo</td>
-                                <td>@c.Caption</td>
+                                <td>@c.LandlordName vs @c.TenantName</td>
                                 <td>@c.IndexNo</td>
                                 <td>@c.HearingTime</td>
                                 <td>@c.CaseTypeName</td>
                                 <td>@c.Judge</td>
-                                <td>@(c.CreatedOn?.ToString("yyyy-MM-dd") ?? "")</td>
+                                <td>@(c.LastAction)</td>
                             </tr>
                         }
                     }
@@ -311,7 +453,66 @@
 
             </table>
         </div>
+
+     
+
     </section>
+
+  
+        <div id="myPrintableContent" class="print-container">
+
+            <!-- HEADER -->
+            <div class="print-header">
+                <h2>EvictionFiler – Housing Court Calendar</h2>
+                <div class="sub">
+                    <span><strong>County:</strong> @CountyList.FirstOrDefault(c => c.Id == hearingDto.CountyId)?.Name</span>
+                    <span><strong>Court Date:</strong> @hearingDto.HearingDate.ToString("yyyy-MM-dd")</span>
+                </div>
+            </div>
+
+            <!-- PART / ROOM -->
+            <div class="part-box">
+            <div class="part-title">Part A – Room 105</div>
+                <div class="judge"> -- </div>
+            </div>
+
+            <!-- CASE LIST -->
+            @if (CasesHearing != null && CasesHearing.Any())
+            {
+                int i = 1;
+                foreach (var c in CasesHearing)
+                {
+                    <div class="case-box">
+                        <div class="case-title">
+                            @i. [@c.IndexNo] @c.LandlordName v. @c.TenantName
+                        </div>
+
+                        <div class="case-row">
+                            <span><strong>Appearance:</strong> First Time</span>
+                            <span><strong>Time:</strong> @c.HearingTime</span>
+                            <span><strong>Case Type:</strong> @c.CaseTypeName</span>
+                        </div>
+
+                        <div class="case-row">
+                            <span><strong>Opposition Attorney:</strong>--</span>
+                        </div>
+
+                        <div class="last-action">
+                            <strong>Last action:</strong> @c.LastAction
+                        </div>
+                    </div>
+
+                    i++;
+                }
+            }
+            else
+            {
+                <p>No data available</p>
+            }
+
+        </div>
+   
+
 </div>
 
 
@@ -324,13 +525,18 @@
     private EditContext _editContext;
     private ValidationMessageStore _messages;  
     private List<CaseType> CaseTypeList = new();
-    private List<CourtPart> CourtPartList = new();
+    private List<CourtPartDto> CourtPartList = new();
     private List<County> CountyList = new();
     private List<CaseStatus> CaseStatusList = new();
     private string? loggedInUserId;
+ 
+
     private bool isAdmin = false;
+    public List<CourtDto> filteredCourts = new List<CourtDto>();
+    private List<CourtDto> CourtLocationList = new();
 
     private List<CalanderDto> CourtCases { get; set; }
+    private List<CaseHearingDto> AllCasesHearing = new();
     private List<CaseHearingDto> CasesHearing { get; set; }
 
 
@@ -346,11 +552,15 @@
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
         CaseStatusList = await CaseTypeRepository.GetAllCaseStatus();
         CountyList = await CaseTypeRepository.GetAllCounty();
-        CourtPartList = await CaseTypeRepository.GetAllCourtPart();
+        // CourtPartList = await CaseTypeRepository.GetAllCourtPart();
         // legalcaseDto.ClientId = Guid.Parse(ClientId);
+        CourtLocationList = await _courtService.GetAllCourtDataAsync();
 
         CourtCases = await CalanderService.GetAllCalanderAsync();
         CasesHearing = await CaseHearingService.GetAllCaseHeariingAsync();
+        AllCasesHearing = await CaseHearingService.GetAllCaseHeariingAsync();
+
+        CasesHearing = AllCasesHearing.ToList();
 
         var authState = await _authStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
@@ -362,35 +572,183 @@
         }
     }
 
-    private async Task SubmitAsync()
+    private void SelectCourtPart()
     {
-        spinnerservice.Show();
-        if (calanderDto == null)
-            return;
+        
+
+        ApplyFilters();
+        StateHasChanged();
+    }
 
 
-        var authState = await _authStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+    private void SelectCounty()
+    {
 
-        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-        if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userGuid))
+        if (hearingDto.CountyId != null && hearingDto.CountyId != Guid.Empty)
         {
-            hearingDto.CreatedBy = userGuid;
+            CasesHearing = AllCasesHearing
+           .Where(x => x.CountyId == hearingDto.CountyId)
+           .ToList();
+            filteredCourts = CourtLocationList.Where(x => x.CountyId == hearingDto.CountyId)
+                                .ToList();
         }
         else
         {
-            // unauthenticated user
-            hearingDto.CreatedBy = Guid.Empty;
+          
+            CasesHearing = AllCasesHearing.ToList();
+        }
+        
+        StateHasChanged();
+    }
+    private async Task ShowAllCourts()
+    {
+        if (hearingDto.CountyId != null)
+        {
+            // Sirf selected county ke courts dikhao
+            filteredCourts = CourtLocationList
+                                .Where(x => x.CountyId == hearingDto.CountyId)
+                                .ToList();
+        }
+        else
+        {
+
+            filteredCourts = await _courtService.GetAllCourtDataAsync();
         }
 
-        // Save the full nested object
-        var isSaved = await CaseHearingService.AddHearing(hearingDto);
-        if (isSaved)
-        {
-            Navigation.NavigateTo("/Calander", true);
-        }
     }
+
+    private async Task SelectCourt()
+    {
+        var selectedCourtId = hearingDto.CourtLocationId;
+
+        var court = CourtLocationList.Where(ct => ct.Id == hearingDto.CourtLocationId).FirstOrDefault();
+
+
+        if (court.CourtPart.Any())
+        {
+
+            CourtPartList = court.CourtPart.ToList();
+        }
+
+        if ((hearingDto.CountyId == null || hearingDto.CountyId == Guid.Empty) && hearingDto.CountyId != court.CountyId)
+        {
+            var county = CountyList.FirstOrDefault(cts => cts.Id == court.CountyId);
+            // if (court.CountyName.Contains("Nassau") || court.CountyName.Contains("Westchester"))
+            // {
+            hearingDto.CountyId = county.Id;
+            hearingDto.CountyName = county?.Name;
+
+            // }
+            SelectCounty();
+        }
+
+        await InvokeAsync(StateHasChanged);
+        hearingDto.CourtLocationId = null;
+        await Task.Delay(10);
+
+        if (filteredCourts.Any(x => x.Id == selectedCourtId))
+        {
+            hearingDto.CourtLocationId = selectedCourtId;
+
+            hearingDto.CourtLocation = court.Court;
+
+
+        }
+        else
+        {
+          
+            hearingDto.CourtLocationId = Guid.Empty;
+        }
+
+        StateHasChanged();
+    }
+
+
+
+    private void ApplyFilters()
+    {
+        var query = AllCasesHearing.AsQueryable();
+
+        // County
+        if (hearingDto.CountyId != null && hearingDto.CountyId != Guid.Empty)
+            query = query.Where(x => x.CountyId == hearingDto.CountyId);
+
+        // Date From
+        if (hearingDto.HearingDate != null)
+            query = query.Where(x => x.HearingDate >= hearingDto.HearingDate);
+
+        // Date To
+        if (hearingDto.HearingDateTo != null)
+            query = query.Where(x => x.HearingDate <= hearingDto.HearingDateTo);
+
+      
+        // Court Part
+        if (hearingDto.CourtPartId != null && hearingDto.CourtPartId != Guid.Empty)
+            query = query.Where(x => x.CourtPartId == hearingDto.CourtPartId);
+
+        if (!string.IsNullOrWhiteSpace(hearingDto.RoomNo))
+            query = query.Where(x => x.RoomNo != null &&
+                                     x.RoomNo.Contains(hearingDto.RoomNo, StringComparison.OrdinalIgnoreCase));
+
+        // Case Type
+        if (hearingDto.CaseTypeId != null && hearingDto.CaseTypeId != Guid.Empty)
+            query = query.Where(x => x.CaseTypeId == hearingDto.CaseTypeId);
+
+        // Status
+        if (hearingDto.CaseStatusId != null && hearingDto.CaseStatusId != Guid.Empty)
+            query = query.Where(x => x.CaseStatusId == hearingDto.CaseStatusId);
+
+        // Judge
+        if (!string.IsNullOrWhiteSpace(hearingDto.Judge))
+            query = query.Where(x => x.Judge != null &&
+                                     x.Judge.Contains(hearingDto.Judge, StringComparison.OrdinalIgnoreCase));
+
+        // Search (Caption / Index / Party names)
+        if (!string.IsNullOrWhiteSpace(hearingDto.Caption))
+        {
+            var search = hearingDto.Caption.Trim();
+
+            query = query.Where(x =>
+                (x.Caption != null && x.Caption.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                (x.IndexNo != null && x.IndexNo.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                (x.LandlordName != null && x.LandlordName.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                (x.TenantName != null && x.TenantName.Contains(search, StringComparison.OrdinalIgnoreCase))
+            );
+        }
+
+        CasesHearing = query.ToList();
+    }
+
+
+    // private async Task SubmitAsync()
+    // {
+    //     spinnerservice.Show();
+    //     if (calanderDto == null)
+    //         return;
+
+
+    //     var authState = await _authStateProvider.GetAuthenticationStateAsync();
+    //     var user = authState.User;
+
+    //     var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+    //     if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userGuid))
+    //     {
+    //         hearingDto.CreatedBy = userGuid;
+    //     }
+    //     else
+    //     {
+    //         // unauthenticated user
+    //         hearingDto.CreatedBy = Guid.Empty;
+    //     }
+
+    //     // Save the full nested object
+    //     var isSaved = await CaseHearingService.AddHearing(hearingDto);
+    //     if (isSaved)
+    //     {
+    //         Navigation.NavigateTo("/Calander", true);
+    //     }
+    // }
 
 
 }

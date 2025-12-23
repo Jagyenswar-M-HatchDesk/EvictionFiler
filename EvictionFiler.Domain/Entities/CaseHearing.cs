@@ -29,10 +29,10 @@ namespace EvictionFiler.Domain.Entities
 
         [ForeignKey("AppreanceModeId")]
         public AppearanceMode? AppearanceModes { get; set; }
-        public Guid? AppearanceTypeId { get; set; }
+        public Guid? AppearanceTypeForHearingId { get; set; }
 
-        [ForeignKey("AppearanceTypeId")]
-        public AppearanceType? AppearanceTypes { get; set; }
+        [ForeignKey("AppearanceTypeForHearingId")]
+        public AppearanceTypeforHearing? AppearanceTypeforHearing { get; set; }
         public Guid? VirtualPlatformId { get; set; }
 
         [ForeignKey("VirtualPlatformId")]
@@ -40,6 +40,8 @@ namespace EvictionFiler.Domain.Entities
 
         public string? RoomNo { get; set; }
         public string? Judge { get; set; }
+
+        public string? LastAction { get; set; }
 
         public Guid? CaseTypeId { get; set; }
         [ForeignKey("CaseTypeId")]

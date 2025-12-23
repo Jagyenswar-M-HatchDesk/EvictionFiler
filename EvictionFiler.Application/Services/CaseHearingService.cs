@@ -21,16 +21,18 @@ namespace EvictionFiler.Application.Services
         private readonly ICaseHearingRepository _caseHearingRepository;
         private readonly IAppearanceModeRepository _modeRepository;
         private readonly IVirtualPlatformRepository _virtualRepository;
+        private readonly IAppearanceTypeForHearingRepository _appearanceTypeForHearingRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserRepository _userRepo;
 
-        public CaseHearingService(ICaseHearingRepository caseHearingRepository, IAppearanceModeRepository modeRepository, IVirtualPlatformRepository virtualRepository, IUnitOfWork unitOfWork, IUserRepository userRepo)
+        public CaseHearingService(ICaseHearingRepository caseHearingRepository, IAppearanceTypeForHearingRepository appearanceTypeForHearingRepository, IAppearanceModeRepository modeRepository, IVirtualPlatformRepository virtualRepository, IUnitOfWork unitOfWork, IUserRepository userRepo)
         {
             _caseHearingRepository = caseHearingRepository;
             _modeRepository = modeRepository;
             _virtualRepository = virtualRepository;
             _unitOfWork = unitOfWork;
             _userRepo = userRepo;
+            _appearanceTypeForHearingRepository = appearanceTypeForHearingRepository;
         }
         public async Task<bool> AddHearing(CaseHearingDto dto)
         {
@@ -52,8 +54,9 @@ namespace EvictionFiler.Application.Services
                 CreatedOn = DateTime.Now,
                 CreatedBy = dto.CreatedBy,
                 AppearanceModeId = dto.AppearanceModeId,
-                AppearanceTypeId = dto.AppearanceTypeId,
+                AppearanceTypeForHearingId = dto.AppearanceTypeForHearingId,
                 VirtualPlatformId = dto.VirtualPlatformId,
+                LastAction = dto.LastAction,
                 
 
 
@@ -75,7 +78,7 @@ namespace EvictionFiler.Application.Services
         public async Task<List<CaseHearingDto>> GetAllCaseHeariingAsync()
         {
             var calanders = await _caseHearingRepository
-                  .GetAllQuerable(x => x.IsDeleted != true, x => x.LegalCase, x => x.Courts, x => x.LegalCase.CaseType)
+                  .GetAllQuerable(x => x.IsDeleted != true, x => x.LegalCase, x=>x.Courts.County, x=>x.CourtParts ,  x => x.Courts, x => x.LegalCase.CaseType , x=>x.LegalCase.LandLords , x=>x.LegalCase.Tenants)
                   .ToListAsync();
 
             var result = calanders.Select(dto => new CaseHearingDto
@@ -92,11 +95,11 @@ namespace EvictionFiler.Application.Services
                 CourtId = dto.CourtId,
                 LegalCaseId = dto.LegalCaseId,
                 IndexNo = dto.LegalCase != null ? dto.LegalCase.Index : "",
-                Caption = dto.Caption,
+               
 
                 // CaseType name — safe whether CaseTypeId or LegalCaseId is null
                 CaseTypeName =
-        dto.CaseTypeId != null
+               dto.CaseTypeId != null
             ? dto.CaseTypes?.Name
             : dto.LegalCase?.CaseType?.Name ?? string.Empty,
 
@@ -110,6 +113,7 @@ namespace EvictionFiler.Application.Services
                 dto.CourtPartId != null
                     ? dto.CourtParts?.Part
                     : string.Empty,
+                CourtPartId = dto.CourtPartId,
 
                 // Case status name — only if present
                 CaseStatusName =
@@ -127,6 +131,17 @@ namespace EvictionFiler.Application.Services
         dto.Courts.County.Name != null
             ? dto.Courts.County.Name
             : string.Empty,
+
+                LandlordName = dto.LegalCase?.LandLords != null
+        ? $"{dto.LegalCase.LandLords.FirstName} {dto.LegalCase.LandLords.LastName}"
+        : string.Empty,
+
+                TenantName = dto.LegalCase?.Tenants != null
+        ? $"{dto.LegalCase.Tenants.FirstName} {dto.LegalCase.Tenants.LastName}"
+        : string.Empty,
+                LastAction = dto.LastAction,
+                CountyId = dto.Courts.CountyId,
+               
 
                 CreatedOn = dto.CreatedOn,
 
@@ -193,6 +208,7 @@ namespace EvictionFiler.Application.Services
             : string.Empty,
 
                 CreatedOn = dto.CreatedOn,
+                LastAction = dto.LastAction,
 
             }).OrderBy(e=>e.HearingDate).ToList();
 
@@ -204,6 +220,12 @@ namespace EvictionFiler.Application.Services
         public async Task<IEnumerable<AppearanceMode>> GetAllModes()
         {
             var modes = await _modeRepository.GetAllAsync();
+            return modes;
+        }
+
+        public async Task<IEnumerable<AppearanceTypeforHearing>> GetAllAppearanceTypeForHearing()
+        {
+            var modes = await _appearanceTypeForHearingRepository.GetAllAsync();
             return modes;
         }
         public async Task<IEnumerable<VirtualPlatform>> GetAllPlatform()

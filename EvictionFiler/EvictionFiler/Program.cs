@@ -154,6 +154,7 @@ builder.Services.AddScoped<ICaseAdditionalTenantService, CaseAdditionalTenantSer
 builder.Services.AddScoped<ICaseNoticeInfoRepository, CaseNoticeInfoRepository>();
 builder.Services.AddScoped<IAppearanceModeRepository, AppearanceModeRepository>();
 builder.Services.AddScoped<IVirtualPlatformRepository, VirtualPlatformRepository>();
+builder.Services.AddScoped<IAppearanceTypeForHearingRepository, AppearanceTypeForHearingRepository>();
 
 builder.Services.AddAuthorization();
 
