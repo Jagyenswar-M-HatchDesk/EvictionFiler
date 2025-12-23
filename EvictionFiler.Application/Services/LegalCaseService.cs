@@ -547,7 +547,7 @@ namespace EvictionFiler.Application.Services
                         AttrneyContactInfo = caseEntity.AttrneyContactInfo,
                         AttrneyEmail = caseEntity.AttrneyEmail,
 
-                        MarshalName = $"{caseEntity.Marshal.FirstName} {caseEntity.Marshal.LastName}",
+                        MarshalName = $"{caseEntity.Marshal?.FirstName} {caseEntity.Marshal?.LastName}",
                         Index = caseEntity.Index,
                         County = caseEntity.County,
                         ManagingAgent = caseEntity.ManagingAgent,
