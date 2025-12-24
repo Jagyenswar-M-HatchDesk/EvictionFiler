@@ -34,6 +34,7 @@
 @inject ICasesRepository _casesRepository
 @inject ICaseFormService _CaseFormService
 @inject IRegulationStatusRepository _regulationStatusRepository
+@inject ILandLordRepository _landLordRepository
 @inject IStateRepository _stateRepository
 @inject IBuildingRepository _buildingRepository
 @inject IBuildingService _buildingService
@@ -47,6 +48,7 @@
 @inject IToastService ToastService
 @inject IMarshalService _marshalService
 @inject ICourtpartServices courtpartService
+@inject ILandlordSevice _landlordSevice
 @inject ICountyService countyService
 @inject ICaseAdditionalTenantService _caseAdditionalTenant
 @using Microsoft.AspNetCore.Authorization
@@ -747,10 +749,43 @@
             <section class="row g-4 mt-1">
                 <!-- Left -->
                 <div class="col-12 col-lg-7 d-flex flex-column gap-4">
-                    <!-- Tenant & Building -->
+                    <!-- Tenant & Building & Landlord-->
                     <div class="card shadow-sm border-0">
                         <div class="card-header bg-transparent">
-                            <div class="fw-semibold d-flex align-items-center gap-2"><i class="bi bi-people"></i> Tenant &amp; Building</div>
+                            <div class="fw-semibold d-flex align-items-center gap-2"><i class="bi bi-people"></i> Tenant &amp; Building &amp; Landlord</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="border rounded-3 p-3 h-100 position-relative">
+
+                                        <div class="d-flex justify-content-between align-items-center ">
+                                            <div class="fw-semibold">Landlord</div>
+                                            <button type="button" class="btn btn-sm normal p-1" title="Edit Landlord" @onclick="ShowLandlordModal">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                        </div>
+                                        <div class="text-secondary small d-flex justify-content-between">
+                                            <div><span class="text-body">Name:</span> <span id="landlordName2">@(string.IsNullOrWhiteSpace(legalcaseDto.landlordName) ? "--" : legalcaseDto.landlordName)</span></div>
+                                            <div><span class="text-body">Contact Person:</span> <span id="landlordperson">@(string.IsNullOrWhiteSpace(legalcaseDto.ContactPersonName) ? "--" : legalcaseDto.ContactPersonName)</span></div>
+                                            <div>
+                                                <span class="text-body">Address:</span> <span id="landlordAddr">
+                                                    @{
+                                                        var partlandlord = new List<string>();
+
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.LandlordAddress)) partlandlord.Add(legalcaseDto.LandlordAddress);
+
+
+                                                        var fulllandlordAddress = partlandlord.Count() > 0 ? string.Join(", ", partlandlord) : "--";
+                                                    }
+                                                    @fulllandlordAddress
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                             
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
@@ -801,17 +836,17 @@
                                             <div>
                                                 <span class="text-body">Address:</span> <span id="bAddr">
                                                     @{
-                                                        var partlandlord = new List<string>();
+                                                        var partbuilding = new List<string>();
 
-                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingAddress)) partlandlord.Add(legalcaseDto.BuildingAddress);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingAddress)) partbuilding.Add(legalcaseDto.BuildingAddress);
                                                         // if (!string.IsNullOrWhiteSpace(legalcaseDto.Address2)) partlandlord.Add(legalcaseDto.Address2);
-                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.Borough)) partlandlord.Add(legalcaseDto.Borough);
-                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingState)) partlandlord.Add(legalcaseDto.BuildingState);
-                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingZip)) partlandlord.Add(legalcaseDto.BuildingZip);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.Borough)) partbuilding.Add(legalcaseDto.Borough);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingState)) partbuilding.Add(legalcaseDto.BuildingState);
+                                                        if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingZip)) partbuilding.Add(legalcaseDto.BuildingZip);
 
-                                                        var fulllandlordAddress = partlandlord.Count() > 0 ? string.Join(", ", partlandlord) : "--";
+                                                        var fullbuildingAddress = partbuilding.Count() > 0 ? string.Join(", ", partbuilding) : "--";
                                                     }
-                                                    @fulllandlordAddress
+                                                    @fullbuildingAddress
                                                 </span>
                                             </div>
                                         </div>
@@ -969,7 +1004,7 @@
                                         {
                                             <div class="item" data-status="current">
                                                 <span class="dot bg-brand-primary"></span>
-                                                <div class="text-secondary small mx-2">@(item.HearingDate.ToString("dd/MM/yyyy") ?? "--")</div>
+                                                <div class="text-secondary small mx-2">@(item.HearingDate)</div>
                                                 <div class="fw-semibold mx-2">Hearing Scheduled</div>
                                                 <div class="text-secondary small mx-2">Awaiting confirmation from court</div>
                                             </div>
@@ -1588,6 +1623,113 @@
         </div>
     </div>
 
+
+
+    <!-- Landlord Edit Modal -->
+    <div class="modal fade" id="landlordModal" tabindex="-1" aria-labelledby="landlordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="landlordModalLabel">Edit Landlord Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <EditForm Model="@editLandlordModel">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        <div class=" border-0">
+                            <div class="card-body p-0">
+
+                                <!-- Search + Add Section -->
+                                <div class="row mt-2">
+                                    @if (!showLandlordFields)
+                                    {
+                                        <div class="col-md-6 position-relative" @onfocusout="HideLandlordDropdown">
+                                            <label class="form-label  required-label">Landlord</label>
+                                            <input type="text" class="form-control"
+                                                   placeholder="Search by Landlord name or code..."
+                                                   @bind-value="searchLandlordText" @onclick="ShowAllLandlords"
+                                                   @oninput="OnSearchLandlordInput" />
+                                            @if (filteredlandlords?.Count() > 0)
+                                            {
+                                                <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
+                                                    @foreach (var c in filteredlandlords)
+                                                    {
+                                                        <li class="dropdown-item" @onclick="() => SelectLandlord(c)">
+                                                            @c.LandLordCode / @c.FirstName @c.LastName
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
+                                            <ValidationMessage For="() => legalcaseDto.LandlordId" />
+                                        </div>
+                                    }
+
+                                    @if (!showLandlordFields)
+                                    {
+                                        <div class="col-md-1 d-flex justify-content-center align-items-end pb-2">
+                                            <span>OR</span>
+                                        </div>
+                                        <div class="col-md-2 d-flex align-items-end">
+                                            <button type="button" class="btn btn-primary base" @onclick="OnBindLandlordAfter">+ Add</button>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Add/Edit Fields -->
+                                @if (showLandlordFields)
+                                {
+                                    <div class=" rounded-3 p-3 position-relative">
+                                        <button type="button"
+                                                aria-label="Clear"
+                                                style="background: transparent; border: none; z-index: 9999; position:absolute; top:-15px ; right:0px"
+                                                @onclick="OnBindLandlordCancel">
+                                            <i class="fa-solid fa-xmark"></i> Clear
+                                        </button>
+
+                                        <div class="row g-3">
+                                            @if (IsNewLandlord)
+                                            {
+                                                <div class="col-md-6">
+                                                    <label class="form-label required-label">First Name</label>
+                                                    <InputText class="form-control" @bind-Value="editLandlordModel.FirstName" placeholder="Enter First Name" />
+                                                    <ValidationMessage For="() => editLandlordModel.FirstName" />
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label class="form-label required-label">Last Name</label>
+                                                    <InputText class="form-control" @bind-Value="editLandlordModel.LastName" placeholder="Enter Last Name" />
+                                                </div>
+                                            }
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Contact Person Name </label>
+                                                <InputText class="form-control" @bind-Value="editLandlordModel.ContactPersonName" placeholder="Enter Contact person" />
+                                                <ValidationMessage For="() => editLandlordModel.ContactPersonName" />
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Address</label>
+                                                <InputText class="form-control" @bind-Value="editLandlordModel.Address1" placeholder="Enter Address" />
+                                            </div>
+                                      
+
+                                           
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary base" @onclick="SaveLandlordChanges">Save</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+
     <!-- Rent Edit Modal -->
     <div class="modal fade" id="rentModal" tabindex="-1" aria-labelledby="rentModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -2066,22 +2208,28 @@
     private System.Timers.Timer animationTimer;
 
     private EditToBuildingDto editBuildingModel = new();
+    private EditToLandlordDto editLandlordModel = new();
     private IntakeModel editRentModel = new();
     private bool showBuildingFields = false;
+    private bool showLandlordFields = false;
     private bool showCourtFields = false;
     private bool IsNewBuilding = false;
+      private bool IsNewLandlord = false;
     private bool ShowCourtDropdown = false;
     private bool ShowCourtPartDropdown = false;
     private string searchBuildingText;
+      private string searchLandlordText;
     private string searchCourtText;
     private string? searchCourtPartText;
     private string searchTenantText;
     private List<EditToBuildingDto> filteredBuildings = new();
+     private List<EditToLandlordDto> filteredlandlords = new();
     private List<EditToTenantDto> filteredTenant = new();
     private List<State> StateList = new();
     private List<RegulationStatus> RegulationList = new();
     private IEnumerable<City> CityList = new List<City>();
     private List<EditToBuildingDto> BuildingList = new();
+      private List<EditToLandlordDto> LandlordList = new();
     private List<EditToTenantDto> TenantList = new();
     private List<string> Tenants = new();
     private List<string> UnderTenants = new();
@@ -2508,6 +2656,9 @@
                 Email = legalcaseDto.Email,
                 LandLordTypeId = legalcaseDto.LandLordTypeId ?? Guid.Empty,
                 LandlordId = legalcaseDto.LandlordId,
+                landlordName = legalcaseDto.landlordName,
+                ContactPersonName = legalcaseDto.ContactPersonName,
+                LandlordAddress = legalcaseDto.LandlordAddress,
 
                 // Building
                 BuildingId = legalcaseDto.BuildingId,
@@ -2888,7 +3039,15 @@
 
     }
 
-
+    private async Task ShowLandlordModal()
+    {
+      
+        editLandlordModel = await _landLordRepository.GetLandlordByIdAsync(legalcaseDto.LandlordId!.Value);
+        BuildingList = await _buildingRepository.GetBuildingsByLandlordIdAsync(legalcaseDto.ClientId!.Value);
+        searchLandlordText = editLandlordModel.LandLordCode;
+        showLandlordFields = true;
+        await JS.InvokeVoidAsync("showModal", "landlordModal");
+    }
 
 
     private async Task ShowBuildingModal()
@@ -2905,49 +3064,65 @@
     }
     private async Task ShowCourtModal()
     {
+        // Load lists if empty
+        if (!CourtTypeList.Any())
+            CourtTypeList = await _service.CourtTypeList();
 
-        if (!CourtTypeList.Any()) CourtTypeList = await _service.CourtTypeList();
-        if (!CountyList.Any()) CountyList = await countyService.GetAllCounty();
-        if (!CourtLocationList.Any()) CourtLocationList = await _courtService.GetAllCourtDataAsync();
+        if (!CountyList.Any())
+            CountyList = await countyService.GetAllCounty();
+
+        if (!CourtLocationList.Any())
+            CourtLocationList = await _courtService.GetAllCourtDataAsync();
+
+        // Load CourtPartList if CourtLocationId exists
         if (legalcaseDto.CourtLocationId != null && legalcaseDto.CourtLocationId != Guid.Empty)
         {
-            if (!CourtPartList.Any()) CourtPartList = CourtLocationList.Where(e => e.Id == legalcaseDto.CourtLocationId).FirstOrDefault()!.CourtPart;
+            var location = CourtLocationList.FirstOrDefault(e => e.Id == legalcaseDto.CourtLocationId);
+            if (location != null)
+                CourtPartList = location.CourtPart;
         }
 
-
+   
         if (legalcaseDto.CourtTypeId != null && legalcaseDto.CourtTypeId != Guid.Empty)
         {
-            var casetype = CourtTypeList.Where(e => e.Id == legalcaseDto.CourtTypeId).FirstOrDefault();
-            if (casetype.Name.Contains("NYC"))
+            var casetype = CourtTypeList.FirstOrDefault(e => e.Id == legalcaseDto.CourtTypeId);
+            if (casetype != null && !string.IsNullOrEmpty(casetype.Name) && casetype.Name.Contains("NYC"))
             {
                 showCountyDropdown = true;
-                // showCourtPartDropdown = true;
                 ShowClearBtn = true;
             }
         }
-        if (legalcaseDto.CourtTypeId == null || legalcaseDto.CourtTypeId == Guid.Empty)
+        else
         {
-            legalcaseDto.CourtTypeId = CourtTypeList.Where(e => e.Name.Contains("NYC")).FirstOrDefault()!.Id;
+            var nycCourtType = CourtTypeList.FirstOrDefault(e => !string.IsNullOrEmpty(e.Name) && e.Name.Contains("NYC"));
+            if (nycCourtType != null)
+                legalcaseDto.CourtTypeId = nycCourtType.Id;
+
             showCountyDropdown = true;
-            // showCourtPartDropdown = true;
             ShowClearBtn = true;
+
             if (legalcaseDto.CountyId == null || legalcaseDto.CountyId == Guid.Empty)
             {
-                legalcaseDto.CountyId = CountyList.Where(e => e.Name.Contains(legalcaseDto.Borough!)).FirstOrDefault()!.Id;
+                if (!string.IsNullOrEmpty(legalcaseDto.Borough))
+                {
+                    var county = CountyList.FirstOrDefault(e => !string.IsNullOrEmpty(e.Name) && e.Name.Contains(legalcaseDto.Borough));
+                    if (county != null)
+                        legalcaseDto.CountyId = county.Id;
+                }
             }
         }
-
         if (legalcaseDto.CourtPartId != null && legalcaseDto.CourtPartId != Guid.Empty)
         {
             showCourtPartDropdown = true;
-            filteredCourtsPart = CourtLocationList.Where(e => e.Id == legalcaseDto.CourtLocationId).FirstOrDefault()!.CourtPart.ToList();
+            var location = CourtLocationList.FirstOrDefault(e => e.Id == legalcaseDto.CourtLocationId);
+            if (location != null)
+                filteredCourtsPart = location.CourtPart?.ToList() ?? new List<CourtPartDto>();
         }
+
         await ShowAllCourts();
-        // CaseTypeStepLoaded = true;
-
-
         await JS.InvokeVoidAsync("showModal", "courtModal");
     }
+
 
     private async Task ShowRentModal()
     {
@@ -2965,6 +3140,32 @@
         }
         StateHasChanged();
     }
+
+     async Task HideLandlordDropdown(FocusEventArgs e)
+    {
+        await Task.Delay(500);
+        if (filteredlandlords.Any())
+        {
+            filteredlandlords.Clear();
+        }
+        StateHasChanged();
+    }
+
+     private async Task ShowAllLandlords()
+    {
+        if (legalcaseDto.ClientId == null || legalcaseDto.ClientId == Guid.Empty)
+        {
+            filteredlandlords = new List<EditToLandlordDto>();
+            return;
+        }
+        else
+        {
+
+            filteredlandlords = await _landlordSevice.GetLandlordsByClientIdAsync(legalcaseDto.ClientId.Value);
+        }
+
+    }
+
     private async Task ShowAllBuildings()
     {
         if (legalcaseDto.LandlordId == null || legalcaseDto.LandlordId == Guid.Empty)
@@ -2978,6 +3179,50 @@
             filteredBuildings = await _buildingService.GetBuildingsByLandlordIdAsync(legalcaseDto.LandlordId.Value);
         }
 
+    }
+    private async Task OnSearchLandlordInput(ChangeEventArgs e)
+    {
+        searchLandlordText = e.Value.ToString();
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        // ⭐ Empty — show all landlords
+        try
+        {
+
+            await Task.Delay(300, _cts.Token);
+            if (string.IsNullOrWhiteSpace(searchLandlordText))
+            {
+                await ShowAllLandlords();
+                return;
+            }
+
+            // ⭐ Jab tak 3 characters nahi — show all landlords
+            if (searchBuildingText.Length < 3)
+            {
+                await ShowAllLandlords();
+                return;
+            }
+
+            if (legalcaseDto.ClientId == null || legalcaseDto.ClientId == Guid.Empty)
+            {
+                filteredlandlords = new List<EditToLandlordDto>();
+                return;
+            }
+            else
+            {
+                // ⭐ 3 characters → server search
+                filteredlandlords = await _landlordSevice.SearchLandlordsAsync(
+                    searchLandlordText,
+                    legalcaseDto.ClientId.Value
+                );
+            }
+
+
+        }
+        catch (TaskCanceledException)
+        {
+            // Old task cancelled → ignore
+        }
     }
     // Search handler
     private async Task OnSearchBuildingInput(ChangeEventArgs e)
@@ -3062,6 +3307,19 @@
 
 
 
+     private void SelectLandlord(EditToLandlordDto selected)
+    {
+        editLandlordModel.Id = selected.Id;
+        editLandlordModel.Address1 = selected.Address1;
+        editLandlordModel.ContactPersonName = selected.ContactPersonName;
+     
+
+        filteredlandlords.Clear();
+        searchLandlordText = selected.LandLordCode;
+        showLandlordFields = true;
+       
+        legalcaseDto.ClientId = selected.Id;
+    }
 
     // Select building from list
     private void SelectBuilding(EditToBuildingDto selected)
@@ -3189,6 +3447,21 @@
     {
         showBuildingFields = true;
         IsNewBuilding = true;
+    }
+
+     private void OnBindLandlordAfter()
+    {
+        showLandlordFields = true;
+        IsNewLandlord = true;
+    }
+
+     private void OnBindLandlordCancel()
+    {
+        showLandlordFields = false;
+        IsNewLandlord = true; 
+searchLandlordText = null;
+        editLandlordModel = new EditToLandlordDto();
+       
     }
     private void OnBindCourtAfter()
     {
@@ -3347,6 +3620,74 @@
             {
                 ToastService.ShowSuccess("Building details updated successfully!");
                 await JS.InvokeVoidAsync("hideModal", "buildingModal");
+
+                await LoadCaseDetails();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to update building details.");
+            }
+        }
+        // Map edited fields
+
+
+        spinnerservice.Hide();
+    }
+
+    private async Task SaveLandlordChanges()
+    {
+        spinnerservice.Show();
+
+        var addorupdate = false;
+        if (editLandlordModel.Id == null || editLandlordModel.Id == Guid.Empty)
+        {
+            
+            var newLandlord = new CreateToLandLordDto()
+            {
+                FirstName = editLandlordModel.FirstName,
+                LastName = editLandlordModel.LastName,
+                Address1 = editLandlordModel.Address1,
+                ContactPersonName = editLandlordModel.ContactPersonName,
+                ClientId = legalcaseDto.ClientId,
+            };
+
+            var landlordId = await _landlordSevice.AddOnlyLandLordfromCase(newLandlord);
+            addorupdate = true;
+            legalcaseDto.LandlordId = landlordId;
+
+        }
+        else
+        {
+            if (editLandlordModel.Id != null && editLandlordModel.Id != Guid.Empty)
+            {
+               
+                var updateLandLord = new EditToLandlordDto()
+                {
+                    Id = editLandlordModel.Id,
+               
+                    Address1 = editLandlordModel.Address1,
+                    ClientId = legalcaseDto.ClientId,
+                    ContactPersonName = editLandlordModel.ContactPersonName
+                };
+
+                await _landlordSevice.UpdateLandLordsfromCase(updateLandLord);
+                addorupdate = true;
+            }
+        }
+
+        if (addorupdate)
+        {
+            legalcaseDto.LandlordAddress = editLandlordModel.Address1;
+              legalcaseDto.ContactPersonName = editLandlordModel.ContactPersonName;
+            legalcaseDto.FirstName = editLandlordModel.FirstName;
+            legalcaseDto.LastName = editLandlordModel.LastName;
+             
+            var success = await _service.UpdateCaseAsync(legalcaseDto);
+
+            if (success.HasValue)
+            {
+                ToastService.ShowSuccess("Landlord details updated successfully!");
+                await JS.InvokeVoidAsync("hideModal", "landlordModal");
 
                 await LoadCaseDetails();
             }

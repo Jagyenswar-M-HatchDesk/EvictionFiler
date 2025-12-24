@@ -12,8 +12,8 @@ namespace EvictionFiler.Application.DTOs.CaseHearing
     public class CaseHearingDto : DeletableBaseEntity
     {
         public Guid Id { get; set; }
-        public DateTime HearingDate { get; set; }
-        public DateTime HearingDateTo { get; set; }
+        public DateTime? HearingDate { get; set; }
+        public DateTime? HearingDateTo { get; set; }
         public TimeOnly HearingTime { get; set; }
         public string? Caption { get; set; }
         public string? IndexNo { get; set; }
@@ -24,6 +24,7 @@ namespace EvictionFiler.Application.DTOs.CaseHearing
 
         public Guid? LegalCaseId { get; set; }
         public Guid? AppearanceTypeForHearingId { get; set; }
+        public string? AppearanceTypeForHearinname { get; set; }
         public Guid? AppearanceModeId { get; set; }
         public Guid? VirtualPlatformId { get; set; }
 

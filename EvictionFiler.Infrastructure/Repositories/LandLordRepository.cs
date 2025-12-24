@@ -7,6 +7,7 @@ using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
+using Polly;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
@@ -197,6 +198,41 @@ namespace EvictionFiler.Infrastructure.Repositories
 			return await _mainDbContext.MstTypeOfOwners.ToListAsync();
 		}
 
-		
-	}
+        public async Task<EditToLandlordDto> GetLandlordByIdAsync(Guid landlordId)
+        {
+            var l = await _mainDbContext.LandLords
+               .Include(x => x.State)
+                .Include(x => x.LandlordType)
+                .Include(x => x.TypeOfOwner)
+                .FirstOrDefaultAsync(x => x.Id == landlordId && x.IsDeleted != true);
+
+            if (l == null) return null;
+
+            return new EditToLandlordDto
+            {
+                Id = l.Id,
+                LandLordCode = l.LandLordCode,
+                FirstName = l.FirstName,
+                LastName = l.LastName,
+                EINorSSN = l.EINorSSN,
+                Phone = l.Phone,
+                Email = l.Email,
+                Address1 = l.Address1,
+                Address2 = l.Address2,
+                StateId = l.StateId,
+                LandlordTypeId = l.LandlordTypeId,
+                LandlordTypeName = l.LandlordType != null ? l.LandlordType.Name : string.Empty,
+                StateName = l.State != null ? l.State.Name : string.Empty,
+                TypeOwnerName = l.TypeOfOwner != null ? l.TypeOfOwner.Name : string.Empty,
+                City = l.City,
+                Zipcode = l.Zipcode,
+                ContactPersonName = l.ContactPersonName,
+                TypeOwnerId = l.TypeOfOwnerId,
+                ClientId = l.ClientId,
+                IsDeleted = l.IsDeleted,
+                IsActive = l.IsActive,
+            };
+        }
+
+    }
 }

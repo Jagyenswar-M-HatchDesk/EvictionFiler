@@ -78,7 +78,7 @@ namespace EvictionFiler.Application.Services
         public async Task<List<CaseHearingDto>> GetAllCaseHeariingAsync()
         {
             var calanders = await _caseHearingRepository
-                  .GetAllQuerable(x => x.IsDeleted != true, x => x.LegalCase, x=>x.Courts.County, x=>x.CourtParts ,  x => x.Courts, x => x.LegalCase.CaseType , x=>x.LegalCase.LandLords , x=>x.LegalCase.Tenants)
+                  .GetAllQuerable(x => x.IsDeleted != true, x => x.LegalCase,x=>x.CaseTypes, x=>x.AppearanceTypeforHearing, x=>x.Courts.County, x=>x.CourtParts ,  x => x.Courts, x => x.LegalCase.CaseType , x=>x.LegalCase.LandLords , x=>x.LegalCase.Tenants)
                   .ToListAsync();
 
             var result = calanders.Select(dto => new CaseHearingDto
@@ -95,6 +95,7 @@ namespace EvictionFiler.Application.Services
                 CourtId = dto.CourtId,
                 LegalCaseId = dto.LegalCaseId,
                 IndexNo = dto.LegalCase != null ? dto.LegalCase.Index : "",
+                CaseTypeId = dto.LegalCase.CaseTypeId,
                
 
                 // CaseType name — safe whether CaseTypeId or LegalCaseId is null
@@ -119,6 +120,11 @@ namespace EvictionFiler.Application.Services
                 CaseStatusName =
                 dto.CaseStatusId != null
                     ? dto.CaseStatus?.Name
+                    : string.Empty,
+
+                AppearanceTypeForHearinname =
+                dto.AppearanceTypeForHearingId != null
+                    ? dto.AppearanceTypeforHearing?.Name
                     : string.Empty,
 
                 // Room number — prefer explicit RoomNo, fallback to Court’s RoomNo

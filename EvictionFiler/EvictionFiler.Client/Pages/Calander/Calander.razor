@@ -36,6 +36,17 @@
 
 @using System.Security.Claims
 @inject AuthenticationStateProvider _authStateProvider
+@{
+    var groupedCases = (CasesHearing ?? Enumerable.Empty<CaseHearingDto>())
+        .GroupBy(x => new
+        {
+            x.CourtPart,
+            x.RoomNo,
+            x.Judge
+        })
+        .ToList();
+}
+
 
 <style>
     /* ===== EvictionFiler Light Theme (cards + rounded + blue/yellow accents) ===== */
@@ -167,63 +178,7 @@
 
     #myPrintableContent { position: absolute; left: 0; top: 0; width: 100%; }
     }
-    .print-container {
-    font-family: Arial, sans-serif;
-    padding: 20px;
-}
-
-.print-header h2 {
-    margin-bottom: 5px;
-}
-
-.print-header .sub {
-    display: flex;
-    gap: 20px;
-    font-size: 14px;
-    margin-bottom: 25px;
-}
-
-.part-box {
-    background: #f3f4f6;
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 15px;
-}
-
-.part-title {
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.judge {
-    font-size: 14px;
-    color: #444;
-    margin-top: 4px;
-}
-
-.case-box {
-    border-top: 2px solid #000;
-    padding-top: 10px;
-    margin-top: 15px;
-}
-
-.case-title {
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 8px;
-}
-
-.case-row {
     
-    gap: 25px;
-    font-size: 14px;
-    margin-bottom: 6px;
-}
-
-.last-action {
-    margin-top: 10px;
-    font-size: 14px;
-}
 
     #myPrintableContent{
         display:none;
@@ -247,25 +202,45 @@
     }
 }
 
-    .print-container { font-family: Arial, sans-serif; padding: 20px; }
+    .print-container { font-family: "Segoe UI", Arial, sans-serif; background: #fff; color: #000; padding: 20px 30px; }
 
-    .print-header h2 { margin-bottom: 5px; }
+    /* HEADER */
+    .print-header { background: linear-gradient(180deg, #0b1626, #111827); color: #fff; padding: 25px 30px; margin-bottom: 30px; }
 
-    .print-header .sub { display: flex; gap: 20px; font-size: 14px; margin-bottom: 25px; }
+        .print-header h2 { margin: 0 0 10px 0; font-size: 22px; }
 
-    .part-box { background: #f3f4f6; padding: 12px; border-radius: 6px; margin-bottom: 15px; }
+    .header-meta { display: flex; gap: 25px; font-size: 14px; }
 
-    .part-title { font-size: 18px; font-weight: bold; }
+    .print-link { margin-top: 15px; font-size: 14px; text-decoration: underline; cursor: pointer; }
 
-    .judge { font-size: 14px; color: #444; margin-top: 4px; }
+    /* PART HEADER */
+    .part-box { background: #f4f6f8; border-radius: 8px; padding: 15px 20px; margin-bottom: 10px; }
 
-    .case-box { border-top: 2px solid #000; padding-top: 10px; margin-top: 15px; }
+    .part-title { font-size: 18px; font-weight: 600; }
 
-    .case-title { font-size: 16px; font-weight: bold; margin-bottom: 8px; }
+    .judge { font-size: 14px; margin-top: 5px; }
+
+    /* CASE */
+    .case-box { border-top: 2px solid #111; padding: 15px 0; margin-bottom: 25px; }
+
+    .case-title { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
 
     .case-row { display: flex; gap: 25px; font-size: 14px; margin-bottom: 6px; }
 
-    .last-action { margin-top: 10px; font-size: 14px; }
+    .last-action { margin-top: 20px; font-size: 14px; }
+
+    /* PRINT ONLY */
+    @@media print { body
+    { background: #fff; }
+
+    .print-link { display: none; }
+
+    .part-box { page-break-inside: avoid; }
+
+    .case-box { page-break-inside: avoid; }
+    }
+
+
 
     /* PRINT RULES */
     @@media print { body *
@@ -276,6 +251,24 @@
 
     #myPrintableContent { position: absolute; top: 0; left: 0; width: 100%; }
     }
+
+    .table-wrap { overflow-x: auto; /* horizontal scroll */ overflow-y: auto; max-width: 100%; }
+
+    .nowrap-table { white-space: nowrap; /* column break stop */ min-width: 1200px; /* force horizontal scroll */ }
+
+        .nowrap-table th,
+        .nowrap-table td { white-space: nowrap; }
+
+    .status-button { padding: 4px 12px; border-radius: 12px; font-weight: bold; display: inline-block; }
+
+    /* Colors matching your screenshot */
+    .holdover { background-color: #e0e4ff; color: #3a4bb3; }
+
+    .nonpayment { background-color: #d9f6f6; color: #2c8c8c; }
+
+    .perdiem { background-color: #fff4cc; color: #b38a00; }
+
+    .default-status { background-color: #f0f0f0; color: #555; }
 </style>
 
 <div class="wrap">
@@ -312,7 +305,7 @@
                     </div>
                     <div class="col-md-2">
                         <label for="f-to" class="form-label">Date To</label>
-                        <InputDate id="f-from" class="form-control" @bind-Value="hearingDto.HearingDateTo" @bind-Value:after="ApplyFilters" />
+                        <InputDate id="f-from" class="form-control" @bind-Value="hearingDto.HearingDateTo"  />
                     </div>
                     <div class="col-md-2">
                         <label class="form-label ">Court <span class="text-danger">*</span></label>
@@ -373,7 +366,7 @@
 
                             <div class="col-md-3">
                                 <label for="f-q" class="form-label">Search</label>
-                                <InputText id="f-from" class="form-control" @bind-Value="hearingDto.IndexNo" @bind-Value:after="ApplyFilters" />
+                                <InputText id="f-from" class="form-control" @bind-Value="hearingDto.IndexNo" placeholder="Index / #Caption" @bind-Value:after="ApplyFilters" />
                             </div>
 
 
@@ -389,7 +382,8 @@
                 </div>
 
                 <div class="mt-4 d-flex gap-2 flex-wrap align-items-center bar">
-                    <button type="button" class="btn btn-primary" id="btnGenerate">Generate</button>
+
+                     <button class="btn btn-primary"  style="font-size:14px" @onclick="SubmitAsync">Generate</button>
                     <button type="reset" class="btn secondary" id="btnReset">Reset</button>
                     <button type="button" class="btn secondary"  onclick="window.print()">Print</button>
                     <button type="button" class="btn secondary" id="btnExport">Export CSV</button>
@@ -410,18 +404,18 @@
             </div>
             <div class="sub" id="printMeta"></div>
         </div>
-        <div class="card-body table-wrap">
-            <table class="table" id="table">
+        <div class="card-body table-wrap" style=" overflow-x:auto;">
+            <table class="table" id="table" style="overflow-x:scroll; width:100vw">
                 <thead>
                     <tr>
                         <th>County</th>
                         <th class="hide-sm">Date</th>
-                        <th>Court Part</th>
+                        <th>Part</th>
                         <th>Room</th>
                         <th>Caption</th>
                         <th>Index #</th>
                         <th>Time</th>
-                        <th>Case Type</th>
+                        <th>Type</th>
                         <th class="hide-sm">Judge</th>
                         <th>Last Action</th>
                     </tr>
@@ -433,13 +427,15 @@
                         {
                             <tr>
                                 <td>@c.CountyName</td>
-                                <td>@(c.HearingDate.ToString("yyyy-MM-dd") ?? "")</td>
+                                 <td>@c.HearingDate?.ToString("MMM dd, yyyy")</td>
                                 <td>@c.CourtPart</td>
                                 <td>@c.RoomNo</td>
                                 <td>@c.LandlordName vs @c.TenantName</td>
                                 <td>@c.IndexNo</td>
                                 <td>@c.HearingTime</td>
-                                <td>@c.CaseTypeName</td>
+                                <td> <span class="status-button @(GetStatusClass(c.CaseTypeName))">
+        @c.CaseTypeName
+    </span</td>
                                 <td>@c.Judge</td>
                                 <td>@(c.LastAction)</td>
                             </tr>
@@ -458,62 +454,77 @@
 
     </section>
 
-  
-        <div id="myPrintableContent" class="print-container">
 
-            <!-- HEADER -->
-            <div class="print-header">
-                <h2>EvictionFiler – Housing Court Calendar</h2>
-                <div class="sub">
-                    <span><strong>County:</strong> @CountyList.FirstOrDefault(c => c.Id == hearingDto.CountyId)?.Name</span>
-                    <span><strong>Court Date:</strong> @hearingDto.HearingDate.ToString("yyyy-MM-dd")</span>
-                </div>
+    <div id="myPrintableContent" class="print-container">
+
+        <!-- HEADER -->
+        <div class="print-header">
+            <h2>EvictionFiler – Housing Court Calendar</h2>
+
+            <div class="header-meta" style="display:flex">
+                <span>
+                    <strong>County:</strong>
+                    @countyNameForPrint
+                </span>
+                <span>
+                    <strong>Court Date:</strong>
+                    @hearingDto.HearingDate
+                </span>
             </div>
-
-            <!-- PART / ROOM -->
-            <div class="part-box">
-            <div class="part-title">Part A – Room 105</div>
-                <div class="judge"> -- </div>
-            </div>
-
-            <!-- CASE LIST -->
-            @if (CasesHearing != null && CasesHearing.Any())
-            {
-                int i = 1;
-                foreach (var c in CasesHearing)
-                {
-                    <div class="case-box">
-                        <div class="case-title">
-                            @i. [@c.IndexNo] @c.LandlordName v. @c.TenantName
-                        </div>
-
-                        <div class="case-row">
-                            <span><strong>Appearance:</strong> First Time</span>
-                            <span><strong>Time:</strong> @c.HearingTime</span>
-                            <span><strong>Case Type:</strong> @c.CaseTypeName</span>
-                        </div>
-
-                        <div class="case-row">
-                            <span><strong>Opposition Attorney:</strong>--</span>
-                        </div>
-
-                        <div class="last-action">
-                            <strong>Last action:</strong> @c.LastAction
-                        </div>
-                    </div>
-
-                    i++;
-                }
-            }
-            else
-            {
-                <p>No data available</p>
-            }
 
         </div>
+
+
+
+        @foreach (var part in groupedCases)
+        {
+            int i = 1;
+
+            <!-- PART HEADER -->
+            <div class="part-box">
+                <div class="part-title">
+                    Part @part.Key.CourtPart – Room @part.Key.RoomNo
+                </div>
+                <div class="judge">
+                    Judge: @(string.IsNullOrWhiteSpace(part.Key.Judge)
+                                    ? "Hon. Assigned Judge"
+                                    : part.Key.Judge)
+            </div>
+        </div>
+
+            <!-- CASES -->
+        @foreach (var c in part)
+            {
+                <div class="case-box">
+                    <div class="case-title">
+                        @i. [@c.IndexNo] @c.LandlordName v. @c.TenantName
+                    </div>
+
+                    <div class="case-row">
+                        <span><strong>Appearance:</strong> @c.AppearanceTypeForHearinname</span>
+                        <span><strong>Time:</strong> @c.HearingTime</span>
+                        <span><strong>Case Type:</strong> @c.CaseTypeName</span>
+                    </div>
+
+                    <div class="case-row">
+                        <span><strong>Opposition Attorney:</strong> -- </span>
+                    </div>
+
+                    <div class="last-action">
+                        <strong>Last action:</strong> @c.LastAction
+                    </div>
+                </div>
+
+                i++;
+            }
+        }
+    </div>
+
+
    
 
 </div>
+
 
 
 
@@ -527,9 +538,10 @@
     private List<CaseType> CaseTypeList = new();
     private List<CourtPartDto> CourtPartList = new();
     private List<County> CountyList = new();
+    private string countyNameForPrint;
     private List<CaseStatus> CaseStatusList = new();
     private string? loggedInUserId;
- 
+
 
     private bool isAdmin = false;
     public List<CourtDto> filteredCourts = new List<CourtDto>();
@@ -543,8 +555,8 @@
     protected override async Task OnInitializedAsync()
     {
         hearingDto = new CaseHearingDto();
-        hearingDto.HearingDate = DateTime.Now;
-        hearingDto.HearingDateTo = DateTime.Now;
+        // hearingDto.HearingDate = DateTime.Now;
+        // hearingDto.HearingDateTo = DateTime.Now;
         _editContext = new EditContext(hearingDto);
         _messages = new ValidationMessageStore(_editContext);
 
@@ -552,15 +564,30 @@
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
         CaseStatusList = await CaseTypeRepository.GetAllCaseStatus();
         CountyList = await CaseTypeRepository.GetAllCounty();
+        var defaultCourt = CountyList
+ .FirstOrDefault(x => x.Name == "New York");
+
+        if (defaultCourt != null)
+        {
+            hearingDto.CountyId = defaultCourt.Id;
+        }
+
+        countyNameForPrint = CountyList?
+           .FirstOrDefault(c => c.Id == hearingDto.CountyId)
+           ?.Name ?? "";
+
         // CourtPartList = await CaseTypeRepository.GetAllCourtPart();
         // legalcaseDto.ClientId = Guid.Parse(ClientId);
         CourtLocationList = await _courtService.GetAllCourtDataAsync();
+     
 
         CourtCases = await CalanderService.GetAllCalanderAsync();
         CasesHearing = await CaseHearingService.GetAllCaseHeariingAsync();
         AllCasesHearing = await CaseHearingService.GetAllCaseHeariingAsync();
 
-        CasesHearing = AllCasesHearing.ToList();
+CasesHearing = AllCasesHearing
+    .Where(x => x.CountyId == hearingDto.CountyId)
+    .ToList();
 
         var authState = await _authStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
@@ -572,14 +599,32 @@
         }
     }
 
-    private void SelectCourtPart()
+    private string GetStatusClass(string caseType)
     {
-        
-
-        ApplyFilters();
-        StateHasChanged();
+        return caseType switch
+        {
+            "Holdover" => "holdover",
+            "Non Payment" => "nonpayment",
+            "Per Diem" => "perdiem",
+            _ => "default-status"
+        };
     }
 
+    private void SelectCourtPart()
+    {
+      
+        if (hearingDto.CourtPartId == null || hearingDto.CourtPartId == Guid.Empty)
+        {
+            CasesHearing = AllCasesHearing.ToList();
+            return;
+        }
+
+        ApplyFilters();
+    }
+
+
+
+  
 
     private void SelectCounty()
     {
@@ -665,21 +710,31 @@
 
 
 
-    private void ApplyFilters()
+    private async Task  ApplyFilters()
     {
-        var query = AllCasesHearing.AsQueryable();
+        var query =  AllCasesHearing.AsQueryable();
 
         // County
         if (hearingDto.CountyId != null && hearingDto.CountyId != Guid.Empty)
             query = query.Where(x => x.CountyId == hearingDto.CountyId);
 
         // Date From
-        if (hearingDto.HearingDate != null)
-            query = query.Where(x => x.HearingDate >= hearingDto.HearingDate);
+        if (hearingDto.HearingDate.HasValue)
+{
+    var fromDate = hearingDto.HearingDate.Value.Date;
+    var toDate = fromDate.AddDays(1);
+    query = query.Where(x => x.HearingDate >= fromDate && x.HearingDate < toDate);
+}
 
-        // Date To
-        if (hearingDto.HearingDateTo != null)
-            query = query.Where(x => x.HearingDate <= hearingDto.HearingDateTo);
+
+        // // Date To
+        // if (hearingDto.HearingDateTo.HasValue)
+        // {
+        //     var toDate = hearingDto.HearingDateTo.Value.Date.AddDays(1);
+        //     query = query.Where(x => x.HearingDate < toDate);
+        // }
+
+
 
       
         // Court Part
@@ -694,9 +749,9 @@
         if (hearingDto.CaseTypeId != null && hearingDto.CaseTypeId != Guid.Empty)
             query = query.Where(x => x.CaseTypeId == hearingDto.CaseTypeId);
 
-        // Status
-        if (hearingDto.CaseStatusId != null && hearingDto.CaseStatusId != Guid.Empty)
-            query = query.Where(x => x.CaseStatusId == hearingDto.CaseStatusId);
+        // // Status
+        // if (hearingDto.CaseStatusId != null && hearingDto.CaseStatusId != Guid.Empty)
+        //     query = query.Where(x => x.CaseStatusId == hearingDto.CaseStatusId);
 
         // Judge
         if (!string.IsNullOrWhiteSpace(hearingDto.Judge))
@@ -704,51 +759,33 @@
                                      x.Judge.Contains(hearingDto.Judge, StringComparison.OrdinalIgnoreCase));
 
         // Search (Caption / Index / Party names)
-        if (!string.IsNullOrWhiteSpace(hearingDto.Caption))
+        if (!string.IsNullOrWhiteSpace(hearingDto.IndexNo))
         {
-            var search = hearingDto.Caption.Trim();
+           
 
             query = query.Where(x =>
-                (x.Caption != null && x.Caption.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
-                (x.IndexNo != null && x.IndexNo.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
-                (x.LandlordName != null && x.LandlordName.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
-                (x.TenantName != null && x.TenantName.Contains(search, StringComparison.OrdinalIgnoreCase))
+         
+                (x.IndexNo != null && x.IndexNo.Contains(hearingDto.IndexNo, StringComparison.OrdinalIgnoreCase))
+               
             );
         }
 
-        CasesHearing = query.ToList();
+        CasesHearing =  query.ToList();
     }
 
 
-    // private async Task SubmitAsync()
-    // {
-    //     spinnerservice.Show();
-    //     if (calanderDto == null)
-    //         return;
+   private async Task SubmitAsync()
+{
+    spinnerservice.Show();
+    StateHasChanged(); 
+    await Task.Delay(100); 
 
+    await ApplyFilters();  
 
-    //     var authState = await _authStateProvider.GetAuthenticationStateAsync();
-    //     var user = authState.User;
+    spinnerservice.Hide();
+    StateHasChanged();
+}
 
-    //     var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-    //     if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userGuid))
-    //     {
-    //         hearingDto.CreatedBy = userGuid;
-    //     }
-    //     else
-    //     {
-    //         // unauthenticated user
-    //         hearingDto.CreatedBy = Guid.Empty;
-    //     }
-
-    //     // Save the full nested object
-    //     var isSaved = await CaseHearingService.AddHearing(hearingDto);
-    //     if (isSaved)
-    //     {
-    //         Navigation.NavigateTo("/Calander", true);
-    //     }
-    // }
 
 
 }
