@@ -1688,8 +1688,7 @@
                                         </button>
 
                                         <div class="row g-3">
-                                            @if (IsNewLandlord)
-                                            {
+                                           
                                                 <div class="col-md-6">
                                                     <label class="form-label required-label">First Name</label>
                                                     <InputText class="form-control" @bind-Value="editLandlordModel.FirstName" placeholder="Enter First Name" />
@@ -1700,7 +1699,7 @@
                                                     <label class="form-label required-label">Last Name</label>
                                                     <InputText class="form-control" @bind-Value="editLandlordModel.LastName" placeholder="Enter Last Name" />
                                                 </div>
-                                            }
+                                            
                                             <div class="col-md-6">
                                                 <label class="form-label required-label">Contact Person Name </label>
                                                 <InputText class="form-control" @bind-Value="editLandlordModel.ContactPersonName" placeholder="Enter Contact person" />
@@ -2214,22 +2213,22 @@
     private bool showLandlordFields = false;
     private bool showCourtFields = false;
     private bool IsNewBuilding = false;
-      private bool IsNewLandlord = false;
+    private bool IsNewLandlord = false;
     private bool ShowCourtDropdown = false;
     private bool ShowCourtPartDropdown = false;
     private string searchBuildingText;
-      private string searchLandlordText;
+    private string searchLandlordText;
     private string searchCourtText;
     private string? searchCourtPartText;
     private string searchTenantText;
     private List<EditToBuildingDto> filteredBuildings = new();
-     private List<EditToLandlordDto> filteredlandlords = new();
+    private List<EditToLandlordDto> filteredlandlords = new();
     private List<EditToTenantDto> filteredTenant = new();
     private List<State> StateList = new();
     private List<RegulationStatus> RegulationList = new();
     private IEnumerable<City> CityList = new List<City>();
     private List<EditToBuildingDto> BuildingList = new();
-      private List<EditToLandlordDto> LandlordList = new();
+    private List<EditToLandlordDto> LandlordList = new();
     private List<EditToTenantDto> TenantList = new();
     private List<string> Tenants = new();
     private List<string> UnderTenants = new();
@@ -3041,7 +3040,7 @@
 
     private async Task ShowLandlordModal()
     {
-      
+
         editLandlordModel = await _landLordRepository.GetLandlordByIdAsync(legalcaseDto.LandlordId!.Value);
         BuildingList = await _buildingRepository.GetBuildingsByLandlordIdAsync(legalcaseDto.ClientId!.Value);
         searchLandlordText = editLandlordModel.LandLordCode;
@@ -3082,7 +3081,7 @@
                 CourtPartList = location.CourtPart;
         }
 
-   
+
         if (legalcaseDto.CourtTypeId != null && legalcaseDto.CourtTypeId != Guid.Empty)
         {
             var casetype = CourtTypeList.FirstOrDefault(e => e.Id == legalcaseDto.CourtTypeId);
@@ -3141,7 +3140,7 @@
         StateHasChanged();
     }
 
-     async Task HideLandlordDropdown(FocusEventArgs e)
+    async Task HideLandlordDropdown(FocusEventArgs e)
     {
         await Task.Delay(500);
         if (filteredlandlords.Any())
@@ -3151,7 +3150,7 @@
         StateHasChanged();
     }
 
-     private async Task ShowAllLandlords()
+    private async Task ShowAllLandlords()
     {
         if (legalcaseDto.ClientId == null || legalcaseDto.ClientId == Guid.Empty)
         {
@@ -3307,18 +3306,20 @@
 
 
 
-     private void SelectLandlord(EditToLandlordDto selected)
+    private void SelectLandlord(EditToLandlordDto selected)
     {
         editLandlordModel.Id = selected.Id;
         editLandlordModel.Address1 = selected.Address1;
         editLandlordModel.ContactPersonName = selected.ContactPersonName;
-     
+        editLandlordModel.FirstName = selected.FirstName;
+        editLandlordModel.LastName = selected.LastName;
+
 
         filteredlandlords.Clear();
         searchLandlordText = selected.LandLordCode;
         showLandlordFields = true;
-       
-        legalcaseDto.ClientId = selected.Id;
+
+        legalcaseDto.ClientId = selected.ClientId;
     }
 
     // Select building from list
@@ -3449,19 +3450,19 @@
         IsNewBuilding = true;
     }
 
-     private void OnBindLandlordAfter()
+    private void OnBindLandlordAfter()
     {
         showLandlordFields = true;
         IsNewLandlord = true;
     }
 
-     private void OnBindLandlordCancel()
+    private void OnBindLandlordCancel()
     {
         showLandlordFields = false;
         IsNewLandlord = true; 
-searchLandlordText = null;
+        searchLandlordText = null;
         editLandlordModel = new EditToLandlordDto();
-       
+
     }
     private void OnBindCourtAfter()
     {
@@ -3636,12 +3637,13 @@ searchLandlordText = null;
 
     private async Task SaveLandlordChanges()
     {
+        Console.WriteLine("legalcasedto", legalcaseDto);
         spinnerservice.Show();
 
         var addorupdate = false;
         if (editLandlordModel.Id == null || editLandlordModel.Id == Guid.Empty)
         {
-            
+
             var newLandlord = new CreateToLandLordDto()
             {
                 FirstName = editLandlordModel.FirstName,
@@ -3660,14 +3662,16 @@ searchLandlordText = null;
         {
             if (editLandlordModel.Id != null && editLandlordModel.Id != Guid.Empty)
             {
-               
+
                 var updateLandLord = new EditToLandlordDto()
                 {
                     Id = editLandlordModel.Id,
-               
+                    FirstName = editLandlordModel.FirstName,
+                    LastName = editLandlordModel.LastName,
                     Address1 = editLandlordModel.Address1,
-                    ClientId = legalcaseDto.ClientId,
-                    ContactPersonName = editLandlordModel.ContactPersonName
+                  
+                    ContactPersonName = editLandlordModel.ContactPersonName,
+    
                 };
 
                 await _landlordSevice.UpdateLandLordsfromCase(updateLandLord);
@@ -3678,9 +3682,12 @@ searchLandlordText = null;
         if (addorupdate)
         {
             legalcaseDto.LandlordAddress = editLandlordModel.Address1;
-              legalcaseDto.ContactPersonName = editLandlordModel.ContactPersonName;
+            legalcaseDto.ContactPersonName = editLandlordModel.ContactPersonName;
             legalcaseDto.FirstName = editLandlordModel.FirstName;
             legalcaseDto.LastName = editLandlordModel.LastName;
+            legalcaseDto.landlordName =$"{editLandlordModel.FirstName} {editLandlordModel.LastName}";
+            legalcaseDto.LandlordId = editLandlordModel.Id;
+
              
             var success = await _service.UpdateCaseAsync(legalcaseDto);
 
