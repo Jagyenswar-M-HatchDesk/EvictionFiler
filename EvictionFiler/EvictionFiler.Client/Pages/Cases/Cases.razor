@@ -1,14 +1,18 @@
 ﻿@page "/legalcases"
 @page "/legalcases/search"
+@using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
 @using EvictionFiler.Application.DTOs.PaginationDto
 @using EvictionFiler.Application.DTOs.TenantDto
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
 @using EvictionFiler.Application.Interfaces.IServices
+@inject ICaseTypeRepository CaseTypeRepository
 @* @using EvictionFiler.Client.Jwt *@
 @using EvictionFiler.Domain.Entities
+@using EvictionFiler.Domain.Entities.Master
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization;
 @using System.Security.Claims
@@ -38,6 +42,7 @@
     /* background-color: #F2F0EC; */
     border: solid 1px #F2F0EC;
     box-shadow: 0 15px 20px #F2F0EC !important;
+    max-width:100%;
     }
 
     .btn-primary, .btn-primary:hover, .btn-primary:disabled , .btn-primary:active, .btn-primary:focus {
@@ -186,6 +191,18 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="m-0" style="font-size:14px;font-weight:bold">Manage Legal Cases</h5>
             <div>
+                <div class="col-5 ">
+                    <label class="form-label required-label">Case Type</label>
+                    <InputSelect class="form-select holdover-form"
+                                 @bind-Value="legalcaseDto.CaseTypeId">
+
+                        @foreach (var l in CaseTypeList)
+                        {
+                            <option value="@l.Id">@l.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => legalcaseDto.CaseTypeId" />
+                </div>
                 <button class="btn btn-primary" title="Clear all Search" disabled="@IsClearbtndisable" @onclick="ClearAll" style="font-size:14px"><i class="fa-solid fa-arrows-rotate"></i></button>
                 <button class="btn btn-primary" @onclick="navigatetoCase" style="font-size:14px">Create Case</button>
 
@@ -421,6 +438,7 @@
 
 
 @code {
+
     public string? cases { get; set; }
     public string? client { get; set; }
     public string? tenant { get; set; }
@@ -436,6 +454,8 @@
     private string searchTermDept = string.Empty;
     private string searchTermDate = string.Empty;
     private string searchTermResonHoldover = string.Empty;
+    private IntakeModel legalcaseDto = new IntakeModel();
+    private List<CaseType> CaseTypeList = new();
 
     private string showClient = string.Empty;
     private bool ViewSearch = false;
@@ -456,6 +476,7 @@
     private bool isAdmin = false;
     private bool IsClearbtndisable = true;
     private CancellationTokenSource _cts;
+    private EditContext _editContext;
 
     // private void EditCase(Guid caseId)
     // {
@@ -476,6 +497,8 @@
     protected override async Task OnInitializedAsync()
     {
         spinnerservice.Show();
+        legalcaseDto = new IntakeModel();
+        _editContext = new EditContext(legalcaseDto);
         var uri = new Uri(navManager.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
@@ -510,7 +533,7 @@
 
         await Task.Delay(500);
 
-        if (query.TryGetValue("case", out var caseVal))
+        if (query.TryGetValue("cases", out var caseVal))
         {
             searchcasecode = caseVal;
             IsClearbtndisable = false;
@@ -533,7 +556,7 @@
             searchTermLandLord = landlordVal;
             IsClearbtndisable = false;
         }
-
+        CaseTypeList = await CaseTypeRepository.GetAllCaseType();
 
 
         await GetAllCases();

@@ -67,15 +67,82 @@ namespace EvictionFiler.Infrastructure.Repositories
             return await query.Take(5).ToListAsync();
         }
 
-
-        public async Task<List<string>> GetCaseSuggestions(string term)
+        public async Task<List<CreateToEditLegalCaseModel>> GetCaseSuggestions(string term)
         {
             term = term.ToLower().Trim();
 
+            IQueryable<CreateToEditLegalCaseModel> query;
+
+            query = _context.LegalCases
+                  .Where(c => c.Casecode.ToLower().ToLower().StartsWith(term))
+                    .Select(c => new CreateToEditLegalCaseModel
+                    {
+                        Id = c.Id,
+                        Casecode = c.Casecode,
+                        
+                    });
+
+            return await query.Take(5).ToListAsync();
+        }
+
+        public async Task<List<CreateToEditLegalCaseModel>> GetTopCases()
+        {
             return await _context.LegalCases
-                .Where(c => c.Casecode.ToLower().Contains(term))
-                .Select(c => c.Casecode)
-                .Take(5)
+                .OrderBy(c => c.Casecode)
+                .Take(10)
+                .Select(c => new CreateToEditLegalCaseModel
+                {
+                    Id = c.Id,
+                    Casecode = c.Casecode,
+
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<EditToLandlordDto>> GetTopLandlords()
+        {
+            return await _context.LandLords
+                .OrderBy(c => c.FirstName)
+                .Take(10)
+                .Select(c => new EditToLandlordDto
+                {
+                    Id = c.Id,
+                    LandLordCode = c.LandLordCode,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<EditToTenantDto>> GetTopTenants()
+        {
+            return await _context.Tenants
+                .OrderBy(c => c.FirstName)
+                .Take(10)
+                .Select(c => new EditToTenantDto
+                {
+                    Id = c.Id,
+                    TenantCode = c.TenantCode,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<EditToClientDto>> GetTopClients()
+        {
+            return await _context.Clients
+                .OrderBy(c => c.FirstName)
+                .Take(10)
+                .Select(c => new EditToClientDto
+                {
+                    Id = c.Id,
+                    ClientCode = c.ClientCode,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName
+                })
                 .ToListAsync();
         }
 
