@@ -440,7 +440,9 @@ namespace EvictionFiler.Application.Services
         c => c.Courts!,
          c => c.CourtLocation!.County!,
          c => c.ArrearLedgers,
-         c=>c.Marshal
+         c=>c.Marshal,
+         c=>c.RemainderCenters
+         //c=>c.RemainderCenter
     )
     .FirstOrDefaultAsync();
 
@@ -473,6 +475,10 @@ namespace EvictionFiler.Application.Services
                         StateName = caseEntity.Clients.State != null ? caseEntity.Clients.State.Name : string.Empty,
                         ZipCode = caseEntity.Clients.ZipCode,
                         MarshalId = caseEntity.MarshalId,
+                        RemainderDate = caseEntity.RemainderCenters?
+                    .OrderByDescending(x => x.When)
+                    .FirstOrDefault()?.When,
+
 
                         // Landlord
                         LandlordId = caseEntity.LandLordId,

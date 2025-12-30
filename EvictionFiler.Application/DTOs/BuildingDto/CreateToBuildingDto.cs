@@ -39,9 +39,13 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
         public string? Zipcode { get; set; } = string.Empty;
 		[Required(ErrorMessage = "Select LandLord")]
 		public Guid? LandlordId { get; set; }
+        public Guid? ExemptionBasisId { get; set; }
+        public Guid? ExemptionreasonId { get; set; }
         [Required(ErrorMessage = "Select Registration Status")]
         public Guid? RegistrationStatusId { get; set; }
         public Guid? BuildingTypeId { get; set; }
+
+        public bool? OwnerOccupied { get; set; }
 
         public List<CreateToTenantDto>? Tenants { get; set; }
 

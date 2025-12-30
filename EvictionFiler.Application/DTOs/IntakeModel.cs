@@ -1,4 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.ArrearLedgerDtos;
+using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Base.Base;
 using EvictionFiler.Domain.Entities.Master;
 using System;
@@ -200,6 +201,11 @@ namespace EvictionFiler.Application.DTOs
 
         public Guid? BuildingTypeId { get; set; }
         public BuildingType? BuildingType { get; set; }
+
+        public Guid? RemainderCenterId { get; set; }
+        public DateTime? RemainderDate { get; set; }
+
+        public RemainderCenter? RemainderCenter { get; set; }
         public Guid? RegistrationStatusTypeId { get; set; }
 
         public Guid? PaymentMethodId { get; set; }
