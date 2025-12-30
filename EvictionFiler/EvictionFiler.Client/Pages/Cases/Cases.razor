@@ -186,21 +186,26 @@
         </ol>
     </nav>
     <div class="container p-4 rounded shadow-sm mt-4">
-
+         <EditForm EditContext="_editContext">
+        <DataAnnotationsValidator />
         <!-- Title Row -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="m-0" style="font-size:14px;font-weight:bold">Manage Legal Cases</h5>
-            <div>
-                <div class="col-5 ">
-                    <label class="form-label required-label">Case Type</label>
-                    <InputSelect class="form-select holdover-form"
-                                 @bind-Value="legalcaseDto.CaseTypeId">
+            <div class="d-flex gap-2">
+                <div class="col-6 ">
+                        <InputSelect class="form-select holdover-form"
+                                     @bind-Value="legalcaseDto.CaseTypeId"
+                                     @bind-Value:after="OnCaseTypeChanged">
 
-                        @foreach (var l in CaseTypeList)
-                        {
-                            <option value="@l.Id">@l.Name</option>
-                        }
-                    </InputSelect>
+                            <option value=""> All Case Types</option>
+
+                            @foreach (var l in CaseTypeList)
+                            {
+                                <option value="@l.Id">@l.Name</option>
+                            }
+                        </InputSelect>
+
+
                     <ValidationMessage For="() => legalcaseDto.CaseTypeId" />
                 </div>
                 <button class="btn btn-primary" title="Clear all Search" disabled="@IsClearbtndisable" @onclick="ClearAll" style="font-size:14px"><i class="fa-solid fa-arrows-rotate"></i></button>
@@ -320,10 +325,10 @@
                                 <td>@( cas?.CreatedOn.ToString("MM/dd/yyyy"))</td>
                                 <td>
                                     @(cas.IsActive == true
-                                                                                                            ? "Active"
-                                                                                                            : cas.IsDeleted == true
-                                                                                                            ? "InActive"
-                                                                                                            : "Not Set")
+                                     ? "Active"
+                                     : cas.IsDeleted == true
+                                     ? "InActive"
+                                     : "Not Set")
                                 </td>
 
 
@@ -381,7 +386,7 @@
             </div>
         }
 
-
+        </EditForm>
     </div>
 
     @if (!string.IsNullOrEmpty(successMessage))
@@ -467,11 +472,12 @@
     private string successMessage;
     private Guid selectedClientId = new Guid();
     private PaginationDto<LegalCase> pagedcases;
-    private int currentPage = 1;
-    private int pageSize = 10;
+   
     private string searchTerm = "";
     bool isCollapsed = false;
     bool isSettingsMode = false;
+    private int currentPage = 1;
+    private int pageSize = 10;
     private string? loggedInUserId;
     private bool isAdmin = false;
     private bool IsClearbtndisable = true;
@@ -575,7 +581,9 @@
             LandLord = searchTermLandLord,
             ReasonHoldover = searchTermResonHoldover,
             ActionDate = searchTermDate,
-            Status = searchTermStatus
+            Status = searchTermStatus,
+            CaseTypeId = legalcaseDto.CaseTypeId
+            
         };
 
         pagedcases = await _service.GetAllAsync(currentPage, pageSize, filters, loggedInUserId,
@@ -583,6 +591,14 @@
 
 
     }
+
+    private async Task OnCaseTypeChanged()
+    {
+        currentPage = 1;
+        await GetAllCases();
+    }
+
+
 
     public void navigatetoCase()
     {

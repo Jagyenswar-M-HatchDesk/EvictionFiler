@@ -1,5 +1,7 @@
 ﻿using EvictionFiler.Application.DTOs.CalanderDto;
 using EvictionFiler.Application.DTOs.CaseHearing;
+using EvictionFiler.Application.DTOs.LegalCaseDto;
+using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Application.Interfaces.IServices;
@@ -75,87 +77,189 @@ namespace EvictionFiler.Application.Services
                   .CountAsync();
             return calanders;
         }
-        public async Task<List<CaseHearingDto>> GetAllCaseHeariingAsync()
+        //    public async Task<PaginationDto<CaseHearingDto>> GetAllCaseHeariingAsync(int pageNumber, int pageSize, string userId, bool isAdmin)
+        //    {
+        //        var calanders = await _caseHearingRepository
+        //              .GetAllQuerable(x => x.IsDeleted != true, x => x.LegalCase,x=>x.CaseTypes, x=>x.AppearanceTypeforHearing, x=>x.Courts.County, x=>x.CourtParts ,  x => x.Courts, x => x.LegalCase.CaseType , x=>x.LegalCase.LandLords , x=>x.LegalCase.Tenants)
+        //              .ToListAsync();
+
+        //        var result = calanders.Select(dto => new CaseHearingDto
+        //        {
+        //            Id = dto.Id,
+
+        //            HearingDate = dto.HearingDate ?? DateTime.Today,
+
+        //            HearingTime = (dto.HearingTime == default || dto.HearingTime == TimeOnly.MinValue)
+        //? TimeOnly.FromTimeSpan(TimeSpan.FromHours(9.5))
+        //: dto.HearingTime.Value,
+
+
+        //            CourtId = dto.CourtId,
+        //            LegalCaseId = dto.LegalCaseId,
+        //            IndexNo = dto.LegalCase != null ? dto.LegalCase.Index : "",
+        //            CaseTypeId = dto.LegalCase.CaseTypeId,
+
+
+        //            // CaseType name — safe whether CaseTypeId or LegalCaseId is null
+        //            CaseTypeName =
+        //           dto.CaseTypeId != null
+        //        ? dto.CaseTypes?.Name
+        //        : dto.LegalCase?.CaseType?.Name ?? string.Empty,
+
+        //            // Judge — prefer Hearing Judge, fallback to Court Judge
+        //            Judge = dto.CourtParts != null
+        //            ? dto.CourtParts?.Judge
+        //            : string.Empty,
+
+        //            // Court part — from CourtPart or fallback to Court.Part
+        //            CourtPart =
+        //            dto.CourtPartId != null
+        //                ? dto.CourtParts?.Part
+        //                : string.Empty,
+        //            CourtPartId = dto.CourtPartId,
+
+        //            // Case status name — only if present
+        //            CaseStatusName =
+        //            dto.CaseStatusId != null
+        //                ? dto.CaseStatus?.Name
+        //                : string.Empty,
+
+        //            AppearanceTypeForHearinname =
+        //            dto.AppearanceTypeForHearingId != null
+        //                ? dto.AppearanceTypeforHearing?.Name
+        //                : string.Empty,
+
+        //            // Room number — prefer explicit RoomNo, fallback to Court’s RoomNo
+        //            RoomNo = dto.CourtParts != null
+        //            ? dto.CourtParts?.RoomNo
+        //            : string.Empty,
+
+        //            // County name — safe for null CountyId
+        //            CountyName =
+        //    dto.Courts.County.Name != null
+        //        ? dto.Courts.County.Name
+        //        : string.Empty,
+
+        //            LandlordName = dto.LegalCase?.LandLords != null
+        //    ? $"{dto.LegalCase.LandLords.FirstName} {dto.LegalCase.LandLords.LastName}"
+        //    : string.Empty,
+
+        //            TenantName = dto.LegalCase?.Tenants != null
+        //    ? $"{dto.LegalCase.Tenants.FirstName} {dto.LegalCase.Tenants.LastName}"
+        //    : string.Empty,
+        //            LastAction = dto.LastAction,
+        //            CountyId = dto.Courts.CountyId,
+
+
+        //            CreatedOn = dto.CreatedOn,
+
+        //        }).ToList();
+
+
+        //        return result;
+        //    }
+
+        public async Task<PaginationDto<CaseHearingDto>> GetAllCaseHeariingAsync(
+    int pageNumber,
+    int pageSize,
+    string userId,
+    bool isAdmin)
         {
-            var calanders = await _caseHearingRepository
-                  .GetAllQuerable(x => x.IsDeleted != true, x => x.LegalCase,x=>x.CaseTypes, x=>x.AppearanceTypeforHearing, x=>x.Courts.County, x=>x.CourtParts ,  x => x.Courts, x => x.LegalCase.CaseType , x=>x.LegalCase.LandLords , x=>x.LegalCase.Tenants)
-                  .ToListAsync();
+            // 🔹 SAME SOURCE – bas Queryable rakha
+            var query = _caseHearingRepository
+                .GetAllQuerable(
+                    x => x.IsDeleted != true,
+                    x => x.LegalCase,
+                    x => x.CaseTypes,
+                    x => x.AppearanceTypeforHearing,
+                    x => x.Courts.County,
+                    x => x.CourtParts,
+                    x => x.Courts,
+                    x => x.LegalCase.CaseType,
+                    x => x.LegalCase.LandLords,
+                    x => x.LegalCase.Tenants
+                )
+                .AsQueryable();
 
-            var result = calanders.Select(dto => new CaseHearingDto
+           
+
+            // 🔹 Total count (pagination)
+            var totalCount = await query.CountAsync();
+
+            // 🔹 SAME DTO mapping (unchanged)
+            var items = await query
+                .OrderByDescending(x => x.CreatedOn)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(dto => new CaseHearingDto
+                {
+                    Id = dto.Id,
+                    HearingDate = dto.HearingDate ?? DateTime.Today,
+
+                    HearingTime =
+                        (dto.HearingTime == default || dto.HearingTime == TimeOnly.MinValue)
+                            ? TimeOnly.FromTimeSpan(TimeSpan.FromHours(9.5))
+                            : dto.HearingTime!.Value,
+
+                    CourtId = dto.CourtId,
+                    LegalCaseId = dto.LegalCaseId,
+                    IndexNo = dto.LegalCase != null ? dto.LegalCase.Index : "",
+                    CaseTypeId = dto.LegalCase!.CaseTypeId,
+
+                    CaseTypeName =
+                        dto.CaseTypeId != null
+                            ? dto.CaseTypes!.Name
+                            : dto.LegalCase!.CaseType!.Name ?? string.Empty,
+
+                    Judge = dto.CourtParts != null ? dto.CourtParts.Judge : string.Empty,
+
+                    CourtPart = dto.CourtPartId != null
+                        ? dto.CourtParts!.Part
+                        : string.Empty,
+
+                    CourtPartId = dto.CourtPartId,
+
+                    CaseStatusName =
+                        dto.CaseStatusId != null
+                            ? dto.CaseStatus!.Name
+                            : string.Empty,
+
+                    AppearanceTypeForHearinname =
+                        dto.AppearanceTypeForHearingId != null
+                            ? dto.AppearanceTypeforHearing!.Name
+                            : string.Empty,
+
+                    RoomNo = dto.CourtParts != null
+                        ? dto.CourtParts!.RoomNo
+                        : string.Empty,
+
+                    CountyName = dto.Courts.County.Name ?? string.Empty,
+
+                    LandlordName = dto.LegalCase!.LandLords != null
+                        ? $"{dto.LegalCase.LandLords.FirstName} {dto.LegalCase.LandLords.LastName}"
+                        : string.Empty,
+
+                    TenantName = dto.LegalCase!.Tenants != null
+                        ? $"{dto.LegalCase.Tenants.FirstName} {dto.LegalCase.Tenants.LastName}"
+                        : string.Empty,
+
+                    LastAction = dto.LastAction,
+                    CountyId = dto.Courts.CountyId,
+                    CreatedOn = dto.CreatedOn
+                })
+                .ToListAsync();
+
+         
+            return new PaginationDto<CaseHearingDto>
             {
-                Id = dto.Id,
-
-                HearingDate = dto.HearingDate ?? DateTime.Today,
-
-                HearingTime = (dto.HearingTime == default || dto.HearingTime == TimeOnly.MinValue)
-    ? TimeOnly.FromTimeSpan(TimeSpan.FromHours(9.5))
-    : dto.HearingTime.Value,
-
-
-                CourtId = dto.CourtId,
-                LegalCaseId = dto.LegalCaseId,
-                IndexNo = dto.LegalCase != null ? dto.LegalCase.Index : "",
-                CaseTypeId = dto.LegalCase.CaseTypeId,
-               
-
-                // CaseType name — safe whether CaseTypeId or LegalCaseId is null
-                CaseTypeName =
-               dto.CaseTypeId != null
-            ? dto.CaseTypes?.Name
-            : dto.LegalCase?.CaseType?.Name ?? string.Empty,
-
-                // Judge — prefer Hearing Judge, fallback to Court Judge
-                Judge = dto.CourtParts != null
-                ? dto.CourtParts?.Judge
-                : string.Empty,
-
-                // Court part — from CourtPart or fallback to Court.Part
-                CourtPart =
-                dto.CourtPartId != null
-                    ? dto.CourtParts?.Part
-                    : string.Empty,
-                CourtPartId = dto.CourtPartId,
-
-                // Case status name — only if present
-                CaseStatusName =
-                dto.CaseStatusId != null
-                    ? dto.CaseStatus?.Name
-                    : string.Empty,
-
-                AppearanceTypeForHearinname =
-                dto.AppearanceTypeForHearingId != null
-                    ? dto.AppearanceTypeforHearing?.Name
-                    : string.Empty,
-
-                // Room number — prefer explicit RoomNo, fallback to Court’s RoomNo
-                RoomNo = dto.CourtParts != null
-                ? dto.CourtParts?.RoomNo
-                : string.Empty,
-
-                // County name — safe for null CountyId
-                CountyName =
-        dto.Courts.County.Name != null
-            ? dto.Courts.County.Name
-            : string.Empty,
-
-                LandlordName = dto.LegalCase?.LandLords != null
-        ? $"{dto.LegalCase.LandLords.FirstName} {dto.LegalCase.LandLords.LastName}"
-        : string.Empty,
-
-                TenantName = dto.LegalCase?.Tenants != null
-        ? $"{dto.LegalCase.Tenants.FirstName} {dto.LegalCase.Tenants.LastName}"
-        : string.Empty,
-                LastAction = dto.LastAction,
-                CountyId = dto.Courts.CountyId,
-               
-
-                CreatedOn = dto.CreatedOn,
-
-            }).ToList();
-
-
-            return result;
+                Items = items,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = pageNumber
+            };
         }
+
+
 
         public async Task<List<CaseHearingDto>> GetAllCaseHeariingByCaseIdAsync(Guid id)
         {

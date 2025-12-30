@@ -193,6 +193,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     from court in cCourt.DefaultIfEmpty()
                     join county in _context.MstCounties on court.CountyId equals county.Id into cCounty
                     from county in cCounty.DefaultIfEmpty()
+                    //join CaseNoticeInfo in _context.CaseNoticeInfo on lc.Case equals CaseNoticeInfo.Id
                     join rentdue in _context.MstDateRent on lc.RentDueEachMonthOrWeekId equals rentdue.Id into cRent
                     from rentdue in cRent.DefaultIfEmpty()
                     where lc.Id == legalCaseId
@@ -266,6 +267,28 @@ namespace EvictionFiler.Infrastructure.Repositories
                 string firstTenantName = tenants.Count > 0 ? tenants[0].FullName : "";
                 string firstApartmentNumber = tenants.Count > 0 ? tenants[0].ApartmentNumber : "";
 
+                var otherTenantsList = tenants.Skip(1).Select(x => x.FullName).ToList();
+
+                // Occupants (already separate list)
+                var occupantList = additionalOccupants.Select(x => x.FullName).ToList();
+
+                string otherTenantsText = "";
+                if (otherTenantsList.Any())
+                {
+                    otherTenantsText =
+                       
+                        string.Join("<br>", otherTenantsList);
+                }
+
+                string occupantsText = "";
+                if (occupantList.Any())
+                {
+                    occupantsText =
+                     
+                        string.Join("<br>", occupantList);
+                }
+
+
                 // Parse last rent
                 string lastRent = "";
                 if (DateTime.TryParseExact(caseDetails.LastRent, "MMM yyyy", CultureInfo.InvariantCulture,
@@ -309,7 +332,9 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{RentalExpiredDate}}", "")
     .Replace("{{MoveOutDate}}", "")
     .Replace("{{Floors}}", "")
-    .Replace("{{Tenant_Names}}", firstTenantName);
+    .Replace("{{Tenant_Names}}", firstTenantName)
+                   .Replace("{{OtherTenants}}", otherTenantsText)
+    .Replace("{{Occupants}}", occupantsText);
 
 
                 for (int i = 0; i < 12; i++)

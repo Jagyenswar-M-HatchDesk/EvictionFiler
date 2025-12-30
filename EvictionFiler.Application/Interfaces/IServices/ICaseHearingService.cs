@@ -1,4 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.CaseHearing;
+using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Domain.Entities.Master;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
     public interface ICaseHearingService
     {
         Task<bool> AddHearing(CaseHearingDto dto);
-        Task<List<CaseHearingDto>> GetAllCaseHeariingAsync();
+        Task<PaginationDto<CaseHearingDto>> GetAllCaseHeariingAsync(int pageNumber, int pageSize, string userId, bool isAdmin);
         Task<List<CaseHearingDto>> GetAllCaseHeariingByCaseIdAsync(Guid id);
         Task<int> GetAllTodayCaseHearingAsync();
 

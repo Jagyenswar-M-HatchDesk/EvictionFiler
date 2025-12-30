@@ -284,8 +284,13 @@ namespace EvictionFiler.Infrastructure.Repositories
                     )
                 );
             }
-            if (!string.IsNullOrWhiteSpace(filters.CaseType))
-                query = query.Where(x => (x.CaseType.Name ?? "").ToLower().StartsWith(filters.CaseType.ToLower()));
+            //if (!string.IsNullOrWhiteSpace(filters.CaseType))
+            //    query = query.Where(x => (x.CaseType.Name ?? "").ToLower().StartsWith(filters.CaseType.ToLower()));
+            if (filters.CaseTypeId.HasValue && filters.CaseTypeId != Guid.Empty)
+            {
+                query = query.Where(x => x.CaseTypeId == filters.CaseTypeId);
+            }
+
 
             if (!string.IsNullOrWhiteSpace(filters.ReasonHoldover))
                 query = query.Where(x => (x.ReasonHoldover.Name ?? "").ToLower().StartsWith(filters.ReasonHoldover.ToLower()));

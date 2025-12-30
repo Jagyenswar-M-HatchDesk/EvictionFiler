@@ -16,8 +16,9 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
             public string? ReasonHoldover { get; set; }
             public string? CaseType { get; set; }
             public string? Status { get; set; }
-            public string? ActionDate { get; set; } 
-        
+            public string? ActionDate { get; set; }
+        public Guid? CaseTypeId { get; set; }
+
 
     }
 }
