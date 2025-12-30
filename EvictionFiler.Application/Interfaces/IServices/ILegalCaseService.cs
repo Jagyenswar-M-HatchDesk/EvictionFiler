@@ -57,6 +57,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<bool> DeleteAdditionalpetitioner(CaseAdditionalPetitioner petitioner);
 
         Task<Guid?> AddCaseNoticeInfo(CaseNoticeInfoDto dto);
+        Task<Guid?> AddOrUpdateCaseNoticeInfo(CaseNoticeInfoDto dto);
 
     }
 }

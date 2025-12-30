@@ -200,6 +200,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
                     select new
                     {
+                        Id = lc.Id,
                         CaseCode = lc.Casecode,
                         LandlordName = landlord.FirstName + " " + landlord.LastName,
                         LandlordAddress = landlord.Address1 + " " + landlord.Address2 + " " +
@@ -245,8 +246,8 @@ namespace EvictionFiler.Infrastructure.Repositories
                     .Select(t => new { FullName = t.FirstName + " " + t.LastName, ApartmentNumber = t.UnitOrApartmentNumber })
                     .ToListAsync();
 
-                var additionalTenants = await _context.AdditioanlTenants
-                    .Where(e => tenantIds.Contains(e.TenantId.Value))
+                var additionalTenants = await _context.CaseAdditionalTenants
+                    .Where(e => e.LegalCaseId == legalCaseId)
                     .Select(t => new { FullName = t.FirstName + " " + t.LastName, ApartmentNumber = "" })
                     .ToListAsync();
 
@@ -270,7 +271,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 var otherTenantsList = tenants.Skip(1).Select(x => x.FullName).ToList();
 
                 // Occupants (already separate list)
-                var occupantList = additionalOccupants.Select(x => x.FullName).ToList();
+                //var occupantList = additionalOccupants.Select(x => x.FullName).ToList();
 
                 string otherTenantsText = "";
                 if (otherTenantsList.Any())
@@ -280,13 +281,13 @@ namespace EvictionFiler.Infrastructure.Repositories
                         string.Join("<br>", otherTenantsList);
                 }
 
-                string occupantsText = "";
-                if (occupantList.Any())
-                {
-                    occupantsText =
+                //string occupantsText = "";
+                //if (occupantList.Any())
+                //{
+                //    occupantsText =
                      
-                        string.Join("<br>", occupantList);
-                }
+                //        string.Join("<br>", occupantList);
+                //}
 
 
                 // Parse last rent
@@ -334,7 +335,7 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{Floors}}", "")
     .Replace("{{Tenant_Names}}", firstTenantName)
                    .Replace("{{OtherTenants}}", otherTenantsText)
-    .Replace("{{Occupants}}", occupantsText);
+    .Replace("{{Occupants}}", "");
 
 
                 for (int i = 0; i < 12; i++)

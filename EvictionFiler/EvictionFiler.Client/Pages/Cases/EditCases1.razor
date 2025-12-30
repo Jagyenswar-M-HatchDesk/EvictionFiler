@@ -558,7 +558,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         padding-bottom: 90px; /* reserve space for footer */
     }
     @@media (min-width: 1400px) {
-        .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl { max-width: 100%; }
+        .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl { max-width: 100%; }}
 
 
 </style>
@@ -8313,8 +8313,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                         t.TenantId = legalcaseDto.TenantId;
                     }
 
-                    var toadd = AdditionalTenantList.Where(e => e.Id == null || e.Id == Guid.Empty).ToList();
-                    var toupdate = AdditionalTenantList.Where(e => e.Id != null && e.Id != Guid.Empty).ToList();
+                    var toadd = AdditionalTenantList.Where(e => e.Id == null || e.Id == Guid.Empty && e.IsDeleted == false).ToList();
+                    var toupdate = AdditionalTenantList.Where(e => e.Id != null && e.Id != Guid.Empty && e.IsDeleted == false).ToList();
                     if (toadd.Any())
                     {
                         await _additionalTenant.AddAdditionalTenantAsync(toadd);
@@ -8418,7 +8418,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                         .ToList();
 
                         var toDelete = AdditionalOccupantsList
-                            .Where(o => o.IsDeleted == true)
+                            .Where(o => o.IsDeleted == true && (o.Id != null && o.Id != Guid.Empty))
                             .ToList();
 
                         if (toUpdate.Any())
@@ -9391,7 +9391,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
         selectedtenant = tenant;
         Tenants.Clear();
-        AdditionalTenantList.Clear();
+        foreach (var item in AdditionalTenantList)
+        {
+            item.IsDeleted = true;
+        }
         Tenants.Add($"{tenant.FirstName} {tenant.LastName}");
 
 
