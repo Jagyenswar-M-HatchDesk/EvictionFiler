@@ -13,6 +13,7 @@
 @using EvictionFiler.Application.DTOs.MarshalsDto
 @using EvictionFiler.Application.DTOs.MasterDtos.CountyDto
 @using EvictionFiler.Application.DTOs.OccupantDto
+@using EvictionFiler.Application.DTOs.RemainderCenterDto
 @using EvictionFiler.Application.DTOs.TenantDto
 @using EvictionFiler.Application.Interfaces.IRepository
 @using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
@@ -50,6 +51,7 @@
 @inject ICourtpartServices courtpartService
 @inject ILandlordSevice _landlordSevice
 @inject ICountyService countyService
+@inject IRemianderCenterService RemianderCenterService
 @inject ICaseAdditionalTenantService _caseAdditionalTenant
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization;
@@ -1206,7 +1208,15 @@
                           <div class="row g-3 mt-4 small" id="paymentsGrid">
                                 <h6>Key Dates</h6>
                                 <div class="col-12 col-md-6 col-lg-6"><div class="border rounded-3 p-3"><div class="text-secondary">Vacate Dat</div><div class="fw-medium">--</div></div></div>
-                                <div class="col-12 col-md-6 col-lg-6"><div class="border rounded-3 p-3"><div class="text-secondary">Next Reminder</div><div class="fw-medium">--</div></div></div>
+                            <div class="col-12 col-md-6 col-lg-6">
+                                <div class="border rounded-3 p-3">
+                                    <div class="text-secondary">Next Reminder</div><div class="fw-medium">
+                                        @(legalcaseDto.RemainderDate.HasValue
+                                                                                ? legalcaseDto.RemainderDate.Value.ToString("dd MMM yyyy")
+                                                                                : "--")
+                                    </div>
+                                </div>
+                            </div>
                                 
 
                             </div>
@@ -2228,6 +2238,7 @@
     private List<RegulationStatus> RegulationList = new();
     private IEnumerable<City> CityList = new List<City>();
     private List<EditToBuildingDto> BuildingList = new();
+    private List<EditToRemainderCenterDto> RemainderCenterList = new();
     private List<EditToLandlordDto> LandlordList = new();
     private List<EditToTenantDto> TenantList = new();
     private List<string> Tenants = new();
@@ -2636,6 +2647,7 @@
                 TenancyTypeId = legalcaseDto.TenancyTypeId,
                 CreatedOn = legalcaseDto.CreatedOn,
                 Status = legalcaseDto.IsActive ? "Active" : "Inactive",
+                RemainderDate = legalcaseDto.RemainderDate,
 
                 // for client
                 ClientCode = legalcaseDto.ClientCode,

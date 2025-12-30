@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251230120427_TablemodifyLegalcase ")]
+    partial class TablemodifyLegalcase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1567,6 +1570,9 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<string>("ReliefActionRequested")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("RemainderCenterId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool?>("RenewalOffer")
                         .HasColumnType("bit");
 
@@ -1679,6 +1685,8 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasIndex("ReasonHoldoverId");
 
                     b.HasIndex("RegulationStatusId");
+
+                    b.HasIndex("RemainderCenterId");
 
                     b.HasIndex("RenewalStatusId");
 
@@ -4955,6 +4963,10 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("RegulationStatusId");
 
+                    b.HasOne("EvictionFiler.Domain.Entities.RemainderCenter", "RemainderCenter")
+                        .WithMany()
+                        .HasForeignKey("RemainderCenterId");
+
                     b.HasOne("EvictionFiler.Domain.Entities.Master.RenewalStatus", "RenewalStatus")
                         .WithMany()
                         .HasForeignKey("RenewalStatusId");
@@ -5023,6 +5035,8 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Navigation("RegulationStatus");
 
+                    b.Navigation("RemainderCenter");
+
                     b.Navigation("RenewalStatus");
 
                     b.Navigation("RentDueEachMonthOrWeek");
@@ -5078,7 +5092,7 @@ namespace EvictionFiler.Infrastructure.Migrations
             modelBuilder.Entity("EvictionFiler.Domain.Entities.RemainderCenter", b =>
                 {
                     b.HasOne("EvictionFiler.Domain.Entities.LegalCase", "Case")
-                        .WithMany("RemainderCenters")
+                        .WithMany()
                         .HasForeignKey("CaseId");
 
                     b.HasOne("EvictionFiler.Domain.Entities.Master.County", "County")
@@ -5295,8 +5309,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Navigation("Addoccupants");
 
                     b.Navigation("ArrearLedgers");
-
-                    b.Navigation("RemainderCenters");
                 });
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.Tenant", b =>
