@@ -132,15 +132,12 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 			return await _dbSet.FindAsync(id);
 		}
 
-        public Task<T> UpdateAsync(T entity)
+        public T UpdateAsync(T entity)
         {
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
-
             _dbSet.Attach(entity);
-            _context.Entry(entity).State = EntityState.Modified;
-
-            return Task.FromResult(entity);
+            return entity;
         }
 
 

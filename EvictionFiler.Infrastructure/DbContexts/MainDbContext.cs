@@ -82,6 +82,9 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<SubCaseType> MstSubCaseTypes { get; set; }
         public DbSet<City> MstCities { get; set; }
         public DbSet<CourtType> MstCourtType { get; set; }
+        public DbSet<TenancyTypeForBuilding> MstTenancyTypesForBuilding { get; set; }
+        public DbSet<ExemptionBasic> MstExemptionBasic { get; set; }
+        public DbSet<ExemptionReason> MstExemptionReason { get; set; }
         public DbSet<CaseAdditionalPetitioner> CaseAdditionalPetitioners { get; set; }
         public DbSet<CaseAdditionalRespondent> CaseAdditionalResondents { get; set; }
         public DbSet<CaseNoticeInfo> CaseNoticeInfo { get; set; }

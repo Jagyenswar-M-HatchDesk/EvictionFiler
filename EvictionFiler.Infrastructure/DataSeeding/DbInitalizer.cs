@@ -38,6 +38,9 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 await SeedRate(context);
                 await SeedPaymentMethod(context);
                 await SeedReportingTypePerDiem(context);
+                await SeedTenancyTypesForBuilding(context);
+                await SeedExemptionReason(context);
+                await SeedExemptionBasic(context);
 
                 await SeedRemainderTypes(context);
                 await SeedTypeOfOwner(context);
@@ -81,6 +84,42 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 if (context.MstAppearanceTypesForHearing.FirstOrDefault(d => d.Name == type.Name) == null)
                 {
                     await context.MstAppearanceTypesForHearing.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedTenancyTypesForBuilding(MainDbContext context)
+        {
+            var tenancytypes = InitialDataGenerator.GetTenancyTypesForBuilding();
+            foreach (var type in tenancytypes)
+            {
+                if (context.MstTenancyTypesForBuilding.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstTenancyTypesForBuilding.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedExemptionBasic(MainDbContext context)
+        {
+            var eb = InitialDataGenerator.GetExemptionBasic();
+            foreach (var type in eb)
+            {
+                if (context.MstExemptionBasic.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstExemptionBasic.AddAsync(type);
+                }
+            }
+        }
+
+        private static async Task SeedExemptionReason(MainDbContext context)
+        {
+            var er = InitialDataGenerator.GetExemptionReason();
+            foreach (var type in er)
+            {
+                if (context.MstExemptionReason.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstExemptionReason.AddAsync(type);
                 }
             }
         }

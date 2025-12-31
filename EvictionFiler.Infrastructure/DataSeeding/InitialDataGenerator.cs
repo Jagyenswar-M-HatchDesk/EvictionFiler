@@ -493,6 +493,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new RegulationStatus() { Name = "Market", CreatedOn = now },
                 new RegulationStatus() { Name = "Section 8", CreatedOn = now },
                 new RegulationStatus() { Name = "FHEPS", CreatedOn = now },
+                 new RegulationStatus() { Name = "Exempt", CreatedOn = now },
                 new RegulationStatus() { Name = "Other", CreatedOn = now },
             };
         }
@@ -562,6 +563,45 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new TenancyType() { Name = "Squatter", CreatedOn = now },
                 new TenancyType() { Name = "Section-8", CreatedOn = now },
                 new TenancyType() { Name = "Other", CreatedOn = now },
+            };
+        }
+
+        public static IEnumerable<TenancyTypeForBuilding> GetTenancyTypesForBuilding()
+        {
+            var now = DateTime.UtcNow;
+            return new List<TenancyTypeForBuilding>
+            {
+                new TenancyTypeForBuilding() { Name = "Month-to-Month", CreatedOn = now },
+                new TenancyTypeForBuilding() { Name = "Expired Lease", CreatedOn = now },
+                new TenancyTypeForBuilding() { Name = "Licensee", CreatedOn = now },
+                new TenancyTypeForBuilding() { Name = "Squatter", CreatedOn = now },
+           
+            };
+        }
+
+        public static IEnumerable<ExemptionReason> GetExemptionReason()
+        {
+            var now = DateTime.UtcNow;
+            return new List<ExemptionReason>
+            {
+                new ExemptionReason() { Name = "Owner occupied ≤ 10 units", CreatedOn = now },
+                new ExemptionReason() { Name = "Small landlord", CreatedOn = now },
+                new ExemptionReason() { Name = "Regulated unit", CreatedOn = now },
+                new ExemptionReason() { Name = "Other statutory exemption", CreatedOn = now },
+
+            };
+        }
+
+        public static IEnumerable<ExemptionBasic> GetExemptionBasic()
+        {
+            var now = DateTime.UtcNow;
+            return new List<ExemptionBasic>
+            {
+                new ExemptionBasic() { Name = "1–2 Family Owner Occupied", CreatedOn = now },
+                new ExemptionBasic() { Name = "Post-1974 Construction", CreatedOn = now },
+                new ExemptionBasic() { Name = "High Rent Vacancy", CreatedOn = now },
+                new ExemptionBasic() { Name = "Other", CreatedOn = now },
+
             };
         }
 

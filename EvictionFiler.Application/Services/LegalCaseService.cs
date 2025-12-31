@@ -1558,7 +1558,7 @@ namespace EvictionFiler.Application.Services
                     casinfo.UpdatedOn = DateTime.Now;
 
                     // 🔴 REQUIRED FIXES
-                    await _caseNoticeInfoRepository.UpdateAsync(casinfo);
+                    //await _caseNoticeInfoRepository.UpdateAsync(casinfo);
                 }
 
                 var result = await _unitOfWork.SaveChangesAsync();

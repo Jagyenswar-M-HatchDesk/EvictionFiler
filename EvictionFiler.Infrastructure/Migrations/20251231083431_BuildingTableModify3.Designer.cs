@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251231083431_BuildingTableModify3")]
+    partial class BuildingTableModify3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1422,12 +1425,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<DateOnly?>("ERAPPaymentReceivedDate")
                         .HasColumnType("date");
 
-                    b.Property<Guid?>("ExemptionBasisId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ExemptionReasonId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateOnly?>("ExpirationDate")
                         .HasColumnType("date");
 
@@ -1449,9 +1446,6 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Property<decimal?>("Flatdescription")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<bool?>("GoodCause")
-                        .HasColumnType("bit");
 
                     b.Property<bool?>("GoodCauseApplies")
                         .HasColumnType("bit");
@@ -1552,9 +1546,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<string>("OtherPropertiesBuildingId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("OwnerOccupied")
-                        .HasColumnType("bit");
-
                     b.Property<Guid?>("PartyRepresentId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1584,9 +1575,6 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Property<DateOnly?>("PreferedFilingDate")
                         .HasColumnType("date");
-
-                    b.Property<bool?>("PrimaryResidence")
-                        .HasColumnType("bit");
 
                     b.Property<Guid?>("RatetypeId")
                         .HasColumnType("uniqueidentifier");
@@ -1618,9 +1606,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<Guid?>("RentDueEachMonthOrWeekId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("RentRegulationDescription")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid?>("ServiceMethodId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1635,9 +1620,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("SubCaseTypeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("TenancyTypeForBuildingId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("TenancyTypeId")
@@ -1704,10 +1686,6 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasIndex("CourtTypeId");
 
-                    b.HasIndex("ExemptionBasisId");
-
-                    b.HasIndex("ExemptionReasonId");
-
                     b.HasIndex("FilingMethodId");
 
                     b.HasIndex("IsUnitIllegalId");
@@ -1739,8 +1717,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.HasIndex("ServiceMethodId");
 
                     b.HasIndex("SubCaseTypeId");
-
-                    b.HasIndex("TenancyTypeForBuildingId");
 
                     b.HasIndex("TenancyTypeId");
 
@@ -5111,14 +5087,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("CourtTypeId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.ExemptionBasic", "ExemptionBasis")
-                        .WithMany()
-                        .HasForeignKey("ExemptionBasisId");
-
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.ExemptionReason", "ExemptionReason")
-                        .WithMany()
-                        .HasForeignKey("ExemptionReasonId");
-
                     b.HasOne("EvictionFiler.Domain.Entities.Master.FilingMethod", "FilingMethods")
                         .WithMany()
                         .HasForeignKey("FilingMethodId");
@@ -5183,10 +5151,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("SubCaseTypeId");
 
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.TenancyTypeForBuilding", "TenancyTypeForBuilding")
-                        .WithMany()
-                        .HasForeignKey("TenancyTypeForBuildingId");
-
                     b.HasOne("EvictionFiler.Domain.Entities.Master.TenancyType", "TenancyType")
                         .WithMany()
                         .HasForeignKey("TenancyTypeId");
@@ -5214,10 +5178,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Navigation("CourtTypes");
 
                     b.Navigation("Courts");
-
-                    b.Navigation("ExemptionBasis");
-
-                    b.Navigation("ExemptionReason");
 
                     b.Navigation("FilingMethods");
 
@@ -5252,8 +5212,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Navigation("SubCaseTypes");
 
                     b.Navigation("TenancyType");
-
-                    b.Navigation("TenancyTypeForBuilding");
 
                     b.Navigation("Tenants");
                 });

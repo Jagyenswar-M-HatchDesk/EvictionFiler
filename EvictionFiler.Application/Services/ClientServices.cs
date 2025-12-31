@@ -368,6 +368,16 @@ namespace EvictionFiler.Application.Services
 								BuildingUnits = b.BuildingUnits,
 								ManagingAgent = b.ManagingAgent,
 								RegistrationStatusId = b.RegistrationStatusId,
+								ExemptionReasonId = b.ExemptionreasonId,
+                                ExemptionBasisId =
+        (b.RegulationStatusName == "Exempt")
+            ? b.ExemptionBasisId
+            : null,
+                                PrimaryResidence = b.PrimaryResidence,
+								OwnerOccupied = b.OwnerOccupied,
+								RentRegulationDescription = b.RentRegulationDescription,
+								TenancyTypeForBuildingId = b.TenancyTypeForBuildingId,
+								GoodCause = b.GoodCause,
 								LandlordId = landlord.Id,
 								CreatedOn = landlord.CreatedOn,
                                 CreatedBy = landlord.CreatedBy,
@@ -649,7 +659,14 @@ namespace EvictionFiler.Application.Services
 							RegistrationStatusId = b.RegistrationStatusId,
 							ManagingAgent = b.ManagingAgent,
 							BuildingUnits = b.BuildingUnits,
-							LandlordId = landlord.Id
+						    ExemptionReasonId = b.ExemptionreasonId,
+                            ExemptionBasisId = b.ExemptionBasisId,
+                            PrimaryResidence = b.PrimaryResidence,
+                            OwnerOccupied = b.OwnerOccupied,
+							TenancyTypeForBuildingId = b.TenancyTypeForBuildingId,
+                            GoodCause = b.GoodCause,
+                            RentRegulationDescription = b.RentRegulationDescription,
+                            LandlordId = landlord.Id
 						};
 
 						if (isNewBuilding)

@@ -245,7 +245,23 @@ namespace EvictionFiler.Domain.Entities
 
 		public string Notes { get; set; } = string.Empty;
 
-       
+        public Guid? ExemptionBasisId { get; set; }
+        [ForeignKey("ExemptionBasisId")]
+        public ExemptionBasic? ExemptionBasis { get; set; }
 
+        public Guid? ExemptionReasonId { get; set; }
+        [ForeignKey("ExemptionReasonId")]
+        public ExemptionReason? ExemptionReason { get; set; }
+
+        public Guid? TenancyTypeForBuildingId { get; set; }
+        [ForeignKey("TenancyTypeForBuildingId")]
+        public TenancyTypeForBuilding? TenancyTypeForBuilding { get; set; }
+        public bool? OwnerOccupied { get; set; }
+
+        public bool? PrimaryResidence { get; set; }
+
+        public bool? GoodCause { get; set; }
+
+        public string? RentRegulationDescription { get; set; }
     }
 }

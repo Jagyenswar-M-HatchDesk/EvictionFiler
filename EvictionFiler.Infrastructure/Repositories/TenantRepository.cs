@@ -135,7 +135,20 @@ namespace EvictionFiler.Infrastructure.Repositories
                     Id = t.Id,
                     TenantCode = t.TenantCode,
                     FirstName = t.FirstName,
-                    LastName = t.LastName
+                    LastName = t.LastName,
+                    SSN = t.SSN,
+                    Email = t.Email,
+                    Phone = t.Phone,
+                    ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
+                    LanguageId = t.LanguageId,
+                    LanguageName= t.Language.Name,
+                    UnitOrApartmentNumber = t.UnitOrApartmentNumber,
+                    MonthlyRent = t.MonthlyRent,
+                    TenantShare = t.TenantShare,
+                    TenancyTypeId=t.TenancyTypeId,
+                    TenancyTypeName = t.TenancyType.Name,
+                    RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId,
+                    IsUnitIllegalId = t.IsUnitIllegalId,
                 })
                 .ToListAsync();
 
@@ -177,8 +190,7 @@ GetLandlordBuildingByTenantAsync(Guid tenantId)
 
             return (data.Landlord, data.Building);
         }
-        public async Task<EditToLandlordDto>
-GetLandlordByBuildingAsync(Guid buildingId)
+        public async Task<EditToLandlordDto>GetLandlordByBuildingAsync(Guid buildingId)
         {
             var data = await _dbContext.Buildings
                 .Where(t => t.Id == buildingId)

@@ -145,7 +145,13 @@ namespace EvictionFiler.Infrastructure.Repositories
                     BuildingUnits = b.BuildingUnits,
                     LandlordId = b.LandlordId,
 					BuildingTypeId = b.BuildingTypeId,
-					RegistrationStatusId = b.RegistrationStatusId
+					RegistrationStatusId = b.RegistrationStatusId,
+                    ExemptionBasisId = b.ExemptionBasisId,
+                    ExemptionreasonId = b.ExemptionReasonId,
+                    PrimaryResidence = b.PrimaryResidence,
+                    GoodCause = b.GoodCause,
+                    OwnerOccupied = b.OwnerOccupied,
+                    TenancyTypeForBuildingId = b.TenancyTypeForBuildingId,
 
                 })
                 .ToListAsync();
@@ -158,7 +164,11 @@ namespace EvictionFiler.Infrastructure.Repositories
 		.Include(a => a.State)
 		.Include(a => a.PremiseType)
 		.Include(a => a.RegulationStatus)
-		.Where(x => x.LandlordId == landlordId && x.IsDeleted != true)
+        .Include(a => a.RegistrationStatus)
+        .Include(a => a.ExemptionReason)
+        .Include(a => a.ExemptionBasis)
+        .Include(a => a.TenancyTypeForBuilding)
+        .Where(x => x.LandlordId == landlordId && x.IsDeleted != true)
 		.ToListAsync();
 
 			return building.Select(appartment  => new EditToBuildingDto
@@ -173,8 +183,19 @@ namespace EvictionFiler.Infrastructure.Repositories
 				PremiseTypeName = appartment.PremiseType?.Name,
 				RegulationStatusId = appartment.RegulationStatusId,
 				RegulationStatusName = appartment.RegulationStatus?.Name,
-				RegistrationStatusId = appartment.RegistrationStatusId,
-				Address1 = appartment.Address1,
+                RegistrationStatusName = appartment.RegistrationStatus?.Name,
+                RegistrationStatusId = appartment.RegistrationStatusId,
+                ExemptionBasisName = appartment.ExemptionBasis?.Name,
+                ExemptionBasisId = appartment.ExemptionBasisId,
+                ExemptionReasonName = appartment.ExemptionReason?.Name,
+                ExemptionreasonId = appartment.ExemptionReasonId,
+                TenancyTypeForBuildingName = appartment.TenancyTypeForBuilding?.Name,
+                TenancyTypeForBuildingId = appartment.TenancyTypeForBuildingId,
+				PrimaryResidence = appartment.PrimaryResidence,
+                GoodCause = appartment.GoodCause,
+                OwnerOccupied = appartment.OwnerOccupied,
+				RentRegulationDescription = appartment.RentRegulationDescription,
+                Address1 = appartment.Address1,
 				ManagingAgent = appartment.ManagingAgent,
 				Address2 = appartment.Address2,
 				Zipcode = appartment.Zipcode,
