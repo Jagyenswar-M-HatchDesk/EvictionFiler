@@ -1,13 +1,14 @@
-﻿using System;
+﻿using EvictionFiler.Application.Interfaces.IRepository.Base;
+using EvictionFiler.Domain.Entities.Base.Base;
+using EvictionFiler.Infrastructure.DbContexts;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using EvictionFiler.Application.Interfaces.IRepository.Base;
-using EvictionFiler.Domain.Entities.Base.Base;
-using EvictionFiler.Infrastructure.DbContexts;
-using Microsoft.EntityFrameworkCore;
+using static Grpc.Core.Metadata;
 
 namespace EvictionFiler.Infrastructure.Repositories.Base
 {
@@ -137,8 +138,14 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
-            _dbSet.Attach(entity);
-            _context.Entry(entity).State = EntityState.Modified;
+            var entry = _context.Entry(entity);
+            if (entry.State == EntityState.Detached)
+			{
+				_dbSet.Attach(entity);
+                _context.Entry(entity).State = EntityState.Modified;
+
+            }
+            //_dbSet.Attach(entity);
 
             return Task.FromResult(entity);
         }

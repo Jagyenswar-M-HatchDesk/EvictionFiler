@@ -189,12 +189,21 @@ namespace EvictionFiler.Infrastructure.Repositories
                     join landlord in _context.LandLords on lc.LandLordId equals landlord.Id
                     join building in _context.Buildings on lc.BuildingId equals building.Id
                     join tenant in _context.Tenants on lc.TenantId equals tenant.Id
-                    join court in _context.Courts on lc.CourtId equals court.Id into cCourt
-                    from court in cCourt.DefaultIfEmpty()
-                    join county in _context.MstCounties on court.CountyId equals county.Id into cCounty
-                    from county in cCounty.DefaultIfEmpty()
+                    join court in _context.Courts on lc.CourtLocationId equals court.Id 
+                    join county in _context.MstCounties on court.CountyId equals county.Id 
                     //join CaseNoticeInfo in _context.CaseNoticeInfo on lc.Case equals CaseNoticeInfo.Id
                     join rentdue in _context.MstDateRent on lc.RentDueEachMonthOrWeekId equals rentdue.Id into cRent
+                    let notice = _context.CaseNoticeInfo
+                    .Where(x => x.LegalCaseId == lc.Id && x.FormtypeId == formTypeId)
+                    .FirstOrDefault()
+
+                    let ledger = _context.ArrearLedgers
+                    .Where(x => x.LegalCaseId == lc.Id && x.CaseNoticeId == notice.Id)
+                    .FirstOrDefault()
+
+                    // ✅ Now join TenancyType safely
+                    join tenancy in _context.MstTenancyTypes
+                        on notice.TenancyTypeId equals tenancy.Id 
                     from rentdue in cRent.DefaultIfEmpty()
                     where lc.Id == legalCaseId
 
@@ -215,16 +224,21 @@ namespace EvictionFiler.Infrastructure.Repositories
                         CityorCounty = county != null ? county.Name : building.Cities.Name,
                         RentOwned = lc.TotalRentOwed,
                         RentDate = rentdue != null ? rentdue.Name : null,
-                        LastRent = lc.LastRentPaid,
-                        NoticePeriod = lc.CalculatedNoticeLength,
-                        VacateDate = lc.ExpirationDate,
+                        LastRent = notice.DateofLastPayment,
+                        NoticePeriod = notice.CalcNoticeLength,
+                        VacateDate = notice.DateNoticeServed.Value.AddDays(notice.CalcNoticeLength.Value),
                         BuildingStreet = building.Address1 + " " + building.Address2,
                         BuildingCity = building.Cities.Name,
                         BuildingState = building.State.Name,
                         BuildingZip = building.Zipcode,
                         BuildindAptno = tenant.UnitOrApartmentNumber,
                         leaseExpired = lc.DateNoticeServed,
-                        MoveOutdate = lc.ExpirationDate,
+                        TenancyType = tenancy.Name,
+                        County = court.County.Name,
+                        Court = court.Court,
+                        CourtAddress = court.Address,
+                        TotalOwed = notice.Totalowed,
+                        //MoveOutdate = lc.ExpirationDate,
                     }
                 ).FirstOrDefaultAsync();
 
@@ -268,10 +282,10 @@ namespace EvictionFiler.Infrastructure.Repositories
                 string firstTenantName = tenants.Count > 0 ? tenants[0].FullName : "";
                 string firstApartmentNumber = tenants.Count > 0 ? tenants[0].ApartmentNumber : "";
 
-                var otherTenantsList = tenants.Skip(1).Select(x => x.FullName).ToList();
+                var otherTenantsList = additionalTenants.Select(x => x.FullName).ToList();
 
                 // Occupants (already separate list)
-                //var occupantList = additionalOccupants.Select(x => x.FullName).ToList();
+                var occupantList = additionalOccupants.Select(x => x.FullName).ToList();
 
                 string otherTenantsText = "";
                 if (otherTenantsList.Any())
@@ -281,23 +295,22 @@ namespace EvictionFiler.Infrastructure.Repositories
                         string.Join("<br>", otherTenantsList);
                 }
 
-                //string occupantsText = "";
-                //if (occupantList.Any())
-                //{
-                //    occupantsText =
-                     
-                //        string.Join("<br>", occupantList);
-                //}
+                string occupantsText = "";
+                if (occupantList.Any())
+                {
+                    occupantsText =
+
+                        string.Join("<br>", occupantList);
+                }
 
 
                 // Parse last rent
-                string lastRent = "";
-                if (DateTime.TryParseExact(caseDetails.LastRent, "MMM yyyy", CultureInfo.InvariantCulture,
-                    DateTimeStyles.None, out var lastRentDate) ||
-                    DateTime.TryParseExact(caseDetails.LastRent, "MMMM yyyy", CultureInfo.InvariantCulture,
-                    DateTimeStyles.None, out lastRentDate))
+                string lastRentMonth = "";
+                string lastRentYear = "";
+                if (caseDetails.LastRent != null)
                 {
-                    lastRent = lastRentDate.AddMonths(1).ToString("MMMM");
+                    lastRentMonth = caseDetails.LastRent.Value.AddMonths(1).ToString("MMMM");
+                    lastRentYear = caseDetails.LastRent.Value.ToString("yy");
                 }
 
                 string filledHtml = template.HTML
@@ -320,8 +333,8 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{City_County}}", caseDetails.CityorCounty ?? "")
     .Replace("{{Rent_Owned}}", caseDetails.RentOwned.ToString())
     .Replace("{{Rent_day}}", caseDetails.RentDate ?? "")
-    .Replace("{{month}}", lastRent ?? "")
-    .Replace("{{year}}", DateTime.Now.ToString("yy"))
+    .Replace("{{month}}", lastRentMonth ?? "")
+    .Replace("{{year}}", lastRentYear ?? "")
     .Replace("{{Vacate_Date}}", caseDetails.VacateDate.ToString())
     .Replace("{{NP}}", caseDetails.NoticePeriod.ToString())
     .Replace("{{Building_Street}}", caseDetails.BuildingStreet ?? "")
@@ -333,9 +346,16 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{RentalExpiredDate}}", "")
     .Replace("{{MoveOutDate}}", "")
     .Replace("{{Floors}}", "")
+    .Replace("{{Tenancy_Type}}", caseDetails.TenancyType ?? "")
     .Replace("{{Tenant_Names}}", firstTenantName)
-                   .Replace("{{OtherTenants}}", otherTenantsText)
-    .Replace("{{Occupants}}", "");
+                   .Replace("{{OtherTenants}}", otherTenantsText ?? "")
+                   //.Replace("{{UnderTenants_Name}}", occupantsText)
+    .Replace("{{Occupants}}", occupantsText ?? "")
+    .Replace("{{Court}}", caseDetails.Court ?? "")
+    .Replace("{{County}}", caseDetails.County ?? "")
+    .Replace("{{Court_Address}}", caseDetails.County ?? "")
+    .Replace("{{Ledger_Total}}", caseDetails.TotalOwed.ToString() ?? "00")
+    ;
 
 
                 for (int i = 0; i < 12; i++)

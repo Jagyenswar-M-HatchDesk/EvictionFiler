@@ -2953,6 +2953,7 @@
         // Copy current data into editable model
         Tenants.Clear();
         UnderTenants.Clear();
+        CaseAdditionalTenantfromDbList.Clear();
         TenantList = await _tenantService.GetTenantsByClientIdAsync(legalcaseDto.BuildingId!.Value);
         ViewTenant = await _tenantService.GetByIdAsync(legalcaseDto.TenantId!.Value);
         if (!CaseAdditionalTenantfromDbList.Any()) CaseAdditionalTenantfromDbList = await _caseAdditionalTenant.GetAllAdditionalCaseTenantsAsync(legalcaseDto.Id);
@@ -2962,7 +2963,18 @@
         AdditionalOccupantsList = AdditionalOccupantsFromDbList.ToList();
         searchTenantText = ViewTenant.UnitOrApartmentNumber!;
         Tenants.Add(legalcaseDto.TenantName);
-        Tenants.AddRange(CaseAdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}"));
+        if (CaseAdditionalTenantfromDbList.Any())
+        {
+            Tenants.AddRange(CaseAdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}").ToList());
+            AdditionalTenantList.AddRange(CaseAdditionalTenantfromDbList.Select(e => new AddtionalTenantDto
+            {
+                FirstName = e.FirstName,
+                LastName = e.LastName,
+                Id = e.Id,
+                LegalCaseId = e.LegalCaseId
+            }).ToList());
+        }
+        // Tenants.AddRange(CaseAdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}"));
         UnderTenants.AddRange(AdditionalOccupantsFromDbList.Select(e => $"{e.Name}"));
         var undertenaants = new List<string>() { "John Doe", "John Doe" };
         UnderTenants.AddRange(undertenaants);
@@ -3816,39 +3828,29 @@
         spinnerservice.Show();
 
         var addorupdate = false;
-        if (legalcaseDto.TenantId == null && Tenants.Count > 0)
+        
+        if (selectedTenant == null)
         {
-            var mainTenantName = Tenants[0]?.Trim();
-            if (!string.IsNullOrWhiteSpace(mainTenantName))
+            var parts = Tenants[0].Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            var firstName = parts.FirstOrDefault() ?? "";
+            var lastName = parts.Length > 1 ? parts.Last() : "";
+            var newTenant = new CreateToTenantDto()
             {
-                var parts = mainTenantName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-                var firstName = parts.Length > 0 ? parts[0] : "";
-                var lastName = parts.Length > 1 ? parts[1] : "";
+                FirstName = firstName,
+                LastName = lastName,
+                UnitOrApartmentNumber = legalcaseDto.UnitOrApartmentNumber ?? searchTenantText,
+                BuildingId = legalcaseDto.BuildingId,
 
-                var newTenant = new CreateToTenantDto()
-                {
-                    FirstName = firstName,
-                    LastName = lastName,
-                    UnitOrApartmentNumber = legalcaseDto.UnitOrApartmentNumber,
-                    BuildingId = legalcaseDto.BuildingId,
-                    MoveInDate = legalcaseDto.DateTenantMoved,
-                    MonthlyRent = legalcaseDto.MonthlyRent,
-                    TenantShare = legalcaseDto.TenantShare,
-                    RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
-                    TotalRentOwed = legalcaseDto.TotalOwed,
-                    TenancyTypeId = legalcaseDto.TenancyTypeId,
-                    SocialServices = legalcaseDto.SocialService,
-                };
-                var tenantId = await _tenantService.AddTenantfromCase(newTenant);
-
-                legalcaseDto.TenantId = tenantId;
-                addorupdate = true;
-            }
+            };
+            var tenantId = await _tenantService.AddTenantfromCase(newTenant);
+            // IsNewTenant = true;
+            legalcaseDto.TenantId = tenantId;
 
         }
         else
         {
-            if (legalcaseDto.TenantId != null && Tenants.Count > 0)
+            if (Tenants.Count > 0 && selectedTenant != null)
             {
                 var mainTenantName = Tenants[0]?.Trim();
                 if (!string.IsNullOrWhiteSpace(mainTenantName))
@@ -3858,142 +3860,140 @@
                     var lastName = parts.Length > 1 ? parts[1] : "";
 
                     // Only update if anything actually changed
-
-                    var updateTenant = new EditToTenantDto
+                    if (HasTenantChanged(selectedTenant, legalcaseDto, firstName, lastName))
                     {
-                        Id = legalcaseDto.TenantId ?? Guid.Empty,
-                        FirstName = firstName,
-                        LastName = lastName,
-                        BuildingId = legalcaseDto.BuildingId,
-                        UnitOrApartmentNumber = legalcaseDto.UnitOrApartmentNumber,
-                        MonthlyRent = legalcaseDto.MonthlyRent,
-                        TenantShare = legalcaseDto.TenantShare,
-                        RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
-                        TotalRentOwed = legalcaseDto.TotalOwed,
-                        TenancyTypeId = legalcaseDto.TenancyTypeId,
-                        SocialServices = legalcaseDto.SocialService,
-                        UpdatedOn = DateTime.Now,
+                        var updateTenant = new EditToTenantDto
+                        {
+                            Id = legalcaseDto.TenantId ?? Guid.Empty,
+                            FirstName = firstName,
+                            LastName = lastName,
+                            BuildingId = legalcaseDto.BuildingId,
+                            UnitOrApartmentNumber = legalcaseDto.UnitOrApartmentNumber,
+                            MonthlyRent = legalcaseDto.MonthlyRent,
+                            TenantShare = legalcaseDto.TenantShare,
+                            RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                            TotalRentOwed = legalcaseDto.TotalOwed,
+                            TenancyTypeId = legalcaseDto.TenancyTypeId,
+                            SocialServices = legalcaseDto.SocialService,
+                            UpdatedOn = DateTime.Now
+                        };
 
-                    };
-
-                    await _tenantService.UpdateTenantAsync(updateTenant);
-                    addorupdate = true;
-
-                }
-            }
-        }
-
-        if (Tenants.Count > 1)
-        {
-            for (int i = 1; i < Tenants.Count; i++)
-            {
-                var fullName = Tenants[i]?.Trim();
-                if (string.IsNullOrWhiteSpace(fullName)) continue;
-
-                var parts = fullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-                var firstName = parts.Length > 0 ? parts[0] : "";
-                var lastName = parts.Length > 1 ? parts[1] : "";
-
-                if (i - 1 < AdditionalTenantfromDbList.Count)
-                {
-                    var existingList = AdditionalTenantfromDbList.Select(e => new AddtionalTenantDto
-                    {
-                        Id = e.Id,
-                        FirstName = e.FirstName,
-                        LastName = e.LastName,
-                        TenantId = e.TenantId,
-
-                    }).ToList();
-                    var existing = existingList[i - 1];
-
-                    existing.FirstName = firstName;
-                    existing.LastName = lastName;
-                    existing.UpdatedOn = DateTime.Now;
-                    await _additionalTenantService.UpdateAdditionalTenantAsync(new List<AddtionalTenantDto>() { existing });
-
-                }
-                else
-                {
-                    // New Additional Tenant
-                    var newAdditional = new AddtionalTenantDto
-                    {
-                        TenantId = legalcaseDto.TenantId,
-                        FirstName = firstName,
-                        LastName = lastName,
-                        CreatedOn = DateTime.Now,
-                        IsActive = true,
-                        IsDeleted = false,
-                        IsVisible = true
-                    };
-
-                    await _additionalTenantService.AddAdditionalTenantAsync(new List<AddtionalTenantDto> { newAdditional });
-                }
-            }
-        }
-        if (addorupdate)
-        {
-            //     legalcaseDto.BuildingAddress = editBuildingModel.Address1;
-            //     legalcaseDto.Borough = editBuildingModel.City;
-            //     legalcaseDto.Mdr = editBuildingModel.MDRNumber;
-            //     legalcaseDto.BuildingZip = editBuildingModel.Zipcode;
-            //     legalcaseDto.BuildingStateId = editBuildingModel.StateId;
-            //     legalcaseDto.Units = editBuildingModel.BuildingUnits;
-            //     legalcaseDto.RegulationStatusId = editBuildingModel.RegulationStatusId;
-            //     legalcaseDto.UnitOrApartmentNumber = editBuildingModel.ApartmentCode;
-
-            var success = await _service.UpdateCaseAsync(legalcaseDto);
-
-            if (success.HasValue)
-            {
-                if (AdditionalOccupantsList.Any())
-                {
-                    foreach (var occupant in AdditionalOccupantsList)
-                    {
-                        occupant.LegalCaseId = success;
+                        await _tenantService.UpdateTenantAsync(updateTenant);
                     }
+                }
+            }
 
-                    var toAdd = AdditionalOccupantsList
-                        .Where(o => o.IsDeleted != true && (o.Id == null || o.Id == Guid.Empty))
-                        .ToList();
+        }
 
-                    var toUpdate = AdditionalOccupantsList
-                    .Where(o => o.IsDeleted != true && (o.Id != null && o.Id != Guid.Empty))
+        if (AdditionalTenantList.Count > 0)
+        {
+            foreach (var t in AdditionalTenantList)
+            {
+                t.TenantId = legalcaseDto.TenantId;
+            }
+
+            var toadd = AdditionalTenantList.Where(e => e.Id == null || e.Id == Guid.Empty && e.IsDeleted == false).ToList();
+            var toupdate = AdditionalTenantList.Where(e => e.Id != null && e.Id != Guid.Empty && e.IsDeleted == false).ToList();
+            if (toadd.Any())
+            {
+                await _additionalTenantService.AddAdditionalTenantAsync(toadd);
+            }
+            if (toupdate.Any())
+            {
+                await _additionalTenantService.UpdateAdditionalTenantAsync(toupdate);
+            }
+
+        }
+
+
+        var success = await _service.UpdateCaseAsync(legalcaseDto);
+
+        if (success.HasValue)
+        {
+            if (AdditionalTenantList.Any())
+            {
+               
+
+                var toAdd = AdditionalTenantList
+                    .Where(o => o.IsDeleted != true && (o.LegalCaseId == null || o.LegalCaseId == Guid.Empty))
                     .ToList();
 
-                    var toDelete = AdditionalOccupantsList
-                        .Where(o => o.IsDeleted == true)
-                        .ToList();
+                var toUpdate = AdditionalTenantList
+                .Where(o => o.IsDeleted != true && (o.LegalCaseId != null && o.LegalCaseId != Guid.Empty))
+                .ToList();
 
-                    if (toUpdate.Any())
-                        await _additionalOccupantService.UpdateAdditionalOccupantsAsync(toUpdate);
+                var toDelete = AdditionalTenantList
+                    .Where(o => o.IsDeleted == true && (o.LegalCaseId != null && o.LegalCaseId != Guid.Empty))
+                    .ToList();
+                foreach (var occupant in toAdd)
+                {
+                    occupant.LegalCaseId = legalcaseDto.Id;
+                }
+                if (toUpdate.Any())
+                    await _caseAdditionalTenant.UpdateAdditionalCaseTenantAsync(toUpdate);
 
-                    if (toAdd.Any())
-                        await _additionalOccupantService.AddAdditionalOccupantsAsync(toAdd);
+                if (toAdd.Any())
+                    await _caseAdditionalTenant.AddAdditionalCaseTenantAsync(toAdd);
 
-                    if (toDelete.Any())
-                        await _additionalOccupantService.DeleteAdditionalOccupants(toDelete);
+                if (toDelete.Any())
+                    await _caseAdditionalTenant.DeleteAdditionalCaseTenants(toDelete);
+            }
+            if (AdditionalOccupantsList.Any())
+            {
+                foreach (var occupant in AdditionalOccupantsList)
+                {
+                    occupant.LegalCaseId = success;
                 }
 
-                ToastService.ShowSuccess("Tenant details updated successfully!");
-                await JS.InvokeVoidAsync("hideModal", "tenantModal");
+                var toAdd = AdditionalOccupantsList
+                    .Where(o => o.IsDeleted != true && (o.Id == null || o.Id == Guid.Empty))
+                    .ToList();
 
-                await LoadCaseDetails();
+                var toUpdate = AdditionalOccupantsList
+                .Where(o => o.IsDeleted != true && (o.Id != null && o.Id != Guid.Empty))
+                .ToList();
+
+                var toDelete = AdditionalOccupantsList
+                    .Where(o => o.IsDeleted == true)
+                    .ToList();
+
+                if (toUpdate.Any())
+                    await _additionalOccupantService.UpdateAdditionalOccupantsAsync(toUpdate);
+
+                if (toAdd.Any())
+                    await _additionalOccupantService.AddAdditionalOccupantsAsync(toAdd);
+
+                if (toDelete.Any())
+                    await _additionalOccupantService.DeleteAdditionalOccupants(toDelete);
             }
-            else
-            {
-                ToastService.ShowError("Failed to update tenant details.");
-            }
+
+            ToastService.ShowSuccess("Tenant details updated successfully!");
+            await JS.InvokeVoidAsync("hideModal", "tenantModal");
+
+            await LoadCaseDetails();
         }
         else
         {
-            ToastService.ShowError("Failed to update Legal Case details.");
+            ToastService.ShowError("Failed to update tenant details.");
         }
+        
         // Map edited fields
 
 
         spinnerservice.Hide();
     }
-
+    private bool HasTenantChanged(EditToTenantDto existing, IntakeModel current, string firstName, string lastName)
+    {
+        return existing.FirstName != firstName
+            || existing.LastName != lastName
+            || existing.UnitOrApartmentNumber != current.UnitOrApartmentNumber
+            || existing.MonthlyRent != current.MonthlyRent
+            || existing.TenantShare != current.TenantShare
+            || existing.RentDueEachMonthOrWeekId != current.RentDueEachMonthOrWeekId
+            || existing.TotalRentOwed != current.TotalOwed
+            || existing.TenancyTypeId != current.TenancyTypeId
+            || existing.SocialServices != current.SocialService;
+    }
 
     private async Task<bool> ValidateCurrentStep()
     {
@@ -4254,12 +4254,15 @@
 
         selectedTenant = tenant;
         Tenants.Clear();
-        AdditionalTenantList.Clear();
+        foreach (var item in AdditionalTenantList)
+        {
+            item.IsDeleted = true;
+        }
         Tenants.Add($"{tenant.FirstName} {tenant.LastName}");
 
 
 
-        searchTenantText = $"{tenant.UnitOrApartmentNumber} ";
+        searchTenantText = $"{tenant.UnitOrApartmentNumber}";
 
         legalcaseDto.UnitOrApartmentNumber = tenant.UnitOrApartmentNumber;
         legalcaseDto.TenantName = tenant.FirstName + " " + tenant.LastName;
@@ -4273,10 +4276,10 @@
             Tenants.AddRange(AdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}").ToList());
             AdditionalTenantList.AddRange(AdditionalTenantfromDbList.Select(e => new AddtionalTenantDto
             {
-                Id = e.Id,
                 FirstName = e.FirstName,
                 LastName = e.LastName,
                 TenantId = e.TenantId,
+                Id = e.Id
             }));
         }
         filteredTenant?.Clear();
@@ -4286,6 +4289,7 @@
 
 
     }
+
     void DeleteAdditionalTenant(int index)
     {
         // Index 0 = primary tenant → never delete

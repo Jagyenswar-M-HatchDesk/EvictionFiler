@@ -2,6 +2,7 @@
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,14 @@ namespace EvictionFiler.Infrastructure.Repositories
         public CaseNoticeInfoRepository(MainDbContext mainDbContext) : base(mainDbContext)
         {
             _mainDbContext = mainDbContext;
+        }
+
+        public async Task<CaseNoticeInfo?> GetByCaseAndFormTypeAsync(Guid legalCaseId, Guid formTypeId)
+        {
+            return await _mainDbContext.CaseNoticeInfo
+                .Where(x =>
+                    x.LegalCaseId == legalCaseId &&
+                    x.FormtypeId == formTypeId).FirstOrDefaultAsync();
         }
     }
 }

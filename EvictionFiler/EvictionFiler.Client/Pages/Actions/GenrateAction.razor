@@ -2882,9 +2882,9 @@
             bool success = false;
 
             var infosuccess = await _service.AddOrUpdateCaseNoticeInfo(noticeModel);
-            if (Rows.Any())
+            if (Rows.Count > 0)
             {
-                var addrows = Rows.Where(e => e.Id == null || e.Id == Guid.Empty).Select(e => new ArrearLedgerDto()
+                var addrows = Rows.Where(e => (e.Id == null || e.Id == Guid.Empty) && (e.Amount != null || e.Month != null)).Select(e => new ArrearLedgerDto()
                 {
                     LegalCaseId = legalcaseDto.Id,
                     CaseNoticeId = infosuccess ?? null,
@@ -3053,7 +3053,7 @@
 
     private void RecalculateTotal()
     {
-        legalcaseDto.TotalOwed = Rows.Sum(x => x.Amount);
+        noticeModel.Totalowed = (int)Rows.Sum(x => x.Amount);
         StateHasChanged();
     }
 

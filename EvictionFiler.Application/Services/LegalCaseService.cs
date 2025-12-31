@@ -1491,12 +1491,12 @@ namespace EvictionFiler.Application.Services
         {
             try
             {
-                var entity = await _caseNoticeInfoRepository.GetAllAsync();
-
-                var casinfo = entity
-                    .Where(x => x.LegalCaseId == dto.LegalCaseId &&
-                                x.FormtypeId == dto.FormTypeId)
-                    .FirstOrDefault();
+                //var entity = await _caseNoticeInfoRepository.GetAllAsync();
+                var casinfo = await _caseNoticeInfoRepository.GetByCaseAndFormTypeAsync(dto.LegalCaseId.Value ,dto.FormTypeId.Value);
+                //var casinfo = entity
+                //    .Where(x => x.LegalCaseId == dto.LegalCaseId &&
+                //                x.FormtypeId == dto.FormTypeId)
+                //    .FirstOrDefault();
 
                 if (casinfo == null)
                 {
@@ -1558,7 +1558,7 @@ namespace EvictionFiler.Application.Services
                     casinfo.UpdatedOn = DateTime.Now;
 
                     // 🔴 REQUIRED FIXES
-                    await _caseNoticeInfoRepository.UpdateAsync(casinfo);
+                    //await _caseNoticeInfoRepository.UpdateAsync(casinfo);
                 }
 
                 var result = await _unitOfWork.SaveChangesAsync();
