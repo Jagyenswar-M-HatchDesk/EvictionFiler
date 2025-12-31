@@ -12,11 +12,11 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 		public string BuildingCode { get; set; } = string.Empty;
 		
 		public string? ApartmentCode { get; set; }
-        [Required(ErrorMessage = "MDR Number is Required")]
+        [Required(ErrorMessage = "MDR  is Required")]
         public string? MDRNumber { get; set; }
-        [Required(ErrorMessage = "Building Unit is Required")]
+        [Required(ErrorMessage = "Unit is Required")]
         public string? BuildingUnits { get; set; }
-		[Required(ErrorMessage = "Premise Type is Required")]
+		[Required(ErrorMessage = "Premise is Required")]
 		public Guid? PremiseTypeId { get; set; }
 		public string? PremiseTypeName { get; set; }
 
@@ -39,13 +39,25 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
         public string? Zipcode { get; set; } = string.Empty;
 		[Required(ErrorMessage = "Select LandLord")]
 		public Guid? LandlordId { get; set; }
+
+        public string? ExemptionBasisName { get; set; }
+        public string? ExemptionReasonName { get; set; }
+        public string? TenancyTypeForBuildingName { get; set; }
+        [Required(ErrorMessage = "Exemption basic  required")]
         public Guid? ExemptionBasisId { get; set; }
         public Guid? ExemptionreasonId { get; set; }
+        [Required(ErrorMessage = "Tenancy type required")]
+        public Guid? TenancyTypeForBuildingId { get; set; }
         [Required(ErrorMessage = "Select Registration Status")]
         public Guid? RegistrationStatusId { get; set; }
+
+        public string? RegistrationStatusName { get; set; }
         public Guid? BuildingTypeId { get; set; }
 
         public bool? OwnerOccupied { get; set; }
+        public bool? PrimaryResidence { get; set; }
+        public bool? GoodCause { get; set; }
+        public string? RentRegulationDescription { get; set; }
 
         public List<CreateToTenantDto>? Tenants { get; set; }
 

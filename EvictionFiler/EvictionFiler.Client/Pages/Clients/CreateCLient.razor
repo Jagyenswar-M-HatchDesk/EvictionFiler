@@ -35,6 +35,9 @@
 @inject IDateRentRepository  DateRentRepository
 @inject ICaseTypeRepository CaseTypeRepository
 @inject ICityRepository cityRepository
+@inject ITenancyTypeForBuildingRepository TenancyTypeForBuildingRepository;
+@inject IExemptionBasicRepository ExemptionBasicRepository;
+@inject IExemptionReasonRepository ExemptionReasonRepository;
 
 
 
@@ -339,7 +342,9 @@ aria-labelledby="createUserLabel">
                                 <label class="required-label">First Name</label>
 
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <span class="input-group-text">
+                                        <i class="bi bi-person"></i>
+                                        </span>
                                     <InputText class="form-control" @bind-Value="landlord.FirstName" placeholder="Enter First Name" />
                                 </div>
                                 <ValidationMessage For="@(() => landlord.FirstName)" />
@@ -672,34 +677,37 @@ aria-labelledby="createUserLabel">
                                 <label>Petitioner Interest</label>
                                 <InputText class="form-control" @bind-Value="building.PetitionerInterest" placeholder="Enter Intrest" />
                             </div>
-                            <div class="col-md-4">
-                                <label class="required-label" for="RentStatus">Exemption Basis</label>
-                                <InputSelect class="form-select" @bind-Value="building.ExemptionBasisId">
-                                    <option value="">-- Select --</option>
-                                    <option value="">1–2 Family Owner Occupied</option>
-                                    <option value=""> Post-1974 Construction</option>
-                                    <option value="">High Rent Vacancy</option>
-                                   @*  @foreach (var r in RegulationList)
-                                    {
-                                        <option value="@r.Id">@r.Name</option>
-                                    } *@
-                                </InputSelect>
-                                <ValidationMessage For="@(() => building.RegulationStatusId)" />
-                            </div>
+                            @if (SelectedRegulationName?.Equals("Exempt", StringComparison.OrdinalIgnoreCase) == true)
+
+                            {
+                                <div class="col-md-4">
+                                    <label class="required-label">Exemption Basis</label>
+                                    <InputSelect class="form-select"
+                                                 @bind-Value="building.ExemptionBasisId">
+                                        <option value="">-- Select --</option>
+                                        @foreach (var r in ExemptionBasicList)
+                                        {
+                                            <option value="@r.Id">@r.Name</option>
+                                        }
+                                    </InputSelect>
+                                    @* <ValidationMessage For="@(() => building.ExemptionBasisId)" /> *@
+                                </div>
+                            }
+                            
 
                         </div>
 
                         <div class="row mb-3">
-                            <div class="col">
+                            <div class="col-6">
                                 <label class="required-label">Address Line 1</label>
-                                <div class="input-group mb-3">
+                                <div class="input-group ">
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                     <InputText class="form-control" @bind-Value="building.Address1" placeholder="Enter First Address" />
                                 </div>
                                 <ValidationMessage For="@(() => building.Address1)" />
 
                             </div>
-                            <div class="col">
+                            <div class="col-6">
                                 <label>Address Line 2</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
@@ -710,7 +718,7 @@ aria-labelledby="createUserLabel">
                         </div>
 
                         <div class="row mb-3">
-                            <div class="col-5">
+                            <div class="col-6">
                                 <label class="required-label">Registration Status(HPD/DOF)</label>
                                 <InputSelect class="form-select" @bind-Value="building.RegistrationStatusId">
                                     <option value="">-- Select --</option>
@@ -721,36 +729,50 @@ aria-labelledby="createUserLabel">
                                 </InputSelect>
                                 <ValidationMessage For="@(() => building.RegistrationStatusId)" />
                             </div>
-                            <div class="col-4">
+                            <div class="col-6">
                                 <label class="required-label">Agent</label>
 
-                                <div class="input-group mb-3">
+                                <div class="input-group ">
                                     <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
                                     <InputText class="form-control" @bind-Value="building.ManagingAgent" placeholder="Enter Agent Name " />
                                     
                                 </div>
                                 <ValidationMessage For="@(() => building.ManagingAgent)" />
                             </div>
-                            <div class="col-md-3">
-                                <label class="required-label" for="RentStatus">Exemption Reason</label>
-                                <InputSelect class="form-select" @bind-Value="building.ExemptionreasonId">
-                                    <option value="">-- Select --</option>
-                                    <option value="">Owner occupied ≤ 10 units</option>
-                                    <option value="">Small Landlord</option>
-                                    <option value=""> Regulated uni</option>
-                                    <option value="">Other statutory exemption</option>
-                                    @*  @foreach (var r in RegulationList)
-                                    {
-                                        <option value="@r.Id">@r.Name</option>
-                                    } *@
-                                </InputSelect>
-                                <ValidationMessage For="@(() => building.ExemptionreasonId)" />
-                            </div>
+                           
                            
 
 
                             
                         </div>
+
+                         <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="required-label" for="RentStatus">Exemption Reason</label>
+                                <InputSelect class="form-select" @bind-Value="building.ExemptionreasonId">
+                                    <option value="">-- Select --</option>
+
+                                    @foreach (var r in ExemptionReasonList)
+                                    {
+                                        <option value="@r.Id">@r.Name</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => building.ExemptionreasonId)" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="required-label" for="RentStatus">Tenancy Type</label>
+                                <InputSelect class="form-select" @bind-Value="building.TenancyTypeForBuildingId">
+                                    <option value="">-- Select --</option>
+
+                                    @foreach (var r in TenancyTypeForBuildingList)
+                                    {
+                                        <option value="@r.Id">@r.Name</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => building.ExemptionreasonId)" />
+                            </div>
+
+                             </div>
                         
                         <div class="row mb-3">
                             <div class="col-4">
@@ -771,7 +793,7 @@ aria-labelledby="createUserLabel">
                                 </InputRadioGroup>
                             </div>
                             <div class="col-4">
-                                <InputRadioGroup @bind-Value="building.OwnerOccupied">
+                                <InputRadioGroup @bind-Value="building.PrimaryResidence">
                                     <label class="form-label mb-0 me-2">Primary Residence?:</label>
                                     <div class="d-flex gap-2">
 
@@ -788,7 +810,7 @@ aria-labelledby="createUserLabel">
                                 </InputRadioGroup>
                             </div>
                             <div class="col-4">
-                                <InputRadioGroup @bind-Value="building.OwnerOccupied">
+                                <InputRadioGroup @bind-Value="building.GoodCause">
                                     <label class="form-label mb-0 me-2">Does Good Cause Apply?:</label>
                                     <div class="d-flex gap-2">
 
@@ -807,7 +829,7 @@ aria-labelledby="createUserLabel">
                             </div>
 
                         <div class="row mb-3">
-                            <div class="col">
+                            <div class="col-4">
                                 <label class="required-label">Zip Code</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-geo"></i></span>
@@ -817,8 +839,8 @@ aria-labelledby="createUserLabel">
 
                             </div>
 
-                            <div class="col">
-                                <label class="required-label">County</label>
+                            <div class="col-4">
+                                <label class="required-label">City</label>
 
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
@@ -834,7 +856,7 @@ aria-labelledby="createUserLabel">
                                 </div>
                             </div>
 
-                            <div class="col">
+                            <div class="col-4">
                                 <label class="required-label">State</label>
                                 <InputSelect class="form-select" @bind-Value="building.StateId">
                                     @foreach (var s in StatesList)
@@ -845,9 +867,23 @@ aria-labelledby="createUserLabel">
                                 <ValidationMessage For="@(() => building.StateId)" />
                             </div>
                         </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="required-label">Rent Regulation Decription </label>
+                                <div class="input-group">
+                                    
+                                    <InputTextArea class="form-control" @bind-Value="building.RentRegulationDescription" placeholder="Enter Description" />
+                             
+                                </div>
+
+                            </div>
+
+                          
+
+                            
+                        </div>
                         
-
-
 
 
                         <!-- Submit Button -->
@@ -865,10 +901,14 @@ aria-labelledby="createUserLabel">
                                     <th>Premise</th>
                                     <th>Address</th>
                                     <th>MDR</th>
-                                    <th>Interest</th>
+                                    <th> Petitioner Interest</th>
                                     <th>Rent Regulation</th>
-                                    <th>Building Units</th>
-                                   
+                                    <th>Building Units</th> 
+                                    <th>Registration Status</th>
+                                    <th>Agent</th>
+                                    <th>Exemption Reason</th>
+                                    <th>Exemption Basic</th>
+                                    <th>Tenancy Type</th>
                                     <th>Status</th>
 
                                 </tr>
@@ -881,6 +921,7 @@ aria-labelledby="createUserLabel">
                                         <tr>
                                             <td>@(string.IsNullOrWhiteSpace(b.ApartmentCode) ? "-" : b.ApartmentCode)</td>
                                             <td>@(string.IsNullOrWhiteSpace(b.PremiseTypeName) ? "-" : b.PremiseTypeName)</td>
+                                         
                                             <td>
                                                 @{
                                                     var parts = new List<string>();
@@ -899,7 +940,11 @@ aria-labelledby="createUserLabel">
                                             <td>@(string.IsNullOrWhiteSpace(b.PetitionerInterest) ? "-" : b.PetitionerInterest)</td>
                                             <td>@(string.IsNullOrWhiteSpace(b.RegulationStatusName) ? "-" : b.RegulationStatusName)</td>
                                             <td>@(string.IsNullOrWhiteSpace(b.BuildingUnits) ? "-" : b.BuildingUnits)</td>
-                                          
+                                            <td>@(string.IsNullOrWhiteSpace(b.RegistrationStatusName) ? "-" : b.RegistrationStatusName)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(b.ManagingAgent) ? "-" : b.ManagingAgent)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(b.ExemptionBasisName) ? "-" : b.ExemptionBasisName)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(b.ExemptionReasonName) ? "-" : b.ExemptionReasonName)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(b.TenancyTypeForBuildingName) ? "-" : b.TenancyTypeForBuildingName)</td>
                                             <td>Active</td>
 
                                         </tr>
@@ -917,6 +962,7 @@ aria-labelledby="createUserLabel">
 
                     </div>
                 }
+            
             </div>
         }
 
@@ -1452,6 +1498,9 @@ aria-labelledby="createUserLabel">
 
     private List<TypeOfOwner> TypeOwnerList = new();
     private List<RegulationStatus> RegulationList = new();
+    private IEnumerable<ExemptionBasic> ExemptionBasicList = new List<ExemptionBasic>();
+    private IEnumerable<ExemptionReason> ExemptionReasonList = new List<ExemptionReason>();
+    private IEnumerable<TenancyTypeForBuilding> TenancyTypeForBuildingList = new List<TenancyTypeForBuilding>();
     private List<PremiseType> premiseTypesList = new();
     private List<Language> LangList = new();
     private List<LandlordType> LandLordTypeList = new();
@@ -1491,6 +1540,11 @@ aria-labelledby="createUserLabel">
             LatestBuildingCode = await _apartmentService.GetLastBuilding();
             LatestTenantCode = await _tenantService.GetLastTenantCode();
             CityList = await cityRepository.GetAllAsync();
+            ExemptionBasicList = await ExemptionBasicRepository.GetAllAsync();
+            ExemptionReasonList = await ExemptionReasonRepository.GetAllAsync();
+            TenancyTypeForBuildingList = await TenancyTypeForBuildingRepository.GetAllAsync();
+            
+
             if (!RegistrationstatusList.Any()) RegistrationstatusList = await CaseTypeRepository.GetAllRegistrationstatus();
         }
         landlord.StateId = StatesList.Where(e => e.Name.Contains("New York")).Select(e => e.Id).FirstOrDefault();
@@ -1498,6 +1552,11 @@ aria-labelledby="createUserLabel">
         occupants.Add(new AddtionalTenantDto());
 
     }
+
+    private string? SelectedRegulationName =>
+        RegulationList
+            ?.FirstOrDefault(x => x.Id == building.RegulationStatusId)
+            ?.Name;
 
     private async Task OnBuildingChanged()
     {
@@ -1543,6 +1602,19 @@ aria-labelledby="createUserLabel">
 
         building.RegulationStatusName = RegulationList
        .FirstOrDefault(x => x.Id == building.RegulationStatusId)?.Name ?? "";
+
+        building.ExemptionBasisName = ExemptionBasicList
+       .FirstOrDefault(x => x.Id == building.ExemptionBasisId)?.Name ?? "";
+
+        building.ExemptionReasonName = ExemptionReasonList
+       .FirstOrDefault(x => x.Id == building.ExemptionreasonId)?.Name ?? "";
+
+        building.TenancyTypeForBuildingName = TenancyTypeForBuildingList
+       .FirstOrDefault(x => x.Id == building.TenancyTypeForBuildingId)?.Name ?? "";
+
+        building.RegistrationStatusName = RegistrationstatusList
+    .FirstOrDefault(x => x.Id == building.RegistrationStatusId)?.Name ?? "";
+
         int nextNumber = 0;
         if (LatestBuildingCode != null)
         {
@@ -1924,5 +1996,6 @@ aria-labelledby="createUserLabel">
         {
             Navigation.NavigateTo("/clients?success=true", true);
         }
+        spinnerservice.Hide();
     }
 }

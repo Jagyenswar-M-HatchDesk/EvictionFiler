@@ -155,6 +155,9 @@ builder.Services.AddScoped<ICaseNoticeInfoRepository, CaseNoticeInfoRepository>(
 builder.Services.AddScoped<IAppearanceModeRepository, AppearanceModeRepository>();
 builder.Services.AddScoped<IVirtualPlatformRepository, VirtualPlatformRepository>();
 builder.Services.AddScoped<IAppearanceTypeForHearingRepository, AppearanceTypeForHearingRepository>();
+builder.Services.AddScoped<ITenancyTypeForBuildingRepository, TenancytypeForBuildingRepository>();
+builder.Services.AddScoped<IExemptionReasonRepository, ExemptionReasonRepository>();
+builder.Services.AddScoped<IExemptionBasicRepository, ExemptionBasicRepository>();
 
 builder.Services.AddAuthorization();
 

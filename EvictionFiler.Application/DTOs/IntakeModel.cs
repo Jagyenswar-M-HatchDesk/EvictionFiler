@@ -238,6 +238,20 @@ namespace EvictionFiler.Application.DTOs
 
         public Guid? CourtPartId { get; set; }
 
+        public Guid? ExemptionBasisId { get; set; }
+      
+
+        public Guid? ExemptionReasonId { get; set; }
+      
+
+        public Guid? TenancyTypeForBuildingId { get; set; }
+       
+        public bool? OwnerOccupied { get; set; }
+
+        public bool? PrimaryResidence { get; set; }
+
+        public bool? GoodCause { get; set; }
+
         public List<ArrearLedgerDto> ArrearLedgers { get; set; } = new List<ArrearLedgerDto>();
 
 
