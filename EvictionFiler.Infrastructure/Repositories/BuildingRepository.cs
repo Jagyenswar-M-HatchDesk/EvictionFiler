@@ -187,10 +187,10 @@ namespace EvictionFiler.Infrastructure.Repositories
                 RegistrationStatusId = appartment.RegistrationStatusId,
                 ExemptionBasisName = appartment.ExemptionBasis?.Name,
                 ExemptionBasisId = appartment.ExemptionBasisId,
-                ExemptionReasonName = appartment.ExemptionReason?.Name,
                 ExemptionreasonId = appartment.ExemptionReasonId,
-                TenancyTypeForBuildingName = appartment.TenancyTypeForBuilding?.Name,
                 TenancyTypeForBuildingId = appartment.TenancyTypeForBuildingId,
+                ExemptionReasonName = appartment.ExemptionReason?.Name,
+                TenancyTypeForBuildingName = appartment.TenancyTypeForBuilding?.Name,
 				PrimaryResidence = appartment.PrimaryResidence,
                 GoodCause = appartment.GoodCause,
                 OwnerOccupied = appartment.OwnerOccupied,
@@ -238,6 +238,12 @@ namespace EvictionFiler.Infrastructure.Repositories
                 MDRNumber = appartment.MDRNumber,
                 PetitionerInterest = appartment.PetitionerInterest,
                 BuildingUnits = appartment.BuildingUnits,
+               ExemptionBasisId = appartment.ExemptionBasisId,
+               ExemptionreasonId = appartment.ExemptionReasonId,
+               PrimaryResidence = appartment.PrimaryResidence,
+               GoodCause = appartment.GoodCause,
+               OwnerOccupied = appartment.OwnerOccupied,
+               TenancyTypeForBuildingId = appartment.TenancyTypeForBuildingId,
                 LandlordId = appartment.LandlordId,
                 IsActive = appartment.IsActive,
                 IsDeleted = appartment.IsDeleted,
@@ -252,7 +258,11 @@ namespace EvictionFiler.Infrastructure.Repositories
 				.Include(a => a.State)
 				.Include(a => a.PremiseType)
 				.Include(a => a.RegulationStatus)
-				.FirstOrDefaultAsync(x => x.Id == buildingId && x.IsDeleted != true);
+                .Include(a => a.TenancyTypeForBuilding)
+                .Include(a => a.ExemptionReason)
+                .Include(a => a.ExemptionBasis)
+                 .Include(a => a.RegistrationStatus)
+                .FirstOrDefaultAsync(x => x.Id == buildingId && x.IsDeleted != true);
 
 			if (appartment == null) return null;
 
@@ -265,10 +275,21 @@ namespace EvictionFiler.Infrastructure.Repositories
 				StateId = appartment.StateId,
 				StateName = appartment.State?.Name,
 				PremiseTypeId = appartment.PremiseTypeId,
-				PremiseTypeName = appartment.PremiseType?.Name,
+                ExemptionBasisId = appartment.ExemptionBasisId,
+                ExemptionreasonId = appartment.ExemptionReasonId,
+                TenancyTypeForBuildingId = appartment.TenancyTypeForBuildingId,
+                GoodCause = appartment.GoodCause,
+                PrimaryResidence = appartment.PrimaryResidence,
+                OwnerOccupied = appartment.OwnerOccupied,
+                PremiseTypeName = appartment.PremiseType?.Name,
 				RegulationStatusId = appartment.RegulationStatusId,
-				RegulationStatusName = appartment.RegulationStatus?.Name,
-				Address1 = appartment.Address1,
+                RegistrationStatusId = appartment.RegistrationStatusId,
+                RegulationStatusName = appartment.RegulationStatus?.Name,
+                RegistrationStatusName = appartment.RegistrationStatus?.Name,
+                ExemptionBasisName = appartment.ExemptionBasis?.Name,
+                ExemptionReasonName = appartment.ExemptionReason?.Name,
+                TenancyTypeForBuildingName = appartment.TenancyTypeForBuilding?.Name,
+                Address1 = appartment.Address1,
 				Address2 = appartment.Address2,
 				Zipcode = appartment.Zipcode,
 				MDRNumber = appartment.MDRNumber,

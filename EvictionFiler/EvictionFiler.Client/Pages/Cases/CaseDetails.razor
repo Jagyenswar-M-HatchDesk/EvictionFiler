@@ -52,6 +52,10 @@
 @inject ILandlordSevice _landlordSevice
 @inject ICountyService countyService
 @inject IRemianderCenterService RemianderCenterService
+@inject ITenancyTypeForBuildingRepository TenancyTypeForBuildingRepository;
+@inject IExemptionBasicRepository ExemptionBasicRepository;
+@inject IExemptionReasonRepository ExemptionReasonRepository;
+@inject ICaseTypeRepository CaseTypeRepository
 @inject ICaseAdditionalTenantService _caseAdditionalTenant
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization;
@@ -1560,12 +1564,24 @@
                                                 <ValidationMessage For="() => editBuildingModel.Address1" />
                                             </div>
 
-                                            <div class="col-md-6">
+                                            <div class="col-md-2">
                                                 <label class="form-label required-label">Unit / Apt</label>
                                                 <InputText class="form-control" @bind-Value="editBuildingModel.ApartmentCode" placeholder="Enter Unit" />
                                             </div>
+                                             <div class="col-md-4">
+                                                    <label class="form-label required-label">Exeption Reason</label>
+                                                    <InputSelect class="form-select" @bind-Value="editBuildingModel.ExemptionreasonId">
+                                                        @foreach (var s in ExemptionReasonList)
+                                                        {
+                                                            <option value="@s.Id">@s.Name</option>
+                                                        }
+                                                    </InputSelect>
+                                                <ValidationMessage For="() => editBuildingModel.ExemptionreasonId" />
+                                                </div>
+                                       </div>
+                                        <div class="row g-3 mt-3">
 
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <label class="form-label required-label">County</label>
                                                 <InputSelect class="form-select" @bind-Value="editBuildingModel.CityId">
                                                     <option value="">-- Select --</option>
@@ -1576,13 +1592,26 @@
                                                 </InputSelect>
                                                 <ValidationMessage For="() => editBuildingModel.CityId" />
                                             </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label required-label">Tenancy type</label>
+                                                <InputSelect class="form-select" @bind-Value="editBuildingModel.TenancyTypeForBuildingId">
+                                                    <option value="">-- Select --</option>
+                                                    @foreach (var s in TenancyTypeForBuildingList)
+                                                    {
+                                                        <option value="@s.Id">@s.Name</option>
+                                                    }
+                                                </InputSelect>
+                                                <ValidationMessage For="() => editBuildingModel.TenancyTypeForBuildingId" />
+                                            </div>
 
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <label class="form-label required-label">MDR Number</label>
                                                 <InputText class="form-control" @bind-Value="editBuildingModel.MDRNumber" placeholder="Enter MDR Number" />
                                             </div>
+                                       </div>
                                             @if (IsNewBuilding)
                                             {
+                                            <div class="row g-3 mt-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label required-label">State</label>
                                                     <InputSelect class="form-select" @bind-Value="editBuildingModel.StateId">
@@ -1598,15 +1627,19 @@
                                                     <label class="form-label required-label">Zip Code</label>
                                                     <InputText class="form-control" @bind-Value="editBuildingModel.Zipcode" placeholder="Enter Zipcode" />
                                                 </div>
+                                                </div>
                                             }
 
+                                        <div class="row mt-3">
 
-                                            <div class="col-md-6">
+                                            <!-- County -->
+                                            <div class="@ColumnClass">
                                                 <label class="form-label required-label">Units</label>
                                                 <InputText class="form-control" @bind-Value="editBuildingModel.BuildingUnits" placeholder="Enter Units" />
                                             </div>
 
-                                            <div class="col-md-6">
+                                            <!-- Rent Regulation -->
+                                            <div class="@ColumnClass">
                                                 <label class="form-label required-label">Rent Regulation</label>
                                                 <InputSelect class="form-select" @bind-Value="editBuildingModel.RegulationStatusId">
                                                     <option value="">-- Select --</option>
@@ -1617,8 +1650,117 @@
                                                 </InputSelect>
                                                 <ValidationMessage For="() => editBuildingModel.RegulationStatusId" />
                                             </div>
+
+                                            @if (ShowExemptionBasic)
+                                            {
+                                                <!-- Exemption Basic -->
+                                                <div class="@ColumnClass">
+                                                    <label class="form-label required-label fw-semibold">
+                                                        Exemption Basic
+                                                    </label>
+                                                    <InputSelect class="form-select"
+                                                                 @bind-Value="editBuildingModel.ExemptionBasisId">
+                                                        <option value="">-- Select --</option>
+                                                        @foreach (var s in ExemptionBasicList)
+                                                        {
+                                                            <option value="@s.Id">@s.Name</option>
+                                                        }
+                                                    </InputSelect>
+                                                </div>
+                                            }
+
                                         </div>
-                                    </div>
+                                        <div class="row mb-3 mt-3">
+                                            <div class="col-4">
+                                                <InputRadioGroup @bind-Value="editBuildingModel.OwnerOccupied" >
+                                                    <label class="form-label mb-0 me-2">Owner Occupied?:</label>
+                                                    <div class="d-flex gap-2">
+
+                                                        <div class="form-check me-2">
+                                                            <InputRadio class="form-check-input" Value="true"  />
+                                                            <label class="form-check-label">Yes</label>
+                                                        </div>
+
+                                                        <div class="form-check">
+                                                            <InputRadio class="form-check-input" Value="false"  />
+                                                            <label class="form-check-label">No</label>
+                                                        </div>
+                                                    </div>
+                                                </InputRadioGroup>
+                                            </div>
+                                            <div class="col-4">
+                                                <InputRadioGroup @bind-Value="editBuildingModel.PrimaryResidence" >
+                                                    <label class="form-label mb-0 me-2">Primary Residence?:</label>
+                                                    <div class="d-flex gap-2">
+
+                                                        <div class="form-check me-2">
+                                                            <InputRadio class="form-check-input" Value="true"  />
+                                                            <label class="form-check-label">Yes</label>
+                                                        </div>
+
+                                                        <div class="form-check">
+                                                            <InputRadio class="form-check-input" Value="false" />
+                                                            <label class="form-check-label">No</label>
+                                                        </div>
+                                                    </div>
+                                                </InputRadioGroup>
+                                            </div>
+                                            <div class="col-4">
+                                                <InputRadioGroup @bind-Value="editBuildingModel.GoodCause">
+                                                    <label class="form-label mb-0 me-2">Does Good Cause Apply?:</label>
+                                                    <div class="d-flex gap-2">
+
+                                                        <div class="form-check me-2">
+                                                            <InputRadio class="form-check-input" Value="true"  />
+                                                            <label class="form-check-label">Yes</label>
+                                                        </div>
+
+                                                        <div class="form-check">
+                                                            <InputRadio class="form-check-input" Value="false"  />
+                                                            <label class="form-check-label">No -Exempt</label>
+                                                        </div>
+                                                    </div>
+                                                </InputRadioGroup>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mt-3">
+                                          
+                                                <div class="col-md-6">
+                                                <label class="form-label mb-0 me-2">
+                                                        Registration Status (HPD/DOF)
+                                                    </label>
+
+                                                    <div class="row mt-1">
+                                                        @if (RegistrationstatusList != null && RegistrationstatusList.Any())
+                                                        {
+                                                            <div style="display: flex;flex-wrap: wrap; column-gap: 33px;">
+                                                                <InputRadioGroup @bind-Value="editBuildingModel.RegistrationStatusId" class="d-flex flex-wrap">
+                                                                    @foreach (var Type in RegistrationstatusList)
+                                                                    {
+                                                                        <div class="col-auto">
+                                                                            <div class="form-check">
+                                                                                <InputRadio class="form-check-input" 
+                                                                                            id="@($"RegStatus_{Type.Id}")"
+                                                                                            Value="@Type.Id"  />
+                                                                                <label class="form-check-label" for="@($"RegStatus_{Type.Id}")">@Type.Name</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                </InputRadioGroup>
+                                                            <ValidationMessage For="() => editBuildingModel.RegistrationStatusId" />
+
+
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                          
+                                        
+                                        </div>
+                                     
+                                        </div>
+                                     
                                 }
                             </div>
                         </div>
@@ -2267,6 +2409,16 @@
     private bool showMarshalError = false;
     [Parameter] public EventCallback OnFormCreate { get; set; } = new();
 
+    private List<Registrationstatus> RegistrationstatusList = new List<Registrationstatus>();
+    private IEnumerable<ExemptionBasic> ExemptionBasicList = new List<ExemptionBasic>();
+    private IEnumerable<ExemptionReason> ExemptionReasonList = new List<ExemptionReason>();
+    private IEnumerable<TenancyTypeForBuilding> TenancyTypeForBuildingList = new List<TenancyTypeForBuilding>();
+    bool ShowExemptionBasic =>
+ RegulationList.Any(r =>
+     r.Id == editBuildingModel.RegulationStatusId &&
+     r.Name == "Exempt");
+
+    string ColumnClass => ShowExemptionBasic ? "col-md-4" : "col-md-6";
 
     protected override async Task OnInitializedAsync()
     {
@@ -2292,6 +2444,10 @@
         court.SelectedCourtPart ??= new CourtPartDto();
 
         ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
+        ExemptionBasicList = await ExemptionBasicRepository.GetAllAsync();
+        ExemptionReasonList = await ExemptionReasonRepository.GetAllAsync();
+        TenancyTypeForBuildingList = await TenancyTypeForBuildingRepository.GetAllAsync();
+        RegistrationstatusList = await CaseTypeRepository.GetAllRegistrationstatus();
         if (!CityList.Any()) CityList = await _service.GetAllCitiesList();
 
 
@@ -3076,6 +3232,7 @@
     private async Task ShowBuildingModal()
     {
         RegulationList = await _regulationStatusRepository.GetAllRegulationStatus();
+        ExemptionBasicList = await ExemptionBasicRepository.GetAllAsync();
         StateList = await _stateRepository.GetAllState();
         //IsNewBuilding = true;
         // Prefill edit model from case
@@ -3357,6 +3514,13 @@
         editBuildingModel.ApartmentCode = selected.ApartmentCode;
         editBuildingModel.BuildingUnits = selected.BuildingUnits;
         editBuildingModel.RegulationStatusId = selected.RegulationStatusId;
+        editBuildingModel.TenancyTypeForBuildingId = selected.TenancyTypeForBuildingId;
+        editBuildingModel.ExemptionBasisId = selected.ExemptionBasisId;
+        editBuildingModel.ExemptionreasonId = selected.ExemptionreasonId;
+        editBuildingModel.PrimaryResidence = selected.PrimaryResidence;
+        editBuildingModel.OwnerOccupied = selected.OwnerOccupied;
+        editBuildingModel.RegistrationStatusId = selected.RegistrationStatusId;
+        editBuildingModel.GoodCause = selected.GoodCause;
 
         filteredBuildings.Clear();
         searchBuildingText = selected.BuildingCode;
@@ -3595,6 +3759,14 @@
                 ApartmentCode = editBuildingModel.ApartmentCode,
                 MDRNumber = editBuildingModel.MDRNumber,
                 RegulationStatusId = editBuildingModel.RegulationStatusId,
+                RegistrationStatusId = editBuildingModel.RegistrationStatusId,
+
+                 ExemptionBasisId = editBuildingModel.ExemptionBasisId,
+                  ExemptionreasonId = editBuildingModel.ExemptionreasonId,
+                   TenancyTypeForBuildingId = editBuildingModel.TenancyTypeForBuildingId,
+                    PrimaryResidence = editBuildingModel.PrimaryResidence,
+                GoodCause = editBuildingModel.GoodCause,
+                OwnerOccupied = editBuildingModel.OwnerOccupied,
                 LandlordId = legalcaseDto.LandlordId
             };
 
@@ -3619,8 +3791,15 @@
                     Zipcode = editBuildingModel.Zipcode,
                     BuildingUnits = editBuildingModel.BuildingUnits,
                     ApartmentCode = editBuildingModel.ApartmentCode,
+                    RegistrationStatusId = editBuildingModel.RegistrationStatusId,
                     MDRNumber = editBuildingModel.MDRNumber,
                     RegulationStatusId = editBuildingModel.RegulationStatusId,
+                    ExemptionBasisId = editBuildingModel.ExemptionBasisId,
+                    ExemptionreasonId = editBuildingModel.ExemptionreasonId,
+                    TenancyTypeForBuildingId = editBuildingModel.TenancyTypeForBuildingId,
+                    PrimaryResidence = editBuildingModel.PrimaryResidence,
+                    GoodCause = editBuildingModel.GoodCause,
+                    OwnerOccupied = editBuildingModel.OwnerOccupied,
                 };
 
                 await _buildingService.UpdateonlyBuildingfromCase(updateBuilding);
@@ -3637,7 +3816,15 @@
             legalcaseDto.BuildingStateId = editBuildingModel.StateId;
             legalcaseDto.Units = editBuildingModel.BuildingUnits;
             legalcaseDto.RegulationStatusId = editBuildingModel.RegulationStatusId;
+            
             legalcaseDto.UnitOrApartmentNumber = editBuildingModel.ApartmentCode;
+            legalcaseDto.ExemptionBasisId = editBuildingModel.ExemptionBasisId;
+            legalcaseDto.ExemptionReasonId = editBuildingModel.ExemptionreasonId;
+            legalcaseDto.TenancyTypeForBuildingId = editBuildingModel.TenancyTypeForBuildingId;
+            legalcaseDto.PrimaryResidence = editBuildingModel.PrimaryResidence;
+            legalcaseDto.OwnerOccupied = editBuildingModel.OwnerOccupied;
+            legalcaseDto.GoodCause = editBuildingModel.GoodCause;
+            legalcaseDto.RegistrationStatusTypeId = editBuildingModel.RegistrationStatusId;
 
             var success = await _service.UpdateCaseAsync(legalcaseDto);
 
