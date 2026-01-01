@@ -1,0 +1,459 @@
+﻿@page "/remainder-center-new"
+@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs.RemainderCenterDto
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Domain.Entities.Master
+@using EvictionFiler.Infrastructure.Repositories
+@using Microsoft.AspNetCore.Components.Authorization
+@using EvictionFiler.Client.SpinnerService
+@using System.Security.Claims
+@inject IRemianderCenterService RemianderCenterService
+@inject IReminderEscalateRepository esclatesRepo
+@inject IReminderCategoryRepository categoryRepo
+@inject IToastService ToastService
+@inject SpinnerService spinnerservice
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider _authStateProvider
+<PageTitle>Reminder Center - Housing Court Filer</PageTitle>
+<style>
+    .card-theme {
+        background: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 6px 16px rgba(15, 30, 60, .06);
+    }
+
+    .btn {
+        border-radius: 7px;
+        height: 38px;
+        width: 180px;
+        font-size: 16px;
+    }
+
+    .health-score {
+        font-weight: 700;
+        font-size: 24px;
+    }
+
+    .btn-primary {
+        background-color: #1F365D !important;
+        border-color: #1F365D !important;
+    }
+
+        .btn-primary:hover {
+            background-color: #042254 !important;
+            border-color: #042254 !important;
+        }
+
+    .page-wrapper {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .page-content {
+        flex: 1; /* pushes footer down */
+    }
+
+    .page-footer {
+        background: #ffffff;
+        border-top: 1px solid #e5e7eb;
+        padding: 12px 20px;
+    }
+</style>
+
+
+<!-- ADD REMINDER MODAL -->
+@if (ShowModal)
+{
+    <EditForm Model="@remainderDto" FormName="Reminderpopup">
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header  text-white" style="background-color: #1F365D;">
+
+
+                        <h5 class="modal-title">
+                            @* <i class="bi bi-exclamation-triangle-fill me-2"></i> *@ Add Reminder
+                        </h5>
+
+                        <button type="button" class="btn-close btn-close-white" aria-label="Close" @onclick="CloseModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label>Title</label>
+                        <input class="form-control mb-2" @bind="remainderDto.ReminderName" />
+
+                        <label>Category</label>
+                        <select class="form-select mb-2" @bind="remainderDto.ReminderCategoryId">
+                            @foreach (var item in Categories)
+                            {
+                                <option value="@item.Id">@item.Name</option>
+                            }
+
+                        </select>
+
+                        <label>Due Date</label>
+                        <input type="date" class="form-control mb-2"
+                               @bind="remainderDto.When" />
+
+                        <label>Escalate To</label>
+                        <select class="form-select" @bind="remainderDto.ReminderEscalateId">
+                            @foreach (var item in Escalates)
+                            {
+                                <option value="@item.Id">@item.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                   
+                    <div class="modal-footer justify-content-end">
+                        <button class="btn btn-outline-secondary" @onclick="CloseModal">Cancel</button>
+                        <button class="btn btn-primary" @onclick="SubmitAsync">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+
+}
+
+@if (ShowCompleteReminder)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header  text-white" style="background-color: #1F365D;">
+
+
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Info
+                    </h5>
+
+                    <button type="button" class="btn-close btn-close-white" aria-label="Close" @onclick="CloseCourtInfoAlert"></button>
+                </div>
+                <div class="modal-body text-center">
+
+                    <p class="fw-semibold mb-2">Selected reminders marked complete.</p>
+
+                </div>
+                @*<div class="modal-footer justify-content-center">
+                        <button class="btn btn-primary" @onclick="ShowCourtModal">Add Court Info</button>
+                        <button class="btn btn-outline-secondary" @onclick="CloseCourtInfoAlert">Close</button>
+                    </div>*@
+            </div>
+        </div>
+    </div>
+}
+@if (ShowSnoozeReminder)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header  text-white" style="background-color: #1F365D;">
+
+
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Info
+                    </h5>
+
+                    <button type="button" class="btn-close btn-close-white" aria-label="Close" @onclick="CloseCourtInfoAlert"></button>
+                </div>
+                <div class="modal-body text-center">
+
+                    <p class="fw-semibold mb-2">Selected reminders snoozed.</p>
+
+                </div>
+                @*<div class="modal-footer justify-content-center">
+                        <button class="btn btn-primary" @onclick="ShowCourtModal">Add Court Info</button>
+                        <button class="btn btn-outline-secondary" @onclick="CloseCourtInfoAlert">Close</button>
+                    </div>*@
+            </div>
+        </div>
+    </div>
+}
+
+<!-- FOOTER -->
+<div class="page-wrapper">
+    <main class="page-content">
+        <!-- EXISTING CONTENT (unchanged) -->
+        <div class="container my-4">
+
+            <!-- CASE HEALTH -->
+            <div class="card-theme p-3 mb-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>Case Health Score</strong><br />
+                    <span class="text-muted">
+                        Based on missed deadlines, payments, and warrant risk
+                    </span>
+                </div>
+                <div class="health-score text-success">@HealthScore%</div>
+            </div>
+
+            <h4>Reminder Center</h4>
+
+            <!-- BULK ACTION BAR -->
+            <div class="d-flex gap-2 my-2">
+                <button class="btn btn-sm btn-outline-secondary" @onclick="BulkComplete">
+                    Mark Complete
+                </button>
+                <button style="width: 130px;" class="btn btn-sm btn-outline-secondary" @onclick="BulkSnooze">
+                    Snooze
+                </button>
+                <button class="btn btn-sm btn-primary" @onclick="ShowAddModal">
+                    + New Reminder
+                </button>
+            </div>
+
+            <!-- TABS -->
+            <ul class="nav nav-tabs mt-3">
+                @foreach (var tab in Tabs)
+                {
+                    <li class="nav-item">
+                        <button class="nav-link @(ActiveTab == tab ? "active" : "")"
+                                @onclick="() => SwitchTab(tab)">
+                            @tab
+                            <span class="badge @(tab == "Critical" ? "bg-danger" : "bg-secondary") ms-1">
+                                @GetCount(tab)
+                            </span>
+                        </button>
+                    </li>
+                }
+            </ul>
+
+            <!-- REMINDER LIST -->
+            <div class="mt-3">
+                @foreach (var reminder in FilteredReminders)
+                {
+                    var severity = GetSeverityByCategory(reminder.ReminderCategoryId);
+
+                    <div class="card-theme p-3 mb-2 d-flex align-items-center gap-2">
+                        <input type="checkbox" class="form-check-input"
+                               @bind="reminder.IsComplete" />
+
+                        <strong>@reminder.ReminderName</strong>
+
+                        @*  @if (severity == Severity.Critical)
+                {
+                    <span class="badge bg-danger ms-auto">Critical</span>
+                }
+                else if (severity == Severity.Warning)
+                {
+                    <span class="badge bg-warning text-dark ms-auto">Warning</span>
+                }
+                else
+                {
+                    <span class="badge bg-info ms-auto">Info</span>
+                } *@
+                    </div>
+                }
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="page-footer">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="text-muted">HousingCourtFiler ▸ Reminder Engine</div>
+            <div>
+                <button class="btn btn-outline-secondary btn-sm">Save</button>
+                <button class="btn btn-primary btn-sm">Save All</button>
+            </div>
+        </div>
+    </footer>
+</div>
+
+
+@code {
+
+    private int HealthScore = 82;
+
+    private string ActiveTab = "All";
+    private bool ShowModal;
+    private bool ShowCompleteReminder;
+    private bool ShowSnoozeReminder;
+    private EditToRemainderCenterDto remainderDto = new EditToRemainderCenterDto();
+    private List<EditToRemainderCenterDto> Remiandercenters { get; set; }
+    private IEnumerable<ReminderCategory> Categories = new List<ReminderCategory>();
+    private IEnumerable<ReminderEscalate> Escalates = new List<ReminderEscalate>();
+
+    private readonly string[] Tabs =
+    {
+        "All", "Court", "Payments", "Warrant", "Critical"
+    };
+
+
+    private IEnumerable<EditToRemainderCenterDto> FilteredReminders = new List<EditToRemainderCenterDto>();
+    private void CloseCourtInfoAlert()
+    {
+
+        ShowCompleteReminder = false;
+        ShowSnoozeReminder = false;
+    }
+    private Task GetFilteredRemainder()
+    {
+        FilteredReminders = ActiveTab switch
+        {
+            "All" => Remiandercenters,
+
+            "Critical" => Remiandercenters
+                .Where(r => GetSeverityByCategory(r.ReminderCategoryId) == Severity.Critical),
+
+            _ => Remiandercenters
+                .Where(r => r.ReminderCategoryName == ActiveTab)
+        };
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+    private Task SwitchTab(string Tab)
+    {
+        ActiveTab = Tab;
+        GetFilteredRemainder();
+
+        return Task.CompletedTask;
+        StateHasChanged();
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        spinnerservice.Show();
+        Categories = await categoryRepo.GetAllAsync();
+        Escalates = await esclatesRepo.GetAllAsync();
+
+        Remiandercenters = await RemianderCenterService.GetAllRemainderCenterAsync();
+        await GetFilteredRemainder();
+        spinnerservice.Hide();
+    }
+    private Severity GetSeverityByCategory(Guid? categoryId)
+    {
+        var category = Categories.FirstOrDefault(c => c.Id == categoryId)?.Name;
+
+        return category switch
+        {
+            "Critical" => Severity.Critical,
+            "Warrant" => Severity.Warrant,
+            "Payments" => Severity.Payments,
+            "Court" => Severity.Court,
+            _ => Severity.Court
+        };
+    }
+
+
+    private async Task SubmitAsync()
+    {
+        spinnerservice.Show();
+        if (remainderDto == null)
+            return;
+
+
+        var authState = await _authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userGuid))
+        {
+            remainderDto.CreatedBy = userGuid;
+        }
+        else
+        {
+            // unauthenticated user
+            remainderDto.CreatedBy = Guid.Empty;
+        }
+
+        // Save the full nested object
+        var isSaved = await RemianderCenterService.Create(remainderDto);
+        if (isSaved)
+        {
+            //spinnerservice.Show();
+            CloseModal();
+            // Navigation.NavigateTo("/remainder-center", true);
+            ToastService.ShowSuccess("Reminder Added Successfully!");
+            Remiandercenters = await RemianderCenterService.GetAllRemainderCenterAsync();
+            await GetFilteredRemainder();
+            StateHasChanged();
+        }
+        else
+        {
+            ToastService.ShowError("Error occured in adding Reminder!");
+        }
+        spinnerservice.Hide();
+    }
+    private int GetCount(string tab) =>
+    tab switch
+    {
+        "All" => Remiandercenters?.Count(r=> r.IsComplete != true) ?? 0,
+
+        "Critical" => Remiandercenters?
+            .Count(r => GetSeverityByCategory(r.ReminderCategoryId) == Severity.Critical && r.IsComplete != true) ?? 0,
+
+        _ => Remiandercenters?
+            .Count(r => r.ReminderCategoryName == tab && r.IsComplete != true) ?? 0
+    };
+
+    private void ShowAddModal()
+    {
+        remainderDto = new();
+        ShowModal = true;
+    }
+
+    private void CloseModal()
+    {
+        remainderDto = new();
+        ShowModal = false;
+    }
+
+
+
+    private async Task BulkComplete()
+    {
+        spinnerservice.Show();
+        var tocomplete = FilteredReminders.Where(e => e.IsComplete == true).ToList();
+        foreach (var item in tocomplete)
+        {
+            var result = await RemianderCenterService.CompleteRemainder(item);
+        }
+        // .RemoveAll(r => r.IsSelected);
+
+        spinnerservice.Hide();
+        ShowCompleteReminder = true;
+    }
+
+    private void BulkSnooze()
+    {
+        ShowSnoozeReminder = true;
+        // foreach (var r in Reminders.Where(r => r.IsSelected))
+        // {
+        //     r.IsSelected = false;
+        // }
+    }
+
+    public class ReminderItem
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Category { get; set; } = "Court";
+        public Severity Severity { get; set; } = Severity.Court;
+        public DateTime? DueDate { get; set; }
+        public bool IsSelected { get; set; }
+
+        public ReminderItem() { }
+
+        public ReminderItem(string title, string category, Severity severity)
+        {
+            Title = title;
+            Category = category;
+            Severity = severity;
+        }
+    }
+
+    public enum Severity
+    {
+        Court,
+        Payments,
+        Warrant,
+        Critical
+    }
+}
+

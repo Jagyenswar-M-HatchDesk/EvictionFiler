@@ -50,6 +50,27 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new SubCaseType() { Name = "Residential", CreatedOn = now },
             };
         }
+        public static IEnumerable<ReminderEscalate> GetReminderEscalates()
+        {
+            var now = DateTime.UtcNow;
+            return new List<ReminderEscalate>
+            {
+                new ReminderEscalate() { Name = "Admin", CreatedOn = now },
+                new ReminderEscalate() { Name = "None", CreatedOn = now },
+                new ReminderEscalate() { Name = "Supervising Attorney", CreatedOn = now },
+            };
+        }
+        public static IEnumerable<ReminderCategory> GetReminderCategory()
+        {
+            var now = DateTime.UtcNow;
+            return new List<ReminderCategory>
+            {
+                new ReminderCategory() { Name = "Court", CreatedOn = now },
+                new ReminderCategory() { Name = "Payment", CreatedOn = now },
+                new ReminderCategory() { Name = "Warrant", CreatedOn = now },
+                new ReminderCategory() { Name = "Critical", CreatedOn = now },
+            };
+        }
 
         public static IEnumerable<AppearanceMode> GetAppearanceMode()
         {

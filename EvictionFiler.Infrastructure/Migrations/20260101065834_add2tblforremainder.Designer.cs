@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260101065834_add2tblforremainder")]
+    partial class add2tblforremainder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4127,9 +4130,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsComplete")
-                        .HasColumnType("bit");
-
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -4137,10 +4137,10 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<Guid?>("RemainderTypeId")
+                    b.Property<Guid?>("RemainderCategoryId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ReminderCategoryId")
+                    b.Property<Guid?>("RemainderTypeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("ReminderEscalateId")
@@ -4168,9 +4168,9 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.HasIndex("CountyId");
 
-                    b.HasIndex("RemainderTypeId");
+                    b.HasIndex("RemainderCategoryId");
 
-                    b.HasIndex("ReminderCategoryId");
+                    b.HasIndex("RemainderTypeId");
 
                     b.HasIndex("ReminderEscalateId");
 
@@ -5402,13 +5402,13 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("CountyId");
 
+                    b.HasOne("EvictionFiler.Domain.Entities.Master.ReminderCategory", "RemainderCategory")
+                        .WithMany()
+                        .HasForeignKey("RemainderCategoryId");
+
                     b.HasOne("EvictionFiler.Domain.Entities.Master.RemainderType", "RemainderType")
                         .WithMany()
                         .HasForeignKey("RemainderTypeId");
-
-                    b.HasOne("EvictionFiler.Domain.Entities.Master.ReminderCategory", "ReminderCategory")
-                        .WithMany()
-                        .HasForeignKey("ReminderCategoryId");
 
                     b.HasOne("EvictionFiler.Domain.Entities.Master.ReminderEscalate", "ReminderEscalates")
                         .WithMany()
@@ -5422,9 +5422,9 @@ namespace EvictionFiler.Infrastructure.Migrations
 
                     b.Navigation("County");
 
-                    b.Navigation("RemainderType");
+                    b.Navigation("RemainderCategory");
 
-                    b.Navigation("ReminderCategory");
+                    b.Navigation("RemainderType");
 
                     b.Navigation("ReminderEscalates");
 

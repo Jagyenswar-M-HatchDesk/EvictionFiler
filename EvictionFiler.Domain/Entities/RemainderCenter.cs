@@ -33,11 +33,19 @@ namespace EvictionFiler.Domain.Entities
         public Guid? RemainderTypeId { get; set; }
         [ForeignKey("RemainderTypeId")]
         public RemainderType? RemainderType { get; set; }
+        public Guid? ReminderEscalateId { get; set; }
+        [ForeignKey("ReminderEscalateId")]
+        public ReminderEscalate? ReminderEscalates { get; set; }
+        public Guid? ReminderCategoryId { get; set; }
+        [ForeignKey("ReminderCategoryId")]
+        public ReminderCategory? ReminderCategory { get; set; }
 
         public DateTime? When { get; set; }
 
         [MaxLength(500)]
         public string? Notes { get; set; }
+        public string? ReminderName { get; set; }
+        public bool? IsComplete { get; set; }
     }
 
 }

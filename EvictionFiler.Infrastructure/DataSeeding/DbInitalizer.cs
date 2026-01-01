@@ -68,6 +68,8 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 await SeedAppreanceMode(context);
                 await SeedVirtualPlatform(context);
                 await SeedCourtType(context);
+                await SeedReminderCategory(context);
+                await SeedReminderEscalates(context);
                 await context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -84,6 +86,28 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 if (context.MstAppearanceTypesForHearing.FirstOrDefault(d => d.Name == type.Name) == null)
                 {
                     await context.MstAppearanceTypesForHearing.AddAsync(type);
+                }
+            }
+        }
+        private static async Task SeedReminderCategory(MainDbContext context)
+        {
+            var appearancetypes = InitialDataGenerator.GetReminderCategory();
+            foreach (var type in appearancetypes)
+            {
+                if (context.MstReminderCategory.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstReminderCategory.AddAsync(type);
+                }
+            }
+        }
+        private static async Task SeedReminderEscalates(MainDbContext context)
+        {
+            var appearancetypes = InitialDataGenerator.GetReminderEscalates();
+            foreach (var type in appearancetypes)
+            {
+                if (context.MstReminderEscalates.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstReminderEscalates.AddAsync(type);
                 }
             }
         }

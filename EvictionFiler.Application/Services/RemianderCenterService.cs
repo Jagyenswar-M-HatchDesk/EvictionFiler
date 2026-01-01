@@ -3,7 +3,9 @@ using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
+using static Azure.Core.HttpHeader;
 
 namespace EvictionFiler.Application.Services
 {
@@ -32,10 +34,27 @@ namespace EvictionFiler.Application.Services
                 RemainderTypeId = dto.RemainderTypeId,
                 Index = dto.Index,
                 Notes = dto.Notes,
+                ReminderName = dto.ReminderName,
+                ReminderCategoryId = dto.ReminderCategoryId,
+                ReminderEscalateId = dto.ReminderEscalateId,
+
 
             };
             await _remainderCenterRepo.AddAsync(rc);
 
+            var result = await _unitOfWork.SaveChangesAsync();
+
+            return result > 0;
+        }
+        public async Task<bool> CompleteRemainder(EditToRemainderCenterDto dto)
+        {
+            var data = await _remainderCenterRepo.GetAsync(dto.Id);
+            if (data != null)
+            {
+                data.IsComplete = dto.IsComplete;
+                
+            }
+            
             var result = await _unitOfWork.SaveChangesAsync();
 
             return result > 0;
@@ -64,7 +83,7 @@ namespace EvictionFiler.Application.Services
         public async Task<List<EditToRemainderCenterDto>> GetAllRemainderCenterAsync()
         {
             var calanders = await _remainderCenterRepo
-                .GetAllQuerable(x => x.IsDeleted != true, x => x.RemainderType, x => x.County, x => x.Tenant, x => x.Case)
+                .GetAllQuerable(x => x.IsDeleted != true, x => x.RemainderType, x => x.County, x => x.Tenant, x => x.Case, x=>x.ReminderEscalates, x=>x.ReminderCategory)
                 .ToListAsync();
 
             var result = calanders.Select(dto => new EditToRemainderCenterDto
@@ -81,7 +100,12 @@ namespace EvictionFiler.Application.Services
                 CountyName = dto.County?.Name ?? "Unknown",
                 TenantName = dto.Tenant?.FirstName ?? "Unknown",
                 CaseCode = dto.Case?.Casecode ?? "Unknown",
-
+                ReminderName = dto.ReminderName,
+                ReminderCategoryId = dto.ReminderCategoryId,
+                ReminderEscalateId = dto.ReminderEscalateId,
+                ReminderCategoryName = dto.ReminderCategory != null ? dto.ReminderCategory.Name : string.Empty,
+                ReminderEscalateName = dto.ReminderEscalates != null ? dto.ReminderEscalates.Name : string.Empty,
+                IsComplete = dto.IsComplete,
 
 
             }).ToList();

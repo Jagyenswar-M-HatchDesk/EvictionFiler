@@ -26,5 +26,11 @@ namespace EvictionFiler.Application.DTOs.RemainderCenterDto
 
 
         public string? Notes { get; set; }
+        public string? ReminderName { get; set; }
+        public Guid? ReminderCategoryId { get; set; }
+        public string? ReminderCategoryName { get; set; }
+        public string? ReminderEscalateName { get; set; }
+        public Guid? ReminderEscalateId { get; set; }
+        public bool? IsComplete { get; set; }
     }
 }

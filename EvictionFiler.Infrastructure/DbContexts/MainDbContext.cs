@@ -88,6 +88,8 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<CaseAdditionalPetitioner> CaseAdditionalPetitioners { get; set; }
         public DbSet<CaseAdditionalRespondent> CaseAdditionalResondents { get; set; }
         public DbSet<CaseNoticeInfo> CaseNoticeInfo { get; set; }
+        public DbSet<ReminderEscalate> MstReminderEscalates { get; set; }
+        public DbSet<ReminderCategory> MstReminderCategory { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
