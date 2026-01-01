@@ -128,6 +128,12 @@ namespace EvictionFiler.Application.Services
                 BuildingUnits = appartment.BuildingUnits,
                 BuildingTypeId = appartment.BuildingTypeId,
                 RegistrationStatusId = appartment.RegistrationStatusId,
+                ExemptionBasisId = appartment.ExemptionBasisId,
+                ExemptionReasonId = appartment.ExemptionreasonId,
+                PrimaryResidence = appartment.PrimaryResidence,
+                GoodCause = appartment.GoodCause,
+                OwnerOccupied = appartment.OwnerOccupied,
+                TenancyTypeForBuildingId = appartment.TenancyTypeForBuildingId,
                 ManagingAgent = appartment.ManagingAgent,
 
                 LandlordId = appartment.LandlordId,
@@ -165,7 +171,13 @@ namespace EvictionFiler.Application.Services
                 MDRNumber = appartment.MDRNumber,
                 PetitionerInterest = appartment.PetitionerInterest,
                 BuildingUnits = appartment.BuildingUnits,
-
+                RegistrationStatusId = appartment.RegistrationStatusId,
+                ExemptionBasisId = appartment.ExemptionBasisId,
+                ExemptionreasonId = appartment.ExemptionReasonId,
+                PrimaryResidence = appartment.PrimaryResidence,
+                GoodCause = appartment.GoodCause,
+                OwnerOccupied = appartment.OwnerOccupied,
+                TenancyTypeForBuildingId = appartment.TenancyTypeForBuildingId,
                 LandlordId = appartment.LandlordId,
             };
         }
@@ -235,6 +247,8 @@ namespace EvictionFiler.Application.Services
             if (entity != null)
             {
 
+
+
                 if(entity.ApartmentCode != appartment.ApartmentCode) entity.ApartmentCode = appartment.ApartmentCode;
                 if(entity.CityId != appartment.CityId) entity.CityId = appartment.CityId;
                 if (entity.Address1 != appartment.Address1)  entity.Address1 = appartment.Address1;
@@ -246,7 +260,12 @@ namespace EvictionFiler.Application.Services
                 if (entity.BuildingTypeId != appartment.BuildingTypeId) entity.BuildingTypeId = appartment.BuildingTypeId;
                 if (entity.PremiseTypeId != appartment.PremiseTypeId) entity.PremiseTypeId = appartment.PremiseTypeId;
                 if (entity.RegistrationStatusId != appartment.RegistrationStatusId) entity.RegistrationStatusId = appartment.RegistrationStatusId;
-                if (entity.ManagingAgent != appartment.ManagingAgent) entity.ManagingAgent = appartment.ManagingAgent;
+                if (entity.PrimaryResidence != appartment.PrimaryResidence) entity.PrimaryResidence = appartment.PrimaryResidence;
+                if (entity.GoodCause != appartment.GoodCause) entity.GoodCause = appartment.GoodCause;
+                if (entity.OwnerOccupied != appartment.OwnerOccupied) entity.OwnerOccupied = appartment.OwnerOccupied;
+                if (entity.ExemptionReasonId != appartment.ExemptionreasonId) entity.ExemptionReasonId = appartment.ExemptionreasonId;
+                if (entity.ExemptionBasisId != appartment.ExemptionBasisId) entity.ExemptionBasisId = appartment.ExemptionBasisId;
+                if (entity.TenancyTypeForBuildingId != appartment.TenancyTypeForBuildingId) entity.TenancyTypeForBuildingId = appartment.TenancyTypeForBuildingId;
 
                 _repository.UpdateAsync(entity);
                 await _unitOfWork.SaveChangesAsync();

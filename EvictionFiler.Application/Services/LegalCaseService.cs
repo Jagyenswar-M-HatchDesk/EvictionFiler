@@ -426,6 +426,9 @@ namespace EvictionFiler.Application.Services
         c => c.PartyRepresents!,
         c => c.Buildings!.BuildingType!,
         c => c.Buildings!.RegistrationStatus!,
+         c => c.Buildings!.ExemptionReason!,
+           c => c.Buildings!.ExemptionBasis!,
+             c => c.Buildings!.TenancyTypeForBuilding!,
         c => c.HarassmentTypse,
         c => c.DefenseTypse,
         c => c.ReliefPetitionerType,
@@ -493,9 +496,6 @@ namespace EvictionFiler.Application.Services
                         BuildingId = caseEntity.BuildingId,
                         Buildingcode = caseEntity.Buildings.BuildingCode,
                         Mdr = caseEntity.Buildings?.MDRNumber,
-
-
-
                         Borough = caseEntity.Buildings?.Cities != null ? caseEntity.Buildings?.Cities.Name : null,
                         BoroughorCityId = caseEntity.Buildings != null ? caseEntity.Buildings.CityId : Guid.Empty,
                         Units = caseEntity.Buildings != null ? caseEntity.Buildings?.BuildingUnits : null,
@@ -506,6 +506,13 @@ namespace EvictionFiler.Application.Services
                         RegulationStatusId = caseEntity.Buildings?.RegulationStatusId ?? Guid.Empty,
                         BuildingTypeId = caseEntity.Buildings.BuildingTypeId,
                         RegistrationStatusTypeId = caseEntity.Buildings.RegistrationStatusId,
+                        ExemptionReasonId = caseEntity.Buildings.ExemptionReasonId,
+                        ExemptionBasisId = caseEntity.Buildings.ExemptionBasisId,
+                        TenancyTypeForBuildingId = caseEntity.Buildings.TenancyTypeForBuildingId,
+                        PrimaryResidence = caseEntity.Buildings.PrimaryResidence,
+                        GoodCause = caseEntity.Buildings.GoodCause,
+                        OwnerOccupied = caseEntity.Buildings.OwnerOccupied,
+
 
 
                         // Tenant

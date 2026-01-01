@@ -55,6 +55,9 @@
 @inject IAdditionalOccupantsService _additionalOccupant
 @inject IStateRepository _stateRepository
 @inject ICaseAdditionalTenantService _caseAdditionalTenant
+@inject ITenancyTypeForBuildingRepository TenancyTypeForBuildingRepository;
+@inject IExemptionBasicRepository ExemptionBasicRepository;
+@inject IExemptionReasonRepository ExemptionReasonRepository;
 @inject NavigationStateMessage navmessage
 
 @using EvictionFiler.Client.SpinnerService
@@ -1071,7 +1074,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         @onclick="OnBindBuldingCancel" title="Click here for building reset">
                                                 </button>
                                             }
-                                            <div class="row mt-2">
+                                            <div class="row mt-5">
                                                 <div class="col-6">
                                                     <label class=@(isBuildingSelected ? "form-label" : "form-label required-label")>Street Address </label>
                                                     <InputText class="form-control" style=@(isBuildingSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter Address" disabled="@isBuildingSelected" />
@@ -1082,7 +1085,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     }
                                                 </div>
 
-                                                <div class="col-md-6">
+                                                <div class="col-md-3">
                                                     <label class=@(isBuildingSelected ? "form-label" : "form-label required-label")>MDR Number </label>
                                                     <InputText class="form-control" style=@(isBuildingSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.Mdr" placeholder="Enter MDR Number" disabled="@isBuildingSelected" />
 
@@ -1091,26 +1094,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <ValidationMessage For="() => legalcaseDto.Mdr" />
                                                     }
                                                 </div>
-                                            </div>
-
-                                            <div class="row mt-4">
-                                                <div class="col-md-4">
-                                                    <label class=@(isBuildingSelected ? "form-label" : "form-label required-label")>County </label>
-
-                                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.BoroughorCityId" style=@(isBuildingSelected ? "cursor:not-allowed" : "cursor:pointer") disabled="@isBuildingSelected">
-                                                        <option value="">-- Select --</option>
-                                                        @foreach (var s in CityList)
-                                                        {
-                                                            <option value="@s.Id">@s.Name</option>
-                                                        }
-                                                    </InputSelect>
-                                                    @if (!isBuildingSelected)
-                                                    {
-                                                        <ValidationMessage For="() => legalcaseDto.BoroughorCityId" />
-                                                    }
-                                                </div>
-
-                                                <div class="col-md-4">
+                                                <div class="col-md-3">
                                                     <label class=@(isBuildingSelected ? "form-label" : "form-label required-label")>Units </label>
                                                     <InputText class="form-control" style=@(isBuildingSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.Units" placeholder="Enter Units" disabled="@isBuildingSelected" />
 
@@ -1119,22 +1103,97 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <ValidationMessage For="() => legalcaseDto.Units" />
                                                     }
                                                 </div>
-                                                <div class="col-4">
-                                                    <label class=@(isBuildingSelected ? "form-label" : "form-label required-label")>Rent Regulation </label>
-                                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.RegulationStatusId" style=@(isBuildingSelected ? "cursor:not-allowed" : "cursor:pointer") disabled="@isBuildingSelected">
-                                                        <option value="">-- Select  --</option>
+
+                                            </div>
+
+                                            <div class="row mt-4">
+
+                                                <!-- County -->
+                                                <div class="@ColumnClass">
+                                                    <label class="form-label required-label">County</label>
+                                                    <InputSelect class="form-select"
+                                                                 @bind-Value="legalcaseDto.BoroughorCityId"
+                                                                 disabled="@isBuildingSelected">
+                                                        <option value="">-- Select --</option>
+                                                        @foreach (var s in CityList)
+                                                        {
+                                                            <option value="@s.Id">@s.Name</option>
+                                                        }
+                                                    </InputSelect>
+                                                </div>
+
+                                                <!-- Rent Regulation -->
+                                                <div class="@ColumnClass">
+                                                    <label class="form-label required-label">Rent Regulation</label>
+                                                    <InputSelect class="form-select"
+                                                                 @bind-Value="legalcaseDto.RegulationStatusId"
+                                                                 disabled="@isBuildingSelected">
+                                                        <option value="">-- Select --</option>
                                                         @foreach (var l in RegulationList)
                                                         {
                                                             <option value="@l.Id">@l.Name</option>
                                                         }
                                                     </InputSelect>
-                                                    @if (!isBuildingSelected)
+                                                </div>
+
+                                                @if (ShowExemptionBasic)
+                                                {
+                                                    <!-- Exemption Basic -->
+                                                    <div class="@ColumnClass">
+                                                        <label class="form-label required-label fw-semibold">
+                                                            Exemption Basic
+                                                        </label>
+                                                        <InputSelect class="form-select"
+                                                                     @bind-Value="legalcaseDto.ExemptionBasisId"
+                                                                     disabled="@isBuildingSelected">
+                                                            <option value="">-- Select --</option>
+                                                            @foreach (var s in ExemptionBasicList)
+                                                            {
+                                                                <option value="@s.Id">@s.Name</option>
+                                                            }
+                                                        </InputSelect>
+                                                    </div>
+                                                }
+
+                                            </div>
+
+                                            <div class="row mt-3">
+                                                <div class="col-md-6">
+                                                    <label class=@(isBuildingSelected ? "form-label fw-semibold" : "form-label required-label fw-semibold")>
+                                                        Tenancy Type
+                                                    </label>
+                                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.TenancyTypeForBuildingId" style=@(isBuildingSelected ? "cursor:not-allowed" : "cursor:pointer") disabled="@isBuildingSelected">
+                                                        <option value="">-- Select --</option>
+                                                        @foreach (var s in TenancyTypeForBuildingList)
+                                                        {
+                                                            <option value="@s.Id">@s.Name</option>
+                                                        }
+                                                    </InputSelect>
+                                                    @if (!IsExistingBuildingSelected)
                                                     {
-                                                        <ValidationMessage For="() => legalcaseDto.RegulationStatusId" />
+                                                        <ValidationMessage For="() => legalcaseDto.TenancyTypeForBuildingId" />
+                                                    }
+
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class=@(isBuildingSelected ? "form-label fw-semibold" : "form-label required-label fw-semibold")>
+                                                        Exemption Reason
+                                                    </label>
+                                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.ExemptionReasonId" style=@(isBuildingSelected ? "cursor:not-allowed" : "cursor:pointer") disabled="@isBuildingSelected">
+                                                        <option value="">-- Select --</option>
+                                                        @foreach (var s in ExemptionReasonList)
+                                                        {
+                                                            <option value="@s.Id">@s.Name</option>
+                                                        }
+                                                    </InputSelect>
+                                                    @if (!IsExistingBuildingSelected)
+                                                    {
+                                                        <ValidationMessage For="() => legalcaseDto.ExemptionReasonId" />
                                                     }
 
                                                 </div>
                                             </div>
+
                                             @if (IsNewBuilding)
                                             {
                                                 <div class="row mt-4">
@@ -1166,9 +1225,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                             }
                                             <div class="row mt-4 d-flex justify-content-between">
-
-                                                <div class="col-md-5">
-
+                                                <div class="col-md-6">
                                                     <label class=@(isBuildingSelected ? "form-label fw-semibold" : "form-label required-label fw-semibold")>
                                                         Building Type
                                                     </label>
@@ -1183,35 +1240,12 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     {
                                                         <ValidationMessage For="() => legalcaseDto.PremiseTypeId" />
                                                     }
-                                                    @* @if (PremiseTypesList != null && PremiseTypesList.Any())
-                                                {
-                                                    <div class="row" style="display: flex;flex-wrap: wrap; margin-left:10px;">
-                                                        <InputRadioGroup @bind-Value="legalcaseDto.PremiseTypeId" class="d-flex gap-4 flex-wrap mt-2">
 
-                                                            @foreach (var Type in PremiseTypesList)
-                                                            {
-                                                                <div class="form-check d-flex align-items-center gap-1 col-6">
-                                                                    <InputRadio class="form-check-input"
-                                                                                id="@($"Type_{Type.Id}")"
-                                                                                Value="@Type.Id" disabled="@IsExistingBuildingSelected" />
-
-                                                                    <label class="form-check-label" for="@($"Type_{Type.Id}")">@Type.Name</label>
-                                                                </div>
-                                                            }
-
-                                                        </InputRadioGroup>
-
-                                                        @if (!IsExistingBuildingSelected)
-                                                        {
-                                                            <ValidationMessage For="() => legalcaseDto.PremiseTypeId" />
-                                                        }
-
-
-                                                    </div>
-                                                } *@
                                                 </div>
 
-                                                <div class="col-md-7">
+
+
+                                                <div class="col-md-6">
                                                     <label class=@(isBuildingSelected ? "form-label fw-semibold" : "form-label required-label fw-semibold")>
                                                         Registration Status (HPD/DOF)
                                                     </label>
@@ -1234,10 +1268,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                     }
                                                                 </InputRadioGroup>
                                                                 <ValidationMessage For="() => legalcaseDto.RegistrationStatusTypeId" />
-                                                                @*                         @if (!IsExistingBuildingSelected)
-                                                {
-                                                                
-                                                } *@
+
 
                                                             </div>
                                                         }
@@ -1246,7 +1277,59 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
 
                                             </div>
+                                            <div class="row mb-3">
+                                                <div class="col-4">
+                                                    <InputRadioGroup @bind-Value="legalcaseDto.OwnerOccupied" style=@(isBuildingSelected ? "cursor:not-allowed" : "")>
+                                                        <label class="form-label mb-0 me-2">Owner Occupied?:</label>
+                                                        <div class="d-flex gap-2">
 
+                                                            <div class="form-check me-2">
+                                                                <InputRadio class="form-check-input" Value="true" disabled="@isBuildingSelected" />
+                                                                <label class="form-check-label">Yes</label>
+                                                            </div>
+
+                                                            <div class="form-check">
+                                                                <InputRadio class="form-check-input" Value="false" disabled="@isBuildingSelected" />
+                                                                <label class="form-check-label">No</label>
+                                                            </div>
+                                                        </div>
+                                                    </InputRadioGroup>
+                                                </div>
+                                                <div class="col-4">
+                                                    <InputRadioGroup @bind-Value="legalcaseDto.PrimaryResidence" style=@(isBuildingSelected ? "cursor:not-allowed" : "")>
+                                                        <label class="form-label mb-0 me-2">Primary Residence?:</label>
+                                                        <div class="d-flex gap-2">
+
+                                                            <div class="form-check me-2">
+                                                                <InputRadio class="form-check-input" Value="true" disabled="@isBuildingSelected" />
+                                                                <label class="form-check-label">Yes</label>
+                                                            </div>
+
+                                                            <div class="form-check">
+                                                                <InputRadio class="form-check-input" Value="false" disabled="@isBuildingSelected" />
+                                                                <label class="form-check-label">No</label>
+                                                            </div>
+                                                        </div>
+                                                    </InputRadioGroup>
+                                                </div>
+                                                <div class="col-4">
+                                                    <InputRadioGroup @bind-Value="legalcaseDto.GoodCause" style=@(isBuildingSelected ? "cursor:not-allowed" : "")>
+                                                        <label class="form-label mb-0 me-2">Does Good Cause Apply?:</label>
+                                                        <div class="d-flex gap-2">
+
+                                                            <div class="form-check me-2">
+                                                                <InputRadio class="form-check-input" Value="true" disabled="@isBuildingSelected" />
+                                                                <label class="form-check-label">Yes</label>
+                                                            </div>
+
+                                                            <div class="form-check">
+                                                                <InputRadio class="form-check-input" Value="false" disabled="@isBuildingSelected" />
+                                                                <label class="form-check-label">No -Exempt</label>
+                                                            </div>
+                                                        </div>
+                                                    </InputRadioGroup>
+                                                </div>
+                                            </div>
                                         </div>
                                     }
                                 </div>
@@ -5606,6 +5689,16 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     private List<EditToTenantDto> filteredTenants = new();
     private List<EditToTenantDto> masterTenantList = new();
     private List<FormAddEditViewModelDto> FilteredFormTypeList = new();
+    private IEnumerable<ExemptionBasic> ExemptionBasicList = new List<ExemptionBasic>();
+    private IEnumerable<ExemptionReason> ExemptionReasonList = new List<ExemptionReason>();
+    private IEnumerable<TenancyTypeForBuilding> TenancyTypeForBuildingList = new List<TenancyTypeForBuilding>();
+
+    bool ShowExemptionBasic =>
+    RegulationList.Any(r =>
+        r.Id == legalcaseDto.RegulationStatusId &&
+        r.Name == "Exempt");
+
+    string ColumnClass => ShowExemptionBasic ? "col-md-4" : "col-md-6";
 
     protected override async Task OnInitializedAsync()
     {
@@ -5828,6 +5921,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         //     showBuildingfields = false;
         //     IsNewBuilding = false;
         // }
+
+        ExemptionBasicList = await ExemptionBasicRepository.GetAllAsync();
+        ExemptionReasonList = await ExemptionReasonRepository.GetAllAsync();
+        TenancyTypeForBuildingList = await TenancyTypeForBuildingRepository.GetAllAsync();
 
         GenerateMonths();
         await BuildSteps();
@@ -8088,7 +8185,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                         ApartmentCode = legalcaseDto.UnitOrApartmentNumber,
                         MDRNumber = legalcaseDto.Mdr,
                         RegulationStatusId = legalcaseDto.RegulationStatusId,
-                        LandlordId = legalcaseDto.LandlordId
+                        LandlordId = legalcaseDto.LandlordId,
+                        ExemptionBasisId = legalcaseDto.ExemptionBasisId,
+                        ExemptionreasonId = legalcaseDto.ExemptionReasonId,
+                        PrimaryResidence = legalcaseDto.PrimaryResidence,
+                        GoodCause = legalcaseDto.GoodCause,
+                        OwnerOccupied = legalcaseDto.OwnerOccupied,
+                        TenancyTypeForBuildingId = legalcaseDto.TenancyTypeForBuildingId,
+                        RegistrationStatusId = legalcaseDto.RegistrationStatusTypeId,
                     };
 
                     var buildingId = await _buildingService.AddOnlyApartmentfromCase(newBuilding);
@@ -8134,6 +8238,12 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                             ApartmentCode = legalcaseDto.UnitOrApartmentNumber,
                             MDRNumber = legalcaseDto.Mdr,
                             RegulationStatusId = legalcaseDto.RegulationStatusId,
+                            ExemptionBasisId = legalcaseDto.ExemptionBasisId,
+                            ExemptionreasonId = legalcaseDto.ExemptionReasonId,
+                            PrimaryResidence = legalcaseDto.PrimaryResidence,
+                            GoodCause = legalcaseDto.GoodCause,
+                            OwnerOccupied = legalcaseDto.OwnerOccupied,
+                            TenancyTypeForBuildingId = legalcaseDto.TenancyTypeForBuildingId,
                         };
 
                         await _buildingService.UpdateonlyBuildingfromCase(updateBuilding);
@@ -9221,6 +9331,12 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         legalcaseDto.RegulationStatusId = building.RegulationStatusId;
         legalcaseDto.BuildingTypeId = building.BuildingTypeId;
         legalcaseDto.RegistrationStatusTypeId = building.RegistrationStatusId;
+        legalcaseDto.ExemptionBasisId = building.ExemptionBasisId;
+        legalcaseDto.ExemptionReasonId = building.ExemptionreasonId;
+        legalcaseDto.PrimaryResidence = building.PrimaryResidence;
+        legalcaseDto.GoodCause = building.GoodCause;
+        legalcaseDto.OwnerOccupied = building.OwnerOccupied;
+        legalcaseDto.TenancyTypeForBuildingId = building.TenancyTypeForBuildingId;
 
 
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.BuildingAddress)));
@@ -9341,7 +9457,17 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         legalcaseDto.City = null;
         legalcaseDto.Mdr = null;
         legalcaseDto.RegulationStatusId = null;
+        legalcaseDto.StateId = null;
+        legalcaseDto.ZipCode = null;
         legalcaseDto.BuildingStateId = StateList.Where(e => e.Name.Contains("New York")).FirstOrDefault().Id;
+        legalcaseDto.PremiseTypeId = null;
+        legalcaseDto.RegistrationStatusTypeId = null;
+        legalcaseDto.ExemptionReasonId = null;
+        legalcaseDto.ExemptionBasisId = null;
+        legalcaseDto.TenancyTypeForBuildingId = null;
+        legalcaseDto.PrimaryResidence = null;
+        legalcaseDto.GoodCause = null;
+        legalcaseDto.OwnerOccupied = null;
         TenantList = new();
         Tenants = new();
 
