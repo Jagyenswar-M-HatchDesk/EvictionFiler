@@ -116,6 +116,8 @@ namespace EvictionFiler.Application.Services
                 LastName = e.LastName,
                 UnitOrApartmentNumber = e.UnitOrApartmentNumber,
                 BuildinId = e.BuildingId,
+                PrimaryResidence = e.PrimaryResidence,
+                TenancyTypeId = e.TenancyTypeId,
 
             };
             //newtenant.Add(tenant);
@@ -195,6 +197,8 @@ namespace EvictionFiler.Application.Services
                 IsUnitIllegalId = t.IsUnitIllegalId,
                 IsUnitIllegalName = t.IsUnitIllegal?.Name,
                 BuildingId = t.BuildinId,
+                PrimaryResidence = t.PrimaryResidence,
+                
 
 
                 //Building = new EditToBuildingDto
@@ -331,42 +335,54 @@ namespace EvictionFiler.Application.Services
         }
         public async Task<bool> UpdateTenantAsync(EditToTenantDto t)
         {
-            var entity = await _repo.GetAsync(t.Id);
-            if (entity != null)
+            try
             {
-                entity.FirstName = t.FirstName;
-                entity.LastName = t.LastName;
-                entity.SSN = t.SSN;
-                entity.Phone = t.Phone;
-                entity.Email = t.Email;
-                entity.LanguageId = t.LanguageId;
+                var entity = await _repo.GetAsync(t.Id);
+                if (entity != null)
+                {
+                    entity.FirstName = t.FirstName;
+                    entity.LastName = t.LastName;
+                    entity.SSN = t.SSN;
+                    entity.Phone = t.Phone;
+                    entity.Email = t.Email;
+                    entity.LanguageId = t.LanguageId;
 
-                entity.HasPossession = t.HasPossession;
-                entity.HasRegulatedTenancy = t.HasRegulatedTenancy;
-                //entity.Additionaltenants = t.Additionaltenants;
-                entity.OtherOccupants = t.OtherOccupants;
+                    entity.HasPossession = t.HasPossession;
+                    entity.HasRegulatedTenancy = t.HasRegulatedTenancy;
+                    //entity.Additionaltenants = t.Additionaltenants;
+                    entity.OtherOccupants = t.OtherOccupants;
 
-                entity.TenantRecord = t.TenantRecord;
-                entity.HasPriorCase = t.HasPriorCase;
-                entity.TenancyTypeId = t.TenancyTypeId;
-                entity.RenewalOffer = t.RenewalOffer;
-                //entity.RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek;
-                entity.SocialServices = t.SocialServices;
-                entity.MonthlyRent = t.MonthlyRent;
+                    entity.TenantRecord = t.TenantRecord;
+                    entity.HasPriorCase = t.HasPriorCase;
+                    entity.TenancyTypeId = t.TenancyTypeId;
+                    entity.PrimaryResidence = t.PrimaryResidence;
+                    entity.RenewalOffer = t.RenewalOffer;
+                    //entity.RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek;
+                    entity.SocialServices = t.SocialServices;
+                    entity.MonthlyRent = t.MonthlyRent;
 
-                entity.TenantShare = t.TenantShare;
-                entity.ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate;
-                entity.UnitOrApartmentNumber = t.UnitOrApartmentNumber;
+                    entity.TenantShare = t.TenantShare;
+                    entity.ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate;
+                    entity.UnitOrApartmentNumber = t.UnitOrApartmentNumber;
 
-                entity.IsUnitIllegalId = t.IsUnitIllegalId;
-                entity.BuildinId = t.BuildingId;
+                    entity.IsUnitIllegalId = t.IsUnitIllegalId;
+                    entity.BuildinId = t.BuildingId;
+                }
+
+                _repo.UpdateAsync(entity);
+                var result = await _unitOfWork.SaveChangesAsync();
+                if (result > 0) return true;
+
+                return false;
+
+            }
+            catch (Exception ex)
+            {
+                return false;
+
             }
 
-            _repo.UpdateAsync(entity);
-            var result = await _unitOfWork.SaveChangesAsync();
-            if (result > 0) return true;
 
-            return false;
         }
 
         public async Task<List<CreateToTenantDto>> GetAll()

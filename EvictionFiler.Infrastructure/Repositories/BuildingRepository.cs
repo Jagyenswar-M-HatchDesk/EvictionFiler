@@ -205,6 +205,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 				LandlordId = appartment.LandlordId,
 				IsActive = appartment.IsActive,
 				IsDeleted = appartment.IsDeleted,
+                RentRegulationOther = appartment.RentRentRegulationOther,
+                ExemptionBasisother = appartment.ExemptionBasisOther,
 			
 
 			}).ToList();
@@ -297,7 +299,9 @@ namespace EvictionFiler.Infrastructure.Repositories
 				BuildingUnits = appartment.BuildingUnits,
 				LandlordId = appartment.LandlordId,
 				IsActive = appartment.IsActive,
-				IsDeleted = appartment.IsDeleted
+				IsDeleted = appartment.IsDeleted,
+                RentRegulationOther = appartment.RentRentRegulationOther,
+                ExemptionBasisother = appartment.ExemptionBasisOther,
 			};
 		}
 

@@ -28,6 +28,7 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public bool? HasRegulatedTenancy { get; set; }
 		public bool? OtherOccupants { get; set; }
 		public bool? HasPriorCase { get; set; }
+		public bool PrimaryResidence { get; set; }
         [Required(ErrorMessage = "Select Building")]
         public Guid? BuildingId { get; set; }
 

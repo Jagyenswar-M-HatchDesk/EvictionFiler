@@ -135,6 +135,8 @@ namespace EvictionFiler.Application.Services
                 OwnerOccupied = appartment.OwnerOccupied,
                 TenancyTypeForBuildingId = appartment.TenancyTypeForBuildingId,
                 ManagingAgent = appartment.ManagingAgent,
+                RentRentRegulationOther = appartment.RentRegulationOther,
+                ExemptionBasisOther = appartment.ExemptionBasisother,
 
                 LandlordId = appartment.LandlordId,
             };
@@ -266,6 +268,8 @@ namespace EvictionFiler.Application.Services
                 if (entity.ExemptionReasonId != appartment.ExemptionreasonId) entity.ExemptionReasonId = appartment.ExemptionreasonId;
                 if (entity.ExemptionBasisId != appartment.ExemptionBasisId) entity.ExemptionBasisId = appartment.ExemptionBasisId;
                 if (entity.TenancyTypeForBuildingId != appartment.TenancyTypeForBuildingId) entity.TenancyTypeForBuildingId = appartment.TenancyTypeForBuildingId;
+                if (entity.RentRentRegulationOther != appartment.RentRegulationOther) entity.RentRentRegulationOther = appartment.RentRegulationOther;
+                if (entity.ExemptionBasisOther != appartment.ExemptionBasisother) entity.ExemptionBasisOther = appartment.ExemptionBasisother;
 
                 _repository.UpdateAsync(entity);
                 await _unitOfWork.SaveChangesAsync();

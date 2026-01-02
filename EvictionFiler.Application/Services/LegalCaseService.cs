@@ -508,10 +508,8 @@ namespace EvictionFiler.Application.Services
                         RegistrationStatusTypeId = caseEntity.Buildings.RegistrationStatusId,
                         ExemptionReasonId = caseEntity.Buildings.ExemptionReasonId,
                         ExemptionBasisId = caseEntity.Buildings.ExemptionBasisId,
-                        TenancyTypeForBuildingId = caseEntity.Buildings.TenancyTypeForBuildingId,
-                        PrimaryResidence = caseEntity.Buildings.PrimaryResidence,
-                        GoodCause = caseEntity.Buildings.GoodCause,
-                        OwnerOccupied = caseEntity.Buildings.OwnerOccupied,
+                        GoodCause = caseEntity.Buildings.GoodCause!= null ? caseEntity.Buildings.GoodCause.Value : false,
+                        OwnerOccupied = caseEntity.Buildings.OwnerOccupied != null ? caseEntity.Buildings.OwnerOccupied.Value : false,
 
 
 
@@ -519,6 +517,8 @@ namespace EvictionFiler.Application.Services
                         TenantId = caseEntity.TenantId,
                         TenantName = $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}",
                         ApartmentNumber = caseEntity.Buildings?.ApartmentCode,
+                        TenancyTypeForBuildingId = caseEntity.Tenants != null ? caseEntity.Tenants.TenancyTypeId : Guid.Empty,
+                        PrimaryResidence = caseEntity.Tenants != null ? caseEntity.Tenants.PrimaryResidence : false,
 
                         WrittenLease = caseEntity.WrittenLease,
 

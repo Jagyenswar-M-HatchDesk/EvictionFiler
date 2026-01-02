@@ -21,7 +21,7 @@ namespace EvictionFiler.Application.DTOs
         public Guid? CountyId { get; set; }
         public Guid? MarshalId { get; set; }
 
-        public string ?Selectedclient { get; set; }
+        public string? Selectedclient { get; set; }
         public string Status { get; set; }
         public string ClientName { get; set; }
 
@@ -50,8 +50,8 @@ namespace EvictionFiler.Application.DTOs
         public string? ApartmentNumber { get; set; }
 
         public Guid? BuildingId { get; set; }
-        public Guid? CourtLocationId{ get; set; }
-        public Guid? FilingMethodId{ get; set; }
+        public Guid? CourtLocationId { get; set; }
+        public Guid? FilingMethodId { get; set; }
         public Guid? BuildingStateId { get; set; }
         public string? BuildingState { get; set; }
         public string BuildingAddress { get; set; }
@@ -143,7 +143,7 @@ namespace EvictionFiler.Application.DTOs
         public string? ClientPhone { get; set; }
 
         public string Court { get; set; } = string.Empty;
-        
+
         public string CourtAddress { get; set; } = string.Empty;
         public string CourtPhone { get; set; } = string.Empty;
 
@@ -173,12 +173,12 @@ namespace EvictionFiler.Application.DTOs
         public string? AttrneyEmail { get; set; }
 
         public string? Attrney { get; set; }
-       
+
         public string? AttrneyContactInfo { get; set; }
 
         public Guid? CaseTypeHPDId { get; set; }
         public Guid? CaseTypePerDiemId { get; set; }
-       
+
 
         public CaseTypeHPD? CaseTypeHPDs { get; set; }
         public CaseTypePerdiem? CaseTypePerdiems { get; set; }
@@ -221,10 +221,10 @@ namespace EvictionFiler.Application.DTOs
         public AppearanceTypePerDiem? AppearanceTypePerDiem { get; set; }
 
         public Guid? ReliefRespondentTypeId { get; set; }
-    
+
         public ReliefRespondentType? ReliefRespondentType { get; set; }
         public Guid? ReliefPetitionerTypeId { get; set; }
-     
+
         public ReliefPetitionerType? ReliefPetitionerType { get; set; }
         public string? Partynames { get; set; }
         public string? CaseBackground { get; set; }
@@ -232,27 +232,34 @@ namespace EvictionFiler.Application.DTOs
         public string? PerDiemAttorneyname { get; set; }
         public string? PerDiemSignature { get; set; }
         public DateOnly? PerDiemDate { get; set; }
-       
+
         public string? SpecialInstruction { get; set; }
         public string? Notes { get; set; }
+        public string? ExemptionBasisOther { get; set; }
+        public string? RentRegulationOther { get; set; }
 
         public Guid? CourtPartId { get; set; }
 
         public Guid? ExemptionBasisId { get; set; }
-      
+
 
         public Guid? ExemptionReasonId { get; set; }
-      
+
 
         public Guid? TenancyTypeForBuildingId { get; set; }
-       
-        public bool? OwnerOccupied { get; set; }
+
+        public bool OwnerOccupied { get; set; }
 
         public bool? PrimaryResidence { get; set; }
 
-        public bool? GoodCause { get; set; }
+        public bool GoodCause { get; set; }
 
         public List<ArrearLedgerDto> ArrearLedgers { get; set; } = new List<ArrearLedgerDto>();
+
+        //public IntakeModel()
+        //{
+        //    GoodCause = true;
+        //}
 
 
     }

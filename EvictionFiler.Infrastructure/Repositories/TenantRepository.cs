@@ -149,6 +149,8 @@ namespace EvictionFiler.Infrastructure.Repositories
                     TenancyTypeName = t.TenancyType.Name,
                     RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId,
                     IsUnitIllegalId = t.IsUnitIllegalId,
+                    PrimaryResidence = t.PrimaryResidence,
+                    
                 })
                 .ToListAsync();
 

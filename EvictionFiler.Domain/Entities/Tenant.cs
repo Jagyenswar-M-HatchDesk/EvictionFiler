@@ -43,6 +43,7 @@ namespace EvictionFiler.Domain.Entities
 		public bool? TenantRecord { get; set; }
 		public bool? RenewalOffer { get; set; }
 		public bool? HasPossession { get; set; }
+		public bool PrimaryResidence { get; set; }
 		public bool? HasRegulatedTenancy { get; set; }
 		public bool? OtherOccupants { get; set; }
 		public bool? HasPriorCase { get; set; }

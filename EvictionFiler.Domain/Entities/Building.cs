@@ -70,6 +70,8 @@ namespace EvictionFiler.Domain.Entities
         public bool? GoodCause { get; set; }
 
         public string? RentRegulationDescription { get; set; }
+        public string? RentRentRegulationOther { get; set; }
+        public string? ExemptionBasisOther { get; set; }
 
         public ICollection<Tenant>? Tenants { get; set; }
 	}
