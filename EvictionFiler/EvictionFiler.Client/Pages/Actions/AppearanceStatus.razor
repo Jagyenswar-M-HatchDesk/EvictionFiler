@@ -1,0 +1,361 @@
+﻿@* @page "/court-outcome" *@
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Domain.Entities.Master
+
+@inject ICourtTodayTypeRepository Courttodayrepo
+
+@* <PageTitle>HousingCourtFiler – Outcome Actions</PageTitle> *@
+<style>
+    /* body {
+        background: #f5f7fb;
+        padding-bottom: 90px;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont;
+    } */
+
+    .header {
+        background: #0b1f3a;
+        color: #fff;
+        padding: 14px 20px;
+        border-radius: 12px;
+    }
+
+    .section {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 6px 16px rgba(15,30,60,.06);
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+
+    .section h6 {
+        font-weight: 600;
+        color: #0b1f3a;
+    }
+
+    .sticky-footer {
+        position: fixed;
+        bottom: 0;
+        
+        right: 0;
+        background: #fff;
+        border-top: 1px solid #e5e7eb;
+        padding: 12px 20px;
+        z-index: 100;
+    }
+
+    .width-adjust {
+        Width: 100% !important;
+    }
+
+    .card-theme {
+        background: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 6px 16px rgba(15, 30, 60, .06);
+    }
+
+    .btn {
+        border-radius: 7px;
+        height: 38px;
+        /* width: 180px; */
+        font-size: 16px;
+        min-width: fit-content;
+    }
+
+    .health-score {
+        font-weight: 700;
+        font-size: 24px;
+    }
+
+    .btn-primary {
+        background-color: #1F365D !important;
+        border-color: #1F365D !important;
+    }
+
+        .btn-primary:hover {
+            background-color: #042254 !important;
+            border-color: #042254 !important;
+        }
+
+    .page-wrapper {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .page-content {
+        flex: 1; /* pushes footer down */
+    }
+
+    .page-footer {
+        background: #ffffff;
+        border-top: 1px solid #e5e7eb;
+        padding: 12px 20px;
+    }
+
+    .active {
+        color: #1F365D !important;
+        font-weight: 700;
+    }
+
+    .nav-link {
+        color: grey;
+    }
+
+        .nav-link:hover {
+            color: #1F365D !important;
+            font-weight: 700;
+        }
+</style>
+
+<div class="container my-4">
+
+    <!-- HEADER -->
+    <div class="header mb-3">
+        <strong>ACTIONS</strong><br />
+        Case #: CSI-2025-009312 | Court: Queens | Part D | Judge Bryan
+    </div>
+
+    <!-- OUTCOME SELECTOR -->
+    <div class="section">
+        <h6>What happened in court today?</h6>
+        <InputSelect class="form-select" @bind-Value="Outcome">
+            <option value="">—-Select-—</option>
+            @foreach(var item in CourtTodayType)
+            {
+                <option value="@item.Id">@item.Name</option>
+               @*  <option value="motion">Adjourned for Motion Practice</option>
+                <option value="stip">Stipulation (No Judgment)</option>
+                <option value="stip_judgment">Stipulation With Judgment</option>
+                <option value="final">Final Judgment + Warrant</option>
+                <option value="money">Money Judgment Only</option>
+                <option value="closed">Case Settled / Discontinued</option> *@
+            }
+            
+        </InputSelect>
+    </div>
+
+    @if (ShowAdjourn)
+    {
+        <div class="section">
+            <h6>Adjourn Date & Time</h6>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Date</label>
+                    <input type="date" @bind="AdjournDate" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label>Time</label>
+                    <input type="time" @bind="AdjournTime" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label>Reason</label>
+                    <select class="form-select" @bind="AdjournReason">
+                        <option>By Court</option>
+                        <option>By Stipulation</option>
+                        <option>Motion Practice</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (ShowMotions)
+    {
+        <div class="section">
+            <h6>Motion Schedule</h6>
+            <div class="row">
+                <div class="col-md-3"><label>Motion Due</label><InputDate @bind-Value="MotionDue" class="form-control" /></div>
+                <div class="col-md-3"><label>Opposition Due</label><InputDate @bind-Value="OppositionDue" class="form-control" /></div>
+                <div class="col-md-3"><label>Reply Due</label><InputDate @bind-Value="ReplyDue" class="form-control" /></div>
+                <div class="col-md-3"><label>Return Date</label><InputDate @bind-Value="ReturnDate" class="form-control" /></div>
+            </div>
+        </div>
+    }
+
+    @if (ShowStip)
+    {
+        <div class="section">
+            <h6>Stipulation Summary</h6>
+            <div class="form-check">
+                <InputCheckbox class="form-check-input" @bind-Value="JurisdictionWaived" />
+                <label class="form-check-label">Jurisdictional defenses waived</label>
+            </div>
+            <div class="form-check">
+                <InputCheckbox class="form-check-input" @bind-Value="MilitaryAffidavit" />
+                <label class="form-check-label">Military affidavit complete</label>
+            </div>
+        </div>
+    }
+
+    @if (ShowWarrant)
+    {
+        <div class="section">
+            <h6>Warrant & Eviction</h6>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Warrant Issued</label>
+                    <select class="form-select" @bind="WarrantIssued">
+                        <option>Yes</option>
+                        <option>No</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label>Issuance Date</label>
+                    <InputDate @bind-Value="WarrantDate" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label>Stay Until</label>
+                    <InputDate @bind-Value="StayUntil" class="form-control" />
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (ShowPayments)
+    {
+        <div class="section">
+            <h6>Payments / Use & Occupancy</h6>
+
+            <div class="row mb-2">
+                <div class="col-md-3">
+                    <InputNumber @bind-Value="Amount" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <InputDate @bind-Value="PaymentStart" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <InputDate @bind-Value="PaymentEnd" class="form-control" />
+                </div>
+            </div>
+
+            <button class="btn btn-sm btn-primary" @onclick="GenerateSchedule">
+                Generate Schedule
+            </button>
+
+            <table class="table table-sm mt-2">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in PaymentSchedule)
+                    {
+                        <tr>
+                            <td>@row.Date.ToShortDateString()</td>
+                            <td>@row.Amount.ToString("C")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @if (Outcome != null && Outcome != Guid.Empty)
+    {
+        <div class="section">
+            <h6>Key Dates (Read Only)</h6>
+            <ul>
+                <li>Vacate Date: —</li>
+                <li>Next Appearance: —</li>
+                <li>Next Payment: —</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h6>Reminders</h6>
+            <div class="form-check">
+                <InputCheckbox class="form-check-input" @bind-Value="ReminderDeadlines" />
+                <label class="form-check-label">Deadlines</label>
+            </div>
+            <div class="form-check">
+                <InputCheckbox class="form-check-input" @bind-Value="ReminderPayments" />
+                <label class="form-check-label">Payments</label>
+            </div>
+        </div>
+    }
+
+</div>
+
+<div class="sticky-footer d-flex justify-content-between width-adjust">
+    <div class="text-muted">Court-ready ✓</div>
+    <div>
+        <button class="btn btn-outline-secondary btn-sm">Save</button>
+        <button class="btn btn-primary btn-sm">Save & Generate Reminders</button>
+    </div>
+</div>
+
+@code {
+
+    Guid? Outcome = null;
+
+    DateTime? AdjournDate;
+    TimeOnly? AdjournTime;
+    string AdjournReason = "By Court";
+
+    DateTime? MotionDue;
+    DateTime? OppositionDue;
+    DateTime? ReplyDue;
+    DateTime? ReturnDate;
+
+    bool JurisdictionWaived;
+    bool MilitaryAffidavit;
+
+    string WarrantIssued = "Yes";
+    DateTime? WarrantDate;
+    DateTime? StayUntil;
+
+    decimal Amount = 1500;
+    DateTime? PaymentStart;
+    DateTime? PaymentEnd;
+
+    bool ReminderDeadlines = true;
+    bool ReminderPayments = true;
+
+    List<PaymentRow> PaymentSchedule = new();
+    IEnumerable<CourtToday> CourtTodayType = new List<CourtToday>();
+
+    // bool ShowAdjourn => Outcome is "adjourned" or "motion";
+    bool ShowAdjourn => CourtTodayType.Any(e => e.Id == Outcome && (e.Name.Trim().Equals("Adjourned") || e.Name.Trim().Equals("Adjourned for Motion Practice")));
+    // bool ShowMotions => Outcome == "motion";
+    bool ShowMotions => CourtTodayType.Any(e => e.Id == Outcome && (e.Name.Trim().Equals("Adjourned for Motion Practice")));
+    // bool ShowStip => Outcome is "stip" or "stip_judgment";
+    bool ShowStip => CourtTodayType.Any(e => e.Id == Outcome && (e.Name.Trim().Equals("Stipulation (No Judgement)") || e.Name.Trim().Equals("Stipulation With Judgement")));
+    // bool ShowWarrant => Outcome == "final";
+    bool ShowWarrant => CourtTodayType.Any(e => e.Id == Outcome && (e.Name.Trim().Equals("Final Judgement + Warrant")));
+    // bool ShowPayments => Outcome is "stip" or "stip_judgment" or "final" or "money"; Money Judgment Only
+    bool ShowPayments => CourtTodayType.Any(e => e.Id == Outcome && (e.Name.Trim().Equals("Stipulation (No Judgement)") || e.Name.Trim().Equals("Stipulation With Judgement") || e.Name.Trim().Equals("Final Judgement + Warrant") || e.Name.Trim().Equals("Money Judgement Only")));
+
+    protected override async Task OnInitializedAsync()
+    {
+        CourtTodayType = await Courttodayrepo.GetAllAsync();
+
+    }
+
+    void GenerateSchedule()
+    {
+        PaymentSchedule.Clear();
+
+        if (PaymentStart == null || PaymentEnd == null) return;
+
+        var d = PaymentStart.Value;
+
+        while (d <= PaymentEnd)
+        {
+            PaymentSchedule.Add(new PaymentRow
+            {
+                Date = d,
+                Amount = Amount
+            });
+
+            d = d.AddMonths(1);
+        }
+    }
+
+    class PaymentRow
+    {
+        public DateTime Date { get; set; }
+        public decimal Amount { get; set; }
+    }
+}

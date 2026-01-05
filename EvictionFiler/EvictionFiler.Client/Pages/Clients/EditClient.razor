@@ -263,6 +263,25 @@
     max-width:97%;
     }
 
+
+    .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+        box-shadow: none;
+    }
+
+    .form-switch .form-check-input:checked {
+        background-color: darkblue;
+    }
+
+    .form-switch .form-check-input:not(:checked) {
+        --bs-form-switch-bg: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='%236b84af'/></svg>");
+    }
+
+    .form-switch .form-check-input {
+        width: 2.5em;
+        margin-left: -0.5em;
+        border: solid 2px lightgrey;
+    }
+
 </style>
 @using System.Collections.Generic
 
@@ -716,6 +735,7 @@ aria-labelledby="createUserLabel">
                 @if (showBuildingForm)
                 {
                     <EditForm id="buildingForm" Model="@building" OnValidSubmit="SaveBuildingAsync">
+                        <ValidationSummary />
                         <DataAnnotationsValidator />
 
                         <div class="row mb-3">
@@ -762,9 +782,12 @@ aria-labelledby="createUserLabel">
                         <!-- Premise Type & MDR Number -->
                         <div class="row mb-3">
 
-
-                            <div class="col-md-4">
-                                <label class="required-label" for="RentStatus">Rent Regulation Status</label>
+                            <div class="col-md-4" style=@(ShowExemptionOther ? "width:20%" : "")>
+                                <label>Petitioner Interest</label>
+                                <InputText class="form-control" @bind-Value="building.PetitionerInterest" placeholder="Enter Intrest" />
+                            </div>
+                            <div class="col-md-4" style=@(ShowExemptionOther ? "width:20%" : "")>
+                                <label class="required-label" for="RentStatus">Rent Regulation</label>
                                 <InputSelect class="form-select" @bind-Value="building.RegulationStatusId">
                                     <option value="">-- Select --</option>
                                     @foreach (var r in RegulationList)
@@ -775,14 +798,11 @@ aria-labelledby="createUserLabel">
                                 <ValidationMessage For="@(() => building.RegulationStatusId)" />
                             </div>
 
-                            <div class="col-md-4">
-                                <label>Petitioner Interest</label>
-                                <InputText class="form-control" @bind-Value="building.PetitionerInterest" placeholder="Enter Intrest" />
-                            </div>
+
                             @if (SelectedRegulationName?.Equals("Exempt", StringComparison.OrdinalIgnoreCase) == true)
 
                             {
-                                <div class="col-md-4">
+                                <div class="col-md-4" style=@(ShowExemptionOther ? "width:20%" : "")>
                                     <label class="required-label">Exemption Basis</label>
                                     <InputSelect class="form-select"
                                                  @bind-Value="building.ExemptionBasisId">
@@ -792,7 +812,28 @@ aria-labelledby="createUserLabel">
                                             <option value="@r.Id">@r.Name</option>
                                         }
                                     </InputSelect>
-                                    <ValidationMessage For="@(() => building.ExemptionBasisId)" />
+                                    @* <ValidationMessage For="@(() => building.ExemptionBasisId)" /> *@
+                                </div>
+                            }
+                            @if (SelectedRegulationName?.Equals("Other", StringComparison.OrdinalIgnoreCase) == true)
+
+                            {
+                                <div class="col">
+                                    <label class="required-label ">
+                                        Other Regulation
+                                    </label>
+                                    <InputText class="form-control" @bind-Value="building.RentRegulationOther" placeholder="Enter Other Reulation" />
+                                </div>
+                            }
+
+                            @if (ShowExemptionOther == true)
+
+                            {
+                                <div class="col">
+                                    <label class="required-label ">
+                                        Exemption
+                                    </label>
+                                    <InputText class="form-control" @bind-Value="building.ExemptionBasisother" placeholder="Enter Exemption" />
                                 </div>
                             }
 
@@ -800,16 +841,16 @@ aria-labelledby="createUserLabel">
                         </div>
 
                         <div class="row mb-3">
-                            <div class="col">
+                            <div class="col-6">
                                 <label class="required-label">Address Line 1</label>
-                                <div class="input-group mb-3">
+                                <div class="input-group ">
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                     <InputText class="form-control" @bind-Value="building.Address1" placeholder="Enter First Address" />
                                 </div>
                                 <ValidationMessage For="@(() => building.Address1)" />
 
                             </div>
-                            <div class="col">
+                            <div class="col-6">
                                 <label>Address Line 2</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
@@ -822,7 +863,7 @@ aria-labelledby="createUserLabel">
                         <div class="row mb-3">
                             <div class="col-6">
                                 <label class="required-label">Registration Status(HPD/DOF)</label>
-                                <InputSelect class="form-select" @bind-Value="building.RegistrationStatusId">
+                                <InputSelect class="form-select" @bind-Value="building.RegistrationStatusId" disabled="@(building.OwnerOccupied == true)">
                                     <option value="">-- Select --</option>
                                     @foreach (var s in RegistrationstatusList)
                                     {
@@ -834,7 +875,7 @@ aria-labelledby="createUserLabel">
                             <div class="col-6">
                                 <label class="required-label">Agent</label>
 
-                                <div class="input-group mb-3">
+                                <div class="input-group ">
                                     <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
                                     <InputText class="form-control" @bind-Value="building.ManagingAgent" placeholder="Enter Agent Name " />
 
@@ -848,7 +889,7 @@ aria-labelledby="createUserLabel">
 
                         </div>
 
-                        <div class="row mb-3">
+                        @*  <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="required-label" for="RentStatus">Exemption Reason</label>
                                 <InputSelect class="form-select" @bind-Value="building.ExemptionreasonId">
@@ -874,27 +915,28 @@ aria-labelledby="createUserLabel">
                                 <ValidationMessage For="@(() => building.ExemptionreasonId)" />
                             </div>
 
-                        </div>
-
+                             </div>
+                         *@
                         <div class="row mb-3">
                             <div class="col-4">
-                                <InputRadioGroup @bind-Value="building.OwnerOccupied">
-                                    <label class="form-label mb-0 me-2">Owner Occupied?:</label>
-                                    <div class="d-flex gap-2">
+                                <div class="form-check form-switch" style="padding-left:0px;">
 
-                                        <div class="form-check me-2">
-                                            <InputRadio class="form-check-input" Value="true" />
-                                            <label class="form-check-label">Yes</label>
-                                        </div>
 
-                                        <div class="form-check">
-                                            <InputRadio class="form-check-input" Value="false" />
-                                            <label class="form-check-label">No</label>
-                                        </div>
-                                    </div>
-                                </InputRadioGroup>
+                                    <label class="form-check-label form-label mb-0 me-2" for="ownerOccupiedSwitch">
+                                        Owner Occupied?
+                                        @* <span class="ms-2 fw-semibold">
+                                                                @(legalcaseDto.OwnerOccupied ? "Yes" : "No")
+                                                            </span> *@
+                                    </label>
+                                    <input class="form-check-input" style="float:none;"
+                                           type="checkbox"
+                                           id="ownerOccupiedSwitch"
+                                           @bind="building.OwnerOccupied" @bind:after="SelectedOwnerOccupied" />
+                                </div>
+
+
                             </div>
-                            <div class="col-4">
+                            @*  <div class="col-4">
                                 <InputRadioGroup @bind-Value="building.PrimaryResidence">
                                     <label class="form-label mb-0 me-2">Primary Residence?:</label>
                                     <div class="d-flex gap-2">
@@ -910,28 +952,49 @@ aria-labelledby="createUserLabel">
                                         </div>
                                     </div>
                                 </InputRadioGroup>
-                            </div>
+                            </div> *@
                             <div class="col-4">
-                                <InputRadioGroup @bind-Value="building.GoodCause">
-                                    <label class="form-label mb-0 me-2">Does Good Cause Apply?:</label>
-                                    <div class="d-flex gap-2">
 
-                                        <div class="form-check me-2">
-                                            <InputRadio class="form-check-input" Value="true" />
-                                            <label class="form-check-label">Yes</label>
-                                        </div>
+                                <div class="form-check form-switch" style="padding-left:0px;">
 
-                                        <div class="form-check">
-                                            <InputRadio class="form-check-input" Value="false" />
-                                            <label class="form-check-label">No -Exempt</label>
-                                        </div>
-                                    </div>
-                                </InputRadioGroup>
+
+                                    <label class="form-check-label form-label mb-0 me-2" for="goodCauseSwitch">
+                                        Does Good Cause Apply?:
+                                        @* <span class="ms-2 fw-semibold">
+                                                                @(legalcaseDto.OwnerOccupied ? "Yes" : "No")
+                                                            </span> *@
+                                    </label>
+                                    <input class="form-check-input" style="float:none;"
+                                           type="checkbox"
+                                           id="GoodCauseSwitch"
+                                           @bind="building.GoodCause" />
+                                </div>
+
+
                             </div>
+                            @if (building.GoodCause.Value == false)
+                            {
+                                <div class="col-md-4">
+                                    <label class="required-label" )>
+                                        Exemption Reason
+                                    </label>
+                                    <InputSelect class="form-select" @bind-Value="building.ExemptionreasonId">
+                                        <option value="">-- Select --</option>
+                                        @foreach (var s in ExemptionReasonList)
+                                        {
+                                            <option value="@s.Id">@s.Name</option>
+                                        }
+                                    </InputSelect>
+
+                                    <ValidationMessage For="() => building.ExemptionreasonId" />
+
+
+                                </div>
+                            }
                         </div>
 
                         <div class="row mb-3">
-                            <div class="col-3">
+                            <div class="col-4">
                                 <label class="required-label">Zip Code</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-geo"></i></span>
@@ -941,7 +1004,7 @@ aria-labelledby="createUserLabel">
 
                             </div>
 
-                            <div class="col-3">
+                            <div class="col-4">
                                 <label class="required-label">City</label>
 
                                 <div class="input-group mb-3">
@@ -954,11 +1017,11 @@ aria-labelledby="createUserLabel">
                                             <option value="@s.Id">@s.Name</option>
                                         }
                                     </InputSelect>
+                                    <ValidationMessage For="@(() => building.CityId)" />
                                 </div>
-                                <ValidationMessage For="@(() => building.CityId)" />
                             </div>
 
-                            <div class="col-3">
+                            <div class="col-4">
                                 <label class="required-label">State</label>
                                 <InputSelect class="form-select" @bind-Value="building.StateId">
                                     @foreach (var s in StatesList)
@@ -1625,6 +1688,19 @@ aria-labelledby="createUserLabel">
          ?.FirstOrDefault(x => x.Id == building.RegulationStatusId)
          ?.Name;
 
+    bool ShowExemptionOther =>
+       ExemptionBasicList.Any(r =>
+           r.Id == building.ExemptionBasisId &&
+           r.Name == "Other");
+
+    private async Task SelectedOwnerOccupied()
+    {
+        if (building.OwnerOccupied == true)
+        {
+            building.RegistrationStatusId = RegistrationstatusList.Where(e => e.Name.Equals("Registered")).FirstOrDefault().Id;
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         
@@ -1744,6 +1820,7 @@ aria-labelledby="createUserLabel">
     {
         showBuildingForm = false;
         building = new();
+        building.GoodCause = true;
     }
     private void BackToTenantList()
     {
@@ -1894,6 +1971,7 @@ aria-labelledby="createUserLabel">
 
 
         building = new();
+        building.GoodCause = true;
         building.StateId = StatesList.Where(e => e.Name.Contains("New York")).Select(e => e.Id).FirstOrDefault();
         showBuildingForm = false;
         StateHasChanged();
@@ -1995,7 +2073,7 @@ aria-labelledby="createUserLabel">
                 occupants.Add(new AddtionalTenantDto());
             }
         }
-        
+
 
         StateHasChanged();
     }
@@ -2006,6 +2084,7 @@ aria-labelledby="createUserLabel">
         selectedBuildingId = BuildingId;
         showBuildingForm = true;
         activeTab = "building"; // 👈 set tab
+        building.GoodCause = true;
 
         if (savelandlordList == null || !savelandlordList.Any())
         {
@@ -2013,7 +2092,10 @@ aria-labelledby="createUserLabel">
         }
         // Get selected landlord from list
         building = Buildings.FirstOrDefault(l => l.Id == BuildingId) ?? new();
-
+        if (building.GoodCause == null)
+        {
+            building.GoodCause = false;
+        }
 
 
         StateHasChanged();

@@ -71,6 +71,36 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new ReminderCategory() { Name = "Critical", CreatedOn = now },
             };
         }
+        public static IEnumerable<CourtToday> GetCourtToday()
+        {
+            var now = DateTime.UtcNow;
+            return new List<CourtToday>
+            {
+                new CourtToday() { Name = "Adjourned", CreatedOn = now },
+                new CourtToday() { Name = "Adjourned for Motion Practice", CreatedOn = now },
+                new CourtToday() { Name = "Stipulation (No Judgement)", CreatedOn = now },
+                new CourtToday() { Name = "Stipulation With Judgement", CreatedOn = now },
+                new CourtToday() { Name = "Final Judgement + Warrant", CreatedOn = now },
+                new CourtToday() { Name = "Money Judgement Only", CreatedOn = now },
+                new CourtToday() { Name = "Case Settled / Discontinued", CreatedOn = now },
+            };
+        }
+        public static IEnumerable<DocumentType> GetDocumentType()
+        {
+            var now = DateTime.UtcNow;
+            return new List<DocumentType>
+            {
+                new DocumentType() { Name = "Show on the detail screen", CreatedOn = now },
+                new DocumentType() { Name = "Signed Good Cause Article 6A", CreatedOn = now },
+                new DocumentType() { Name = "Notice of Appearance", CreatedOn = now },
+                new DocumentType() { Name = "Stipulation", CreatedOn = now },
+                new DocumentType() { Name = "Judgement and Warrant", CreatedOn = now },
+                new DocumentType() { Name = "Decision/Order", CreatedOn = now },
+                new DocumentType() { Name = "Notice of Eviction", CreatedOn = now },
+                new DocumentType() { Name = "OSC/Motion", CreatedOn = now },
+                new DocumentType() { Name = "Rent Ledger", CreatedOn = now },
+            };
+        }
 
         public static IEnumerable<AppearanceMode> GetAppearanceMode()
         {

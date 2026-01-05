@@ -84,6 +84,19 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 			return true;
 
 		}
+		public async Task<bool> SoftDeleteAsync(Guid id)
+		{
+			var entity = await _dbSet.FindAsync(id);
+			if (entity == null)
+			{
+				return false;
+			}
+			entity.IsDeleted = true;
+            _context.Entry(entity).State = EntityState.Modified;
+
+            return true;
+
+		}
 
 
 

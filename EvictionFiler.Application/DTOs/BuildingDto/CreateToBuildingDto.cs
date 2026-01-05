@@ -48,7 +48,7 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
         [Required(ErrorMessage = "Exemption basic  required")]
         public Guid? ExemptionBasisId { get; set; }
         public Guid? ExemptionreasonId { get; set; }
-        [Required(ErrorMessage = "Tenancy type required")]
+        //[Required(ErrorMessage = "Tenancy type required")]
         public Guid? TenancyTypeForBuildingId { get; set; }
         [Required(ErrorMessage = "Select Registration Status")]
         public Guid? RegistrationStatusId { get; set; }

@@ -160,6 +160,8 @@ builder.Services.AddScoped<IAppearanceTypeForHearingRepository, AppearanceTypeFo
 builder.Services.AddScoped<ITenancyTypeForBuildingRepository, TenancytypeForBuildingRepository>();
 builder.Services.AddScoped<IExemptionReasonRepository, ExemptionReasonRepository>();
 builder.Services.AddScoped<IExemptionBasicRepository, ExemptionBasicRepository>();
+builder.Services.AddScoped<IDocumentTypeRepository, DocumentTypeRepository>();
+builder.Services.AddScoped<ICourtTodayTypeRepository, CourtTodayTypeRepository>();
 
 builder.Services.AddAuthorization();
 

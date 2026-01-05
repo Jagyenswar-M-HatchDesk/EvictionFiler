@@ -2,6 +2,7 @@
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.ArrearLedgerDtos
+@using EvictionFiler.Application.DTOs.CaseDocumentDtos
 @using EvictionFiler.Application.DTOs.CaseHearing
 @using EvictionFiler.Application.DTOs.CaseNoticeInfoDtos
 @using EvictionFiler.Application.DTOs.ClientDto
@@ -52,6 +53,7 @@
 @inject ICaseTypeRepository CaseTypeRepository
 @inject IAppearanceTypeRepository appearanceTypeRepository
 @inject ICourtService courtRepository
+@inject IDocumentTypeRepository DocRepo
 
 
 
@@ -79,7 +81,7 @@
 
     .offcanvas {
         transform: translateX(100%);
-        width: 60% !important;
+        width: 65% !important;
         transition: transform 1s ease-in-out;
     }
 
@@ -103,10 +105,10 @@
     }
 
     /* .form-wrapper.hidden {
-                                                                            transform: translateX(-100%);
-                                                                            opacity: 0;
-                                                                            pointer-events: none;
-                                                                            } */
+                                                                                        transform: translateX(-100%);
+                                                                                        opacity: 0;
+                                                                                        pointer-events: none;
+                                                                                        } */
 
     .overlay-form {
         animation: slideIn 1.0s ease forwards;
@@ -409,8 +411,8 @@
     }
 
     /* =========================================================
-                   Motion Form – Scoped Styling
-                   ========================================================= */
+                               Motion Form – Scoped Styling
+                               ========================================================= */
 
     .motion-form {
         --border-color: #e5e7eb;
@@ -483,20 +485,20 @@
 
         /* Toggle (Bootstrap switch enhancement) */
         /* .motion-form .form-switch .form-check-input {
-                        width: 2.5rem;
-                        height: 1.25rem;
-                        cursor: pointer;
-                    } */
+                                    width: 2.5rem;
+                                    height: 1.25rem;
+                                    cursor: pointer;
+                                } */
 
         /* .motion-form .form-switch .form-check-input:checked {
-                            background-color: var(--primary-dark);
-                            border-color: var(--primary-dark);
-                        }
-             */
+                                        background-color: var(--primary-dark);
+                                        border-color: var(--primary-dark);
+                                    }
+                         */
         /* Attachments */
         /*  .motion-form .form-check {
-                        margin-bottom: 0.5rem;
-                    } */
+                                    margin-bottom: 0.5rem;
+                                } */
 
         .motion-form .form-check-label {
             font-size: 14px;
@@ -549,8 +551,8 @@
     }
 
     /* =========================================================
-                   Collapsible Motion Sections (Tab-like)
-                   ========================================================= */
+                               Collapsible Motion Sections (Tab-like)
+                               ========================================================= */
 
     .motion-section {
         border: 1px solid #e5e7eb;
@@ -642,53 +644,33 @@
                 <div class="row">
 
                     <ul class="row nav nav-tabs" id="actionTabs" role="tablist">
-                        <li class="col nav-item center" role="presentation">
+                        <li class="col nav-item center" role="presentation" style="padding:0px;">
                             <button class="nav-link active" id="notice-tab" data-bs-toggle="tab" data-bs-target="#notice" type="button" role="tab">Notices</button>
                         </li>
-                        <li class="col nav-item center" role="presentation">
-                            <button class="nav-link " id="marshal-tab" data-bs-toggle="tab" data-bs-target="#marshal" type="button" role="tab" @onclick="OnMarshalTabOpen">Marshal</button>
+                        <li class="col nav-item center" role="presentation" style="padding:0px;">
+                            <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" @onclick="GetAllDocuments" role="tab">Uploads</button>
                         </li>
-
-                        <li class="col-auto nav-item center" role="presentation">
-                            <button class="nav-link" id="server-tab" data-bs-toggle="tab" data-bs-target="#server" type="button" role="tab">Process Server</button>
-                        </li>
-
-                        <li class="col nav-item center" role="presentation">
-                            <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab">Uploads</button>
-                        </li>
-
-                        <li class="col nav-item center" role="presentation">
-                            <button class="nav-link" id="notes-tab" data-bs-toggle="tab" data-bs-target="#notes" type="button" role="tab">Notes</button>
-                        </li>
-
-                        <li class="col nav-item center" role="presentation">
+                        <li class="col nav-item center" role="presentation" style="padding:0px;">
                             <button class="nav-link" id="hearing-tab" data-bs-toggle="tab" data-bs-target="#hearing" type="button" role="tab">Hearing</button>
                         </li>
-                        @if (legalcaseDto.CaseTypeName == "NonPayment")
-                        {
-                            @*  <li class="col-auto nav-item center" role="presentation">
-                                <button class="nav-link" id="pedicate-tab" data-bs-toggle="tab" data-bs-target="#predicate" type="button" role="tab">Predicate Notice</button>
-                            </li> *@
-                            @*  <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="remark-tab" data-bs-toggle="tab" data-bs-target="#remarks" type="button" role="tab">Document & Remarks</button>
-                            </li> *@
-
-                        }
-                        @*  @if (legalcaseDto.CaseTypeName == "Holdover")
-                        {
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="remark-tab" data-bs-toggle="tab" data-bs-target="#remarks" type="button" role="tab">Document & Remarks</button>
-                            </li>
-
-                        } *@
-                        @if (legalcaseDto.CaseTypeName == "Per Diem")
-                        {
-                            @* <li class="col nav-item center" role="presentation"> 
-                                <button class="nav-link" id="billing-tab" data-bs-toggle="tab" data-bs-target="#billing" type="button" role="tab">Billing</button>
-                            </li>*@
-
-                        }
-
+                        <li class="col nav-item center" role="presentation" style="padding:0px;white-space:nowrap;">
+                            <button class="nav-link" id="appearance-tab" data-bs-toggle="tab" data-bs-target="#appearance" type="button" @onclick="() => ShowAppearance = true" role="tab">Appearance Status</button>
+                        </li>
+                        <li class="col nav-item center" role="presentation" style="padding:0px;">
+                            <button class="nav-link" id="filings-tab" data-bs-toggle="tab" data-bs-target="#filings" type="button" role="tab">Filings</button>
+                        </li>
+                        <li class="col nav-item center" role="presentation" style="padding:0px;">
+                            <button class="nav-link " id="marshal-tab" data-bs-toggle="tab" data-bs-target="#marshal" type="button" role="tab" @onclick="OnMarshalTabOpen">Marshal</button>
+                        </li>
+                        <li class="col nav-item center" role="presentation" style="padding:0px;">
+                            <button class="nav-link" id="notes-tab" data-bs-toggle="tab" data-bs-target="#notes" type="button" role="tab">Notes</button>
+                        </li>
+                        <li class="col-auto nav-item center" role="presentation" style="padding:0px;">
+                            <button class="nav-link" id="server-tab" data-bs-toggle="tab" data-bs-target="#server" type="button" role="tab">Process Server</button>
+                        </li>
+                        <li class="col nav-item center" role="presentation" style="padding:0px;">
+                            <button class="nav-link" id="reminder-tab" data-bs-toggle="tab" data-bs-target="#reminder" type="button" @onclick="() => ShowReminder = true" role="tab">Reminder</button>
+                        </li>
 
                     </ul>
 
@@ -1172,13 +1154,13 @@
                                         <div class="text-warning small">
                                         </div>
 
-                                        <div style="min-width:20%">
+                                        <div style="min-width:20% !important">
                                             @* <button type="button" class="btn btn-outline-secondary me-2"
                                                     @onclick="Cancel">
                                                 Cancel
                                             </button> *@
 
-                                            <button type="submit" class="btn btn-primary">
+                                            <button type="submit" class="btn btn-primary" style="min-width:100% !important">
                                                 Generate
                                             </button>
                                         </div>
@@ -1189,7 +1171,21 @@
                             </div>
 
                         </div>
-
+                        <div class="tab-pane fade" id="appearance" role="tabpanel" aria-labelledby="appearance-tab">
+                            @if(ShowAppearance)
+                            {
+                                <AppearanceStatus />
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="reminder" role="tabpanel" aria-labelledby="reminder-tab">
+                            @if (ShowReminder)
+                            {
+                                <RemainderCenter />
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="filings" role="tabpanel" aria-labelledby="filings-tab">
+                           <h4>Under Construction</h4>
+                        </div>
                         <div class="tab-pane fade" id="marshal" role="tabpanel" aria-labelledby="marshal-tab">
                             <div class="row mb-3 d-flex align-items-center">
 
@@ -1259,77 +1255,90 @@
                         </div>
 
                         <div class="tab-pane fade" id="server" role="tabpanel" aria-labelledby="server-tab">
-                            <!-- CONTENT for Process Server -->
-                            <div class="row mb-3">
-                                <label class="form-label color-text col-auto" style="display:flex; align-items:center;">Process Server</label>
-                                <div class="input-group mb-3 col">
-
-                                    <InputText class="form-control col" style="border-right:none;" @bind-Value="MarshalName" placeholder="Search Process Server" />
-                                    <span class="input-group-text" style="background:none;"><i class="fa-solid fa-magnifying-glass"></i></span>
-                                </div>
-
-                            </div>
+                            <h4>Under Construction</h4>
                         </div>
 
                         <div class="tab-pane fade" id="documents" role="tabpanel" aria-labelledby="documents-tab">
-                            <!-- CONTENT for Upload / View Documents -->
-                            <InputFile @ref="fileInput" OnChange="OnInputChanged" multiple style="display:none" />
-
-                            <div class="drop-zone"
-                                 @ref="dropZoneRef"
-                                 @onclick="OpenFileDialog">
-
-                                <div class="row">
-                                    <div class="dropzonecontent">Upload Documents</div>
-                                    <div class="dropzonecontent">
-                                        <span style="text-decoration:underline; cursor:pointer; color:#00a7ff; margin-right:5px;">Click</span>
-                                        or drag & drop file(s) here
+                            <EditForm Model="@Documentdto" OnValidSubmit="SaveFiles">
+                                <DataAnnotationsValidator />
+                                <div class="row mb-3">
+                                    <div class="fw-semibold col-auto" style="display: flex;
+                                                                            justify-content: center;
+                                                                            align-items: center;">
+                                        Document Type
+                                    </div>
+                                    <div class="col-6 ">
+                                        <InputSelect class="form-select" @bind-Value="Documentdto.DocumentTypeId">
+                                            <option value="">--Select--</option>
+                                            @foreach (var item in DocumentsType)
+                                            {
+                                                <option value="@item.Id">@item.Name</option>
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => Documentdto.DocumentTypeId)" />
                                     </div>
 
                                 </div>
+                                <!-- CONTENT for Upload / View Documents -->
+                                <InputFile @ref="fileInput" OnChange="OnInputChanged" multiple style="display:none" disabled="@(Documentdto.DocumentTypeId != null && Documentdto.DocumentTypeId != Guid.Empty)" />
+
+                                <div class="drop-zone"
+                                     @ref="dropZoneRef"
+                                     @onclick="OpenFileDialog">
+
+                                    <div class="row">
+                                        <div class="dropzonecontent">Upload Documents</div>
+                                        <div class="dropzonecontent">
+                                            <span style="text-decoration:underline; cursor:pointer; color:#00a7ff; margin-right:5px;">Click</span>
+                                            or drag & drop file(s) here
+                                        </div>
+
+                                    </div>
 
 
-                            </div>
-                            <div class="dropzonecontent" style="color:red; font-size:0.9rem; margin-top:5px;">
-                                * Only PDF and DOC/DOCX files are allowed
-                            </div>
+                                </div>
+                                <div class="dropzonecontent" style="color:red; font-size:0.9rem; margin-top:5px;">
+                                    * Only PDF and DOC/DOCX files are allowed
+                                </div>
 
-                            @if (Files.Count > 0)
-                            {
-                                <ul class="google-upload-list mt-3">
-                                    @foreach (var item in UploadItems)
-                                    {
-                                        <li class="google-upload-item">
+                                @if (Files.Count > 0)
+                                {
+                                    <ul class="google-upload-list mt-3">
+                                        @foreach (var item in UploadItems)
+                                        {
+                                            <li class="google-upload-item">
 
-                                            <div class="file-info">
-                                                <div class="file-icon">📄</div>
+                                                <div class="file-info">
+                                                    <div class="file-icon">📄</div>
 
-                                                <div class="file-meta">
-                                                    <div class="file-name">@item.File.Name</div>
+                                                    <div class="file-meta">
+                                                        <div class="file-name">@item.File.Name</div>
 
-                                                    <div class="d-flex" style="width:100px">
-                                                        <div class="progress-container">
-                                                            <div class="progress-bar" style="width:@item.Progress%"></div>
+                                                        <div class="d-flex" style="width:100px">
+                                                            <div class="progress-container">
+                                                                <div class="progress-bar" style="width:@item.Progress%"></div>
+                                                            </div>
+
+                                                            <div class="progress-text">@item.Progress%</div>
                                                         </div>
-
-                                                        <div class="progress-text">@item.Progress%</div>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            <button class="btn-close delete-btn"
-                                                    @onclick="() => RemoveUploadItem(item)">
-                                            </button>
+                                                <button class="btn-close delete-btn"
+                                                        @onclick="() => RemoveUploadItem(item)">
+                                                </button>
 
-                                        </li>
-                                    }
-                                </ul>
-                            }
+                                            </li>
+                                        }
+                                    </ul>
+                                }
 
 
-                            <div class="modal-footer mt-3" style="padding: 5px !important; border-top: none !important; ">
-                                <button type="submit" class="btn btn-primary base" @onclick="SaveFiles">Upload</button>
-                            </div>
+                                <div class="modal-footer mt-3" style="padding: 5px !important; border-top: none !important; ">
+                                    <button type="submit" class="btn btn-primary base" style="min-width:100% !important" disabled="@(Documentdto.DocumentTypeId != null && Documentdto.DocumentTypeId != Guid.Empty)">Upload</button>
+                                </div>
+                            </EditForm>
+
                         </div>
 
                         <div class="tab-pane fade" id="notes" role="tabpanel" aria-labelledby="notes-tab">
@@ -1469,11 +1478,11 @@
                                                 <div class="row g-3">
                                                     <div class="col-md-6">
                                                         <label class="form-label ">Appearance Type </label>
-                                                        <InputSelect class="form-select" @bind-Value="caseHearing.AppearanceTypeForHearingId" placeholder="Select Date" >
-                                                            
-                                                            @foreach(var item in AppearanceTypeforHearing)
+                                                        <InputSelect class="form-select" @bind-Value="caseHearing.AppearanceTypeForHearingId" placeholder="Select Date">
+
+                                                            @foreach (var item in AppearanceTypeforHearing)
                                                             {
-                                                                <option value="@item.Id">@item.Name</option>                                                                
+                                                                <option value="@item.Id">@item.Name</option>
                                                             }
                                                         </InputSelect>
                                                     </div>
@@ -1486,7 +1495,7 @@
                                                             {
                                                                 <option value="@item.Id">@item.Part / @item.RoomNo</option>
                                                             }
-                                                            </InputSelect>
+                                                        </InputSelect>
                                                     </div>
                                                 </div>
 
@@ -1506,7 +1515,7 @@
                                         </div>
                                     </div>
 
-                                  @*   <div class="motion-section">
+                                    @*   <div class="motion-section">
                                         <button type="button"
                                                 class="section-header"
                                                 @onclick="() => Toggle(nameof(IsDatetime))">
@@ -1521,7 +1530,7 @@
                                         </div>
                                     </div> *@
 
-                                   
+
                                     <div class="motion-section">
                                         <button type="button"
                                                 class="section-header"
@@ -1537,38 +1546,39 @@
                                                     <div class="col-md-3">
                                                         <label class="form-label ">Appearance Mode </label>
                                                         <InputSelect class="form-select" @bind-Value="caseHearing.AppearanceModeId">
-                                                            
+
                                                             @foreach (var item in AppearanceModes)
                                                             {
                                                                 <option value="@item.Id">@item.Name</option>
                                                             }
-                                                            </InputSelect>
+                                                        </InputSelect>
                                                     </div>
 
-                                                    @if(IsVirtualMode){
-                                                  
-                                                    <div class="col-md-3 ">
-                                                        <label class="form-label ">Virtual Platform</label>
-                                                        <InputSelect class="form-select" @bind-Value="caseHearing.VirtualPlatformId">
-                                                            <option value="">-- Select --</option>
-                                                            @foreach (var item in VirtualPlatforms)
-                                                            {
-                                                                <option value="@item.Id">@item.Name</option>
-                                                            }
-                                                            </InputSelect>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label ">Virtual Link</label>
-                                                        <InputText  class="form-control" @bind-Value="caseHearing.Virtuallink" placeholder="https://"/>
-                                                    </div>
-                                              
+                                                    @if (IsVirtualMode)
+                                                    {
 
-                                                    <div class="col-md-3 ">
-                                                        <label class="form-label ">Metting ID</label>
-                                                        <InputText  class="form-control" @bind-Value="caseHearing.Meetingid" placeholder="optional" />
-                                                    </div>
+                                                        <div class="col-md-3 ">
+                                                            <label class="form-label ">Virtual Platform</label>
+                                                            <InputSelect class="form-select" @bind-Value="caseHearing.VirtualPlatformId">
+                                                                <option value="">-- Select --</option>
+                                                                @foreach (var item in VirtualPlatforms)
+                                                                {
+                                                                    <option value="@item.Id">@item.Name</option>
+                                                                }
+                                                            </InputSelect>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label ">Virtual Link</label>
+                                                            <InputText class="form-control" @bind-Value="caseHearing.Virtuallink" placeholder="https://" />
+                                                        </div>
+
+
+                                                        <div class="col-md-3 ">
+                                                            <label class="form-label ">Metting ID</label>
+                                                            <InputText class="form-control" @bind-Value="caseHearing.Meetingid" placeholder="optional" />
+                                                        </div>
                                                     }
-                                                    
+
                                                 </div>
                                             </div>
                                         </div>
@@ -1590,7 +1600,7 @@
                                                         <InputTextArea class="form-control" @bind-Value="caseHearing.LastAction" placeholder="Taking points, courts instruction, clerk comments" />
                                                     </div>
 
-                                                   
+
                                                 </div>
                                             </div>
                                         </div>
@@ -1599,14 +1609,14 @@
                                         <div class="text-warning small">
                                         </div>
 
-                                        <div style="min-width:40%">
+                                        <div style="min-width:40% !important">
                                             @* <button type="button" class="btn btn-outline-secondary me-2"
                                                     @onclick="Cancel">
                                                 Cancel
                                             </button> *@
-                                            <button type="button" class="btn btn-secondary " style="width:45%" @onclick="OnBindHearingCancel">Reset</button>
-                                            <button type="submit" class="btn btn-primary base" style="width:45%; min-width:0px;" @onclick="SaveHearingChanges">Save</button>
-                                            
+                                            <button type="button" class="btn btn-secondary " style="width:45% !important;" @onclick="OnBindHearingCancel">Reset</button>
+                                            <button type="submit" class="btn btn-primary base" style="width:45% !important; min-width:0px !important;" @onclick="SaveHearingChanges">Save</button>
+
                                         </div>
                                     </div>
                                 </EditForm>
@@ -2297,6 +2307,7 @@
     private IEnumerable<AppearanceTypeforHearing> AppearanceTypeforHearing = new List<AppearanceTypeforHearing>();
     private IEnumerable<AppearanceType> AppearanceTypes = new List<AppearanceType>();
     private IEnumerable<VirtualPlatform> VirtualPlatforms = new List<VirtualPlatform>();
+    private IEnumerable<DocumentType> DocumentsType = new List<DocumentType>();
     private List<BilingType> BilingTypesList = new();
     private List<PaymentMethod> PaymentMethodDtoList = new();
     private List<TenancyType> TenancyTypeList = new();
@@ -2307,6 +2318,8 @@
     private string? MarshalName;
     private bool isAdmin = false;
     private bool isEditMode = false;
+    private bool ShowAppearance = false;
+    private bool ShowReminder = false;
     private MarshalDto selectedmarshal;
     private string searchmarshalText;
     private bool isMarshalAssigned = false;
@@ -2314,6 +2327,7 @@
     private GenrateNoticeModel caseForm = new();
     private List<CaseHearingDto> CaseHearings = new();
     private CaseHearingDto CaseHearing = new();
+    private CaseDocumentDto Documentdto = new();
     private List<GenrateNoticeModel> caseFormDto = new();
     [Parameter] public Guid? CurrentCaseId { get; set; }
     private CancellationTokenSource _cts;
@@ -2371,7 +2385,7 @@
         var virtualMode = AppearanceModes
       .FirstOrDefault(x => x.Name.Equals("Virtual", StringComparison.OrdinalIgnoreCase));
 
-        if (virtualMode != null )
+        if (virtualMode != null)
         {
             caseHearing.AppearanceModeId = virtualMode.Id;
         }
@@ -2434,6 +2448,13 @@
     {
 
         await LoadMarshalUI();
+
+        StateHasChanged();
+    }
+    private async Task GetAllDocuments()
+    {
+
+        if (!DocumentsType.Any()) DocumentsType = await DocRepo.GetAllAsync();
 
         StateHasChanged();
     }
@@ -3020,6 +3041,7 @@
             {
                 Id = Guid.NewGuid(),
                 LegalCaseId = CurrentCaseId.Value,
+                DocumentTypeId = Documentdto.DocumentTypeId,
                 Name = newFileName,
                 Path = $"uploads/{newFileName}",   // Relative path for web access
                 CreatedOn = DateTime.Now

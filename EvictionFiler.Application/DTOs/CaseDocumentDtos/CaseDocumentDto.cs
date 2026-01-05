@@ -1,25 +1,24 @@
-﻿using EvictionFiler.Domain.Entities.Base.Base;
+﻿using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EvictionFiler.Domain.Entities
+namespace EvictionFiler.Application.DTOs.CaseDocumentDtos
 {
-    public class CaseDocument : DeletableBaseEntity
+    public class CaseDocumentDto
     {
         public Guid Id { get; set; }
         public string? Name { get; set; } = string.Empty;
         public string? Path { get; set; } = string.Empty;
 
         public Guid? LegalCaseId { get; set; }
-        [ForeignKey("LegalCaseId")]
-        public LegalCase? Cases {  get; set; }
+        [Required(ErrorMessage = "Document Type is Required")]
         public Guid? DocumentTypeId { get; set; }
-        [ForeignKey("DocumentTypeId")]
-        public DocumentType? DocumentTypes {  get; set; }
+        
     }
 }

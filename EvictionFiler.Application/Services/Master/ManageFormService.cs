@@ -156,7 +156,7 @@ namespace EvictionFiler.Application.Services.Master
 
         public async Task<bool> DeleteFormAsync(Guid id)
         {
-            var form = await _repository.DeleteAsync(id);
+            var form = await _repository.SoftDeleteAsync(id);
             var deleterecordes = await _unitOfWork.SaveChangesAsync();
             if (deleterecordes > 0)
                 return true;
