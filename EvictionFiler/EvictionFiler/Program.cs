@@ -220,6 +220,8 @@ builder.Services.AddScoped<IFeesCatalogAttorneyRosterRepository, FeesCatalogAtto
 builder.Services.AddScoped<IFeesCatalogService, FeesCatalogService>();
 builder.Services.AddScoped<IFeesCatalogCourtAppearanceService, FeesCatalogCourtAppearanceService>();
 builder.Services.AddScoped<IFeesCatalogAttorneyRosterService, FeesCatalogAttorneyRosterService>();
+builder.Services.AddScoped<ICaseWarrantService, CaseWarrantService>();
+builder.Services.AddScoped<ICaseWarrantRepository, CaseWarrantRepository>();
 
 var app = builder.Build();
 

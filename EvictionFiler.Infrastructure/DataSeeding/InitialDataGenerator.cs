@@ -1,4 +1,6 @@
-﻿using EvictionFiler.Domain.Entities.Master;
+﻿using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities.Master;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +19,29 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new Language() { Name = "Hindi", CreatedOn = now },
                 new Language() { Name = "French", CreatedOn = now },
                 new Language() { Name = "Chienese", CreatedOn = now },
+            };
+        }
+        public static IEnumerable<User> GetUser()
+        {
+            var now = DateTime.UtcNow;
+            return new List<User>
+            {
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    FirstName = "Admin12",
+                    CreatedOn = DateTime.Now,
+                    Email = "admin12@gmail.com",
+                    UserName = "admin12@gmail.com",
+                    NormalizedEmail = "ADMIN12@GMAIL.COM",
+                    NormalizedUserName = "ADMIN12@GMAIL.COM",
+                    IsActive = true,
+                    RoleId = Guid.Parse("f5ab29da-356e-42df-a3ad-d91bbf644550"),
+                    EmailConfirmed = true,
+                    SecurityStamp = "38fef087-d2ad-4e78-9823-123456789abc",
+                    ConcurrencyStamp = "12456e31-62c3-4db3-a8fc-987654321def",
+                    PasswordHash = new PasswordHasher<object>().HashPassword(null, "Abcd@1234")
+                }
             };
         }
         

@@ -1,0 +1,961 @@
+﻿@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.ArrearLedgerDtos
+@using EvictionFiler.Application.DTOs.CaseNoticeInfoDtos
+@using EvictionFiler.Application.DTOs.FormTypeDto
+@using EvictionFiler.Application.Interfaces.IRepository
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Domain.Entities.Master
+@using System.Linq.Expressions
+@inject IClientService _clientService
+@inject IClientRoleRepository _clientRoleService
+@inject ILandlordSevice _landlordService
+@inject IBuildingService _apartmentService
+@inject ITenantService _tenantService
+@inject IStateRepository StateRepository
+@inject IPremiseTypeRepository PremiseTypeRepository
+@inject ITypeOwnerRepository TypeOwnerRepository
+@inject IRegulationStatusRepository RegulationStatusRepository
+@inject ILanguageRepository LanguageRepository
+@inject IUnitIllegalRepository UnitIllegalRepository
+@inject ITenancyTypeRepository TenancyTypeRepository
+@inject ILandlordTypeRepository LandlordTypeRepository
+@inject IDateRentRepository DateRentRepository
+@inject ICaseHearingService _caseHearingService
+@inject IMarshalService _marshalService
+@inject ILegalCaseService _caseService
+@inject ICaseTypeRepository CaseTypeRepository
+@inject IAppearanceTypeRepository appearanceTypeRepository
+@inject ICourtService courtRepository
+@inject IDocumentTypeRepository DocRepo
+@inject ICaseFormRepository CaseFormRepository
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Authorization;
+@inject ICaseFormService _CaseFormService
+@using System.Security.Claims
+@inject IToastService ToastService
+@inject ILegalCaseService _service
+@using EvictionFiler.Client.SpinnerService
+@inject SpinnerService spinnerservice
+@rendermode InteractiveAuto
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Globalization
+@inject AuthenticationStateProvider _authStateProvider
+@inject IFormTypesRepository FormTypesRepository
+
+<div class="row mb-3 motion-form">
+    <EditForm Model="@noticeModel" OnValidSubmit="GenerateNotice">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="motion-section">
+            <button type="button"
+                    class="section-header"
+                    @onclick="() => Toggle(nameof(IsMotionOpen))">
+                <span>Motion Type</span>
+                <i class="chevron @(IsMotionOpen ? "open" : "")"></i>
+            </button>
+
+            <div class="section-body @(IsMotionOpen ? "open" : "")">
+                <div class="card card-body">
+                    <!-- YOUR EXISTING FORM FIELDS HERE -->
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-8">
+                            <label class="form-label ">Motion</label>
+                            <InputSelect class="form-select" @bind-Value="noticeModel.FormTypeId" @bind-Value:after="FormTypeBindAfter">
+                                <option value="">-- Select --</option>
+                                @foreach (var m in FilteredFormTypeList)
+                                {
+                                    <option value="@m.Id">@m.Name</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="() => noticeModel.FormTypeId" />
+
+                        </div>
+
+                        <div class="col-md-4 text-md-end">
+                            @* <label class="form-label required-label">Motion</label> *@
+                            <div class=" input-group" style="width:140px">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" @bind="noticeModel.BillAmount">
+                            </div>
+                            <ValidationMessage For="() => noticeModel.BillAmount" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (legalcaseDto.CaseTypeName == "NonPayment" || legalcaseDto.CaseTypeName == "Holdover")
+        {
+
+            <div class="motion-section">
+                <button type="button"
+                        class="section-header"
+                        @onclick="() => Toggle(nameof(IsRentOpen))">
+                    <span>Rent & Payment Details</span>
+                    <i class="chevron @(IsRentOpen ? "open" : "")"></i>
+                </button>
+
+                <div class="section-body @(IsRentOpen ? "open" : "")">
+                    <div class="card card-body">
+                        <!-- YOUR EXISTING FORM FIELDS HERE -->
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label ">Rent Due Frequency</label>
+                                <InputSelect class="form-select" @bind-Value="noticeModel.DateRentId">
+                                    <option value="">-- Select --</option>
+                                    @foreach (var l in DateRentList)
+                                    {
+                                        <option value="@l.Id">@l.Name</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="() => noticeModel.DateRentId" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label ">Monthly Rent ($)</label>
+                                <InputNumber class="form-control" @bind-Value="noticeModel.MonthlyRent" />
+                                <ValidationMessage For="() => noticeModel.MonthlyRent" />
+
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Tenant's Share ($)</label>
+                                <InputNumber class="form-control" @bind-Value="noticeModel.TenantShare" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label ">Tenancy Type</label>
+                                <InputSelect class="form-select" @bind-Value="noticeModel.TenancyTypeId" @bind-Value:after="CalcNoticeDays">
+                                    <option value="">-- Select --</option>
+                                    @foreach (var t in TenancyTypeList)
+                                    {
+                                        <option value="@t.Id">@t.Name</option>
+                                    }
+                                </InputSelect>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Last Payment Date</label>
+                                <InputDate class="form-control" @bind-Value="noticeModel.DateofLastPayment" @bind-Value:after="GenerateMonths" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Last Payment Amount ($)</label>
+                                <InputNumber class="form-control" @bind-Value="noticeModel.LastPaidAmt" />
+                            </div>
+                            @if (legalcaseDto.CaseTypeName == "NonPayment")
+                            {
+                                <div class="col-md-4">
+                                    <label class="form-label ">Lease Start </label>
+                                    <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="noticeModel.LeaseStart" />
+
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label ">Lease End </label>
+                                    <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="noticeModel.LeaseEnd" />
+
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" style="align-items: center;display: flex;height: 36px;">Written Lease?</label>
+                                    <div class="d-flex justify-content-start align-items-center  gap-2">
+                                        <InputRadioGroup @bind-Value="noticeModel.WrittenLease">
+                                            <div class="form-check d-flex justify-content-center gap-2">
+                                                <InputRadio class="form-check-input" Value="true" style="font-size:15px" />
+                                                <label class="form-check-label">Yes</label>
+                                            </div>
+                                            <div class="form-check  d-flex justify-content-center gap-2">
+                                                <InputRadio class="form-check-input " Value="false" style="font-size:15px" />
+                                                <label class="form-check-label">No</label>
+                                            </div>
+                                        </InputRadioGroup>
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @if (LastdateSelected)
+            {
+                <div class="motion-section">
+                    <button type="button"
+                            class="section-header"
+                            @onclick="() => Toggle(nameof(IsLedgerOpen))">
+                        <span>Arrear Ledger</span>
+                        <i class="chevron @(IsLedgerOpen ? "open" : "")"></i>
+                    </button>
+
+                    <div class="section-body @(IsLedgerOpen ? "open" : "")">
+                        <div class="card card-body">
+                            <!-- YOUR EXISTING FORM FIELDS HERE -->
+                            <div class="row g-2 mt-2">
+                                <div class="col">
+                                    <label class="form-label">Rent Breakup</label>
+                                    <div class="total-box mt-1">
+                                        <label class="form-label " style="font-size:14px; font-weight:300; margin-bottom:0px;">Total Owed: $ @(noticeModel.Totalowed ?? 00)</label>
+                                    </div>
+
+                                    @foreach (var item in Rows)
+                                    {
+                                        <div class="row mb-3">
+                                            <div class="col-4">
+                                                <label class="form-label ">Month (YYYY-MM) </label>
+                                                <InputSelect class="form-select holdover-form"
+                                                             @bind-Value="item.Month"
+                                                             @bind-Value:after="(() => OnMonthChanged(item))">
+
+                                                    <option value="">Select month</option>
+
+                                                    @foreach (var m in MonthOptions)
+                                                    {
+                                                        <option value="@m.Value">@m.Display</option>
+                                                    }
+
+                                                </InputSelect>
+                                            </div>
+                                            <div class="col-3">
+                                                <label class="form-label  ">Amount ($) </label>
+                                                <InputNumber @bind-Value="item.Amount" @bind-Value:after="RecalculateTotal"
+                                                             class="form-control" />
+                                            </div>
+
+                                            <div class="col-3">
+                                                <label class="form-label  ">Notes </label>
+                                                <InputText @bind-Value="item.Notes"
+                                                           class="form-control" placeholder="Partial, vouchers, etc." />
+                                            </div>
+
+                                            <div class="col-2" style="justify-content:end; display:flex;">
+                                                <button type="button" class="remove-btn" @onclick="(() => RemoveRow(item))">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                </button>
+                                            </div>
+
+
+                                        </div>
+                                    }
+
+                                    <button type="button" class="add-btn" @onclick="AddRow">
+                                        + Add Month
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+
+
+            <div class="motion-section">
+                <button type="button"
+                        class="section-header"
+                        @onclick="() => Toggle(nameof(IsNoticeOpen))">
+                    <span>Notice Details</span>
+                    <i class="chevron @(IsNoticeOpen ? "open" : "")"></i>
+                </button>
+
+                <div class="section-body @(IsNoticeOpen ? "open" : "")">
+                    <div class="card card-body">
+                        <!-- YOUR EXISTING FORM FIELDS HERE -->
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label ">Date Notice Served</label>
+                                <InputDate class="form-control"
+                                           @bind-Value="noticeModel.DateNoticeServed" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Calculated Notice Length</label>
+                                <InputNumber class="form-control bg-light" disabled @bind-Value="noticeModel.CalcNoticeLength" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label d-block">Good Cause Exemption</label>
+                                <div class="d-flex justify-content-start align-items-center  gap-2">
+                                    <InputRadioGroup @bind-Value="noticeModel.GoodCauseExempt">
+                                        <div class="form-check d-flex justify-content-center gap-2">
+                                            <InputRadio class="form-check-input" Value="true" style="font-size:15px" />
+                                            <label class="form-check-label">Yes</label>
+                                        </div>
+                                        <div class="form-check  d-flex justify-content-center gap-2">
+                                            <InputRadio class="form-check-input " Value="false" style="font-size:15px" />
+                                            <label class="form-check-label">No</label>
+                                        </div>
+                                    </InputRadioGroup>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Expiration Date</label>
+                                <InputDate class="form-control bg-light" disabled
+                                           @bind-Value="noticeModel.ExpirationDate" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Predicate Notice</label>
+                                <InputText class="form-control bg-light" disabled
+                                           @bind-Value="noticeModel.PredicateNotice" />
+                            </div>
+                            @if (legalcaseDto.CaseTypeName == "NonPayment")
+                            {
+                                <div class="col-md-4">
+                                    <label class="form-label ">Service Method </label>
+                                    <InputSelect class="form-select" @bind-Value="legalcaseDto.ServiceMethodId" style="cursor:pointer;">
+                                        <option value="">-- Select --</option>
+                                        @foreach (var l in ServiceMethodList)
+                                        {
+                                            <option value="@l.Id">@l.Name</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label ">Planned Service Date </label>
+                                    <RadzenDatePicker Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.PlannedServiceDate" />
+
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Roll to Next Business Day</label>
+                                    <div class="d-flex justify-content-start align-items-center  gap-2">
+                                        <InputRadioGroup @bind-Value="legalcaseDto.NextBussinessday">
+                                            <div class="form-check d-flex justify-content-center gap-2">
+                                                <InputRadio class="form-check-input" Value="true" style="font-size:15px" />
+                                                <label class="form-check-label">Yes</label>
+                                            </div>
+                                            <div class="form-check  d-flex justify-content-center gap-2">
+                                                <InputRadio class="form-check-input " Value="false" style="font-size:15px" />
+                                                <label class="form-check-label">No</label>
+                                            </div>
+                                        </InputRadioGroup>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label ">Deemed Service (Auto) </label>
+                                    <InputText class="form-control" @bind-Value="legalcaseDto.DeemedService" style="cursor:pointer;" />
+
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label ">Expiry (auto) </label>
+                                    <InputText class="form-control" Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.Expiry" />
+
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="motion-section">
+                <button type="button"
+                        class="section-header"
+                        @onclick="() => Toggle(nameof(IsAttachmentOpen))">
+                    <span>Attachments</span>
+                    <i class="chevron @(IsAttachmentOpen ? "open" : "")"></i>
+                </button>
+
+                <div class="section-body @(IsAttachmentOpen ? "open" : "")">
+                    <div class="card card-body">
+                        <!-- YOUR EXISTING FORM FIELDS HERE -->
+                        <div class="row g-3">
+                            <div class="col-md-6 form-check">
+                                <InputCheckbox class="form-check-input" @bind-Value="noticeModel.LeasedAttached" />
+                                <label class="form-check-label">Lease Attached</label>
+                            </div>
+
+                            <div class="col-md-6 form-check">
+                                <InputCheckbox class="form-check-input" @bind-Value="noticeModel.LedgerAttached" />
+                                <label class="form-check-label">Ledger Attached</label>
+                            </div>
+
+                            <div class="col-md-6 form-check">
+                                <InputCheckbox class="form-check-input" @bind-Value="noticeModel.NoticeProofattached" />
+                                <label class="form-check-label">Notices Proof Attached</label>
+                            </div>
+
+                            <div class="col-md-6 form-check">
+                                <InputCheckbox class="form-check-input" @bind-Value="noticeModel.RegistrationRentHistory" />
+                                <label class="form-check-label">Registration / Rent History Attached</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="motion-section">
+                <button type="button"
+                        class="section-header"
+                        @onclick="() => Toggle(nameof(IsCommentsOpen))">
+                    <span>Additional Comments</span>
+                    <i class="chevron @(IsCommentsOpen ? "open" : "")"></i>
+                </button>
+
+                <div class="section-body @(IsCommentsOpen ? "open" : "")">
+                    <div class="card card-body">
+                        <!-- YOUR EXISTING FORM FIELDS HERE -->
+                        <div class="fw-semibold mb-2">Additional Comments</div>
+                        <InputTextArea class="form-control" rows="3"
+                                       @bind-Value="noticeModel.AdditionalComments" />
+
+                    </div>
+                </div>
+            </div>
+            @if (legalcaseDto.CaseTypeName == "NonPayment")
+            {
+                <div class="motion-section">
+                    <button type="button"
+                            class="section-header"
+                            @onclick="() => Toggle(nameof(IsothersOpen))">
+                        <span>Other</span>
+                        <i class="chevron @(IsothersOpen ? "open" : "")"></i>
+                    </button>
+
+                    <div class="section-body @(IsothersOpen ? "open" : "")">
+                        <div class="card card-body">
+                            <!-- YOUR EXISTING FORM FIELDS HERE -->
+                            <div class="fw-semibold mb-2">Assistance (Section 8 / SCRIE/DRIE / other)</div>
+                            <InputText class="form-control" rows="3"
+                                       @bind-Value="noticeModel.Assistance" />
+                        </div>
+                    </div>
+                </div>
+            }
+
+        }
+        @if (legalcaseDto.CaseTypeName == "Per Diem")
+        {
+            <div class="motion-section">
+                <button type="button"
+                        class="section-header"
+                        @onclick="() => Toggle(nameof(IsBillingopen))">
+                    <span>Billing</span>
+                    <i class="chevron @(IsBillingopen ? "open" : "")"></i>
+                </button>
+
+                <div class="section-body @(IsBillingopen ? "open" : "")">
+                    <div class="card card-body">
+                        <!-- YOUR EXISTING FORM FIELDS HERE -->
+                        <div class="row">
+                            <div class="col-12">
+                                <label class="form-label ">Rate / Compensation </label>
+                                @if (BilingTypesList != null && BilingTypesList.Any())
+                                {
+                                    <InputRadioGroup @bind-Value="legalcaseDto.BilingTypeId" class="d-flex flex-wrap">
+                                        <div class="d-flex align-items-center gap-4">
+
+                                            @foreach (var Type in BilingTypesList)
+                                            {
+                                                <div class="d-flex align-items-center">
+
+                                                    <!-- Radio -->
+                                                    <InputRadio class="form-check-input me-2"
+                                                                Value="@Type.Id"
+                                                                id="@($"Type_{Type.Id}")"
+                                                                @onclick="@(() => OnBillingTypeChanged(Type.Id))" />
+
+                                                    <!-- Label -->
+                                                    <label class="form-check-label me-3" for="@($"Type_{Type.Id}")">
+                                                        @Type.Name
+                                                    </label>
+
+                                                    <!-- Input box (same horizontal line) -->
+                                                    @if (legalcaseDto.BilingTypeId == Type.Id)
+                                                    {
+                                                        <input type="number"
+                                                               class="form-control"
+                                                               style="width: 180px;"
+                                                               placeholder="@(Type.Name == "Flat Rate" ? "$" : "$ / hr")"
+                                                               @bind="legalcaseDto.BilingTypeInputValue" />
+                                                    }
+
+                                                </div>
+                                            }
+
+                                        </div>
+
+
+                                    </InputRadioGroup>
+                                    <ValidationMessage For="() => legalcaseDto.BilingTypeId" />
+                                }
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-5">
+                                <label class="form-label">Travel / Other Expenses </label>
+                                <InputText class="form-control" placeholder="Optional" @bind-Value="legalcaseDto.TravelExpense" />
+                            </div>
+                            <div class="col-md-7">
+                                <label class="form-label">Payment Method  <span class="text-danger">*</span></label>
+
+                                <div id="reliefRespondentGroup" class="row">
+                                    @if (PaymentMethodDtoList != null && PaymentMethodDtoList.Any())
+                                    {
+                                        <InputRadioGroup @bind-Value="legalcaseDto.PaymentMethodId" class="d-flex flex-wrap">
+                                            @foreach (var method in PaymentMethodDtoList)
+                                            {
+                                                <div class="col-auto">
+                                                    <div class="form-check mb-2">
+                                                        <InputRadio class="form-check-input"
+                                                                    id="@($"partyType_{method.Id}")"
+                                                                    Value="@method.Id" />
+                                                        <label class="form-check-label"
+                                                               for="@($"method{method.Id}")">@method.Name</label>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </InputRadioGroup>
+                                        <ValidationMessage For="() => legalcaseDto.PaymentMethodId" />
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        <!-- Sticky Footer (inside modal/container) -->
+        <div class="d-flex justify-content-between align-items-center border-top pt-3">
+            <div class="text-warning small">
+            </div>
+
+            <div style="min-width:20% !important">
+                @* <button type="button" class="btn btn-outline-secondary me-2"
+                                                    @onclick="Cancel">
+                                                Cancel
+                                            </button> *@
+
+                <button type="submit" class="btn btn-primary" style="min-width:100% !important">
+                    Generate
+                </button>
+            </div>
+        </div>
+
+    </EditForm>
+
+</div>
+
+@code{
+    [Parameter] public IntakeModel legalcaseDto { get; set; }
+
+    private IEnumerable<ServiceMethod> ServiceMethodList = new List<ServiceMethod>();
+    private IEnumerable<AppearanceMode> AppearanceModes = new List<AppearanceMode>();
+    private IEnumerable<AppearanceTypeforHearing> AppearanceTypeforHearing = new List<AppearanceTypeforHearing>();
+    private IEnumerable<AppearanceType> AppearanceTypes = new List<AppearanceType>();
+    private IEnumerable<VirtualPlatform> VirtualPlatforms = new List<VirtualPlatform>();
+    private IEnumerable<DocumentType> DocumentsType = new List<DocumentType>();
+    private List<BilingType> BilingTypesList = new();
+    private List<PaymentMethod> PaymentMethodDtoList = new();
+    private List<TenancyType> TenancyTypeList = new();
+    private List<DateRent> DateRentList = new();
+    [Parameter] public CaseNoticeInfoDto noticeModel { get; set; } = new();
+    private ValidationMessageStore messageStore;
+    private EditContext _editContext;
+    private List<FormAddEditViewModelDto> FilteredFormTypeList = new();
+    [Parameter] public GenrateNoticeModel createAction { get; set; } = new();
+    [Parameter] public string LoggedinUserid { get; set; } 
+    // private CourtDto Court = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        _editContext = new EditContext(noticeModel);
+        messageStore = new ValidationMessageStore(_editContext);
+
+        FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
+
+        if (!ServiceMethodList.Any()) ServiceMethodList = await _caseService.ServiceMethodList();
+        if (!BilingTypesList.Any()) BilingTypesList = await CaseTypeRepository.GetAllBilingTypes();
+        PaymentMethodDtoList = await CaseTypeRepository.GetAllPaymentMethod();
+        if (!TenancyTypeList.Any()) TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
+        if (!DateRentList.Any()) DateRentList = await DateRentRepository.GetAllDateRent();
+        AppearanceModes = await _caseHearingService.GetAllModes();
+        AppearanceTypeforHearing = await _caseHearingService.GetAllAppearanceTypeForHearing();
+        AppearanceTypes = await appearanceTypeRepository.GetAllAsync();
+        VirtualPlatforms = await _caseHearingService.GetAllPlatform();
+    }
+
+    bool IsMotionOpen = true;
+    bool IsBasicHearingOpen = true;
+    bool IsAppearanceformatOpen = false;
+    bool IsDatetime = false;
+    bool IsInternalNotes = false;
+    bool IsRentOpen = false;
+    bool IsLedgerOpen = false;
+    bool LastdateSelected = false;
+    bool IsothersOpen = false;
+    bool IsBillingopen = false;
+    bool IsNoticeOpen = false;
+    bool IsAttachmentOpen = false;
+    bool IsCommentsOpen = false;
+
+    void Toggle(string section)
+    {
+        switch (section)
+        {
+            case nameof(IsMotionOpen): IsMotionOpen = !IsMotionOpen; break;
+            case nameof(IsRentOpen): IsRentOpen = !IsRentOpen; break;
+            case nameof(IsBasicHearingOpen): IsBasicHearingOpen = !IsBasicHearingOpen; break;
+            case nameof(IsAppearanceformatOpen): IsAppearanceformatOpen = !IsAppearanceformatOpen; break;
+            case nameof(IsInternalNotes): IsInternalNotes = !IsInternalNotes; break;
+            case nameof(IsDatetime): IsDatetime = !IsDatetime; break;
+            case nameof(IsothersOpen): IsothersOpen = !IsothersOpen; break;
+            case nameof(IsBillingopen): IsBillingopen = !IsBillingopen; break;
+            case nameof(IsLedgerOpen): IsLedgerOpen = !IsLedgerOpen; break;
+            case nameof(IsNoticeOpen): IsNoticeOpen = !IsNoticeOpen; break;
+            case nameof(IsAttachmentOpen): IsAttachmentOpen = !IsAttachmentOpen; break;
+            case nameof(IsCommentsOpen): IsCommentsOpen = !IsCommentsOpen; break;
+        }
+    }
+
+    void OnBillingTypeChanged(Guid id)
+    {
+        legalcaseDto.BilingTypeId = id;
+
+        // Input reset jab Flat → Hourly switch hota hai
+        legalcaseDto.BilingTypeInputValue = null;
+    }
+
+    private void CalcNoticeDays()
+    {
+        if (legalcaseDto.CaseTypeName == "Holdover")
+        {
+            Console.WriteLine("1");
+            if (legalcaseDto.DateTenantMoved != null && noticeModel.TenancyTypeId != null)
+            {
+                Console.WriteLine("2");
+
+                int length = 0;
+
+                var type = TenancyTypeList
+                    .Where(a => a.Id == noticeModel.TenancyTypeId)
+                    .Select(e => e.Name?.ToLower())
+                    .FirstOrDefault();
+
+                // ✅ Special case tenancy types get fixed 10 days
+                if (new[] { "squatter", "licensee", "referee" }.Contains(type))
+                {
+                    length = 10;
+                }
+                else
+                {
+                    // ✅ Otherwise calculate by years
+                    var yrs = DiffYears(legalcaseDto.DateTenantMoved?.ToDateTime(TimeOnly.MinValue), DateTime.Today);
+
+                    if (yrs < 1)
+                        length = 30;
+                    else if (yrs < 2)
+                        length = 60;
+                    else
+                        length = 90;
+                }
+
+                noticeModel.CalcNoticeLength = length;
+
+                // ✅ Set PredicateNotice text
+                noticeModel.PredicateNotice = type switch
+                {
+                    "licensee" => "10 Days Notice - Tenant Of Record Vacated (Licensee)",
+                    "referee" => "10 Days Notice - Referee Deed / Prior Owner",
+                    "squatter" => "10 Days Notice - Squatter / Intruder",
+                    "month-to-month" => $"{length} Days Notice - Month to Month",
+                    _ => ""
+                };
+            }
+        }
+    }
+    private int DiffYears(DateTime? from, DateTime? to)
+    {
+        if (!from.HasValue || !to.HasValue) return 0;
+        return (int)((to.Value - from.Value).TotalDays / 365);
+    }
+    private int ParseDueDay(string str)
+    {
+        if (string.IsNullOrWhiteSpace(str)) return 1;
+        if (int.TryParse(str, out var d)) return Math.Clamp(d, 1, 31);
+        return 1;
+    }
+    private void CalcExpireAligned()
+    {
+        int dueDay = ParseDueDay(
+            DateRentList.FirstOrDefault(x => x.Id == legalcaseDto.RentDueEachMonthOrWeekId)?.Name
+        );
+
+        int? days = legalcaseDto.CalculatedNoticeLength;
+        var servedISO = ToDateTime(legalcaseDto.DateNoticeServed);
+
+        // Null check
+        if (!servedISO.HasValue || !days.HasValue || days.Value <= 0)
+        {
+            legalcaseDto.ExpirationDate = null;
+            return;
+        }
+
+        // *** FIX: Initialize target here ***
+        DateTime target = servedISO.Value.AddDays(days.Value);
+
+        DateOnly expiration;
+
+        if (dueDay == 1)
+        {
+            expiration = new DateOnly(
+                target.Year,
+                target.Month,
+                DateTime.DaysInMonth(target.Year, target.Month)
+            );
+        }
+        else
+        {
+            expiration = new DateOnly(target.Year, target.Month, dueDay - 1);
+        }
+
+        legalcaseDto.ExpirationDate = expiration;
+    }
+    private DateTime? ToDateTime(DateOnly? date)
+    {
+        return date.HasValue ? date.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
+    }
+
+    private async Task<bool> ValidateCurrentStep()
+    {
+        messageStore.Clear();
+
+        if (legalcaseDto.CaseTypeName == "Holdover")
+        {
+            Require(() => noticeModel.TenancyTypeId, nameof(noticeModel.TenancyTypeId), "Tenancy type required");
+            Require(() => noticeModel.DateNoticeServed, nameof(noticeModel.DateNoticeServed), "Notice Serve Date required");
+            Require(() => noticeModel.DateRentId, nameof(noticeModel.DateRentId), "Select Date Rent required");
+            Require(() => noticeModel.MonthlyRent, nameof(noticeModel.MonthlyRent), "Monthly Rent required");
+        }
+
+
+        _editContext.NotifyValidationStateChanged();
+
+        // Get current validation messages (optional: for logging)
+        var errors = _editContext.GetValidationMessages().ToList();
+        Console.WriteLine($"Validation errors : {string.Join(", ", errors)}");
+
+        // Check if form is valid
+        bool isValid = !_editContext.GetValidationMessages().Any();
+
+        // Return validity
+        return isValid;
+    }
+    private void Require<T>(Expression<Func<T>> accessor, string fieldName, string message)
+    {
+        var value = accessor.Compile().Invoke();
+        var fieldIdentifier = new FieldIdentifier(legalcaseDto, fieldName);
+
+        // Clear old message first
+        messageStore.Clear(fieldIdentifier);
+
+        // Add message if invalid
+        bool isEmpty = value == null ||
+                       (value is string s && string.IsNullOrWhiteSpace(s)) ||
+                       (value is Guid g && g == Guid.Empty);
+
+        if (isEmpty)
+        {
+            messageStore.Add(fieldIdentifier, message);
+        }
+
+        _editContext.NotifyValidationStateChanged();
+    }
+    private async Task GenerateNotice()
+    {
+        spinnerservice.Show();
+
+        noticeModel.LegalCaseId = legalcaseDto.Id;
+        legalcaseDto.BillAmount = (legalcaseDto.BillAmount ?? 0) + (noticeModel.BillAmount ?? 0);
+
+        var successcase = await _service.UpdateCaseAsync(legalcaseDto);
+        if (!successcase.HasValue)
+        {
+            return;
+        }
+        else
+        {
+
+            noticeModel.BillAmount = null;
+        }
+
+        if (legalcaseDto.Id != Guid.Empty && noticeModel.FormTypeId.HasValue)
+        {
+            bool success = false;
+
+            var infosuccess = await _service.AddOrUpdateCaseNoticeInfo(noticeModel);
+            if (Rows.Count > 0)
+            {
+                var addrows = Rows.Where(e => (e.Id == null || e.Id == Guid.Empty) && (e.Amount != null || e.Month != null)).Select(e => new ArrearLedgerDto()
+                {
+                    LegalCaseId = legalcaseDto.Id,
+                    CaseNoticeId = infosuccess ?? null,
+                    Notes = e.Notes,
+                    Amount = e.Amount,
+                    Month = e.Month,
+                }).ToList();
+                if (addrows.Any())
+                {
+                    await _service.AddArrearLedgerAsync(addrows);
+                }
+
+                var updaterows = Rows.Where(e => e.Id != null && e.Id != Guid.Empty).Select(e => new ArrearLedgerDto()
+                {
+                    LegalCaseId = legalcaseDto.Id,
+                    CaseNoticeId = infosuccess ?? null,
+                    Notes = e.Notes,
+                    Amount = e.Amount,
+                    Month = e.Month,
+                }).ToList();
+                if (updaterows.Any())
+                {
+                    await _service.UpdateArrearLedgerAsync(updaterows);
+                }
+            }
+
+            if (isEditMode)
+            {
+                // UPDATE existing notice
+                success = await _CaseFormService.UpdateCaseFormAsync(new GenrateNoticeModel
+                {
+                    Id = createAction.Id,
+                    LegalCaseId = legalcaseDto.Id,
+                    FormTypeId = createAction.FormTypeId,
+                    File = createAction.File,
+                    HTML = createAction.HTML,
+                    CreatedOn = createAction.CreatedOn
+                });
+
+                if (success)
+                {
+                    ToastService.ShowSuccess("Notice has been updated successfully!");
+                }
+            }
+            else
+            {
+                // CREATE new notice
+                success = await CaseFormRepository.GenerateNoticeAsync(
+                    legalcaseDto.Id,
+                    noticeModel.FormTypeId.Value,
+                       Guid.Parse(LoggedinUserid)
+                );
+
+                if (success)
+                {
+                    ToastService.ShowSuccess("Notice has been generated successfully!");
+                }
+            }
+
+            if (success)
+            {
+                // await LoadCaseForms();
+
+                // // Reset form
+                // createAction = new GenrateNoticeModel();
+                // isEditMode = false;
+                // CurrentCaseId = caseId;
+                // await OnFormCreate.InvokeAsync();
+                // await JS.InvokeVoidAsync("openTab", "activity");
+            }
+        }
+        else
+        {
+
+        }
+
+        spinnerservice.Hide();
+    }
+
+    public record MonthItem(string Value, string Display);
+    private List<MonthItem> MonthOptions = new();
+    private List<ArrearLedgerDto> Rows = new();
+    private bool isEditMode = false;
+    private bool LastDaterentfilled = false;
+    private bool NoticeSelected = false;
+    private void OnMonthChanged(ArrearLedgerDto row)
+    {
+        StateHasChanged();
+    }
+
+    private void RecalculateTotal()
+    {
+        noticeModel.Totalowed = (int)Rows.Sum(x => x.Amount);
+        StateHasChanged();
+    }
+
+    private void AddRow()
+    {
+        Rows.Add(new ArrearLedgerDto());
+    }
+
+    private void RemoveRow(ArrearLedgerDto row)
+    {
+        Rows.Remove(row);
+    }
+
+    private void OnAmountChanged(ArrearLedgerDto row, double value)
+    {
+
+        row.Amount = value;
+        StateHasChanged();
+    }
+
+    private void GenerateMonths()
+    {
+        MonthOptions.Clear();
+        LastDaterentfilled = true;
+
+        if (noticeModel.DateofLastPayment is null)
+            return;
+
+        LastdateSelected = true;
+        IsLedgerOpen = true;
+        DateTime start = new DateTime(
+            noticeModel.DateofLastPayment.Value.Year,
+            noticeModel.DateofLastPayment.Value.Month,
+            1);
+
+        DateTime end = new DateTime(
+            DateTime.Today.Year,
+            DateTime.Today.Month,
+            1);
+
+        // Iterate month-by-month
+        for (DateTime dt = start; dt <= end; dt = dt.AddMonths(1))
+        {
+            string value = $"{dt:yyyy-MM}"; // stored value
+            string display = $"{dt:yyyy}-{CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(dt.Month)}";
+
+            MonthOptions.Add(new MonthItem(value, display));
+        }
+        if (Rows.Any())
+        {
+            if (Rows.Last().Month != null)
+            {
+                Rows.Add(new ArrearLedgerDto());
+            }
+        }
+
+        if (!Rows.Any())
+        {
+            Rows.Add(new ArrearLedgerDto());
+        }
+
+    }
+    private void FormTypeBindAfter()
+    {
+        var selectedForm = FilteredFormTypeList
+            .FirstOrDefault(f => f.Id == noticeModel.FormTypeId);
+
+        if (selectedForm != null)
+            noticeModel.BillAmount = Convert.ToDecimal(selectedForm.Rate);
+        else
+            noticeModel.BillAmount = null;
+
+        NoticeSelected = true;
+        StateHasChanged(); // ensure UI refreshes
+    }
+
+}

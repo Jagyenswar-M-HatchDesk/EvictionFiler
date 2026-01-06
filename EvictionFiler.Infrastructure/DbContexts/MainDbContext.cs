@@ -92,6 +92,7 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<ReminderCategory> MstReminderCategory { get; set; }
         public DbSet<DocumentType> MstDocumentType { get; set; }
         public DbSet<CourtToday> MstCourtTodayType { get; set; }
+        public DbSet<CaseWarrant> CaseWarrants { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

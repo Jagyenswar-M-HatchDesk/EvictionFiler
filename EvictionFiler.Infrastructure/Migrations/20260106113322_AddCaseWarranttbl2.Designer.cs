@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260106113322_AddCaseWarranttbl2")]
+    partial class AddCaseWarranttbl2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -979,9 +982,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("LegalCaseId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("MarshalId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1011,8 +1011,6 @@ namespace EvictionFiler.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LegalCaseId");
 
                     b.HasIndex("MarshalId");
 
@@ -5272,15 +5270,9 @@ namespace EvictionFiler.Infrastructure.Migrations
 
             modelBuilder.Entity("EvictionFiler.Domain.Entities.CaseWarrant", b =>
                 {
-                    b.HasOne("EvictionFiler.Domain.Entities.LegalCase", "LegalCases")
-                        .WithMany()
-                        .HasForeignKey("LegalCaseId");
-
                     b.HasOne("EvictionFiler.Domain.Entities.Marshal", "Marshal")
                         .WithMany()
                         .HasForeignKey("MarshalId");
-
-                    b.Navigation("LegalCases");
 
                     b.Navigation("Marshal");
                 });

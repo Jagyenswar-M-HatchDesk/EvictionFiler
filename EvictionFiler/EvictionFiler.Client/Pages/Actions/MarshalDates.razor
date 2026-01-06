@@ -1,0 +1,691 @@
+﻿@* @page "/marshal-lifecycle-custom"
+
+<PageTitle>Marshal Forms & Key Dates</PageTitle> *@
+@inject SpinnerService spinnerservice
+@inject ICaseFormRepository CaseFormRepository
+@inject IClientService _clientService
+@inject IClientRoleRepository _clientRoleRepository
+@inject ITenancyTypeRepository TenancyTypeRepository
+@inject IFormTypesRepository FormTypesRepository
+@inject ICasesRepository _casesRepository
+@inject ICaseFormService _CaseFormService
+@inject IRegulationStatusRepository _regulationStatusRepository
+@inject ILandLordRepository _landLordRepository
+@inject IStateRepository _stateRepository
+@inject IBuildingRepository _buildingRepository
+@inject IBuildingService _buildingService
+@inject IAdditionalTenantService _additionalTenantService
+@inject IAdditionalOccupantsService _additionalOccupantService
+@inject ITenantService _tenantService
+@inject ICourtService _courtService
+@inject ILegalCaseService _service
+@inject ICaseHearingService _caseHearingService
+@inject ILegalCaseService _CaseService
+@inject IFeesCatalogService _feeCatalogService
+@inject IToastService ToastService
+@inject IMarshalService _marshalService
+@inject ICourtpartServices courtpartService
+@inject IPremiseTypeRepository PremiseTypeRepository
+@inject ILandlordSevice _landlordSevice
+@inject ICountyService countyService
+@inject IRemianderCenterService RemianderCenterService
+@inject ITenancyTypeForBuildingRepository TenancyTypeForBuildingRepository;
+@inject IExemptionBasicRepository ExemptionBasicRepository;
+@inject IExemptionReasonRepository ExemptionReasonRepository;
+@inject ICaseTypeRepository CaseTypeRepository
+@inject ICaseAdditionalTenantService _caseAdditionalTenant
+@inject ICaseWarrantService _casewarrantservice
+@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs.CaseWarrantDtos
+@using EvictionFiler.Application.DTOs.MarshalsDto
+@using EvictionFiler.Client.SpinnerService
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.Interfaces.IRepository
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Application.Interfaces.IServices.Master
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization;
+@using EvictionFiler.Domain.Entities
+@inject IJSRuntime JS
+@inject NavigationStateMessage navmessage
+<style>
+    /* ===== PAGE ===== */
+    .page-wrapper {
+        min-height: 100vh;
+        padding-bottom: 90px;
+    }
+
+    h4 {
+        color: #0b1f3a;
+    }
+
+    /* ===== MOTION SECTION ===== */
+    .motion-section {
+        margin-top: 16px;
+    }
+
+    .motion-item {
+        background: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 6px 16px rgba(15,30,60,.06);
+        margin-bottom: 14px;
+        overflow: hidden;
+    }
+
+    /* Header */
+    .motion-header {
+        width: 100%;
+        padding: 14px 18px;
+        background: #f5f7fb;
+        border: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        font-size: 15px;
+        color: #0b1f3a;
+        cursor: pointer;
+    }
+
+    /* Chevron */
+    /* .chevron {
+            font-size: 16px;
+            transition: transform .3s ease;
+        }
+
+            .chevron.open {
+                transform: rotate(180deg);
+            } */
+
+    /* Body animation */
+    .motion-body {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: max-height .35s ease, opacity .2s ease;
+    }
+
+        .motion-body.open {
+            max-height: 2000px;
+            opacity: 1;
+        }
+
+    /* Inner content */
+    .motion-content {
+        padding: 18px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    /* Helpers */
+    .helper {
+        font-size: .85rem;
+        color: #6b7280;
+    }
+
+    /* Footer */
+    .sticky-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #ffffff;
+        border-top: 1px solid #e5e7eb;
+        padding: 12px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 100;
+    }
+</style>
+
+<EditForm Model="@model">
+    <DataAnnotationsValidator />
+
+    <div class="page-wrapper">
+        <div class="container my-4">
+            <h4>Marshal ▸ Forms & Key Dates</h4>
+
+            <div class="motion-form">
+
+                <!-- 1. WARRANT LIFECYCLE -->
+                <div class="motion-section">
+                    <button class="motion-header" @onclick="() => ToggleSection(nameof(IsDatesOpen))">
+                        <span>Warrant Lifecycle & Status</span>
+                        @* <span class="chevron @(IsDatesOpen ? "open" : "")"><i class="fa-solid fa-angle-down"></i></span> *@
+                        <i class="chevron @(IsDatesOpen ? "open" : "")"></i>
+                    </button>
+
+                    <div class="motion-body @(IsDatesOpen ? "open" : "")">
+                        <div class="motion-content">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label>Warrant Requested</label>
+                                    <InputDate class="form-control" @bind-Value="model.WarrantRequested" @bind-Value:after="() => ToShow = true" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Warrant Issued</label>
+                                    <InputDate class="form-control" @bind-Value="model.WarrantIssued" @bind-Value:after="() => ToShow = true" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Warrant Rejected</label>
+                                    <InputDate class="form-control" @bind-Value="model.WarrantRejected" @bind-Value:after="() => ToShow = true" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Re-file / Re-mail</label>
+                                    <InputDate class="form-control" @bind-Value="model.ReFileDate" @bind-Value:after="() => ToShow = true" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label>Notice Served</label>
+                                    <InputDate class="form-control" @bind-Value="model.NoticeServed" @bind-Value:after="() => ToShow = true" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Execution Eligible</label>
+                                    <InputDate class="form-control" @bind-Value="model.ExecutionEligible" @bind-Value:after="() => ToShow = true" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Eviction Executed</label>
+                                    <InputDate class="form-control" @bind-Value="model.EvictionExecuted" @bind-Value:after="() => ToShow = true" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Status</label>
+                                    <InputSelect class="form-select" @bind-Value="model.Status">
+                                        @foreach (var s in StatusList)
+                                        {
+                                            <option value="@s">@s</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+                            </div>
+
+                            <p class="helper">
+                                Each date unlocks the next marshal action and reminder.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                @if(ToShow)
+                {
+                    <!-- 2. MARSHAL INFO -->
+                    <div class="motion-section" style="overflow:visible;">
+                        <button class="motion-header" @onclick="() => ToggleSection(nameof(IsInfoOpen))">
+                            <span>Marshal Information</span>
+                            @* <span class="chevron @(IsInfoOpen ? "open" : "")"><i class="fa-solid fa-angle-down"></i></span> *@
+                            <i class="chevron @(IsInfoOpen ? "open" : "")"></i>
+
+                        </button>
+
+                        <div class="motion-body @(IsInfoOpen ? "open" : "")" style="overflow:visible;">
+                            <div class="motion-content">
+                                <div class="row">
+
+                                    <!-- Selected Marshal -->
+                                    <div class="col-md-4 position-relative">
+                                        <label>Marshal Name</label>
+                                        <InputText class="form-control search-box" placeholder="Search by marshal name.." @bind-value="searchmarshalText" @oninput="OnSearchMarshalInput"
+                                                   @onclick="ShowAllmarshal" />
+                                        <button class="search-btn" type="button" style="top:70%">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+
+
+
+
+                                        @if (filteredmarshal?.Any() == true)
+                                        {
+                                            <ul class="dropdown-menu show" style="position:absolute; width:94%; cursor:pointer; z-index:999;">
+                                                @foreach (var c in filteredmarshal)
+                                                {
+                                                    <li class="dropdown-item" @onclick="() => Selectedmarshal(c)">
+                                                        @c.FirstName  @c.LastName
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Badge #</label>
+                                        <InputText class="form-control" @bind-Value="model.BadgeNumber" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Phone</label>
+                                        <InputText class="form-control" @bind-Value="model.Phone" />
+                                    </div>
+
+                                    @* } *@
+
+
+
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                    <!-- 3. FORMS -->
+                    <div class="motion-section">
+                        <button class="motion-header" @onclick="() => ToggleSection(nameof(IsFormsOpen))">
+                            <span>Marshal Forms</span>
+                            @* <span class="chevron @(IsFormsOpen ? "open" : "")"><i class="fa-solid fa-angle-down"></i></span> *@
+                            <i class="chevron @(IsFormsOpen ? "open" : "")"></i>
+
+                        </button>
+
+                        <div class="motion-body @(IsFormsOpen ? "open" : "")">
+                            <div class="motion-content">
+                                @foreach (var f in model.Forms)
+                                {
+                                    <div class="form-check">
+                                        <InputCheckbox class="form-check-input" @bind-Value="f.Selected" />
+                                        <label class="form-check-label">@f.Name</label>
+                                    </div>
+                                }
+                            </div>
+                            <button class="btn bg-primary base text-white " style="margin-bottom: 20px; margin-left: 20px;"
+                                    @onclick="GenrateMarshalForm">
+                                Generate Selected Form
+                            </button>
+                        </div>
+
+                    </div>
+                    <div class="motion-section" style="overflow:visible;">
+                        <button class="motion-header" @onclick="() => ToggleSection(nameof(IsReadonlyOpen))">
+                            <span>Marshal Information</span>
+                            @* <span class="chevron @(IsInfoOpen ? "open" : "")"><i class="fa-solid fa-angle-down"></i></span> *@
+                            <i class="chevron @(IsReadonlyOpen ? "open" : "")"></i>
+
+                        </button>
+
+                        <div class="motion-body @(IsReadonlyOpen ? "open" : "")" style="overflow:visible;">
+                            <div class="motion-content">
+                                <div class="row">
+
+                                    <!-- Selected Marshal -->
+                                    <div class="col-md-12 position-relative">
+                                        <label>Warrant Requested: @(model.WarrantRequested?.ToString("dd/MM/yyyy") ?? "-")</label>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label>Warrant Issued: @(model.WarrantIssued?.ToString("dd/MM/yyyy") ?? "-")</label>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <label>Notice Served: @(model.NoticeServed?.ToString("dd/MM/yyyy") ?? "-")</label>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label>Execution Eligible: @(model.ExecutionEligible?.ToString("dd/MM/yyyy") ?? "-")</label>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label>Eviction Executed: @(model.EvictionExecuted?.ToString("dd/MM/yyyy") ?? "-")</label>
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                    <!-- 4. REMINDERS -->
+                    <div class="motion-section">
+                        <button class="motion-header" @onclick="() => ToggleSection(nameof(IsRemainderOpen))">
+                            <span>Lifecycle Reminders</span>
+                            @* <span class="chevron @(IsRemainderOpen ? "open" : "")"><i class="fa-solid fa-angle-down"></i></span> *@
+                            <i class="chevron @(IsRemainderOpen ? "open" : "")"></i>
+
+                        </button>
+
+                        <div class="motion-body @(IsRemainderOpen ? "open" : "")">
+                            <div class="motion-content">
+                                @foreach (var r in model.Reminders)
+                                {
+                                    <div class="form-check">
+                                        <InputCheckbox class="form-check-input" @bind-Value="r.Enabled" />
+                                        <label class="form-check-label">@r.Name</label>
+                                    </div>
+                                }
+
+                                <label class="mt-3">Delivery</label><br />
+                                <InputRadioGroup @bind-Value="model.ReminderDelivery">
+                                    <InputRadio Value="@("InApp")" /> In-App
+                                    <InputRadio Value="@("Email")" class="ms-3" /> Email
+                                    <InputRadio Value="@("SMS")" class="ms-3" /> SMS
+                                </InputRadioGroup>
+                            </div>
+                        </div>
+                    </div>
+                }
+                
+
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="sticky-footer">
+            <div class="text-muted">HousingCourtFiler ▸ Marshal Lifecycle Manager</div>
+            <div>
+                <button type="submit" class="btn btn-outline-secondary btn-sm" @onclick="() => SubmitMarshal(false)">Save</button>
+                <button type="button" class="btn btn-primary btn-sm" @onclick="() =>SubmitMarshal(true)">Save & Generate</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public IntakeModel legalcaseDto { get; set; }
+    [Parameter] public string LoggedInUser { get; set; }
+    [Parameter] public EventCallback OnGenerateMarshalForm { get; set; } = new();
+    private int openSection = 1;
+    private bool IsDatesOpen = true;
+    private bool IsInfoOpen = false;
+    private bool IsFormsOpen = false;
+    private bool IsRemainderOpen = false;
+    private bool IsReadonlyOpen = false;
+    private bool showMarshalError = false;
+    private bool ToShow = false;
+    private MarshalDto selectedmarshal;
+    private string searchmarshalText;
+    private bool isMarshalAssigned = false;
+    private List<MarshalDto> filteredmarshal = new();
+    private CancellationTokenSource _cts;
+
+    private void Toggle(int section)
+    {
+        openSection = openSection == section ? 0 : section;
+    }
+    void ToggleSection(string section)
+    {
+        switch (section)
+        {
+            case nameof(IsDatesOpen): IsDatesOpen = !IsDatesOpen; break;
+            case nameof(IsInfoOpen): IsInfoOpen = !IsInfoOpen; break;
+            case nameof(IsFormsOpen): IsFormsOpen = !IsFormsOpen; break;
+            case nameof(IsRemainderOpen): IsRemainderOpen = !IsRemainderOpen; break;
+            case nameof(IsReadonlyOpen): IsReadonlyOpen = !IsReadonlyOpen; break;
+        }
+    }
+
+    private bool IsOpen(int section) => openSection == section;
+
+    private readonly string[] StatusList =
+    {
+        "Pending", "Issued", "Rejected", "Served", "Scheduled", "Executed", "Stayed"
+    };
+
+    private MarshalLifecycleModel model = new();
+
+    public class MarshalLifecycleModel
+    {
+        public DateTime? WarrantRequested { get; set; }
+        public DateTime? WarrantIssued { get; set; }
+        public DateTime? WarrantRejected { get; set; }
+        public DateTime? ReFileDate { get; set; }
+        public DateTime? NoticeServed { get; set; }
+        public DateTime? ExecutionEligible { get; set; }
+        public DateTime? EvictionExecuted { get; set; }
+
+        public string Status { get; set; } = "Pending";
+
+        public string? MarshalName { get; set; }
+        public string? BadgeNumber { get; set; }
+        public string? Phone { get; set; }
+
+        public List<FormItem> Forms { get; set; } =
+        [
+            new("Warrant of Eviction"),
+            new("Notice of Eviction"),
+            new("Affidavit of Service"),
+            new("Affidavit of Eviction"),
+            new("Marshal Return")
+        ];
+
+        public List<ReminderItem> Reminders { get; set; } =
+        [
+            new("Warrant issuance follow-up"),
+            new("Re-mail / re-file reminder"),
+            new("Notice service deadline"),
+            new("Execution eligibility alert"),
+            new("Eviction execution alert")
+        ];
+
+        public string ReminderDelivery { get; set; } = "InApp";
+    }
+
+    public record FormItem(string Name)
+    {
+        public bool Selected { get; set; }
+    }
+
+    public record ReminderItem(string Name)
+    {
+        public bool Enabled { get; set; } = true;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMarshalUI();
+    }
+
+    private async Task GenrateMarshalForm()
+    {
+
+        spinnerservice.Show();
+        var warrantForm = model.Forms
+        .FirstOrDefault(f => f.Name == "Warrant of Eviction");
+
+        if (warrantForm == null || !warrantForm.Selected)
+        {
+            // ToastService.ShowWarning("Please select 'Warrant of Eviction' to generate the form.");
+            spinnerservice.Hide();
+            return;
+        }
+
+        if (legalcaseDto.Id != Guid.Empty)
+        {
+            bool success = false;
+
+
+            // CREATE new notice
+            success = await CaseFormRepository.GenerateWarrantNoticeAsync(
+                    legalcaseDto.Id,
+                    "Request for Warrant (CIV-LT-100)",
+                       // "Written Demand to Terminate (move out)",
+                       Guid.Parse(LoggedInUser)
+                );
+
+            if (success)
+            {
+                ToastService.ShowSuccess("Warrant Notice  has been generated successfully!");
+                // await LoadCaseForms();
+                // await JS.InvokeVoidAsync("openTab", "activity");
+                await OnGenerateMarshalForm.InvokeAsync();
+            }
+        }
+
+
+
+
+
+        spinnerservice.Hide();
+
+    }
+
+    private async Task LoadMarshalUI()
+    {
+        if (legalcaseDto.MarshalId != null && legalcaseDto.MarshalId != Guid.Empty)
+        {
+            selectedmarshal = await _marshalService.GetMarshalByIdAsync(legalcaseDto.MarshalId.Value);
+            model.MarshalName = $"{selectedmarshal.FirstName} {selectedmarshal.LastName}";
+            searchmarshalText = model.MarshalName;
+            model.BadgeNumber = selectedmarshal.BadgeNumber;
+            model.Phone = selectedmarshal.Telephone;
+            isMarshalAssigned = true;
+        }
+        else
+        {
+            isMarshalAssigned = false;
+            selectedmarshal = null;
+            searchmarshalText = string.Empty;
+        }
+    }
+
+    async Task HideMarshalDropDown(FocusEventArgs e)
+    {
+        // Small delay to allow click on dropdown item to register before hiding
+        await Task.Delay(500);
+        if (filteredmarshal.Any())
+        {
+            filteredmarshal.Clear();
+
+        }
+        StateHasChanged();
+    }
+
+    private async void Selectedmarshal(MarshalDto marshal)
+    {
+
+        selectedmarshal = marshal;
+        // searchmarshalText = marshal.Name!;
+        searchmarshalText = $"{marshal.FirstName} {marshal.LastName}";
+        model.MarshalName = searchmarshalText;
+        model.BadgeNumber = marshal.BadgeNumber;
+        model.Phone = marshal.Telephone;
+
+        legalcaseDto.MarshalId = marshal.Id;
+
+
+        filteredmarshal?.Clear();
+        // isMarshalAssigned = true;
+
+        StateHasChanged();
+
+
+    }
+
+    private void ResetMarshal()
+    {
+        spinnerservice.Show();
+        isMarshalAssigned = false;
+        selectedmarshal = null;
+        legalcaseDto.MarshalId = null;     // Marshal unassign
+        searchmarshalText = "";            // Clear search box
+        filteredmarshal?.Clear();
+        showMarshalError = false;// Clear list
+
+        StateHasChanged();
+        spinnerservice.Hide();
+    }
+
+
+    private async Task OnSearchMarshalInput(ChangeEventArgs e)
+    {
+        searchmarshalText = e.Value?.ToString() ?? "";
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        try
+        {
+
+            await Task.Delay(300, _cts.Token);
+            // ⭐ Empty input → load all tenants (ONLY here)
+            if (string.IsNullOrWhiteSpace(searchmarshalText))
+            {
+                await ShowAllmarshal();
+                return;
+            }
+
+            // ⭐ 1st & 2nd character → DO NOTHING (keep list unchanged)
+            if (searchmarshalText.Length < 3)
+            {
+                // ❗ No reload here (important)
+                return;
+            }
+
+            else
+            {
+                // ⭐ 3+ characters → server search
+
+                filteredmarshal = await _marshalService.SearchMarshalbyname(searchmarshalText);
+            }
+
+        }
+        catch (TaskCanceledException)
+        {
+            // Old task cancelled → ignore
+        }
+
+    }
+
+    private async Task ShowAllmarshal()
+    {
+        filteredmarshal = (await _marshalService.GetAllMarshalAsync()).ToList();
+        StateHasChanged(); // UI refresh karega
+    }
+
+
+    private async Task SubmitMarshal(bool formgeneration)
+    {
+        showMarshalError = false; // reset old errors
+
+        if (legalcaseDto.MarshalId == null || legalcaseDto.MarshalId == Guid.Empty)
+        {
+            showMarshalError = true;
+            StateHasChanged();
+            return;
+        }
+        spinnerservice.Show();
+
+        var result = await _service.UpdateMarshalAsync(legalcaseDto);
+
+        if (result)
+        {
+            ToastService.ShowSuccess("Marshal Assign  successfully!");
+            // await LoadCaseDetails();
+            isMarshalAssigned = true;
+        }
+        else
+        {
+            if(!isMarshalAssigned)
+            {
+                ToastService.ShowError("Failed to asign Marshal .");
+            }
+        }
+
+
+
+        var toadd = new CaseWarrantDto
+            {
+                WarrantIssued = model.WarrantIssued,
+                WarrantRejected = model.WarrantRejected,
+                WarrantRequested = model.WarrantRejected,
+                EvictionExecuted = model.EvictionExecuted,
+                ExecutionEligible = model.ExecutionEligible,
+                NoticeServed = model.NoticeServed,
+                ReFileDate = model.ReFileDate,
+                Status = model.Status,
+                MarshalId = legalcaseDto.MarshalId,
+                LegalcaseId = legalcaseDto.Id
+            };
+
+        var resultcasewarrant = await _casewarrantservice.AddCaseWarrant(toadd);
+
+        if (resultcasewarrant)
+        {
+            ToastService.ShowSuccess("Case Warrant Added successfully!");
+            // await LoadCaseDetails();
+        }
+        else
+        {
+            ToastService.ShowError("Error occured in adding Case Warrant!");
+        }
+
+        if(formgeneration)
+        {
+           await GenrateMarshalForm();
+        }
+
+        StateHasChanged();
+        spinnerservice.Hide();
+    }
+}

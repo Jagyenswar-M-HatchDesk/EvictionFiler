@@ -72,6 +72,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 await SeedReminderEscalates(context);
                 await SeedDocumentType(context);
                 await SeedCourtTodayTypes(context);
+                await SeedUser(context);
                 await context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -99,6 +100,17 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 if (context.MstCourtTodayType.FirstOrDefault(d => d.Name == type.Name) == null)
                 {
                     await context.MstCourtTodayType.AddAsync(type);
+                }
+            }
+        }
+        private static async Task SeedUser(MainDbContext context)
+        {
+            var appearancetypes = InitialDataGenerator.GetUser();
+            foreach (var type in appearancetypes)
+            {
+                if (context.Users.FirstOrDefault(d => d.FirstName == type.FirstName) == null)
+                {
+                    await context.Users.AddAsync(type);
                 }
             }
         }

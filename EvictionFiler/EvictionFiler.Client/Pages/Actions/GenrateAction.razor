@@ -614,10 +614,29 @@
             border-radius: 0;
         }
 
-    .btn-primary {
-        color: white;
-        min-width: 100%;
+    .btn {
+        border-radius: 7px;
+        height: 38px;
+        /* width: 180px; */
+        font-size: 16px;
+        min-width: fit-content;
     }
+
+    .health-score {
+        font-weight: 700;
+        font-size: 24px;
+    }
+
+    .btn-primary {
+        color:white;
+        background-color: #1F365D !important;
+        border-color: #1F365D !important;
+    }
+
+        .btn-primary:hover {
+            background-color: #042254 !important;
+            border-color: #042254 !important;
+        }
 
 </style>
 @using System.Collections.Generic
@@ -1174,7 +1193,7 @@
                         <div class="tab-pane fade" id="appearance" role="tabpanel" aria-labelledby="appearance-tab">
                             @if(ShowAppearance)
                             {
-                                <AppearanceStatus />
+                                <AppearanceStatus legalcaseDto="legalcaseDto"/>
                             }
                         </div>
                         <div class="tab-pane fade" id="reminder" role="tabpanel" aria-labelledby="reminder-tab">
@@ -1187,71 +1206,11 @@
                            <h4>Under Construction</h4>
                         </div>
                         <div class="tab-pane fade" id="marshal" role="tabpanel" aria-labelledby="marshal-tab">
-                            <div class="row mb-3 d-flex align-items-center">
-
-                                <div class="fw-semibold col-3">Assign Marshal</div>
-
-                                <div class="col-6 position-relative" @onfocusout="HideMarshalDropDown">
-
-                                    @if (!isMarshalAssigned)
-                                    {
-                                        <!-- Search Box -->
-
-                                        <InputText class="form-control search-box" placeholder="Search by marshal name.." @bind-value="searchmarshalText" @oninput="OnSearchMarshalInput"
-                                                   @onclick="ShowAllmarshal" />
-                                        <button class="search-btn" type="button">
-                                            <i class="fa fa-search"></i>
-                                        </button>
-
-
-
-
-                                        @if (filteredmarshal?.Any() == true)
-                                        {
-                                            <ul class="dropdown-menu show" style="position:absolute; width:94%; cursor:pointer;">
-                                                @foreach (var c in filteredmarshal)
-                                                {
-                                                    <li class="dropdown-item" @onclick="() => Selectedmarshal(c)">
-                                                        @c.FirstName  @c.LastName
-                                                    </li>
-                                                }
-                                            </ul>
-                                        }
-
-                                    }
-                                    else
-                                    {
-                                        <!-- Selected Marshal -->
-                                        <label class="form-control bg-light fw-bold d-flex align-items-center">
-                                            @(selectedmarshal != null ? selectedmarshal.FirstName + " " + selectedmarshal.LastName : "")
-                                        </label>
-
-                                    }
-
-                                </div>
-
-                                <div class="col-3">
-                                    @if (!isMarshalAssigned)
-                                    {
-                                        <button class="btn bg-brand-primary base text-white" @onclick="SubmitMarshal">Save</button>
-
-                                    }
-                                    else
-                                    {
-
-                                        <button class="btn bg-brand-primary base text-white" @onclick="ResetMarshal">Reset</button>
-                                    }
-                                </div>
-
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col-12">
-                                    @if (showMarshalError)
-                                    {
-                                        <div class="text-danger small mt-1">Please select a marshal.</div>
-                                    }
-                                </div>
-                            </div>
+                           
+                            @if(ShowMarshal)
+                            {
+                                <MarshalDates legalcaseDto="legalcaseDto" LoggedInUser="loggedInUserId" OnGenerateMarshalForm="HideAsync" />
+                            }
                         </div>
 
                         <div class="tab-pane fade" id="server" role="tabpanel" aria-labelledby="server-tab">
@@ -2320,6 +2279,7 @@
     private bool isEditMode = false;
     private bool ShowAppearance = false;
     private bool ShowReminder = false;
+    private bool ShowMarshal = false;
     private MarshalDto selectedmarshal;
     private string searchmarshalText;
     private bool isMarshalAssigned = false;
@@ -2446,8 +2406,8 @@
     }
     private async Task OnMarshalTabOpen()
     {
-
-        await LoadMarshalUI();
+        ShowMarshal = true;
+        // await LoadMarshalUI();
 
         StateHasChanged();
     }
