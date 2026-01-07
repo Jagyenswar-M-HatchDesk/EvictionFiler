@@ -292,7 +292,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 {
                     otherTenantsText =
                        
-                        string.Join("<br>", otherTenantsList);
+                        string.Join(",", otherTenantsList) + " (Tenant)";
                 }
 
                 string occupantsText = "";
@@ -300,7 +300,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 {
                     occupantsText =
 
-                        string.Join("<br>", occupantList);
+                       "<br>" + string.Join(",", occupantList) + ", John Doe, Jane Doe (Under Tenant)";
                 }
 
 
@@ -316,6 +316,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 string filledHtml = template.HTML
     .Replace("{{LandlordName}}", caseDetails.LandlordName ?? "")
     .Replace("{{Landlord_Name}}", caseDetails.LandlordName ?? "")
+    .Replace("{{Landlord_NameDemand}}", caseDetails.LandlordName + " (LandLord)" ?? "")
     .Replace("{{LandlordAddress}}", caseDetails.LandlordAddress ?? "")
     .Replace("{{Landlord_Address}}", caseDetails.LandlordAddress ?? "")
     .Replace("{{LandlordPhone}}", caseDetails.LandlordPhone ?? "")

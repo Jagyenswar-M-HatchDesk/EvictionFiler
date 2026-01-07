@@ -682,7 +682,7 @@
                             <button class="nav-link active" id="notice-tab" data-bs-toggle="tab" data-bs-target="#notice" type="button" role="tab">Notices</button>
                         </li>
                         <li class="col nav-item center" role="presentation" style="padding:0px;">
-                            <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" @onclick="GetAllDocuments" role="tab">Uploads</button>
+                            <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" @onclick="() => ShowUploadDoc = true" role="tab">Uploads</button>
                         </li>
                         <li class="col nav-item center" role="presentation" style="padding:0px;">
                             <button class="nav-link" id="hearing-tab" data-bs-toggle="tab" data-bs-target="#hearing" type="button" role="tab">Hearing</button>
@@ -700,7 +700,7 @@
                             <button class="nav-link" id="notes-tab" data-bs-toggle="tab" data-bs-target="#notes" type="button" role="tab">Notes</button>
                         </li>
                         <li class="col-auto nav-item center" role="presentation" style="padding:0px;">
-                            <button class="nav-link" id="server-tab" data-bs-toggle="tab" data-bs-target="#server" type="button" role="tab">Process Server</button>
+                            <button class="nav-link" id="server-tab" data-bs-toggle="tab" data-bs-target="#server" type="button" @onclick="() => ShowProcessServer = true" role="tab">Process Server</button>
                         </li>
                         <li class="col nav-item center" role="presentation" style="padding:0px;">
                             <button class="nav-link" id="reminder-tab" data-bs-toggle="tab" data-bs-target="#reminder" type="button" @onclick="() => ShowReminder = true" role="tab">Reminder</button>
@@ -1229,11 +1229,14 @@
                         </div>
 
                         <div class="tab-pane fade" id="server" role="tabpanel" aria-labelledby="server-tab">
-                            <h4>Under Construction</h4>
+                            @if(ShowProcessServer)
+                            {
+                                <UploadDocument IsProcessserver=true LegalCaseId="legalcaseDto.Id" OnFormCreate="HideAsync" />
+                            }
                         </div>
 
                         <div class="tab-pane fade" id="documents" role="tabpanel" aria-labelledby="documents-tab">
-                            <EditForm Model="@Documentdto" OnValidSubmit="SaveFiles">
+                            @* <EditForm Model="@Documentdto" OnValidSubmit="SaveFiles">
                                 <DataAnnotationsValidator />
                                 <div class="row mb-3">
                                     <div class="fw-semibold col-auto" style="display: flex;
@@ -1311,8 +1314,12 @@
                                 <div class="modal-footer mt-3" style="padding: 5px !important; border-top: none !important; ">
                                     <button type="submit" class="btn btn-primary base" style="min-width:100% !important" disabled="@(Documentdto.DocumentTypeId == null || Documentdto.DocumentTypeId == Guid.Empty)">Upload</button>
                                 </div>
-                            </EditForm>
+                            </EditForm> *@
+                            @if(ShowUploadDoc)
+                            {
+                                <UploadDocument IsProcessserver=false LegalCaseId="legalcaseDto.Id" OnFormCreate="HideAsync" />
 
+                            }
                         </div>
 
                         <div class="tab-pane fade" id="notes" role="tabpanel" aria-labelledby="notes-tab">
@@ -2281,7 +2288,7 @@
     private IEnumerable<AppearanceTypeforHearing> AppearanceTypeforHearing = new List<AppearanceTypeforHearing>();
     private IEnumerable<AppearanceType> AppearanceTypes = new List<AppearanceType>();
     private IEnumerable<VirtualPlatform> VirtualPlatforms = new List<VirtualPlatform>();
-    private IEnumerable<DocumentType> DocumentsType = new List<DocumentType>();
+    // private IEnumerable<DocumentType> DocumentsType = new List<DocumentType>();
     private List<BilingType> BilingTypesList = new();
     private List<PaymentMethod> PaymentMethodDtoList = new();
     private List<TenancyType> TenancyTypeList = new();
@@ -2293,6 +2300,8 @@
     private bool isAdmin = false;
     private bool isEditMode = false;
     private bool ShowAppearance = false;
+    private bool ShowUploadDoc = false;
+    private bool ShowProcessServer = false;
     private bool ShowReminder = false;
     private bool ShowMarshal = false;
     private MarshalDto selectedmarshal;
@@ -2302,7 +2311,7 @@
     private GenrateNoticeModel caseForm = new();
     private List<CaseHearingDto> CaseHearings = new();
     private CaseHearingDto CaseHearing = new();
-    private CaseDocumentDto Documentdto = new();
+    // private CaseDocumentDto Documentdto = new();
     private List<GenrateNoticeModel> caseFormDto = new();
     [Parameter] public Guid? CurrentCaseId { get; set; }
     private CancellationTokenSource _cts;
@@ -2315,11 +2324,11 @@
     public EventCallback OnClose { get; set; }
     // [Parameter] public EventCallback<CreateToClientDto> Submit { get; set; }
     public CaseHearingDto caseHearing = new CaseHearingDto();
-    public class UploadItem
-    {
-        public IBrowserFile File { get; set; }
-        public int Progress { get; set; } = 0;
-    }
+    // public class UploadItem
+    // {
+    //     public IBrowserFile File { get; set; }
+    //     public int Progress { get; set; } = 0;
+    // }
 
 
 
@@ -2426,13 +2435,13 @@
 
         StateHasChanged();
     }
-    private async Task GetAllDocuments()
-    {
+    // private async Task GetAllDocuments()
+    // {
 
-        if (!DocumentsType.Any()) DocumentsType = await DocRepo.GetAllAsync();
+    //     if (!DocumentsType.Any()) DocumentsType = await DocRepo.GetAllAsync();
 
-        StateHasChanged();
-    }
+    //     StateHasChanged();
+    // }
     private int ParseDueDay(string str)
     {
         if (string.IsNullOrWhiteSpace(str)) return 1;
@@ -2534,140 +2543,140 @@
         return (int)((to.Value - from.Value).TotalDays / 365);
     }
 
-    private async Task LoadMarshalUI()
-    {
-        if (legalcaseDto.MarshalId != null && legalcaseDto.MarshalId != Guid.Empty)
-        {
-            selectedmarshal = await _marshalService.GetMarshalByIdAsync(legalcaseDto.MarshalId.Value);
-            isMarshalAssigned = true;
-        }
-        else
-        {
-            isMarshalAssigned = false;
-            selectedmarshal = null;
-            searchmarshalText = string.Empty;
-        }
-    }
+    // private async Task LoadMarshalUI()
+    // {
+    //     if (legalcaseDto.MarshalId != null && legalcaseDto.MarshalId != Guid.Empty)
+    //     {
+    //         selectedmarshal = await _marshalService.GetMarshalByIdAsync(legalcaseDto.MarshalId.Value);
+    //         isMarshalAssigned = true;
+    //     }
+    //     else
+    //     {
+    //         isMarshalAssigned = false;
+    //         selectedmarshal = null;
+    //         searchmarshalText = string.Empty;
+    //     }
+    // }
 
-    async Task HideMarshalDropDown(FocusEventArgs e)
-    {
-        // Small delay to allow click on dropdown item to register before hiding
-        await Task.Delay(500);
-        if (filteredmarshal.Any())
-        {
-            filteredmarshal.Clear();
+    // async Task HideMarshalDropDown(FocusEventArgs e)
+    // {
+    //     // Small delay to allow click on dropdown item to register before hiding
+    //     await Task.Delay(500);
+    //     if (filteredmarshal.Any())
+    //     {
+    //         filteredmarshal.Clear();
 
-        }
-        StateHasChanged();
-    }
+    //     }
+    //     StateHasChanged();
+    // }
 
-    private async void Selectedmarshal(MarshalDto marshal)
-    {
+    // private async void Selectedmarshal(MarshalDto marshal)
+    // {
 
-        selectedmarshal = marshal;
-        // searchmarshalText = marshal.Name!;
-        searchmarshalText = $"{marshal.FirstName} {marshal.LastName}";
-
-
-        legalcaseDto.MarshalId = marshal.Id;
+    //     selectedmarshal = marshal;
+    //     // searchmarshalText = marshal.Name!;
+    //     searchmarshalText = $"{marshal.FirstName} {marshal.LastName}";
 
 
-        filteredmarshal?.Clear();
-        // isMarshalAssigned = true;
-
-        StateHasChanged();
+    //     legalcaseDto.MarshalId = marshal.Id;
 
 
-    }
+    //     filteredmarshal?.Clear();
+    //     // isMarshalAssigned = true;
 
-    private void ResetMarshal()
-    {
-        spinnerservice.Show();
-        isMarshalAssigned = false;
-        selectedmarshal = null;
-        legalcaseDto.MarshalId = null;     // Marshal unassign
-        searchmarshalText = "";            // Clear search box
-        filteredmarshal?.Clear();
-        showMarshalError = false;// Clear list
-
-        StateHasChanged();
-        spinnerservice.Hide();
-    }
+    //     StateHasChanged();
 
 
-    private async Task OnSearchMarshalInput(ChangeEventArgs e)
-    {
-        searchmarshalText = e.Value?.ToString() ?? "";
-        _cts?.Cancel();
-        _cts = new CancellationTokenSource();
-        try
-        {
+    // }
 
-            await Task.Delay(300, _cts.Token);
-            // ⭐ Empty input → load all tenants (ONLY here)
-            if (string.IsNullOrWhiteSpace(searchmarshalText))
-            {
-                await ShowAllmarshal();
-                return;
-            }
+    // private void ResetMarshal()
+    // {
+    //     spinnerservice.Show();
+    //     isMarshalAssigned = false;
+    //     selectedmarshal = null;
+    //     legalcaseDto.MarshalId = null;     // Marshal unassign
+    //     searchmarshalText = "";            // Clear search box
+    //     filteredmarshal?.Clear();
+    //     showMarshalError = false;// Clear list
 
-            // ⭐ 1st & 2nd character → DO NOTHING (keep list unchanged)
-            if (searchmarshalText.Length < 3)
-            {
-                // ❗ No reload here (important)
-                return;
-            }
-
-            else
-            {
-                // ⭐ 3+ characters → server search
-
-                filteredmarshal = await _marshalService.SearchMarshalbyname(searchmarshalText);
-            }
-
-        }
-        catch (TaskCanceledException)
-        {
-            // Old task cancelled → ignore
-        }
-
-    }
-
-    private async Task ShowAllmarshal()
-    {
-        filteredmarshal = (await _marshalService.GetAllMarshalAsync()).ToList();
-        StateHasChanged(); // UI refresh karega
-    }
+    //     StateHasChanged();
+    //     spinnerservice.Hide();
+    // }
 
 
-    private async Task SubmitMarshal()
-    {
-        showMarshalError = false; // reset old errors
+    // private async Task OnSearchMarshalInput(ChangeEventArgs e)
+    // {
+    //     searchmarshalText = e.Value?.ToString() ?? "";
+    //     _cts?.Cancel();
+    //     _cts = new CancellationTokenSource();
+    //     try
+    //     {
 
-        if (legalcaseDto.MarshalId == null || legalcaseDto.MarshalId == Guid.Empty)
-        {
-            showMarshalError = true;
-            StateHasChanged();
-            return;
-        }
-        spinnerservice.Show();
+    //         await Task.Delay(300, _cts.Token);
+    //         // ⭐ Empty input → load all tenants (ONLY here)
+    //         if (string.IsNullOrWhiteSpace(searchmarshalText))
+    //         {
+    //             await ShowAllmarshal();
+    //             return;
+    //         }
 
-        var result = await _service.UpdateMarshalAsync(legalcaseDto);
+    //         // ⭐ 1st & 2nd character → DO NOTHING (keep list unchanged)
+    //         if (searchmarshalText.Length < 3)
+    //         {
+    //             // ❗ No reload here (important)
+    //             return;
+    //         }
 
-        if (result)
-        {
-            ToastService.ShowSuccess("Marshal Assign  successfully!");
-            // await LoadCaseDetails();
-            isMarshalAssigned = true;
-        }
-        else
-        {
-            ToastService.ShowError("Failed to asign Marshal .");
-        }
-        StateHasChanged();
-        spinnerservice.Hide();
+    //         else
+    //         {
+    //             // ⭐ 3+ characters → server search
 
-    }
+    //             filteredmarshal = await _marshalService.SearchMarshalbyname(searchmarshalText);
+    //         }
+
+    //     }
+    //     catch (TaskCanceledException)
+    //     {
+    //         // Old task cancelled → ignore
+    //     }
+
+    // }
+
+    // private async Task ShowAllmarshal()
+    // {
+    //     filteredmarshal = (await _marshalService.GetAllMarshalAsync()).ToList();
+    //     StateHasChanged(); // UI refresh karega
+    // }
+
+
+    // private async Task SubmitMarshal()
+    // {
+    //     showMarshalError = false; // reset old errors
+
+    //     if (legalcaseDto.MarshalId == null || legalcaseDto.MarshalId == Guid.Empty)
+    //     {
+    //         showMarshalError = true;
+    //         StateHasChanged();
+    //         return;
+    //     }
+    //     spinnerservice.Show();
+
+    //     var result = await _service.UpdateMarshalAsync(legalcaseDto);
+
+    //     if (result)
+    //     {
+    //         ToastService.ShowSuccess("Marshal Assign  successfully!");
+    //         // await LoadCaseDetails();
+    //         isMarshalAssigned = true;
+    //     }
+    //     else
+    //     {
+    //         ToastService.ShowError("Failed to asign Marshal .");
+    //     }
+    //     StateHasChanged();
+    //     spinnerservice.Hide();
+
+    // }
     private async Task<bool> ValidateCurrentStep()
     {
         messageStore.Clear();
@@ -2715,7 +2724,7 @@
     }
 
 
-    private List<UploadItem> UploadItems = new();
+    // private List<UploadItem> UploadItems = new();
 
 
     private void OnBindHearingCancel()
@@ -2785,66 +2794,66 @@
     //     spinnerservice.Hide();
     // }
 
-    private ElementReference dropZoneRef;
-    private InputFile? fileInput;
-    private List<IBrowserFile> Files = new();
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JS.InvokeVoidAsync("fileupload.registerDropHandler", dropZoneRef, fileInput!.Element);
-        }
-    }
+    // private ElementReference dropZoneRef;
+    // private InputFile? fileInput;
+    // private List<IBrowserFile> Files = new();
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     if (firstRender)
+    //     {
+    //         await JS.InvokeVoidAsync("fileupload.registerDropHandler", dropZoneRef, fileInput!.Element);
+    //     }
+    // }
 
-    private async Task OpenFileDialog()
-    {
-        await JS!.InvokeVoidAsync("fileupload.triggerInput", fileInput!.Element);
-    }
+    // private async Task OpenFileDialog()
+    // {
+    //     await JS!.InvokeVoidAsync("fileupload.triggerInput", fileInput!.Element);
+    // }
 
-    private void OnDragOver(DragEventArgs e)
-    {
-        e.DataTransfer.DropEffect = "copy";
-    }
+    // private void OnDragOver(DragEventArgs e)
+    // {
+    //     e.DataTransfer.DropEffect = "copy";
+    // }
 
-    private async Task OnDrop(DragEventArgs e)
-    {
-        // send dropped files to <input type="file">
-        await JS!.InvokeVoidAsync("fileupload.addDroppedFiles", fileInput!.Element);
-    }
-    private void OnInputChanged(InputFileChangeEventArgs e)
-    {
-        foreach (var file in e.GetMultipleFiles())
-        {
-            var item = new UploadItem
-            {
-                File = file,
-                Progress = 0
-            };
+    // private async Task OnDrop(DragEventArgs e)
+    // {
+    //     // send dropped files to <input type="file">
+    //     await JS!.InvokeVoidAsync("fileupload.addDroppedFiles", fileInput!.Element);
+    // }
+    // private void OnInputChanged(InputFileChangeEventArgs e)
+    // {
+    //     foreach (var file in e.GetMultipleFiles())
+    //     {
+    //         var item = new UploadItem
+    //         {
+    //             File = file,
+    //             Progress = 0
+    //         };
 
-            UploadItems.Add(item);
-            Files.Add(file);
+    //         UploadItems.Add(item);
+    //         Files.Add(file);
 
-            // Simulate upload progress (replace with real API upload later)
-            _ = SimulateProgressAsync(item);
-        }
-    }
+    //         // Simulate upload progress (replace with real API upload later)
+    //         _ = SimulateProgressAsync(item);
+    //     }
+    // }
 
-    private async Task SimulateProgressAsync(UploadItem item)
-    {
-        while (item.Progress < 100)
-        {
-            item.Progress += 5;
-            await Task.Delay(100);
-            StateHasChanged();
-        }
-    }
+    // private async Task SimulateProgressAsync(UploadItem item)
+    // {
+    //     while (item.Progress < 100)
+    //     {
+    //         item.Progress += 5;
+    //         await Task.Delay(100);
+    //         StateHasChanged();
+    //     }
+    // }
 
-    private void RemoveUploadItem(UploadItem item)
-    {
-        UploadItems.Remove(item);
-        Files.Remove(item.File);
-        StateHasChanged();
-    }
+    // private void RemoveUploadItem(UploadItem item)
+    // {
+    //     UploadItems.Remove(item);
+    //     Files.Remove(item.File);
+    //     StateHasChanged();
+    // }
 
     private async Task LoadHearing()
     {
@@ -2959,85 +2968,85 @@
 
         spinnerservice.Hide();
     }
-    private readonly string[] AllowedExtensions = { ".pdf", ".doc", ".docx" };
+    // private readonly string[] AllowedExtensions = { ".pdf", ".doc", ".docx" };
 
-    private async Task SaveFiles()
-    {
-        if (legalcaseDto.Id == null || legalcaseDto.Id == Guid.Empty)
-        {
-            ToastService.ShowError("Invalid Case ID.");
-            Files.Clear();
-            return;
-        }
+    // private async Task SaveFiles()
+    // {
+    //     if (legalcaseDto.Id == null || legalcaseDto.Id == Guid.Empty)
+    //     {
+    //         ToastService.ShowError("Invalid Case ID.");
+    //         Files.Clear();
+    //         return;
+    //     }
 
-        if (!Files.Any())
-        {
-            ToastService.ShowWarning("Please select files to upload.");
-            Files.Clear();
-            return;
-        }
+    //     if (!Files.Any())
+    //     {
+    //         ToastService.ShowWarning("Please select files to upload.");
+    //         Files.Clear();
+    //         return;
+    //     }
 
-        // Check allowed file types
-        foreach (var file in Files)
-        {
-            var extension = Path.GetExtension(file.Name).ToLower();
-            if (!AllowedExtensions.Contains(extension))
-            {
-                ToastService.ShowWarning($" Only PDF and DOC/DOCX are permitted.");
-                Files.Clear();
-                return; // stop uploading
-            }
-        }
+    //     // Check allowed file types
+    //     foreach (var file in Files)
+    //     {
+    //         var extension = Path.GetExtension(file.Name).ToLower();
+    //         if (!AllowedExtensions.Contains(extension))
+    //         {
+    //             ToastService.ShowWarning($" Only PDF and DOC/DOCX are permitted.");
+    //             Files.Clear();
+    //             return; // stop uploading
+    //         }
+    //     }
 
-        var uploadPath = Path.Combine(Environment.CurrentDirectory, "wwwroot", "uploads");
-        if (!Directory.Exists(uploadPath))
-            Directory.CreateDirectory(uploadPath);
+    //     var uploadPath = Path.Combine(Environment.CurrentDirectory, "wwwroot", "uploads");
+    //     if (!Directory.Exists(uploadPath))
+    //         Directory.CreateDirectory(uploadPath);
 
-        var DocList = new List<CaseDocument>();
+    //     var DocList = new List<CaseDocument>();
 
-        foreach (var file in Files)
-        {
-            var extension = Path.GetExtension(file.Name);
-            var baseName = Path.GetFileNameWithoutExtension(file.Name);
+    //     foreach (var file in Files)
+    //     {
+    //         var extension = Path.GetExtension(file.Name);
+    //         var baseName = Path.GetFileNameWithoutExtension(file.Name);
 
-            // Add DateTime stamp to filename
-            var dateStamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            var newFileName = $"{baseName}_{dateStamp}{extension}";
+    //         // Add DateTime stamp to filename
+    //         var dateStamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+    //         var newFileName = $"{baseName}_{dateStamp}{extension}";
 
-            var physicalPath = Path.Combine(uploadPath, newFileName);
+    //         var physicalPath = Path.Combine(uploadPath, newFileName);
 
-            // Save the file physically
-            await using var stream = file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 200);
-            await using var fs = new FileStream(physicalPath, FileMode.Create);
-            await stream.CopyToAsync(fs);
+    //         // Save the file physically
+    //         await using var stream = file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 200);
+    //         await using var fs = new FileStream(physicalPath, FileMode.Create);
+    //         await stream.CopyToAsync(fs);
 
-            // Save DB record
-            var document = new CaseDocument
-            {
-                Id = Guid.NewGuid(),
-                LegalCaseId = CurrentCaseId.Value,
-                DocumentTypeId = Documentdto.DocumentTypeId,
-                Name = newFileName,
-                Path = $"uploads/{newFileName}",   // Relative path for web access
-                CreatedOn = DateTime.Now
-            };
+    //         // Save DB record
+    //         var document = new CaseDocument
+    //         {
+    //             Id = Guid.NewGuid(),
+    //             LegalCaseId = CurrentCaseId.Value,
+    //             DocumentTypeId = Documentdto.DocumentTypeId,
+    //             Name = newFileName,
+    //             Path = $"uploads/{newFileName}",   // Relative path for web access
+    //             CreatedOn = DateTime.Now
+    //         };
 
-            DocList.Add(document);
-        }
+    //         DocList.Add(document);
+    //     }
 
-        var result = await _service.AddDocumentAsync(DocList);
-        if (result)
-        {
-            ToastService.ShowSuccess("Documents saved successfully!");
-            Files.Clear();
-            UploadItems.Clear();
-            await OnFormCreate.InvokeAsync();
-        }
-        else
-        {
-            ToastService.ShowError("An error occurred during saving!");
-        }
-    }
+    //     var result = await _service.AddDocumentAsync(DocList);
+    //     if (result)
+    //     {
+    //         ToastService.ShowSuccess("Documents saved successfully!");
+    //         Files.Clear();
+    //         UploadItems.Clear();
+    //         await OnFormCreate.InvokeAsync();
+    //     }
+    //     else
+    //     {
+    //         ToastService.ShowError("An error occurred during saving!");
+    //     }
+    // }
     public record MonthItem(string Value, string Display);
     private List<MonthItem> MonthOptions = new();
     private List<ArrearLedgerDto> Rows = new();

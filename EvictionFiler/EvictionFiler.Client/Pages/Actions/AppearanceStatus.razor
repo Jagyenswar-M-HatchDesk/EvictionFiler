@@ -1,18 +1,23 @@
 ﻿@* @page "/court-outcome" *@
+@using Blazored.Toast.Services
 @using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.CaseAppearanceDtos
 @using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Domain.Entities.Master
 
 @inject ICourtTodayTypeRepository Courttodayrepo
 @inject IAdjournedReasonRepository adjournedRepo
+@inject ICaseAppearanceService appreanceService
+@inject IToastService ToastService
 
 @* <PageTitle>HousingCourtFiler – Outcome Actions</PageTitle> *@
 <style>
     /* body {
-        background: #f5f7fb;
-        padding-bottom: 90px;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont;
-    } */
+            background: #f5f7fb;
+            padding-bottom: 90px;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont;
+        } */
 
     .header {
         background: #0b1f3a;
@@ -29,15 +34,14 @@
         margin-bottom: 16px;
     }
 
-    .section h6 {
-        font-weight: 600;
-        color: #0b1f3a;
-    }
+        .section h6 {
+            font-weight: 600;
+            color: #0b1f3a;
+        }
 
     .sticky-footer {
         position: fixed;
         bottom: 0;
-        
         right: 0;
         background: #fff;
         border-top: 1px solid #e5e7eb;
@@ -116,180 +120,186 @@
         <strong>ACTIONS</strong><br />
         Case #: @(legalcaseDto.Casecode ?? "CSI-2025-009312")  | Court: @(legalcaseDto.CountyName ?? "Queens")  | Part @(legalcaseDto.CourtPart ?? "D") | Judge @(legalcaseDto.Judge ?? "Bryan")
     </div>
+    <EditForm Model="@model">
 
-    <!-- OUTCOME SELECTOR -->
-    <div class="section">
-        <h6>What happened in court today?</h6>
-        <InputSelect class="form-select" @bind-Value="Outcome">
-            <option value="">—-Select-—</option>
-            @foreach(var item in CourtTodayType)
-            {
-                <option value="@item.Id">@item.Name</option>
-               @*  <option value="motion">Adjourned for Motion Practice</option>
+
+        <!-- OUTCOME SELECTOR -->
+        <div class="section">
+            <h6>What happened in court today?</h6>
+            <InputSelect class="form-select" @bind-Value="model.CourtTodayId">
+                <option value="">—-Select-—</option>
+                @foreach (var item in CourtTodayType)
+                {
+                    <option value="@item.Id">@item.Name</option>
+                    @*  <option value="motion">Adjourned for Motion Practice</option>
                 <option value="stip">Stipulation (No Judgment)</option>
                 <option value="stip_judgment">Stipulation With Judgment</option>
                 <option value="final">Final Judgment + Warrant</option>
                 <option value="money">Money Judgment Only</option>
                 <option value="closed">Case Settled / Discontinued</option> *@
-            }
-            
-        </InputSelect>
-    </div>
+                }
 
-    @if (ShowAdjourn)
-    {
-        <div class="section">
-            <h6>Adjourn Date & Time</h6>
-            <div class="row">
-                <div class="col-md-4">
-                    <label>Date</label>
-                    <input type="date" @bind="AdjournDate" class="form-control" />
-                </div>
-                <div class="col-md-4">
-                    <label>Time</label>
-                    <input type="time" @bind="AdjournTime" class="form-control" />
-                </div>
-                <div class="col-md-4">
-                    <label>Reason</label>
-                    <select class="form-select" @bind="AdjournReason">
-                        <option>By Court</option>
-                        <option>By Stipulation</option>
-                        <option>Motion Practice</option>
-                    </select>
-                </div>
-            </div>
+            </InputSelect>
         </div>
-    }
 
-    @if (ShowMotions)
-    {
-        <div class="section">
-            <h6>Motion Schedule</h6>
-            <div class="row">
-                <div class="col-md-3"><label>Motion Due</label><InputDate @bind-Value="MotionDue" class="form-control" /></div>
-                <div class="col-md-3"><label>Opposition Due</label><InputDate @bind-Value="OppositionDue" class="form-control" /></div>
-                <div class="col-md-3"><label>Reply Due</label><InputDate @bind-Value="ReplyDue" class="form-control" /></div>
-                <div class="col-md-3"><label>Return Date</label><InputDate @bind-Value="ReturnDate" class="form-control" /></div>
-            </div>
-        </div>
-    }
+        @if (ShowAdjourn)
+        {
+            <div class="section">
+                <h6>Adjourn Date & Time</h6>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label>Date</label>
+                        <input type="date" @bind="model.AdjournDate" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label>Time</label>
+                        <input type="time" @bind="model.AdjournTime" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label>Reason</label>
+                        <InputSelect class="form-select" @bind-Value="model.AdjournReasonId">
+                            <option value="">--Select--</option>
+                            @foreach (var item in AdjournedReasons)
+                            {
+                                <option value="@item.Id">@item.Name</option>
+                            }
 
-    @if (ShowStip)
-    {
-        <div class="section">
-            <h6>Stipulation Summary</h6>
-            <div class="form-check">
-                <InputCheckbox class="form-check-input" @bind-Value="JurisdictionWaived" />
-                <label class="form-check-label">Jurisdictional defenses waived</label>
-            </div>
-            <div class="form-check">
-                <InputCheckbox class="form-check-input" @bind-Value="MilitaryAffidavit" />
-                <label class="form-check-label">Military affidavit complete</label>
-            </div>
-        </div>
-    }
-
-    @if (ShowWarrant)
-    {
-        <div class="section">
-            <h6>Warrant & Eviction</h6>
-            <div class="row">
-                <div class="col-md-4">
-                    <label>Warrant Issued</label>
-                    <select class="form-select" @bind="WarrantIssued">
-                        <option>Yes</option>
-                        <option>No</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label>Issuance Date</label>
-                    <InputDate @bind-Value="WarrantDate" class="form-control" />
-                </div>
-                <div class="col-md-4">
-                    <label>Stay Until</label>
-                    <InputDate @bind-Value="StayUntil" class="form-control" />
+                        </InputSelect>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
+        }
 
-    @if (ShowPayments)
-    {
-        <div class="section">
-            <h6>Payments / Use & Occupancy</h6>
-
-            <div class="row mb-2">
-                <div class="col-md-3">
-                    <InputNumber @bind-Value="Amount" class="form-control" />
-                </div>
-                <div class="col-md-3">
-                    <InputDate @bind-Value="PaymentStart" class="form-control" />
-                </div>
-                <div class="col-md-3">
-                    <InputDate @bind-Value="PaymentEnd" class="form-control" />
+        @if (ShowMotions)
+        {
+            <div class="section">
+                <h6>Motion Schedule</h6>
+                <div class="row">
+                    <div class="col-md-3"><label>Motion Due</label><InputDate @bind-Value="model.MotionDue" class="form-control" /></div>
+                    <div class="col-md-3"><label>Opposition Due</label><InputDate @bind-Value="model.OppositionDue" class="form-control" /></div>
+                    <div class="col-md-3"><label>Reply Due</label><InputDate @bind-Value="model.ReplyDue" class="form-control" /></div>
+                    <div class="col-md-3"><label>Return Date</label><InputDate @bind-Value="model.ReturnDate" class="form-control" /></div>
                 </div>
             </div>
+        }
 
-            <button class="btn btn-sm btn-primary" @onclick="GenerateSchedule">
-                Generate Schedule
-            </button>
+        @if (ShowStip)
+        {
+            <div class="section">
+                <h6>Stipulation Summary</h6>
+                <div class="form-check">
+                    <InputCheckbox class="form-check-input" @bind-Value="model.JurisdictionWaived" />
+                    <label class="form-check-label">Jurisdictional defenses waived</label>
+                </div>
+                <div class="form-check">
+                    <InputCheckbox class="form-check-input" @bind-Value="model.MilitaryAffidavit" />
+                    <label class="form-check-label">Military affidavit complete</label>
+                </div>
+            </div>
+        }
 
-            <table class="table table-sm mt-2">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var row in PaymentSchedule)
-                    {
+        @if (ShowWarrant)
+        {
+            <div class="section">
+                <h6>Warrant & Eviction</h6>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label>Warrant Issued</label>
+                        <select class="form-select" @bind="model.WarrantIssued">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Issuance Date</label>
+                        <InputDate @bind-Value="model.WarrantDate" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label>Stay Until</label>
+                        <InputDate @bind-Value="model.StayUntil" class="form-control" />
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (ShowPayments)
+        {
+            <div class="section">
+                <h6>Payments / Use & Occupancy</h6>
+
+                <div class="row mb-2">
+                    <div class="col-md-3">
+                        <InputNumber @bind-Value="Amount" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <InputDate @bind-Value="PaymentStart" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <InputDate @bind-Value="PaymentEnd" class="form-control" />
+                    </div>
+                </div>
+
+                <button class="btn btn-sm btn-primary" @onclick="GenerateSchedule">
+                    Generate Schedule
+                </button>
+
+                <table class="table table-sm mt-2">
+                    <thead>
                         <tr>
-                            <td>@row.Date.ToShortDateString()</td>
-                            <td>@row.Amount.ToString("C")</td>
+                            <th>Date</th>
+                            <th>Amount</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
-
-    @if (Outcome != null && Outcome != Guid.Empty)
-    {
-        <div class="section">
-            <h6>Key Dates (Read Only)</h6>
-            <ul>
-                <li>Vacate Date: —</li>
-                <li>Next Appearance: —</li>
-                <li>Next Payment: —</li>
-            </ul>
-        </div>
-
-        <div class="section">
-            <h6>Reminders</h6>
-            <div class="form-check">
-                <InputCheckbox class="form-check-input" @bind-Value="ReminderDeadlines" />
-                <label class="form-check-label">Deadlines</label>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in PaymentSchedule)
+                        {
+                            <tr>
+                                <td>@row.Date.ToShortDateString()</td>
+                                <td>@row.Amount.ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
-            <div class="form-check">
-                <InputCheckbox class="form-check-input" @bind-Value="ReminderPayments" />
-                <label class="form-check-label">Payments</label>
-            </div>
-        </div>
-    }
+        }
 
+        @if (model.CourtTodayId != null && model.CourtTodayId != Guid.Empty)
+        {
+            <div class="section">
+                <h6>Key Dates (Read Only)</h6>
+                <ul>
+                    <li>Vacate Date: —</li>
+                    <li>Next Appearance: —</li>
+                    <li>Next Payment: —</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h6>Reminders</h6>
+                <div class="form-check">
+                    <InputCheckbox class="form-check-input" @bind-Value="model.ReminderDeadlines" />
+                    <label class="form-check-label">Deadlines</label>
+                </div>
+                <div class="form-check">
+                    <InputCheckbox class="form-check-input" @bind-Value="model.ReminderPayments" />
+                    <label class="form-check-label">Payments</label>
+                </div>
+            </div>
+        }
+    </EditForm>
 </div>
 
 <div class="sticky-footer d-flex justify-content-between width-adjust">
     <div class="text-muted">Court-ready ✓</div>
     <div>
-        <button class="btn btn-outline-secondary btn-sm" disabled="@(Outcome == null || Outcome == Guid.Empty)">Save</button>
-        <button class="btn btn-primary btn-sm" disabled="@(Outcome == null || Outcome == Guid.Empty)" >Save & Generate Reminders</button>
+        <button class="btn btn-outline-secondary btn-sm" disabled="@(model.CourtTodayId == null || model.CourtTodayId == Guid.Empty)" @onclick="SaveAsync">Save</button>
+        <button class="btn btn-primary btn-sm" disabled="@(model.CourtTodayId == null || model.CourtTodayId == Guid.Empty)" @onclick="SaveAsync">Save & Generate Reminders</button>
     </div>
 </div>
 
 @code {
     [Parameter] public IntakeModel legalcaseDto { get; set; }
+    public CaseAppearanceDto model { get; set; } = new();
 
     Guid? Outcome = null;
 
@@ -321,15 +331,15 @@
     IEnumerable<AdjournedReason> AdjournedReasons = new List<AdjournedReason>();
 
     // bool ShowAdjourn => Outcome is "adjourned" or "motion";
-    bool ShowAdjourn => CourtTodayType.Any(e => e.Id == Outcome && (e.Name.Trim().Equals("Adjourned") || e.Name.Trim().Equals("Adjourned for Motion Practice")));
+    bool ShowAdjourn => CourtTodayType.Any(e => e.Id == model.CourtTodayId && (e.Name.Trim().Equals("Adjourned") || e.Name.Trim().Equals("Adjourned for Motion Practice")));
     // bool ShowMotions => Outcome == "motion";
-    bool ShowMotions => CourtTodayType.Any(e => e.Id == Outcome && (e.Name.Trim().Equals("Adjourned for Motion Practice")));
+    bool ShowMotions => CourtTodayType.Any(e => e.Id == model.CourtTodayId && (e.Name.Trim().Equals("Adjourned for Motion Practice")));
     // bool ShowStip => Outcome is "stip" or "stip_judgment";
-    bool ShowStip => CourtTodayType.Any(e => e.Id == Outcome && (e.Name.Trim().Equals("Stipulation (No Judgement)") || e.Name.Trim().Equals("Stipulation With Judgement")));
+    bool ShowStip => CourtTodayType.Any(e => e.Id == model.CourtTodayId && (e.Name.Trim().Equals("Stipulation (No Judgement)") || e.Name.Trim().Equals("Stipulation With Judgement")));
     // bool ShowWarrant => Outcome == "final";
-    bool ShowWarrant => CourtTodayType.Any(e => e.Id == Outcome && (e.Name.Trim().Equals("Final Judgement + Warrant")));
+    bool ShowWarrant => CourtTodayType.Any(e => e.Id == model.CourtTodayId && (e.Name.Trim().Equals("Final Judgement + Warrant")));
     // bool ShowPayments => Outcome is "stip" or "stip_judgment" or "final" or "money"; Money Judgment Only
-    bool ShowPayments => CourtTodayType.Any(e => e.Id == Outcome && (e.Name.Trim().Equals("Stipulation (No Judgement)") || e.Name.Trim().Equals("Stipulation With Judgement") || e.Name.Trim().Equals("Final Judgement + Warrant") || e.Name.Trim().Equals("Money Judgement Only")));
+    bool ShowPayments => CourtTodayType.Any(e => e.Id == model.CourtTodayId && (e.Name.Trim().Equals("Stipulation (No Judgement)") || e.Name.Trim().Equals("Stipulation With Judgement") || e.Name.Trim().Equals("Final Judgement + Warrant") || e.Name.Trim().Equals("Money Judgement Only")));
 
     protected override async Task OnInitializedAsync()
     {
@@ -362,5 +372,19 @@
     {
         public DateTime Date { get; set; }
         public decimal Amount { get; set; }
+    }
+
+    public async Task SaveAsync()
+    {
+        model.LegalCaseId = legalcaseDto.Id;
+        var result = await appreanceService.AddCaseAppearance(model);
+        if(result)
+        {
+            ToastService.ShowSuccess("Case Appreance Added Successfully!");
+        }
+        else
+        {
+            ToastService.ShowError("Error occured in adding Case Appreance");
+        }
     }
 }

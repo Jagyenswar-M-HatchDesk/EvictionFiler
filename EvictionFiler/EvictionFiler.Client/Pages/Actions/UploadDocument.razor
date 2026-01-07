@@ -1,0 +1,258 @@
+﻿@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs.CaseDocumentDtos
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Domain.Entities
+@using EvictionFiler.Domain.Entities.Master
+@inject IJSRuntime JS
+@inject IDocumentTypeRepository DocRepo
+@inject IToastService ToastService
+@inject ILegalCaseService _service
+
+<EditForm Model="@Documentdto" OnValidSubmit="SaveFiles">
+    <DataAnnotationsValidator />
+    <div class="row mb-3">
+        <div class="fw-semibold col-auto" style="display: flex;
+                                                                            justify-content: center;
+                                                                            align-items: center;">
+            Document Type
+        </div>
+        <div class="col-6 ">
+            <InputSelect class="form-select" @bind-Value="Documentdto.DocumentTypeId">
+                <option value="">--Select--</option>
+                @foreach (var item in DocumentsType)
+                {
+                    <option value="@item.Id">@item.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => Documentdto.DocumentTypeId)" />
+        </div>
+
+    </div>
+    <!-- CONTENT for Upload / View Documents -->
+    <InputFile @ref="fileInput" OnChange="OnInputChanged" multiple style="display:none" disabled="@(Documentdto.DocumentTypeId == null || Documentdto.DocumentTypeId == Guid.Empty)" />
+
+    <div class="drop-zone @(Documentdto.DocumentTypeId == null || Documentdto.DocumentTypeId == Guid.Empty ? "divdisabled" : "")"
+         @ref="dropZoneRef"
+         @onclick="OpenFileDialog">
+
+        <div class="row">
+            <div class="dropzonecontent">Upload Documents</div>
+            <div class="dropzonecontent">
+                <span class="@(Documentdto.DocumentTypeId == null || Documentdto.DocumentTypeId == Guid.Empty ? "divdisabled" : "")" style="text-decoration:underline; cursor:pointer; color:#00a7ff; margin-right:5px;">Click</span>
+                or drag & drop file(s) here
+            </div>
+
+        </div>
+
+
+    </div>
+    <div class="dropzonecontent" style="color:red; font-size:0.9rem; margin-top:5px;">
+        * Only PDF and DOC/DOCX files are allowed
+    </div>
+
+    @if (Files.Count > 0)
+    {
+        <ul class="google-upload-list mt-3">
+            @foreach (var item in UploadItems)
+            {
+                <li class="google-upload-item">
+
+                    <div class="file-info">
+                        <div class="file-icon">📄</div>
+
+                        <div class="file-meta">
+                            <div class="file-name">@item.File.Name</div>
+
+                            <div class="d-flex" style="width:100px">
+                                <div class="progress-container">
+                                    <div class="progress-bar" style="width:@item.Progress%"></div>
+                                </div>
+
+                                <div class="progress-text">@item.Progress%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-close delete-btn"
+                            @onclick="() => RemoveUploadItem(item)">
+                    </button>
+
+                </li>
+            }
+        </ul>
+    }
+
+
+    <div class="modal-footer mt-3" style="padding: 5px !important; border-top: none !important; ">
+        <button type="submit" class="btn btn-primary base" style="min-width:100% !important" disabled="@(Documentdto.DocumentTypeId == null || Documentdto.DocumentTypeId == Guid.Empty)">Upload</button>
+    </div>
+</EditForm>
+
+@code{
+    [Parameter]public Guid LegalCaseId { get; set; }
+    [Parameter]public bool IsProcessserver { get; set; }
+    [Parameter] public EventCallback OnFormCreate { get; set; }
+    private ElementReference dropZoneRef;
+    private InputFile? fileInput;
+    private List<IBrowserFile> Files = new();
+    public class UploadItem
+    {
+        public IBrowserFile File { get; set; }
+        public int Progress { get; set; } = 0;
+    }
+    private List<UploadItem> UploadItems = new();
+    private CaseDocumentDto Documentdto = new();
+    private IEnumerable<DocumentType> DocumentsType = new List<DocumentType>();
+    private readonly string[] AllowedExtensions = { ".pdf", ".doc", ".docx" };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAllDocuments();
+    }
+
+    private async Task GetAllDocuments()
+    {
+
+        if (!DocumentsType.Any())
+        {
+            var list = await DocRepo.GetAllAsync();
+            DocumentsType = list.Where(e => e.IsProcessServer == IsProcessserver).ToList();
+        }
+        StateHasChanged();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("fileupload.registerDropHandler", dropZoneRef, fileInput!.Element);
+        }
+    }
+
+    private async Task OpenFileDialog()
+    {
+        await JS!.InvokeVoidAsync("fileupload.triggerInput", fileInput!.Element);
+    }
+
+    private void OnDragOver(DragEventArgs e)
+    {
+        e.DataTransfer.DropEffect = "copy";
+    }
+
+    private async Task OnDrop(DragEventArgs e)
+    {
+        // send dropped files to <input type="file">
+        await JS!.InvokeVoidAsync("fileupload.addDroppedFiles", fileInput!.Element);
+    }
+    private void OnInputChanged(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles())
+        {
+            var item = new UploadItem
+            {
+                File = file,
+                Progress = 0
+            };
+
+            UploadItems.Add(item);
+            Files.Add(file);
+
+            // Simulate upload progress (replace with real API upload later)
+            _ = SimulateProgressAsync(item);
+        }
+    }
+
+    private async Task SimulateProgressAsync(UploadItem item)
+    {
+        while (item.Progress < 100)
+        {
+            item.Progress += 5;
+            await Task.Delay(100);
+            StateHasChanged();
+        }
+    }
+
+    private void RemoveUploadItem(UploadItem item)
+    {
+        UploadItems.Remove(item);
+        Files.Remove(item.File);
+        StateHasChanged();
+    }
+    private async Task SaveFiles()
+    {
+        if (LegalCaseId == null || LegalCaseId == Guid.Empty)
+        {
+            ToastService.ShowError("Invalid Case ID.");
+            Files.Clear();
+            return;
+        }
+
+        if (!Files.Any())
+        {
+            ToastService.ShowWarning("Please select files to upload.");
+            Files.Clear();
+            return;
+        }
+
+        // Check allowed file types
+        foreach (var file in Files)
+        {
+            var extension = Path.GetExtension(file.Name).ToLower();
+            if (!AllowedExtensions.Contains(extension))
+            {
+                ToastService.ShowWarning($" Only PDF and DOC/DOCX are permitted.");
+                Files.Clear();
+                return; // stop uploading
+            }
+        }
+
+        var uploadPath = Path.Combine(Environment.CurrentDirectory, "wwwroot", "uploads");
+        if (!Directory.Exists(uploadPath))
+            Directory.CreateDirectory(uploadPath);
+
+        var DocList = new List<CaseDocument>();
+
+        foreach (var file in Files)
+        {
+            var extension = Path.GetExtension(file.Name);
+            var baseName = Path.GetFileNameWithoutExtension(file.Name);
+
+            // Add DateTime stamp to filename
+            var dateStamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            var newFileName = $"{baseName}_{dateStamp}{extension}";
+
+            var physicalPath = Path.Combine(uploadPath, newFileName);
+
+            // Save the file physically
+            await using var stream = file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 200);
+            await using var fs = new FileStream(physicalPath, FileMode.Create);
+            await stream.CopyToAsync(fs);
+
+            // Save DB record
+            var document = new CaseDocument
+            {
+                Id = Guid.NewGuid(),
+                LegalCaseId = LegalCaseId,
+                DocumentTypeId = Documentdto.DocumentTypeId,
+                Name = newFileName,
+                Path = $"uploads/{newFileName}",   // Relative path for web access
+                CreatedOn = DateTime.Now
+            };
+
+            DocList.Add(document);
+        }
+
+        var result = await _service.AddDocumentAsync(DocList);
+        if (result)
+        {
+            ToastService.ShowSuccess("Documents saved successfully!");
+            Files.Clear();
+            UploadItems.Clear();
+            await OnFormCreate.InvokeAsync();
+        }
+        else
+        {
+            ToastService.ShowError("An error occurred during saving!");
+        }
+    }
+}

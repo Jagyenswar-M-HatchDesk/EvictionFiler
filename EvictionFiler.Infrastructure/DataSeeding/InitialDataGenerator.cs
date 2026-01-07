@@ -127,15 +127,18 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             var now = DateTime.UtcNow;
             return new List<DocumentType>
             {
-                new DocumentType() { Name = "Show on the detail screen", CreatedOn = now },
-                new DocumentType() { Name = "Signed Good Cause Article 6A", CreatedOn = now },
-                new DocumentType() { Name = "Notice of Appearance", CreatedOn = now },
-                new DocumentType() { Name = "Stipulation", CreatedOn = now },
-                new DocumentType() { Name = "Judgement and Warrant", CreatedOn = now },
-                new DocumentType() { Name = "Decision/Order", CreatedOn = now },
-                new DocumentType() { Name = "Notice of Eviction", CreatedOn = now },
-                new DocumentType() { Name = "OSC/Motion", CreatedOn = now },
-                new DocumentType() { Name = "Rent Ledger", CreatedOn = now },
+                new DocumentType() { Name = "Show on the detail screen", CreatedOn = now , IsProcessServer= false },
+                new DocumentType() { Name = "Signed Good Cause Article 6A", CreatedOn = now, IsProcessServer= false },
+                new DocumentType() { Name = "Notice of Appearance", CreatedOn = now , IsProcessServer= false},
+                new DocumentType() { Name = "Stipulation", CreatedOn = now , IsProcessServer = false},
+                new DocumentType() { Name = "Judgement and Warrant", CreatedOn = now , IsProcessServer = false},
+                new DocumentType() { Name = "Decision/Order", CreatedOn = now , IsProcessServer = false},
+                new DocumentType() { Name = "Notice of Eviction", CreatedOn = now , IsProcessServer = false},
+                new DocumentType() { Name = "OSC/Motion", CreatedOn = now , IsProcessServer = false},
+                new DocumentType() { Name = "Rent Ledger", CreatedOn = now , IsProcessServer = false},
+                new DocumentType() { Name = "Affidavit of Service - Demand Notice", CreatedOn = now , IsProcessServer = true},
+                new DocumentType() { Name = "Affidavit of Service - Petition/Notice of Petition", CreatedOn = now , IsProcessServer = true},
+                new DocumentType() { Name = "Non Military Affidavit", CreatedOn = now , IsProcessServer = true},
             };
         }
 
