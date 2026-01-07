@@ -21,6 +21,18 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new Language() { Name = "Chienese", CreatedOn = now },
             };
         }
+        public static IEnumerable<AdjournedReason> GetAdjournedReasons()
+        {
+            var now = DateTime.UtcNow;
+            return new List<AdjournedReason>
+            {
+                new AdjournedReason() { Name = "By Court", CreatedOn = now },
+                new AdjournedReason() { Name = "By Stipulation", CreatedOn = now },
+                new AdjournedReason() { Name = "Motion Practice", CreatedOn = now },
+               
+            };
+        }
+        
         public static IEnumerable<User> GetUser()
         {
             var now = DateTime.UtcNow;

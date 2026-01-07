@@ -4,6 +4,7 @@
 @using EvictionFiler.Domain.Entities.Master
 
 @inject ICourtTodayTypeRepository Courttodayrepo
+@inject IAdjournedReasonRepository adjournedRepo
 
 @* <PageTitle>HousingCourtFiler – Outcome Actions</PageTitle> *@
 <style>
@@ -282,8 +283,8 @@
 <div class="sticky-footer d-flex justify-content-between width-adjust">
     <div class="text-muted">Court-ready ✓</div>
     <div>
-        <button class="btn btn-outline-secondary btn-sm">Save</button>
-        <button class="btn btn-primary btn-sm">Save & Generate Reminders</button>
+        <button class="btn btn-outline-secondary btn-sm" disabled="@(Outcome == null || Outcome == Guid.Empty)">Save</button>
+        <button class="btn btn-primary btn-sm" disabled="@(Outcome == null || Outcome == Guid.Empty)" >Save & Generate Reminders</button>
     </div>
 </div>
 
@@ -317,6 +318,7 @@
 
     List<PaymentRow> PaymentSchedule = new();
     IEnumerable<CourtToday> CourtTodayType = new List<CourtToday>();
+    IEnumerable<AdjournedReason> AdjournedReasons = new List<AdjournedReason>();
 
     // bool ShowAdjourn => Outcome is "adjourned" or "motion";
     bool ShowAdjourn => CourtTodayType.Any(e => e.Id == Outcome && (e.Name.Trim().Equals("Adjourned") || e.Name.Trim().Equals("Adjourned for Motion Practice")));
@@ -332,6 +334,7 @@
     protected override async Task OnInitializedAsync()
     {
         CourtTodayType = await Courttodayrepo.GetAllAsync();
+        AdjournedReasons = await adjournedRepo.GetAllAsync();
 
     }
 

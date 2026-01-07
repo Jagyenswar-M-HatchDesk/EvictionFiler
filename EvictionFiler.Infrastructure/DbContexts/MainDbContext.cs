@@ -93,6 +93,8 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<DocumentType> MstDocumentType { get; set; }
         public DbSet<CourtToday> MstCourtTodayType { get; set; }
         public DbSet<CaseWarrant> CaseWarrants { get; set; }
+        public DbSet<CaseAppearance> CaseAppearances { get; set; }
+        public DbSet<AdjournedReason> MstAdjournedReasons { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

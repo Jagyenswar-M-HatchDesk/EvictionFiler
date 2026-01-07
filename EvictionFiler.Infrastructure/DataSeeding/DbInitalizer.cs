@@ -72,7 +72,8 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 await SeedReminderEscalates(context);
                 await SeedDocumentType(context);
                 await SeedCourtTodayTypes(context);
-                await SeedUser(context);
+                //await SeedUser(context);
+                await SeedAdjournedReason(context);
                 await context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -89,6 +90,17 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 if (context.MstAppearanceTypesForHearing.FirstOrDefault(d => d.Name == type.Name) == null)
                 {
                     await context.MstAppearanceTypesForHearing.AddAsync(type);
+                }
+            }
+        }
+        private static async Task SeedAdjournedReason(MainDbContext context)
+        {
+            var appearancetypes = InitialDataGenerator.GetAdjournedReasons();
+            foreach (var type in appearancetypes)
+            {
+                if (context.MstAdjournedReasons.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstAdjournedReasons.AddAsync(type);
                 }
             }
         }

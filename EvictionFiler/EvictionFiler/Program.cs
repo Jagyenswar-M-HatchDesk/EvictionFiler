@@ -222,6 +222,7 @@ builder.Services.AddScoped<IFeesCatalogCourtAppearanceService, FeesCatalogCourtA
 builder.Services.AddScoped<IFeesCatalogAttorneyRosterService, FeesCatalogAttorneyRosterService>();
 builder.Services.AddScoped<ICaseWarrantService, CaseWarrantService>();
 builder.Services.AddScoped<ICaseWarrantRepository, CaseWarrantRepository>();
+builder.Services.AddScoped<IAdjournedReasonRepository, AdjournedReasonsRepository>();
 
 var app = builder.Build();
 

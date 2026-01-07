@@ -105,10 +105,10 @@
     }
 
     /* .form-wrapper.hidden {
-                                                                                        transform: translateX(-100%);
-                                                                                        opacity: 0;
-                                                                                        pointer-events: none;
-                                                                                        } */
+                                                                                            transform: translateX(-100%);
+                                                                                            opacity: 0;
+                                                                                            pointer-events: none;
+                                                                                            } */
 
     .overlay-form {
         animation: slideIn 1.0s ease forwards;
@@ -411,8 +411,8 @@
     }
 
     /* =========================================================
-                               Motion Form – Scoped Styling
-                               ========================================================= */
+                                   Motion Form – Scoped Styling
+                                   ========================================================= */
 
     .motion-form {
         --border-color: #e5e7eb;
@@ -485,20 +485,20 @@
 
         /* Toggle (Bootstrap switch enhancement) */
         /* .motion-form .form-switch .form-check-input {
-                                    width: 2.5rem;
-                                    height: 1.25rem;
-                                    cursor: pointer;
-                                } */
+                                        width: 2.5rem;
+                                        height: 1.25rem;
+                                        cursor: pointer;
+                                    } */
 
         /* .motion-form .form-switch .form-check-input:checked {
-                                        background-color: var(--primary-dark);
-                                        border-color: var(--primary-dark);
-                                    }
-                         */
+                                            background-color: var(--primary-dark);
+                                            border-color: var(--primary-dark);
+                                        }
+                             */
         /* Attachments */
         /*  .motion-form .form-check {
-                                    margin-bottom: 0.5rem;
-                                } */
+                                        margin-bottom: 0.5rem;
+                                    } */
 
         .motion-form .form-check-label {
             font-size: 14px;
@@ -551,8 +551,8 @@
     }
 
     /* =========================================================
-                               Collapsible Motion Sections (Tab-like)
-                               ========================================================= */
+                                   Collapsible Motion Sections (Tab-like)
+                                   ========================================================= */
 
     .motion-section {
         border: 1px solid #e5e7eb;
@@ -628,7 +628,7 @@
     }
 
     .btn-primary {
-        color:white;
+        color: white;
         background-color: #1F365D !important;
         border-color: #1F365D !important;
     }
@@ -637,6 +637,21 @@
             background-color: #042254 !important;
             border-color: #042254 !important;
         }
+
+    .btn:disabled {
+        cursor: not-allowed;
+        pointer-events: auto;
+    }
+
+    input:disabled {
+        pointer-events: auto;
+        cursor: not-allowed;
+    }
+
+    .divdisabled {
+        cursor: not-allowed !important;
+        pointer-events: auto;
+    }
 
 </style>
 @using System.Collections.Generic
@@ -1191,9 +1206,9 @@
 
                         </div>
                         <div class="tab-pane fade" id="appearance" role="tabpanel" aria-labelledby="appearance-tab">
-                            @if(ShowAppearance)
+                            @if (ShowAppearance)
                             {
-                                <AppearanceStatus legalcaseDto="legalcaseDto"/>
+                                <AppearanceStatus legalcaseDto="legalcaseDto" />
                             }
                         </div>
                         <div class="tab-pane fade" id="reminder" role="tabpanel" aria-labelledby="reminder-tab">
@@ -1203,11 +1218,11 @@
                             }
                         </div>
                         <div class="tab-pane fade" id="filings" role="tabpanel" aria-labelledby="filings-tab">
-                           <h4>Under Construction</h4>
+                            <h4>Under Construction</h4>
                         </div>
                         <div class="tab-pane fade" id="marshal" role="tabpanel" aria-labelledby="marshal-tab">
-                           
-                            @if(ShowMarshal)
+
+                            @if (ShowMarshal)
                             {
                                 <MarshalDates legalcaseDto="legalcaseDto" LoggedInUser="loggedInUserId" OnGenerateMarshalForm="HideAsync" />
                             }
@@ -1239,16 +1254,16 @@
 
                                 </div>
                                 <!-- CONTENT for Upload / View Documents -->
-                                <InputFile @ref="fileInput" OnChange="OnInputChanged" multiple style="display:none" disabled="@(Documentdto.DocumentTypeId != null && Documentdto.DocumentTypeId != Guid.Empty)" />
+                                <InputFile @ref="fileInput" OnChange="OnInputChanged" multiple style="display:none" disabled="@(Documentdto.DocumentTypeId == null || Documentdto.DocumentTypeId == Guid.Empty)" />
 
-                                <div class="drop-zone"
+                                <div class="drop-zone @(Documentdto.DocumentTypeId == null || Documentdto.DocumentTypeId == Guid.Empty ? "divdisabled" : "")"
                                      @ref="dropZoneRef"
                                      @onclick="OpenFileDialog">
 
                                     <div class="row">
                                         <div class="dropzonecontent">Upload Documents</div>
                                         <div class="dropzonecontent">
-                                            <span style="text-decoration:underline; cursor:pointer; color:#00a7ff; margin-right:5px;">Click</span>
+                                            <span class="@(Documentdto.DocumentTypeId == null || Documentdto.DocumentTypeId == Guid.Empty ? "divdisabled" : "")" style="text-decoration:underline; cursor:pointer; color:#00a7ff; margin-right:5px;">Click</span>
                                             or drag & drop file(s) here
                                         </div>
 
@@ -1294,7 +1309,7 @@
 
 
                                 <div class="modal-footer mt-3" style="padding: 5px !important; border-top: none !important; ">
-                                    <button type="submit" class="btn btn-primary base" style="min-width:100% !important" disabled="@(Documentdto.DocumentTypeId != null && Documentdto.DocumentTypeId != Guid.Empty)">Upload</button>
+                                    <button type="submit" class="btn btn-primary base" style="min-width:100% !important" disabled="@(Documentdto.DocumentTypeId == null || Documentdto.DocumentTypeId == Guid.Empty)">Upload</button>
                                 </div>
                             </EditForm>
 
@@ -1338,7 +1353,7 @@
                             </div>
 
                             <div class="modal-footer" style="padding: 5px !important; border-top: none !important;">
-                                <button type="submit" class="btn btn-primary base" @onclick="SaveHearingChanges">Save</button>
+                                <button type="submit" class="btn btn-primary base" disabled="@(legalcaseDto.Notes == null)" @onclick="SaveHearingChanges">Save</button>
                             </div>
                         </div>
 
