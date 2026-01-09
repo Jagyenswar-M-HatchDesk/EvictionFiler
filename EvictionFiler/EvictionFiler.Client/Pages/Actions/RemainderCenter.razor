@@ -1,4 +1,5 @@
 ﻿@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.RemainderCenterDto
 @using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
 @using EvictionFiler.Application.Interfaces.IServices
@@ -280,7 +281,7 @@
 
 
 @code {
-
+    [Parameter] public IntakeModel LegalCaseDto { get; set; }
     private int HealthScore = 82;
 
     private string ActiveTab = "All";
@@ -336,7 +337,7 @@
         Categories = await categoryRepo.GetAllAsync();
         Escalates = await esclatesRepo.GetAllAsync();
 
-        Remiandercenters = await RemianderCenterService.GetAllRemainderCenterAsync();
+        Remiandercenters = await RemianderCenterService.GetRemainderCenterByCaseIdAsync(LegalCaseDto.Id);
         await GetFilteredRemainder();
         // spinnerservice.Hide();
     }
@@ -377,6 +378,8 @@
             remainderDto.CreatedBy = Guid.Empty;
         }
 
+        remainderDto.CaseId = LegalCaseDto.Id;
+        remainderDto.TenantId = LegalCaseDto.TenantId;
         // Save the full nested object
         var isSaved = await RemianderCenterService.Create(remainderDto);
         if (isSaved)

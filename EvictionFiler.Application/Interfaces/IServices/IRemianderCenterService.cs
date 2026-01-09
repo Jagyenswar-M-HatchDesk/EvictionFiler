@@ -11,6 +11,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<EditToRemainderCenterDto?> GetRemainderCenterByIdAsync(Guid? id);
         Task<bool> DeleteRemainderCenterAsync(Guid id);
         Task<bool> DeleteAllRemainderAsync();
+        Task<List<EditToRemainderCenterDto?>> GetRemainderCenterByCaseIdAsync(Guid? CaseId);
         //Task<List<EditToClientDto>> SearchRemainderCenter(string searchTerm);
 
     }

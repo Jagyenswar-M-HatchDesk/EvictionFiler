@@ -16,6 +16,7 @@ namespace EvictionFiler.Application.DTOs.CaseNoticeInfoDtos
         public Guid? TenancyTypeId { get; set; }
         //[Required]
         public Guid? FormTypeId { get; set; }
+        public string? FormTypeName { get; set; }
         //[Required]
         public int? MonthlyRent { get; set; }
         public Guid? LegalCaseId { get; set; }

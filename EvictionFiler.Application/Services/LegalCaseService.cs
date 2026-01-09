@@ -17,6 +17,7 @@ using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace EvictionFiler.Application.Services
@@ -445,6 +446,7 @@ namespace EvictionFiler.Application.Services
          c => c.ArrearLedgers,
          c=>c.Marshal,
          c=>c.RemainderCenters
+         
          //c=>c.RemainderCenter
     )
     .FirstOrDefaultAsync();
@@ -508,7 +510,7 @@ namespace EvictionFiler.Application.Services
                         RegistrationStatusTypeId = caseEntity.Buildings.RegistrationStatusId,
                         ExemptionReasonId = caseEntity.Buildings.ExemptionReasonId,
                         ExemptionBasisId = caseEntity.Buildings.ExemptionBasisId,
-                        GoodCause = caseEntity.Buildings.GoodCause!= null ? caseEntity.Buildings.GoodCause.Value : false,
+                        GoodCause = caseEntity.Buildings.GoodCause != null ? caseEntity.Buildings.GoodCause.Value : false,
                         OwnerOccupied = caseEntity.Buildings.OwnerOccupied != null ? caseEntity.Buildings.OwnerOccupied.Value : false,
 
 
@@ -560,7 +562,8 @@ namespace EvictionFiler.Application.Services
                         AttrneyContactInfo = caseEntity.AttrneyContactInfo,
                         AttrneyEmail = caseEntity.AttrneyEmail,
 
-                        MarshalName = $"{caseEntity.Marshal?.FirstName} {caseEntity.Marshal?.LastName}",
+                        MarshalName = caseEntity.Marshal!= null ? $"{caseEntity.Marshal?.FirstName} {caseEntity.Marshal?.LastName}" : string.Empty,
+                        MarshalPhone = caseEntity.Marshal != null ? caseEntity.Marshal.Telephone : string.Empty,
                         Index = caseEntity.Index,
                         County = caseEntity.County,
                         ManagingAgent = caseEntity.ManagingAgent,
@@ -623,7 +626,7 @@ namespace EvictionFiler.Application.Services
                         CourtTypeId = caseEntity.CourtTypeId,
                         CountyName = caseEntity.CourtLocation?.County?.Name ?? string.Empty,
 
-
+                       
 
                         ArrearLedgers = caseEntity.ArrearLedgers != null ? caseEntity.ArrearLedgers.Select(e => new ArrearLedgerDto()
                         {
@@ -1451,131 +1454,7 @@ namespace EvictionFiler.Application.Services
             return await _unitOfWork.SaveChangesAsync() > 0;
         }
 
-        public async Task<Guid?> AddCaseNoticeInfo(CaseNoticeInfoDto dto)
-        {
-            try
-            {
-                var Casenoticeinfo = new CaseNoticeInfo()
-                {
-                    LegalCaseId = dto.LegalCaseId,
-                    DateNoticeServed = dto.DateNoticeServed,
-                    AdditionalComments = dto.AdditionalComments,
-                    CalcNoticeLength = dto.CalcNoticeLength,
-                    DateofLastPayment = dto.DateofLastPayment,
-                    DateRentId = dto.DateRentId,
-                    ExpirationDate = dto.ExpirationDate,
-                    FormtypeId = dto.FormTypeId,
-                    TenancyTypeId = dto.TenancyTypeId,
-                    GoodCauseExempt = dto.GoodCauseExempt,
-                    LastPaidAmt = dto.LastPaidAmt,
-                    LeasedAttached = dto.LeasedAttached,
-                    LedgerAttached = dto.LedgerAttached,
-                    MonthlyRent = dto.MonthlyRent,
-                    NoticeProofattached = dto.NoticeProofattached,
-                    PredicateNotice = dto.PredicateNotice,
-                    RegistrationRentHistory = dto.RegistrationRentHistory,
-                    SocialService = dto.SocialService,
-                    TenantShare = dto.TenantShare,
-                    Totalowed = dto.Totalowed,
-                    LeaseEnd = dto.LeaseEnd,
-                    LeaseStart = dto.LeaseStart,
-                    WrittenLease = dto.WrittenLease,
-                    Assistance = dto.Assistance,
-                    CreatedOn = DateTime.Now,
-                };
-                var addedcasenoticeinfo = await _caseNoticeInfoRepository.AddAsync(Casenoticeinfo);
-                var result = await _unitOfWork.SaveChangesAsync();
-                return result > 0 ? addedcasenoticeinfo.Id : null;
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-
-        }
-
-        public async Task<Guid?> AddOrUpdateCaseNoticeInfo(CaseNoticeInfoDto dto)
-        {
-            try
-            {
-                //var entity = await _caseNoticeInfoRepository.GetAllAsync();
-                var casinfo = await _caseNoticeInfoRepository.GetByCaseAndFormTypeAsync(dto.LegalCaseId.Value ,dto.FormTypeId.Value);
-                //var casinfo = entity
-                //    .Where(x => x.LegalCaseId == dto.LegalCaseId &&
-                //                x.FormtypeId == dto.FormTypeId)
-                //    .FirstOrDefault();
-
-                if (casinfo == null)
-                {
-                    casinfo = new CaseNoticeInfo
-                    {
-                        LegalCaseId = dto.LegalCaseId,
-                        DateNoticeServed = dto.DateNoticeServed,
-                        AdditionalComments = dto.AdditionalComments,
-                        CalcNoticeLength = dto.CalcNoticeLength,
-                        DateofLastPayment = dto.DateofLastPayment,
-                        DateRentId = dto.DateRentId,
-                        ExpirationDate = dto.ExpirationDate,
-                        FormtypeId = dto.FormTypeId,
-                        TenancyTypeId = dto.TenancyTypeId,
-                        GoodCauseExempt = dto.GoodCauseExempt,
-                        LastPaidAmt = dto.LastPaidAmt,
-                        LeasedAttached = dto.LeasedAttached,
-                        LedgerAttached = dto.LedgerAttached,
-                        MonthlyRent = dto.MonthlyRent,
-                        NoticeProofattached = dto.NoticeProofattached,
-                        PredicateNotice = dto.PredicateNotice,
-                        RegistrationRentHistory = dto.RegistrationRentHistory,
-                        SocialService = dto.SocialService,
-                        TenantShare = dto.TenantShare,
-                        Totalowed = dto.Totalowed,
-                        LeaseEnd = dto.LeaseEnd,
-                        LeaseStart = dto.LeaseStart,
-                        WrittenLease = dto.WrittenLease,
-                        Assistance = dto.Assistance,
-                        CreatedOn = DateTime.Now,
-                    };
-
-                    await _caseNoticeInfoRepository.AddAsync(casinfo);
-                }
-                else
-                {
-                    casinfo.DateNoticeServed = dto.DateNoticeServed;
-                    casinfo.AdditionalComments = dto.AdditionalComments;
-                    casinfo.CalcNoticeLength = dto.CalcNoticeLength;
-                    casinfo.DateofLastPayment = dto.DateofLastPayment;
-                    casinfo.DateRentId = dto.DateRentId;
-                    casinfo.ExpirationDate = dto.ExpirationDate;
-                    casinfo.TenancyTypeId = dto.TenancyTypeId;
-                    casinfo.GoodCauseExempt = dto.GoodCauseExempt;
-                    casinfo.LastPaidAmt = dto.LastPaidAmt;
-                    casinfo.LeasedAttached = dto.LeasedAttached;
-                    casinfo.LedgerAttached = dto.LedgerAttached;
-                    casinfo.MonthlyRent = dto.MonthlyRent;
-                    casinfo.NoticeProofattached = dto.NoticeProofattached;
-                    casinfo.PredicateNotice = dto.PredicateNotice;
-                    casinfo.RegistrationRentHistory = dto.RegistrationRentHistory;
-                    casinfo.SocialService = dto.SocialService;
-                    casinfo.TenantShare = dto.TenantShare;
-                    casinfo.Totalowed = dto.Totalowed;
-                    casinfo.LeaseEnd = dto.LeaseEnd;
-                    casinfo.LeaseStart = dto.LeaseStart;
-                    casinfo.WrittenLease = dto.WrittenLease;
-                    casinfo.Assistance = dto.Assistance;
-                    casinfo.UpdatedOn = DateTime.Now;
-
-                    // 🔴 REQUIRED FIXES
-                    //await _caseNoticeInfoRepository.UpdateAsync(casinfo);
-                }
-
-                var result = await _unitOfWork.SaveChangesAsync();
-                return result > 0 ? casinfo.Id : null;
-            }
-            catch
-            {
-                return null;
-            }
-        }
+        
 
 
     }

@@ -26,6 +26,7 @@ namespace EvictionFiler.Application.DTOs
         public string ClientName { get; set; }
 
         public string MarshalName { get; set; }
+        public string MarshalPhone { get; set; }
         public string ClientAddress { get; set; }
         public string Casecode { get; set; }
         public string Buildingcode { get; set; }

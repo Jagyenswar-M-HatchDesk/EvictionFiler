@@ -21,6 +21,9 @@ namespace EvictionFiler.Application.Interfaces.IRepository.Base
 
 		Task<bool> SoftDeleteAsync(Guid id);
 
+		public IQueryable<T> GetAllQueryablewithThenInclude(Expression<Func<T, bool>>? predicate = null, Func<IQueryable<T>, IQueryable<T>>? include = null);
+
+
 
     }
 }

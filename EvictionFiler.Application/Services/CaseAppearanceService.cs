@@ -20,6 +20,34 @@ namespace EvictionFiler.Application.Services
             _unitofwork = unitofwork;
         }
 
+        public async Task<List<CaseAppearanceDto>> GetAllCaseAppreance(Guid caseId)
+        {
+            var appreaaces = await _repository.GetAllAsync( predicate: x => x.LegalCaseId == caseId, includes: a=>a.CourtToday!);
+            var result = appreaaces.Select(e => new CaseAppearanceDto
+            {
+                AdjournDate = e.AdjournDate,
+                AdjournReasonId = e.AdjournReasonId,
+                AdjournTime = e.AdjournTime,
+                MotionDue = e.MotionDue,
+                ReminderPayments = e.ReminderPayments,
+                ReminderDeadlines = e.ReminderDeadlines,
+                ReplyDue = e.ReplyDue,
+                ReturnDate = e.ReturnDate,
+                CourtTodayId = e.CourtTodayId,
+                OppositionDue = e.OppositionDue,
+                JurisdictionWaived = e.JurisdictionWaived,
+                StayUntil = e.StayUntil,
+                WarrantDate = e.WarrantDate,
+                WarrantIssued = e.WarrantIssued,
+                MilitaryAffidavit= e.MilitaryAffidavit,
+                LegalCaseId = e.LegalCaseId,
+                CourtTodayName = e.CourtToday != null ? e.CourtToday.Name : string.Empty,
+
+
+            }).ToList();
+            return result;
+        }
+
         public async Task<bool> AddCaseAppearance(CaseAppearanceDto data)
         {
             try

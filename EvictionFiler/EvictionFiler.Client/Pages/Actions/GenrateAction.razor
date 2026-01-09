@@ -11,6 +11,7 @@
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.MarshalsDto
 @using EvictionFiler.Application.DTOs.OccupantDto
+@using EvictionFiler.Application.DTOs.RemainderCenterDto
 @using EvictionFiler.Application.DTOs.TenantDto
 @using EvictionFiler.Application.Interfaces.IRepository
 @using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
@@ -26,6 +27,7 @@
 @using System.Security.Claims
 @inject IToastService ToastService
 @inject ILegalCaseService _service
+@inject ICaseNoticeInfoService _caseInfoservice
 @inject AuthenticationStateProvider _authStateProvider
 
 @inject IFormTypesRepository FormTypesRepository
@@ -37,6 +39,8 @@
 @inject IClientRoleRepository _clientRoleService
 @inject ILandlordSevice _landlordService
 @inject IBuildingService _apartmentService
+@inject IRemianderCenterService _remaindercenter
+@inject IReminderCategoryRepository remaindercategoryRepo
 @inject ITenantService _tenantService
 @inject IStateRepository StateRepository
 @inject IPremiseTypeRepository PremiseTypeRepository
@@ -1214,7 +1218,7 @@
                         <div class="tab-pane fade" id="reminder" role="tabpanel" aria-labelledby="reminder-tab">
                             @if (ShowReminder)
                             {
-                                <RemainderCenter />
+                                <RemainderCenter legalcaseDto="legalcaseDto" />
                             }
                         </div>
                         <div class="tab-pane fade" id="filings" role="tabpanel" aria-labelledby="filings-tab">
@@ -1407,44 +1411,7 @@
                                 <h5 class="offcanvas-title fw-bold color-text" id="createUserLabel">Appearance Details (@Court.Court)</h5>
                                 <EditForm Model="@caseHearing">
                                     <DataAnnotationsValidator />
-                                    @* <div class="modal-body">
-
-                                        <div class="card border-0">
-                                            <div class="card-body p-0">
-
-                                                <!-- Search + Add Section -->
-                                                <!-- Add/Edit Fields -->
-
-                                                <div class="border rounded-3 p-3 mb-3 position-relative">
-
-                                                    @*  <button type="button" class=" position-absolute top-0 end-0 m-2"
-                                                        aria-label="Reset" style="cursor:pointer; background:none;"
-                                                        @onclick="OnBindHearingCancel"> Reset
-                                                </button> *
-
-                                                    <div class=" g-3">
-                                                        <div class="col-md-6">
-                                                            <label class="form-label required-label">Date </label>
-                                                            <InputDate class="form-control" @bind-Value="caseHearing.HearingDate" placeholder="Select Date" />
-                                                        </div>
-
-                                                        <div class="col-md-6 mt-2 ">
-                                                            <label class="form-label required-label">Time</label>
-                                                            <input type="time" class="form-control" @bind="caseHearing.HearingTime" />
-                                                        </div>
-
-
-
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
-                                        <button type="button" class="btn btn-secondary me-2" @onclick="OnBindHearingCancel">Reset</button>
-                                        <button type="submit" class="btn btn-primary base" @onclick="SaveHearingChanges">Save</button>
-                                    </div> *@
+                                   
 
                                     <div class="motion-section">
                                         <button type="button"
@@ -1496,20 +1463,7 @@
                                         </div>
                                     </div>
 
-                                    @*   <div class="motion-section">
-                                        <button type="button"
-                                                class="section-header"
-                                                @onclick="() => Toggle(nameof(IsDatetime))">
-                                            <span>Motion Type</span>
-                                            <i class="chevron @(IsDatetime ? "open" : "")"></i>
-                                        </button>
-
-                                        <div class="section-body @(IsDatetime ? "open" : "")">
-                                            <div class="card card-body">
-
-                                            </div>
-                                        </div>
-                                    </div> *@
+                                   
 
 
                                     <div class="motion-section">
@@ -2313,6 +2267,7 @@
     private CaseHearingDto CaseHearing = new();
     // private CaseDocumentDto Documentdto = new();
     private List<GenrateNoticeModel> caseFormDto = new();
+    private IEnumerable<ReminderCategory> reminderTypes = new List<ReminderCategory>();
     [Parameter] public Guid? CurrentCaseId { get; set; }
     private CancellationTokenSource _cts;
     private bool showMarshalError = false;
@@ -2324,6 +2279,7 @@
     public EventCallback OnClose { get; set; }
     // [Parameter] public EventCallback<CreateToClientDto> Submit { get; set; }
     public CaseHearingDto caseHearing = new CaseHearingDto();
+    private EditToRemainderCenterDto remainderDto = new EditToRemainderCenterDto();
     // public class UploadItem
     // {
     //     public IBrowserFile File { get; set; }
@@ -2361,6 +2317,7 @@
         AppearanceTypeforHearing = await _caseHearingService.GetAllAppearanceTypeForHearing();
         AppearanceTypes = await appearanceTypeRepository.GetAllAsync();
         VirtualPlatforms = await _caseHearingService.GetAllPlatform();
+        if (!reminderTypes.Any()) reminderTypes = await remaindercategoryRepo.GetAllAsync();
         if (legalcaseDto.CourtLocationId != null && legalcaseDto.CourtLocationId != Guid.Empty)
         {
             Court = await courtRepository.GetCourtByIdAsync(legalcaseDto.CourtLocationId!.Value);
@@ -2735,41 +2692,66 @@
     }
     private async Task SaveHearingChanges()
     {
-        spinnerservice.Show();
-
-        var newHearing = new CaseHearingDto()
+        try
         {
-            Caption = caseHearing.Caption,
-            LegalCaseId = legalcaseDto.Id,
-            CourtPartId = caseHearing.CourtPartId,
-            CourtId = legalcaseDto.CourtLocationId,
-            HearingDate = caseHearing.HearingDate,
-            HearingTime = caseHearing.HearingTime,
-            CreatedBy = Guid.Parse(loggedInUserId),
-            AppearanceModeId = caseHearing.AppearanceModeId,
-            AppearanceTypeForHearingId = caseHearing.AppearanceTypeForHearingId,
-            VirtualPlatformId = caseHearing.VirtualPlatformId,
-            Virtuallink = caseHearing.Virtuallink,
-            LastAction = caseHearing.LastAction,
-            // CallIn = caseHearing.CallIn,
-            // Phone = caseHearing.Phone,
-            // VirtualLink = caseHearing.VirtualLink,
-            // Notes = caseHearing.Notes
-        };
+            spinnerservice.Show();
 
-        var CourtId = await _caseHearingService.AddHearing(newHearing);
+            var newHearing = new CaseHearingDto()
+            {
+                Caption = caseHearing.Caption,
+                LegalCaseId = legalcaseDto.Id,
+                CourtPartId = caseHearing.CourtPartId,
+                CourtId = legalcaseDto.CourtLocationId,
+                HearingDate = caseHearing.HearingDate,
+                HearingTime = caseHearing.HearingTime,
+                CreatedBy = Guid.Parse(loggedInUserId),
+                AppearanceModeId = caseHearing.AppearanceModeId,
+                AppearanceTypeForHearingId = caseHearing.AppearanceTypeForHearingId,
+                VirtualPlatformId = caseHearing.VirtualPlatformId,
+                Virtuallink = caseHearing.Virtuallink,
+                LastAction = caseHearing.LastAction,
+                // CallIn = caseHearing.CallIn,
+                // Phone = caseHearing.Phone,
+                // VirtualLink = caseHearing.VirtualLink,
+                // Notes = caseHearing.Notes
+            };
 
-        if (CourtId)
-        {
-            ToastService.ShowSuccess("Hearing details Added successfully!");
-            await OnFormCreate.InvokeAsync();
+            var CourtId = await _caseHearingService.AddHearing(newHearing);
+
+            if (CourtId)
+            {
+                ToastService.ShowSuccess("Hearing details Added successfully!");
+                remainderDto = new EditToRemainderCenterDto
+                {
+                    CaseId = legalcaseDto.Id,
+                    TenantId = legalcaseDto.TenantId,
+                    When = newHearing.HearingDate,
+                    ReminderName = $"Case Hearing on {newHearing.HearingDate.Value.ToString("dd/MM/yyyy")}",
+                    ReminderCategoryId = reminderTypes.Where(e => e.Name.Contains("Court")).FirstOrDefault()!.Id,
+                };
+                var remainderresult = await _remaindercenter.Create(remainderDto);
+                if (remainderresult)
+                {
+                    ToastService.ShowSuccess("successfully created Remainder for Hearing!");
+                }
+                else
+                {
+                    ToastService.ShowError("Error occured in creating Remainder!");
+                }
+                await OnFormCreate.InvokeAsync();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to create Hearing details.");
+            }
+            LoadHearing();
+            HideAsync();
         }
-        else
+        catch(Exception ex)
         {
-            ToastService.ShowError("Failed to create Hearing details.");
+
         }
-        LoadHearing();
-        HideAsync();
+   
 
         spinnerservice.Hide();
     }
@@ -2886,7 +2868,7 @@
         {
             bool success = false;
 
-            var infosuccess = await _service.AddOrUpdateCaseNoticeInfo(noticeModel);
+            var infosuccess = await _caseInfoservice.AddOrUpdateCaseNoticeInfo(noticeModel);
             if (Rows.Count > 0)
             {
                 var addrows = Rows.Where(e => (e.Id == null || e.Id == Guid.Empty) && (e.Amount != null || e.Month != null)).Select(e => new ArrearLedgerDto()

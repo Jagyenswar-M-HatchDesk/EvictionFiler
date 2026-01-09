@@ -137,7 +137,20 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 			return query;
 		}
 
-		public async Task<T?> GetAsync(object id)
+        public IQueryable<T> GetAllQueryablewithThenInclude(Expression<Func<T, bool>>? predicate = null, Func<IQueryable<T>, IQueryable<T>>? include = null)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (predicate != null)
+                query = query.Where(predicate);
+
+            if (include != null)
+                query = include(query);
+
+            return query;
+        }
+
+        public async Task<T?> GetAsync(object id)
 		{
 			if (id == null)
 			{

@@ -5,6 +5,7 @@ using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using static Azure.Core.HttpHeader;
 
 namespace EvictionFiler.Application.Services
@@ -24,27 +25,36 @@ namespace EvictionFiler.Application.Services
 
         public async Task<bool> Create(EditToRemainderCenterDto dto)
         {
-            var rc = new RemainderCenter()
+            try
             {
-                Id = dto.Id,
-                When = dto.When,
-                CaseId = dto.CaseId,
-                CountyId = dto.CountyId,
-                TenantId = dto.TenantId,
-                RemainderTypeId = dto.RemainderTypeId,
-                Index = dto.Index,
-                Notes = dto.Notes,
-                ReminderName = dto.ReminderName,
-                ReminderCategoryId = dto.ReminderCategoryId,
-                ReminderEscalateId = dto.ReminderEscalateId,
+                var rc = new RemainderCenter()
+                {
+                    Id = dto.Id,
+                    When = dto.When,
+                    CaseId = dto.CaseId,
+                    CountyId = dto.CountyId,
+                    TenantId = dto.TenantId,
+                    RemainderTypeId = dto.RemainderTypeId,
+                    Index = dto.Index,
+                    Notes = dto.Notes,
+                    ReminderName = dto.ReminderName,
+                    ReminderCategoryId = dto.ReminderCategoryId,
+                    ReminderEscalateId = dto.ReminderEscalateId,
 
 
-            };
-            await _remainderCenterRepo.AddAsync(rc);
+                };
+                await _remainderCenterRepo.AddAsync(rc);
 
-            var result = await _unitOfWork.SaveChangesAsync();
+                var result = await _unitOfWork.SaveChangesAsync();
 
-            return result > 0;
+                return result > 0;
+            }
+            catch(Exception ex)
+            {
+                return false;
+            }
+
+
         }
         public async Task<bool> CompleteRemainder(EditToRemainderCenterDto dto)
         {
@@ -137,6 +147,38 @@ namespace EvictionFiler.Application.Services
                 TenantName = dto.Tenant?.FirstName ?? "Unknown",
                 CreatedOn = dto.CreatedOn,
             };
+        }
+        public async Task<List<EditToRemainderCenterDto?>> GetRemainderCenterByCaseIdAsync(Guid? CaseId)
+        {
+            var list = await _remainderCenterRepo.GetAllAsync(predicate:e=>e.CaseId == CaseId, includes: b=>b.RemainderType!);
+
+
+            //if (dto == null)
+            //    return null;
+
+            var result = list.Select(dto=> new EditToRemainderCenterDto
+            {
+                Id = dto.Id,
+                When = dto.When,
+                CaseId = dto.CaseId,
+                CountyId = dto.CountyId,
+                TenantId = dto.TenantId,
+                RemainderTypeId = dto.RemainderTypeId,
+                Index = dto.Index,
+                Notes = dto.Notes,
+                RemainderTypeName = dto.RemainderType?.Name ?? "Unknown",
+                CountyName = dto.County?.Name ?? "Unknown",
+                TenantName = dto.Tenant?.FirstName ?? "Unknown",
+                CaseCode = dto.Case?.Casecode ?? "Unknown",
+                ReminderName = dto.ReminderName,
+                ReminderCategoryId = dto.ReminderCategoryId,
+                ReminderEscalateId = dto.ReminderEscalateId,
+                ReminderCategoryName = dto.ReminderCategory != null ? dto.ReminderCategory.Name : string.Empty,
+                ReminderEscalateName = dto.ReminderEscalates != null ? dto.ReminderEscalates.Name : string.Empty,
+                IsComplete = dto.IsComplete,
+            }).ToList();
+
+            return result;
         }
 
         //public Task<List<EditToClientDto>> SearchRemainderCenter(string searchTerm)

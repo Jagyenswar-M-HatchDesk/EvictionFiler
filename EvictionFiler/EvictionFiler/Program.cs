@@ -162,6 +162,7 @@ builder.Services.AddScoped<IExemptionReasonRepository, ExemptionReasonRepository
 builder.Services.AddScoped<IExemptionBasicRepository, ExemptionBasicRepository>();
 builder.Services.AddScoped<IDocumentTypeRepository, DocumentTypeRepository>();
 builder.Services.AddScoped<ICourtTodayTypeRepository, CourtTodayTypeRepository>();
+builder.Services.AddScoped<ICaseNoticeInfoService, CaseNoticeInfoService>();
 
 builder.Services.AddAuthorization();
 

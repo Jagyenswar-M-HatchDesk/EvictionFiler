@@ -132,7 +132,8 @@ namespace EvictionFiler.Domain.Entities
 		public RenewalStatus? RenewalStatus { get; set; }
 		public ICollection<AdditionalOccupants>? Addoccupants { get; set; }
 
-		[NotMapped]
+
+        [NotMapped]
 		public string? CreatedByName { get; set; }
 
 		public string? UnitOrApartmentNumber { get; set; }
