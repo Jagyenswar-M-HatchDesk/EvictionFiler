@@ -283,43 +283,41 @@
                         </thead>
 
                         <tbody>
-                            @foreach (var row in FeeRows)
+                            @foreach (var row in WarrentDataList)
                             {
                                 <tr>
-                                    <td><input class="form-control" @bind='row.Values["Code"]' /></td>
                                     <td>
-                                        <select class="form-select" @bind='row.Values["LabelId"]'>
-                                            <option value="">--select--</option>
-                                            @foreach (var form in CaseformList)
-                                            {
-                                                <option value="@form.Id">@form.Name</option>
-                                            }
-                                        </select>
+                                        <input class="form-control" @bind='row.Code' @bind:after="() => row.IsChanged = true" />
+                                    </td>
+                                    <td>
+                                        <input class="form-control" @bind='row.Name' />
+
                                     </td>
 
                                     <td>
-                                        <select class="form-select" @bind='row.Values["Unit"]'>
+                                        <select class="form-select" @bind='row.UnitId' @bind:after="() => row.IsChanged = true">
                                             <option value="">--select--</option>
                                             @foreach (var u in Units)
                                             {
-                                                <option value="@u">@u</option>
+                                                <option value="@u.Id">@u.Name</option>
                                             }
                                         </select>
                                     </td>
 
                                     <td>
-                                        <input class="form-control" type="number"
-                                               step="0.01"
-                                               value="@(row.NumberValues.ContainsKey("Rate (USD)")
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ? row.NumberValues["Rate (USD)"].ToString("0.##") : "")"
-                                           @oninput="@(e => OnNumberInputChanged(row, "Rate (USD)", e))" />
-                                </td>
-
-                                    <td class="text-center">
-                                        <button class="btn btn-danger btn-sm" @onclick="() => RemoveRow(row)">Remove</button>
+                                        @* <input class="form-control" type="number"
+                                                   step="0.01"
+                                                   value="@(row.NumberValues.ContainsKey("Rate (USD)")
+                                                                                                     ? row.NumberValues["Rate (USD)"].ToString("0.##") : "")"
+                                           @oninput="@(e => OnNumberInputChanged(row, "Rate (USD)", e))" /> *@
+                                        <input class="form-control" @bind='row.Rate' @bind:after="() => row.IsChanged = true" />
                                     </td>
+
+                                    @* <td class="text-center">
+                                            <button class="btn btn-danger btn-sm" @onclick="() => RemoveRow(row)">Remove</button>
+                                        </td> *@
                                 </tr>
-                                                        }
+                            }
                         </tbody>
                     </table>
 
@@ -1021,6 +1019,7 @@
         await LoadForms();
         await LoadHoldoverForms();
         await LoadNonpaymentForms();
+        await LoadWarrenaForms();
 
         SpinnerService.Hide();
     }
@@ -1044,20 +1043,20 @@
 
     private async Task LoadHoldoverForms()
     {
-        HoldoverDataList = CaseformList.Where(e => e.CaseTypeName.Contains("Holdover")).ToList();
+        HoldoverDataList = CaseformList.Where(e => e.CategoryName.Contains("Holdover")).ToList();
     }
 
     private async Task LoadNonpaymentForms()
     {
-        NonpaymentDataList = CaseformList.Where(e => e.CaseTypeName.Contains("NonPayment")).ToList();
+        NonpaymentDataList = CaseformList.Where(e => e.CategoryName.Contains("NonPayment")).ToList();
     }
     private async Task LoadWarrenaForms()
     {
-        NonpaymentDataList = CaseformList.Where(e => e.CaseTypeName.Contains("Warrant")).ToList();
+        WarrentDataList = CaseformList.Where(e => e.CategoryName.Contains("Warrant")).ToList();
     }
     private async Task LoadProcessForms()
     {
-        NonpaymentDataList = CaseformList.Where(e => e.CaseTypeName.Contains("Process")).ToList();
+        NonpaymentDataList = CaseformList.Where(e => e.CategoryName.Contains("Process")).ToList();
     }
     // private async Task LoadCourtForms()
     // {
@@ -1065,7 +1064,7 @@
     // }
     private async Task LoadFillingForms()
     {
-        NonpaymentDataList = CaseformList.Where(e => e.CaseTypeName.Contains("Nonpayment")).ToList();
+        NonpaymentDataList = CaseformList.Where(e => e.CategoryName.Contains("Nonpayment")).ToList();
     }
     // private async Task LoadAttorneyForms()
     // {
