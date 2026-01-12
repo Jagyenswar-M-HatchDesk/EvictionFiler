@@ -61,6 +61,20 @@ namespace EvictionFiler.Infrastructure.Repositories
             existing.Telephone = marshal.Telephone;
             existing.Fax = marshal.Fax;
             existing.OfficeAddress = marshal.OfficeAddress;
+            existing.DocketNo = marshal.DocketNo;
+
+            await _db.SaveChangesAsync();
+            return existing;
+        }
+        public async Task<Marshal> UpdateMarshalDocketnoAsync(Guid marhsalid, string docket)
+        {
+            var existing = await _db.Marshal.FindAsync(marhsalid);
+
+            if (existing == null)
+                return null;
+
+           
+            existing.DocketNo = docket;
 
             await _db.SaveChangesAsync();
             return existing;

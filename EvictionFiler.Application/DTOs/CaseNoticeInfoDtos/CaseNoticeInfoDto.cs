@@ -12,9 +12,9 @@ namespace EvictionFiler.Application.DTOs.CaseNoticeInfoDtos
         public Guid? Id { get; set; }
         //[Required]
         public Guid? DateRentId { get; set; }
-        //[Required]
+        //[Required(ErrorMessage = "Select Tenancy Type")]
         public Guid? TenancyTypeId { get; set; }
-        //[Required]
+        //[Required(ErrorMessage = "Select Form")]
         public Guid? FormTypeId { get; set; }
         public string? FormTypeName { get; set; }
         //[Required]
@@ -31,7 +31,7 @@ namespace EvictionFiler.Application.DTOs.CaseNoticeInfoDtos
         //[Required]
         public decimal? BillAmount { get; set; }
         public DateOnly? DateofLastPayment { get; set; }
-        //[Required]
+        //[Required(ErrorMessage = "Notice Date Required")]
         public DateOnly? DateNoticeServed { get; set; }
         public DateOnly? LeaseStart { get; set; }
         public DateOnly? LeaseEnd { get; set; }

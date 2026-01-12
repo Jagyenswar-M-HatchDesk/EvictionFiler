@@ -14,6 +14,7 @@ namespace EvictionFiler.Domain.Entities
         public string LastName { get; set; } = string.Empty;
 
         public string Email { get; set; } = string.Empty;
+        public string DocketNo {  get; set; } = string.Empty;
 
         public string BadgeNumber { get; set; }
 

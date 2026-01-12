@@ -11,6 +11,7 @@ using Syncfusion.Pdf;
 using Syncfusion.Drawing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using EvictionFiler.Application.Constants;
 
 
 
@@ -184,63 +185,128 @@ namespace EvictionFiler.Infrastructure.Repositories
                 // --------------------
                 // LOAD CASE DATA
                 // --------------------
-                var caseDetails = await (
-                    from lc in _context.LegalCases
-                    join landlord in _context.LandLords on lc.LandLordId equals landlord.Id
-                    join building in _context.Buildings on lc.BuildingId equals building.Id
-                    join tenant in _context.Tenants on lc.TenantId equals tenant.Id
-                    join court in _context.Courts on lc.CourtLocationId equals court.Id 
-                    join county in _context.MstCounties on court.CountyId equals county.Id 
-                    //join CaseNoticeInfo in _context.CaseNoticeInfo on lc.Case equals CaseNoticeInfo.Id
-                    join rentdue in _context.MstDateRent on lc.RentDueEachMonthOrWeekId equals rentdue.Id into cRent
-                    let notice = _context.CaseNoticeInfo
-                    .Where(x => x.LegalCaseId == lc.Id && x.FormtypeId == formTypeId)
-                    .FirstOrDefault()
+                var caseDetails = await
+             (
+                 from lc in _context.LegalCases
 
-                    let ledger = _context.ArrearLedgers
-                    .Where(x => x.LegalCaseId == lc.Id && x.CaseNoticeId == notice.Id)
-                    .FirstOrDefault()
+                 join landlord in _context.LandLords
+                     on lc.LandLordId equals landlord.Id into ll
+                 from landlord in ll.DefaultIfEmpty()
 
-                    // ✅ Now join TenancyType safely
-                    join tenancy in _context.MstTenancyTypes
-                        on notice.TenancyTypeId equals tenancy.Id 
-                    from rentdue in cRent.DefaultIfEmpty()
-                    where lc.Id == legalCaseId
+                 join building in _context.Buildings
+                     on lc.BuildingId equals building.Id into bl
+                 from building in bl.DefaultIfEmpty()
 
-                    select new
-                    {
-                        Id = lc.Id,
-                        CaseCode = lc.Casecode,
-                        LandlordName = landlord.FirstName + " " + landlord.LastName,
-                        LandlordAddress = landlord.Address1 + " " + landlord.Address2 + " " +
-                                          landlord.City + " " + landlord.State.Name + " " + landlord.Zipcode,
-                        LandlordPhone = landlord.Phone,
-                        LandlordEmail = landlord.Email,
-                        PropertyAddress = building.Address1 + " " + building.Address2 + " " +
-                                          building.Cities.Name + " " + building.State.Name + " " + building.Zipcode,
-                        NumberofRoom = building.BuildingUnits.ToString(),
-                        TenantIds = lc.TenantId,
-                        LeaseEnd = lc.LeaseEnd,
-                        CityorCounty = county != null ? county.Name : building.Cities.Name,
-                        RentOwned = lc.TotalRentOwed,
-                        RentDate = rentdue != null ? rentdue.Name : null,
-                        LastRent = notice.DateofLastPayment,
-                        NoticePeriod = notice.CalcNoticeLength,
-                        VacateDate = notice.DateNoticeServed.Value.AddDays(notice.CalcNoticeLength.Value),
-                        BuildingStreet = building.Address1 + " " + building.Address2,
-                        BuildingCity = building.Cities.Name,
-                        BuildingState = building.State.Name,
-                        BuildingZip = building.Zipcode,
-                        BuildindAptno = tenant.UnitOrApartmentNumber,
-                        leaseExpired = lc.DateNoticeServed,
-                        TenancyType = tenancy.Name,
-                        County = court.County.Name,
-                        Court = court.Court,
-                        CourtAddress = court.Address,
-                        TotalOwed = notice.Totalowed,
-                        //MoveOutdate = lc.ExpirationDate,
-                    }
-                ).FirstOrDefaultAsync();
+                 join tenant in _context.Tenants
+                     on lc.TenantId equals tenant.Id into tl
+                 from tenant in tl.DefaultIfEmpty()
+
+                 join court in _context.Courts
+                     on lc.CourtLocationId equals court.Id into cl
+                 from court in cl.DefaultIfEmpty()
+
+                 join county in _context.MstCounties
+                     on court.CountyId equals county.Id into col
+                 from county in col.DefaultIfEmpty()
+
+                 join rentdue in _context.MstDateRent
+                     on lc.RentDueEachMonthOrWeekId equals rentdue.Id into rl
+                 from rentdue in rl.DefaultIfEmpty()
+
+                     // LEFT JOIN CaseNoticeInfo
+                 join notice in _context.CaseNoticeInfo
+                     .Where(x => x.FormtypeId == formTypeId)
+                     on lc.Id equals notice.LegalCaseId into nl
+                 from notice in nl.DefaultIfEmpty()
+
+                     // LEFT JOIN Ledger (only if notice exists)
+                 join ledger in _context.ArrearLedgers
+                     on notice.Id equals ledger.CaseNoticeId into al
+                 from ledger in al.DefaultIfEmpty()
+
+                     // LEFT JOIN Tenancy Type
+                 join tenancy in _context.MstTenancyTypes
+                     on notice.TenancyTypeId equals tenancy.Id into ttl
+                 from tenancy in ttl.DefaultIfEmpty()
+
+                 where lc.Id == legalCaseId
+
+                 select new
+                 {
+                     Id = lc.Id,
+                     CaseCode = lc.Casecode,
+
+                     LandlordName = landlord != null
+                         ? landlord.FirstName + " " + landlord.LastName
+                         : null,
+
+                     LandlordAddress = landlord != null
+                         ? landlord.Address1 + " " + landlord.Address2 + " " +
+                           landlord.City + " " +
+                           (landlord.State != null ? landlord.State.Name : "") + " " +
+                           landlord.Zipcode
+                         : null,
+
+                     LandlordPhone = landlord.Phone,
+                     LandlordEmail = landlord.Email,
+
+                     PropertyAddress = building != null
+                         ? building.Address1 + " " + building.Address2 + " " +
+                           (building.Cities != null ? building.Cities.Name : "") + " " +
+                           (building.State != null ? building.State.Name : "") + " " +
+                           building.Zipcode
+                         : null,
+
+                     NumberofRoom = building != null
+                         ? building.BuildingUnits.ToString()
+                         : null,
+
+                     TenantIds = lc.TenantId,
+                     LeaseEnd = lc.LeaseEnd,
+
+                     CityorCounty = county != null
+                         ? county.Name
+                         : building != null && building.Cities != null
+                             ? building.Cities.Name
+                             : null,
+
+                     RentOwned = lc.TotalRentOwed,
+                     RentDate = rentdue.Name,
+
+                     LastRent = notice.DateofLastPayment,
+                     NoticePeriod = notice.CalcNoticeLength,
+
+                     VacateDate =
+                         notice != null &&
+                         notice.DateNoticeServed.HasValue &&
+                         notice.CalcNoticeLength.HasValue
+                             ? notice.DateNoticeServed.Value
+                                 .AddDays(notice.CalcNoticeLength.Value)
+                             : (DateOnly?)null,
+
+                     BuildingStreet = building != null
+                         ? building.Address1 + " " + building.Address2
+                         : null,
+
+                     BuildingCity = building.Cities.Name,
+                     BuildingState = building.State.Name,
+                     BuildingZip = building.Zipcode,
+
+                     BuildindAptno = tenant.UnitOrApartmentNumber,
+
+                     leaseExpired = lc.DateNoticeServed,
+
+                     TenancyType = tenancy.Name,
+
+                     County = county.Name,
+                     Court = court.Court,
+                     CourtAddress = court.Address,
+
+                     TotalOwed = notice.Totalowed
+                 }
+             )
+             .FirstOrDefaultAsync();
+
 
                 if (caseDetails == null)
                     throw new Exception("Case details not found.");
@@ -323,12 +389,12 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{Landlord_Phone}}", caseDetails.LandlordPhone ?? "")
     .Replace("{{LandlordEmail}}", caseDetails.LandlordEmail ?? "")
     .Replace("{{Landlord_Email}}", caseDetails.LandlordEmail ?? "")
-    .Replace("{{LandlordDate}}", noticeDate.ToString("dd/MM/yyyy"))
-    .Replace("{{Notice_Date}}", DateTime.Now.ToString("dd/MM/yyyy"))
+    .Replace("{{LandlordDate}}", noticeDate.ToString(DateFormats.Default))
+    .Replace("{{Notice_Date}}", DateTime.Now.ToString(DateFormats.Default))
     .Replace("{{PropertyAddress}}", caseDetails.PropertyAddress ?? "")
     .Replace("{{Premises_Address}}", caseDetails.PropertyAddress ?? "")
     .Replace("{{ApartmentNumber}}", firstApartmentNumber ?? "")
-    .Replace("{{CurrentDate}}", DateTime.Now.ToString("dd/MM/yyyy"))
+    .Replace("{{CurrentDate}}", DateTime.Now.ToString(DateFormats.Default))
     .Replace("{{NumberofRoom}}", caseDetails.NumberofRoom ?? "")
     .Replace("{{TenantName}}", firstTenantName)
     .Replace("{{City_County}}", caseDetails.CityorCounty ?? "")
@@ -369,7 +435,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     filledHtml = filledHtml.Replace("{{lease_expired}}", "checked");
 
                 filledHtml = filledHtml.Replace("{{lease_expired_date}}",
-                    caseDetails.LeaseEnd?.ToString("dd/MM/yyyy") ?? "");
+                    caseDetails.LeaseEnd?.ToString(DateFormats.Default) ?? "");
 
                 Log("HTML filled successfully.");
 

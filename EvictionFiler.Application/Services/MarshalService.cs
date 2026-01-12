@@ -29,7 +29,8 @@ namespace EvictionFiler.Application.Services
                 BadgeNumber = entity.BadgeNumber,
                 Telephone = entity.Telephone,
                 Fax = entity.Fax,
-                OfficeAddress = entity.OfficeAddress
+                OfficeAddress = entity.OfficeAddress,
+                DocketNo = entity.DocketNo,
             };
 
         }
@@ -52,7 +53,8 @@ namespace EvictionFiler.Application.Services
                 BadgeNumber = e.BadgeNumber,
                 Telephone = e.Telephone,
                 Fax = e.Fax,
-                OfficeAddress = e.OfficeAddress
+                OfficeAddress = e.OfficeAddress,
+                DocketNo = e.DocketNo
             });
         }
 
@@ -67,7 +69,8 @@ namespace EvictionFiler.Application.Services
                 BadgeNumber = dto.BadgeNumber,
                 Telephone = dto.Telephone,
                 Fax = dto.Fax,
-                OfficeAddress = dto.OfficeAddress
+                OfficeAddress = dto.OfficeAddress,
+                DocketNo = dto.OfficeAddress
             };
 
             var saved = await _marshalRepo.AddMarshalAsync(entity);
@@ -81,7 +84,8 @@ namespace EvictionFiler.Application.Services
                 BadgeNumber = saved.BadgeNumber,
                 Telephone = saved.Telephone,
                 Fax = saved.Fax,
-                OfficeAddress = saved.OfficeAddress
+                OfficeAddress = saved.OfficeAddress,
+                DocketNo = saved.DocketNo,
             };
         }
         public async Task<MarshalDto> UpdateMarshalAsync(MarshalDto dto)
@@ -95,7 +99,8 @@ namespace EvictionFiler.Application.Services
                 BadgeNumber = dto.BadgeNumber,
                 Telephone = dto.Telephone,
                 Fax = dto.Fax,
-                OfficeAddress = dto.OfficeAddress
+                OfficeAddress = dto.OfficeAddress,
+                DocketNo = dto.DocketNo
             };
 
             var updated = await _marshalRepo.UpdateMarshalAsync(entity);
@@ -109,7 +114,27 @@ namespace EvictionFiler.Application.Services
                 BadgeNumber = updated.BadgeNumber,
                 Telephone = updated.Telephone,
                 Fax = updated.Fax,
-                OfficeAddress = updated.OfficeAddress
+                OfficeAddress = updated.OfficeAddress,
+                DocketNo = updated.DocketNo
+            };
+        }
+        public async Task<MarshalDto> UpdateMarshalDocketNoAsync(Guid MarshalId , string docket)
+        {
+           
+
+            var updated = await _marshalRepo.UpdateMarshalDocketnoAsync(MarshalId, docket);
+
+            return new MarshalDto
+            {
+                Id = updated.Id,
+                FirstName = updated.FirstName,
+                LastName = updated.LastName,
+                Email = updated.Email,
+                BadgeNumber = updated.BadgeNumber,
+                Telephone = updated.Telephone,
+                Fax = updated.Fax,
+                OfficeAddress = updated.OfficeAddress,
+                DocketNo = updated.DocketNo
             };
         }
 

@@ -13,5 +13,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
         Task<Marshal> UpdateMarshalAsync(Marshal marshal);
         Task<bool> DeleteMarshalAsync(Guid id);
         Task<List<MarshalDto>> SearchMarshalbyname(string name);
+
+        Task<Marshal> UpdateMarshalDocketnoAsync(Guid marhsalid, string docket);
     }
 }

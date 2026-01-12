@@ -36,6 +36,7 @@
 @inject ICaseAdditionalTenantService _caseAdditionalTenant
 @inject ICaseWarrantService _casewarrantservice
 @using Blazored.Toast.Services
+@using EvictionFiler.Application.Constants
 @using EvictionFiler.Application.DTOs.CaseWarrantDtos
 @using EvictionFiler.Application.DTOs.MarshalsDto
 @using EvictionFiler.Client.SpinnerService
@@ -148,6 +149,65 @@
 
             <div class="motion-form">
 
+                <div class="motion-section" style="overflow:visible;">
+                    <button class="motion-header" @onclick="() => ToggleSection(nameof(IsInfoOpen))">
+                        <span>Marshal Information</span>
+                        @* <span class="chevron @(IsInfoOpen ? "open" : "")"><i class="fa-solid fa-angle-down"></i></span> *@
+                        <i class="chevron @(IsInfoOpen ? "open" : "")"></i>
+
+                    </button>
+
+                    <div class="motion-body @(IsInfoOpen ? "open" : "")" style="overflow:visible;">
+                        <div class="motion-content">
+                            @if (IsInfoOpen)
+                            {
+                                <div class="row">
+
+                                    <!-- Selected Marshal -->
+                                    <div class="col-md-4 position-relative">
+                                        <label>Marshal Name</label>
+                                        <InputText class="form-control search-box" placeholder="Search by marshal name.." @bind-value="searchmarshalText" @oninput="OnSearchMarshalInput"
+                                                   @onclick="ShowAllmarshal" />
+                                        <button class="search-btn" type="button" style="top:70%">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+
+
+
+
+                                        @if (filteredmarshal?.Any() == true)
+                                        {
+                                            <ul class="dropdown-menu show" style="position:absolute; width:94%; cursor:pointer; z-index:999;">
+                                                @foreach (var c in filteredmarshal)
+                                                {
+                                                    <li class="dropdown-item" @onclick="() => Selectedmarshal(c)">
+                                                        @c.FirstName  @c.LastName
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Badge #</label>
+                                        <InputText class="form-control" @bind-Value="model.BadgeNumber" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Phone</label>
+                                        <InputText class="form-control" @bind-Value="model.Phone" />
+                                    </div>
+
+                                    @* } *@
+
+
+
+                                </div>
+                            }
+
+                        </div>
+
+
+                    </div>
+                </div>
                 <!-- 1. WARRANT LIFECYCLE -->
                 <div class="motion-section">
                     <button class="motion-header" @onclick="() => ToggleSection(nameof(IsDatesOpen))">
@@ -163,34 +223,34 @@
                                 <div class="row mb-3">
                                     <div class="col-md-3">
                                         <label>Warrant Requested</label>
-                                        <InputDate class="form-control" @bind-Value="model.WarrantRequested" @bind-Value:after="() => ToShow = true" />
+                                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="model.WarrantRequested" @bind-Value:after="() => ToShow = true" />
                                     </div>
                                     <div class="col-md-3">
                                         <label>Warrant Issued</label>
-                                        <InputDate class="form-control" @bind-Value="model.WarrantIssued" @bind-Value:after="() => ToShow = true" />
+                                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; "  @bind-Value="model.WarrantIssued" @bind-Value:after="() => ToShow = true" />
                                     </div>
                                     <div class="col-md-3">
                                         <label>Warrant Rejected</label>
-                                        <InputDate class="form-control" @bind-Value="model.WarrantRejected" @bind-Value:after="() => ToShow = true" />
+                                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; "  @bind-Value="model.WarrantRejected" @bind-Value:after="() => ToShow = true" />
                                     </div>
                                     <div class="col-md-3">
                                         <label>Re-file / Re-mail</label>
-                                        <InputDate class="form-control" @bind-Value="model.ReFileDate" @bind-Value:after="() => ToShow = true" />
+                                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; "  @bind-Value="model.ReFileDate" @bind-Value:after="() => ToShow = true" />
                                     </div>
                                 </div>
 
                                 <div class="row mb-3">
                                     <div class="col-md-3">
                                         <label>Notice Served</label>
-                                        <InputDate class="form-control" @bind-Value="model.NoticeServed" @bind-Value:after="() => ToShow = true" />
+                                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; "  @bind-Value="model.NoticeServed" @bind-Value:after="() => ToShow = true" />
                                     </div>
                                     <div class="col-md-3">
                                         <label>Execution Eligible</label>
-                                        <InputDate class="form-control" @bind-Value="model.ExecutionEligible" @bind-Value:after="() => ToShow = true" />
+                                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; "  @bind-Value="model.ExecutionEligible" @bind-Value:after="() => ToShow = true" />
                                     </div>
                                     <div class="col-md-3">
                                         <label>Eviction Executed</label>
-                                        <InputDate class="form-control" @bind-Value="model.EvictionExecuted" @bind-Value:after="() => ToShow = true" />
+                                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; "  @bind-Value="model.EvictionExecuted" @bind-Value:after="() => ToShow = true" />
                                     </div>
                                     <div class="col-md-3">
                                         <label>Status</label>
@@ -213,68 +273,10 @@
                 @if(ToShow)
                 {
                     <!-- 2. MARSHAL INFO -->
-                    <div class="motion-section" style="overflow:visible;">
-                        <button class="motion-header" @onclick="() => ToggleSection(nameof(IsInfoOpen))">
-                            <span>Marshal Information</span>
-                            @* <span class="chevron @(IsInfoOpen ? "open" : "")"><i class="fa-solid fa-angle-down"></i></span> *@
-                            <i class="chevron @(IsInfoOpen ? "open" : "")"></i>
-
-                        </button>
-
-                        <div class="motion-body @(IsInfoOpen ? "open" : "")" style="overflow:visible;">
-                            <div class="motion-content">
-                                @if (IsInfoOpen)
-                                {
-                                    <div class="row">
-
-                                        <!-- Selected Marshal -->
-                                        <div class="col-md-4 position-relative">
-                                            <label>Marshal Name</label>
-                                            <InputText class="form-control search-box" placeholder="Search by marshal name.." @bind-value="searchmarshalText" @oninput="OnSearchMarshalInput"
-                                                       @onclick="ShowAllmarshal" />
-                                            <button class="search-btn" type="button" style="top:70%">
-                                                <i class="fa fa-search"></i>
-                                            </button>
-
-
-
-
-                                            @if (filteredmarshal?.Any() == true)
-                                            {
-                                                <ul class="dropdown-menu show" style="position:absolute; width:94%; cursor:pointer; z-index:999;">
-                                                    @foreach (var c in filteredmarshal)
-                                                    {
-                                                        <li class="dropdown-item" @onclick="() => Selectedmarshal(c)">
-                                                            @c.FirstName  @c.LastName
-                                                        </li>
-                                                    }
-                                                </ul>
-                                            }
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label>Badge #</label>
-                                            <InputText class="form-control" @bind-Value="model.BadgeNumber" />
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label>Phone</label>
-                                            <InputText class="form-control" @bind-Value="model.Phone" />
-                                        </div>
-
-                                        @* } *@
-
-
-
-                                    </div>
-                                }
-                               
-                            </div>
-
-
-                        </div>
-                    </div>
+                   
 
                     <!-- 3. FORMS -->
-                    <div class="motion-section">
+                   <!-- <div class="motion-section">
                         <button class="motion-header" @onclick="() => ToggleSection(nameof(IsFormsOpen))">
                             <span>Marshal Forms</span>
                             @* <span class="chevron @(IsFormsOpen ? "open" : "")"><i class="fa-solid fa-angle-down"></i></span> *@
@@ -298,7 +300,7 @@
                             </button>
                         </div>
 
-                    </div>
+                    </div> -->
                     <div class="motion-section" style="overflow:visible;">
                         <button class="motion-header" @onclick="() => ToggleSection(nameof(IsReadonlyOpen))">
                             <span>Marshal Information</span>
@@ -313,20 +315,20 @@
 
                                     <!-- Selected Marshal -->
                                     <div class="col-md-12 position-relative">
-                                        <label>Warrant Requested: @(model.WarrantRequested?.ToString("dd/MM/yyyy") ?? "-")</label>
+                                        <label>Warrant Requested: @(model.WarrantRequested?.ToString(DateFormats.Default) ?? "-")</label>
                                     </div>
                                     <div class="col-md-12">
-                                        <label>Warrant Issued: @(model.WarrantIssued?.ToString("dd/MM/yyyy") ?? "-")</label>
+                                        <label>Warrant Issued: @(model.WarrantIssued?.ToString(DateFormats.Default) ?? "-")</label>
                                     </div>
 
                                     <div class="col-md-12">
-                                        <label>Notice Served: @(model.NoticeServed?.ToString("dd/MM/yyyy") ?? "-")</label>
+                                        <label>Notice Served: @(model.NoticeServed?.ToString(DateFormats.Default) ?? "-")</label>
                                     </div>
                                     <div class="col-md-12">
-                                        <label>Execution Eligible: @(model.ExecutionEligible?.ToString("dd/MM/yyyy") ?? "-")</label>
+                                        <label>Execution Eligible: @(model.ExecutionEligible?.ToString(DateFormats.Default) ?? "-")</label>
                                     </div>
                                     <div class="col-md-12">
-                                        <label>Eviction Executed: @(model.EvictionExecuted?.ToString("dd/MM/yyyy") ?? "-")</label>
+                                        <label>Eviction Executed: @(model.EvictionExecuted?.ToString(DateFormats.Default) ?? "-")</label>
                                     </div>
 
                                 </div>
@@ -386,7 +388,7 @@
     [Parameter] public EventCallback OnGenerateMarshalForm { get; set; } = new();
     private int openSection = 1;
     private bool IsDatesOpen = true;
-    private bool IsInfoOpen = false;
+    private bool IsInfoOpen = true;
     private bool IsFormsOpen = false;
     private bool IsRemainderOpen = false;
     private bool IsReadonlyOpen = false;
@@ -478,15 +480,15 @@
     {
 
         spinnerservice.Show();
-        var warrantForm = model.Forms
-        .FirstOrDefault(f => f.Name == "Warrant of Eviction");
+        // var warrantForm = model.Forms
+        // .FirstOrDefault(f => f.Name == "Warrant of Eviction");
 
-        if (warrantForm == null || !warrantForm.Selected)
-        {
-            // ToastService.ShowWarning("Please select 'Warrant of Eviction' to generate the form.");
-            spinnerservice.Hide();
-            return;
-        }
+        // if (warrantForm == null || !warrantForm.Selected)
+        // {
+        //     // ToastService.ShowWarning("Please select 'Warrant of Eviction' to generate the form.");
+        //     spinnerservice.Hide();
+        //     return;
+        // }
 
         if (legalcaseDto.Id != Guid.Empty)
         {

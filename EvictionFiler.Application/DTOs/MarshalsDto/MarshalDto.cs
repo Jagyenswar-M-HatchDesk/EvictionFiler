@@ -24,6 +24,7 @@ namespace EvictionFiler.Application.DTOs.MarshalsDto
 
         [RegularExpression(@"^(\+1\s?)?(\(?\d{3}\)?[\s.-]?)?\d{3}[\s.-]?\d{4}$", ErrorMessage = "Enter a valid fax number.")]
         public string Fax { get; set; } = string.Empty;
+        public string DocketNo { get; set; } = string.Empty;
 
         public string OfficeAddress { get; set; } = string.Empty;
     }
