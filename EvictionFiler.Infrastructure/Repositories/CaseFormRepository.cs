@@ -302,7 +302,8 @@ namespace EvictionFiler.Infrastructure.Repositories
                      Court = court.Court,
                      CourtAddress = court.Address,
 
-                     TotalOwed = notice.Totalowed
+                     TotalOwed = notice.Totalowed,
+                     IndexNo = lc.Index
                  }
              )
              .FirstOrDefaultAsync();
@@ -421,6 +422,7 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{Court}}", caseDetails.Court ?? "")
     .Replace("{{County}}", caseDetails.County ?? "")
     .Replace("{{Court_Address}}", caseDetails.County ?? "")
+    .Replace("{{Index}}", caseDetails.IndexNo ?? "")
     .Replace("{{Ledger_Total}}", caseDetails.TotalOwed.ToString() ?? "00")
     ;
 
@@ -428,7 +430,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 for (int i = 0; i < 12; i++)
                 {
                     string tenantValue = i < tenants.Count ? tenants[i].FullName : "";
-                    filledHtml = filledHtml.Replace($"{{{{TenantName{i + 1}}}}}", tenantValue);
+                    filledHtml = filledHtml.Replace($"{{TenantName{i + 1}}}", tenantValue);
                 }
 
                 if (caseDetails.LeaseEnd != null)
