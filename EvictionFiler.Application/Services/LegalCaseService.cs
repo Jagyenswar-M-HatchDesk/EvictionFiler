@@ -519,28 +519,30 @@ namespace EvictionFiler.Application.Services
                         TenantId = caseEntity.TenantId,
                         TenantName = $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}",
                         ApartmentNumber = caseEntity.Buildings?.ApartmentCode,
-                        TenancyTypeForBuildingId = caseEntity.Tenants != null ? caseEntity.Tenants.TenancyTypeId : Guid.Empty,
+                        TenancyTypeId = caseEntity.Tenants != null ? caseEntity.Tenants.TenancyTypeId : Guid.Empty,
                         PrimaryResidence = caseEntity.Tenants != null ? caseEntity.Tenants.PrimaryResidence : false,
+                        MonthlyRent = caseEntity.Tenants != null ? caseEntity.Tenants.MonthlyRent : 0,
+                        TenantShare = caseEntity.Tenants != null ? caseEntity.Tenants.TenantShare : 0,
+                        RentDueEachMonthOrWeekId = caseEntity.Tenants != null ? caseEntity.Tenants.RentDueEachMonthOrWeekId : Guid.Empty,
 
                         WrittenLease = caseEntity.WrittenLease,
-
                         OralAgreeMent = caseEntity.OralAgreeMent,
                         CaseProgramId = caseEntity.CaseProgramId,
                         GoodCauseApplies = caseEntity.GoodCauseApplies,
                         DateTenantMoved = caseEntity.DateTenantMoved,
                         LeaseEnd = caseEntity.LeaseEnd,
-                        TenancyTypeId = caseEntity.TenancyTypeId,
+                        //TenancyTypeId = caseEntity.TenancyTypeId,
                         DateNoticeServed = caseEntity.DateNoticeServed,
                         CalculatedNoticeLength = caseEntity.CalculatedNoticeLength,
                         ExpirationDate = caseEntity.ExpirationDate,
                         PredicateNotice = caseEntity.PredicateNotice,
-                        RentDueEachMonthOrWeekId = caseEntity.RentDueEachMonthOrWeekId,
-                        MonthlyRent = caseEntity.MonthlyRent,
+                        
+                        
                         TotalOwed = caseEntity.TotalRentOwed,
-                        TenantShare = caseEntity.TenantShare,
+                        
                         SocialService = caseEntity.SocialService,
                         LastRentPaid = caseEntity.LastRentPaid,
-                        Docketno = caseEntity.DocketNo,
+                        
 
                         //CourtId = caseEntity.CourtId != null ? caseEntity.CourtId : Guid.Empty,
                         Court = caseEntity.CourtLocation != null ? caseEntity.CourtLocation.Court! : "",
@@ -564,6 +566,8 @@ namespace EvictionFiler.Application.Services
 
                         MarshalName = caseEntity.Marshal!= null ? $"{caseEntity.Marshal?.FirstName} {caseEntity.Marshal?.LastName}" : string.Empty,
                         MarshalPhone = caseEntity.Marshal != null ? caseEntity.Marshal.Telephone : string.Empty,
+                        Docketno = caseEntity.Marshal != null ? caseEntity.Marshal.DocketNo : string.Empty,
+                        WarrantRequested = caseEntity.WarrantRequested,
                         Index = caseEntity.Index,
                         County = caseEntity.County,
                         ManagingAgent = caseEntity.ManagingAgent,
@@ -1195,6 +1199,27 @@ namespace EvictionFiler.Application.Services
                 if (existingCase == null) return false;
 
                 existingCase.MarshalId = legalCase.MarshalId!;
+
+                var result = await _unitOfWork.SaveChangesAsync();
+
+                if (result > 0) return true;
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+            }
+
+        }
+        public async Task<bool> UpdateWarrantRequested(IntakeModel legalCase)
+        {
+            try
+            {
+                var existingCase = await _repository.GetAsync(legalCase.Id);
+                if (existingCase == null) return false;
+
+                existingCase.WarrantRequested = legalCase.WarrantRequested!;
 
                 var result = await _unitOfWork.SaveChangesAsync();
 

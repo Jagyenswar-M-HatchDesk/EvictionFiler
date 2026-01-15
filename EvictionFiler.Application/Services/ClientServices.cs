@@ -712,10 +712,10 @@ namespace EvictionFiler.Application.Services
 									HasPriorCase = t.HasPriorCase,
 									TenancyTypeId = t.TenancyTypeId,
 									RenewalOffer = t.RenewalOffer,
-									
+									PrimaryResidence = t.PrimaryResidence,
 									SocialServices = t.SocialServices,
 									MonthlyRent = t.MonthlyRent,
-								MoveInDate  = t.MoveInDate,
+									MoveInDate  = t.MoveInDate,
 									TenantShare = t.TenantShare,
 									ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
 									UnitOrApartmentNumber = t.UnitOrApartmentNumber,

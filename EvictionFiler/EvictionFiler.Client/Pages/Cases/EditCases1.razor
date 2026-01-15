@@ -1414,7 +1414,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <input class="form-check-input"
                                                    type="checkbox"
                                                    id="ownerOccupiedSwitch"
-                                                   @bind="PrimaryResidence" />
+                                                   @bind="legalcaseDto.PrimaryResidence" />
                                         </div>
 
 
@@ -6338,7 +6338,7 @@ r.Name == "Other");
             if (!PremiseTypesList.Any()) PremiseTypesList = await PremiseTypeRepository.GetAllPremiseType();
             if (!RegistrationstatusList.Any()) RegistrationstatusList = await CaseTypeRepository.GetAllRegistrationstatus();
             if (!RegulationList.Any()) RegulationList = await RegulationStatusRepository.GetAllRegulationStatus();
-            if (!TenancyTypeList.Any()) TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
+           
 
             legalcaseDto.StateId = StateList.Where(e => e.Name.Contains("New York")).Select(e => e.Id).FirstOrDefault();
             legalcaseDto.BuildingStateId = StateList.Where(e => e.Name.Contains("New York")).Select(e => e.Id).FirstOrDefault();
@@ -6353,6 +6353,8 @@ r.Name == "Other");
 
         if (Steps[CurrentStep].Name == "Tenant" && !tenantStepLoaded)
         {
+            if (!TenancyTypeList.Any()) TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
+            if (!DateRentList.Any()) DateRentList = await DateRentRepository.GetAllDateRent();
             if (legalcaseDto.BuildingId != null && legalcaseDto.BuildingId != Guid.Empty)
             {
                 if (!TenantList.Any()) TenantList = await _tenantService.GetTenantsByClientIdAsync(legalcaseDto.BuildingId!.Value);
@@ -8578,8 +8580,11 @@ r.Name == "Other");
                         LastName = lastName,
                         UnitOrApartmentNumber = legalcaseDto.UnitOrApartmentNumber ?? searchTenantText,
                         BuildingId = legalcaseDto.BuildingId,
-                        PrimaryResidence = PrimaryResidence,
-                        TenancyTypeId = TenancytypeId,
+                        PrimaryResidence = legalcaseDto.PrimaryResidence,
+                        TenancyTypeId = legalcaseDto.TenancyTypeId,
+                        MonthlyRent = legalcaseDto.MonthlyRent,
+                        TenantShare = legalcaseDto.TenantShare,
+                        RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId
 
                     };
                     var tenantId = await _tenantService.AddTenantfromCase(newTenant);
@@ -8611,9 +8616,9 @@ r.Name == "Other");
                                     MonthlyRent = legalcaseDto.MonthlyRent,
                                     TenantShare = legalcaseDto.TenantShare,
                                     RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
-                                    TotalRentOwed = legalcaseDto.TotalOwed,
-                                    TenancyTypeId = TenancytypeId,
-                                    PrimaryResidence = PrimaryResidence,
+                                    // TotalRentOwed = legalcaseDto.TotalOwed,
+                                    TenancyTypeId = legalcaseDto.TenancyTypeId,
+                                    PrimaryResidence = legalcaseDto.PrimaryResidence,
                                     SocialServices = legalcaseDto.SocialService,
                                     UpdatedOn = DateTime.Now
                                 };
@@ -9659,7 +9664,7 @@ r.Name == "Other");
         legalcaseDto.RegistrationStatusTypeId = building.RegistrationStatusId;
         legalcaseDto.ExemptionBasisId = building.ExemptionBasisId;
         legalcaseDto.ExemptionReasonId = building.ExemptionreasonId;
-        legalcaseDto.PrimaryResidence = building.PrimaryResidence;
+        // legalcaseDto.PrimaryResidence = building.PrimaryResidence;
         legalcaseDto.GoodCause = building.GoodCause != null ? building.GoodCause.Value : false;
         legalcaseDto.OwnerOccupied = building.OwnerOccupied != null ? building.OwnerOccupied.Value : false;
         legalcaseDto.ExemptionBasisOther = building.ExemptionBasisother;
@@ -9698,10 +9703,11 @@ r.Name == "Other");
         legalcaseDto.UnitOrApartmentNumber = tenant.UnitOrApartmentNumber;
         legalcaseDto.TenantName = tenant.FirstName + " " + tenant.LastName;
         legalcaseDto.TenantId = tenant.Id;
-        PrimaryResidence = tenant.PrimaryResidence;
-        TenancytypeId = tenant.TenancyTypeId;
-
-
+        legalcaseDto.PrimaryResidence = tenant.PrimaryResidence;
+        legalcaseDto.TenancyTypeId = tenant.TenancyTypeId;
+        legalcaseDto.MonthlyRent = tenant.MonthlyRent;
+        legalcaseDto.RentDueEachMonthOrWeekId = tenant.RentDueEachMonthOrWeekId;
+        legalcaseDto.TenantShare = tenant.TenantShare;
 
         AdditionalTenantfromDbList = await _additionalTenant.GetAllAdditionalTenantsAsync(legalcaseDto.TenantId);
         if (AdditionalTenantfromDbList.Count > 0)
@@ -9794,7 +9800,7 @@ r.Name == "Other");
         legalcaseDto.ExemptionReasonId = null;
         legalcaseDto.ExemptionBasisId = null;
         legalcaseDto.TenancyTypeForBuildingId = null;
-        legalcaseDto.PrimaryResidence = null;
+        legalcaseDto.PrimaryResidence = false;
         legalcaseDto.GoodCause = false;
         legalcaseDto.OwnerOccupied = false;
         TenantList = new();

@@ -119,6 +119,7 @@ namespace EvictionFiler.Domain.Entities
 		public bool? RegistrationRentAttached { get; set; }
 		public bool? GoodCauseExempt { get; set; }
 		public bool? CourtDraftNop { get; set; }
+		public bool WarrantRequested { get; set; }
 		public DateOnly? DateTenantMoved { get; set; }
 
 		public DateOnly? OralStart { get; set; }

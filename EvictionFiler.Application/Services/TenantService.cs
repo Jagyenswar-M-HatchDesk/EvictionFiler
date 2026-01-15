@@ -118,6 +118,10 @@ namespace EvictionFiler.Application.Services
                 BuildinId = e.BuildingId,
                 PrimaryResidence = e.PrimaryResidence,
                 TenancyTypeId = e.TenancyTypeId,
+                MonthlyRent = e.MonthlyRent,
+                TenantShare = e.TenantShare,
+                RentDueEachMonthOrWeekId = e.RentDueEachMonthOrWeekId,
+
 
             };
             //newtenant.Add(tenant);
@@ -189,7 +193,7 @@ namespace EvictionFiler.Application.Services
                 RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId,
                 SocialServices = t.SocialServices,
                 MonthlyRent = t.MonthlyRent,
-
+                
                 TenantShare = t.TenantShare,
                 ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate,
                 UnitOrApartmentNumber = t.UnitOrApartmentNumber,
@@ -364,7 +368,7 @@ namespace EvictionFiler.Application.Services
                     entity.TenantShare = t.TenantShare;
                     entity.ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate;
                     entity.UnitOrApartmentNumber = t.UnitOrApartmentNumber;
-
+                    entity.RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId;
                     entity.IsUnitIllegalId = t.IsUnitIllegalId;
                     entity.BuildinId = t.BuildingId;
                 }

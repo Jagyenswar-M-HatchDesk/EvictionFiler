@@ -247,6 +247,11 @@ GetLandlordBuildingByTenantAsync(Guid tenantId)
                      TenantCode = t.TenantCode,
                      BuildingId = t.BuildinId,
                      UnitOrApartmentNumber = t.UnitOrApartmentNumber,
+                     TenancyTypeId = t.TenancyTypeId,
+                     TenantShare = t.TenantShare,
+                     MonthlyRent = t.MonthlyRent,
+                     RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId,
+                     PrimaryResidence = t.PrimaryResidence,
                      
                  })
                  .ToListAsync();

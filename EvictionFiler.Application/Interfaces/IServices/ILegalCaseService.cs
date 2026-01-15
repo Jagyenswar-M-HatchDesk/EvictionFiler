@@ -31,6 +31,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<Guid?> UpdateCaseAsync(IntakeModel legalCase);
 
         Task<bool> UpdateMarshalAsync(IntakeModel legalCase);
+        Task<bool> UpdateWarrantRequested(IntakeModel legalCase);
         Task<bool> AddDocumentAsync(List<CaseDocument> document);
         Task<IEnumerable<CaseDocument>> CaseDocumentList(Guid Id);
         Task<bool> DeleteCaseDocument(Guid Id);

@@ -205,6 +205,7 @@ namespace EvictionFiler.Application.DTOs
 
         public Guid? RemainderCenterId { get; set; }
         public DateTime? RemainderDate { get; set; }
+        public DateTime? NextCourtDate { get; set; }
 
         public RemainderCenter? RemainderCenter { get; set; }
         public Guid? RegistrationStatusTypeId { get; set; }
@@ -251,9 +252,10 @@ namespace EvictionFiler.Application.DTOs
 
         public bool OwnerOccupied { get; set; }
 
-        public bool? PrimaryResidence { get; set; }
+        public bool PrimaryResidence { get; set; }
 
         public bool GoodCause { get; set; }
+        public bool WarrantRequested { get; set; }
 
         public List<ArrearLedgerDto> ArrearLedgers { get; set; } = new List<ArrearLedgerDto>();
 

@@ -56,21 +56,172 @@ namespace EvictionFiler.Infrastructure.Repositories
                 if (template == null)
                     throw new Exception("Form Type not found by name.");
 
-                var caseDetails = await (
-                 from lc in _context.LegalCases
-                 
-                 where lc.Id == legalCaseId
+                var caseDetails = await
+            (
+                from lc in _context.LegalCases
 
-                 select new
-                 {
-                     CaseCode = lc.Casecode,
-                    
-                 }
-             ).FirstOrDefaultAsync();
+                join landlord in _context.LandLords
+                    on lc.LandLordId equals landlord.Id into ll
+                from landlord in ll.DefaultIfEmpty()
+
+                join building in _context.Buildings
+                    on lc.BuildingId equals building.Id into bl
+                from building in bl.DefaultIfEmpty()
+
+                join tenant in _context.Tenants
+                    on lc.TenantId equals tenant.Id into tl
+                from tenant in tl.DefaultIfEmpty()
+
+                join court in _context.Courts
+                    on lc.CourtLocationId equals court.Id into cl
+                from court in cl.DefaultIfEmpty()
+
+                join county in _context.MstCounties
+                    on court.CountyId equals county.Id into col
+                from county in col.DefaultIfEmpty()
+
+                join marshal in _context.Marshal 
+                    on lc.MarshalId equals marshal.Id into ms
+                from marshal in ms.DefaultIfEmpty()
+
+                    // LEFT JOIN CaseNoticeInfo
+                
+
+                    // LEFT JOIN Ledger (only if notice exists)
+                
+
+                    // LEFT JOIN Tenancy Type
+                
+
+                where lc.Id == legalCaseId
+
+                select new
+                {
+                    Id = lc.Id,
+                    CaseCode = lc.Casecode,
+
+                    LandlordName = landlord != null
+                        ? landlord.FirstName + " " + landlord.LastName
+                        : null,
+
+                    LandlordAddress = landlord != null
+                        ? landlord.Address1 + " " + landlord.Address2 + " " +
+                          landlord.City + " " +
+                          (landlord.State != null ? landlord.State.Name : "") + " " +
+                          landlord.Zipcode
+                        : null,
+
+                    LandlordPhone = landlord.Phone,
+                    LandlordEmail = landlord.Email,
+
+                    PropertyAddress = building != null
+                        ? building.Address1 + " " + building.Address2 + " " +
+                          (building.Cities != null ? building.Cities.Name : "") + " " +
+                          (building.State != null ? building.State.Name : "") + " " +
+                          building.Zipcode
+                        : null,
+
+                    NumberofRoom = building != null
+                        ? building.BuildingUnits.ToString()
+                        : null,
+
+                    TenantIds = lc.TenantId,
+                    LeaseEnd = lc.LeaseEnd,
+
+                    CityorCounty = county != null
+                        ? county.Name
+                        : building != null && building.Cities != null
+                            ? building.Cities.Name
+                            : null,
+
+                   
+
+                    BuildingStreet = building != null
+                        ? building.Address1 + " " + building.Address2
+                        : null,
+
+                    BuildingCity = building.Cities.Name,
+                    BuildingState = building.State.Name,
+                    BuildingZip = building.Zipcode,
+
+                    BuildindAptno = tenant.UnitOrApartmentNumber,
+
+                    leaseExpired = lc.DateNoticeServed,
+
+                   
+
+                    County = county.Name,
+                    Court = court.Court,
+                    CourtAddress = court.Address,
+
+                   
+                    IndexNo = lc.Index,
+                    MarshalName = marshal.FirstName + " " + marshal.LastName,
+                    MarshalPhone = marshal.Telephone,
+                    MarshalAddress = marshal.OfficeAddress,
+                    MarshalBadge = marshal.BadgeNumber,
+                    marshalFax = marshal.Fax,
+                    marshalDocket = marshal.DocketNo,
+
+                }
+            )
+            .FirstOrDefaultAsync();
 
                 if (caseDetails == null)
                     throw new Exception("Case details not found.");
 
+                List<Guid> tenantIds = new();
+
+                if (caseDetails.TenantIds.HasValue)
+                    tenantIds.Add(caseDetails.TenantIds.Value);
+
+                var tenants = await _context.Tenants
+                    .Where(t => tenantIds.Contains(t.Id))
+                    .Select(t => new { FullName = t.FirstName + " " + t.LastName, ApartmentNumber = t.UnitOrApartmentNumber })
+                    .ToListAsync();
+
+                var additionalTenants = await _context.CaseAdditionalTenants
+                    .Where(e => e.LegalCaseId == legalCaseId)
+                    .Select(t => new { FullName = t.FirstName + " " + t.LastName, ApartmentNumber = "" })
+                    .ToListAsync();
+
+                tenants.AddRange(additionalTenants);
+
+                var additionalOccupants = await _context.AdditionalOccupants
+                    .Where(e => e.LegalCaseId == legalCaseId)
+                    .Select(t => new { FullName = t.Name, ApartmentNumber = "" })
+                    .ToListAsync();
+
+                tenants.AddRange(additionalOccupants);
+
+                Log($"Total Tenants found: {tenants.Count}");
+
+                // --------------------
+                // HTML VARIABLE REPLACEMENT
+                // --------------------
+                string firstTenantName = tenants.Count > 0 ? tenants[0].FullName : "";
+                string firstApartmentNumber = tenants.Count > 0 ? tenants[0].ApartmentNumber : "";
+
+                var otherTenantsList = additionalTenants.Select(x => x.FullName).ToList();
+
+                // Occupants (already separate list)
+                var occupantList = additionalOccupants.Select(x => x.FullName).ToList();
+
+                string otherTenantsText = "";
+                if (otherTenantsList.Any())
+                {
+                    otherTenantsText =
+
+                        "<br>" + string.Join(",", otherTenantsList) ;
+                }
+
+                string occupantsText = "";
+                if (occupantList.Any())
+                {
+                    occupantsText =
+
+                       "<br>" + string.Join(",", occupantList) ;
+                }
 
                 string filledHtml = template.HTML;
   
@@ -86,7 +237,33 @@ namespace EvictionFiler.Infrastructure.Repositories
     ";
 
                 filledHtml = filledHtml.Replace("</head>", cssPatch + "</head>");
-
+                filledHtml = template.HTML
+    .Replace("{{LandlordName}}", caseDetails.LandlordName ?? "")
+    .Replace("{{Landlord_Name}}", caseDetails.LandlordName ?? "")
+    .Replace("{{LandlordAddress}}", caseDetails.LandlordAddress ?? "")
+    .Replace("{{Landlord_Address}}", caseDetails.LandlordAddress ?? "")
+    .Replace("{{Notice_Date}}", DateTime.Now.ToString(DateFormats.Default))
+    .Replace("{{PropertyAddress}}", caseDetails.PropertyAddress ?? "")
+    .Replace("{{Premises_Address}}", caseDetails.PropertyAddress ?? "")
+    .Replace("{{CurrentDate}}", DateTime.Now.ToString(DateFormats.Default))
+    .Replace("{{NumberofRoom}}", caseDetails.NumberofRoom ?? "")
+    .Replace("{{TenantName}}", firstTenantName)
+    .Replace("{{Tenant_Names}}", firstTenantName)
+                   .Replace("{{OtherTenants}}", otherTenantsText ?? "")
+    //.Replace("{{UnderTenants_Name}}", occupantsText)
+    .Replace("{{Occupants}}", occupantsText ?? "")
+    .Replace("{{Court}}", caseDetails.Court ?? "")
+    .Replace("{{County}}", caseDetails.County ?? "")
+    .Replace("{{Court_Address}}", caseDetails.County ?? "")
+    .Replace("{{Index}}", caseDetails.IndexNo ?? "")
+    .Replace("{{Marshal_Name}}", caseDetails.MarshalName ?? "")
+    .Replace("{{Marshal_Badge}}", caseDetails.MarshalBadge ?? "")
+    .Replace("{{Marshal_Address}}", caseDetails.MarshalAddress ?? "")
+    .Replace("{{Marshal_Fax}}", caseDetails.marshalFax ?? "")
+    .Replace("{{Marshakl_Docket}}", caseDetails.marshalDocket ?? "")
+    .Replace("{{marshal_Phone}}", caseDetails.MarshalPhone ?? "")
+    ;
+                Console.WriteLine("Filled Html - " + filledHtml);
                 // --------------------
                 // CREATE FOLDER
                 // --------------------
