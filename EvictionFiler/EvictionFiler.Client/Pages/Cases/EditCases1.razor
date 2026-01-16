@@ -1176,20 +1176,20 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 {
                                                     <!-- Exemption Basic -->
                                                     <div class="col">
-                                                        <label class="form-label required-label fw-semibold">
+                                                        <label class="form-label  fw-semibold">
                                                             Exemption
                                                         </label>
-                                                        <InputText class="form-control" @bind-Value="legalcaseDto.ExemptionBasisOther" placeholder="Enter Exemption" />
+                                                        <InputText class="form-control" @bind-Value="legalcaseDto.ExemptionBasisOther" placeholder="Enter Exemption" disabled="@isBuildingSelected" />
                                                     </div>
                                                 }
                                                 @if (ShowRentOther)
                                                 {
                                                     <!-- Exemption Basic -->
                                                     <div class="col">
-                                                        <label class="form-label required-label ">
+                                                        <label class="form-label  ">
                                                             Other Regulation
                                                         </label>
-                                                        <InputText class="form-control" @bind-Value="legalcaseDto.RentRegulationOther" placeholder="Enter Other Reulation" />
+                                                        <InputText class="form-control" @bind-Value="legalcaseDto.RentRegulationOther" placeholder="Enter Other Reulation" disabled="@isBuildingSelected" />
                                                     </div>
                                                 }
                                             </div>
@@ -1545,12 +1545,12 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                         <div class="col-md-4">
                                             <label class="form-label">Last Payment Date</label>
-                                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; "  class="form-control" @bind-Value="legalcaseDto.LastPaymentDate" @bind-Value:after="GenerateMonths" />
+                                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; "  @bind-Value="legalcaseDto.LastPaymentDate" @bind-Value:after="GenerateMonths" />
                                         </div>
 
                                         <div class="col-md-4">
                                             <label class="form-label">Last Payment Amount ($)</label>
-                                            <InputNumber class="form-control" @bind-Value="legalcaseDto.LastPayment" disabled />
+                                            <InputNumber class="form-control" @bind-Value="legalcaseDto.LastPayment" />
                                         </div>
                                         @if (legalcaseDto.CaseTypeName == "NonPayment")
                                         {
@@ -2740,7 +2740,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                         <div class="col-md-4">
                                                             <label class="form-label">Last Payment Date</label>
-                                                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " disabled class="form-control" @bind-Value="legalcaseDto.LastPaymentDate" @bind-Value:after="GenerateMonths" />
+                                                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " disabled  @bind-Value="legalcaseDto.LastPaymentDate" @bind-Value:after="GenerateMonths" />
                                                         </div>
 
                                                         <div class="col-md-4">
@@ -5795,7 +5795,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <div class="col-md-4 ">
 
                                             <label class="form-label fw-semibold">Date<span class="text-danger">*</span></label>
-                                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " class="form-control" @bind-Value="legalcaseDto.PerDiemDate" />
+                                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; "  @bind-Value="legalcaseDto.PerDiemDate" />
                                             <ValidationMessage For="() => legalcaseDto.PerDiemDate" />
 
                                         </div>
@@ -6065,7 +6065,7 @@ r.Name == "Other");
         // FilteredFormTypeList = await _FormService.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
         // FilingMethodList = await _legalCaseService.FilingMethodList();
         // ServiceMethodList = await _legalCaseService.ServiceMethodList();
-        Rows = legalcaseDto.ArrearLedgers;
+        // Rows = legalcaseDto.ArrearLedgers;
         searchCourtText = legalcaseDto.CourtName;
         searchCountyText = legalcaseDto.CountyName;
 
@@ -6338,7 +6338,7 @@ r.Name == "Other");
             if (!PremiseTypesList.Any()) PremiseTypesList = await PremiseTypeRepository.GetAllPremiseType();
             if (!RegistrationstatusList.Any()) RegistrationstatusList = await CaseTypeRepository.GetAllRegistrationstatus();
             if (!RegulationList.Any()) RegulationList = await RegulationStatusRepository.GetAllRegulationStatus();
-           
+
 
             legalcaseDto.StateId = StateList.Where(e => e.Name.Contains("New York")).Select(e => e.Id).FirstOrDefault();
             legalcaseDto.BuildingStateId = StateList.Where(e => e.Name.Contains("New York")).Select(e => e.Id).FirstOrDefault();
@@ -6393,7 +6393,8 @@ r.Name == "Other");
             var undertanants = new List<string>() { "John Doe", "Jane Doe" };
             Undertenants.AddRange(undertanants);
             searchTenantText = $"{legalcaseDto?.UnitOrApartmentNumber} / {legalcaseDto?.TenantName} ";
-
+            Rows = legalcaseDto.ArrearLedgers;
+            legalcaseDto.TotalOwed = legalcaseDto.ArrearLedgers?.Sum(e => e.Amount) ?? 0;
             tenantStepLoaded = true;
         }
 
@@ -8775,6 +8776,35 @@ r.Name == "Other");
                             AdditionalPetitioners.Remove(item);
                         }
 
+                    }
+                    if (Rows.Count > 0)
+                    {
+                        var addrows = Rows.Where(e => (e.Id == null || e.Id == Guid.Empty) && (e.Amount != null || e.Month != null)).Select(e => new ArrearLedgerDto()
+                        {
+                            LegalCaseId = legalcaseDto.Id,
+                            CaseNoticeId =  null,
+                            Notes = e.Notes,
+                            Amount = e.Amount,
+                            Month = e.Month,
+                        }).ToList();
+                        if (addrows.Any())
+                        {
+                            await _legalCaseService.AddArrearLedgerAsync(addrows);
+                        }
+
+                        var updaterows = Rows.Where(e => e.Id != null && e.Id != Guid.Empty).Select(e => new ArrearLedgerDto()
+                        {
+                            Id = e.Id,
+                            LegalCaseId = legalcaseDto.Id,
+                            CaseNoticeId = null,
+                            Notes = e.Notes,
+                            Amount = e.Amount,
+                            Month = e.Month,
+                        }).ToList();
+                        if (updaterows.Any())
+                        {
+                            await _legalCaseService.UpdateArrearLedgerAsync(updaterows);
+                        }
                     }
 
                     navmessage.Set("edit", true, "Case updated successfully.");

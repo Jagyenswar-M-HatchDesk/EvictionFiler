@@ -11,6 +11,7 @@ namespace EvictionFiler.Application.DTOs.CaseAppearanceDtos
 {
     public class CaseAppearanceDto
     {
+        public Guid Id { get; set; } = Guid.Empty;
         public Guid? CourtTodayId { get; set; }
         public string? CourtTodayName { get; set; }
 

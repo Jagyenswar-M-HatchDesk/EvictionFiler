@@ -25,6 +25,7 @@ namespace EvictionFiler.Application.Services
             var appreaaces = await _repository.GetAllAsync( predicate: x => x.LegalCaseId == caseId, includes: a=>a.CourtToday!);
             var result = appreaaces.Select(e => new CaseAppearanceDto
             {
+                Id = e.Id,
                 AdjournDate = e.AdjournDate,
                 AdjournReasonId = e.AdjournReasonId,
                 AdjournTime = e.AdjournTime,
@@ -46,6 +47,18 @@ namespace EvictionFiler.Application.Services
 
             }).ToList();
             return result;
+        }
+        public async Task<bool> UpdateCaseAppreance(CaseAppearanceDto appearance)
+        {
+            var existing = await _repository.GetAsync(appearance.Id);
+
+            existing.MotionDue = appearance.MotionDue;
+            existing.ReplyDue = appearance.ReplyDue;
+            existing.OppositionDue = appearance.OppositionDue;
+            existing.ReturnDate = appearance.ReturnDate;
+
+            var result = await _unitofwork.SaveChangesAsync();
+            return result > 0 ? true : false;
         }
 
         public async Task<bool> AddCaseAppearance(CaseAppearanceDto data)

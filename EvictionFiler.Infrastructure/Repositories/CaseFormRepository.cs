@@ -80,18 +80,18 @@ namespace EvictionFiler.Infrastructure.Repositories
                     on court.CountyId equals county.Id into col
                 from county in col.DefaultIfEmpty()
 
-                join marshal in _context.Marshal 
+                join marshal in _context.Marshal
                     on lc.MarshalId equals marshal.Id into ms
                 from marshal in ms.DefaultIfEmpty()
 
                     // LEFT JOIN CaseNoticeInfo
-                
+
 
                     // LEFT JOIN Ledger (only if notice exists)
-                
+
 
                     // LEFT JOIN Tenancy Type
-                
+
 
                 where lc.Id == legalCaseId
 
@@ -134,7 +134,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                             ? building.Cities.Name
                             : null,
 
-                   
+
 
                     BuildingStreet = building != null
                         ? building.Address1 + " " + building.Address2
@@ -148,13 +148,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 
                     leaseExpired = lc.DateNoticeServed,
 
-                   
+
 
                     County = county.Name,
                     Court = court.Court,
                     CourtAddress = court.Address,
 
-                   
+
                     IndexNo = lc.Index,
                     MarshalName = marshal.FirstName + " " + marshal.LastName,
                     MarshalPhone = marshal.Telephone,
@@ -212,7 +212,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 {
                     otherTenantsText =
 
-                        "<br>" + string.Join(",", otherTenantsList) ;
+                        "<br>" + string.Join(",", otherTenantsList);
                 }
 
                 string occupantsText = "";
@@ -220,11 +220,11 @@ namespace EvictionFiler.Infrastructure.Repositories
                 {
                     occupantsText =
 
-                       "<br>" + string.Join(",", occupantList) ;
+                       "<br>" + string.Join(",", occupantList);
                 }
 
                 string filledHtml = template.HTML;
-  
+
 
                 // ----------------------------------------------------------------------
                 // ADD CSS TO REMOVE SCROLLBARS (IRONPDF limitation fix)
@@ -284,10 +284,10 @@ namespace EvictionFiler.Infrastructure.Repositories
                 renderer.RenderingOptions.MarginBottom = 0;
                 renderer.RenderingOptions.MarginLeft = 0;
                 renderer.RenderingOptions.MarginRight = 0;
-               
+
                 renderer.RenderingOptions.EnableJavaScript = true;
                 renderer.RenderingOptions.Timeout = 60000; // 60 seconds
-               
+
                 renderer.RenderingOptions.PaperSize = IronPdf.Rendering.PdfPaperSize.A4;
 
                 // Convert HTML → PDF
@@ -390,6 +390,10 @@ namespace EvictionFiler.Infrastructure.Repositories
                      on lc.RentDueEachMonthOrWeekId equals rentdue.Id into rl
                  from rentdue in rl.DefaultIfEmpty()
 
+                 join tenancylc in _context.MstTenancyTypes
+                    on lc.TenancyTypeId equals tenancylc.Id into ttlc
+                 from tenancylc in ttlc.DefaultIfEmpty()
+
                      // LEFT JOIN CaseNoticeInfo
                  join notice in _context.CaseNoticeInfo
                      .Where(x => x.FormtypeId == formTypeId)
@@ -408,62 +412,142 @@ namespace EvictionFiler.Infrastructure.Repositories
 
                  where lc.Id == legalCaseId
 
+                 //select new
+                 //{
+                 //    Id = lc.Id,
+                 //    CaseCode = lc.Casecode,
+
+                 //    LandlordName = landlord != null
+                 //        ? landlord.FirstName + " " + landlord.LastName
+                 //        : null,
+
+                 //    LandlordAddress = landlord != null
+                 //        ? landlord.Address1 + " " + landlord.Address2 + " " +
+                 //          landlord.City + " " +
+                 //          (landlord.State != null ? landlord.State.Name : "") + " " +
+                 //          landlord.Zipcode
+                 //        : null,
+
+                 //    LandlordPhone = landlord.Phone,
+                 //    LandlordEmail = landlord.Email,
+
+                 //    PropertyAddress = building != null
+                 //        ? building.Address1 + " " + building.Address2 + " " +
+                 //          (building.Cities != null ? building.Cities.Name : "") + " " +
+                 //          (building.State != null ? building.State.Name : "") + " " +
+                 //          building.Zipcode
+                 //        : null,
+
+                 //    NumberofRoom = building != null
+                 //        ? building.BuildingUnits.ToString()
+                 //        : null,
+
+                 //    TenantIds = lc.TenantId,
+                 //    LeaseEnd = lc.LeaseEnd,
+
+                 //    CityorCounty = county != null
+                 //        ? county.Name
+                 //        : building != null && building.Cities != null
+                 //            ? building.Cities.Name
+                 //            : null,
+
+                 //    RentOwned = lc.TotalRentOwed,
+                 //    RentDate = rentdue.Name,
+
+                 //    LastRent = notice.DateofLastPayment ?? lc.LastPaymentDate,
+                 //    NoticePeriod = notice.CalcNoticeLength ?? lc.CalculatedNoticeLength,
+
+                 //    VacateDate =
+                 //        notice != null &&
+                 //        notice.DateNoticeServed.HasValue &&
+                 //        notice.CalcNoticeLength.HasValue
+                 //            ? notice.DateNoticeServed.Value
+                 //                .AddDays(notice.CalcNoticeLength.Value)
+                 //            : (DateOnly?)null,
+
+                 //    VacateDatelc = DateTime.Now.AddDays(Convert.ToDouble( lc.CalculatedNoticeLength ?? 0)),
+
+                 //    BuildingStreet = building != null
+                 //        ? building.Address1 + " " + building.Address2
+                 //        : null,
+
+                 //    BuildingCity = building.Cities.Name,
+                 //    BuildingState = building.State.Name,
+                 //    BuildingZip = building.Zipcode,
+
+                 //    BuildindAptno = tenant.UnitOrApartmentNumber,
+
+                 //    leaseExpired = lc.DateNoticeServed,
+
+                 //    TenancyType = tenancy.Name ?? tenancylc.Name,
+
+                 //    County = county.Name,
+                 //    Court = court.Court,
+                 //    CourtAddress = court.Address,
+
+                 //    TotalOwed = notice.Totalowed ?? (int)lc.TotalRentOwed! ,
+                 //    IndexNo = lc.Index
+                 //}
                  select new
                  {
                      Id = lc.Id,
                      CaseCode = lc.Casecode,
 
                      LandlordName = landlord != null
-                         ? landlord.FirstName + " " + landlord.LastName
-                         : null,
+        ? landlord.FirstName + " " + landlord.LastName
+        : null,
 
                      LandlordAddress = landlord != null
-                         ? landlord.Address1 + " " + landlord.Address2 + " " +
-                           landlord.City + " " +
-                           (landlord.State != null ? landlord.State.Name : "") + " " +
-                           landlord.Zipcode
-                         : null,
+        ? (landlord.Address1 ?? "") + " " +
+          (landlord.Address2 ?? "") + " " +
+          (landlord.City ?? "") + " " +
+          (landlord.State != null ? landlord.State.Name : "") + " " +
+          (landlord.Zipcode ?? "")
+        : null,
 
                      LandlordPhone = landlord.Phone,
                      LandlordEmail = landlord.Email,
 
                      PropertyAddress = building != null
-                         ? building.Address1 + " " + building.Address2 + " " +
-                           (building.Cities != null ? building.Cities.Name : "") + " " +
-                           (building.State != null ? building.State.Name : "") + " " +
-                           building.Zipcode
-                         : null,
+        ? (building.Address1 ?? "") + " " +
+          (building.Address2 ?? "") + " " +
+          (building.Cities != null ? building.Cities.Name : "") + " " +
+          (building.State != null ? building.State.Name : "") + " " +
+          (building.Zipcode ?? "")
+        : null,
 
                      NumberofRoom = building != null
-                         ? building.BuildingUnits.ToString()
-                         : null,
+        ? building.BuildingUnits.ToString()
+        : null,
 
                      TenantIds = lc.TenantId,
                      LeaseEnd = lc.LeaseEnd,
 
                      CityorCounty = county != null
-                         ? county.Name
-                         : building != null && building.Cities != null
-                             ? building.Cities.Name
-                             : null,
+        ? county.Name
+        : (building.Cities != null ? building.Cities.Name : null),
 
                      RentOwned = lc.TotalRentOwed,
                      RentDate = rentdue.Name,
 
-                     LastRent = notice.DateofLastPayment,
-                     NoticePeriod = notice.CalcNoticeLength,
+                     LastRent = notice.DateofLastPayment ?? lc.LastPaymentDate,
+
+                     NoticePeriod = notice.CalcNoticeLength ?? lc.CalculatedNoticeLength,
 
                      VacateDate =
-                         notice != null &&
-                         notice.DateNoticeServed.HasValue &&
-                         notice.CalcNoticeLength.HasValue
-                             ? notice.DateNoticeServed.Value
-                                 .AddDays(notice.CalcNoticeLength.Value)
-                             : (DateOnly?)null,
+        notice != null &&
+        notice.DateNoticeServed.HasValue &&
+        notice.CalcNoticeLength.HasValue
+            ? notice.DateNoticeServed.Value.AddDays(notice.CalcNoticeLength.Value)
+            : (DateOnly?)null,
+
+                     VacateDatelc = lc.CalculatedNoticeLength.HasValue
+        ? DateTime.Now.AddDays(lc.CalculatedNoticeLength.Value)
+        : (DateTime?)null,
 
                      BuildingStreet = building != null
-                         ? building.Address1 + " " + building.Address2
-                         : null,
+        ? (building.Address1 ?? "") + " " + (building.Address2 ?? "")
+        : null,
 
                      BuildingCity = building.Cities.Name,
                      BuildingState = building.State.Name,
@@ -473,15 +557,19 @@ namespace EvictionFiler.Infrastructure.Repositories
 
                      leaseExpired = lc.DateNoticeServed,
 
-                     TenancyType = tenancy.Name,
+                     TenancyType = tenancy.Name ?? tenancylc.Name,
 
                      County = county.Name,
                      Court = court.Court,
                      CourtAddress = court.Address,
 
-                     TotalOwed = notice.Totalowed,
-                     IndexNo = lc.Index
+                     TotalOwed = notice.Totalowed
+        ?? (lc.TotalRentOwed.HasValue ? (int)lc.TotalRentOwed.Value : 0),
+
+                     IndexNo = lc.Index,
+                     MonthlyRent = lc.MonthlyRent
                  }
+
              )
              .FirstOrDefaultAsync();
 
@@ -535,7 +623,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 if (otherTenantsList.Any())
                 {
                     otherTenantsText =
-                       
+
                         string.Join(",", otherTenantsList) + " (Tenant)";
                 }
 
@@ -580,7 +668,7 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{Rent_day}}", caseDetails.RentDate ?? "")
     .Replace("{{month}}", lastRentMonth ?? "")
     .Replace("{{year}}", lastRentYear ?? "")
-    .Replace("{{Vacate_Date}}", caseDetails.VacateDate.ToString())
+    .Replace("{{Vacate_Date}}", caseDetails.VacateDate?.ToString(DateFormats.Default) ?? caseDetails.VacateDatelc?.ToString(DateFormats.Default))
     .Replace("{{NP}}", caseDetails.NoticePeriod.ToString())
     .Replace("{{Building_Street}}", caseDetails.BuildingStreet ?? "")
     .Replace("{{Building_State}}", caseDetails.BuildingState ?? "")
@@ -594,13 +682,14 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{Tenancy_Type}}", caseDetails.TenancyType ?? "")
     .Replace("{{Tenant_Names}}", firstTenantName)
                    .Replace("{{OtherTenants}}", otherTenantsText ?? "")
-                   //.Replace("{{UnderTenants_Name}}", occupantsText)
+    //.Replace("{{UnderTenants_Name}}", occupantsText)
     .Replace("{{Occupants}}", occupantsText ?? "")
     .Replace("{{Court}}", caseDetails.Court ?? "")
     .Replace("{{County}}", caseDetails.County ?? "")
     .Replace("{{Court_Address}}", caseDetails.County ?? "")
     .Replace("{{Index}}", caseDetails.IndexNo ?? "")
     .Replace("{{Ledger_Total}}", caseDetails.TotalOwed.ToString() ?? "00")
+    .Replace("{{Monthly_Rent}}", caseDetails.MonthlyRent.ToString() ?? "00")
     ;
 
 
@@ -621,6 +710,13 @@ namespace EvictionFiler.Infrastructure.Repositories
                 // ----------------------------------------------------------------------
                 // ADD CSS TO REMOVE SCROLLBARS (IRONPDF limitation fix)
                 // ----------------------------------------------------------------------
+                string fontPath = Path.Combine(
+                                            Directory.GetCurrentDirectory(),
+                                            "wwwroot", "fonts", "arialuni.otf"
+                                        ).Replace("\\", "/");
+
+                string fontUrl = $"file:///{fontPath}";
+
                 string cssPatch = @"
         <style>
             html, body { overflow: visible !important; height: auto !important; }
