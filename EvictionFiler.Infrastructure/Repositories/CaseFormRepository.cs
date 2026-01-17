@@ -410,84 +410,13 @@ namespace EvictionFiler.Infrastructure.Repositories
                      on notice.TenancyTypeId equals tenancy.Id into ttl
                  from tenancy in ttl.DefaultIfEmpty()
 
+                 join arrearledger in _context.ArrearLedgers
+                 on lc.Id equals arrearledger.LegalCaseId into arrearLedgers
+
+
                  where lc.Id == legalCaseId
 
-                 //select new
-                 //{
-                 //    Id = lc.Id,
-                 //    CaseCode = lc.Casecode,
-
-                 //    LandlordName = landlord != null
-                 //        ? landlord.FirstName + " " + landlord.LastName
-                 //        : null,
-
-                 //    LandlordAddress = landlord != null
-                 //        ? landlord.Address1 + " " + landlord.Address2 + " " +
-                 //          landlord.City + " " +
-                 //          (landlord.State != null ? landlord.State.Name : "") + " " +
-                 //          landlord.Zipcode
-                 //        : null,
-
-                 //    LandlordPhone = landlord.Phone,
-                 //    LandlordEmail = landlord.Email,
-
-                 //    PropertyAddress = building != null
-                 //        ? building.Address1 + " " + building.Address2 + " " +
-                 //          (building.Cities != null ? building.Cities.Name : "") + " " +
-                 //          (building.State != null ? building.State.Name : "") + " " +
-                 //          building.Zipcode
-                 //        : null,
-
-                 //    NumberofRoom = building != null
-                 //        ? building.BuildingUnits.ToString()
-                 //        : null,
-
-                 //    TenantIds = lc.TenantId,
-                 //    LeaseEnd = lc.LeaseEnd,
-
-                 //    CityorCounty = county != null
-                 //        ? county.Name
-                 //        : building != null && building.Cities != null
-                 //            ? building.Cities.Name
-                 //            : null,
-
-                 //    RentOwned = lc.TotalRentOwed,
-                 //    RentDate = rentdue.Name,
-
-                 //    LastRent = notice.DateofLastPayment ?? lc.LastPaymentDate,
-                 //    NoticePeriod = notice.CalcNoticeLength ?? lc.CalculatedNoticeLength,
-
-                 //    VacateDate =
-                 //        notice != null &&
-                 //        notice.DateNoticeServed.HasValue &&
-                 //        notice.CalcNoticeLength.HasValue
-                 //            ? notice.DateNoticeServed.Value
-                 //                .AddDays(notice.CalcNoticeLength.Value)
-                 //            : (DateOnly?)null,
-
-                 //    VacateDatelc = DateTime.Now.AddDays(Convert.ToDouble( lc.CalculatedNoticeLength ?? 0)),
-
-                 //    BuildingStreet = building != null
-                 //        ? building.Address1 + " " + building.Address2
-                 //        : null,
-
-                 //    BuildingCity = building.Cities.Name,
-                 //    BuildingState = building.State.Name,
-                 //    BuildingZip = building.Zipcode,
-
-                 //    BuildindAptno = tenant.UnitOrApartmentNumber,
-
-                 //    leaseExpired = lc.DateNoticeServed,
-
-                 //    TenancyType = tenancy.Name ?? tenancylc.Name,
-
-                 //    County = county.Name,
-                 //    Court = court.Court,
-                 //    CourtAddress = court.Address,
-
-                 //    TotalOwed = notice.Totalowed ?? (int)lc.TotalRentOwed! ,
-                 //    IndexNo = lc.Index
-                 //}
+                 
                  select new
                  {
                      Id = lc.Id,
@@ -567,7 +496,8 @@ namespace EvictionFiler.Infrastructure.Repositories
         ?? (lc.TotalRentOwed.HasValue ? (int)lc.TotalRentOwed.Value : 0),
 
                      IndexNo = lc.Index,
-                     MonthlyRent = lc.MonthlyRent
+                     MonthlyRent = lc.MonthlyRent,
+                     ArrearLedgers  = arrearLedgers.OrderBy(e=>e.Month).ToList(),
                  }
 
              )
@@ -697,6 +627,30 @@ namespace EvictionFiler.Infrastructure.Repositories
                 {
                     string tenantValue = i < tenants.Count ? tenants[i].FullName : "";
                     filledHtml = filledHtml.Replace($"{{TenantName{i + 1}}}", tenantValue);
+                }
+                for (int i = 0; i < 12; i++)
+                {
+                    var ledger = i < caseDetails.ArrearLedgers.Count
+                        ? caseDetails.ArrearLedgers[i]
+                        : null;
+
+                    var arrearledgerAmount = ledger?.Amount;
+
+                    string monthName = "";
+                    string year = "";
+
+                    if (!string.IsNullOrEmpty(ledger?.Month))
+                    {
+                        // Month value is in format yyyy-MM
+                        var dt = DateTime.ParseExact(ledger.Month, "yyyy-MM", null);
+
+                        monthName = dt.ToString("MMMM"); // e.g., November
+                        year = dt.ToString("yy");      // e.g., 2025
+                    }
+
+                    filledHtml = filledHtml.Replace($"{{{{arRent{i + 1}}}}}", arrearledgerAmount.ToString());
+                    filledHtml = filledHtml.Replace($"{{{{arMonth{i + 1}}}}}", monthName);
+                    filledHtml = filledHtml.Replace($"{{{{ary{i + 1}}}}}", year);
                 }
 
                 if (caseDetails.LeaseEnd != null)
