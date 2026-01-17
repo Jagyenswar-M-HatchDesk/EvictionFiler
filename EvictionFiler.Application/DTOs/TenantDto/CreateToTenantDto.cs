@@ -28,15 +28,19 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public bool? HasRegulatedTenancy { get; set; }
 		public bool? OtherOccupants { get; set; }
 		public bool? HasPriorCase { get; set; }
-		public bool PrimaryResidence { get; set; }
+        [Required(ErrorMessage = "Primary Residence is Required")]
+		 public bool PrimaryResidence { get; set; }
         [Required(ErrorMessage = "Select Building")]
         public Guid? BuildingId { get; set; }
 
 		//Rent Details
 		public bool? RenewalOffer { get; set; }
-        public Guid? RentDueEachMonthOrWeekId { get; set; }
+        [Required(ErrorMessage = "Select Rent Due date")]
+		public Guid? RentDueEachMonthOrWeekId { get; set; }
 
-        public string? RentDueEachMonthOrWeekName { get; set; }
+		public string? RentDueEachMonthOrWeekName { get; set; }
+        [Required(ErrorMessage = "Monthly Rent is required")]
+
         public double? MonthlyRent { get; set; }
 		public double? TenantShare { get; set; }
 		public string? SocialServices { get; set; }
@@ -49,7 +53,9 @@ namespace EvictionFiler.Application.DTOs.TenantDto
         public string? UnitOrApartmentNumber { get; set; }
 		public Guid? IsUnitIllegalId { get; set; }
 		public string? IsUnitIllegalName { get; set; }
-		public Guid? TenancyTypeId { get; set; }
+        [Required(ErrorMessage = "Select Tenancy type")]
+
+        public Guid? TenancyTypeId { get; set; }
 
 		public Guid? AdditialTenantsId { get; set; }
 		public string? TenancyTypeName { get; set; }
