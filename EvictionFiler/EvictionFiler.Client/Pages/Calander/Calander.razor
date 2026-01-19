@@ -46,6 +46,7 @@
         })
         .ToList();
 }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 
 
 <style>
@@ -171,7 +172,7 @@
     /* #printLayout { display: none; } */
 
     /* PRINT MODE */
-    @@media print { body *
+    /* @@media print { body *
     { visibility: hidden; }
 
     #myPrintableContent, #myPrintableContent * { visibility: visible; }
@@ -182,10 +183,10 @@
 
     #myPrintableContent{
         display:none;
-    }
+    } */
 
 /* PRINT RULES */
-@@media print {
+/* @@media print {
     body * {
         visibility: hidden;
     }
@@ -200,7 +201,7 @@
         left: 0;
         width: 100%;
     }
-}
+} */
 
     .print-container { font-family: "Segoe UI", Arial, sans-serif; background: #fff; color: #000; padding: 20px 30px; }
 
@@ -250,6 +251,25 @@
     #myPrintableContent * { visibility: visible; }
 
     #myPrintableContent { position: absolute; top: 0; left: 0; width: 100%; }
+
+    .row {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+    }
+
+    .col-6, .col-4, .col-3, .col-2, .col-12 {
+        float: none !important;
+        display: block !important;
+    }
+
+    .case-row .col-6 {
+        width: 60% !important;
+    }
+
+    .case-row .col-4 {
+        width: 40% !important;
+        text-align: right !important;
+    }
     }
 
     .table-wrap { overflow-x: auto; /* horizontal scroll */ overflow-y: auto; max-width: 100%; }
@@ -385,7 +405,7 @@
 
                      <button class="btn btn-primary"  style="font-size:14px" @onclick="SubmitAsync">Generate</button>
                     <button type="reset" class="btn secondary" id="btnReset">Reset</button>
-                    <button type="button" class="btn secondary"  onclick="window.print()">Print</button>
+                    <button type="button" class="btn secondary"  @onclick="PrintWithQRCodes">Print</button>
                     <button type="button" class="btn secondary" id="btnExport">Export CSV</button>
                     <span class="ms-auto text-muted" id="countInfo">0 results</span>
                 </div>
@@ -526,15 +546,23 @@
                         @i. [@c.IndexNo] @c.LandlordName v. @c.TenantName
                     </div>
 
-                    <div class="case-row">
-                        <span><strong>Appearance:</strong> @c.AppearanceTypeForHearinname</span>
-                        <span><strong>Time:</strong> @c.HearingTime</span>
-                        <span><strong>Case Type:</strong> @c.CaseTypeName</span>
+                    <div class="case-row row">
+                        <div class="col-6">
+                            <span><strong>Appearance:</strong> @c.AppearanceTypeForHearinname</span><br />
+                            <span><strong>Time:</strong> @c.HearingTime</span><br />
+                            <span><strong>Case Type:</strong> @c.CaseTypeName</span><br />
+                            <span><strong>Opposition Attorney:</strong> -- </span><br />
+                        </div>
+                        <div class="col-4">
+                            <div style="margin-top:12px; text-align:right;">
+                                <img id=@($"qr-@{c.Id}")
+                                     data-qr="@BuildQrText(c)"
+                                     style="width:100px; height:100px;" />
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="case-row">
-                        <span><strong>Opposition Attorney:</strong> -- </span>
-                    </div>
+                    
 
                     <div class="last-action">
                         <strong>Last action:</strong> @c.LastAction
@@ -550,6 +578,20 @@
    
 
 </div>
+<script>
+    window.generateAllQRCodesForPrint = function () {
+        document.querySelectorAll("img[data-qr]").forEach(img => {
+            const qrText = img.getAttribute("data-qr");
+
+            const qr = new QRious({
+                value: qrText,
+                size: 120
+            });
+
+            img.src = qr.toDataURL();
+        });
+    };
+</script>
 
 
 
@@ -636,6 +678,33 @@
             "Per Diem" => "perdiem",
             _ => "default-status"
         };
+    }
+
+    private string BuildQrText(CaseHearingDto c)
+    {
+        var judge = c.Judge ?? "Assigned Judge";
+        return
+            $@"Case Hearing
+            Index: {c.IndexNo}
+            Landlord: {c.LandlordName}
+            Tenant: {c.TenantName}
+            Court: {c.CourtLocation}
+            Part: {c.CourtPart}
+            Room: {c.RoomNo}
+            Judge: {judge}
+            Date: {c.HearingDate:yyyy-MM-dd}
+            Time: {c.HearingTime}";
+    }
+    private async Task PrintWithQRCodes()
+    {
+        // Generate QR images in DOM
+        await JS.InvokeVoidAsync("generateAllQRCodesForPrint");
+
+        // Give browser time to paint images
+        await Task.Delay(300);
+
+        // Open print dialog
+        await JS.InvokeVoidAsync("eval", "window.print()");
     }
 
      private async Task GetAllCaseHearing()
