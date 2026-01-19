@@ -12,21 +12,21 @@ namespace EvictionFiler.Infrastructure.Extensions
 			try
 			{
 				using var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope();
-				var services = serviceScope.ServiceProvider;
-				using (var scope = services.CreateScope())
-				{
-					using (var context = scope.ServiceProvider.GetRequiredService<MainDbContext>())
-					{
-						try
-						{
-							await DbInitalizer.Seed(context);
-						}
-						catch (Exception)
-						{
+				//var services = serviceScope.ServiceProvider;
+				//using (var scope = services.CreateScope())
+				//{
+				//	using (var context = scope.ServiceProvider.GetRequiredService<MainDbContext>())
+				//	{
+				//		try
+				//		{
+				//			await DbInitalizer.Seed(context);
+				//		}
+				//		catch (Exception)
+				//		{
 
-						}
-					}
-				}
+				//		}
+				//	}
+				//}
 				return app;
 			}
 			catch (Exception)

@@ -31,6 +31,10 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
 
 <style>
+    .page-title {
+        margin: 0; /* prevent browser inconsistencies */
+        font: normal 500 20px/30px "Poppins", sans-serif;
+    }
     .status-active {
         background-color: rgba(25,135,84,1);
         color: #fff;
@@ -117,14 +121,14 @@
 <style>
     .search-box {
         width: 100%;
-        padding-right: 3rem; /* space for the button */
-        padding-left: 1rem;
-        /* border-radius: 1.5rem; */
-        border: 2px solid #020336;
-        background-color: #FFF; /* dark background */
-        color: black;
+        padding: 12px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        background: #fff;
+        color: #0f172a;
+        outline: none;
         height: 2.5rem;
-        font-size: 14px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
     }
 
         .search-box::placeholder {
@@ -144,7 +148,7 @@
         transform: translateY(-50%);
         border: none;
         background: none;
-        color: #020336;
+        color: #9f9faf;
         cursor: pointer;
         padding: 0;
         font-size: 1.2rem;
@@ -180,10 +184,6 @@
             text-decoration: underline;
         }
 
-    .page-title {
-        font-weight: 600;
-    }
-
     .search-panel {
         background: #fff;
         border-radius: 14px;
@@ -206,9 +206,9 @@
     .case-header {
         background: #1F365D;
         color: #fff;
-        padding: 14px 16px;
+        padding: 10px 11px;
         border-radius: 16px 16px 0 0;
-        font-size: 14px;
+        font-size: 16px;
         font-weight: 500;
         display: flex;
         align-items: center;
@@ -222,13 +222,18 @@
     }
 
     .case-body {
-        padding: 16px;
-        font-size: 14px;
+        padding: 10px;
+        font-size: 15px;
     }
 
-    .btn-primary {
-        background: #1f3c88;
-        border: none;
+    .case-body .title {
+        font-weight: 600;
+            color: #000000;
+        }
+
+    .case-body .value  {
+            font-weight: 500;
+            color: #5d6064;
     }
 
     .view-toggle .btn {
@@ -251,7 +256,7 @@
     <nav aria-label="breadcrumb" class="mt-2">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/dashboard" class="case-bread">Home</a></li>
-            <li class="breadcrumb-item ">Legal Cases</li>
+            <li class="breadcrumb-item ">Cases Workspace</li>
 
         </ol>
     </nav>
@@ -260,8 +265,8 @@
             <DataAnnotationsValidator />
             <!-- Title Row -->
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="m-0" style="font-size:14px;font-weight:bold">Manage Legal Cases</h5>
-                <div class="d-flex gap-2" style="width:37%;">
+                <h5 class="m-0 flex-fill page-title">Cases Workspace</h5>
+                <div class="d-flex flex-fill gap-2 justify-content-end">
                     <div class="btn-group view-toggle">
                         <button id="cardViewBtn" class=@(IsGridView ? "btn btn-primary btn-sm" : "btn btn-outline-secondary btn-sm") @onclick="OnViewTypeChange">
                             <i class="bi bi-grid"></i>
@@ -270,8 +275,8 @@
                             <i class="bi bi-table"></i>
                         </button>
                     </div>
-                    <div class="col-6 ">
-                        <select class="form-select holdover-form"
+                    <div class="col-4">
+                        <select id="casetype" class="form-select holdover-form"
                                 @bind="selectedCaseTypeId"
                                 @bind:after="OnCaseTypeChanged">
 
@@ -287,7 +292,7 @@
                         @* <ValidationMessage For="() => legalcaseDto.CaseTypeId" /> *@
                     </div>
                     <button class="btn btn-primary" title="Clear all Search" disabled="@IsClearbtndisable" @onclick="ClearAll" style="font-size:14px"><i class="fa-solid fa-arrows-rotate"></i></button>
-                    <button class="btn btn-primary" @onclick="navigatetoCase" style="font-size:14px">Create Case</button>
+                    <button class="btn btn-primary" @onclick="navigatetoCase"><i class="fa-solid fa-file-circle-plus"></i> Create Case</button>
 
                 </div>
             </div>
@@ -337,7 +342,7 @@
                             </button>
                         </div>
                         <div class="col-md-3 position-relative">
-                            <input class="form-control search-box" placeholder="Search by Reason Holdover" @bind="searchTermResonHoldover" @oninput="@(e => OnSearchChanged(e, "ReasonHoldover"))" />
+                            <input class="form-control search-box" placeholder="Search by Reason" @bind="searchTermResonHoldover" @oninput="@(e => OnSearchChanged(e, "ReasonHoldover"))" />
                             <button class="search-btn" type="button">
                                 <i class="fa fa-search"></i>
                             </button>
@@ -390,22 +395,19 @@
                                         </div>
                                     </div>
                                     <div class="case-body">
-
-
-                                        <p class="mt-2 mb-1"><strong>Client: </strong>@cas.Clients?.FirstName @cas.Clients?.LastName - @cas.Clients?.ClientCode</p>
-                                        <p class="mb-1"><strong>Landlord: </strong>@cas.LandLords?.FirstName @cas.LandLords?.LastName - @cas.LandLords?.LandLordCode</p>
-                                        <p class="mb-3"><strong>Tenant: </strong>@cas.Tenants?.FirstName @cas.Tenants?.LastName - @cas.Tenants?.TenantCode</p>
-
+                                        <p class="mt-2 mb-1"><span class="title">Client: </span><span class="value">@cas.Clients?.FirstName @cas.Clients?.LastName - @cas.Clients?.ClientCode</span></p>
+                                        <p class="mb-1"><span class="title">Landlord: </span><span class="value">@cas.LandLords?.FirstName @cas.LandLords?.LastName - @cas.LandLords?.LandLordCode</span></p>
+                                        <p class="mb-3"><span class="title">Tenant: </span><span class="value">@cas.Tenants?.FirstName @cas.Tenants?.LastName - @cas.Tenants?.TenantCode</span></p>
                                         <hr />
                                         <div class="card-footer-data">
                                             <div>
                                                 @if (cas.UpdatedOn == null)
                                                 {
-                                                    <p style="margin-bottom:0px"><strong>Created on </strong>@cas.CreatedOn.ToString(DateFormats.Default)</p>
+                                                    <p style="margin-bottom:0px"><span class="title">Created On </span><span class="value">@cas.CreatedOn.ToString(DateFormats.Default)</span></p>
                                                 }
                                                 else
                                                 {
-                                                    <p style="margin-bottom:0px"><strong>Updated on </strong>@cas.UpdatedOn?.ToString(DateFormats.Default)</p>
+                                                    <p style="margin-bottom:0px"><span class="title">Updated On  </span><span class="value">@cas.UpdatedOn?.ToString(DateFormats.Default)</span></p>
                                                 }
                                             </div>
                                            
