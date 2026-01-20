@@ -73,7 +73,6 @@ builder.Services.AddDbContext<MainDbContext>(
 //builder.Services.AddBlazoredSessionStorage();
 
 
-SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JFaF1cX2hIf0x3THxbf1x1ZFdMYVpbQHNPMyBoS35Rc0RiWH1ecnVTQmVcUER2VEFc");
 string ironKey = builder.Configuration["IronPdf:Key"]!;
 License.LicenseKey = ironKey;
 builder.Services.AddScoped<DialogService>();
@@ -171,15 +170,29 @@ builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStat
 
 
 
+//builder.Services.ConfigureApplicationCookie(options =>
+//{
+//    options.LoginPath = "/";
+//    options.AccessDeniedPath = "/unauthorized";
+
+//    options.Cookie.HttpOnly = true;  // OK
+//    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+//    options.Cookie.SameSite = SameSiteMode.None;
+//});
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/";
     options.AccessDeniedPath = "/unauthorized";
 
-    options.Cookie.HttpOnly = true;  // OK
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+    options.SlidingExpiration = true;
+
+    options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.None;
 });
+
 
 builder.Services.AddScoped<SpinnerService>();
 builder.Services.AddScoped<IUserservices, UserService>();
@@ -287,7 +300,6 @@ app.MapRazorComponents<App>()
 
 app.MapPost("/api/auth/logout", async (HttpContext http, SignInManager<User> signInManager) =>
 {
-    Console.WriteLine("LOGOUT POST HIT!");
     await signInManager.SignOutAsync();
     await http.SignOutAsync(IdentityConstants.ApplicationScheme);
     http.Response.Cookies.Delete(".AspNetCore.Identity.Application");

@@ -202,6 +202,8 @@ namespace EvictionFiler.Application.Services
                             : dto.HearingTime!.Value,
 
                     CourtId = dto.CourtId,
+                    CourtLocationId = dto.CourtId,
+                   
                     LegalCaseId = dto.LegalCaseId,
                     IndexNo = dto.LegalCase != null ? dto.LegalCase.Index : "",
                     CaseTypeId = dto.LegalCase!.CaseTypeId,

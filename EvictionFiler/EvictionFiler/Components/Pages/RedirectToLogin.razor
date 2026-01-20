@@ -1,8 +1,16 @@
-﻿@inject NavigationManager Nav
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthState
 
 @code {
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        Nav.NavigateTo("/account/login", forceLoad: true);
+        var state = await AuthState.GetAuthenticationStateAsync();
+
+        // If user is NOT authenticated → redirect to Login page
+        if (!state.User.Identity?.IsAuthenticated ?? true)
+        {
+            Nav.NavigateTo("/", true);   // full browser reload
+        }
     }
 }

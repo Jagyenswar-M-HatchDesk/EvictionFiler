@@ -167,6 +167,34 @@
 
     body.per5 .table tbody tr:nth-child(5n) { page-break-after: always }
     }
+    /* SCREEN: hide printable content */
+@@media screen {
+    #myPrintableContent {
+        display: none !important;
+    }
+}
+
+/* PRINT: show only printable content */
+@@media print {
+
+    body * {
+        visibility: hidden;
+    }
+
+    #myPrintableContent,
+    #myPrintableContent * {
+        visibility: visible;
+        display: block;
+    }
+
+    #myPrintableContent {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+}
+
 
     /* SCREEN */
     /* #printLayout { display: none; } */
@@ -325,7 +353,7 @@
                     </div>
                     <div class="col-md-2">
                         <label for="f-to" class="form-label">Date To</label>
-                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " id="f-from"  @bind-Value="hearingDto.HearingDateTo"  />
+                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; "  @bind-Value="hearingDto.HearingDateTo" @bind-Value:after="ApplyFilters" />
                     </div>
                     <div class="col-md-2">
                         <label class="form-label ">Court <span class="text-danger">*</span></label>
@@ -613,6 +641,7 @@
     private int pageSize = 10;
 
     private bool isAdmin = false;
+    private bool showprintable = false;
     public List<CourtDto> filteredCourts = new List<CourtDto>();
     private List<CourtDto> CourtLocationList = new();
 
@@ -666,7 +695,7 @@
             isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
         }
 
-       await  GetAllCaseHearing();
+        await  GetAllCaseHearing();
     }
 
     private string GetStatusClass(string caseType)
@@ -707,20 +736,20 @@
         await JS.InvokeVoidAsync("eval", "window.print()");
     }
 
-     private async Task GetAllCaseHearing()
+    private async Task GetAllCaseHearing()
     {
-        
-     
 
-         CasesHearing = await CaseHearingService.GetAllCaseHeariingAsync(currentPage, pageSize,loggedInUserId,
-                isAdmin);
+
+
+        CasesHearing = await CaseHearingService.GetAllCaseHeariingAsync(currentPage, pageSize,loggedInUserId,
+               isAdmin);
         AllCasesHearing = await CaseHearingService.GetAllCaseHeariingAsync(currentPage, pageSize,loggedInUserId,
                 isAdmin);
 
 
     }
 
-      private async Task ChangePage(int page)
+    private async Task ChangePage(int page)
     {
         if (page >= 1 && page <= Math.Ceiling((double)CasesHearing.TotalCount / pageSize))
         {
@@ -730,26 +759,26 @@
     }
 
     private void SelectCourtPart()
-{
-    if (hearingDto.CourtPartId == null || hearingDto.CourtPartId == Guid.Empty)
     {
-        CasesHearing = AllCasesHearing;  
-        return;
+        if (hearingDto.CourtPartId == null || hearingDto.CourtPartId == Guid.Empty)
+        {
+            CasesHearing = AllCasesHearing;  
+            return;
+        }
+
+        ApplyFilters();
     }
 
-    ApplyFilters();
-}
 
 
 
 
-  
 
- private void SelectCounty()
-{
-    if (hearingDto.CountyId != null && hearingDto.CountyId != Guid.Empty)
+    private void SelectCounty()
     {
-        CasesHearing = new PaginationDto<CaseHearingDto>
+        if (hearingDto.CountyId != null && hearingDto.CountyId != Guid.Empty)
+        {
+            CasesHearing = new PaginationDto<CaseHearingDto>
         {
             Items = AllCasesHearing.Items
                 .Where(x => x.CountyId == hearingDto.CountyId)
@@ -762,17 +791,17 @@
             CurrentPage = 1
         };
 
-        filteredCourts = CourtLocationList
-            .Where(x => x.CountyId == hearingDto.CountyId)
-            .ToList();
-    }
-    else
-    {
-        CasesHearing = AllCasesHearing; 
-    }
+            filteredCourts = CourtLocationList
+                .Where(x => x.CountyId == hearingDto.CountyId)
+                .ToList();
+        }
+        else
+        {
+            CasesHearing = AllCasesHearing; 
+        }
 
-    StateHasChanged();
-}
+        StateHasChanged();
+    }
 
     private async Task ShowAllCourts()
     {
@@ -830,10 +859,10 @@
         }
         else
         {
-          
+
             hearingDto.CourtLocationId = Guid.Empty;
         }
-
+        await ApplyFilters();
         StateHasChanged();
     }
 
@@ -855,13 +884,23 @@
         var toDate = fromDate.AddDays(1);
 
         query = query.Where(x =>
-            x.HearingDate >= fromDate &&
-            x.HearingDate < toDate);
+            x.HearingDate >= fromDate);
+    }
+    if (hearingDto.HearingDateTo.HasValue)
+    {
+        var ToDate = hearingDto.HearingDateTo.Value.Date;
+        
+
+        query = query.Where(x =>
+            x.HearingDate <= ToDate);
     }
 
     // Court Part
     if (hearingDto.CourtPartId != null && hearingDto.CourtPartId != Guid.Empty)
         query = query.Where(x => x.CourtPartId == hearingDto.CourtPartId);
+
+    if (hearingDto.CourtLocationId != null && hearingDto.CourtLocationId != Guid.Empty)
+        query = query.Where(x => x.CourtLocationId == hearingDto.CourtLocationId);
 
     // Room No
     if (!string.IsNullOrWhiteSpace(hearingDto.RoomNo))

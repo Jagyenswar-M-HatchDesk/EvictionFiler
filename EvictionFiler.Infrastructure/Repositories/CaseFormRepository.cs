@@ -362,9 +362,16 @@ namespace EvictionFiler.Infrastructure.Repositories
                 // --------------------
                 // LOAD CASE DATA
                 // --------------------
+                var testNotice = await _context.CaseNoticeInfo
+    .Where(x =>
+        x.LegalCaseId == legalCaseId &&
+        x.FormtypeId == formTypeId
+    )
+    .ToListAsync();
+
                 var caseDetails = await
              (
-                 from lc in _context.LegalCases
+                 from lc in _context.LegalCases where lc.Id == legalCaseId
 
                  join landlord in _context.LandLords
                      on lc.LandLordId equals landlord.Id into ll
@@ -394,11 +401,17 @@ namespace EvictionFiler.Infrastructure.Repositories
                     on lc.TenancyTypeId equals tenancylc.Id into ttlc
                  from tenancylc in ttlc.DefaultIfEmpty()
 
+                 join courtPart in _context.CourtPart
+                    on lc.CourtPartId equals courtPart.Id into cp
+                 from courtPart in cp.DefaultIfEmpty()
+
                      // LEFT JOIN CaseNoticeInfo
                  join notice in _context.CaseNoticeInfo
-                     .Where(x => x.FormtypeId == formTypeId)
-                     on lc.Id equals notice.LegalCaseId into nl
+                    on new { CaseId = (Guid?)lc.Id, FormTypeId = (Guid?)formTypeId }
+                    equals new { CaseId = notice.LegalCaseId, FormTypeId = notice.FormtypeId }
+                    into nl
                  from notice in nl.DefaultIfEmpty()
+
 
                      // LEFT JOIN Ledger (only if notice exists)
                  join ledger in _context.ArrearLedgers
@@ -463,11 +476,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 
                      NoticePeriod = notice.CalcNoticeLength ?? lc.CalculatedNoticeLength,
 
+                     Noticetype = notice.FormType!.Name,
+
                      VacateDate =
         notice != null &&
         notice.DateNoticeServed.HasValue &&
-        notice.CalcNoticeLength.HasValue
-            ? notice.DateNoticeServed.Value.AddDays(notice.CalcNoticeLength.Value)
+        lc.CalculatedNoticeLength.HasValue
+            ? notice.DateNoticeServed.Value.AddDays(lc.CalculatedNoticeLength.Value)
             : (DateOnly?)null,
 
                      VacateDatelc = lc.CalculatedNoticeLength.HasValue
@@ -484,7 +499,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 
                      BuildindAptno = tenant.UnitOrApartmentNumber,
 
-                     leaseExpired = lc.DateNoticeServed,
+                     NoticeDate = notice.DateNoticeServed,
+                     LeaseExpired = lc.LeaseEnd,
 
                      TenancyType = tenancy.Name ?? tenancylc.Name,
 
@@ -493,11 +509,17 @@ namespace EvictionFiler.Infrastructure.Repositories
                      CourtAddress = court.Address,
 
                      TotalOwed = notice.Totalowed
-        ?? (lc.TotalRentOwed.HasValue ? (int)lc.TotalRentOwed.Value : 0),
+        ?? (lc.TotalRentOwed.HasValue ? (int)lc.TotalRentOwed!.Value : 0),
 
                      IndexNo = lc.Index,
                      MonthlyRent = lc.MonthlyRent,
                      ArrearLedgers  = arrearLedgers.OrderBy(e=>e.Month).ToList(),
+                     RentReulation = building.RegulationStatus!.Name,
+                     ManagingAgent = building.ManagingAgent,
+                     RegulationBasis = building.ExemptionBasis!.Name ?? building.ExemptionBasisOther,
+                     GoodCauseAppliable = building.GoodCause == true ? "good cause applicable" : "not good cause applicable because",
+                     GoodCauseExemption = building.ExemptionReason!.Name,
+                     Room_Part = $"{courtPart.RoomNo} / {courtPart.Part}"
                  }
 
              )
@@ -586,7 +608,7 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{LandlordEmail}}", caseDetails.LandlordEmail ?? "")
     .Replace("{{Landlord_Email}}", caseDetails.LandlordEmail ?? "")
     .Replace("{{LandlordDate}}", noticeDate.ToString(DateFormats.Default))
-    .Replace("{{Notice_Date}}", DateTime.Now.ToString(DateFormats.Default))
+    .Replace("{{Notice_Date}}", caseDetails.NoticeDate?.ToString(DateFormats.Default) ?? DateTime.Now.ToString(DateFormats.Default))
     .Replace("{{PropertyAddress}}", caseDetails.PropertyAddress ?? "")
     .Replace("{{Premises_Address}}", caseDetails.PropertyAddress ?? "")
     .Replace("{{ApartmentNumber}}", firstApartmentNumber ?? "")
@@ -605,7 +627,7 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{Building_AptNo}}", caseDetails.BuildindAptno ?? "")
     .Replace("{{Building_Zip}}", caseDetails.BuildingZip ?? "")
     .Replace("{{Building_City}}", caseDetails.BuildingCity ?? "")
-    .Replace("{{LeaseExpiredDate}}", caseDetails.leaseExpired.ToString() ?? "")
+    //.Replace("{{LeaseExpiredDate}}", caseDetails.LeaseExpired.ToString())
     .Replace("{{RentalExpiredDate}}", "")
     .Replace("{{MoveOutDate}}", "")
     .Replace("{{Floors}}", "")
@@ -616,10 +638,19 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{Occupants}}", occupantsText ?? "")
     .Replace("{{Court}}", caseDetails.Court ?? "")
     .Replace("{{County}}", caseDetails.County ?? "")
+    .Replace("{{COUNTY}}", caseDetails.County.ToUpper() ?? "")
     .Replace("{{Court_Address}}", caseDetails.County ?? "")
     .Replace("{{Index}}", caseDetails.IndexNo ?? "")
     .Replace("{{Ledger_Total}}", caseDetails.TotalOwed.ToString() ?? "00")
     .Replace("{{Monthly_Rent}}", caseDetails.MonthlyRent.ToString() ?? "00")
+    .Replace("{{LastRentDate}}", caseDetails.LastRent?.ToString(DateFormats.Default) ?? "")
+    .Replace("{{RentRegulationStatus}}", caseDetails.RentReulation ?? "")
+    .Replace("{{RegulationBasis}}", caseDetails.RegulationBasis ?? "")
+    .Replace("{{ManagingAgent}}", caseDetails.ManagingAgent ?? "")
+    .Replace("{{GoodCauseApplicable}}", caseDetails.GoodCauseAppliable ?? "")
+    .Replace("{{GoodCauseExemption}}", caseDetails.GoodCauseExemption ?? "")
+    .Replace("{{Noticetype}}", caseDetails.Noticetype ?? "")
+    .Replace("{{Rooom_Part}}", caseDetails.Room_Part ?? "")
     ;
 
 
