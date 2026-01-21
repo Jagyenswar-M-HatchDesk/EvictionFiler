@@ -400,6 +400,8 @@
     private List<MarshalDto> filteredmarshal = new();
     private CancellationTokenSource _cts;
 
+
+
     private void Toggle(int section)
     {
         openSection = openSection == section ? 0 : section;
@@ -434,6 +436,9 @@
         public DateTime? NoticeServed { get; set; }
         public DateTime? ExecutionEligible { get; set; }
         public DateTime? EvictionExecuted { get; set; }
+
+        public Guid? MarshalId { get; set; }
+        public Guid? LegalCaseId { get; set; }
 
         public string Status { get; set; } = "Pending";
 
@@ -474,6 +479,19 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadMarshalUI();
+        var dto = await _casewarrantservice.GetWarrantDetails(legalcaseDto.Id);
+        if (dto != null)
+        {
+            model.ReFileDate = dto.ReFileDate;
+            model.WarrantRequested = dto.WarrantRequested;
+            model.WarrantIssued = dto.WarrantIssued;
+            model.WarrantRejected = dto.WarrantRejected;
+            model.EvictionExecuted = dto.EvictionExecuted;
+            model.ExecutionEligible = dto.ExecutionEligible;
+            model.NoticeServed = dto.NoticeServed;
+            model.MarshalId = dto.MarshalId;
+            model.LegalCaseId = dto.LegalcaseId;
+        }
     }
 
     private async Task GenrateMarshalForm()

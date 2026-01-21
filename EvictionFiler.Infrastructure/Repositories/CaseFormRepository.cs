@@ -519,7 +519,10 @@ namespace EvictionFiler.Infrastructure.Repositories
                      RegulationBasis = building.ExemptionBasis!.Name ?? building.ExemptionBasisOther,
                      GoodCauseAppliable = building.GoodCause == true ? "good cause applicable" : "not good cause applicable because",
                      GoodCauseExemption = building.ExemptionReason!.Name,
-                     Room_Part = $"{courtPart.RoomNo} / {courtPart.Part}"
+                     Room_Part = $"{courtPart.RoomNo} / {courtPart.Part}",
+                     PrimisesType = building.PremiseType.Name,
+                     MultipleDewlling = building.PremiseType.Name.Contains("Multiple Dwelling") ? $"There is a currently effective registration on file with HPD/DOF designating {building.ManagingAgent} as managing agent." : "",
+
                  }
 
              )
@@ -651,6 +654,8 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{GoodCauseExemption}}", caseDetails.GoodCauseExemption ?? "")
     .Replace("{{Noticetype}}", caseDetails.Noticetype ?? "")
     .Replace("{{Rooom_Part}}", caseDetails.Room_Part ?? "")
+    .Replace("{{PrimisesType}}", caseDetails.PrimisesType ?? "")
+    .Replace("{{ifmultiple_dwelling}}", caseDetails.MultipleDewlling ?? "")
     ;
 
 
@@ -665,23 +670,28 @@ namespace EvictionFiler.Infrastructure.Repositories
                         ? caseDetails.ArrearLedgers[i]
                         : null;
 
-                    var arrearledgerAmount = ledger?.Amount;
+                    string? arrearledgerAmount = null;
 
-                    string monthName = "";
-                    string year = "";
-
-                    if (!string.IsNullOrEmpty(ledger?.Month))
+                    string? monthName = null;
+                    string? year = null;
+                    if (ledger != null)
                     {
-                        // Month value is in format yyyy-MM
-                        var dt = DateTime.ParseExact(ledger.Month, "yyyy-MM", null);
+                        arrearledgerAmount = ledger?.Amount.ToString();
 
-                        monthName = dt.ToString("MMMM"); // e.g., November
-                        year = dt.ToString("yy");      // e.g., 2025
+                        if (!string.IsNullOrEmpty(ledger?.Month))
+                        {
+                            // Month value is in format yyyy-MM
+                            var dt = DateTime.ParseExact(ledger.Month, "yyyy-MM", null);
+
+                            monthName = dt.ToString("MMMM"); // e.g., November
+                            year = dt.ToString("yy");      // e.g., 2025
+                        }
                     }
+                    
 
-                    filledHtml = filledHtml.Replace($"{{{{arRent{i + 1}}}}}", arrearledgerAmount.ToString());
-                    filledHtml = filledHtml.Replace($"{{{{arMonth{i + 1}}}}}", monthName);
-                    filledHtml = filledHtml.Replace($"{{{{ary{i + 1}}}}}", year);
+                    filledHtml = filledHtml.Replace($"{{{{arRent{i + 1}}}}}", arrearledgerAmount ?? "_____");
+                    filledHtml = filledHtml.Replace($"{{{{arMonth{i + 1}}}}}", monthName ?? "_______");
+                    filledHtml = filledHtml.Replace($"{{{{ary{i + 1}}}}}", year ?? "____");
                 }
 
                 if (caseDetails.LeaseEnd != null)

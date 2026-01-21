@@ -577,6 +577,11 @@ namespace EvictionFiler.Application.Services
                         InvoiceTo = caseEntity.InvoiceTo,
                         BilingTypeId = caseEntity.BilingTypeId,
 
+                        OppAttorneyFirm = caseEntity.OppAttorneyFirm,
+                        OppAttorneyEmail = caseEntity.OppAttorneyEmail,
+                        OppAttorneyname = caseEntity.OppAttorneyname,
+                        OppAttorneyPhone = caseEntity.OppAttorneyPhone,
+                        Aps_Agl = caseEntity.Aps_Agl,
 
                         SelectedCaseTypeHPDIds = caseEntity.CaseTypeHPDs
                                               .Select(x => x.Id)
@@ -996,6 +1001,12 @@ namespace EvictionFiler.Application.Services
                 existingCase.AdditionalComments = legalCase.AdditionalComments;
                 existingCase.DocketNo = legalCase.Docketno;
 
+                existingCase.OppAttorneyEmail = legalCase.OppAttorneyEmail;
+                existingCase.OppAttorneyFirm = legalCase.OppAttorneyFirm;
+                existingCase.OppAttorneyname = legalCase.OppAttorneyname;
+                existingCase.OppAttorneyPhone = legalCase.OppAttorneyPhone;
+                existingCase.Aps_Agl = legalCase.Aps_Agl;
+
 
                 if (legalCase.PartyRepresentPerDiemId != null && legalCase.PartyRepresentPerDiemId != Guid.Empty)
                 {
@@ -1274,7 +1285,6 @@ namespace EvictionFiler.Application.Services
             existing.WrittenLease = legalCase.WrittenLease;
             existing.DateTenantMoved = legalCase.DateTenantMoved;
             existing.RenewalStatusId = legalCase.RenewalStatusId;
-
 
 
             // Purane occupants delete karo jo DB me the

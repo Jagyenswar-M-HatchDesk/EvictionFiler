@@ -263,6 +263,11 @@ namespace EvictionFiler.Application.DTOs
         //{
         //    GoodCause = true;
         //}
+        public string? OppAttorneyname { get; set; }
+        public string? OppAttorneyFirm { get; set; }
+        public string? OppAttorneyEmail { get; set; }
+        public string? OppAttorneyPhone { get; set; }
+        public string? Aps_Agl { get; set; }
 
 
     }

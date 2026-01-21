@@ -14,9 +14,9 @@ namespace EvictionFiler.Domain.Entities
 		public Guid? BuildingId { get; set; }
 		public Guid? LandLordId { get; set; }
 		public Guid? TenantId { get; set; }
-      
 
-        [ForeignKey("ClientId")]
+
+		[ForeignKey("ClientId")]
 		public virtual Client? Clients { get; set; }
 
 		[ForeignKey("BuildingId")]
@@ -49,11 +49,11 @@ namespace EvictionFiler.Domain.Entities
 		[ForeignKey("IsUnitIllegalId")]
 		public IsUnitIllegal? IsUnitIllegal { get; set; }
 
-        public Guid? CourtTypeId { get; set; }
-        [ForeignKey("CourtTypeId")]
-        public CourtType? CourtTypes { get; set; }
+		public Guid? CourtTypeId { get; set; }
+		[ForeignKey("CourtTypeId")]
+		public CourtType? CourtTypes { get; set; }
 
-        public bool? TenantRecord { get; set; }
+		public bool? TenantRecord { get; set; }
 		public bool? RenewalOffer { get; set; }
 		public bool? HasPossession { get; set; }
 
@@ -99,12 +99,12 @@ namespace EvictionFiler.Domain.Entities
 		[MaxLength(50)]
 		public string? Firm { get; set; }
 
-        public Guid? SubCaseTypeId { get; set; }
-        [ForeignKey("SubCaseTypeId")]
-        public SubCaseType? SubCaseTypes { get; set; }
-       
+		public Guid? SubCaseTypeId { get; set; }
+		[ForeignKey("SubCaseTypeId")]
+		public SubCaseType? SubCaseTypes { get; set; }
 
-        public string? OtherPropertiesBuildingId { get; set; }
+
+		public string? OtherPropertiesBuildingId { get; set; }
 
 		public bool? tenantReceive { get; set; }
 		public string? ExplainTenancyReceiveDescription { get; set; }
@@ -134,7 +134,7 @@ namespace EvictionFiler.Domain.Entities
 		public ICollection<AdditionalOccupants>? Addoccupants { get; set; }
 
 
-        [NotMapped]
+		[NotMapped]
 		public string? CreatedByName { get; set; }
 
 		public string? UnitOrApartmentNumber { get; set; }
@@ -159,111 +159,117 @@ namespace EvictionFiler.Domain.Entities
 		public int? CalculatedNoticeLength { get; set; }
 		public Guid? CaseProgramId { get; set; }
 
-        public Guid? CourtId { get; set; }
-        [ForeignKey("CourtId")]
-        public Courts? Courts { get; set; }
-        public Guid? FilingMethodId { get; set; }
-        [ForeignKey("FilingMethodId")]
-        public FilingMethod? FilingMethods { get; set; }
+		public Guid? CourtId { get; set; }
+		[ForeignKey("CourtId")]
+		public Courts? Courts { get; set; }
+		public Guid? FilingMethodId { get; set; }
+		[ForeignKey("FilingMethodId")]
+		public FilingMethod? FilingMethods { get; set; }
 
-        public decimal? BillAmount { get; set; }
+		public decimal? BillAmount { get; set; }
 
-        [MaxLength(100)]
-        public string? AttrneyEmail { get; set; }
+		[MaxLength(100)]
+		public string? AttrneyEmail { get; set; }
 
-        public ICollection<CaseTypeHPD> CaseTypeHPDs { get; set; } = new List<CaseTypeHPD>();
-        public ICollection<CaseTypePerdiem> CaseTypePerDiems { get; set; } = new List<CaseTypePerdiem>();
-        public ICollection<AppearanceType> AppearanceType { get; set; } = new List<AppearanceType>();
-        public ICollection<AppearanceTypePerDiem> AppearanceTypePerDiem { get; set; } = new List<AppearanceTypePerDiem>();
-        public ICollection<ReliefRespondentType> ReliefRespondentType { get; set; } = new List<ReliefRespondentType>();
-        public ICollection<ReliefPetitionerType> ReliefPetitionerType { get; set; } = new List<ReliefPetitionerType>();
-        public ICollection<ArrearLedger> ArrearLedgers { get; set; } = new List<ArrearLedger>();
+		public ICollection<CaseTypeHPD> CaseTypeHPDs { get; set; } = new List<CaseTypeHPD>();
+		public ICollection<CaseTypePerdiem> CaseTypePerDiems { get; set; } = new List<CaseTypePerdiem>();
+		public ICollection<AppearanceType> AppearanceType { get; set; } = new List<AppearanceType>();
+		public ICollection<AppearanceTypePerDiem> AppearanceTypePerDiem { get; set; } = new List<AppearanceTypePerDiem>();
+		public ICollection<ReliefRespondentType> ReliefRespondentType { get; set; } = new List<ReliefRespondentType>();
+		public ICollection<ReliefPetitionerType> ReliefPetitionerType { get; set; } = new List<ReliefPetitionerType>();
+		public ICollection<ArrearLedger> ArrearLedgers { get; set; } = new List<ArrearLedger>();
 
-        public Guid? NoticeId { get; set; }
+		public Guid? NoticeId { get; set; }
 		[ForeignKey("NoticeId")]
-        public FormTypes? FormTypes { get; set; }
-        public Guid? ServiceMethodId { get; set; }
+		public FormTypes? FormTypes { get; set; }
+		public Guid? ServiceMethodId { get; set; }
 		[ForeignKey("ServiceMethodId")]
-        public ServiceMethod? ServiceMethods { get; set; }
+		public ServiceMethod? ServiceMethods { get; set; }
 
-        public Guid? PartyRepresentPerDiemId { get; set; }
-        
-        [ForeignKey("PartyRepresentPerDiemId")]
-        public PartyRepresentPerDiem? PartyRepresentPerDiems { get; set; }
+		public Guid? PartyRepresentPerDiemId { get; set; }
 
-        public Guid? PartyRepresentId { get; set; }
-        [ForeignKey("PartyRepresentId")]
-        public PartyRepresent? PartyRepresents { get; set; }
-  
-        public Guid? BilingTypeId { get; set; }
-        [ForeignKey("BilingTypeId")]
-        public BilingType? BilingType { get; set; }
-        public Guid? PaymentMethodId { get; set; }
-        [ForeignKey("PaymentMethodId")]
-        public PaymentMethod? PaymentMethod { get; set; }
+		[ForeignKey("PartyRepresentPerDiemId")]
+		public PartyRepresentPerDiem? PartyRepresentPerDiems { get; set; }
 
-        public Guid? RatetypeId { get; set; }
-        public decimal? Flatdescription{ get; set; }
-        public decimal? Hourlydescription { get; set; }
-        [ForeignKey("RatetypeId")]
-        public RateType? RateType { get; set; }
-        public string? TravelExpense { get; set; }
-        public string? PerDiemAttorneyname { get; set; }
-        public string? PerDiemSignature { get; set; }
-        public DateOnly? PerDiemDate { get; set; }
-        public ICollection<HarassmentType> HarassmentTypse { get; set; } = new List<HarassmentType>();
-        public ICollection<RemainderCenter> RemainderCenters { get; set; } = new List<RemainderCenter>();
+		public Guid? PartyRepresentId { get; set; }
+		[ForeignKey("PartyRepresentId")]
+		public PartyRepresent? PartyRepresents { get; set; }
 
-        public ICollection<DefenseType> DefenseTypse { get; set; } = new List<DefenseType>();
-        public ICollection<DocumentTypePerDiem> DocumentIntructionsTypse { get; set; } = new List<DocumentTypePerDiem>();
-        public ICollection<ReportingTypePerDiem> ReportingTypePerDiems { get; set; } = new List<ReportingTypePerDiem>();
+		public Guid? BilingTypeId { get; set; }
+		[ForeignKey("BilingTypeId")]
+		public BilingType? BilingType { get; set; }
+		public Guid? PaymentMethodId { get; set; }
+		[ForeignKey("PaymentMethodId")]
+		public PaymentMethod? PaymentMethod { get; set; }
+
+		public Guid? RatetypeId { get; set; }
+		public decimal? Flatdescription { get; set; }
+		public decimal? Hourlydescription { get; set; }
+		[ForeignKey("RatetypeId")]
+		public RateType? RateType { get; set; }
+		public string? TravelExpense { get; set; }
+		public string? PerDiemAttorneyname { get; set; }
+		public string? PerDiemSignature { get; set; }
+		public DateOnly? PerDiemDate { get; set; }
+		public ICollection<HarassmentType> HarassmentTypse { get; set; } = new List<HarassmentType>();
+		public ICollection<RemainderCenter> RemainderCenters { get; set; } = new List<RemainderCenter>();
+
+		public ICollection<DefenseType> DefenseTypse { get; set; } = new List<DefenseType>();
+		public ICollection<DocumentTypePerDiem> DocumentIntructionsTypse { get; set; } = new List<DocumentTypePerDiem>();
+		public ICollection<ReportingTypePerDiem> ReportingTypePerDiems { get; set; } = new List<ReportingTypePerDiem>();
 
 
-        public Guid? CourtLocationId { get; set; }
-        [ForeignKey("CourtLocationId")]
-        public Courts? CourtLocation { get; set; }
-        public Guid? CourtPartId { get; set; }
-        [ForeignKey("CourtPartId")]
-        public CourtPart? CourtPart { get; set; }
+		public Guid? CourtLocationId { get; set; }
+		[ForeignKey("CourtLocationId")]
+		public Courts? CourtLocation { get; set; }
+		public Guid? CourtPartId { get; set; }
+		[ForeignKey("CourtPartId")]
+		public CourtPart? CourtPart { get; set; }
 
-        public Guid? MarshalId { get; set; }
-        [ForeignKey("MarshalId")]
-        public Marshal? Marshal { get; set; }
-        public string? County { get; set; }
-        public string? Index { get; set; }
-        public string? CourtRoom{ get; set; }
-        public string? OpposingCounsel { get; set; }
-        public string? ManagingAgent { get; set; }
+		public Guid? MarshalId { get; set; }
+		[ForeignKey("MarshalId")]
+		public Marshal? Marshal { get; set; }
+		public string? County { get; set; }
+		public string? Index { get; set; }
+		public string? CourtRoom { get; set; }
+		public string? OpposingCounsel { get; set; }
+		public string? ManagingAgent { get; set; }
 
-        public string? Partynames { get; set; }
-        public string? ReliefActionRequested { get; set; }
-        public string? CaseBackground { get; set; }
-        public string? SpecialInstruction { get; set; }
-        public DateOnly? AppearanceDate { get; set; }
+		public string? Partynames { get; set; }
+		public string? ReliefActionRequested { get; set; }
+		public string? CaseBackground { get; set; }
+		public string? SpecialInstruction { get; set; }
+		public DateOnly? AppearanceDate { get; set; }
 
-        public string? InvoiceTo { get; set; }
-        public string? TenantName { get; set; }
-        public TimeOnly? AppearanceTime { get; set; }
+		public string? InvoiceTo { get; set; }
+		public string? TenantName { get; set; }
+		public TimeOnly? AppearanceTime { get; set; }
 
 		public string Notes { get; set; } = string.Empty;
 
-        public Guid? ExemptionBasisId { get; set; }
-        [ForeignKey("ExemptionBasisId")]
-        public ExemptionBasic? ExemptionBasis { get; set; }
+		public Guid? ExemptionBasisId { get; set; }
+		[ForeignKey("ExemptionBasisId")]
+		public ExemptionBasic? ExemptionBasis { get; set; }
 
-        public Guid? ExemptionReasonId { get; set; }
-        [ForeignKey("ExemptionReasonId")]
-        public ExemptionReason? ExemptionReason { get; set; }
+		public Guid? ExemptionReasonId { get; set; }
+		[ForeignKey("ExemptionReasonId")]
+		public ExemptionReason? ExemptionReason { get; set; }
 
-        public Guid? TenancyTypeForBuildingId { get; set; }
-        [ForeignKey("TenancyTypeForBuildingId")]
-        public TenancyTypeForBuilding? TenancyTypeForBuilding { get; set; }
-        public bool? OwnerOccupied { get; set; }
+		public Guid? TenancyTypeForBuildingId { get; set; }
+		[ForeignKey("TenancyTypeForBuildingId")]
+		public TenancyTypeForBuilding? TenancyTypeForBuilding { get; set; }
+		public bool? OwnerOccupied { get; set; }
 
-        public bool? PrimaryResidence { get; set; }
+		public bool? PrimaryResidence { get; set; }
 
-        public bool? GoodCause { get; set; }
+		public bool? GoodCause { get; set; }
 
-        public string? RentRegulationDescription { get; set; }
+		public string? RentRegulationDescription { get; set; }
+
+        public string? OppAttorneyname { get; set; }
+        public string? OppAttorneyFirm { get; set; }
+        public string? OppAttorneyEmail { get; set; }
+        public string? OppAttorneyPhone { get; set; }
+        public string? Aps_Agl { get; set; }
     }
 }

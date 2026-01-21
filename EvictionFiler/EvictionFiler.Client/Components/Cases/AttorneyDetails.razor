@@ -1,0 +1,143 @@
+﻿@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.Interfaces.IServices
+@inject ILegalCaseService _service
+@inject IToastService _toastservice
+
+<style>
+    .reset-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: transparent;
+        border: none;
+    }
+
+        .reset-btn:hover {
+            text-decoration: underline;
+        }
+
+    .Edit-btn {
+        right: 20px;
+    }
+
+    .align-center
+    {
+        display:flex;
+        align-items:center;
+    }
+</style>
+<div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow">
+        <div class="modal-header">
+            <h5 class="modal-title fw-semibold" id="buildingModalLabel">Attorney Details Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="CloseModal"></button>
+        </div>
+
+        <EditForm Model="@legalcaseDto">
+            <DataAnnotationsValidator />
+            <div class="modal-body">
+                <div class="card border-0 position-relative">
+                    <div class="card-body ps-3 p-0">
+
+                        <!-- Search + Add Section -->
+                        <!-- Add/Edit Fields -->
+                        @if (isEditable)
+                        {
+                            <div class="mt-4 ">
+
+                                <button type="button" class="reset-btn"
+                                        aria-label="Reset">
+                                    Reset
+                                </button>
+
+                                <div class="col-8" style="display:grid; row-gap:10px;">
+
+
+                                    <div class="row">
+                                        <div class=" col-6 form-label text-secondary align-center">Opposing Atty : </div><InputText class="form-control col" placeholder="Enter Opposing Attorney" @bind-Value="@legalcaseDto.OppAttorneyname" />
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 form-label text-secondary align-center">Opposing Firm :</div><InputText class="form-control col" placeholder="Enter AttorneycFirm" @bind-Value="@legalcaseDto.OppAttorneyFirm" />
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 form-label text-secondary align-center">Opposing Email :</div><InputText class="form-control col" placeholder="Enter Attorney Email" @bind-Value="@legalcaseDto.OppAttorneyEmail" />
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 form-label text-secondary align-center">Opposing Phone :</div><InputText class="form-control col" placeholder="Enter Attorney Phone" @bind-Value="@legalcaseDto.OppAttorneyPhone" />
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 form-label text-secondary align-center">APS / GAL :</div><InputText class="form-control col" placeholder="Enter APS / AGL" @bind-Value="@legalcaseDto.Aps_Agl" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mt-4 mb-3">
+                                <button type="button" class="reset-btn Edit-btn"
+                                        aria-label="Edit" @onclick="() => isEditable = true">
+                                    Edit
+                                </button>
+
+                                <div class="col-6" >
+
+
+                                    <div class="row">
+                                        <div class=" col-auto text-secondary">Opposing Atty : </div><div class="col text-end fw-medium">@legalcaseDto.OppAttorneyname</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-auto text-secondary">Opposing Firm :</div><div class="col text-end fw-medium">@legalcaseDto.OppAttorneyFirm</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-auto text-secondary">Opposing Email :</div><div class="col text-end fw-medium">@legalcaseDto.OppAttorneyEmail</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-auto text-secondary">Opposing Phone :</div><div class="col text-end fw-medium">@legalcaseDto.OppAttorneyPhone</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-auto text-secondary">APS / GAL :</div><div class="col text-end fw-medium">@legalcaseDto.Aps_Agl</div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            </div>
+            @if (isEditable)
+            {
+                <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="CloseModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary base" @onclick="SaveAttorneyDetails">Save</button>
+                </div>
+            }
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public IntakeModel legalcaseDto { get; set; } = new();
+    private bool isEditable { get; set; } = false;
+
+    private async Task CloseModal()
+    {
+        await OnClose.InvokeAsync();
+    }
+
+    private async Task SaveAttorneyDetails()
+    {
+        var result = await _service.UpdateCaseAsync(legalcaseDto);
+        if (result.HasValue)
+        {
+            _toastservice.ShowSuccess("Attorney Details updated successfully");
+            await OnClose.InvokeAsync();
+            isEditable = false;
+        }
+        else
+        {
+            _toastservice.ShowError("Error occured in save Attorney details.");
+        }
+    }
+}
