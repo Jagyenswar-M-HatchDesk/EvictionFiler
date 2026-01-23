@@ -59,7 +59,7 @@ namespace EvictionFiler.Application.Services
                 AppearanceTypeForHearingId = dto.AppearanceTypeForHearingId,
                 VirtualPlatformId = dto.VirtualPlatformId,
                 LastAction = dto.LastAction,
-                
+
 
 
             };
@@ -181,7 +181,7 @@ namespace EvictionFiler.Application.Services
                 )
                 .AsQueryable();
 
-           
+
 
             // 🔹 Total count (pagination)
             var totalCount = await query.CountAsync();
@@ -203,7 +203,7 @@ namespace EvictionFiler.Application.Services
 
                     CourtId = dto.CourtId,
                     CourtLocationId = dto.CourtId,
-                   
+
                     LegalCaseId = dto.LegalCaseId,
                     IndexNo = dto.LegalCase != null ? dto.LegalCase.Index : "",
                     CaseTypeId = dto.LegalCase!.CaseTypeId,
@@ -247,11 +247,17 @@ namespace EvictionFiler.Application.Services
 
                     LastAction = dto.LastAction,
                     CountyId = dto.Courts.CountyId,
-                    CreatedOn = dto.CreatedOn
+                    CreatedOn = dto.CreatedOn,
+                    OpposingAttorney =
+                                dto.LegalCase.OppAttorneyname != null
+                                    ? dto.LegalCase.OppAttorneyFirm != null
+                                        ? $"{dto.LegalCase.OppAttorneyname}, {dto.LegalCase.OppAttorneyFirm}"
+                                        : dto.LegalCase.OppAttorneyname
+                                    : string.Empty,
                 })
                 .ToListAsync();
 
-         
+
             return new PaginationDto<CaseHearingDto>
             {
                 Items = items,
@@ -322,7 +328,7 @@ namespace EvictionFiler.Application.Services
                 CreatedOn = dto.CreatedOn,
                 LastAction = dto.LastAction,
 
-            }).OrderBy(e=>e.HearingDate).ToList();
+            }).OrderBy(e => e.HearingDate).ToList();
 
 
 

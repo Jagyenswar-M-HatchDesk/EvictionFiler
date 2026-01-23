@@ -1,0 +1,717 @@
+﻿@page "/realestate/leasedrafting"
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NY Contracts & Leases — v5 (Hash Tabs, Smart Fields)</title>
+    <style>
+        :root {
+            --bg: #f6f7fb;
+            --card: #fff;
+            --ink: #0f172a;
+            --muted: #64748b;
+            --line: #e5e7eb;
+            --brand: #0ea5e9;
+            --ok: #10b981;
+            --err: #ef4444
+        }
+
+        html, body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        .wrap {
+            max-width: 1100px;
+            margin: 24px auto;
+            padding: 0 16px
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+            .brand .dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: var(--brand)
+            }
+
+            .brand h1 {
+                margin: 0;
+                font-size: 18px
+            }
+
+        .tag {
+            font-size: 12px;
+            padding: 4px 8px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: #f0f9ff
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,.03);
+            margin-bottom: 12px
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px
+        }
+
+        .grid3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: #334155;
+            margin: 8px 0 4px
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #fff;
+            color: #0f172a
+        }
+
+        textarea {
+            min-height: 90px
+        }
+
+        .seg {
+            display: inline-flex;
+            border: 1px solid var(--line);
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden
+        }
+
+            .seg a {
+                padding: 8px 12px;
+                text-decoration: none;
+                color: #334155;
+                font-weight: 700;
+                border-right: 1px solid var(--line)
+            }
+
+                .seg a:last-child {
+                    border-right: 0
+                }
+
+                .seg a.active {
+                    background: #e0f2fe;
+                    color: #0c4a6e
+                }
+
+        .btn {
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            background: #fff;
+            font-weight: 800;
+            cursor: pointer
+        }
+
+        .primary {
+            background: var(--ok);
+            color: #062215;
+            border-color: #c7f9de
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 12px;
+            flex-wrap: wrap
+        }
+
+        .preview {
+            background: #f8fafc;
+            border: 1px dashed var(--line);
+            border-radius: 12px;
+            padding: 12px;
+            min-height: 160px;
+            white-space: pre-wrap
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 12px
+        }
+
+        .req:after {
+            content: " *";
+            color: var(--err);
+            font-weight: 700
+        }
+
+        .invalid {
+            border-color: var(--err) !important;
+            outline: 0
+        }
+
+        .type-toggle {
+            display: inline-flex;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden
+        }
+
+            .type-toggle button {
+                padding: 6px 10px;
+                border: 0;
+                background: #fff;
+                cursor: pointer;
+                font-weight: 700
+            }
+
+                .type-toggle button.active {
+                    background: #e0f2fe;
+                    color: #0c4a6e
+                }
+
+        .inline-note {
+            font-size: 12px;
+            color: #475569;
+            margin-top: 8px
+        }
+        @@media (max-width:1024px) {
+            .row
+
+        {
+            grid-template-columns: 1fr
+        }
+
+        .grid3 {
+            grid-template-columns: 1fr
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <header>
+            <div class="brand">
+                <div class="dot"></div><h1>NY Contracts & Leases</h1>
+                <span class="tag">⚡ v5 Experimental Build</span>
+            </div>
+            <nav class="seg" id="tabs">
+                <a href="#rs" id="tab-rs" class="active">Rent Stabilized Lease</a>
+                <a href="#std" id="tab-std">Standard Residential Lease</a>
+                <a href="#sale" id="tab-sale">Contract of Sale</a>
+            </nav>
+        </header>
+
+        <!-- Global parties/premises -->
+        <div class="card">
+            <h3>Global Parties / Premises</h3>
+            <div class="row">
+                <div><label class="req">Owner/Landlord or Seller</label><input id="owner_name" required value="ABC Holdings LLC"></div>
+                <div><label class="req">Tenant(s) or Buyer(s)</label><input id="tenant_names" required value="John & Jane Client"></div>
+            </div>
+            <div class="row">
+                <div><label class="req">Premises / Property Address</label><input id="premises_address" required value="123 Example Ave, Brooklyn, NY 11201"></div>
+                <div><label>Unit</label><input id="unit" value="4B"></div>
+            </div>
+        </div>
+
+        <!-- RS -->
+        <section id="panel-rs">
+            <div class="card">
+                <h3>Rent Stabilized Lease (RTP-8)</h3>
+                <div class="grid3">
+                    <div><label class="req">Offer Date</label><input id="rtp8_offer_date" type="date" required></div>
+                    <div><label class="req">Lease Start (Commencement)</label><input id="rtp8_start" type="date" required></div>
+                    <div><label class="req">RGB Order #</label><input id="rtp8_rgb_order" required placeholder="e.g., 56"></div>
+                </div>
+                <div class="row">
+                    <div><label class="req">Tenant Term Choice</label><select id="rtp8_term_choice" required><option value="1">1 Year</option><option value="2">2 Years</option></select></div>
+                    <div><label class="req">Current Legal Regulated Rent</label><input id="rtp8_current_legal_rent" type="number" step="0.01" required placeholder="e.g., 3000"></div>
+                </div>
+                <div class="row">
+                    <div><label class="req">1-Year Guideline %</label><input id="rtp8_gl_1yr" type="number" step="0.01" required placeholder="e.g., 2.75"></div>
+                    <div><label>2-Year Guideline %</label><input id="rtp8_gl_2yr" type="number" step="0.01" placeholder="e.g., 5.0"></div>
+                </div>
+                <div class="row">
+                    <div><label>Proposed Rent — 1 Year (auto)</label><input id="rtp8_rent_1yr" type="number" step="0.01" readonly></div>
+                    <div><label>Proposed Rent — 2 Years (auto)</label><input id="rtp8_rent_2yr" type="number" step="0.01" readonly></div>
+                </div>
+                <div class="row">
+                    <div><label>Security — Current</label><input id="rtp8_sec_current" type="number" step="0.01"></div>
+                    <div><label>Additional Deposit — 1 Year (auto)</label><input id="rtp8_sec_add_1yr" type="number" step="0.01" readonly></div>
+                </div>
+                <div class="row">
+                    <div><label>Additional Deposit — 2 Years (auto)</label><input id="rtp8_sec_add_2yr" type="number" step="0.01" readonly></div>
+                    <div><label>Separate Charges (AC/Appliances/421-a/Other)</label><input id="rtp8_separate" placeholder="AC:30; APPL:25; 421a:2.2%; Storage:25"></div>
+                </div>
+                <div class="row">
+                    <div><label class="req">Owner Signatory</label><input id="rtp8_owner_sig" required></div>
+                    <div><label class="req">Tenant Signatory</label><input id="rtp8_tenant_sig" required></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Standard Lease -->
+        <section id="panel-std" hidden>
+            <div class="card">
+                <h3>Standard Residential Lease (NY State MLS 2-page)</h3>
+                <div class="row">
+                    <div><label class="req">Landlord Mailing Address</label><input id="mls_landlord_addr" required></div>
+                    <div><label class="req">Tenant Mailing Address</label><input id="mls_tenant_addr" required></div>
+                </div>
+                <div class="row">
+                    <div><label class="req">Lease Start Date</label><input id="mls_start_date" required type="date"></div>
+                    <div><label class="req">Lease End Date</label><input id="mls_end_date" required type="date"></div>
+                </div>
+                <div class="row">
+                    <div><label class="req">Monthly Rent</label><input id="mls_monthly_rent" required type="number" step="0.01"></div>
+                    <div><label class="req">Security Deposit</label><input id="mls_security" required type="number" step="0.01"></div>
+                </div>
+                <div class="inline-note" id="mls_date_note"></div>
+            </div>
+        </section>
+
+        <!-- Contract of Sale -->
+        <section id="panel-sale" hidden>
+            <div class="card">
+                <h3>Parties</h3>
+                <div class="row">
+                    <div><label class="req">Seller(s)</label><input id="seller_names" required></div>
+                    <div><label class="req">Buyer(s)</label><input id="buyer_names" required></div>
+                </div>
+                <div class="row">
+                    <div><label class="req">Seller’s Attorney (name & email)</label><input id="seller_atty" required></div>
+                    <div><label class="req">Buyer’s Attorney (name & email)</label><input id="buyer_atty" required></div>
+                </div>
+                <div class="row">
+                    <div><label>Broker(s)</label><input id="brokers"></div>
+                    <div><label>Broker Compensation</label><input id="broker_comp" placeholder="e.g., 3% to Listing, 2% to Co-broke"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Property</h3>
+                <div class="row">
+                    <div><label class="req">Address</label><input id="prop_address" required></div>
+                    <div><label>Unit</label><input id="prop_unit"></div>
+                </div>
+                <div class="row">
+                    <div><label class="req">County / Borough</label><input id="prop_county" required placeholder="Kings / Queens / New York / Bronx / Richmond"></div>
+                    <div><label>Tax Lot / BBL</label><input id="prop_bbl" placeholder="Block-Lot or BBL"></div>
+                </div>
+                <div class="row">
+                    <div>
+                        <label class="req">Property Type</label>
+                        <div class="type-toggle">
+                            <button type="button" id="t_house" class="active">1-4 Family / House</button>
+                            <button type="button" id="t_condo">Condo</button>
+                            <button type="button" id="t_coop">Co-op</button>
+                        </div>
+                        <select id="prop_type" style="margin-top:6px">
+                            <option value="house" selected>1-4 Family / House</option>
+                            <option value="condo">Condominium</option>
+                            <option value="coop">Co-op</option>
+                        </select>
+                    </div>
+                    <div><label class="req">Occupancy / Tenancies</label><input id="occupancy" required placeholder="Vacant at closing / Subject to tenancies"></div>
+                </div>
+                <div class="row">
+                    <div><label>Fixtures / Inclusions</label><input id="inclusions" placeholder="All fixtures & appliances as installed, except as excluded"></div>
+                    <div><label>Exclusions</label><input id="exclusions" placeholder="Items the Seller will remove"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Price & Escrow</h3>
+                <div class="row">
+                    <div><label class="req">Purchase Price</label><input id="price" required inputmode="decimal" placeholder="$"></div>
+                    <div><label class="req">Contract Deposit</label><input id="deposit" required inputmode="decimal" placeholder="$"></div>
+                </div>
+                <div class="row">
+                    <div><label>Deposit % of Price (auto)</label><input id="deposit_pct" readonly></div>
+                    <div></div>
+                </div>
+                <div class="row">
+                    <div><label class="req">Escrow Agent (name & address)</label><input id="escrow_agent" required></div>
+                    <div>
+                        <label class="req">Deposit Due</label>
+                        <select id="deposit_due" required>
+                            <option>Upon full execution</option>
+                            <option>Within 3 business days</option>
+                            <option>By wire within 1 business day</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Financing & Contingencies</h3>
+                <div class="row">
+                    <div>
+                        <label class="req">Financing Contingency?</label>
+                        <select id="finance_cont" required>
+                            <option>No (All-Cash)</option>
+                            <option>Yes</option>
+                        </select>
+                    </div>
+                    <div><label>Mortgage Amount (if contingent)</label><input id="mortgage_amt" inputmode="decimal" placeholder="$"></div>
+                </div>
+                <div class="row">
+                    <div><label>Commitment Letter Due By (if contingent)</label><input id="commit_due" type="date"></div>
+                    <div><label>Appraisal Contingency?</label><select id="appraisal_flag"><option>No</option><option>Yes</option></select></div>
+                </div>
+                <div class="row">
+                    <div><label>Other Contingencies</label><input id="other_cont" placeholder="Sale of Buyer’s home; specific inspection; etc."></div>
+                    <div></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Closing & Title</h3>
+                <div class="row">
+                    <div><label>Projected Closing Date</label><input id="closing_date" type="date"></div>
+                    <div><label>Closing Location</label><input id="closing_place" placeholder="Seller’s Attorney office / Title company"></div>
+                </div>
+                <div class="row">
+                    <div><label>Title Company / Transfer Agent</label><input id="title_company" placeholder="Name & contact"></div>
+                    <div><label>Deed / Transfer Type</label><input id="deed" placeholder="Bargain & Sale Deed with covenant against grantor’s acts"></div>
+                </div>
+                <div class="row">
+                    <div><label>Adjustments / Prorations</label><input id="prorations" placeholder="Taxes, water/sewer, fuel, common charges as of closing"></div>
+                    <div><label>Transfer Taxes</label><input id="transfer_taxes" placeholder="NYC & NYS transfer taxes by Seller (unless otherwise required)"></div>
+                </div>
+                <div class="inline-note" id="sale_date_note"></div>
+            </div>
+
+            <div class="card" id="condo_section" hidden>
+                <h3>Condo Specifics</h3>
+                <div class="row">
+                    <div><label>Common Charges ($/mo)</label><input id="common_charges" inputmode="decimal" placeholder="$"></div>
+                    <div><label>Real Estate Taxes ($/yr)</label><input id="annual_taxes" inputmode="decimal" placeholder="$"></div>
+                </div>
+                <div class="row">
+                    <div><label>Managing Agent</label><input id="managing_agent" placeholder="Name & contact"></div>
+                    <div><label>Board Waiver / Right of First Refusal</label><input id="board_waiver" placeholder="Waiver or ROFR required; who pays fees"></div>
+                </div>
+            </div>
+
+            <div class="card" id="coop_section" hidden>
+                <h3>Co-op Specifics</h3>
+                <div class="row">
+                    <div><label>Shares / Proprietary Lease</label><input id="coop_shares" placeholder="e.g., 175 shares; appurtenant proprietary lease"></div>
+                    <div><label>Maintenance ($/mo)</label><input id="maintenance" inputmode="decimal" placeholder="$"></div>
+                </div>
+                <div class="row">
+                    <div><label>Flip Tax / Move Fees</label><input id="flip_tax" placeholder="Responsibility and amounts, if any"></div>
+                    <div><label>Board Approval</label><input id="board_approval" placeholder="Board approval required; timing"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Disclosures & Misc.</h3>
+                <div class="row">
+                    <div>
+                        <label class="req">PCDL Election</label>
+                        <select id="pcdl" required>
+                            <option value="500credit">$500 credit in lieu of PCDS</option>
+                            <option value="provided">Seller to provide PCDS</option>
+                        </select>
+                    </div>
+                    <div><label>Lead Paint (pre-1978)?</label><select id="lead_flag"><option>No</option><option>Yes</option></select></div>
+                </div>
+                <div class="row">
+                    <div><label>Smoke/CO Detector Compliance</label><input id="detectors" placeholder="Seller represents smoke & CO detectors installed as required"></div>
+                    <div><label>AS-IS / Systems Working</label><input id="as_is" placeholder="AS-IS; systems in working order at closing"></div>
+                </div>
+                <div class="row">
+                    <div>
+                        <label>Riders</label>
+                        <select id="riders" multiple size="5">
+                            <option selected>Mortgage Contingency Rider</option>
+                            <option>Condominium Rider</option>
+                            <option>Co-op Rider</option>
+                            <option>Attorney Approval / Inspection Rider</option>
+                            <option>Additional Escrow Rider</option>
+                        </select>
+                        <div class="hint">Hold Ctrl/Cmd to select multiple.</div>
+                    </div>
+                    <div><label>Additional Terms</label><textarea id="additional_terms" placeholder="Custom clauses, escrows, repairs, credits, survival provisions"></textarea></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="card">
+            <h3>Generate & Save</h3>
+            <p class="hint">Preview shows exactly what will be sent to the generator.</p>
+            <div class="actions">
+                <button class="btn" id="btn-preview" type="button">Preview JSON</button>
+                <button class="btn primary" id="btn-generate" type="button">Generate & Save</button>
+            </div>
+            <div class="preview" id="preview"></div>
+        </div>
+    </div>
+
+    <script>
+        // Hash router for tabs
+        function route(){
+          const h=(location.hash||'#sale').replace('#','');
+          ['rs','std','sale'].forEach(k=>{
+            const tab=document.getElementById('tab-'+k);
+            const panel=document.getElementById('panel-'+k);
+            const active=(k===h);
+            tab && tab.classList.toggle('active', active);
+            if(panel) panel.hidden=!active;
+          });
+        }
+        addEventListener('hashchange', route); route();
+
+        // Utilities
+        function parseCurrency(str){
+          if(!str) return 0;
+          const cleaned = (str+'').replace(/[^0-9.\-]/g,'');
+          const n = parseFloat(cleaned);
+          return isFinite(n) ? n : 0;
+        }
+        function formatCurrency(n){
+          const f = isFinite(n) ? n : 0;
+          return f===0 ? '' : f.toLocaleString('en-US', {style:'currency', currency:'USD'});
+        }
+        function setInvalid(el){ el && el.classList.add('invalid'); }
+        function clearInvalid(){ document.querySelectorAll('.invalid').forEach(e=>e.classList.remove('invalid')); }
+        function reqFilled(id){ const el=document.getElementById(id); return el && el.value && el.value.toString().trim()!==''; }
+        function val(id){
+          const el=document.getElementById(id);
+          if(!el) return '';
+          if(el.tagName==='SELECT' && el.multiple){ return Array.from(el.selectedOptions).map(o=>o.value); }
+          return el.value || '';
+        }
+
+        // Property type smart sections
+        const propTypeSel = document.getElementById('prop_type');
+        const tHouse = document.getElementById('t_house');
+        const tCondo = document.getElementById('t_condo');
+        const tCoop  = document.getElementById('t_coop');
+        const condoSection = document.getElementById('condo_section');
+        const coopSection  = document.getElementById('coop_section');
+
+        function setPropType(v){
+          if(propTypeSel) propTypeSel.value = v;
+          tHouse && tHouse.classList.toggle('active', v==='house');
+          tCondo && tCondo.classList.toggle('active', v==='condo');
+          tCoop  && tCoop.classList.toggle('active', v==='coop');
+          if(condoSection) condoSection.hidden = (v!=='condo');
+          if(coopSection)  coopSection.hidden  = (v!=='coop');
+        }
+        tHouse && tHouse.addEventListener('click', ()=>setPropType('house'));
+        tCondo && tCondo.addEventListener('click', ()=>setPropType('condo'));
+        tCoop  && tCoop.addEventListener('click', ()=>setPropType('coop'));
+        propTypeSel && propTypeSel.addEventListener('change', ()=>setPropType(propTypeSel.value));
+        setPropType(propTypeSel ? propTypeSel.value : 'house');
+
+        // Currency formatting + deposit %
+        const priceEl = document.getElementById('price');
+        const depositEl = document.getElementById('deposit');
+        const depositPctEl = document.getElementById('deposit_pct');
+
+        function syncMoney(){
+          if(!priceEl || !depositEl || !depositPctEl) return;
+          const price = parseCurrency(priceEl.value);
+          const deposit = parseCurrency(depositEl.value);
+          // format field values as currency while typing (on blur we'll reformat cleanly)
+          // live percent
+          const pct = (price>0 && deposit>=0) ? (deposit/price*100) : 0;
+          depositPctEl.value = pct ? (pct.toFixed(2)+'%') : '';
+        }
+        function reformatCurrencyField(el){
+          if(!el) return;
+          const num = parseCurrency(el.value);
+          el.value = formatCurrency(num);
+          syncMoney();
+        }
+        ['input','blur'].forEach(evt=>{
+          priceEl && priceEl.addEventListener(evt, ()=>{ if(evt==='blur') reformatCurrencyField(priceEl); else syncMoney(); });
+          depositEl && depositEl.addEventListener(evt, ()=>{ if(evt==='blur') reformatCurrencyField(depositEl); else syncMoney(); });
+        });
+        syncMoney();
+
+        // Date logic
+        const mlsStart = document.getElementById('mls_start_date');
+        const mlsEnd   = document.getElementById('mls_end_date');
+        const mlsNote  = document.getElementById('mls_date_note');
+        function validateMLSDate(){
+          if(!mlsStart || !mlsEnd || !mlsNote) return true;
+          mlsNote.textContent='';
+          mlsStart.classList.remove('invalid'); mlsEnd.classList.remove('invalid');
+          if(mlsStart.value && mlsEnd.value){
+            const a = new Date(mlsStart.value); const b = new Date(mlsEnd.value);
+            if(!(b > a)){ mlsNote.textContent='End date must be after the start date.'; mlsStart.classList.add('invalid'); mlsEnd.classList.add('invalid'); return false; }
+          }
+          return true;
+        }
+        mlsStart && mlsStart.addEventListener('change', validateMLSDate);
+        mlsEnd && mlsEnd.addEventListener('change', validateMLSDate);
+
+        const closingDateEl = document.getElementById('closing_date');
+        const saleDateNote = document.getElementById('sale_date_note');
+        function validateClosingAfterToday(){
+          if(!closingDateEl || !saleDateNote) return true;
+          saleDateNote.textContent='';
+          closingDateEl.classList.remove('invalid');
+          if(closingDateEl.value){
+            const d = new Date(closingDateEl.value);
+            const today = new Date(); today.setHours(0,0,0,0);
+            if(!(d > today)){ saleDateNote.textContent='Closing date should be after today.'; closingDateEl.classList.add('invalid'); return false; }
+          }
+          return true;
+        }
+        closingDateEl && closingDateEl.addEventListener('change', validateClosingAfterToday);
+
+        // Conditional requireds: finance contingency
+        const financeSel = document.getElementById('finance_cont');
+        const mortgageAmtEl = document.getElementById('mortgage_amt');
+        const commitDueEl = document.getElementById('commit_due');
+        function enforceFinanceRequireds(){
+          if(!financeSel) return true;
+          const yes = financeSel.value === 'Yes';
+          if(mortgageAmtEl){ mortgageAmtEl.required = yes; if(yes && !reqFilled('mortgage_amt')) setInvalid(mortgageAmtEl); else mortgageAmtEl.classList.remove('invalid'); }
+          if(commitDueEl){ commitDueEl.required = yes; if(yes && !reqFilled('commit_due')) setInvalid(commitDueEl); else commitDueEl.classList.remove('invalid'); }
+          return !(yes && (!reqFilled('mortgage_amt') || !reqFilled('commit_due')));
+        }
+        financeSel && financeSel.addEventListener('change', enforceFinanceRequireds);
+
+        // Build payloads
+        function value(id){
+          const el=document.getElementById(id); if(!el) return '';
+          if(el.tagName==='SELECT' && el.multiple){ return Array.from(el.selectedOptions).map(o=>o.value); }
+          // normalize currency fields
+          if(['price','deposit','mortgage_amt','common_charges','annual_taxes','maintenance'].includes(id)){
+            return parseCurrency(el.value);
+          }
+          return el.value||'';
+        }
+        function buildSale(){
+          return { template_key:'ny_contract_of_sale', tokens:{
+            SELLER_NAMES:value('seller_names')||value('owner_name'),
+            BUYER_NAMES:value('buyer_names')||value('tenant_names'),
+            SELLER_ATTY:value('seller_atty'), BUYER_ATTY:value('buyer_atty'),
+            BROKERS:value('brokers'), BROKER_COMP:value('broker_comp'),
+            PROP_ADDRESS:value('prop_address')||value('premises_address'), PROP_UNIT:value('prop_unit')||value('unit'),
+            PROP_COUNTY:value('prop_county'), PROP_BBL:value('prop_bbl'), PROP_TYPE:value('prop_type'),
+            INCLUSIONS:value('inclusions'), EXCLUSIONS:value('exclusions'), OCCUPANCY:value('occupancy'),
+            PRICE:value('price'), DEPOSIT:value('deposit'), ESCROW_AGENT:value('escrow_agent'), DEPOSIT_DUE:value('deposit_due'),
+            FINANCE_CONT:value('finance_cont'), MORTGAGE_AMT:value('mortgage_amt'), COMMIT_DUE:value('commit_due'), APPRAISAL_FLAG:value('appraisal_flag'), OTHER_CONT:value('other_cont'),
+            CLOSING_DATE:value('closing_date'), CLOSING_PLACE:value('closing_place'), TITLE_COMPANY:value('title_company'), DEED:value('deed'),
+            PRORATIONS:value('prorations'), TRANSFER_TAXES:value('transfer_taxes'),
+            COMMON_CHARGES:value('common_charges'), ANNUAL_TAXES:value('annual_taxes'), MANAGING_AGENT:value('managing_agent'), BOARD_WAIVER:value('board_waiver'),
+            COOP_SHARES:value('coop_shares'), MAINTENANCE:value('maintenance'), FLIP_TAX:value('flip_tax'), BOARD_APPROVAL:value('board_approval'),
+            PCDL:value('pcdl'), LEAD_FLAG:value('lead_flag'), DETECTORS:value('detectors'), AS_IS:value('as_is'),
+            RIDERS:value('riders'), ADDITIONAL_TERMS:value('additional_terms')
+          }};
+        }
+        function buildRTP8(){
+          return { template_key:'rtp8_2024', tokens:{
+            OWNER_NAME:value('owner_name'), TENANT_NAMES:value('tenant_names'), PREMISES_ADDRESS:value('premises_address'), UNIT:value('unit'),
+            OFFER_DATE:value('rtp8_offer_date'), START_DATE:value('rtp8_start'), RGB_ORDER:value('rtp8_rgb_order'), TENANT_TERM_CHOICE:value('rtp8_term_choice'),
+            CURRENT_LEGAL_RENT:value('rtp8_current_legal_rent'), GL_1YR_PCT:value('rtp8_gl_1yr'), GL_2YR_PCT:value('rtp8_gl_2yr'),
+            RENT_1YR:value('rtp8_rent_1yr'), RENT_2YR:value('rtp8_rent_2yr'),
+            SEC_CURRENT:value('rtp8_sec_current'), SEC_ADD_1YR:value('rtp8_sec_add_1yr'), SEC_ADD_2YR:value('rtp8_sec_add_2yr'),
+            SEPARATE_CHARGES:value('rtp8_separate'), OWNER_SIG:value('rtp8_owner_sig'), TENANT_SIG:value('rtp8_tenant_sig')
+          }};
+        }
+        function buildMLS(){
+          return { template_key:'nystate_mls_lease', tokens:{
+            LANDLORD_NAME:value('owner_name'), LANDLORD_ADDR:value('mls_landlord_addr'),
+            TENANT_NAMES:value('tenant_names'), TENANT_ADDR:value('mls_tenant_addr'),
+            PREMISES_ADDRESS:value('premises_address'), UNIT:value('unit'),
+            START_DATE:value('mls_start_date'), END_DATE:value('mls_end_date'),
+            MONTHLY_RENT:value('mls_monthly_rent'), SECURITY:value('mls_security')
+          }};
+        }
+
+        // Validation on submit
+        function validateActive(){
+          const h=(location.hash||'#sale').replace('#','');
+          clearInvalid();
+          let ok = true;
+          if(h==='sale'){
+            ['seller_names','buyer_names','seller_atty','buyer_atty','prop_address','prop_county','prop_type','occupancy','price','deposit','escrow_agent','deposit_due','pcdl'].forEach(id=>{
+              if(!reqFilled(id)){ setInvalid(document.getElementById(id)); ok=false; }
+            });
+            ok = validateClosingAfterToday() && ok;
+            ok = enforceFinanceRequireds() && ok;
+          }else if(h==='std'){
+            ['mls_landlord_addr','mls_tenant_addr','mls_start_date','mls_end_date','mls_monthly_rent','mls_security'].forEach(id=>{
+              if(!reqFilled(id)){ setInvalid(document.getElementById(id)); ok=false; }
+            });
+            ok = validateMLSDate() && ok;
+          }else{
+            ['owner_name','tenant_names','premises_address','rtp8_offer_date','rtp8_start','rtp8_rgb_order','rtp8_term_choice','rtp8_current_legal_rent','rtp8_gl_1yr','rtp8_owner_sig','rtp8_tenant_sig'].forEach(id=>{
+              if(!reqFilled(id)){ setInvalid(document.getElementById(id)); ok=false; }
+            });
+          }
+          return ok;
+        }
+
+        // Buttons
+        document.getElementById('btn-preview').addEventListener('click', ()=>{
+          const key=(location.hash||'#sale').replace('#','');
+          const outputs=(key==='rs')?[buildRTP8()]
+                       :(key==='std')?[buildMLS()]
+                       :[buildSale()];
+          document.getElementById('preview').textContent = JSON.stringify({active:key, outputs}, null, 2);
+        });
+
+        document.getElementById('btn-generate').addEventListener('click', async ()=>{
+          const key=(location.hash||'#sale').replace('#','');
+          if(!validateActive()){ alert('Please fix the highlighted fields.'); return; }
+          const outputs=(key==='rs')?[buildRTP8()]
+                       :(key==='std')?[buildMLS()]
+                       :[buildSale()];
+          document.getElementById('preview').textContent = JSON.stringify({active:key, outputs}, null, 2);
+          try{
+            for(const out of outputs){
+              const res = await fetch((window.EF_API_BASE||'/api')+'/realestate/drafting/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(out),credentials:'include'});
+              if(!res.ok) throw new Error('HTTP '+res.status);
+            }
+            alert('Submitted '+outputs.length+' document(s).');
+          }catch(e){ alert('Submission failed: '+e.message); }
+        });
+    </script>
+</body>
+</html>
+

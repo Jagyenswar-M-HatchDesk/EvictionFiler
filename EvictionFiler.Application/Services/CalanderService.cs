@@ -71,7 +71,6 @@ namespace EvictionFiler.Application.Services
                 CountyName = dto.County?.Name ?? "Unknown",
                 CaseTypeName = dto.CaseType?.Name ?? "Unknown",
                 CaseStatusName = dto.CaseStatus?.Name ?? "Unknown",
-               
 
             }).ToList();
 

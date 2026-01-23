@@ -1,0 +1,580 @@
+﻿@page "/realestate"
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EvictionFiler — Real Estate Practice Dashboard (Responsive)</title>
+    <style>
+        :root {
+            --bg: #f6f7fb;
+            --card: #ffffff;
+            --ink: #0f172a;
+            --muted: #6b7280;
+            --brand: #1e40af;
+            --accent: #06b6d4;
+            --ok: #10b981;
+            --warn: #f59e0b;
+            --line: #e5e7eb;
+            --chip: #eef2ff;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html, body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif
+        }
+
+        .wrap {
+            max-width: 1200px;
+            margin: 24px auto;
+            padding: 0 16px
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+            .brand .dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: var(--accent)
+            }
+
+            .brand h1 {
+                font-size: 18px;
+                margin: 0
+            }
+
+        .actions a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #111827;
+            color: #fff;
+            padding: 10px 12px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700
+        }
+
+        .filters {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px;
+            display: grid;
+            grid-template-columns: repeat(5,1fr);
+            gap: 8px;
+            position: sticky;
+            top: 0;
+            z-index: 10
+        }
+
+            .filters input {
+                padding: 10px;
+                border: 1px solid var(--line);
+                border-radius: 10px
+            }
+
+            .filters button {
+                border: 0;
+                background: var(--brand);
+                color: #fff;
+                border-radius: 10px;
+                font-weight: 800
+            }
+
+        .hint {
+            margin: 10px 2px;
+            color: var(--muted);
+            font-size: 14px
+        }
+
+        .chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px
+        }
+
+        .chip {
+            background: var(--chip);
+            color: #4338ca;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            border: 1px solid #e0e7ff;
+            cursor: pointer
+        }
+
+        .grid4 {
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+            gap: 12px;
+            margin: 12px 0 18px
+        }
+
+        .stat {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px
+        }
+
+            .stat h3 {
+                margin: 0 0 8px 0;
+                font-size: 12px;
+                color: var(--muted);
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: .03em
+            }
+
+            .stat .big {
+                font-size: 22px;
+                font-weight: 900
+            }
+
+            .stat .sub {
+                color: var(--muted);
+                font-size: 12px;
+                margin-top: 4px
+            }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap
+        }
+
+            .tabs button {
+                padding: 8px 12px;
+                border-radius: 10px;
+                border: 1px solid var(--line);
+                background: #fff;
+                font-weight: 700;
+                color: #334155
+            }
+
+                .tabs button.active {
+                    background: #0ea5e9;
+                    color: #07263a;
+                    border-color: #7dd3fc
+                }
+
+        .grid2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px
+        }
+
+            .card h4 {
+                margin: 0 0 8px 0;
+                font-size: 14px
+            }
+
+        .flex {
+            display: flex;
+            gap: 10px;
+            align-items: center
+        }
+
+        canvas {
+            width: 100%;
+            height: 220px;
+            border-radius: 10px;
+            background: linear-gradient(180deg,#fff,#f9fafb)
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+            font-size: 14px;
+            white-space: nowrap
+        }
+
+        th {
+            color: #475569
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            font-size: 12px
+        }
+
+            .pill.ok {
+                background: #ecfdf5;
+                color: #065f46;
+                border-color: #bbf7d0
+            }
+
+            .pill.warn {
+                background: #fffbeb;
+                color: #92400e;
+                border-color: #fde68a
+            }
+
+            .pill.neu {
+                background: #eef2ff;
+                color: #3730a3;
+                border-color: #c7d2fe
+            }
+
+        .qa {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+
+            .qa a {
+                background: #fff;
+                border: 1px solid var(--line);
+                padding: 10px 12px;
+                border-radius: 10px;
+                text-decoration: none;
+                color: #0f172a;
+                font-weight: 700
+            }
+
+        .scroll {
+            overflow: auto;
+            -webkit-overflow-scrolling: touch
+        }
+
+        .footer {
+            margin: 18px 0;
+            color: #94a3b8;
+            font-size: 12px;
+            text-align: center
+        }
+        /* Responsive */
+        @@media (max-width: 1024px) {
+            .filters
+
+        {
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            position: static
+        }
+
+        .grid4 {
+            grid-template-columns: repeat(2,1fr)
+        }
+
+        .grid2 {
+            grid-template-columns: 1fr
+        }
+
+        }
+        @@media (max-width: 640px) {
+            .filters
+
+        {
+            grid-template-columns: 1fr;
+            gap: 10px
+        }
+
+        .actions a {
+            width: 100%;
+            justify-content: center
+        }
+
+        .brand h1 {
+            font-size: 16px
+        }
+
+        }
+    </style>
+    <script>window.EF_API_BASE = "/api";</script>
+    <script type="module" src="real_estate_api.js"></script>
+</head>
+<body>
+    <div class="wrap">
+        <header>
+            <div class="brand"><div class="dot"></div><h1>EvictionFiler — Real Estate Practice</h1></div>
+            <div class="actions"><a href="/realestate/leasedrafting">New Action ▸</a></div>
+        </header>
+
+        <div class="filters">
+            <input id="f_case" placeholder="Search by Case #">
+            <input id="f_client" placeholder="Search by Client">
+            <input id="f_property" placeholder="Search by Property / BBL">
+            <input id="f_party" placeholder="Search by Party">
+            <div class="actions">
+                <a style="width: 100%;
+                            display: flex;
+                            justify-content: center;" href="/realestate/search">Search</a>
+            </div>
+        </div>
+        <div class="hint">Hint: Filter by Index # or BBL to jump to the matter.</div>
+        <div class="chips">
+            <span class="chip" onclick="quick('Show condo closings this month')">Show condo closings this month</span>
+            <span class="chip" onclick="quick('Deadlines in Queens today')">Deadlines in Queens today</span>
+            <span class="chip" onclick="quick('RS renewals due in 30 days')">RS renewals due in 30 days</span>
+            <span class="chip" onclick="quick('Unpaid invoices > $1,000')">Unpaid invoices > $1,000</span>
+        </div>
+
+        <div class="grid4">
+            <div class="stat"><h3>Closings This Month</h3><div class="big" id="kpi1">5</div><div class="sub">3 scheduled • 2 pending docs</div></div>
+            <div class="stat"><h3>Active Leases</h3><div class="big" id="kpi2">128</div><div class="sub">12 RS renewals in 60 days</div></div>
+            <div class="stat"><h3>Supreme Motions</h3><div class="big" id="kpi3">9</div><div class="sub">2 replies due this week</div></div>
+            <div class="stat"><h3>Smart Alerts</h3><div class="big" id="kpi4">7</div><div class="sub">See Reminders tab</div></div>
+        </div>
+
+        <div class="tabs">
+            <button class="active" onclick="selTab(0)">Charts & Visuals</button>
+            <button onclick="selTab(1)">Smart Alerts & Reminders</button>
+            <button onclick="selTab(2)">Collaboration Feed</button>
+            <button onclick="selTab(3)">Practice Tips</button>
+        </div>
+
+        <div class="tab" id="tab0">
+            <div class="grid2">
+                <div class="card"><h4>Pipeline — Closings vs Leasing vs Litigation</h4><canvas id="chart1"></canvas></div>
+                <div class="card"><h4>Financial Snapshot — Billed vs Collected</h4><canvas id="chart2"></canvas></div>
+            </div>
+            <div class="grid2">
+                <div class="card"><h4>Calendar Heatmap — Deadlines & Appearances</h4><canvas id="chart3"></canvas></div>
+                <div class="card">
+                    <h4>Task Completion (This Week)</h4>
+                    <div class="flex" style="gap:12px">
+                        <div style="flex:1;background:#f1f5f9;border-radius:999px;overflow:hidden;border:1px solid var(--line)">
+                            <div id="pct" style="width:72%;background:#f59e0b;height:14px"></div>
+                        </div>
+                        <div><strong id="pctTxt">18 / 25</strong> tasks</div>
+                    </div>
+                    <canvas id="chart4" style="margin-top:10px"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab" id="tab1" style="display:none">
+            <div class="grid2">
+                <div class="card scroll">
+                    <h4>Upcoming Deadlines</h4>
+                    <table>
+                        <thead><tr><th>Due</th><th>Matter</th><th>What</th><th>Status</th></tr></thead>
+                        <tbody id="deadlines"></tbody>
+                    </table>
+                </div>
+                <div class="card scroll">
+                    <h4>Recent Dockets (NYSCEF / eCourts)</h4>
+                    <table>
+                        <thead><tr><th>Date</th><th>Index #</th><th>Doc Type</th><th>Action</th></tr></thead>
+                        <tbody id="dockets"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h4>Quick Actions</h4>
+                <div class="qa">
+                    <a class="link" href="service_picker.html" target="_blank">Open Service Picker / Fee Catalog</a>
+                    <a class="link" href="contracts_leases_wizard.html" target="_blank">Draft Contract / Lease</a>
+                    <a class="link" href="#" onclick="generateBundle('lease_rs_dhcr')">Generate RS Lease Package</a>
+                    <a class="link" href="#" onclick="generateBundle('closing_condo')">Generate Condo Closing Bundle</a>
+                    <a class="link" href="#" onclick="importNYSCEF()">Import NYSCEF Email</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab" id="tab2" style="display:none">
+            <div class="card scroll">
+                <h4>Collaboration Feed</h4>
+                <table>
+                    <thead><tr><th>When</th><th>User</th><th>Action</th><th>Link</th></tr></thead>
+                    <tbody>
+                        <tr><td>Today 9:15a</td><td>S. Patel (Paralegal)</td><td>Uploaded title report — 456 Ocean Ave #7C</td><td><a class="link" href="#">Open</a></td></tr>
+                        <tr><td>Yesterday</td><td>Atty. Green</td><td>Approved RS lease terms — 123 Example Ave 4B</td><td><a class="link" href="#">Open</a></td></tr>
+                        <tr><td>Mon</td><td>Intake Bot</td><td>New matter created — Partition Action (Kings)</td><td><a class="link" href="#">Open</a></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab" id="tab3" style="display:none">
+            <div class="card">
+                <h4>Practice Tips</h4>
+                <ul>
+                    <li>Use <strong>GCE applicability checker</strong> in intake to auto-add disclosures to leases and rent demands.</li>
+                    <li>Attach <strong>DHCR rider</strong> automatically to RS leases; stamp tokens onto the official PDF during generation.</li>
+                    <li>Enable <strong>county modifiers</strong> on fees for accurate per diem and appearance quotes.</li>
+                    <li>Let NYSCEF email ingest <strong>spawn motion ladders</strong> (opp/reply dates) automatically.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">© EvictionFiler — Real Estate Practice (Responsive Demo)</div>
+    </div>
+
+    <script>
+        function selTab(i){
+          document.querySelectorAll('.tabs button').forEach((b,idx)=> b.classList.toggle('active', idx===i));
+          document.querySelectorAll('.tab').forEach((t,idx)=> t.style.display = idx===i ? '' : 'none');
+        }
+        function doSearch(){ alert('Search: '+[f_case.value,f_client.value,f_property.value,f_party.value].filter(Boolean).join(' • ')); }
+        function quick(q){ alert(q); }
+        function newAction(){ alert('Open New Action menu'); }
+        const deadlines=[
+          {due:'2025-10-04', matter:'123 Example Ave 4B — RS Lease', what:'Send DHCR Rider', status:'open'},
+          {due:'2025-10-06', matter:'Kings Index 512345/2025', what:'Opposition Due (CPLR 2214(b))', status:'warn'},
+          {due:'2025-10-07', matter:'Condo Closing — 1 Plaza #15D', what:'Finalize Title Clearance', status:'open'},
+          {due:'2025-10-09', matter:'Queens LT 311168/24', what:'Warrant Request Eligibility', status:'open'}
+        ];
+        const dockets=[
+          {date:'2025-10-01', index:'#512345/2025', type:'Motion — Summary Judgment'},
+          {date:'2025-09-30', index:'LT 311168/24', type:'Answer — Respondent'},
+          {date:'2025-09-29', index:'#422111/2025', type:'NOE — Opposition Filed'}
+        ];
+        function rowStatus(s){
+          if(s==='warn') return '<span class="pill warn">At Risk</span>';
+          if(s==='done') return '<span class="pill ok">Done</span>';
+          return '<span class="pill neu">Open</span>';
+        }
+        function hydrateTables(){
+          const dl=document.getElementById('deadlines');
+          deadlines.forEach(x=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${x.due}</td><td>${x.matter}</td><td>${x.what}</td><td>${rowStatus(x.status)}</td>`; dl.appendChild(tr); });
+          const dk=document.getElementById('dockets');
+          dockets.forEach(x=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${x.date}</td><td>${x.index}</td><td>${x.type}</td><td><a class="link" href="#">Open</a></td>`; dk.appendChild(tr); });
+        }
+        function bar(ctx,values){
+          const c=ctx.canvas,w=c.width,h=c.height,g=ctx,max=Math.max(...values,1),pad=24,bw=(w-pad*2)/(values.length*1.5);
+          g.clearRect(0,0,w,h);
+          values.forEach((v,i)=>{ const x=pad+i*(bw*1.5), hh=Math.round((v/max)*(h-pad*2)); g.fillStyle=i%3===0?'#0f172a':(i%3===1?'#06b6d4':'#f59e0b'); g.fillRect(x,h-pad-hh,bw,hh); g.fillStyle='#64748b'; g.fillRect(x,h-pad,bw,1); });
+        }
+        function heat(ctx,days=42){
+          const c=ctx.canvas,g=ctx,w=c.width,h=c.height; g.clearRect(0,0,w,h);
+          const cols=14,rows=Math.ceil(days/cols),cell=Math.min((w-40)/cols,(h-20)/rows); let d=0;
+          for(let r=0;r<rows;r++){ for(let cc=0;cc<cols && d<days; cc++,d++){ const x=20+cc*cell, y=10+r*cell; const level=["#e2e8f0","#cbd5e1","#94a3b8","#334155","#0f172a"][Math.floor(Math.random()*5)]; g.fillStyle=level; g.fillRect(x,y,cell-4,cell-4); g.strokeStyle="#e5e7eb"; g.strokeRect(x,y,cell-4,cell-4);} }
+        }
+        function line(ctx,values){
+          const c=ctx.canvas,g=ctx,w=c.width,h=c.height,pad=20,max=Math.max(...values,1),step=(w-pad*2)/(values.length-1);
+          g.clearRect(0,0,w,h); g.beginPath(); values.forEach((v,i)=>{ const x=pad+i*step, y=h-pad-(v/max)*(h-pad*2); if(i===0) g.moveTo(x,y); else g.lineTo(x,y); }); g.strokeStyle="#0f172a"; g.lineWidth=2; g.stroke();
+        }
+        function initCharts(){
+          const c1=document.getElementById('chart1').getContext('2d');
+          const c2=document.getElementById('chart2').getContext('2d');
+          const c3=document.getElementById('chart3').getContext('2d');
+          const c4=document.getElementById('chart4').getContext('2d');
+          bar(c1,[9,6,11,7,5,8,10,6,4]); bar(c2,[12,10,15,9,14,11,13]); heat(c3,56); line(c4,[3,5,4,6,7,6,8]);
+        }
+        hydrateTables(); initCharts();
+    </script>
+    <script type="module">
+
+        import { getDashboard, getDeadlines, getDockets, generateBundle, importNYSCEF } from './real_estate_api.js';
+
+        // Replace demo hydration with real data
+        async function hydrateFromAPI(){
+          try{
+            const data = await getDashboard();
+            // KPIs
+            if(data.kpi){
+              document.getElementById('kpi1').textContent = data.kpi.closings_this_month ?? '—';
+              document.getElementById('kpi2').textContent = data.kpi.active_leases ?? '—';
+              document.getElementById('kpi3').textContent = data.kpi.supreme_motions ?? '—';
+              document.getElementById('kpi4').textContent = data.kpi.smart_alerts ?? '—';
+            }
+            // Charts
+            const c1=document.getElementById('chart1').getContext('2d');
+            const c2=document.getElementById('chart2').getContext('2d');
+            const c3=document.getElementById('chart3').getContext('2d');
+            const c4=document.getElementById('chart4').getContext('2d');
+            // Fallbacks if arrays missing
+            const pipe = (data.pipeline || [9,6,11,7,5,8,10]);
+            const fin  = (data.finance  || [12,10,15,9,14,11,13]);
+            const heat = (data.heatmap  || 56);
+            const tasks = (data.tasks   || [3,5,4,6,7,6,8]);
+            // Reuse existing renderers declared earlier in file
+            bar(c1, pipe);
+            bar(c2, fin);
+            heatmapCount = heat; // let heat() read this length if you adapt it
+            heat(c3, heat);
+            line(c4, tasks);
+
+            // Deadlines & Dockets
+            const [dl, dk] = await Promise.all([getDeadlines(), getDockets()]);
+            const dlT = document.getElementById('deadlines');
+            const dkT = document.getElementById('dockets');
+            dlT.innerHTML = ''; dkT.innerHTML = '';
+            function rowStatus(s){
+              if(s==='warn') return '<span class="pill warn">At Risk</span>';
+              if(s==='done') return '<span class="pill ok">Done</span>';
+              return '<span class="pill neu">Open</span>';
+            }
+            (dl||[]).forEach(x=>{
+              const tr=document.createElement('tr');
+              tr.innerHTML = `<td>${x.due}</td><td>${x.matter}</td><td>${x.what}</td><td>${rowStatus(x.status)}</td>`;
+              dlT.appendChild(tr);
+            });
+            (dk||[]).forEach(x=>{
+              const tr=document.createElement('tr');
+              const link = x.url ? `<a class="link" href="${x.url}" target="_blank">Open</a>` : '<a class="link" href="#">Open</a>';
+              tr.innerHTML = `<td>${x.date}</td><td>${x.index}</td><td>${x.type}</td><td>${link}</td>`;
+              dkT.appendChild(tr);
+            });
+          }catch(e){
+            console.error(e);
+            alert('Failed to load dashboard: '+ e.message);
+          }
+        }
+        hydrateFromAPI();
+
+        // Button wiring overrides
+        window.generateBundle = async (key)=>{
+          try{
+            const res = await generateBundle(key, {});
+            alert('Bundle generated: ' + (res.fileName || res.id || 'OK'));
+          }catch(e){ alert('Bundle failed: ' + e.message); }
+        };
+        window.importNYSCEF = async ()=>{
+          const emailId = prompt('Gmail message ID to import from NYSCEF:');
+          if(!emailId) return;
+          try{
+            const res = await importNYSCEF(emailId);
+            alert('Imported NYSCEF: ' + (res.caseId || 'OK'));
+          }catch(e){ alert('Import failed: ' + e.message); }
+        };
+
+    </script>
+</body>
+</html>
+

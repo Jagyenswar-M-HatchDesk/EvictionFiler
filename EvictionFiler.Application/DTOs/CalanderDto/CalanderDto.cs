@@ -34,6 +34,7 @@ namespace EvictionFiler.Application.DTOs.CalanderDto
         public string? CaseTypeName { get; set; }
 
 
-        public string LastAction { get; set; }
+        public string? LastAction { get; set; }
+        public string? OppositeAttorney { get; set; }
     }
 }

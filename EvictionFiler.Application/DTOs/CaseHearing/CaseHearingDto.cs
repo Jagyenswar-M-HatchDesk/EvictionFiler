@@ -35,6 +35,7 @@ namespace EvictionFiler.Application.DTOs.CaseHearing
         public string? Meetingid { get; set; }
         public Guid? CountyId { get; set; }
         public string? CountyName { get; set; }
+        public string? OpposingAttorney { get; set; }
 
         public Guid? CourtPartId { get; set; }
         public string? CourtPart { get; set; }

@@ -42,7 +42,7 @@
         {
             x.CourtPart,
             x.RoomNo,
-            x.Judge
+            x.CountyName
         })
         .ToList();
 }
@@ -325,12 +325,12 @@
     }
 
 
-     @@media screen {
+    /*  @@media screen {
         #myPrintableContent {
             display: none !important;
         }
     }
-
+ */
     /* PRINT: show only printable content */
 
 
@@ -338,7 +338,7 @@
         font-family: "Segoe UI", Arial, sans-serif;
         background: #fff;
         color: #000;
-        padding: 20px 30px;
+       /*  padding: 20px 30px; */
     }
 
     /* HEADER */
@@ -369,6 +369,7 @@
 
     /* PART HEADER */
     .part-box {
+        margin: 0px 50px;
         background: #f4f6f8;
         border-radius: 8px;
         padding: 15px 20px;
@@ -389,7 +390,7 @@
     .case-box {
         border-top: 2px solid #111;
         padding: 15px 0;
-        margin-bottom: 25px;
+        margin:0px 50px;
     }
 
     .case-title {
@@ -431,7 +432,8 @@
             left: 0;
             width: 100%;
             background: #ffffff;
-            padding: 20px 30px;
+            padding :0px;
+            margin:0px;
         }
         /* Remove UI elements meant for screen */
         header,
@@ -463,6 +465,7 @@
         }
         /* Part box */
         .part-box {
+            margin: 0px 50px;
             background: #f4f6f8;
             border-radius: 8px;
             padding: 15px 20px;
@@ -483,8 +486,8 @@
         .case-box {
             border-top: 2px solid #111;
             padding: 15px 0;
-            margin-bottom: 25px;
             page-break-inside: avoid !important;
+            margin: 0px 50px;
         }
 
         .case-title {
@@ -574,22 +577,32 @@
             -webkit-print-color-adjust: exact !important;
         }
 
-        .print-header-group {
+        /* .print-header-group {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
             page-break-after: avoid !important;
             break-after: avoid !important;
-        }
+        } */
         /* Now force ONLY subsequent part-boxes to new pages */
-        .part-box {
+        /* .part-box {
+            page-break-before: always !important;
+            break-before: page !important;
+        } */
+        /* But NOT the very first part-box */
+        /* .print-header-group  {
+            page-break-before: avoid !important;
+            break-before: avoid !important;
+        } */
+        /* Make every print-header-group start a new printed page */
+        .print-header-group {
             page-break-before: always !important;
             break-before: page !important;
         }
-        /* But NOT the very first part-box */
-        .print-header-group + .part-box {
-            page-break-before: avoid !important;
-            break-before: avoid !important;
-        }
+            /* EXCEPTION: The very first header should NOT break before */
+            .print-header-group:first-of-type {
+                page-break-before: avoid !important;
+                break-before: avoid !important;
+            }
     }
 
     .page-link
@@ -605,6 +618,47 @@
             border-color : #1F365D;
             color:white;
     }
+    @@media print {
+        .print-footer
+
+    {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: end;
+        font-size: 14px;
+        padding: 6px 0;
+        margin:0px 50px;
+        margin-bottom:50px;
+        /* border-top: 1px solid #000; */
+        background: #fff;
+    }
+
+    }
+
+    .print-footer {
+        display: none;
+    }
+
+    @@media print {
+        .print-footer
+
+    {
+        display: block !important;
+    }
+
+    @@page {
+    /* size: auto; */
+    margin: 0;
+}
+
+    }
+
+
+    
+
+
 </style>
 
 <div class="wrap">
@@ -822,11 +876,11 @@
     <div id="myPrintableContent" class="print-container" style="width :890px">
 
         <!-- HEADER -->
-        <div class="print-header-group">
+        @* <div class="print-header-group">
             <div class="print-header">
-                <h2>EvictionFiler – Housing Court Calendar</h2>
+                <h2>Housing Court Calendar -  @countyNameForPrint County</h2>
 
-                <div class="header-meta" style="display:flex">
+                @* <div class="header-meta" style="display:flex">
                     <span>
                         <strong>County:</strong>
                         @countyNameForPrint
@@ -836,7 +890,7 @@
                         @courtNameForPrint
                     </span>
                     
-                </div>
+                </div> *
                 <div class="header-meta mt-1" style="display:flex">
                    
                     <span>
@@ -851,22 +905,43 @@
 
             </div>
         </div>
-
-
+ *@
+        @{
+            int j = 1;
+        }
         @foreach (var part in groupedCases)
         {
-            int i = 1;
+
+            <div class="print-header-group ">
+                <div class="print-header">
+                    <h2>Housing Court Calendar -  @part.First().CountyName County</h2>
+
+                   
+                    <div class="header-meta mt-1" style="display:flex">
+
+                        <span>
+                            <strong>Court Date:</strong>
+                            @(hearingDto.HearingDate?.ToString(DateFormats.Default) ?? "--")
+                        </span>
+                        @* <span>
+                            <strong>Court Date To:</strong>
+                            @(hearingDto.HearingDateTo?.ToString(DateFormats.Default) ?? "--")
+                        </span> *@
+                    </div>
+
+                </div>
+            </div>
 
             <!-- PART HEADER -->
             <div class="part-box">
                 <div class="part-title">
-                    Part @part.Key.CourtPart – Room @part.Key.RoomNo
+                    First Time on Case - Part @part.Key.CourtPart, Room @part.Key.RoomNo
                 </div>
-                <div class="judge">
+                @* <div class="judge">
                     Judge: @(string.IsNullOrWhiteSpace(part.Key.Judge)
                                     ? "Hon. Assigned Judge"
                                     : part.Key.Judge)
-            </div>
+            </div> *@
         </div>
 
             <!-- CASES -->
@@ -874,35 +949,44 @@
             {
                 <div class="case-box">
                     <div class="case-title">
-                        @i. [@c.IndexNo] @c.LandlordName v. @c.TenantName
+                        @j. [@c.IndexNo] @c.LandlordName v. @c.TenantName
                     </div>
 
                     <div class="case-row row">
                         <div class="col-6">
-                            <span><strong>Appearance:</strong> @c.AppearanceTypeForHearinname</span><br />
-                            <span><strong>Time:</strong> @c.HearingTime</span><br />
-                            <span><strong>Case Type:</strong> @c.CaseTypeName</span><br />
-                            <span><strong>Opposition Attorney:</strong> -- </span><br />
+                            <span>Type: @c.CaseTypeName</span> |  <span>Judge:@c.Judge</span> | <span>Time: @c.HearingTime</span><br />
+
+                            <span>Conty: @c.CountyName</span> | <span>Part: @c.CourtPart</span> | <span>RoomNo: @c.RoomNo</span><br />
+
+
+                            <span>Opposition Attorney: @(c.OpposingAttorney ?? "Self-Represented")  </span><br />
+                            <span style="color:blue">Last action: @c.LastAction</span>
                         </div>
                         <div class="col-4">
-                            <div style="margin-top:12px; text-align:right;">
+                            <div style="text-align:right;">
                                 <img id=@($"qr-@{c.Id}")
                                      data-qr="@BuildQrText(c)"
-                                     style="width:100px; height:100px;" />
+                                     style="width:80px; height:80px;" />
                             </div>
                         </div>
                     </div>
 
 
 
-                    <div class="last-action">
+                    @* <div class="last-action">
                         <strong>Last action:</strong> @c.LastAction
-                    </div>
+                    </div> *@
                 </div>
 
-                i++;
+                j++;
             }
+
+
+            <div class="print-footer">
+                <span>Generated by EvictionFiler • Part @part.First().CourtPart</span>
+            </div>
         }
+        
     </div>
 
 
