@@ -553,15 +553,16 @@ aria-labelledby="createUserLabel">
                             <div class="col">
                                 <label>State</label>
                                 <InputSelect class="form-select" @bind-Value="landlord.StateId">
-                                    <option value="">-- Select --</option>
+                                   
                                     @foreach (var s in StatesList)
+
                                     {
                                         <option value="@s.Id">@s.Name</option>
                                     }
                                 </InputSelect>
                             </div>
 
-                            <div class="col">
+                            @* <div class="col">
                                 <label>City</label>
 
                                 <div class="input-group mb-3">
@@ -570,6 +571,22 @@ aria-labelledby="createUserLabel">
                                 </div>
 
 
+                            </div> *@
+                            <div class="col-4">
+                                <label class="required-label">City</label>
+
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                    @* <InputText class="form-control" @bind-Value="building.CityName" placeholder="Enter City " /> *@
+                                    <InputSelect class="form-select" @bind-Value="landlord.CityId">
+                                        
+                                        @foreach (var s in CityList)
+                                        {
+                                            <option value="@s.Id">@s.Name</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => building.CityId)" />
+                                </div>
                             </div>
 
                             <div class="col">
@@ -667,7 +684,7 @@ aria-labelledby="createUserLabel">
 
                                                     if (!string.IsNullOrWhiteSpace(l.Address1)) parts.Add(l.Address1);
                                                     if (!string.IsNullOrWhiteSpace(l.Address2)) parts.Add(l.Address2);
-                                                    if (!string.IsNullOrWhiteSpace(l.City)) parts.Add(l.City);
+                                                    if (!string.IsNullOrWhiteSpace(l.CityName)) parts.Add(l.CityName);
                                                     if (!string.IsNullOrWhiteSpace(l.StateName)) parts.Add(l.StateName);
                                                     if (!string.IsNullOrWhiteSpace(l.Zipcode)) parts.Add(l.Zipcode);
 
@@ -1003,6 +1020,7 @@ aria-labelledby="createUserLabel">
                                 </div>
 
                             </div>
+                           
 
                             <div class="col-4">
                                 <label class="required-label">City</label>
@@ -1011,7 +1029,7 @@ aria-labelledby="createUserLabel">
                                     <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                     @* <InputText class="form-control" @bind-Value="building.CityName" placeholder="Enter City " /> *@
                                     <InputSelect class="form-select" @bind-Value="building.CityId">
-                                        <option value="">-- Select --</option>
+                                       
                                         @foreach (var s in CityList)
                                         {
                                             <option value="@s.Id">@s.Name</option>
@@ -1023,15 +1041,20 @@ aria-labelledby="createUserLabel">
 
                             <div class="col-4">
                                 <label class="required-label">State</label>
+                               
                                 <InputSelect class="form-select" @bind-Value="building.StateId">
+                                     
                                     @foreach (var s in StatesList)
                                     {
                                         <option value="@s.Id">@s.Name</option>
                                     }
                                 </InputSelect>
                                 <ValidationMessage For="@(() => building.StateId)" />
-                            </div>
+                            
                         </div>
+                        </div>
+
+                         
 
                         <div class="row mb-3">
                             <div class="col-12">
@@ -1741,6 +1764,9 @@ aria-labelledby="createUserLabel">
             TenancyTypeForBuildingList = await TenancyTypeForBuildingRepository.GetAllAsync();
             if (!RegistrationstatusList.Any()) RegistrationstatusList = await CaseTypeRepository.GetAllRegistrationstatus();
         }
+        landlord.StateId = StatesList.Where(e => e.Name.Contains("New York")).Select(e => e.Id).FirstOrDefault();
+        building.StateId = StatesList.Where(e => e.Name.Contains("New York")).Select(e => e.Id).FirstOrDefault();
+        building.GoodCause = true;
         occupants.Add(new AddtionalTenantDto());
 
     }
@@ -1852,7 +1878,7 @@ aria-labelledby="createUserLabel">
             landlord.Id = Guid.NewGuid();
             landlord.TypeOwnerName = TypeOwnerList
                 .FirstOrDefault(x => x.Id == landlord.TypeOwnerId)?.Name ?? "";
-
+            
             landlord.StateName = StatesList
                 .FirstOrDefault(x => x.Id == landlord.StateId)?.Name ?? "";
             landlord.LandlordTypeName = LandLordTypeList
@@ -1893,7 +1919,8 @@ aria-labelledby="createUserLabel">
                 existing.TypeOwnerName = TypeOwnerList.FirstOrDefault(x => x.Id == landlord.TypeOwnerId)?.Name ?? "";
                 existing.StateId = landlord.StateId;
                 existing.StateName = StatesList.FirstOrDefault(x => x.Id == landlord.StateId)?.Name ?? "";
-                existing.City = landlord.City;
+                existing.CityId = landlord.CityId;
+                existing.CityName = CityList.FirstOrDefault(x => x.Id == landlord.CityId)?.Name ?? "";
                 existing.Zipcode = landlord.Zipcode;
             }
 
@@ -2105,6 +2132,7 @@ aria-labelledby="createUserLabel">
         showBuildingForm = true;
         activeTab = "building"; // 👈 set tab
         building.GoodCause = true;
+     
 
         if (savelandlordList == null || !savelandlordList.Any())
         {
@@ -2129,7 +2157,7 @@ aria-labelledby="createUserLabel">
         selectedLandlordId = landlordId;
         showLandlordForm = true;
         activeTab = "landlord"; // 👈 set tab
-                                // Get selected landlord from list
+        // Get selected landlord from list
         landlord = Landlords.FirstOrDefault(l => l.Id == landlordId) ?? new();
         StateHasChanged();
     }
@@ -2141,12 +2169,65 @@ aria-labelledby="createUserLabel">
          && !string.IsNullOrWhiteSpace(editClient.FirstName)
         && !string.IsNullOrWhiteSpace(editClient.Email) &&
             (editClient.ClientTypeId != null && editClient.ClientTypeId != Guid.Empty);
-       
+
 
     }
-    private void ToggleBuildingForm() => showBuildingForm = !showBuildingForm;
-    private void ToggleLandlordForm() => showLandlordForm = !showLandlordForm;
-    private void ToggleTanentForm() => showTanentForm = !showTanentForm;
+    private void ToggleBuildingForm()
+    {
+        if (!showBuildingForm)
+        {
+             var newYorkId = StatesList
+            .FirstOrDefault(s =>
+                s.Name.Equals("New York", StringComparison.OrdinalIgnoreCase))
+            ?.Id;
+            var city = CityList
+               .FirstOrDefault(s =>s.Name.Equals("New York", StringComparison.OrdinalIgnoreCase))?.Id;
+            // ✅ ADD NEW BUILDING
+            building = new EditToBuildingDto
+            {
+                Id = Guid.Empty,
+                StateId=newYorkId,
+                CityId=city,
+                GoodCause=true
+               
+            };
+        }
+        showBuildingForm = !showBuildingForm;
+    }
+    private void ToggleLandlordForm()
+    {
+        if (!showLandlordForm)
+        {
+            var newYorkId = StatesList
+            .FirstOrDefault(s =>
+                s.Name.Equals("New York", StringComparison.OrdinalIgnoreCase))
+            ?.Id;
+             var city = CityList
+               .FirstOrDefault(s =>s.Name.Equals("New York", StringComparison.OrdinalIgnoreCase))?.Id;
+           
+            landlord = new EditToLandlordDto
+            {
+                Id = Guid.Empty,
+                StateId=newYorkId,
+                CityId=city
+               
+            };
+        }
+        showLandlordForm = !showLandlordForm;
+    }
+    private void ToggleTanentForm()
+    {
+         if (!showTanentForm)
+        {
+            // ADD NEW
+            tenant = new EditToTenantDto
+            {
+                Id = Guid.Empty,
+               
+            };
+        }
+        showTanentForm = !showTanentForm;
+    }
 
     public async Task HideAsync()
     {

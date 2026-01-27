@@ -32,9 +32,11 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 		public string? CityName { get; set; } = string.Empty;
         [Required(ErrorMessage = "Select City")]
         public Guid? CityId { get; set; }
+
+        public string? StateName { get; set; }
         [Required(ErrorMessage = "Select State")]
         public Guid? StateId { get; set; }
-		public string? StateName { get; set; }
+
         [Required(ErrorMessage = "Zipcode is Required")]
         public string? Zipcode { get; set; } = string.Empty;
 		[Required(ErrorMessage = "Select LandLord")]

@@ -23,7 +23,8 @@ namespace EvictionFiler.Application.DTOs.LandLordDto
 
         public string Address1 { get; set; } = string.Empty;
 		public string? Address2 { get; set; }
-		public string? City { get; set; } = string.Empty;
+		public Guid? CityId {  get; set; }
+		public string? CityName { get; set; } 
 		public Guid? StateId { get; set; }
 		public string? StateName { get; set; }
 		public string Zipcode { get; set; } = string.Empty;
