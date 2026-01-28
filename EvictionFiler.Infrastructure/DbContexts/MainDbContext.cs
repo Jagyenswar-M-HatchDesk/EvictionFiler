@@ -95,6 +95,7 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<CaseWarrant> CaseWarrants { get; set; }
         public DbSet<CaseAppearance> CaseAppearances { get; set; }
         public DbSet<AdjournedReason> MstAdjournedReasons { get; set; }
+        public DbSet<CaseNotes> CaseNotes { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
