@@ -52,7 +52,7 @@ namespace EvictionFiler.Application.Services
                     Address1 = dto.Address1,
                     Address2 = dto.Address2,
                     StateId = dto.StateId,
-                    City = dto.City,
+                    CityId = dto.CityId,
                     Zipcode = dto.Zipcode,
                     ContactPersonName = dto.ContactPersonName,
                     DateOfRefreeDeed = dto.DateOfRefreeDeed,
@@ -100,7 +100,7 @@ namespace EvictionFiler.Application.Services
                 LandlordTypeId = dto.LandlordTypeId,
                 DateOfRefreeDeed = dto.DateOfRefreeDeed,
                 LandlordTypeName = dto.LandlordType?.Name ?? "Unknown",
-                City = dto.City,
+                CityId = dto.CityId,
                 Zipcode = dto.Zipcode,
                 ContactPersonName = dto.ContactPersonName,
                 AttorneyOfRecord = dto.AttorneyOfRecord,
@@ -141,7 +141,7 @@ namespace EvictionFiler.Application.Services
                 Address1 = dto.Address1,
                 Address2 = dto.Address2,
                 StateId = dto.StateId,
-                City = dto.City,
+                CityId = dto.CityId,
                 Zipcode = dto.Zipcode,
                 ContactPersonName = dto.ContactPersonName,
                 DateOfRefreeDeed = dto.DateOfRefreeDeed,
@@ -196,7 +196,7 @@ namespace EvictionFiler.Application.Services
                 LandlordTypeId = dto.LandlordTypeId,
                 LandlordTypeName = dto.LandlordType?.Name,
                 DateOfRefreeDeed = dto.DateOfRefreeDeed,
-                City = dto.City,
+                CityId = dto.CityId,
                 Zipcode = dto.Zipcode,
                 ContactPersonName = dto.ContactPersonName,
                 TypeOwnerId = dto.TypeOfOwnerId,
@@ -234,7 +234,7 @@ namespace EvictionFiler.Application.Services
                     entity.Address2 = l.Address2;
                     entity.TypeOfOwnerId = l.TypeOwnerId;
                     entity.StateId = l.StateId;
-                    entity.City = l.City;
+                    entity.CityId = l.CityId;
                     entity.Zipcode = l.Zipcode;
                     entity.EINorSSN = l.EINorSSN;
                     entity.LandlordTypeId = l.LandlordTypeId;

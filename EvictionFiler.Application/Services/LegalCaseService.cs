@@ -876,7 +876,7 @@ namespace EvictionFiler.Application.Services
                         Address1 = legalcaseEntity.Tenants.Building.Landlord.Address1,
                         Address2 = legalcaseEntity.Tenants.Building.Landlord.Address2,
                         Zipcode = legalcaseEntity.Tenants.Building.Landlord.Zipcode,
-                        City = legalcaseEntity.Tenants.Building.Landlord.City,
+                        CityId = legalcaseEntity.Tenants.Building.Landlord.CityId,
                         StateId = legalcaseEntity.Tenants.Building.Landlord.StateId,
                         Phone = legalcaseEntity.Tenants.Building.Landlord.Phone,
                         Email = legalcaseEntity.Tenants.Building.Landlord.Email,

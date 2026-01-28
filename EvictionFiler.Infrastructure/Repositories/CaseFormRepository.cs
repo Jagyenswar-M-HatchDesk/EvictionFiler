@@ -442,7 +442,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                      LandlordAddress = landlord != null
         ? (landlord.Address1 ?? "") + " " +
           (landlord.Address2 ?? "") + " " +
-          (landlord.City ?? "") + " " +
+          (landlord.City != null ? landlord.City.Name : "") + " " +
           (landlord.State != null ? landlord.State.Name : "") + " " +
           (landlord.Zipcode ?? "")
         : null,
