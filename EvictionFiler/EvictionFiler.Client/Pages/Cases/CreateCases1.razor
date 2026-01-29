@@ -377,7 +377,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         border-radius: 12px;
         border: 1px solid #cbd5e1;
         background: #fff;
-        color: #0f172a
+        color: #0f172a;
+        min-height:45px;
     }
 
         .btn.primary {
@@ -900,8 +901,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <input type="text" class="  holdover-form"
                                                                placeholder="Enter Name"
                                                                @bind="legalcaseDto.ClientName"
-                                                                @bind:after="ValidateInput">
-                                                               />
+                                                                @bind:after="ValidateInput"  />
                                                         <ValidationMessage For="() => legalcaseDto.ClientName" />
                                                     </div>
                                                     <div class="col-4">
@@ -1220,6 +1220,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <option value="@s.Id">@s.Name</option>
                                                         }
                                                     </InputSelect>
+                                                    <ValidationMessage For="() => legalcaseDto.BoroughorCityId" />
                                                 </div>
 
                                                 <!-- Rent Regulation -->
@@ -1235,6 +1236,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <option value="@l.Id">@l.Name</option>
                                                         }
                                                     </InputSelect>
+                                                    <ValidationMessage For="() => legalcaseDto.RegulationStatusId" />
                                                 </div>
 
                                                 @if (ShowExemptionBasic)
@@ -1321,7 +1323,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <option value="@s.Id">@s.Name</option>
                                                         }
                                                     </InputSelect>
-                                                    @if (!IsExistingBuildingSelected)
+                                                    @if (!isBuildingSelected)
                                                     {
                                                         <ValidationMessage For="() => legalcaseDto.PremiseTypeId" />
                                                     }
@@ -1352,10 +1354,11 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                         </div>
                                                                     }
                                                                 </InputRadioGroup>
-                                                                <ValidationMessage For="() => legalcaseDto.RegistrationStatusTypeId" />
+                                                                
 
 
                                                             </div>
+                                                            <ValidationMessage For="() => legalcaseDto.RegistrationStatusTypeId" />
                                                         }
                                                     </div>
                                                 </div>
@@ -1470,7 +1473,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             </button>
                                         }
                                         <div class="col-md-6 position-relative" @onfocusout="HideTenantDropDown">
-                                            <label class=@(selectedtenant == null ? "lbl required-label" : "lbl ")>Unit / Apt # (confirm)</label>
+                                            <label class=@(selectedtenant == null ? "lbl required-label" : "lbl")>Unit / Apt # (confirm)</label>
                                             <input type="text" class="  holdover-form" autocomplete="off"
                                                    placeholder="Search or Enter Unit / Apt"
                                                    @bind="searchTenantText"
@@ -3257,12 +3260,12 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     @if (legalcaseDto.CaseTypeName == "NonPayment")
                                     {
                                         <!--Lease-->
-                                        <div class="row mt-2">
+                                        @* <div class="row mt-2">
                                             <div class="col">
                                                 <div class="card mb-3">
                                                     <div class="card-header">
                                                         <div style="font-weight:700" class="head"> Lease & Assistance</div>
-                                                        @* <div class="hint">Used to populate petition & notices</div> *@
+                                                        @* <div class="hint">Used to populate petition & notices</div> *
                                                     </div>
                                                     <div class="card-body">
                                                         <div class="row g-2 mb-3">
@@ -3385,7 +3388,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                         <button class="remove-btn" @onclick="(() => RemoveRow(item))">
                                                                             × Remove
                                                                         </button>
-                                                                    </div> *@
+                                                                    </div> *
 
 
                                                                     </div>
@@ -3393,7 +3396,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                                 @* <button class="add-btn" @onclick="AddRow">
                                                                 + Add Month
-                                                            </button> *@
+                                                            </button> *
 
                                                             </div>
                                                         </div>
@@ -3404,7 +3407,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
 
                                         </div>
-
+ *@
                                         <!--notices-->
                                         @*  <div class="row">
                                         <div class="col">
@@ -7132,6 +7135,7 @@ r.Name == "Other");
                     {
                         Require(() => legalcaseDto.BuildingZip, nameof(legalcaseDto.BuildingZip), "Zipcode is Required");
                         Require(() => legalcaseDto.BuildingStateId, nameof(legalcaseDto.BuildingStateId), "Please select a state");
+                        Require(() => legalcaseDto.ManagingAgent, nameof(legalcaseDto.ManagingAgent), "Please select a state");
                     }
 
                     if (!isBuildingSelected)
@@ -7154,6 +7158,11 @@ r.Name == "Other");
                     if (!isBuildingSelected)
                     {
                         Require(() => legalcaseDto.RegistrationStatusTypeId, nameof(legalcaseDto.RegistrationStatusTypeId), "Select Registration Status");
+
+                    }
+                    if (!isBuildingSelected)
+                    {
+                        Require(() => legalcaseDto.RegistrationStatusTypeId, nameof(legalcaseDto.PremiseTypeId), "Select Building Type Status");
 
                     }
 
@@ -8464,9 +8473,27 @@ r.Name == "Other");
                     }
                 }
 
-                if (selectedtenant != null)
+                if (selectedtenant != null && HasTenantChanged(selectedtenant, legalcaseDto))
                 {
                     legalcaseDto.TenantId = selectedtenant.Id;
+                    var parts = Tenants[0].Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    var firstName = parts.FirstOrDefault() ?? "";
+                    var lastName = parts.Length > 1 ? parts.Last() : "";
+                    var existingTenant = new EditToTenantDto()
+                    {
+                        Id = legalcaseDto.TenantId.Value,
+                        FirstName = firstName,
+                        LastName = lastName,
+                        UnitOrApartmentNumber = legalcaseDto.UnitOrApartmentNumber ?? searchTenantText,
+                        BuildingId = legalcaseDto.BuildingId,
+                        PrimaryResidence = legalcaseDto.PrimaryResidence,
+                        TenancyTypeId = legalcaseDto.TenancyTypeId,
+                        MonthlyRent = legalcaseDto.MonthlyRent,
+                        RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+
+
+                    };
+                    var tenantId = await _tenantService.UpdateTenantfromCase(existingTenant);
                 }
                 else
                 {
@@ -8479,8 +8506,11 @@ r.Name == "Other");
                         LastName = lastName,
                         UnitOrApartmentNumber = legalcaseDto.UnitOrApartmentNumber ?? searchTenantText,
                         BuildingId = legalcaseDto.BuildingId,
-                        PrimaryResidence = PrimaryResidence,
-                        TenancyTypeId = TenancytypeId,
+                        PrimaryResidence = legalcaseDto.PrimaryResidence,
+                        TenancyTypeId = legalcaseDto.TenancyTypeId,
+                        MonthlyRent = legalcaseDto.MonthlyRent,
+                        RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+
 
                     };
                     var tenantId = await _tenantService.AddTenantfromCase(newTenant);
@@ -8979,7 +9009,11 @@ r.Name == "Other");
     private bool HasTenantChanged(EditToTenantDto existing, IntakeModel dto)
     {
         return !dto.TenantName.Contains(existing.FirstName)
-            || !dto.TenantName.Contains(existing.LastName!);
+            || !dto.TenantName.Contains(existing.LastName!)
+            || dto.MonthlyRent != existing.MonthlyRent 
+            || dto.TenancyTypeId != existing.TenancyTypeId
+            || dto.RentDueEachMonthOrWeekId != existing.RentDueEachMonthOrWeekId
+            || dto.PrimaryResidence != existing.PrimaryResidence;
 
     }
     // Helper functions
@@ -9036,7 +9070,7 @@ r.Name == "Other");
                 };
             }
         }
-         ValidateInput();
+        ValidateInput();
     }
 
 
@@ -9199,7 +9233,7 @@ r.Name == "Other");
         }
 
         legalcaseDto.ExpirationDate = expiration;
-         ValidateInput();
+        ValidateInput();
     }
 
 
@@ -9683,7 +9717,7 @@ r.Name == "Other");
 
         _editContext.NotifyValidationStateChanged();
 
-
+        await ValidateInput();
     }
 
 
@@ -10120,7 +10154,7 @@ r.Name == "Other");
 
         _editContext.NotifyValidationStateChanged();
 
-
+        await ValidateInput();
     }
 
     private async void SelectedTenant(EditToTenantDto tenant)
@@ -10163,6 +10197,7 @@ r.Name == "Other");
 
         StateHasChanged();
 
+        await ValidateInput();
 
     }
     private async Task SelectedOwnerOccupied()
@@ -10347,7 +10382,7 @@ r.Name == "Other");
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.ClientEmail)));
         _editContext.NotifyValidationStateChanged();
 
-
+        await ValidateInput();
 
     }
 

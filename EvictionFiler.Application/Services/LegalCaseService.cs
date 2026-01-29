@@ -520,8 +520,8 @@ namespace EvictionFiler.Application.Services
 
                         // Tenant
                         TenantId = caseEntity.TenantId,
-                        TenantName = $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}",
-                        ApartmentNumber = caseEntity.Buildings?.ApartmentCode,
+                        TenantName = caseEntity.Tenants != null ? $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}" : string.Empty,
+                        ApartmentNumber = caseEntity.Tenants != null ? caseEntity.Tenants?.UnitOrApartmentNumber : string.Empty,
                         TenancyTypeId = caseEntity.Tenants != null ? caseEntity.Tenants.TenancyTypeId : Guid.Empty,
                         PrimaryResidence = caseEntity.Tenants != null ? caseEntity.Tenants.PrimaryResidence : false,
                         MonthlyRent = caseEntity.Tenants != null ? caseEntity.Tenants.MonthlyRent : 0,
@@ -606,12 +606,12 @@ namespace EvictionFiler.Application.Services
                                               .Select(x => x.Id)
                                               .ToList(),
                         PartyRepresentId = caseEntity.PartyRepresentId,
-                        PremiseTypeId = caseEntity.Buildings.PremiseTypeId,
+                        PremiseTypeId = caseEntity.Buildings != null ? caseEntity.Buildings.PremiseTypeId : null,
 
 
-                        UnitOrApartmentNumber = caseEntity.Tenants!.UnitOrApartmentNumber,
-                        FirstName = caseEntity.Tenants.FirstName,
-                        LastName = caseEntity.Tenants.LastName,
+                        UnitOrApartmentNumber = caseEntity.Tenants != null ? caseEntity.Tenants!.UnitOrApartmentNumber : string.Empty,
+                        FirstName = caseEntity.Tenants != null ? caseEntity.Tenants.FirstName : string.Empty,
+                        LastName = caseEntity.Tenants != null ? caseEntity.Tenants.LastName : string.Empty,
                         BillAmount = caseEntity.BillAmount ?? 0,
 
                         LastPayment = caseEntity.LastPayment,
@@ -634,9 +634,9 @@ namespace EvictionFiler.Application.Services
                         FilingMethodId = caseEntity.FilingMethodId,
                         NoticeId = caseEntity.NoticeId,
                         ServiceMethodId = caseEntity.ServiceMethodId,
-                        CountyId = caseEntity.CourtLocation?.CountyId,
+                        CountyId = caseEntity.CourtLocation !=null ? caseEntity.CourtLocation?.CountyId : null,
                         CourtTypeId = caseEntity.CourtTypeId,
-                        CountyName = caseEntity.CourtLocation?.County?.Name ?? string.Empty,
+                        CountyName = caseEntity.CourtLocation != null ? caseEntity.CourtLocation?.County?.Name : string.Empty,
 
                        
 

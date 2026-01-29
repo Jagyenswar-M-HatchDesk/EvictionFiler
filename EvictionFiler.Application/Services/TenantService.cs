@@ -310,6 +310,10 @@ namespace EvictionFiler.Application.Services
                 if (entity.UnitOrApartmentNumber != tenants.UnitOrApartmentNumber) entity.UnitOrApartmentNumber = tenants.UnitOrApartmentNumber;
                 if (entity.LastName != tenants.LastName) entity.LastName = tenants.LastName;
                 if (entity.BuildinId != tenants.BuildingId) entity.BuildinId = tenants.BuildingId;
+                if (entity.PrimaryResidence != tenants.PrimaryResidence) entity.PrimaryResidence = tenants.PrimaryResidence;
+                if (entity.TenancyTypeId != tenants.TenancyTypeId) entity.TenancyTypeId = tenants.TenancyTypeId;
+                if (entity.MonthlyRent != tenants.MonthlyRent) entity.MonthlyRent = tenants.MonthlyRent;
+                if (entity.RentDueEachMonthOrWeekId != tenants.RentDueEachMonthOrWeekId) entity.RentDueEachMonthOrWeekId = tenants.RentDueEachMonthOrWeekId;
 
             }
 
