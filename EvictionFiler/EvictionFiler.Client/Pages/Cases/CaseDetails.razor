@@ -1090,8 +1090,8 @@
                     <div class="col-12 col-md-6 col-lg-3">
                         <div class="card inner-card border-0 h-100" style="background-color: #DDB156;">
                             <div class="card-body d-flex align-items-center gap-3">
-                                <div class="rounded-3 bg-brand-primary-50 text-brand-primary d-flex align-items-center justify-content-center" style="width:42px;height:42px;">
-                                    <i class="bi bi-cash-stack"></i>
+                                <div class="rounded-3 text-brand-primary d-flex align-items-start justify-content-center" style="width:42px;height:42px; background-color:transparent;">
+                                    <i class="fa-solid fa-dice-d6" style="font-size:34px; color:#1F365D !important;"></i>
                                 </div>
                                 <div>
                                     <div class="Overview-lbl">Monthly Rent</div>
@@ -1103,8 +1103,8 @@
                     <div class="col-12 col-md-6 col-lg-3">
                         <div class="card inner-card border-0 h-100" style="background-color: #E6F5F9;">
                             <div class="card-body d-flex align-items-center gap-3">
-                                <div class="rounded-3 bg-warning-subtle text-warning-emphasis d-flex align-items-center justify-content-center" style="width:42px;height:42px;">
-                                    <i class="bi bi-alarm"></i>
+                                <div class="rounded-3 text-warning-emphasis d-flex align-items-start justify-content-center" style="width:42px;height:42px;background-color:transparent;">
+                                    <i class="fa-solid fa-dice-d6" style="font-size:34px;color:#1F365D !important;"></i>
                                 </div>
                                 <div>
                                     <div class="Overview-lbl">Days Open</div>
@@ -1118,9 +1118,9 @@
                         <div class="card inner-card border-0 h-100" style="background-color: #ECF2FF;">
                             <div class="card-body d-flex align-items-center gap-3">
 
-                                <div class="rounded-3 bg-brand-accent-100 text-brand-accent d-flex align-items-center justify-content-center"
-                                     style="width:42px;height:42px;">
-                                    <i class="bi bi-person"></i>
+                                <div class="rounded-3 text-brand-accent d-flex align-items-start justify-content-center"
+                                     style="width:42px;height:42px; background-color:transparent;">
+                                    <i class="fa-solid fa-dice-d6" style="font-size:34px;color:#1F365D !important;"></i>
                                 </div>
 
                                 <!-- THIS WRAPPER IS CRITICAL -->
@@ -2459,6 +2459,7 @@
 
                             <div class="card-body">
                                 <!-- Unit / Apt -->
+                                <EditForm EditContext="_editContext">
                                 <div class="row position-relative">
 
                                     <div class="col-md-6" @onfocusout="HideTenantDropDown">
@@ -2578,15 +2579,15 @@
                                                 <option value="@l.Id">@l.Name</option>
                                             }
                                         </InputSelect>
-                                        @*<ValidationMessage For="() => legalcaseDto.RentDueEachMonthOrWeekId" />*@
+                                        <ValidationMessage For="() => legalcaseDto.RentDueEachMonthOrWeekId" />
                                     </div>
 
                                     <div class="col-md-4">
                                         <label class="form-label required-label">Monthly Rent ($)</label>
                                         <InputNumber class="form-control" @bind-Value="legalcaseDto.MonthlyRent" />
-                                        @* <ValidationMessage For="() => noticeModel.MonthlyRent" /> *@
+                                            <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
 
-                                    </div>
+                                        </div>
 
                                     <div class="col-md-4">
                                         <label class="form-label">Tenant's Share ($)</label>
@@ -2602,6 +2603,7 @@
                                                 <option value="@t.Id">@t.Name</option>
                                             }
                                         </InputSelect>
+                                            <ValidationMessage For="() => legalcaseDto.TenancyTypeId" />
                                     </div>
 
                                     <div class="col-md-4">
@@ -2699,7 +2701,7 @@
                                 </div>
 
 
-
+                                </EditForm>
 
                             </div>
                         </div>
@@ -4481,6 +4483,7 @@
     public record MonthItem(string Value, string Display);
     private List<MonthItem> MonthOptions = new();
     private List<ArrearLedgerDto> Rows = new();
+    private List<ArrearLedgerDto> RowstoDelete = new();
 
     private void OnMonthChanged(ArrearLedgerDto row)
     {
@@ -4530,6 +4533,11 @@
     private void RemoveRow(ArrearLedgerDto row)
     {
         Rows.Remove(row);
+        if (row.Id != null && row.Id != Guid.Empty)
+        {
+            RowstoDelete.Add(row);
+        }
+
     }
 
     private void OnAmountChanged(ArrearLedgerDto row, double value)
@@ -5036,35 +5044,43 @@
         UnderTenants.Clear();
         CaseAdditionalTenantfromDbList.Clear();
         TenantList = await _tenantService.GetTenantsByClientIdAsync(legalcaseDto.BuildingId!.Value);
-        ViewTenant = await _tenantService.GetByIdAsync(legalcaseDto.TenantId!.Value);
 
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
         if (!TenancyTypeList.Any()) TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
         if (!DateRentList.Any()) DateRentList = await DateRentRepository.GetAllDateRent();
-        if (!CaseAdditionalTenantfromDbList.Any()) CaseAdditionalTenantfromDbList = await _caseAdditionalTenant.GetAllAdditionalCaseTenantsAsync(legalcaseDto.Id);
 
-        // AdditionalTenantfromDbList = await _additionalTenantService.GetAllAdditionalTenantsAsync(legalcaseDto.TenantId);
-        AdditionalOccupantsFromDbList = await _additionalOccupantService.GetAllAdditionalOccupantsAsync(legalcaseDto.Id);
-        AdditionalOccupantsList = AdditionalOccupantsFromDbList.ToList();
-        searchTenantText = ViewTenant.UnitOrApartmentNumber!;
-        Tenants.Add(legalcaseDto.TenantName);
-        if (CaseAdditionalTenantfromDbList.Any())
+        if (legalcaseDto.TenantId != null && legalcaseDto.TenantId != Guid.Empty)
         {
-            Tenants.AddRange(CaseAdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}").ToList());
-            AdditionalTenantList.AddRange(CaseAdditionalTenantfromDbList.Select(e => new AddtionalTenantDto
+            ViewTenant = await _tenantService.GetByIdAsync(legalcaseDto.TenantId!.Value);
+            if (!CaseAdditionalTenantfromDbList.Any()) CaseAdditionalTenantfromDbList = await _caseAdditionalTenant.GetAllAdditionalCaseTenantsAsync(legalcaseDto.Id);
+
+            // AdditionalTenantfromDbList = await _additionalTenantService.GetAllAdditionalTenantsAsync(legalcaseDto.TenantId);
+            AdditionalOccupantsFromDbList = await _additionalOccupantService.GetAllAdditionalOccupantsAsync(legalcaseDto.Id);
+            AdditionalOccupantsList = AdditionalOccupantsFromDbList.ToList();
+            searchTenantText = ViewTenant.UnitOrApartmentNumber!;
+            Tenants.Add(legalcaseDto.TenantName);
+            if (CaseAdditionalTenantfromDbList.Any())
             {
-                FirstName = e.FirstName,
-                LastName = e.LastName,
-                Id = e.Id,
-                LegalCaseId = e.LegalCaseId
-            }).ToList());
+                Tenants.AddRange(CaseAdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}").ToList());
+                AdditionalTenantList.AddRange(CaseAdditionalTenantfromDbList.Select(e => new AddtionalTenantDto
+                {
+                    FirstName = e.FirstName,
+                    LastName = e.LastName,
+                    Id = e.Id,
+                    LegalCaseId = e.LegalCaseId
+                }).ToList());
+            }
+            // Tenants.AddRange(CaseAdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}"));
+            UnderTenants.AddRange(AdditionalOccupantsFromDbList.Select(e => $"{e.Name}"));
+
+            GenerateMonths();
+            Rows = legalcaseDto.ArrearLedgers;
+
         }
-        // Tenants.AddRange(CaseAdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}"));
-        UnderTenants.AddRange(AdditionalOccupantsFromDbList.Select(e => $"{e.Name}"));
+
         var undertenaants = new List<string>() { "John Doe", "John Doe" };
         UnderTenants.AddRange(undertenaants);
-        GenerateMonths();
-        Rows = legalcaseDto.ArrearLedgers;
+
         StateHasChanged();
         JS.InvokeVoidAsync("showModal", "tenantModal");
     }
@@ -5670,6 +5686,14 @@
         searchTenantText = null;
         legalcaseDto.TenantId = null;
         legalcaseDto.TenantName = null;
+        legalcaseDto.MonthlyRent = null;
+        legalcaseDto.TenancyTypeId = null;
+        legalcaseDto.RentDueEachMonthOrWeekId = null;
+        legalcaseDto.PrimaryResidence = false;
+        legalcaseDto.LastPaymentDate = null;
+        legalcaseDto.LastPayment = null;
+        legalcaseDto.TotalOwed = null;
+        RowstoDelete.AddRange(Rows.Where(e => e.Id != null && e.Id != Guid.Empty).ToList());
         AdditionalTenantfromDbList = new List<AdditioanlTenants>();
         AdditionalTenantList = new List<AddtionalTenantDto>();
     }
@@ -6058,7 +6082,9 @@
 
     private async Task SaveTenantChanges()
     {
+        if (!await ValidateCurrentStep("Tenant")) return;
         spinnerservice.Show();
+
 
         var addorupdate = false;
 
@@ -6235,6 +6261,11 @@
                 }
             }
 
+            if(RowstoDelete.Any())
+            {
+                await _service.DeleteArrearLedger(RowstoDelete);
+            }
+
             ToastService.ShowSuccess("Tenant details updated successfully!");
             await JS.InvokeVoidAsync("hideModal", "tenantModal");
 
@@ -6263,12 +6294,29 @@
             || existing.SocialServices != current.SocialService;
     }
 
-    private async Task<bool> ValidateCurrentStep()
+    private async Task<bool> ValidateCurrentStep(string modal)
     {
         messageStore.Clear();
 
+        if(modal == "Tenant")
+        {
+            bool isTenantSelected = legalcaseDto.TenantId.HasValue && legalcaseDto.TenantId.Value != Guid.Empty;
+            bool isTextEntered = !string.IsNullOrWhiteSpace(searchTenantText);
 
-        Require(() => legalcaseDto.CourtLocationId, nameof(legalcaseDto.CourtLocationId), "Court Location is required");
+            // Tenant is required
+            if (!isTenantSelected && !isTextEntered)
+            {
+                Require(() => legalcaseDto.TenantId, nameof(legalcaseDto.TenantId), "Unit/Apt is required");
+            }
+
+            Require(() => legalcaseDto.TenantName, nameof(legalcaseDto.TenantName), "Tenant Name is required");
+            Require(() => legalcaseDto.RentDueEachMonthOrWeekId, nameof(legalcaseDto.RentDueEachMonthOrWeekId), "Select Date Rent due");
+            Require(() => legalcaseDto.TenancyTypeId, nameof(legalcaseDto.TenancyTypeId), "Select Tenancy type");
+            Require(() => legalcaseDto.MonthlyRent, nameof(legalcaseDto.MonthlyRent), "Monthly Rent is required");
+            Require(() => legalcaseDto.PrimaryResidence, nameof(legalcaseDto.PrimaryResidence), "Primary Residence is required");
+        }
+
+        //Require(() => legalcaseDto.CourtLocationId, nameof(legalcaseDto.CourtLocationId), "Court Location is required");
         // Require(() => legalcaseDto.DateNoticeServed, nameof(legalcaseDto.DateNoticeServed), "Notice Serve Date required");
 
 
@@ -6308,7 +6356,7 @@
 
     private async Task SaveCourtChanges()
     {
-        if (!await ValidateCurrentStep()) return;
+        if (!await ValidateCurrentStep("Court")) return;
         spinnerservice.Show();
 
         // bool addOrUpdate = false;
