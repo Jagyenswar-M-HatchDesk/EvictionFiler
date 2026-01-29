@@ -36,7 +36,7 @@ namespace EvictionFiler.Application.DTOs.CaseNoticeInfoDtos
         public DateOnly? LeaseStart { get; set; }
         public DateOnly? LeaseEnd { get; set; }
         public DateOnly? ExpirationDate { get; set; }
-        public bool? GoodCauseExempt { get; set; }
+        public bool GoodCauseExempt { get; set; } = false;
         public bool LeasedAttached { get; set; }
         public bool LedgerAttached { get; set; }
         public bool NoticeProofattached { get; set; }
