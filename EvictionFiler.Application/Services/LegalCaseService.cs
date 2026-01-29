@@ -394,7 +394,7 @@ namespace EvictionFiler.Application.Services
             return await _repository.GetAllCasesAsync();
 
         }
-        
+
 
         public async Task<List<LegalCase>> GetTodayCasesAsync()
         {
@@ -447,10 +447,10 @@ namespace EvictionFiler.Application.Services
         c => c.Courts!,
          c => c.CourtLocation!.County!,
          c => c.ArrearLedgers,
-         c=>c.Marshal,
-         c=>c.RemainderCenters
-         
-         //c=>c.RemainderCenter
+         c => c.Marshal,
+         c => c.RemainderCenters
+
+    //c=>c.RemainderCenter
     )
     .FirstOrDefaultAsync();
 
@@ -539,13 +539,13 @@ namespace EvictionFiler.Application.Services
                         CalculatedNoticeLength = caseEntity.CalculatedNoticeLength,
                         ExpirationDate = caseEntity.ExpirationDate,
                         PredicateNotice = caseEntity.PredicateNotice,
-                        
-                        
+
+
                         TotalOwed = caseEntity.TotalRentOwed,
-                        
+
                         SocialService = caseEntity.SocialService,
                         LastRentPaid = caseEntity.LastRentPaid,
-                        
+
 
                         //CourtId = caseEntity.CourtId != null ? caseEntity.CourtId : Guid.Empty,
                         Court = caseEntity.CourtLocation != null ? caseEntity.CourtLocation.Court! : "",
@@ -567,7 +567,7 @@ namespace EvictionFiler.Application.Services
                         AttrneyContactInfo = caseEntity.AttrneyContactInfo,
                         AttrneyEmail = caseEntity.AttrneyEmail,
 
-                        MarshalName = caseEntity.Marshal!= null ? $"{caseEntity.Marshal?.FirstName} {caseEntity.Marshal?.LastName}" : string.Empty,
+                        MarshalName = caseEntity.Marshal != null ? $"{caseEntity.Marshal?.FirstName} {caseEntity.Marshal?.LastName}" : string.Empty,
                         MarshalPhone = caseEntity.Marshal != null ? caseEntity.Marshal.Telephone : string.Empty,
                         Docketno = caseEntity.Marshal != null ? caseEntity.Marshal.DocketNo : string.Empty,
                         WarrantRequested = caseEntity.WarrantRequested,
@@ -634,11 +634,11 @@ namespace EvictionFiler.Application.Services
                         FilingMethodId = caseEntity.FilingMethodId,
                         NoticeId = caseEntity.NoticeId,
                         ServiceMethodId = caseEntity.ServiceMethodId,
-                        CountyId = caseEntity.CourtLocation !=null ? caseEntity.CourtLocation?.CountyId : null,
+                        CountyId = caseEntity.CourtLocation != null ? caseEntity.CourtLocation?.CountyId : null,
                         CourtTypeId = caseEntity.CourtTypeId,
                         CountyName = caseEntity.CourtLocation != null ? caseEntity.CourtLocation?.County?.Name : string.Empty,
 
-                       
+
 
                         ArrearLedgers = caseEntity.ArrearLedgers != null ? caseEntity.ArrearLedgers.Select(e => new ArrearLedgerDto()
                         {
@@ -1431,15 +1431,21 @@ namespace EvictionFiler.Application.Services
             }
 
         }
-        public async Task<bool> DeleteArrearLedger(Guid Id)
+        public async Task<bool> DeleteArrearLedger(List<ArrearLedgerDto> Ledger)
         {
-            var doclist = await _arrearLedger.DeleteAsync(Id);
-            if (doclist)
+            try
             {
-                await Task.Delay(200);
-                await _unitOfWork.SaveChangesAsync();
+                foreach (var row in Ledger)
+                {
+                    var doclist = await _arrearLedger.DeleteAsync(row.Id);
+                }
+
+                return await _unitOfWork.SaveChangesAsync() > 0;
             }
-            return doclist;
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
         public async Task<IEnumerable<City>> GetAllCitiesList()

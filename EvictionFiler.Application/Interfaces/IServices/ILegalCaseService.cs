@@ -44,7 +44,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 
         Task<bool> AddArrearLedgerAsync(List<ArrearLedgerDto> Ledger);
         Task<bool> UpdateArrearLedgerAsync(List<ArrearLedgerDto> Ledger);
-        Task<bool> DeleteArrearLedger(Guid Id);
+        Task<bool> DeleteArrearLedger(List<ArrearLedgerDto> Ledger);
         Task<IEnumerable<SubCaseType>> GetSubCaseList();
         Task<IEnumerable<City>> GetAllCitiesList();
         Task<IEnumerable<CourtType>> CourtTypeList();
