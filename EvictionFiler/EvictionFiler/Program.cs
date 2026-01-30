@@ -11,6 +11,7 @@ using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Application.Services;
 using EvictionFiler.Application.Services.Helper;
 using EvictionFiler.Application.Services.Master;
+using EvictionFiler.Client.AuthService;
 using EvictionFiler.Client.SpinnerService;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure;
@@ -26,7 +27,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Radzen;
-using Syncfusion.Licensing;
 
 
 
@@ -196,6 +196,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 
 builder.Services.AddScoped<SpinnerService>();
+builder.Services.AddScoped<UserContextService>();
 builder.Services.AddScoped<IUserservices, UserService>();
 builder.Services.AddScoped<ICaseFormService, CaseFormService>();
 builder.Services.AddScoped<ILegalCaseService, LegalCaseService>();

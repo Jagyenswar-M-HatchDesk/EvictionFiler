@@ -210,106 +210,282 @@ namespace EvictionFiler.Infrastructure.Repositories
            
         }
 
-        public async Task<PaginationDto<LegalCase>> GetAllCasesAsync(int pageNumber, int pageSize, CaseFilterDto filters, string userId,bool isAdmin)
-        {
-            var query = _context.LegalCases
-                .AsNoTracking();
-            var users = await _userRepo.GetAllUser();
-            var userDict = users.ToDictionary(u => u.Id, u => $"{u.FirstName} {u.MiddleName} {u.LastName}");
+        //public async Task<PaginationDto<LegalCase>> GetAllCasesAsync(int pageNumber, int pageSize, CaseFilterDto filters, string userId,bool isAdmin)
+        //{
+        //    var query = _context.LegalCases
+        //        .AsNoTracking();
+        //    var users = await _userRepo.GetAllUser();
+        //    var userDict = users.ToDictionary(u => u.Id, u => $"{u.FirstName} {u.MiddleName} {u.LastName}");
 
+        //    if (!isAdmin)
+        //    {
+        //        query = query.Where(c => c.IsActive == true && c.IsDeleted == false);
+
+        //        // ✅ Non-admin → Sirf apne hi clients dekhe
+        //        if (!string.IsNullOrWhiteSpace(userId))
+        //        {
+        //            var userGuid = Guid.Parse(userId);
+        //            query = query.Where(c => c.CreatedBy == userGuid);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        // ✅ Admin → Saare clients dikhenge, deleted + inactive bhi
+        //        query = query.OrderByDescending(c => c.CreatedOn);
+        //    }
+
+        //    // ✅ CaseCode filter
+        //    if (!string.IsNullOrWhiteSpace(filters.CaseCode))
+        //    {
+        //        var caseCode = filters.CaseCode.ToLower();
+        //        query = query.Where(c => (c.Casecode ?? "").ToLower().StartsWith(caseCode));
+        //    }
+
+        //    if (!string.IsNullOrWhiteSpace(filters.Client))
+        //    {
+        //        var clientFilter = filters.Client.ToLower();
+        //        query = query.Where(c =>
+        //            c.Clients != null &&
+        //            (
+        //                (c.Clients.ClientCode ?? "").ToLower().StartsWith(clientFilter) ||
+        //                (((c.Clients.FirstName ?? "") + " " + (c.Clients.LastName ?? "")).ToLower().StartsWith(clientFilter))
+        //            )
+        //        );
+        //    }
+
+
+        //    // ✅ Tenant filter
+        //    if (!string.IsNullOrWhiteSpace(filters.Tenant))
+        //    {
+        //        var tenantFilter = filters.Tenant.ToLower();
+        //        query = query.Where(c =>
+        //            (c.Tenants != null &&
+        //                (
+        //                    (c.Tenants.TenantCode ?? "").ToLower().StartsWith(tenantFilter) ||
+        //                    ((c.Tenants.FirstName ?? "") + " " + (c.Tenants.LastName ?? ""))
+        //                        .ToLower()
+        //                        .StartsWith(tenantFilter)
+        //                )
+        //            )
+        //        );
+        //    }
+
+        //    if (!string.IsNullOrWhiteSpace(filters.LandLord))
+        //    {
+        //        var landlordFilter = filters.LandLord.ToLower();
+        //        query = query.Where(c =>
+        //            (c.Tenants != null &&
+        //                (
+        //                    (c.LandLords.LandLordCode ?? "").ToLower().StartsWith(landlordFilter) ||
+        //                    ((c.LandLords.FirstName ?? "") + " " + (c.LandLords.LastName ?? ""))
+        //                        .ToLower()
+        //                        .StartsWith(landlordFilter)
+        //                )
+        //            )
+        //        );
+        //    }
+        //    //if (!string.IsNullOrWhiteSpace(filters.CaseType))
+        //    //    query = query.Where(x => (x.CaseType.Name ?? "").ToLower().StartsWith(filters.CaseType.ToLower()));
+        //    if (filters.CaseTypeId.HasValue && filters.CaseTypeId != Guid.Empty)
+        //    {
+        //        query = query.Where(x => x.CaseTypeId == filters.CaseTypeId);
+        //    }
+
+
+        //    if (!string.IsNullOrWhiteSpace(filters.ReasonHoldover))
+        //        query = query.Where(x => (x.ReasonHoldover.Name ?? "").ToLower().StartsWith(filters.ReasonHoldover.ToLower()));
+
+        //    if (!string.IsNullOrWhiteSpace(filters.ActionDate) && DateTime.TryParse(filters.ActionDate, out var parsedDate))
+        //        query = query.Where(x => x.CreatedOn.Date == parsedDate.Date);
+
+        //    if (!string.IsNullOrWhiteSpace(filters.Status))
+        //    {
+        //        query = query.Where(x =>
+        //            (x.IsActive ? "active" : "inactive").ToLower().StartsWith(filters.Status.ToLower())
+        //        );
+        //    }
+
+
+
+        //    var totalCount = await query.CountAsync();
+
+
+        //    var items = await query
+        //        .OrderByDescending(c => c.CreatedOn)
+        //        .Skip((pageNumber - 1) * pageSize)
+        //        .Take(pageSize)
+        //        .Select(c => new LegalCase
+        //        {
+        //            Id = c.Id,
+        //            Casecode = c.Casecode,
+        //            CreatedOn = c.CreatedOn,
+        //            IsActive = c.IsActive,  
+        //            IsDeleted = c.IsDeleted,
+        //            CaseType = c.CaseType,
+        //            ReasonHoldover = c.ReasonHoldover,
+        //            CreatedBy = c.CreatedBy,
+        //            TenantName = c.TenantName,
+        //            CreatedByName = userDict.ContainsKey(c.CreatedBy)
+        //                    ? userDict[c.CreatedBy]
+        //                    : "Admin",
+        //            Clients = c.Clients != null ? new Client
+        //            {
+        //                FirstName = c.Clients.FirstName,
+        //                LastName = c.Clients.LastName,
+        //                ClientCode = c.Clients.ClientCode
+        //            } : new Client(),
+        //            LandLords = c.LandLords != null ? new LandLord
+        //            {
+        //                FirstName = c.LandLords.FirstName,
+        //                LastName = c.LandLords.LastName,
+        //                LandLordCode = c.LandLords.LandLordCode
+        //            } : new LandLord(),
+        //            Buildings = c.Buildings != null ? new Building
+        //            {
+        //                BuildingCode = c.Buildings.BuildingCode
+        //            } : new Building(),
+        //            Tenants = c.Tenants != null ? new Tenant
+        //            {
+        //                TenantCode = c.Tenants.TenantCode,
+        //                FirstName = c.Tenants.FirstName,
+        //                LastName = c.Tenants.LastName
+        //            } : new Tenant()
+        //        })
+        //        .ToListAsync();
+
+        //    return new PaginationDto<LegalCase>
+        //    {
+        //        Items = items,
+        //        TotalCount = totalCount,
+        //        PageSize = pageSize,
+        //        CurrentPage = pageNumber
+        //    };
+        //}
+        public async Task<PaginationDto<LegalCase>> GetAllCasesAsync(int pageNumber, int pageSize, CaseFilterDto filters, string userId, bool isAdmin)
+        {
+            IQueryable<LegalCase> query = _context.LegalCases
+                .AsNoTracking();
+
+            // Preload users ONCE
+            var users = await _userRepo.GetAllUser();
+            var userDict = users.ToDictionary(
+                u => u.Id,
+                u => $"{u.FirstName} {u.MiddleName} {u.LastName}".Trim());
+
+            /* ---------------------------------------------------
+               ADMIN + USER FILTERING
+            --------------------------------------------------- */
             if (!isAdmin)
             {
-                query = query.Where(c => c.IsActive == true && c.IsDeleted == false);
+                query = query.Where(c => c.IsActive == true && c.IsDeleted != true);
 
-                // ✅ Non-admin → Sirf apne hi clients dekhe
-                if (!string.IsNullOrWhiteSpace(userId))
+                if (!string.IsNullOrWhiteSpace(userId) &&
+                    Guid.TryParse(userId, out Guid gid))
                 {
-                    var userGuid = Guid.Parse(userId);
-                    query = query.Where(c => c.CreatedBy == userGuid);
+                    query = query.Where(c => c.CreatedBy == gid);
                 }
             }
-            else
-            {
-                // ✅ Admin → Saare clients dikhenge, deleted + inactive bhi
-                query = query.OrderByDescending(c => c.CreatedOn);
-            }
 
-            // ✅ CaseCode filter
+            /* ---------------------------------------------------
+               FILTERS — SQL Server Optimized
+            --------------------------------------------------- */
+
+            // CASE CODE
             if (!string.IsNullOrWhiteSpace(filters.CaseCode))
             {
-                var caseCode = filters.CaseCode.ToLower();
-                query = query.Where(c => (c.Casecode ?? "").ToLower().StartsWith(caseCode));
+                string f = filters.CaseCode;
+                query = query.Where(c =>
+                    c.Casecode != null &&
+                    c.Casecode.StartsWith(f, StringComparison.OrdinalIgnoreCase));
             }
 
+            // CLIENT
             if (!string.IsNullOrWhiteSpace(filters.Client))
             {
-                var clientFilter = filters.Client.ToLower();
+                string f = filters.Client;
                 query = query.Where(c =>
                     c.Clients != null &&
                     (
-                        (c.Clients.ClientCode ?? "").ToLower().StartsWith(clientFilter) ||
-                        (((c.Clients.FirstName ?? "") + " " + (c.Clients.LastName ?? "")).ToLower().StartsWith(clientFilter))
-                    )
-                );
+                        (c.Clients.ClientCode != null &&
+                            c.Clients.ClientCode.StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                        ||
+                        ((c.Clients.FirstName + " " + c.Clients.LastName)
+                            .StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                    ));
             }
 
-
-            // ✅ Tenant filter
+            // TENANT
             if (!string.IsNullOrWhiteSpace(filters.Tenant))
             {
-                var tenantFilter = filters.Tenant.ToLower();
+                string f = filters.Tenant;
                 query = query.Where(c =>
-                    (c.Tenants != null &&
-                        (
-                            (c.Tenants.TenantCode ?? "").ToLower().StartsWith(tenantFilter) ||
-                            ((c.Tenants.FirstName ?? "") + " " + (c.Tenants.LastName ?? ""))
-                                .ToLower()
-                                .StartsWith(tenantFilter)
-                        )
-                    )
-                );
+                    c.Tenants != null &&
+                    (
+                        (c.Tenants.TenantCode != null &&
+                            c.Tenants.TenantCode.StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                        ||
+                        ((c.Tenants.FirstName + " " + c.Tenants.LastName)
+                            .StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                    ));
             }
 
+            // LANDLORD  (FIXED BUG)
             if (!string.IsNullOrWhiteSpace(filters.LandLord))
             {
-                var landlordFilter = filters.LandLord.ToLower();
+                string f = filters.LandLord;
                 query = query.Where(c =>
-                    (c.Tenants != null &&
-                        (
-                            (c.LandLords.LandLordCode ?? "").ToLower().StartsWith(landlordFilter) ||
-                            ((c.LandLords.FirstName ?? "") + " " + (c.LandLords.LastName ?? ""))
-                                .ToLower()
-                                .StartsWith(landlordFilter)
-                        )
-                    )
-                );
+                    c.LandLords != null &&
+                    (
+                        (c.LandLords.LandLordCode != null &&
+                            c.LandLords.LandLordCode.StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                        ||
+                        ((c.LandLords.FirstName + " " + c.LandLords.LastName)
+                            .StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                    ));
             }
-            //if (!string.IsNullOrWhiteSpace(filters.CaseType))
-            //    query = query.Where(x => (x.CaseType.Name ?? "").ToLower().StartsWith(filters.CaseType.ToLower()));
+
+            // CASE TYPE
             if (filters.CaseTypeId.HasValue && filters.CaseTypeId != Guid.Empty)
             {
                 query = query.Where(x => x.CaseTypeId == filters.CaseTypeId);
             }
 
-
+            // REASON HOLDOVER
             if (!string.IsNullOrWhiteSpace(filters.ReasonHoldover))
-                query = query.Where(x => (x.ReasonHoldover.Name ?? "").ToLower().StartsWith(filters.ReasonHoldover.ToLower()));
-
-            if (!string.IsNullOrWhiteSpace(filters.ActionDate) && DateTime.TryParse(filters.ActionDate, out var parsedDate))
-                query = query.Where(x => x.CreatedOn.Date == parsedDate.Date);
-
-            if (!string.IsNullOrWhiteSpace(filters.Status))
             {
+                string f = filters.ReasonHoldover;
                 query = query.Where(x =>
-                    (x.IsActive ? "active" : "inactive").ToLower().StartsWith(filters.Status.ToLower())
-                );
+                    x.ReasonHoldover != null &&
+                    x.ReasonHoldover.Name.StartsWith(f, StringComparison.OrdinalIgnoreCase));
             }
 
+            // ACTION DATE
+            if (!string.IsNullOrWhiteSpace(filters.ActionDate) &&
+                DateTime.TryParse(filters.ActionDate, out DateTime parsedDate))
+            {
+                query = query.Where(x => x.CreatedOn.Date == parsedDate.Date);
+            }
 
+            // STATUS
+            if (!string.IsNullOrWhiteSpace(filters.Status))
+            {
+                var status = filters.Status.ToLower();
 
+                if (status.StartsWith("active"))
+                {
+                    query = query.Where(x => x.IsActive == true && x.IsDeleted != true);
+                }
+                else if (status.StartsWith("inactive"))
+                {
+                    query = query.Where(x => x.IsActive == false && x.IsDeleted == true);
+                }
+            }
+
+            /* ---------------------------------------------------
+               PAGING
+            --------------------------------------------------- */
             var totalCount = await query.CountAsync();
 
-       
             var items = await query
                 .OrderByDescending(c => c.CreatedOn)
                 .Skip((pageNumber - 1) * pageSize)
@@ -319,37 +495,21 @@ namespace EvictionFiler.Infrastructure.Repositories
                     Id = c.Id,
                     Casecode = c.Casecode,
                     CreatedOn = c.CreatedOn,
-                    IsActive = c.IsActive,  
+                    IsActive = c.IsActive,
                     IsDeleted = c.IsDeleted,
                     CaseType = c.CaseType,
                     ReasonHoldover = c.ReasonHoldover,
                     CreatedBy = c.CreatedBy,
                     TenantName = c.TenantName,
+
                     CreatedByName = userDict.ContainsKey(c.CreatedBy)
                             ? userDict[c.CreatedBy]
                             : "Admin",
-                    Clients = c.Clients != null ? new Client
-                    {
-                        FirstName = c.Clients.FirstName,
-                        LastName = c.Clients.LastName,
-                        ClientCode = c.Clients.ClientCode
-                    } : new Client(),
-                    LandLords = c.LandLords != null ? new LandLord
-                    {
-                        FirstName = c.LandLords.FirstName,
-                        LastName = c.LandLords.LastName,
-                        LandLordCode = c.LandLords.LandLordCode
-                    } : new LandLord(),
-                    Buildings = c.Buildings != null ? new Building
-                    {
-                        BuildingCode = c.Buildings.BuildingCode
-                    } : new Building(),
-                    Tenants = c.Tenants != null ? new Tenant
-                    {
-                        TenantCode = c.Tenants.TenantCode,
-                        FirstName = c.Tenants.FirstName,
-                        LastName = c.Tenants.LastName
-                    } : new Tenant()
+
+                    Clients = c.Clients,
+                    LandLords = c.LandLords,
+                    Buildings = c.Buildings,
+                    Tenants = c.Tenants
                 })
                 .ToListAsync();
 

@@ -4,7 +4,6 @@ using BlazorDownloadFile;
 //using EvictionFiler.Client.Jwt;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Syncfusion.Blazor;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 

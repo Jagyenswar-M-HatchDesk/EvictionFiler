@@ -27,6 +27,7 @@
 @using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Application.Interfaces.IServices.Master
+@using EvictionFiler.Client.AuthService
 @using EvictionFiler.Client.Components.Cases
 @* @using EvictionFiler.Client.Jwt *@
 @using EvictionFiler.Domain.Entities
@@ -73,6 +74,7 @@
 @inject IJSRuntime JS
 @inject NavigationManager nav
 @inject SpinnerService spinnerservice
+@inject UserContextService userContext
 @attribute [Authorize]
 <!--
 EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
@@ -449,28 +451,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         background: #1F365D !important;
     }
 
-    .holdover-form {
-        box-shadow: none !important;
-        width: 100%;
-        padding: 12px 14px;
-        border: 1px solid #cbd5e1;
-        border-radius: 12px;
-        background: #fff;
-        color: #0f172a;
-        outline: none;
-    }
-
-        /* Remove highlight outline when opening */
-        .holdover-form:focus {
-            border-color: #1F365D !important;
-            box-shadow: 0 0 0 0 !important;
-            outline: none !important;
-        }
-    .holdover-form:focus {
-        border-color: #1F365D !important;
-        box-shadow: 0 0 0 0 !important;
-        outline: none !important;
-    }
+    
 
     .step-disabled {
         cursor: not-allowed;
@@ -601,9 +582,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
         margin-left: -0.5em;
         border: solid 2px lightgrey;
     }
-     .holdover-form:disabled{
-        background: lightgrey;
-     }
+    
 
     select:disabled {
         background: lightgrey;
@@ -689,7 +668,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <!-- CASE TYPE -->
                                             <div class="col-5 ">
                                                 <label class="lbl required-label">Case Type</label>
-                                                <InputSelect class="holdover-form holdover-form"
+                                                <InputSelect class="form-input form-input"
                                                              @bind-Value="legalcaseDto.CaseTypeId"
                                                              @bind-Value:after="BuildSteps">
 
@@ -703,7 +682,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                             <div class="col-5 ">
                                                 <label class="lbl required-label">Sub Case Type</label>
-                                                <InputSelect class="holdover-form holdover-form"
+                                                <InputSelect class="form-input form-input"
                                                              @bind-Value="legalcaseDto.SubCaseTypeId">
 
                                                     @foreach (var l in SubCaseTypeList)
@@ -721,7 +700,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     <div class="position-relative" @onfocusout="HideClientDropDown">
                                                         <label class="lbl required-label">Client</label>
 
-                                                        <input type="text" class="holdover-form" autocomplete="off"
+                                                        <input type="text" class="form-input" autocomplete="off"
                                                                placeholder="Search by client name or code..."
                                                                @bind-value="searchText"
                                                                @oninput="OnSearchInput"
@@ -778,20 +757,20 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 <div class="row g-3">
                                                     <div class="col-4">
                                                         <label class="lbl ">Client Name</label>
-                                                        <InputText class="holdover-form" style="cursor:not-allowed"
+                                                        <InputText class="form-input" style="cursor:not-allowed"
                                                                    placeholder="Enter Name"
                                                                    @bind-Value="legalcaseDto.ClientName" disabled />
                                                         <ValidationMessage For="() => legalcaseDto.ClientName" />
                                                     </div>
                                                     <div class="col-4">
                                                         <label class="lbl">Phone</label>
-                                                        <InputText class="holdover-form" style="cursor:not-allowed"
+                                                        <InputText class="form-input" style="cursor:not-allowed"
                                                                    placeholder="Enter Number"
                                                                    @bind-Value="legalcaseDto.ClientPhone" disabled />
                                                     </div>
                                                     <div class="col-4">
                                                         <label class="lbl ">Client Type</label>
-                                                        <InputSelect class="holdover-form" style="cursor:not-allowed"
+                                                        <InputSelect class="form-input" style="cursor:not-allowed"
                                                                      @bind-Value="legalcaseDto.ClientTypeId" disabled>
                                                             <option value="">-- Select --</option>
                                                             @foreach (var Own in ClientTypeList)
@@ -808,14 +787,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                     <div class="col-6">
                                                         <label class="lbl ">Email</label>
-                                                        <InputText class="holdover-form" style="cursor:not-allowed"
+                                                        <InputText class="form-input" style="cursor:not-allowed"
                                                                    placeholder="Enter Email"
                                                                    @bind-Value="legalcaseDto.ClientEmail" disabled />
                                                         <ValidationMessage For="() => legalcaseDto.ClientEmail" />
                                                     </div>
                                                     <div class="col-4">
                                                         <label class="lbl">Reference #</label>
-                                                        <InputText class="holdover-form"
+                                                        <InputText class="form-input"
                                                                    placeholder="Enter Reference"
                                                                    @bind-Value="legalcaseDto.Reference" />
                                                     </div>
@@ -826,7 +805,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     {
                                                         <div class="col-9">
                                                             <label class="lbl">Address</label>
-                                                            <InputText class="holdover-form"
+                                                            <InputText class="form-input"
                                                                        placeholder="Enter Address"
                                                                        @bind-Value="legalcaseDto.ClientAddress" />
                                                         </div>
@@ -851,21 +830,21 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                     <div class="col-4">
                                                         <label class="lbl required-label">Client Name</label>
-                                                        <InputText class="holdover-form"
+                                                        <InputText class="form-input"
                                                                    placeholder="Enter Name"
-                                                                   @bind-Value="legalcaseDto.ClientName" />
+                                                                   @bind-Value="legalcaseDto.ClientName" @bind-Value:after="ValidateInput" />
                                                         <ValidationMessage For="() => legalcaseDto.ClientName" />
                                                     </div>
                                                     <div class="col-4">
                                                         <label class="lbl">Phone</label>
-                                                        <InputText class="holdover-form"
+                                                        <InputText class="form-input"
                                                                    placeholder="Enter Number"
                                                                    @bind-Value="legalcaseDto.ClientPhone" />
                                                     </div>
                                                     <div class="col-4">
                                                         <label class="lbl required-label">Client Type</label>
-                                                        <InputSelect class="holdover-form"
-                                                                     @bind-Value="legalcaseDto.ClientTypeId">
+                                                        <InputSelect class="form-input"
+                                                                     @bind-Value="legalcaseDto.ClientTypeId" @bind-Value:after="ValidateInput">
                                                             <option value="">-- Select --</option>
                                                             @foreach (var Own in ClientTypeList)
                                                             {
@@ -876,14 +855,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     </div>
                                                     <div class="col-6">
                                                         <label class="lbl required-label">Email</label>
-                                                        <InputText class="holdover-form"
+                                                        <InputText class="form-input"
                                                                    placeholder="Enter Email"
-                                                                   @bind-Value="legalcaseDto.ClientEmail" />
+                                                                   @bind-Value="legalcaseDto.ClientEmail" @bind-Value:after="ValidateInput" />
                                                         <ValidationMessage For="() => legalcaseDto.ClientEmail" />
                                                     </div>
                                                     <div class="col-4">
                                                         <label class="lbl">Reference #</label>
-                                                        <InputText class="holdover-form"
+                                                        <InputText class="form-input"
                                                                    placeholder="Enter Reference"
                                                                    @bind-Value="legalcaseDto.Reference" />
                                                     </div>
@@ -892,7 +871,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     {
                                                         <div class="col-8">
                                                             <label class="lbl">Address</label>
-                                                            <InputText class="holdover-form"
+                                                            <InputText class="form-input"
                                                                        placeholder="Enter Address"
                                                                        @bind-Value="legalcaseDto.ClientAddress" />
                                                         </div>
@@ -954,7 +933,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                             @if (showLandlordfields && selectedlandlord == null)
                                             {
-                                                <input type="text" class="holdover-form" autocomplete="off"
+                                                <input type="text" class="form-input" autocomplete="off"
                                                        placeholder="Enter Landlord name"
                                                        @bind-value="searchlandlordText"
                                                        @onblur="saveLandLordName" />
@@ -962,7 +941,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             else
 
                                             {
-                                                <input type="text" class="holdover-form" style=@(IsLandlordSelected ? "cursor:not-allowed" : "")
+                                                <input type="text" class="form-input" style=@(IsLandlordSelected ? "cursor:not-allowed" : "")
                                                        placeholder="Search by LandLord name or code..."
                                                        @bind-value="searchlandlordText"
                                                        @oninput="OnSearchLandlordInput"
@@ -1014,7 +993,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <div class="row mt-1">
                                                 <div class="col-md-6">
                                                     <label class=@(IsLandlordSelected ? "lbl" : "lbl required-label")>Contact Person </label>
-                                                    <InputText class="holdover-form" style=@(IsLandlordSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.ContactPersonName" placeholder="Enter Contact Person" disabled="@IsLandlordSelected" />
+                                                    <InputText class="form-input" style=@(IsLandlordSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.ContactPersonName" @bind-Value:after="ValidateInput" placeholder="Enter Contact Person" disabled="@IsLandlordSelected" />
                                                     @if (!IsLandlordSelected)
                                                     {
                                                         <ValidationMessage For="() => legalcaseDto.ContactPersonName" />
@@ -1022,7 +1001,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 </div>
                                                 <div class="col-md-6 ">
                                                     <label class=@(IsLandlordSelected ? "lbl" : "lbl required-label")>Landlord Address </label>
-                                                    <InputText class="holdover-form" style=@(IsLandlordSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.LandlordAddress" placeholder="Enter Address" disabled="@IsLandlordSelected" />
+                                                    <InputText class="form-input" style=@(IsLandlordSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.LandlordAddress" @bind-Value:after="ValidateInput" placeholder="Enter Address" disabled="@IsLandlordSelected" />
                                                     @if (!IsLandlordSelected)
                                                     {
                                                         <ValidationMessage For="() => legalcaseDto.LandlordAddress" />
@@ -1067,7 +1046,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         {
                                             <div class="col-md-6 position-relative" @onfocusout="HideBuildingDropdown">
                                                 <label class="lbl  required-label">Building</label>
-                                                <input type="text" class="holdover-form" autocomplete="off"
+                                                <input type="text" class="form-input" autocomplete="off"
                                                        placeholder="Search by Building Address or code..."
                                                        @bind-value="searchBuildingText"
                                                        @oninput="OnSearchBuildingInput"
@@ -1123,7 +1102,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <div class="row mt-5">
                                                 <div class="col-6">
                                                     <label class=@(isBuildingSelected ? "lbl" : "lbl required-label")>Street Address </label>
-                                                    <InputText class="holdover-form" style=@(isBuildingSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter Address" disabled="@isBuildingSelected" />
+                                                    <InputText class="form-input" style=@(isBuildingSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.BuildingAddress" @bind-Value:after="ValidateInput" placeholder="Enter Address" disabled="@isBuildingSelected" />
 
                                                     @if (!isBuildingSelected)
                                                     {
@@ -1133,7 +1112,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                 <div class="col-md-3">
                                                     <label class=@(isBuildingSelected ? "lbl" : "lbl required-label")>MDR Number </label>
-                                                    <InputText class="holdover-form" style=@(isBuildingSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.Mdr" placeholder="Enter MDR Number" disabled="@isBuildingSelected" />
+                                                    <InputText class="form-input" style=@(isBuildingSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.Mdr" @bind-Value:after="ValidateInput" placeholder="Enter MDR Number" disabled="@isBuildingSelected" />
 
                                                     @if (!isBuildingSelected)
                                                     {
@@ -1142,7 +1121,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label class=@(isBuildingSelected ? "lbl" : "lbl required-label")>No. of Units </label>
-                                                    <InputText class="holdover-form" style=@(isBuildingSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.Units" placeholder="Enter Units" disabled="@isBuildingSelected" />
+                                                    <InputText class="form-input" style=@(isBuildingSelected ? "cursor:not-allowed" : "") @bind-Value="legalcaseDto.Units" @bind-Value:after="ValidateInput" placeholder="Enter Units" disabled="@isBuildingSelected" />
 
                                                     @if (!isBuildingSelected)
                                                     {
@@ -1157,8 +1136,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 <!-- County -->
                                                 <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:25%" : "")>
                                                     <label class="lbl required-label">County</label>
-                                                    <InputSelect class="holdover-form"
-                                                                 @bind-Value="legalcaseDto.BoroughorCityId"
+                                                    <InputSelect class="form-input"
+                                                                 @bind-Value="legalcaseDto.BoroughorCityId" @bind-Value:after="ValidateInput"
                                                                  disabled="@isBuildingSelected">
                                                         <option value="">-- Select --</option>
                                                         @foreach (var s in CityList)
@@ -1166,13 +1145,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <option value="@s.Id">@s.Name</option>
                                                         }
                                                     </InputSelect>
+                                                    <ValidationMessage For="()=> legalcaseDto.BoroughorCityId" />
                                                 </div>
 
                                                 <!-- Rent Regulation -->
                                                 <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:20%" : "")>
                                                     <label class="lbl required-label">Rent Regulation</label>
-                                                    <InputSelect class="holdover-form"
-                                                                 @bind-Value="legalcaseDto.RegulationStatusId"
+                                                    <InputSelect class="form-input"
+                                                                 @bind-Value="legalcaseDto.RegulationStatusId" @bind-Value:after="ValidateInput"
                                                                  disabled="@isBuildingSelected">
                                                         <option value="">-- Select --</option>
                                                         @foreach (var l in RegulationList)
@@ -1180,16 +1160,17 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <option value="@l.Id">@l.Name</option>
                                                         }
                                                     </InputSelect>
+                                                    <ValidationMessage For="() => legalcaseDto.RegulationStatusId" />
                                                 </div>
 
                                                 @if (ShowExemptionBasic)
                                                 {
                                                     <!-- Exemption Basic -->
                                                     <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:20%" : "")>
-                                                        <label class="lbl required-label ">
+                                                        <label class="lbl ">
                                                             Exemption Basic
                                                         </label>
-                                                        <InputSelect class="holdover-form"
+                                                        <InputSelect class="form-input"
                                                                      @bind-Value="legalcaseDto.ExemptionBasisId"
                                                                      disabled="@isBuildingSelected">
                                                             <option value="">-- Select --</option>
@@ -1207,7 +1188,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <label class="lbl ">
                                                             Exemption
                                                         </label>
-                                                        <InputText class="holdover-form" @bind-Value="legalcaseDto.ExemptionBasisOther" placeholder="Enter Exemption" disabled="@isBuildingSelected" />
+                                                        <InputText class="form-input" @bind-Value="legalcaseDto.ExemptionBasisOther" placeholder="Enter Exemption" disabled="@isBuildingSelected" />
                                                     </div>
                                                 }
                                                 @if (ShowRentOther)
@@ -1217,7 +1198,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <label class="lbl  ">
                                                             Other Regulation
                                                         </label>
-                                                        <InputText class="holdover-form" @bind-Value="legalcaseDto.RentRegulationOther" placeholder="Enter Other Reulation" disabled="@isBuildingSelected" />
+                                                        <InputText class="form-input" @bind-Value="legalcaseDto.RentRegulationOther" placeholder="Enter Other Reulation" disabled="@isBuildingSelected" />
                                                     </div>
                                                 }
                                             </div>
@@ -1228,7 +1209,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 <div class="row mt-4">
                                                     <div class="col-md-4">
                                                         <label class="lbl  required-label">State </label>
-                                                        <InputSelect class="holdover-form" @bind-Value="legalcaseDto.BuildingStateId" style="cursor:pointer" disabled="@isBuildingSelected">
+                                                        <InputSelect class="form-input" @bind-Value="legalcaseDto.BuildingStateId" @bind-Value:after="ValidateInput" style="cursor:pointer" disabled="@isBuildingSelected">
                                                             @foreach (var s in StateList)
                                                             {
                                                                 <option value="@s.Id">@s.Name</option>
@@ -1238,12 +1219,12 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label class="lbl  required-label">Zipcode </label>
-                                                        <InputText class="holdover-form" @bind-Value="legalcaseDto.BuildingZip" placeholder="Enter ZipCode" disabled="@isBuildingSelected" />
+                                                        <InputText class="form-input" @bind-Value="legalcaseDto.BuildingZip" @bind-Value:after="ValidateInput" placeholder="Enter ZipCode" disabled="@isBuildingSelected" />
                                                         <ValidationMessage For="() => legalcaseDto.BuildingZip" />
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label class="lbl required-label">Agent </label>
-                                                        <InputText class="holdover-form" @bind-Value="legalcaseDto.ManagingAgent" placeholder="Enter Agent" disabled="@isBuildingSelected" />
+                                                        <InputText class="form-input" @bind-Value="legalcaseDto.ManagingAgent" @bind-Value:after="ValidateInput" placeholder="Enter Agent" disabled="@isBuildingSelected" />
 
                                                         @if (!isBuildingSelected)
                                                         {
@@ -1258,14 +1239,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     <label class=@(isBuildingSelected ? "lbl" : "lbl required-label ")>
                                                         Building Type
                                                     </label>
-                                                    <InputSelect class="holdover-form" @bind-Value="legalcaseDto.PremiseTypeId" style=@(isBuildingSelected ? "cursor:not-allowed" : "cursor:pointer") disabled="@isBuildingSelected">
+                                                    <InputSelect class="form-input" @bind-Value="legalcaseDto.PremiseTypeId" @bind-Value:after="ValidateInput" style=@(isBuildingSelected ? "cursor:not-allowed" : "cursor:pointer") disabled="@isBuildingSelected">
                                                         <option value="">-- Select --</option>
                                                         @foreach (var s in PremiseTypesList)
                                                         {
                                                             <option value="@s.Id">@s.Name</option>
                                                         }
                                                     </InputSelect>
-                                                    @if (!IsExistingBuildingSelected)
+                                                    @if (!isBuildingSelected)
                                                     {
                                                         <ValidationMessage For="() => legalcaseDto.PremiseTypeId" />
                                                     }
@@ -1283,7 +1264,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         @if (RegistrationstatusList != null && RegistrationstatusList.Any())
                                                         {
                                                             <div style="display: flex;flex-wrap: wrap; column-gap: 33px;">
-                                                                <InputRadioGroup @bind-Value="legalcaseDto.RegistrationStatusTypeId" class="d-flex flex-wrap">
+                                                                <InputRadioGroup @bind-Value="legalcaseDto.RegistrationStatusTypeId" @bind-Value:after="ValidateInput" class="d-flex flex-wrap">
                                                                     @foreach (var Type in RegistrationstatusList)
                                                                     {
                                                                         <div class="col-auto">
@@ -1351,17 +1332,17 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 @if (!legalcaseDto.GoodCause)
                                                 {
                                                     <div class="col-md-4">
-                                                        <label class=@(isBuildingSelected ? "lbl" : "lbl required-label ")>
+                                                        <label class=@(isBuildingSelected ? "lbl" : "lbl ")>
                                                             Exemption Reason
                                                         </label>
-                                                        <InputSelect class="holdover-form" @bind-Value="legalcaseDto.ExemptionReasonId" style=@(isBuildingSelected ? "cursor:not-allowed" : "cursor:pointer") disabled="@isBuildingSelected">
+                                                        <InputSelect class="form-input" @bind-Value="legalcaseDto.ExemptionReasonId" style=@(isBuildingSelected ? "cursor:not-allowed" : "cursor:pointer") disabled="@isBuildingSelected">
                                                             <option value="">-- Select --</option>
                                                             @foreach (var s in ExemptionReasonList)
                                                             {
                                                                 <option value="@s.Id">@s.Name</option>
                                                             }
                                                         </InputSelect>
-                                                        @if (!IsExistingBuildingSelected)
+                                                        @if (!isBuildingSelected)
                                                         {
                                                             <ValidationMessage For="() => legalcaseDto.ExemptionReasonId" />
                                                         }
@@ -1414,7 +1395,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         }
                                         <div class="col-md-6 position-relative" @onfocusout="HideTenantDropDown">
                                             <label class=@(selectedtenant == null ? "lbl required-label" : "lbl")>Unit / Apt # (confirm)</label>
-                                            <input type="text" class="holdover-form" autocomplete="off"
+                                            <input type="text" class="form-input" autocomplete="off"
                                                    placeholder="Search or Enter Unit / Apt"
                                                    @bind-value="searchTenantText"
                                                    @oninput="OnSearchTenantInput" @onblur="SelectTenant" @onclick="ShowAllTenantForHoldover" />
@@ -1457,7 +1438,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             </label>
                                         </div>
                                         <div class="col-md-6">
-                                            <InputSelect class="holdover-form" @bind-Value="TenancytypeId">
+                                            <InputSelect class="form-input" @bind-Value="TenancytypeId">
                                                 <option value="">-- Select --</option>
                                                 @foreach (var s in TenancyTypeList)
                                                 {
@@ -1470,6 +1451,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                     </div> *@
                                     <div class="row mt-3">
+
                                         <div class="col-12 row">
                                             <label class=@(selectedtenant == null ? "lbl required-label" : "lbl")>Tenants</label>
                                             @if (Tenants.Count > 0)
@@ -1479,9 +1461,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 {
 
                                                     <div class="col-11">
-                                                        <input class="holdover-form mb-2"
+                                                        <input class="  form-input mb-2"
                                                                placeholder="Tenant Full Name"
-                                                               @bind-value="Tenants[tenant.i]"
+                                                               @bind="Tenants[tenant.i]"
+                                                               @bind:after="ValidateInput"
                                                                @onblur="() => OnchangeAdditionalTenant(tenant.i)" />
                                                     </div>
                                                     if (tenant.i > 0)
@@ -1514,7 +1497,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 @foreach (var undertenant in Undertenants.Select((t, i) => new { t, i }))
                                                 {
                                                     <div class="col-11">
-                                                        <input class="holdover-form mb-2"
+                                                        <input class="  form-input mb-2"
                                                                placeholder="Other Occupant Name"
                                                                @bind-value="Undertenants[undertenant.i]"
                                                                @onblur="() => OnchangeAdditionalOccupants(undertenant.i)" />
@@ -1536,10 +1519,11 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         </div>
                                     </div>
 
+
                                     <div class="row mt-3 g-3">
                                         <div class="col-md-4">
                                             <label class="lbl required-label">Rent Due Frequency</label>
-                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId">
+                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" @bind-Value:after="ValidateInput">
                                                 <option value="">-- Select --</option>
                                                 @foreach (var l in DateRentList)
                                                 {
@@ -1551,7 +1535,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                         <div class="col-md-4">
                                             <label class="lbl required-label">Monthly Rent ($)</label>
-                                            <InputNumber class="holdover-form" @bind-Value="legalcaseDto.MonthlyRent" />
+                                            <InputNumber class="form-input" @bind-Value="legalcaseDto.MonthlyRent"  @bind-Value:after="ValidateInput"/>
                                             @* <ValidationMessage For="() => noticeModel.MonthlyRent" /> *@
                                             <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
 
@@ -1560,12 +1544,12 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                         <div class="col-md-4">
                                             <label class="lbl">Tenant's Share ($)</label>
-                                            <InputNumber class="holdover-form" @bind-Value="legalcaseDto.TenantShare" />
+                                            <InputNumber class="form-input" @bind-Value="legalcaseDto.TenantShare" />
                                         </div>
 
                                         <div class="col-md-4">
                                             <label class="lbl required-label">Tenancy Type</label>
-                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays">
+                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays">
                                                 <option value="">-- Select --</option>
                                                 @foreach (var t in TenancyTypeList)
                                                 {
@@ -1583,7 +1567,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                         <div class="col-md-4">
                                             <label class="lbl">Last Payment Amount ($)</label>
-                                            <InputNumber class="holdover-form" @bind-Value="legalcaseDto.LastPayment" />
+                                            <InputNumber class="form-input" @bind-Value="legalcaseDto.LastPayment" />
                                         </div>
                                         @if (legalcaseDto.CaseTypeName == "NonPayment")
                                         {
@@ -1628,7 +1612,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 <div class="row mb-3">
                                                     <div class="col-4">
                                                         <label class="lbl ">Month (YYYY-MM) </label>
-                                                        <InputSelect class="holdover-form holdover-form"
+                                                        <InputSelect class="form-input form-input"
                                                                      @bind-Value="item.Month"
                                                                      @bind-Value:after="(() => OnMonthChanged(item))">
 
@@ -1644,13 +1628,13 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     <div class="col-3">
                                                         <label class="lbl  ">Amount ($) </label>
                                                         <InputNumber @bind-Value="item.Amount" @bind-Value:after="RecalculateTotal"
-                                                                     class="holdover-form" />
+                                                                     class="form-input" />
                                                     </div>
 
                                                     <div class="col-3">
                                                         <label class="lbl  ">Notes </label>
                                                         <InputText @bind-Value="item.Notes"
-                                                                   class="holdover-form" placeholder="Partial, vouchers, etc." />
+                                                                   class="form-input" placeholder="Partial, vouchers, etc." />
                                                     </div>
 
                                                     <div class="col-2" style="justify-content:end; display:flex;">
@@ -1755,7 +1739,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <!-- Oral End -->
                                         <div class="col-md-4">
                                             <label class="lbl">Program</label>
-                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.CaseProgramId" style="cursor:pointer;">
+                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.CaseProgramId" style="cursor:pointer;" @bind-Value:after="ValidateInput">
                                                 <option value="">-- Select --</option>
                                                 @foreach (var l in CaseProgramList)
                                                 {
@@ -1770,7 +1754,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <!-- Date Tenant Moved -->
                                         <div class="col-md-4">
                                             <label class="lbl">Good Cause Applies?</label>
-                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.GoodCauseApplies" style="cursor:pointer;">
+                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.GoodCauseApplies" style="cursor:pointer;">
                                                 <option value="false">No (Exempt)</option>
                                                 <option value="true">Yes (Owner ≥ 10)</option>
                                             </InputSelect>
@@ -1780,7 +1764,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <!-- Rent Due Day -->
                                         <div class="col-md-4">
                                             <label class="lbl required-label ">Move In Date </label>
-                                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%" @bind-Value="legalcaseDto.DateTenantMoved" Max="@DateTime.Today" @bind-Value:after="CalcNoticeDays" />
+                                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%" @bind-Value="legalcaseDto.DateTenantMoved" @bind-Value:after="ValidateInput" Max="@DateTime.Today" @bind-Value:after="CalcNoticeDays" />
                                             <ValidationMessage For="() => legalcaseDto.DateTenantMoved" />
                                         </div>
 
@@ -1828,7 +1812,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <!-- Tenancy Type -->
                                         <div class="col-md-4">
                                             <label class="lbl required-label">Tenancy Type</label>
-                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays" style="cursor:pointer;">
+                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays" style="cursor:pointer;">
                                                 <option value="">-- Select --</option>
                                                 @foreach (var l in TenancyTypeList)
                                                 {
@@ -1851,7 +1835,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <!-- Oral End -->
                                         <div class="col-md-4">
                                             <label class="lbl">Calculated Notice Length</label>
-                                            <InputNumber class="holdover-form" @bind-Value="legalcaseDto.CalculatedNoticeLength" />
+                                            <InputNumber class="form-input" @bind-Value="legalcaseDto.CalculatedNoticeLength" />
                                         </div>
 
                                     </div>
@@ -1870,7 +1854,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <label class="lbl " style="height: 36px;
                                                                                                                                                                                         display: flex;
                                                                                                                                                                                         align-items: center;">Predicate Notice (Auto) </label>
-                                            <InputText class="holdover-form" @bind-Value="legalcaseDto.PredicateNotice" />
+                                            <InputText class="form-input" @bind-Value="legalcaseDto.PredicateNotice" />
 
                                         </div>
                                         <div class="col-md-4">
@@ -1930,7 +1914,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                         <div class="col">
                                             <label class="lbl ">Additional Comments </label>
-                                            <InputText class="holdover-form" @bind-Value="legalcaseDto.AdditionalComments" style="cursor:pointer;" />
+                                            <InputText class="form-input" @bind-Value="legalcaseDto.AdditionalComments" style="cursor:pointer;" />
 
                                         </div>
                                     </div>
@@ -1966,7 +1950,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <!-- Rent Due Day -->
                                     <div class="col-md-4">
                                         <label class="lbl  required-label">Date Rent  Due (Month/Week) </label>
-                                        <InputSelect class="holdover-form" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" style="cursor:pointer;">
+                                        <InputSelect class="form-input" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" style="cursor:pointer;">
                                             <option value="">-- Select --</option>
                                             @foreach (var l in DateRentList)
                                             {
@@ -1979,14 +1963,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <!-- Monthly Rent -->
                                     <div class="col-md-4">
                                         <label class="lbl  required-label">Monthly Rent ($) </label>
-                                        <InputNumber class="holdover-form" @bind-Value="legalcaseDto.MonthlyRent" placeholder="Enter Monthly Rent" />
+                                        <InputNumber class="form-input" @bind-Value="legalcaseDto.MonthlyRent" placeholder="Enter Monthly Rent" />
                                         <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
                                     </div>
 
                                     <!-- Tenant's Share -->
                                     <div class="col-md-4">
                                         <label class="lbl">Tenant's Share ($)</label>
-                                        <InputNumber class="holdover-form" @bind-Value="legalcaseDto.TenantShare" placeholder="Enter Total Share" min="0" />
+                                        <InputNumber class="form-input" @bind-Value="legalcaseDto.TenantShare" placeholder="Enter Total Share" min="0" />
 
                                     </div>
 
@@ -1996,20 +1980,20 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                 <div class="row g-2 mt-2">
                                     <div class="col-md-4">
                                         <label class="lbl">Social Services (If any)</label>
-                                        <InputText class="holdover-form" @bind-Value="legalcaseDto.SocialService" placeholder="Enter Social Service" />
+                                        <InputText class="form-input" @bind-Value="legalcaseDto.SocialService" placeholder="Enter Social Service" />
 
                                     </div>
 
                                     @* <div class="col-md-4">
                                         <label class="lbl">Unpaid Rent (Months) </label>
-                                        <InputText class="holdover-form"
+                                        <InputText class="form-input"
                                                    @bind-Value="legalcaseDto.LastRentPaid"
                                                    placeholder="Enter  unpaid months" @bind-Value:after="FormatLastRentPaid" />
                                     </div>
 
                                     <div class="col-md-4">
                                         <label class="lbl">Total Rent Owed ($)</label>
-                                        <InputNumber class="holdover-form" @bind-Value="legalcaseDto.TotalOwed" placeholder="Enter Total Rent" min="0" />
+                                        <InputNumber class="form-input" @bind-Value="legalcaseDto.TotalOwed" placeholder="Enter Total Rent" min="0" />
 
                                     </div> *
                                     <div class="col-md-4">
@@ -2019,7 +2003,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     </div>
                                     <div class="col-md-4">
                                         <label class="lbl">Amount of Last Payment ($)</label>
-                                        <InputNumber class="holdover-form" @bind-Value="legalcaseDto.LastPayment" min="0" />
+                                        <InputNumber class="form-input" @bind-Value="legalcaseDto.LastPayment" min="0" />
 
                                     </div>
                                 </div>
@@ -2035,7 +2019,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <div class="row mb-3">
                                                 <div class="col-3">
                                                     <label class="lbl ">Month (YYYY-MM) </label>
-                                                    <InputSelect class="holdover-form holdover-form"
+                                                    <InputSelect class="form-input form-input"
                                                                  @bind-Value="item.Month"
                                                                  @bind-Value:after="(() => OnMonthChanged(item))">
 
@@ -2051,13 +2035,13 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 <div class="col-3">
                                                     <label class="lbl  ">Amount ($) </label>
                                                     <InputNumber @bind-Value="item.Amount" @bind-Value:after="RecalculateTotal"
-                                                                 class="holdover-form" />
+                                                                 class="form-input" />
                                                 </div>
 
                                                 <div class="col-3">
                                                     <label class="lbl  ">Notes </label>
                                                     <InputText @bind-Value="item.Notes"
-                                                               class="holdover-form" placeholder="Partial, vouchers, etc." />
+                                                               class="form-input" placeholder="Partial, vouchers, etc." />
                                                 </div>
 
                                                 <div class="col-3" style="justify-content:end; display:flex;">
@@ -2166,14 +2150,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <!-- Monthly Rent -->
                                         <div class="col-md-4">
                                             <label class="lbl ">Monthly Rent ($) </label>
-                                            <InputNumber class="holdover-form" @bind-Value="legalcaseDto.MonthlyRent" />
+                                            <InputNumber class="form-input" @bind-Value="legalcaseDto.MonthlyRent" />
                                             <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
                                         </div>
                                     </div>
                                     <div class="row g-2 mb-3">
                                         <div class="col-md-4">
                                             <label class="lbl ">Date Rent  Due (Month/Week) </label>
-                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" style="cursor:pointer;">
+                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" style="cursor:pointer;">
                                                 <option value="">-- Select --</option>
                                                 @foreach (var l in DateRentList)
                                                 {
@@ -2189,7 +2173,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         </div>
                                         <div class="col-md-4">
                                             <label class="lbl">Amount of Last Payment ($)</label>
-                                            <InputNumber class="holdover-form" @bind-Value="legalcaseDto.LastPayment" min="0" />
+                                            <InputNumber class="form-input" @bind-Value="legalcaseDto.LastPayment" min="0" />
 
                                         </div>
                                     </div>
@@ -2211,7 +2195,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         </div>
                                         <div class="col-md-4">
                                             <label class="lbl " style="align-items: center;display: flex;height: 36px;">Tenancy Type</label>
-                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays" style="cursor:pointer;">
+                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays" style="cursor:pointer;">
                                                 <option value="">-- Select --</option>
                                                 @foreach (var l in TenancyTypeList)
                                                 {
@@ -2223,7 +2207,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <!-- Oral Start -->
                                         <div class="col-md-4">
                                             <label class="lbl ">Assistance (Section 8 / SCRIE/DRIE / other) </label>
-                                            <InputText class="holdover-form" @bind-Value="legalcaseDto.Assistance" />
+                                            <InputText class="form-input" @bind-Value="legalcaseDto.Assistance" />
 
                                         </div>
 
@@ -2242,7 +2226,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 <div class="row mb-3">
                                                     <div class="col-3">
                                                         <label class="lbl ">Month (YYYY-MM) </label>
-                                                        <InputSelect class="holdover-form holdover-form"
+                                                        <InputSelect class="form-input form-input"
                                                                      @bind-Value="item.Month"
                                                                      @bind-Value:after="(() => OnMonthChanged(item))">
 
@@ -2258,13 +2242,13 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     <div class="col-3">
                                                         <label class="lbl  ">Amount ($) </label>
                                                         <InputNumber @bind-Value="item.Amount" @bind-Value:after="RecalculateTotal"
-                                                                     class="holdover-form" />
+                                                                     class="form-input" />
                                                     </div>
 
                                                     <div class="col-3">
                                                         <label class="lbl  ">Notes </label>
                                                         <InputText @bind-Value="item.Notes"
-                                                                   class="holdover-form" placeholder="Partial, vouchers, etc." />
+                                                                   class="form-input" placeholder="Partial, vouchers, etc." />
                                                     </div>
 
                                                     <div class="col-3" style="justify-content:end; display:flex;">
@@ -2330,20 +2314,20 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <div class="row g-3">
                                                                 <div class="col-4">
                                                                     <label class="lbl  ">Client Name</label>
-                                                                    <InputText class="holdover-form"
+                                                                    <InputText class="form-input"
                                                                                placeholder="Enter Name"
                                                                                @bind-Value="legalcaseDto.ClientName" disabled />
                                                                     <ValidationMessage For="() => legalcaseDto.ClientName" />
                                                                 </div>
                                                                 <div class="col-4">
                                                                     <label class="lbl">Phone</label>
-                                                                    <InputText class="holdover-form"
+                                                                    <InputText class="form-input"
                                                                                placeholder="Enter Number"
                                                                                @bind-Value="legalcaseDto.ClientPhone" disabled />
                                                                 </div>
                                                                 <div class="col-4">
                                                                     <label class="lbl  ">Client Type</label>
-                                                                    <InputSelect class="holdover-form"
+                                                                    <InputSelect class="form-input"
                                                                                  @bind-Value="legalcaseDto.ClientTypeId" disabled>
                                                                         <option value="">-- Select --</option>
                                                                         @foreach (var Own in ClientTypeList)
@@ -2360,14 +2344,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                                 <div class="col-6">
                                                                     <label class="lbl  ">Email</label>
-                                                                    <InputText class="holdover-form"
+                                                                    <InputText class="form-input"
                                                                                placeholder="Enter Email"
                                                                                @bind-Value="legalcaseDto.ClientEmail" disabled />
                                                                     <ValidationMessage For="() => legalcaseDto.ClientEmail" />
                                                                 </div>
                                                                 <div class="col-4">
                                                                     <label class="lbl">Reference #</label>
-                                                                    <InputText class="holdover-form"
+                                                                    <InputText class="form-input"
                                                                                placeholder="Enter Reference"
                                                                                @bind-Value="legalcaseDto.Reference" disabled />
                                                                 </div>
@@ -2378,7 +2362,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                 {
                                                                     <div class="col-9">
                                                                         <label class="lbl">Address</label>
-                                                                        <InputText class="holdover-form"
+                                                                        <InputText class="form-input"
                                                                                    placeholder="Enter Address"
                                                                                    @bind-Value="legalcaseDto.ClientAddress" />
                                                                     </div>
@@ -2403,20 +2387,20 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                                 <div class="col-4">
                                                                     <label class="lbl  ">Client Name</label>
-                                                                    <InputText class="holdover-form"
+                                                                    <InputText class="form-input"
                                                                                placeholder="Enter Name"
                                                                                @bind-Value="legalcaseDto.ClientName" />
                                                                     <ValidationMessage For="() => legalcaseDto.ClientName" />
                                                                 </div>
                                                                 <div class="col-4">
                                                                     <label class="lbl">Phone</label>
-                                                                    <InputText class="holdover-form"
+                                                                    <InputText class="form-input"
                                                                                placeholder="Enter Number"
                                                                                @bind-Value="legalcaseDto.ClientPhone" />
                                                                 </div>
                                                                 <div class="col-4">
                                                                     <label class="lbl  ">Client Type</label>
-                                                                    <InputSelect class="holdover-form"
+                                                                    <InputSelect class="form-input"
                                                                                  @bind-Value="legalcaseDto.ClientTypeId">
                                                                         <option value="">-- Select Type --</option>
                                                                         @foreach (var Own in ClientTypeList)
@@ -2428,14 +2412,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                 </div>
                                                                 <div class="col-6">
                                                                     <label class="lbl  ">Email</label>
-                                                                    <InputText class="holdover-form"
+                                                                    <InputText class="form-input"
                                                                                placeholder="Enter Email"
                                                                                @bind-Value="legalcaseDto.ClientEmail" />
                                                                     <ValidationMessage For="() => legalcaseDto.ClientEmail" />
                                                                 </div>
                                                                 <div class="col-4">
                                                                     <label class="lbl">Reference #</label>
-                                                                    <InputText class="holdover-form"
+                                                                    <InputText class="form-input"
                                                                                placeholder="Enter Reference"
                                                                                @bind-Value="legalcaseDto.Reference" />
                                                                 </div>
@@ -2444,7 +2428,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                 {
                                                                     <div class="col-8">
                                                                         <label class="lbl">Address</label>
-                                                                        <InputText class="holdover-form"
+                                                                        <InputText class="form-input"
                                                                                    placeholder="Enter Address"
                                                                                    @bind-Value="legalcaseDto.ClientAddress" />
                                                                     </div>
@@ -2480,7 +2464,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <div class="col-md-6 position-relative" @onfocusout="HideLandlordsDropDown">
                                                             <label class="lbl  ">Landlord / Owner Name</label>
 
-                                                            <InputText type="text" class="holdover-form"
+                                                            <InputText type="text" class="form-input"
                                                                        placeholder="Enter Landlord name"
                                                                        @bind-value="searchlandlordText"
                                                                        @onblur="saveLandLordName" disabled />
@@ -2494,7 +2478,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <div class="row mt-1">
                                                             <div class="col-md-6">
                                                                 <label class="lbl   ">Contact Person </label>
-                                                                <InputText class="holdover-form" @bind-Value="legalcaseDto.ContactPersonName" placeholder="Enter Contact Person" disabled />
+                                                                <InputText class="form-input" @bind-Value="legalcaseDto.ContactPersonName" placeholder="Enter Contact Person" disabled />
                                                                 @if (!IsLandlordSelected)
                                                                 {
                                                                     <ValidationMessage For="() => legalcaseDto.ContactPersonName" />
@@ -2502,7 +2486,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             </div>
                                                             <div class="col-md-6 ">
                                                                 <label class="lbl   ">Landlord Address </label>
-                                                                <InputText class="holdover-form" @bind-Value="legalcaseDto.LandlordAddress" placeholder="Enter Address" disabled />
+                                                                <InputText class="form-input" @bind-Value="legalcaseDto.LandlordAddress" placeholder="Enter Address" disabled />
                                                                 @if (!IsLandlordSelected)
                                                                 {
                                                                     <ValidationMessage For="() => legalcaseDto.LandlordAddress" />
@@ -2534,7 +2518,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     {
                                                         <div class="col-md-6 position-relative" @onfocusout="HideBuildingDropdown">
                                                             <label class="lbl   ">Building</label>
-                                                            <input type="text" class="holdover-form"
+                                                            <input type="text" class="form-input"
                                                                    placeholder="Search by Building Address or code..."
                                                                    @bind-value="searchBuildingText"
                                                                    @oninput="OnSearchBuildingInput"
@@ -2583,7 +2567,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <div class="row mt-2">
                                                             <div class="col-6">
                                                                 <label class="lbl   ">Street Address </label>
-                                                                <InputText class="holdover-form" @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter Address" disabled />
+                                                                <InputText class="form-input" @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter Address" disabled />
 
                                                                 @if (!isBuildingSelected)
                                                                 {
@@ -2593,7 +2577,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                             <div class="col-md-6">
                                                                 <label class="lbl   ">MDR Number </label>
-                                                                <InputText class="holdover-form" @bind-Value="legalcaseDto.Mdr" placeholder="Enter MDR Number" disabled />
+                                                                <InputText class="form-input" @bind-Value="legalcaseDto.Mdr" placeholder="Enter MDR Number" disabled />
 
                                                                 @if (!isBuildingSelected)
                                                                 {
@@ -2605,7 +2589,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <div class="row mt-4">
                                                             <div class="col-md-4">
                                                                 <label class="lbl   ">County </label>
-                                                                <InputSelect class="holdover-form" @bind-Value="legalcaseDto.BoroughorCityId" style="cursor:pointer;" disabled>
+                                                                <InputSelect class="form-input" @bind-Value="legalcaseDto.BoroughorCityId" style="cursor:pointer;" disabled>
                                                                     <option value="">-- Select --</option>
                                                                     @foreach (var s in CityList)
                                                                     {
@@ -2620,7 +2604,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                             <div class="col-md-4">
                                                                 <label class="lbl  ">Units </label>
-                                                                <InputText class="holdover-form" @bind-Value="legalcaseDto.Units" placeholder="Enter Units" disabled />
+                                                                <InputText class="form-input" @bind-Value="legalcaseDto.Units" placeholder="Enter Units" disabled />
 
                                                                 @if (!isBuildingSelected)
                                                                 {
@@ -2629,7 +2613,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             </div>
                                                             <div class="col-4">
                                                                 <label class="lbl   ">Rent Regulation </label>
-                                                                <InputSelect class="holdover-form" @bind-Value="legalcaseDto.RegulationStatusId" style="cursor:pointer;" disabled>
+                                                                <InputSelect class="form-input" @bind-Value="legalcaseDto.RegulationStatusId" style="cursor:pointer;" disabled>
                                                                     <option value="">-- Select --</option>
                                                                     @foreach (var l in RegulationList)
                                                                     {
@@ -2648,7 +2632,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <div class="row mt-4">
                                                                 <div class="col-md-6">
                                                                     <label class="lbl   ">State </label>
-                                                                    <InputSelect class="holdover-form" @bind-Value="legalcaseDto.BuildingStateId" style="cursor:pointer;" disabled>
+                                                                    <InputSelect class="form-input" @bind-Value="legalcaseDto.BuildingStateId" style="cursor:pointer;" disabled>
                                                                         <option value="">-- Select --</option>
                                                                         @foreach (var s in StateList)
                                                                         {
@@ -2659,7 +2643,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                 </div>
                                                                 <div class="col-md-6">
                                                                     <label class="lbl   ">Zipcode </label>
-                                                                    <InputText class="holdover-form" @bind-Value="legalcaseDto.BuildingZip" placeholder="Enter ZipCode" disabled />
+                                                                    <InputText class="form-input" @bind-Value="legalcaseDto.BuildingZip" placeholder="Enter ZipCode" disabled />
                                                                     <ValidationMessage For="() => legalcaseDto.BuildingZip" />
                                                                 </div>
                                                             </div>
@@ -2686,7 +2670,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                         <div class="col-md-6 position-relative" @onfocusout="HideTenantDropDown">
                                                             <label class="lbl   ">Unit / Apt # (confirm)</label>
-                                                            <InputText type="text" class="holdover-form"
+                                                            <InputText type="text" class="form-input"
                                                                        placeholder="Search or Enter Unit / Apt"
                                                                        @bind-value="searchTenantText"
                                                                        @oninput="OnSearchTenantInput" @onblur="SelectTenant" @onclick="ShowAllTenantForHoldover" disabled />
@@ -2704,7 +2688,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                 {
                                                                     if (!string.IsNullOrEmpty(tenant.t))
                                                                     {
-                                                                        <input class="holdover-form mb-2"
+                                                                        <input class="form-input mb-2"
                                                                                placeholder="Tenant Full Name"
                                                                                @bind-value="Tenants[tenant.i]"
                                                                                @onblur="() => OnchangeAdditionalTenant(tenant.i)" disabled />
@@ -2724,7 +2708,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                 {
                                                                     if (!string.IsNullOrEmpty(undertenant.t))
                                                                     {
-                                                                        <input class="holdover-form mb-2"
+                                                                        <input class="form-input mb-2"
                                                                                placeholder="Other Occupant Full Name"
                                                                                @bind-value="Undertenants[undertenant.i]"
                                                                                @onblur="() => OnchangeAdditionalOccupants(undertenant.i)" disabled />
@@ -2738,7 +2722,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     <div class="row mt-3 g-3">
                                                         <div class="col-md-4">
                                                             <label class="lbl ">Rent Due Frequency</label>
-                                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" disabled>
+                                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" disabled>
                                                                 <option value="">-- Select --</option>
                                                                 @foreach (var l in DateRentList)
                                                                 {
@@ -2750,19 +2734,19 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                         <div class="col-md-4">
                                                             <label class="lbl ">Monthly Rent ($)</label>
-                                                            <InputNumber class="holdover-form" @bind-Value="legalcaseDto.MonthlyRent" disabled />
+                                                            <InputNumber class="form-input" @bind-Value="legalcaseDto.MonthlyRent" disabled />
                                                             @* <ValidationMessage For="() => noticeModel.MonthlyRent" /> *@
 
                                                         </div>
 
                                                         <div class="col-md-4">
                                                             <label class="lbl">Tenant's Share ($)</label>
-                                                            <InputNumber class="holdover-form" @bind-Value="legalcaseDto.TenantShare" disabled />
+                                                            <InputNumber class="form-input" @bind-Value="legalcaseDto.TenantShare" disabled />
                                                         </div>
 
                                                         <div class="col-md-4">
                                                             <label class="lbl ">Tenancy Type</label>
-                                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays" disabled>
+                                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays" disabled>
                                                                 <option value="">-- Select --</option>
                                                                 @foreach (var t in TenancyTypeList)
                                                                 {
@@ -2778,7 +2762,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                         <div class="col-md-4">
                                                             <label class="lbl">Last Payment Amount ($)</label>
-                                                            <InputNumber class="holdover-form" @bind-Value="legalcaseDto.LastPayment" disabled />
+                                                            <InputNumber class="form-input" @bind-Value="legalcaseDto.LastPayment" disabled />
                                                         </div>
                                                         @if (legalcaseDto.CaseTypeName == "NonPayment")
                                                         {
@@ -2823,7 +2807,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                 <div class="row mb-3">
                                                                     <div class="col-4">
                                                                         <label class="lbl ">Month (YYYY-MM) </label>
-                                                                        <InputSelect class="holdover-form holdover-form" disabled
+                                                                        <InputSelect class="form-input form-input" disabled
                                                                                      @bind-Value="item.Month"
                                                                                      @bind-Value:after="(() => OnMonthChanged(item))">
 
@@ -2839,13 +2823,13 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                     <div class="col-3">
                                                                         <label class="lbl  ">Amount ($) </label>
                                                                         <InputNumber @bind-Value="item.Amount" @bind-Value:after="RecalculateTotal" disabled
-                                                                                     class="holdover-form" />
+                                                                                     class="form-input" />
                                                                     </div>
 
                                                                     <div class="col-3">
                                                                         <label class="lbl  ">Notes </label>
                                                                         <InputText @bind-Value="item.Notes"
-                                                                                   class="holdover-form" placeholder="Partial, vouchers, etc." disabled />
+                                                                                   class="form-input" placeholder="Partial, vouchers, etc." disabled />
                                                                     </div>
 
                                                                     @*  <div class="col-2" style="justify-content:end; display:flex;">
@@ -2903,14 +2887,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <!-- Monthly Rent -->
                                                             <div class="col-md-4">
                                                                 <label class="lbl ">Monthly Rent ($) </label>
-                                                                <InputNumber class="holdover-form" @bind-Value="legalcaseDto.MonthlyRent" disabled />
+                                                                <InputNumber class="form-input" @bind-Value="legalcaseDto.MonthlyRent" disabled />
                                                                 <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
                                                             </div>
                                                         </div>
                                                         <div class="row g-2 mb-3">
                                                             <div class="col-md-4">
                                                                 <label class="lbl ">Date Rent  Due (Month/Week) </label>
-                                                                <InputSelect class="holdover-form" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" style="cursor:pointer;" disabled>
+                                                                <InputSelect class="form-input" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId" style="cursor:pointer;" disabled>
                                                                     <option value="">-- Select --</option>
                                                                     @foreach (var l in DateRentList)
                                                                     {
@@ -2926,7 +2910,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <label class="lbl">Amount of Last Payment ($)</label>
-                                                                <InputNumber class="holdover-form" @bind-Value="legalcaseDto.LastPayment" min="0" disabled />
+                                                                <InputNumber class="form-input" @bind-Value="legalcaseDto.LastPayment" min="0" disabled />
 
                                                             </div>
                                                         </div>
@@ -2948,7 +2932,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <label class="lbl " style="align-items: center;display: flex;">Tenancy Type</label>
-                                                                <InputSelect class="holdover-form" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays" style="cursor:pointer;" disabled>
+                                                                <InputSelect class="form-input" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays" style="cursor:pointer;" disabled>
                                                                     <option value="">-- Select --</option>
                                                                     @foreach (var l in TenancyTypeList)
                                                                     {
@@ -2960,7 +2944,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <!-- Oral Start -->
                                                             <div class="col-md-4">
                                                                 <label class="lbl ">Assistance (Section 8 / SCRIE/DRIE / other) </label>
-                                                                <InputText class="holdover-form" @bind-Value="legalcaseDto.Assistance" disabled />
+                                                                <InputText class="form-input" @bind-Value="legalcaseDto.Assistance" disabled />
 
                                                             </div>
 
@@ -2979,7 +2963,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                     <div class="row mb-3">
                                                                         <div class="col-3">
                                                                             <label class="lbl ">Month (YYYY-MM) </label>
-                                                                            <InputSelect class="holdover-form holdover-form"
+                                                                            <InputSelect class="form-input form-input"
                                                                                          @bind-Value="item.Month"
                                                                                          @bind-Value:after="(() => OnMonthChanged(item))" disabled>
 
@@ -2995,13 +2979,13 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                         <div class="col-3">
                                                                             <label class="lbl  ">Amount ($) </label>
                                                                             <InputNumber @bind-Value="item.Amount" @bind-Value:after="RecalculateTotal" disabled
-                                                                                         class="holdover-form" />
+                                                                                         class="form-input" />
                                                                         </div>
 
                                                                         <div class="col-3">
                                                                             <label class="lbl  ">Notes </label>
                                                                             <InputText @bind-Value="item.Notes"
-                                                                                       class="holdover-form" placeholder="Partial, vouchers, etc." disabled />
+                                                                                       class="form-input" placeholder="Partial, vouchers, etc." disabled />
                                                                         </div>
 
                                                                         @* <div class="col-3" style="justify-content:end; display:flex;">
@@ -3041,7 +3025,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <!-- Notice type -->
                                                         <div class="col-md-4">
                                                             <label class="lbl ">Notice Type </label>
-                                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.NoticeId" style="cursor:pointer;" disabled>
+                                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.NoticeId" style="cursor:pointer;" disabled>
                                                                 <option value="">-- Select Type --</option>
                                                                 @foreach (var l in FilteredFormTypeList)
                                                                 {
@@ -3051,7 +3035,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         </div>
                                                         <div class="col-md-4">
                                                             <label class="lbl ">Service Method </label>
-                                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.ServiceMethodId" style="cursor:pointer;" disabled>
+                                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.ServiceMethodId" style="cursor:pointer;" disabled>
                                                                 <option value="">-- Select Type --</option>
                                                                 @foreach (var l in ServiceMethodList)
                                                                 {
@@ -3069,12 +3053,12 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     <div class="row g-2 mb-3">
                                                         <div class="col-md-4">
                                                             <label class="lbl ">Deemed Service (Auto) </label>
-                                                            <InputText class="holdover-form" @bind-Value="legalcaseDto.DeemedService" style="cursor:pointer;" disabled />
+                                                            <InputText class="form-input" @bind-Value="legalcaseDto.DeemedService" style="cursor:pointer;" disabled />
 
                                                         </div>
                                                         <div class="col-md-4">
                                                             <label class="lbl ">Expiry (auto) </label>
-                                                            <InputText class="holdover-form" Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.Expiry" disabled />
+                                                            <InputText class="form-input" Style="width:100%; box-shadow:none" @bind-Value="legalcaseDto.Expiry" disabled />
 
                                                         </div>
                                                         <div class="col-md-4">
@@ -3178,7 +3162,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                         <div class="col-md-6">
                                                             <label class="lbl ">Additional Comments </label>
-                                                            <InputText class="holdover-form" @bind-Value="legalcaseDto.AdditionalComments" style="cursor:pointer;" disabled />
+                                                            <InputText class="form-input" @bind-Value="legalcaseDto.AdditionalComments" style="cursor:pointer;" disabled />
 
                                                         </div>
                                                     </div>
@@ -3242,7 +3226,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <!-- Oral End -->
                                                             <div class="col-md-4">
                                                                 <label class="lbl">Program</label>
-                                                                <InputSelect class="holdover-form" @bind-Value="legalcaseDto.CaseProgramId" style="cursor:pointer;" disabled>
+                                                                <InputSelect class="form-input" @bind-Value="legalcaseDto.CaseProgramId" style="cursor:pointer;" disabled>
                                                                     <option value="">-- Select --</option>
                                                                     @foreach (var l in CaseProgramList)
                                                                     {
@@ -3257,7 +3241,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <!-- Date Tenant Moved -->
                                                             <div class="col-md-4">
                                                                 <label class="lbl">Good Cause Applies?</label>
-                                                                <InputSelect class="holdover-form" @bind-Value="legalcaseDto.GoodCauseApplies" style="cursor:pointer;" disabled>
+                                                                <InputSelect class="form-input" @bind-Value="legalcaseDto.GoodCauseApplies" style="cursor:pointer;" disabled>
                                                                     <option value="false">No (Exempt)</option>
                                                                     <option value="true">Yes (Owner ≥ 10)</option>
                                                                 </InputSelect>
@@ -3332,7 +3316,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <!-- CASE TYPE -->
                                             <div class="col-3 ">
                                                 <label class="lbl required-label">Case Type</label>
-                                                <InputSelect class="holdover-form holdover-form"
+                                                <InputSelect class="form-input form-input"
                                                              @bind-Value="legalcaseDto.CaseTypeId"
                                                              @bind-Value:after="BuildSteps">
 
@@ -3351,7 +3335,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     <div class="position-relative" @onfocusout="HideClientDropDown">
                                                         <label class="lbl required-label">Client</label>
 
-                                                        <InputText type="text" class="holdover-form"
+                                                        <InputText type="text" class="form-input"
                                                                    placeholder="Search by client name or code..."
                                                                    @bind-value="searchText"
                                                                    @bind-value:after="OnBindClientAfter"
@@ -3392,20 +3376,20 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 <div class="row g-3">
                                                     <div class="col-4">
                                                         <label class="lbl required-label">Client Name</label>
-                                                        <InputText class="holdover-form"
+                                                        <InputText class="form-input"
                                                                    placeholder="Enter Name"
                                                                    @bind-Value="legalcaseDto.ClientName" disabled />
                                                         <ValidationMessage For="() => legalcaseDto.ClientName" />
                                                     </div>
                                                     <div class="col-4">
                                                         <label class="lbl">Phone</label>
-                                                        <InputText class="holdover-form"
+                                                        <InputText class="form-input"
                                                                    placeholder="Enter Number"
                                                                    @bind-Value="legalcaseDto.ClientPhone" disabled />
                                                     </div>
                                                     <div class="col-4">
                                                         <label class="lbl required-label">Client Type</label>
-                                                        <InputSelect class="holdover-form"
+                                                        <InputSelect class="form-input"
                                                                      @bind-Value="legalcaseDto.ClientTypeId" disabled>
                                                             <option value="">-- Select --</option>
                                                             @foreach (var Own in ClientTypeList)
@@ -3422,14 +3406,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                     <div class="col-6">
                                                         <label class="lbl required-label">Email</label>
-                                                        <InputText class="holdover-form"
+                                                        <InputText class="form-input"
                                                                    placeholder="Enter Email"
                                                                    @bind-Value="legalcaseDto.ClientEmail" disabled />
                                                         <ValidationMessage For="() => legalcaseDto.ClientEmail" />
                                                     </div>
                                                     <div class="col-4">
                                                         <label class="lbl">Reference #</label>
-                                                        <InputText class="holdover-form"
+                                                        <InputText class="form-input"
                                                                    placeholder="Enter Reference"
                                                                    @bind-Value="legalcaseDto.Reference" disabled />
                                                     </div>
@@ -3440,7 +3424,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     {
                                                         <div class="col-9">
                                                             <label class="lbl">Address</label>
-                                                            <InputText class="holdover-form"
+                                                            <InputText class="form-input"
                                                                        placeholder="Enter Address"
                                                                        @bind-Value="legalcaseDto.ClientAddress" />
                                                         </div>
@@ -3465,20 +3449,20 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                     <div class="col-4">
                                                         <label class="lbl required-label">Client Name</label>
-                                                        <InputText class="holdover-form"
+                                                        <InputText class="form-input"
                                                                    placeholder="Enter Name"
                                                                    @bind-Value="legalcaseDto.ClientName" />
                                                         <ValidationMessage For="() => legalcaseDto.ClientName" />
                                                     </div>
                                                     <div class="col-4">
                                                         <label class="lbl">Phone</label>
-                                                        <InputText class="holdover-form"
+                                                        <InputText class="form-input"
                                                                    placeholder="Enter Number"
                                                                    @bind-Value="legalcaseDto.ClientPhone" />
                                                     </div>
                                                     <div class="col-4">
                                                         <label class="lbl required-label">Client Type</label>
-                                                        <InputSelect class="holdover-form"
+                                                        <InputSelect class="form-input"
                                                                      @bind-Value="legalcaseDto.ClientTypeId">
                                                             <option value="">-- Select --</option>
                                                             @foreach (var Own in ClientTypeList)
@@ -3490,14 +3474,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     </div>
                                                     <div class="col-6">
                                                         <label class="lbl required-label">Email</label>
-                                                        <InputText class="holdover-form"
+                                                        <InputText class="form-input"
                                                                    placeholder="Enter Email"
                                                                    @bind-Value="legalcaseDto.ClientEmail" />
                                                         <ValidationMessage For="() => legalcaseDto.ClientEmail" />
                                                     </div>
                                                     <div class="col-4">
                                                         <label class="lbl">Reference #</label>
-                                                        <InputText class="holdover-form"
+                                                        <InputText class="form-input"
                                                                    placeholder="Enter Reference"
                                                                    @bind-Value="legalcaseDto.Reference" />
                                                     </div>
@@ -3506,7 +3490,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     {
                                                         <div class="col-8">
                                                             <label class="lbl">Address</label>
-                                                            <InputText class="holdover-form"
+                                                            <InputText class="form-input"
                                                                        placeholder="Enter Address"
                                                                        @bind-Value="legalcaseDto.ClientAddress" />
                                                         </div>
@@ -3551,21 +3535,21 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <!-- Hiring Attorney / Firm -->
                                         <div class="col-md-6">
                                             <label class="lbl">Hiring Attorney / Firm <span class="text-danger">*</span></label>
-                                            <InputText name="hiringFirm" class="holdover-form" @bind-Value="legalcaseDto.Attrney" />
+                                            <InputText name="hiringFirm" class="form-input" @bind-Value="legalcaseDto.Attrney" />
                                             <ValidationMessage For="() => legalcaseDto.Attrney" />
                                         </div>
 
                                         <!-- Contact Person -->
                                         <div class="col-md-6">
                                             <label class="lbl">Contact Person</label>
-                                            <InputText name="contactPerson" class="holdover-form" @bind-Value="legalcaseDto.AttrneyContactInfo" />
+                                            <InputText name="contactPerson" class="form-input" @bind-Value="legalcaseDto.AttrneyContactInfo" />
 
                                         </div>
 
                                         <!-- Phone / Email -->
                                         <div class="col-md-12">
                                             <label class="lbl">Phone / Email</label>
-                                            <InputText name="contactPhoneEmail" class="holdover-form" placeholder="(555) 555-5555 / name@example.com" @bind-Value="legalcaseDto.AttrneyEmail" />
+                                            <InputText name="contactPhoneEmail" class="form-input" placeholder="(555) 555-5555 / name@example.com" @bind-Value="legalcaseDto.AttrneyEmail" />
 
                                         </div>
                                     </div>
@@ -3653,7 +3637,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                         <div class=@(showCountyDropdown ? "col-md-3" : "col-md-6")>
                                             <label class="lbl ">Court Type </label>
-                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.CourtTypeId" style="cursor:pointer;" @bind-Value:after="SelectCourtType">
+                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.CourtTypeId" style="cursor:pointer;" @bind-Value:after="SelectCourtType">
                                                 @foreach (var l in CourtTypeList)
                                                 {
                                                     <option value="@l.Id">@l.Name</option>
@@ -3665,7 +3649,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <div class=@(showCountyDropdown ? "col-md-3" : "d-none")>
 
                                             <label class="lbl">County </label>
-                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.CountyId" style="cursor:pointer;" @bind-Value:after="SelectCounty">
+                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.CountyId" style="cursor:pointer;" @bind-Value:after="SelectCounty">
                                                 @foreach (var l in CountyList)
                                                 {
                                                     <option value="@l.Id">@l.Name</option>
@@ -3674,7 +3658,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         </div>
                                         <div class="col-md-6">
                                             <label class="lbl">Court <span class="text-danger">*</span></label>
-                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.CourtLocationId" style="cursor:pointer;" @onmousedown="ShowAllCourts" @bind-Value:after="SelectCourt">
+                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.CourtLocationId" style="cursor:pointer;" @onmousedown="ShowAllCourts" @bind-Value:after="SelectCourt">
                                                 <option value="">-- Select --</option>
                                                 @foreach (var l in filteredCourts)
                                                 {
@@ -3687,14 +3671,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         {
                                             <div class="col-md-6">
                                                 <label class="lbl">Part / Room #</label>
-                                                <InputText type="text" name="partRoom" class="holdover-form" @bind-Value="legalcaseDto.CourtRoom" />
+                                                <InputText type="text" name="partRoom" class="form-input" @bind-Value="legalcaseDto.CourtRoom" />
                                             </div>
                                         }
                                         else
                                         {
                                             <div class="col-md-6">
                                                 <label class="lbl">Part / Room #</label>
-                                                <InputSelect class="holdover-form" @bind-Value="legalcaseDto.CourtPartId" style="cursor:pointer;">
+                                                <InputSelect class="form-input" @bind-Value="legalcaseDto.CourtPartId" style="cursor:pointer;">
                                                     <option value="">-- Select --</option>
                                                     @foreach (var l in CourtPartList)
                                                     {
@@ -3709,7 +3693,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <!-- Index / LT Docket # -->
                                         <div class="col-md-6">
                                             <label class="lbl">Index / LT Docket #</label>
-                                            <InputText type="text" name="docket" class="holdover-form" @bind-Value="legalcaseDto.Index" />
+                                            <InputText type="text" name="docket" class="form-input" @bind-Value="legalcaseDto.Index" />
                                         </div>
 
                                         @if (legalcaseDto.CaseTypeName == "Per Diem")
@@ -3754,13 +3738,13 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     <!-- Managing Agent -->
                                                     <div class="col-md-6">
                                                         <label class="lbl">Party Name(s)</label>
-                                                        <InputText name="Partynames" class="holdover-form" @bind-Value="legalcaseDto.Partynames" />
+                                                        <InputText name="Partynames" class="form-input" @bind-Value="legalcaseDto.Partynames" />
                                                     </div>
 
                                                     <!-- Opposing Counsel -->
                                                     <div class="col-md-6">
                                                         <label class="lbl">Opposing Counsel (if any)</label>
-                                                        <InputText type="text" name="opposingCounsel" class="holdover-form" @bind-Value="legalcaseDto.OpposingCounsel" />
+                                                        <InputText type="text" name="opposingCounsel" class="form-input" @bind-Value="legalcaseDto.OpposingCounsel" />
                                                     </div>
 
                                                 }
@@ -3784,7 +3768,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     <label class="lbl">
                                                         Time of Appearance <span class="text-danger">*</span>
                                                     </label>
-                                                    <input type="time" name="appearanceTime" class="holdover-form" @bind="legalcaseDto.AppearanceTime" />
+                                                    <input type="time" name="appearanceTime" class="form-input" @bind="legalcaseDto.AppearanceTime" />
                                                     <ValidationMessage For="() => legalcaseDto.AppearanceTime" />
                                                 </div>
                                             </div>
@@ -3951,7 +3935,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         {
 
 
-                                                            <InputText class="holdover-form"
+                                                            <InputText class="form-input"
                                                                        placeholder="Enter Tenant name"
                                                                        @bind-value="searchTenantText"
                                                                        @onblur="saveTenantName" />
@@ -3960,7 +3944,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         {
 
 
-                                                            <InputText class="holdover-form"
+                                                            <InputText class="form-input"
                                                                        placeholder="Search by  name or code..."
                                                                        @bind-value="searchTenantText"
                                                                        @oninput="OnSearchTenantHpdInput" @onblur="saveTenantName" @onclick="ShowAllTenant" @onfocus="OnTenantInputFocus" />
@@ -4005,7 +3989,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         {
                                                             <div class="row mt-2">
                                                                 <div class="col-md-8">
-                                                                    <InputText class="holdover-form" placeholder="Enter Additional Petitioner"
+                                                                    <InputText class="form-input" placeholder="Enter Additional Petitioner"
                                                                                @bind-Value="t.Name" />
                                                                 </div>
 
@@ -4037,14 +4021,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                         @if (showLandlordfields && selectedlandlord == null)
                                                         {
-                                                            <InputText type="text" class="holdover-form"
+                                                            <InputText type="text" class="form-input"
                                                                        placeholder="Enter Landlord name"
                                                                        @bind-value="searchlandlordText"
                                                                        @onblur="saveLandLordName" />
                                                         }
                                                         else
                                                         {
-                                                            <InputText type="text" class="holdover-form"
+                                                            <InputText type="text" class="form-input"
                                                                        placeholder="Search by  name or code..."
                                                                        @bind-value="searchlandlordText"
                                                                        @oninput="OnSearchLandlordInput" @onblur="saveLandLordName" @onclick="ShowAlllandlords" />
@@ -4087,7 +4071,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         {
                                                             <div class="row mt-2">
                                                                 <div class="col-md-8">
-                                                                    <InputText class="holdover-form" placeholder="Enter Additional Petitioner"
+                                                                    <InputText class="form-input" placeholder="Enter Additional Petitioner"
                                                                                @bind-Value="t.Name" />
                                                                 </div>
 
@@ -4108,13 +4092,13 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <!-- Managing Agent -->
                                             <div class="col-md-6">
                                                 <label class="lbl">Managing Agent (if applicable)</label>
-                                                <InputText name="managingAgent" class="holdover-form" @bind-Value="legalcaseDto.ManagingAgent" />
+                                                <InputText name="managingAgent" class="form-input" @bind-Value="legalcaseDto.ManagingAgent" />
                                             </div>
 
                                             <!-- Opposing Counsel -->
                                             <div class="col-md-6">
                                                 <label class="lbl">Opposing Counsel (if any)</label>
-                                                <InputText type="text" name="opposingCounsel" class="holdover-form" @bind-Value="legalcaseDto.OpposingCounsel" />
+                                                <InputText type="text" name="opposingCounsel" class="form-input" @bind-Value="legalcaseDto.OpposingCounsel" />
                                             </div>
 
                                         }
@@ -4123,13 +4107,13 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <!-- Managing Agent -->
                                             <div class="col-md-6">
                                                 <label class="lbl">Party Name(s)</label>
-                                                <InputText name="Partynames" class="holdover-form" @bind-Value="legalcaseDto.Partynames" />
+                                                <InputText name="Partynames" class="form-input" @bind-Value="legalcaseDto.Partynames" />
                                             </div>
 
                                             <!-- Opposing Counsel -->
                                             <div class="col-md-6">
                                                 <label class="lbl">Opposing Counsel (if any)</label>
-                                                <InputText type="text" name="opposingCounsel" class="holdover-form" @bind-Value="legalcaseDto.OpposingCounsel" />
+                                                <InputText type="text" name="opposingCounsel" class="form-input" @bind-Value="legalcaseDto.OpposingCounsel" />
                                             </div>
 
                                         }
@@ -4163,7 +4147,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                             <div class="col-md-6 position-relative" @onfocusout="HideBuildingDropdown">
                                                 <label class="lbl  required-label">Building</label>
-                                                <input type="text" class="holdover-form"
+                                                <input type="text" class="form-input"
                                                        placeholder="Search by Building Address or code..."
                                                        @bind-value="searchBuildingText"
                                                        @oninput="OnSearchBuildingInput" />
@@ -4222,7 +4206,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <div class="row">
                                                 <div class="col-6">
                                                     <label class="lbl  required-label">Building Address </label>
-                                                    <InputText class="holdover-form" @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter BuildingAddress" disabled="@IsExistingBuildingSelected" />
+                                                    <InputText class="form-input" @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter BuildingAddress" disabled="@IsExistingBuildingSelected" />
 
 
                                                     @if (!IsExistingBuildingSelected)
@@ -4232,7 +4216,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 </div>
                                                 <div class="col-6">
                                                     <label class="lbl  required-label">Units </label>
-                                                    <InputText class="holdover-form" @bind-Value="legalcaseDto.Units" placeholder="Enter Units" disabled="@IsExistingBuildingSelected" />
+                                                    <InputText class="form-input" @bind-Value="legalcaseDto.Units" placeholder="Enter Units" disabled="@IsExistingBuildingSelected" />
 
                                                     @if (!IsExistingBuildingSelected)
                                                     {
@@ -4447,7 +4431,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <label class="lbl">
                                                 Time of Appearance <span class="text-danger">*</span>
                                             </label>
-                                            <input type="time" name="appearanceTime" class="holdover-form" @bind="legalcaseDto.AppearanceTime" />
+                                            <input type="time" name="appearanceTime" class="form-input" @bind="legalcaseDto.AppearanceTime" />
                                             <ValidationMessage For="() => legalcaseDto.AppearanceTime" />
                                         </div>
                                     </div>
@@ -4650,7 +4634,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <div class="row mt-3">
                                                 <div class="col-md-6">
                                                     <label class="lbl">Invoice To</label>
-                                                    <InputText type="text" class="holdover-form" name="invoiceTo" placeholder="Name or Organization" @bind-Value="legalcaseDto.InvoiceTo" />
+                                                    <InputText type="text" class="form-input" name="invoiceTo" placeholder="Name or Organization" @bind-Value="legalcaseDto.InvoiceTo" />
                                                 </div>
                                             </div>
                                         }
@@ -4683,7 +4667,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                         @if (legalcaseDto.BilingTypeId == Type.Id)
                                                                         {
                                                                             <input type="number"
-                                                                                   class="holdover-form"
+                                                                                   class="form-input"
                                                                                    style="width: 180px;"
                                                                                    placeholder="@(Type.Name == "Flat Rate" ? "$" : "$ / hr")"
                                                                                    @bind="legalcaseDto.BilingTypeInputValue" />
@@ -4703,7 +4687,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <div class="row mt-4">
                                                 <div class="col-6">
                                                     <label class="lbl mb-3">Travel / Other Expenses </label>
-                                                    <InputText class="holdover-form" placeholder="Optional" @bind-Value="legalcaseDto.TravelExpense" />
+                                                    <InputText class="form-input" placeholder="Optional" @bind-Value="legalcaseDto.TravelExpense" />
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="lbl">Payment Method  <span class="text-danger">*</span></label>
@@ -4769,20 +4753,20 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <div class="row g-3">
                                                                 <div class="col-4">
                                                                     <label class="lbl required-label">Client Name</label>
-                                                                    <InputText class="holdover-form"
+                                                                    <InputText class="form-input"
                                                                                placeholder="Enter Name"
                                                                                @bind-Value="legalcaseDto.ClientName" disabled />
                                                                     <ValidationMessage For="() => legalcaseDto.ClientName" />
                                                                 </div>
                                                                 <div class="col-4">
                                                                     <label class="lbl">Phone</label>
-                                                                    <InputText class="holdover-form"
+                                                                    <InputText class="form-input"
                                                                                placeholder="Enter Number"
                                                                                @bind-Value="legalcaseDto.ClientPhone" disabled />
                                                                 </div>
                                                                 <div class="col-4">
                                                                     <label class="lbl required-label">Client Type</label>
-                                                                    <InputSelect class="holdover-form"
+                                                                    <InputSelect class="form-input"
                                                                                  @bind-Value="legalcaseDto.ClientTypeId" disabled>
                                                                         <option value="">-- Select --</option>
                                                                         @foreach (var Own in ClientTypeList)
@@ -4799,14 +4783,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                                 <div class="col-6">
                                                                     <label class="lbl required-label">Email</label>
-                                                                    <InputText class="holdover-form"
+                                                                    <InputText class="form-input"
                                                                                placeholder="Enter Email"
                                                                                @bind-Value="legalcaseDto.ClientEmail" disabled />
                                                                     <ValidationMessage For="() => legalcaseDto.ClientEmail" />
                                                                 </div>
                                                                 <div class="col-4">
                                                                     <label class="lbl">Reference #</label>
-                                                                    <InputText class="holdover-form"
+                                                                    <InputText class="form-input"
                                                                                placeholder="Enter Reference"
                                                                                @bind-Value="legalcaseDto.Reference" disabled />
                                                                 </div>
@@ -4817,7 +4801,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                 {
                                                                     <div class="col-9">
                                                                         <label class="lbl">Address</label>
-                                                                        <InputText class="holdover-form"
+                                                                        <InputText class="form-input"
                                                                                    placeholder="Enter Address"
                                                                                    @bind-Value="legalcaseDto.ClientAddress" />
                                                                     </div>
@@ -4899,7 +4883,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                         <div class=@(showCountyDropdown ? "col-md-3" : "col-md-6")>
                                                             <label class="lbl ">Court Type </label>
-                                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.CourtTypeId" style="cursor:pointer;" @bind-Value:after="SelectCourtType" disabled>
+                                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.CourtTypeId" style="cursor:pointer;" @bind-Value:after="SelectCourtType" disabled>
                                                                 <option value="">-- Select --</option>
                                                                 @foreach (var l in CourtTypeList)
                                                                 {
@@ -4912,7 +4896,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <div class=@(showCountyDropdown ? "col-md-3" : "d-none")>
 
                                                             <label class="lbl">County </label>
-                                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.CountyId" style="cursor:pointer;" @bind-Value:after="SelectCounty" disabled>
+                                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.CountyId" style="cursor:pointer;" @bind-Value:after="SelectCounty" disabled>
                                                                 <option value="">-- Select --</option>
                                                                 @foreach (var l in CountyList)
                                                                 {
@@ -4922,7 +4906,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label class="lbl">Court <span class="text-danger">*</span></label>
-                                                            <InputSelect class="holdover-form" @bind-Value="legalcaseDto.CourtLocationId" style="cursor:pointer;" @onmousedown="ShowAllCourts" @bind-Value:after="SelectCourt" disabled>
+                                                            <InputSelect class="form-input" @bind-Value="legalcaseDto.CourtLocationId" style="cursor:pointer;" @onmousedown="ShowAllCourts" @bind-Value:after="SelectCourt" disabled>
                                                                 <option value="">-- Select --</option>
                                                                 @foreach (var l in filteredCourts)
                                                                 {
@@ -4935,14 +4919,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         {
                                                             <div class="col-md-6">
                                                                 <label class="lbl">Part / Room #</label>
-                                                                <InputText type="text" name="partRoom" class="holdover-form" @bind-Value="legalcaseDto.CourtRoom" disabled />
+                                                                <InputText type="text" name="partRoom" class="form-input" @bind-Value="legalcaseDto.CourtRoom" disabled />
                                                             </div>
                                                         }
                                                         else
                                                         {
                                                             <div class="col-md-6">
                                                                 <label class="lbl">Part / Room #</label>
-                                                                <InputSelect class="holdover-form" @bind-Value="legalcaseDto.CourtPartId" style="cursor:pointer;" disabled>
+                                                                <InputSelect class="form-input" @bind-Value="legalcaseDto.CourtPartId" style="cursor:pointer;" disabled>
                                                                     <option value="">-- Select --</option>
                                                                     @foreach (var l in CourtPartList)
                                                                     {
@@ -4957,7 +4941,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <!-- Index / LT Docket # -->
                                                         <div class="col-md-6">
                                                             <label class="lbl">Index / LT Docket #</label>
-                                                            <InputText type="text" name="docket" class="holdover-form" @bind-Value="legalcaseDto.Index" disabled />
+                                                            <InputText type="text" name="docket" class="form-input" @bind-Value="legalcaseDto.Index" disabled />
                                                         </div>
 
 
@@ -5052,7 +5036,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                         {
 
 
-                                                                            <InputText class="holdover-form"
+                                                                            <InputText class="form-input"
                                                                                        placeholder="Enter Tenant name"
                                                                                        @bind-value="searchTenantText"
                                                                                        @onblur="saveTenantName" disabled />
@@ -5061,7 +5045,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                         {
 
 
-                                                                            <InputText class="holdover-form"
+                                                                            <InputText class="form-input"
                                                                                        placeholder="Search by  name or code..."
                                                                                        @bind-value="searchTenantText"
                                                                                        @oninput="OnSearchTenantHpdInput" @onblur="saveTenantName" @onclick="ShowAllTenant" @onfocus="OnTenantInputFocus" disabled />
@@ -5082,7 +5066,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                         {
                                                                             <div class="row mt-2">
                                                                                 <div class="col-md-8">
-                                                                                    <InputText class="holdover-form" placeholder="Enter Additional Petitioner" disabled
+                                                                                    <InputText class="form-input" placeholder="Enter Additional Petitioner" disabled
                                                                                                @bind-Value="t.Name" />
                                                                                 </div>
 
@@ -5104,14 +5088,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                                         @if (showLandlordfields && selectedlandlord == null)
                                                                         {
-                                                                            <InputText type="text" class="holdover-form"
+                                                                            <InputText type="text" class="form-input"
                                                                                        placeholder="Enter Landlord name"
                                                                                        @bind-value="searchlandlordText"
                                                                                        @onblur="saveLandLordName" disabled />
                                                                         }
                                                                         else
                                                                         {
-                                                                            <InputText type="text" class="holdover-form"
+                                                                            <InputText type="text" class="form-input"
                                                                                        placeholder="Search by  name or code..."
                                                                                        @bind-value="searchlandlordText"
                                                                                        @oninput="OnSearchLandlordInput" @onblur="saveLandLordName" @onclick="ShowAlllandlords" disabled />
@@ -5130,7 +5114,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                         {
                                                                             <div class="row mt-2">
                                                                                 <div class="col-md-8">
-                                                                                    <InputText class="holdover-form" placeholder="Enter Additional Petitioner" disabled
+                                                                                    <InputText class="form-input" placeholder="Enter Additional Petitioner" disabled
                                                                                                @bind-Value="t.Name" />
                                                                                 </div>
 
@@ -5147,13 +5131,13 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <!-- Managing Agent -->
                                                             <div class="col-md-6">
                                                                 <label class="lbl">Managing Agent (if applicable)</label>
-                                                                <InputText name="managingAgent" class="holdover-form" @bind-Value="legalcaseDto.ManagingAgent" disabled />
+                                                                <InputText name="managingAgent" class="form-input" @bind-Value="legalcaseDto.ManagingAgent" disabled />
                                                             </div>
 
                                                             <!-- Opposing Counsel -->
                                                             <div class="col-md-6">
                                                                 <label class="lbl">Opposing Counsel (if any)</label>
-                                                                <InputText type="text" name="opposingCounsel" class="holdover-form" @bind-Value="legalcaseDto.OpposingCounsel" disabled />
+                                                                <InputText type="text" name="opposingCounsel" class="form-input" @bind-Value="legalcaseDto.OpposingCounsel" disabled />
                                                             </div>
 
                                                         }
@@ -5162,13 +5146,13 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <!-- Managing Agent -->
                                                             <div class="col-md-6">
                                                                 <label class="lbl">Party Name(s)</label>
-                                                                <InputText name="Partynames" class="holdover-form" @bind-Value="legalcaseDto.Partynames" disabled />
+                                                                <InputText name="Partynames" class="form-input" @bind-Value="legalcaseDto.Partynames" disabled />
                                                             </div>
 
                                                             <!-- Opposing Counsel -->
                                                             <div class="col-md-6">
                                                                 <label class="lbl">Opposing Counsel (if any)</label>
-                                                                <InputText type="text" name="opposingCounsel" class="holdover-form" @bind-Value="legalcaseDto.OpposingCounsel" disabled />
+                                                                <InputText type="text" name="opposingCounsel" class="form-input" @bind-Value="legalcaseDto.OpposingCounsel" disabled />
                                                             </div>
 
                                                         }
@@ -5194,14 +5178,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <div class="row">
                                                             <div class="col-6">
                                                                 <label class="lbl  required-label">Building Address </label>
-                                                                <InputText class="holdover-form" @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter BuildingAddress" disabled />
+                                                                <InputText class="form-input" @bind-Value="legalcaseDto.BuildingAddress" placeholder="Enter BuildingAddress" disabled />
 
 
 
                                                             </div>
                                                             <div class="col-6">
                                                                 <label class="lbl  required-label">Units </label>
-                                                                <InputText class="holdover-form" @bind-Value="legalcaseDto.Units" placeholder="Enter Units" disabled />
+                                                                <InputText class="form-input" @bind-Value="legalcaseDto.Units" placeholder="Enter Units" disabled />
 
 
                                                             </div>
@@ -5387,7 +5371,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <label class="lbl">
                                                                 Time of Appearance <span class="text-danger">*</span>
                                                             </label>
-                                                            <input type="time" name="appearanceTime" class="holdover-form" @bind="legalcaseDto.AppearanceTime" disabled />
+                                                            <input type="time" name="appearanceTime" class="form-input" @bind="legalcaseDto.AppearanceTime" disabled />
 
                                                         </div>
                                                     </div>
@@ -5580,7 +5564,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <div class="row mt-3">
                                                                 <div class="col-md-6">
                                                                     <label class="lbl">Invoice To</label>
-                                                                    <InputText type="text" class="holdover-form" name="invoiceTo" placeholder="Name or Organization" @bind-Value="legalcaseDto.InvoiceTo" disabled />
+                                                                    <InputText type="text" class="form-input" name="invoiceTo" placeholder="Name or Organization" @bind-Value="legalcaseDto.InvoiceTo" disabled />
                                                                 </div>
                                                             </div>
                                                         }
@@ -5613,7 +5597,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                                         @if (legalcaseDto.BilingTypeId == Type.Id)
                                                                                         {
                                                                                             <input type="number"
-                                                                                                   class="holdover-form"
+                                                                                                   class="form-input"
                                                                                                    style="width: 180px;"
                                                                                                    placeholder="@(Type.Name == "Flat Rate" ? "$" : "$ / hr")"
                                                                                                    @bind="legalcaseDto.BilingTypeInputValue" disabled />
@@ -5633,7 +5617,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                             <div class="row mt-4">
                                                                 <div class="col-6">
                                                                     <label class="lbl mb-3">Travel / Other Expenses </label>
-                                                                    <InputText class="holdover-form" placeholder="Optional" @bind-Value="legalcaseDto.TravelExpense" disabled />
+                                                                    <InputText class="form-input" placeholder="Optional" @bind-Value="legalcaseDto.TravelExpense" disabled />
                                                                 </div>
                                                                 <div class="col-md-6">
                                                                     <label class="lbl">Payment Method  <span class="text-danger">*</span></label>
@@ -5691,7 +5675,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <div class="mb-3 row">
                                         <div class="col-md-12">
                                             <label class="lbl">Key Facts to Know (bullet points) <span class="text-danger">*</span></label>
-                                            <InputTextArea class="holdover-form" name="CaseBackground" placeholder="Enter Your Case In Brief" @bind-Value="legalcaseDto.CaseBackground" />
+                                            <InputTextArea class="form-input" name="CaseBackground" placeholder="Enter Your Case In Brief" @bind-Value="legalcaseDto.CaseBackground" />
                                             <ValidationMessage For="() => legalcaseDto.CaseBackground" />
                                         </div>
                                     </div>
@@ -5742,7 +5726,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                     <div class="mb-3 row mt-3">
                                         <div class="col-md-12">
                                             <label class="lbl">Special Instructions from Hiring Attorney</label>
-                                            <InputTextArea class="holdover-form" name="CaseBackground" placeholder="Enter Your Case In Brief" @bind-Value="legalcaseDto.SpecialInstruction" />
+                                            <InputTextArea class="form-input" name="CaseBackground" placeholder="Enter Your Case In Brief" @bind-Value="legalcaseDto.SpecialInstruction" />
                                         </div>
                                     </div>
                                 </div>
@@ -5814,14 +5798,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                         <div class="col-md-4 ">
 
                                             <label class="lbl">Per Diem Attorney (Name)<span class="text-danger">*</span></label>
-                                            <InputText type="text" class="holdover-form" @bind-Value="legalcaseDto.PerDiemAttorneyname" placeholder="Enter Attorney Name" />
+                                            <InputText type="text" class="form-input" @bind-Value="legalcaseDto.PerDiemAttorneyname" placeholder="Enter Attorney Name" />
                                             <ValidationMessage For="() => legalcaseDto.PerDiemAttorneyname" />
 
                                         </div>
                                         <div class="col-md-4 ">
 
                                             <label class="lbl">Signature<span class="text-danger">*</span></label>
-                                            <InputText type="text" class="holdover-form" placeholder="Type Full Name" @bind-Value="legalcaseDto.PerDiemSignature" />
+                                            <InputText type="text" class="form-input" placeholder="Type Full Name" @bind-Value="legalcaseDto.PerDiemSignature" />
                                             <ValidationMessage For="() => legalcaseDto.PerDiemSignature" />
 
                                         </div>
@@ -6051,6 +6035,17 @@ r.Name == "Other");
         messageStore = new ValidationMessageStore(_editContext);
         legalcaseDto = await _legalCaseService.GetCaseByIdAsync(caseId);
 
+        await userContext.LoadAsync();
+
+        if (!userContext.IsAuthenticated)
+        {
+            nav.NavigateTo("/", forceLoad: true);
+            return;
+        }
+
+        loggedInUserId = userContext.UserId;
+        isAdmin = userContext.IsAdmin;
+
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
         SubCaseTypeList = await _legalCaseService.GetSubCaseList();
         var defaultCaseType = CaseTypeList.FirstOrDefault(x =>
@@ -6085,22 +6080,21 @@ r.Name == "Other");
         // ReliefPetitionerTypesList = await CaseTypeRepository.GetAllReliefPetitionerTypes();
         // ReliefRespondentTypesList = await CaseTypeRepository.GetAllReliefRespondentTypes();
         // BilingTypesList = await CaseTypeRepository.GetAllBilingTypes();
-        LandLordTypeList = await LandlordTypeRepository.GetAllLandLordType();
-        IsUnitIllegalList = await UnitIllegalRepository.GetAllUnitIllegal();
+        //LandLordTypeList = await LandlordTypeRepository.GetAllLandLordType();
+        //IsUnitIllegalList = await UnitIllegalRepository.GetAllUnitIllegal();
         // RegulationList = await RegulationStatusRepository.GetAllRegulationStatus();
         // TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
         // CourtLocationList = await _courtService.GetAllCourtDataAsync();
         // DateRentList = await DateRentRepository.GetAllDateRent();
         // StateList = await _stateRepository.GetAllState();
-        CountyList = await _countyService.GetAllCounty();
+        //CountyList = await _countyService.GetAllCounty();
         // ClientTypeList = await ClientRoleRepository.GetAllClientRole();
         // CaseProgramList = await _caseprogram.GetAllCaseProgram();
         // FilteredFormTypeList = await _FormService.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
         // FilingMethodList = await _legalCaseService.FilingMethodList();
         // ServiceMethodList = await _legalCaseService.ServiceMethodList();
         // Rows = legalcaseDto.ArrearLedgers;
-        searchCourtText = legalcaseDto.CourtName;
-        searchCountyText = legalcaseDto.CountyName;
+        
 
 
 
@@ -6147,13 +6141,13 @@ r.Name == "Other");
         // }
         //LastrentPaid = legalcaseDto.LastRentPaid;
 
-        if (!string.IsNullOrEmpty(legalcaseDto.LastRentPaid))
-        {
-            if (DateTime.TryParseExact(legalcaseDto.LastRentPaid, "MMMM yyyy", null, System.Globalization.DateTimeStyles.None, out var dt))
-            {
-                LastrentPaid = dt.ToString("yyyy-MM");
-            }
-        }
+        // if (!string.IsNullOrEmpty(legalcaseDto.LastRentPaid))
+        // {
+        //     if (DateTime.TryParseExact(legalcaseDto.LastRentPaid, "MMMM yyyy", null, System.Globalization.DateTimeStyles.None, out var dt))
+        //     {
+        //         LastrentPaid = dt.ToString("yyyy-MM");
+        //     }
+        // }
 
         // LandLordTypeList = await LandlordTypeRepository.GetAllLandLordType();
         // IsUnitIllegalList = await UnitIllegalRepository.GetAllUnitIllegal();
@@ -6166,14 +6160,7 @@ r.Name == "Other");
         // CaseProgramList = await _caseprogram.GetAllCaseProgram();
 
 
-        var authState = await _authStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity != null && user.Identity.IsAuthenticated)
-        {
-            loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
-        }
+       
 
         // foreach (var item in CaseTypeHPDList)
         // {
@@ -6264,12 +6251,7 @@ r.Name == "Other");
         //     showBuildingfields = false;
         //     IsNewBuilding = false;
         // }
-
-        ExemptionBasicList = await ExemptionBasicRepository.GetAllAsync();
-        ExemptionReasonList = await ExemptionReasonRepository.GetAllAsync();
-        TenancyTypeForBuildingList = await TenancyTypeForBuildingRepository.GetAllAsync();
-
-        GenerateMonths();
+        
         await BuildSteps();
         spinnerservice.Hide();
 
@@ -6296,6 +6278,11 @@ r.Name == "Other");
     private List<CaseAdditionalPetitioner> AdditionalPetitionersDelete { get; set; } = new();
     private List<CaseAdditionalRespondent> AdditionalRespondent { get; set; } = new();
     private List<CaseAdditionalRespondent> AdditionalRespondentDelete { get; set; } = new();
+
+    private async Task ValidateInput()
+    {
+        var result = await ValidateCurrentStep();
+    }
 
     private async Task Next()
     {
@@ -6371,7 +6358,8 @@ r.Name == "Other");
             if (!PremiseTypesList.Any()) PremiseTypesList = await PremiseTypeRepository.GetAllPremiseType();
             if (!RegistrationstatusList.Any()) RegistrationstatusList = await CaseTypeRepository.GetAllRegistrationstatus();
             if (!RegulationList.Any()) RegulationList = await RegulationStatusRepository.GetAllRegulationStatus();
-
+            if (!ExemptionBasicList.Any()) ExemptionBasicList = await ExemptionBasicRepository.GetAllAsync();
+            if (!ExemptionReasonList.Any()) ExemptionReasonList = await ExemptionReasonRepository.GetAllAsync();
 
             legalcaseDto.StateId = StateList.Where(e => e.Name.Contains("New York")).Select(e => e.Id).FirstOrDefault();
             legalcaseDto.BuildingStateId = StateList.Where(e => e.Name.Contains("New York")).Select(e => e.Id).FirstOrDefault();
@@ -6391,19 +6379,24 @@ r.Name == "Other");
             if (legalcaseDto.BuildingId != null && legalcaseDto.BuildingId != Guid.Empty)
             {
                 if (!TenantList.Any()) TenantList = await _tenantService.GetTenantsByClientIdAsync(legalcaseDto.BuildingId!.Value);
+                
+
+            }
+
+            if (legalcaseDto.TenantId != null && legalcaseDto.TenantId != Guid.Empty)
+            {
                 if (selectedtenant == null)
                 {
                     selectedtenant = TenantList.Where(e => e.Id == legalcaseDto.TenantId).FirstOrDefault() ?? new EditToTenantDto();
                     searchTenantText = legalcaseDto.UnitOrApartmentNumber;
                     Tenants.Add($"{selectedtenant.FirstName} {selectedtenant.LastName}");
                 }
-
-            }
-
-            if (legalcaseDto.TenantId != null && legalcaseDto.TenantId != Guid.Empty)
-            {
                 if (!CaseAdditionalTenantfromDbList.Any()) CaseAdditionalTenantfromDbList = await _caseAdditionalTenant.GetAllAdditionalCaseTenantsAsync(legalcaseDto.Id);
                 if (!AdditionalOccupantsList.Any()) AdditionalOccupantsList = await _additionalOccupant.GetAllAdditionalOccupantsAsync(legalcaseDto.Id);
+                searchTenantText = $"{legalcaseDto?.UnitOrApartmentNumber} / {legalcaseDto?.TenantName} ";
+                Rows = legalcaseDto.ArrearLedgers;
+                GenerateMonths();
+                legalcaseDto.TotalOwed = legalcaseDto.ArrearLedgers?.Sum(e => e.Amount) ?? 0;
             }
 
 
@@ -6423,11 +6416,13 @@ r.Name == "Other");
             {
                 Undertenants.AddRange(AdditionalOccupantsList.Select(e => e.Name).ToList());
             }
+           
+
             var undertanants = new List<string>() { "John Doe", "Jane Doe" };
             Undertenants.AddRange(undertanants);
-            searchTenantText = $"{legalcaseDto?.UnitOrApartmentNumber} / {legalcaseDto?.TenantName} ";
-            Rows = legalcaseDto.ArrearLedgers;
-            legalcaseDto.TotalOwed = legalcaseDto.ArrearLedgers?.Sum(e => e.Amount) ?? 0;
+            
+
+            
             tenantStepLoaded = true;
         }
 
@@ -6475,6 +6470,7 @@ r.Name == "Other");
         {
             if (!CaseTypeHPDList.Any()) CaseTypeHPDList = await CaseTypeRepository.GetAllCaseTypeHPD();
             if (!CaseTypePerDiemList.Any()) CaseTypePerDiemList = await CaseTypeRepository.GetAllCaseTypePerDiem();
+            if (!CountyList.Any()) CountyList = await _countyService.GetAllCounty();
             if (!CourtTypeList.Any()) CourtTypeList = await _legalCaseService.CourtTypeList();
             if (!CourtLocationList.Any()) CourtLocationList = await _courtService.GetAllCourtDataAsync();
             if (!CourtPartList.Any()) CourtPartList = CourtLocationList.Where(e => e.Id == legalcaseDto.CourtLocationId).FirstOrDefault().CourtPart;
@@ -6503,7 +6499,8 @@ r.Name == "Other");
             }
             await ShowAllCourts();
             CaseTypeStepLoaded = true;
-
+            searchCourtText = legalcaseDto.CourtName;
+            searchCountyText = legalcaseDto.CountyName;
             if (legalcaseDto.CaseTypeName == "Per Diem")
             {
                 if (!PartyRepresentPerDiemList.Any()) PartyRepresentPerDiemList = await CaseTypeRepository.GetAllpartyRepresentingPerDiem();
@@ -7999,6 +7996,7 @@ r.Name == "Other");
                     {
                         Require(() => legalcaseDto.BuildingZip, nameof(legalcaseDto.BuildingZip), "Zipcode is Required");
                         Require(() => legalcaseDto.BuildingStateId, nameof(legalcaseDto.BuildingStateId), "Please select a state");
+                        Require(() => legalcaseDto.ManagingAgent, nameof(legalcaseDto.ManagingAgent), "Please select a state");
                     }
 
                     if (!isBuildingSelected)
@@ -8014,11 +8012,14 @@ r.Name == "Other");
                     {
                         Require(() => legalcaseDto.BuildingAddress, nameof(legalcaseDto.BuildingAddress), "Address is required");
                     }
+
                     if (!isBuildingSelected)
                     {
                         Require(() => legalcaseDto.RegulationStatusId, nameof(legalcaseDto.RegulationStatusId), "Please select a regulation");
+                        Require(() => legalcaseDto.PremiseTypeId, nameof(legalcaseDto.PremiseTypeId), "Please select a regulation");
+                        Require(() => legalcaseDto.RegistrationStatusTypeId, nameof(legalcaseDto.RegistrationStatusTypeId), "Select Registration Status");
+
                     }
-                    Require(() => legalcaseDto.RegistrationStatusTypeId, nameof(legalcaseDto.RegistrationStatusTypeId), "Select Registration Status");
 
 
 
@@ -9295,6 +9296,8 @@ r.Name == "Other");
                     _ => ""
                 };
             }
+
+            ValidateInput();
         }
     }
 
@@ -9493,6 +9496,8 @@ r.Name == "Other");
     private async void saveLandLordName()
     {
         legalcaseDto.landlordName = searchlandlordText;
+
+        await ValidateInput();
     }
 
     private async Task SelectLandlord(EditToLandlordDto landlord)
@@ -9518,7 +9523,7 @@ r.Name == "Other");
 
         _editContext.NotifyValidationStateChanged();
 
-
+        await ValidateInput();
     }
 
     private async void SelectLandlords()
@@ -9752,6 +9757,7 @@ r.Name == "Other");
 
         _editContext.NotifyValidationStateChanged();
 
+        await ValidateInput();
 
     }
 
@@ -9794,10 +9800,8 @@ r.Name == "Other");
         }
         filteredTenant?.Clear();
 
-
+        await ValidateInput();
         StateHasChanged();
-
-
     }
 
 
@@ -10035,7 +10039,7 @@ r.Name == "Other");
         messageStore.Clear(new FieldIdentifier(legalcaseDto, nameof(legalcaseDto.ClientEmail)));
         _editContext.NotifyValidationStateChanged();
 
-
+        await ValidateInput();
 
     }
 

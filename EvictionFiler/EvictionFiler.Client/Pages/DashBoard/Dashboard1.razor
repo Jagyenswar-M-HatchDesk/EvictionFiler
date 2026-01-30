@@ -9,6 +9,7 @@
 @using EvictionFiler.Application.Interfaces.IRepository
 @using EvictionFiler.Application.Interfaces.IServices
 @* @using EvictionFiler.Client.Jwt *@
+@using EvictionFiler.Client.AuthService
 @using EvictionFiler.Client.SpinnerService
 @inject SpinnerService spinnerservice
 @using EvictionFiler.Client.Components.Layout
@@ -26,7 +27,10 @@
 @inject SpinnerService spinnerservice;
 @inject IClientService _clientService
 @inject NavigationManager navManager
+@inject UserContextService userContext
 @attribute [Authorize]
+
+
 <style>
     :root {
     /* Light theme with Navy & Gold brand accents */
@@ -963,6 +967,7 @@
     </div>
 
 </div>
+ript>
 
 
 @code {
@@ -1044,22 +1049,21 @@
 
 
 
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        isAuth = authState.User.Identity?.IsAuthenticated ?? false;
-        var user = authState.User;
-        loginUser = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+       await userContext.LoadAsync();
 
-        Console.WriteLine("AUTH SCHEME: " + user.Identity?.AuthenticationType);
-        Console.WriteLine("IS AUTH: " + user.Identity?.IsAuthenticated);
-        if (user.Identity != null && user.Identity.IsAuthenticated)
+        if(!userContext.IsAuthenticated)
         {
-            loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            navManager.NavigateTo("/",forceLoad: true);
+            return;
         }
+
+        loggedInUserId = userContext.UserId;
+        isAdmin = userContext.IsAdmin;
+
         totalCases = await _service.GetTotalCasesCountAsync(loggedInUserId , isAdmin);
         totalCasesHearing = await _caseService.GetAllTodayCaseHearingAsync();
         activeCases = await _service.GetActiveCasesCountAsync(loggedInUserId, isAdmin);
-  ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
+  //ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
 
         spinnerservice.Hide();
     }

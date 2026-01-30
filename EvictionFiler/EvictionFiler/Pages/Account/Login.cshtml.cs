@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.ComponentModel.DataAnnotations;
 
 namespace EvictionFiler.Server.Components.Pages.Account
 {
@@ -24,30 +25,19 @@ namespace EvictionFiler.Server.Components.Pages.Account
         [BindProperty]
         public List<string> AllErrors { get; set; } = new List<string>();
 
-        [BindProperty]
-        public string? ErrorMessage { get; set; } = string.Empty;
-        [BindProperty]
-        public string? UsernameError { get; set; } = string.Empty;
-        [BindProperty]
-        public string? PasswordError { get; set; } = string.Empty;
-
-        [BindProperty]
-        public bool IsProcessing { get; set; } = false;
         [BindNever]
-        public string EmailMarginTop => AllErrors.Any() ? "5px" : "55px";
-
-        public class InputModel
-        {
-            public string Email { get; set; }
-            public string Password { get; set; }
-        }
+        public string EmailMarginTop => AllErrors.Any() ? "5px" : "60px";
 
         public void OnGet() { }
 
         public async Task<IActionResult> OnPostSubmit()
         {
             if (!ModelState.IsValid)
+            {
+               
                 return Page();
+            }
+            await Task.Delay(1000);
 
             var result = await _signInManager.PasswordSignInAsync(
                 loginModel.Username,
@@ -61,7 +51,7 @@ namespace EvictionFiler.Server.Components.Pages.Account
                 return Redirect("/dashboard");
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            AllErrors.Add("Invalid Credentials.");
             return Page();
         }
     }

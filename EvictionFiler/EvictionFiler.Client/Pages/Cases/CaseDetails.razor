@@ -27,6 +27,7 @@
 @* @using EvictionFiler.Client.Jwt *@
 @using EvictionFiler.Application.Interfaces.IServices.Master
 @using EvictionFiler.Application.Services
+@using EvictionFiler.Client.AuthService
 @using EvictionFiler.Client.Pages.Actions
 @using EvictionFiler.Client.SpinnerService
 @using EvictionFiler.Domain.Entities.Master
@@ -74,6 +75,7 @@
 @using EvictionFiler.Domain.Entities
 @inject IJSRuntime JS
 @inject NavigationStateMessage navmessage
+@inject UserContextService userContext
 
 @attribute [Authorize]
 
@@ -4142,14 +4144,17 @@
             ToastService.ShowSuccess($"{message}");
         }
 
-        var authState = await _authStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+        await userContext.LoadAsync();
 
-        if (user.Identity != null && user.Identity.IsAuthenticated)
+        if(!userContext.IsAuthenticated)
         {
-            loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            Navigation.NavigateTo("/",forceLoad: true);
+            return;
         }
+
+        loggedInUserId = userContext.UserId;
+        isAdmin = userContext.IsAdmin;
+
         _editContext = new EditContext(legalcaseDto);
         messageStore = new ValidationMessageStore(_editContext);
 
