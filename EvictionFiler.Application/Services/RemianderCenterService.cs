@@ -23,7 +23,7 @@ namespace EvictionFiler.Application.Services
             _userRepo = userRepo;
         }
 
-        public async Task<bool> Create(EditToRemainderCenterDto dto)
+        public async Task<bool> Create(CreateToRemainderCenterDto dto)
         {
             try
             {
@@ -49,7 +49,7 @@ namespace EvictionFiler.Application.Services
 
                 return result > 0;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -62,9 +62,9 @@ namespace EvictionFiler.Application.Services
             if (data != null)
             {
                 data.IsComplete = dto.IsComplete;
-                
+
             }
-            
+
             var result = await _unitOfWork.SaveChangesAsync();
 
             return result > 0;
@@ -93,7 +93,7 @@ namespace EvictionFiler.Application.Services
         public async Task<List<EditToRemainderCenterDto>> GetAllRemainderCenterAsync()
         {
             var calanders = await _remainderCenterRepo
-                .GetAllQuerable(x => x.IsDeleted != true, x => x.RemainderType, x => x.County, x => x.Tenant, x => x.Case, x=>x.ReminderEscalates, x=>x.ReminderCategory)
+                .GetAllQuerable(x => x.IsDeleted != true, x => x.RemainderType, x => x.County, x => x.Tenant, x => x.Case, x => x.ReminderEscalates, x => x.ReminderCategory)
                 .ToListAsync();
 
             var result = calanders.Select(dto => new EditToRemainderCenterDto
@@ -121,6 +121,51 @@ namespace EvictionFiler.Application.Services
             }).ToList();
 
             return result;
+        }
+        public async Task<List<EditToRemainderCenterDto>?> GetAllInCompleteRemainder(Guid? userId = null)
+        {
+            try 
+            {
+                var calanders = await _remainderCenterRepo
+                .GetAllQuerable(x => x.IsDeleted != true && x.IsComplete != true && x.When <= DateTime.Now, x => x.RemainderType, x => x.County, x => x.Tenant, x => x.Case, x => x.ReminderEscalates, x => x.ReminderCategory)
+                .ToListAsync();
+
+                if (userId != null)
+                {
+                    calanders = calanders.Where(e => e.CreatedBy == userId).ToList();
+                }
+
+                var result = calanders.Select(dto => new EditToRemainderCenterDto
+                {
+                    Id = dto.Id,
+                    When = dto.When,
+                    CaseId = dto.CaseId,
+                    CountyId = dto.CountyId,
+                    TenantId = dto.TenantId,
+                    RemainderTypeId = dto.RemainderTypeId,
+                    Index = dto.Index,
+                    Notes = dto.Notes,
+                    RemainderTypeName = dto.RemainderType?.Name ?? "Unknown",
+                    CountyName = dto.County?.Name ?? "Unknown",
+                    TenantName = dto.Tenant?.FirstName ?? "Unknown",
+                    CaseCode = dto.Case?.Casecode ?? "Unknown",
+                    ReminderName = dto.ReminderName,
+                    ReminderCategoryId = dto.ReminderCategoryId,
+                    ReminderEscalateId = dto.ReminderEscalateId,
+                    ReminderCategoryName = dto.ReminderCategory != null ? dto.ReminderCategory.Name : string.Empty,
+                    ReminderEscalateName = dto.ReminderEscalates != null ? dto.ReminderEscalates.Name : string.Empty,
+                    IsComplete = dto.IsComplete,
+
+
+                }).ToList();
+
+                return result;
+            }
+            catch(Exception ex)
+            {
+                return null;
+            }
+            
         }
 
 
@@ -150,13 +195,13 @@ namespace EvictionFiler.Application.Services
         }
         public async Task<List<EditToRemainderCenterDto?>> GetRemainderCenterByCaseIdAsync(Guid? CaseId)
         {
-            var list = await _remainderCenterRepo.GetAllAsync(predicate:e=>e.CaseId == CaseId, includes: b=>b.RemainderType!);
+            var list = await _remainderCenterRepo.GetAllAsync(predicate: e => e.CaseId == CaseId, includes: b => b.RemainderType!);
 
 
             //if (dto == null)
             //    return null;
 
-            var result = list.Select(dto=> new EditToRemainderCenterDto
+            var result = list.Select(dto => new EditToRemainderCenterDto
             {
                 Id = dto.Id,
                 When = dto.When,
@@ -208,6 +253,19 @@ namespace EvictionFiler.Application.Services
             await _unitOfWork.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task CreateNewReminder(Guid caseId, string Description, DateTime Date)
+        {
+            var remainder = new CreateToRemainderCenterDto()
+            {
+                CaseId = caseId,
+                ReminderName = Description,
+                When = Date.Date,
+            };
+
+            var result = await Create(remainder);
+            
         }
     }
 }

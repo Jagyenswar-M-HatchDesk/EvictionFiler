@@ -550,7 +550,7 @@ namespace EvictionFiler.Application.Services
                         //CourtId = caseEntity.CourtId != null ? caseEntity.CourtId : Guid.Empty,
                         Court = caseEntity.CourtLocation != null ? caseEntity.CourtLocation.Court! : "",
                         CourtAddress = caseEntity.CourtLocation != null ? caseEntity.CourtLocation.Address! : "",
-                        CourtPartId = caseEntity.CourtPartId != null ? caseEntity.CourtPartId : Guid.Empty,
+                        CourtPartId = caseEntity.CourtPartId != null ? caseEntity.CourtPartId : null,
                         CourtPart = caseEntity.CourtPart != null ? caseEntity.CourtPart.Part : string.Empty,
                         CourtRoom = caseEntity.CourtPart != null ? caseEntity.CourtPart.RoomNo : string.Empty,
                         CourtLocationId = caseEntity.CourtLocationId,
@@ -1213,6 +1213,30 @@ namespace EvictionFiler.Application.Services
                 if (existingCase == null) return false;
 
                 existingCase.MarshalId = legalCase.MarshalId!;
+
+                var result = await _unitOfWork.SaveChangesAsync();
+
+                if (result > 0) return true;
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+            }
+
+        }
+        public async Task<bool> UpdateCourtandIndex(IntakeModel legalCase)
+        {
+            try
+            {
+                var existingCase = await _repository.GetAsync(legalCase.Id);
+                if (existingCase == null) return false;
+
+                existingCase.CourtLocationId = legalCase.CourtLocationId!;
+                existingCase.CourtPartId = legalCase.CourtPartId!;
+                existingCase.CourtTypeId = legalCase.CourtTypeId!;
+                existingCase.Index = legalCase.Index!;
 
                 var result = await _unitOfWork.SaveChangesAsync();
 

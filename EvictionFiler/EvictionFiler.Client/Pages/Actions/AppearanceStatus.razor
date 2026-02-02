@@ -10,15 +10,16 @@
 @inject ICourtTodayTypeRepository Courttodayrepo
 @inject IAdjournedReasonRepository adjournedRepo
 @inject ICaseAppearanceService appreanceService
+@inject IRemianderCenterService _remainder
 @inject IToastService ToastService
 
 @* <PageTitle>HousingCourtFiler – Outcome Actions</PageTitle> *@
 <style>
     /* body {
-            background: #f5f7fb;
-            padding-bottom: 90px;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont;
-        } */
+                background: #f5f7fb;
+                padding-bottom: 90px;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont;
+            } */
 
     .header {
         background: #0b1f3a;
@@ -176,9 +177,9 @@
             <div class="section">
                 <h6>Motion Schedule</h6>
                 <div class="row">
-                    <div class="col-md-3"><label>Motion Due</label><RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="model.MotionDue"  /></div>
-                    <div class="col-md-3"><label>Opposition Due</label><RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="model.OppositionDue"  /></div>
-                    <div class="col-md-3"><label>Reply Due</label><RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="model.ReplyDue"  /></div>
+                    <div class="col-md-3"><label>Motion Due</label><RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="model.MotionDue" /></div>
+                    <div class="col-md-3"><label>Opposition Due</label><RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="model.OppositionDue" /></div>
+                    <div class="col-md-3"><label>Reply Due</label><RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="model.ReplyDue" /></div>
                     <div class="col-md-3"><label>Return Date</label><RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="model.ReturnDate" /></div>
                 </div>
             </div>
@@ -213,11 +214,11 @@
                     </div>
                     <div class="col-md-4">
                         <label>Issuance Date</label>
-                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="model.WarrantDate"  />
+                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="model.WarrantDate" />
                     </div>
                     <div class="col-md-4">
                         <label>Stay Until</label>
-                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="model.StayUntil"  />
+                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="model.StayUntil" />
                     </div>
                 </div>
             </div>
@@ -236,7 +237,7 @@
                         <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="PaymentStart" />
                     </div>
                     <div class="col-md-3">
-                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="PaymentEnd"  />
+                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="PaymentEnd" />
                     </div>
                 </div>
 
@@ -275,9 +276,9 @@
                                             ? legalcaseDto.RemainderDate.Value.ToString(DateFormats.Default)
                                         : "--")
                 </li>
-                    <li>Next Payment: —</li>
-                </ul>
-            </div>
+                <li>Next Payment: —</li>
+            </ul>
+        </div>
 
             <div class="section">
                 <h6>Reminders</h6>
@@ -290,7 +291,7 @@
                     <label class="form-check-label">Payments</label>
                 </div>
             </div>
-        }
+                }
     </EditForm>
 </div>
 
@@ -304,7 +305,7 @@
 
 @code {
     [Parameter] public IntakeModel legalcaseDto { get; set; }
-    
+
     public CaseAppearanceDto model { get; set; } = new();
 
     Guid? Outcome = null;
@@ -384,9 +385,25 @@
     {
         model.LegalCaseId = legalcaseDto.Id;
         var result = await appreanceService.AddCaseAppearance(model);
-        if(result)
+        if (result)
         {
             ToastService.ShowSuccess("Case Appreance Added Successfully!");
+            if (model.MotionDue.HasValue)
+            {
+
+                int MotionOppDaysBeforeReturn = -1; // This is hordcoded and will be pick from config later.
+                await _remainder.CreateNewReminder(legalcaseDto.Id, "Opposition Due (motion)", model.ReturnDate!.Value.AddDays(MotionOppDaysBeforeReturn));
+
+                await _remainder.CreateNewReminder(legalcaseDto.Id, "Reply Due (motion)", model.ReplyDue!.Value.AddDays(MotionOppDaysBeforeReturn));
+            }
+
+            if (ShowWarrant)
+            {
+                int MotionOppDaysBeforeReturn = -1; // This is hordcoded and will be pick from config later.
+                await _remainder.CreateNewReminder(legalcaseDto.Id, "Warrant eligible", model.WarrantDate!.Value.AddDays(MotionOppDaysBeforeReturn));
+
+                await _remainder.CreateNewReminder(legalcaseDto.Id, "Appeal Notice Deadline", model.WarrantDate!.Value.AddDays(30));
+            }
         }
         else
         {

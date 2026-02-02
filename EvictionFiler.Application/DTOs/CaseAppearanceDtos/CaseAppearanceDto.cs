@@ -25,9 +25,9 @@ namespace EvictionFiler.Application.DTOs.CaseAppearanceDtos
         public Guid? LegalCaseId { get; set; }
 
 
-        public DateTime? MotionDue { get; set; }
+        public DateTime? MotionDue { get; set; } = null;
         public DateTime? OppositionDue { get; set; }
-        public DateTime? ReplyDue { get; set; }
+        public DateTime? ReplyDue { get; set; } = null;
         public DateTime? ReturnDate { get; set; }
 
         public bool JurisdictionWaived { get; set; }

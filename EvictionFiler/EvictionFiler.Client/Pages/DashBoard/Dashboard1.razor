@@ -1,10 +1,11 @@
-﻿@page "/dashboard" 
+﻿@page "/dashboard"
 <PageTitle>Dashboard - Housing CourtFiler</PageTitle>
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.DashboardDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
 @using EvictionFiler.Application.DTOs.PaginationDto
+@using EvictionFiler.Application.DTOs.RemainderCenterDto
 @using EvictionFiler.Application.DTOs.TenantDto
 @using EvictionFiler.Application.Interfaces.IRepository
 @using EvictionFiler.Application.Interfaces.IServices
@@ -23,6 +24,7 @@
 
 @inject ILegalCaseService _service
 @inject ICaseHearingService _caseService
+@inject IRemianderCenterService _remainder
 @inject IDashBoardRepository DashBoardRepository;
 @inject SpinnerService spinnerservice;
 @inject IClientService _clientService
@@ -33,465 +35,463 @@
 
 <style>
     :root {
-    /* Light theme with Navy & Gold brand accents */
-    --bg: #f6f7fb;
-    /* app background */
-    --card: #ffffff;
-    /* cards */
-    --border: #e9edf3;
-    /* subtle borders */
-    --text: #0f1728;
-    /* primary text */
-    --muted: #697386;
-    /* secondary text */
-    --navy: #0f2747;
-    /* brand navy */
-    --gold: #eab308;
-    /* brand gold */
-    --indigo: #5b67f2;
-    /* supporting accent */
-    --success: #10b981;
-    /* green */
-    --warning: #f59e0b;
-    /* amber */
-    --info: #06b6d4;
-    /* cyan */
-    --danger: #ef4444;
-    /* red */
-    --radius: 16px;
-    --shadow: 0 8px 24px rgba(15, 23, 40, .06);
+        /* Light theme with Navy & Gold brand accents */
+        --bg: #f6f7fb;
+        /* app background */
+        --card: #ffffff;
+        /* cards */
+        --border: #e9edf3;
+        /* subtle borders */
+        --text: #0f1728;
+        /* primary text */
+        --muted: #697386;
+        /* secondary text */
+        --navy: #0f2747;
+        /* brand navy */
+        --gold: #eab308;
+        /* brand gold */
+        --indigo: #5b67f2;
+        /* supporting accent */
+        --success: #10b981;
+        /* green */
+        --warning: #f59e0b;
+        /* amber */
+        --info: #06b6d4;
+        /* cyan */
+        --danger: #ef4444;
+        /* red */
+        --radius: 16px;
+        --shadow: 0 8px 24px rgba(15, 23, 40, .06);
     }
 
     * {
-    box-sizing: border-box
+        box-sizing: border-box
     }
 
     html,
     body {
-    margin: 0;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text)
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text)
     }
 
     a {
-    text-decoration: none;
-    color: inherit
+        text-decoration: none;
+        color: inherit
     }
 
     .container {
-    max-width:100%;
-    margin: 22px auto;
-    padding: 0 16px
+        max-width: 100%;
+        margin: 22px auto;
+        padding: 0 16px
     }
 
     /* Topbar */
     .topbar {
-    display: flex;
-    align-items: center;
-    margin-bottom: 6px;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 7px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    flex-wrap: wrap
+        display: flex;
+        align-items: center;
+        margin-bottom: 6px;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 7px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        flex-wrap: wrap
     }
 
 
 
     .topbar1 {
-
-    gap: 12px;
-    padding: 14px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    flex-wrap: wrap
+        gap: 12px;
+        padding: 14px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        flex-wrap: wrap
     }
 
     .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 800;
-    color: var(--navy)
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 800;
+        color: var(--navy)
     }
 
-    .brand .logo {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, var(--navy), #274b87)
-    }
+        .brand .logo {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--navy), #274b87)
+        }
 
     /* Search filters */
     .searchbar {
-    flex: 1;
-    display: flex;
-    flex-wrap: wrap;
-
-    margin-top: 10px;
+        flex: 1;
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 10px;
     }
 
-    .searchbar input {
-    flex: 1 1 145px;
-    padding: 8px 15px;
-    border: 2px solid #020336;
-    border-radius: 25px;
-    outline: 0;
-    font-size: .9rem
-    }
+        .searchbar input {
+            flex: 1 1 145px;
+            padding: 8px 15px;
+            border: 2px solid #020336;
+            border-radius: 25px;
+            outline: 0;
+            font-size: .9rem
+        }
 
     .searchbtn {
-    padding: 8px 14px;
-    background: var(--navy);
-    border: 0;
-    border-radius: 8px;
-    color: #fff;
-    cursor: pointer
+        padding: 8px 14px;
+        background: var(--navy);
+        border: 0;
+        border-radius: 8px;
+        color: #fff;
+        cursor: pointer
     }
 
-    .searchbtn:hover {
-    padding: 8px 14px;
-    background: #6b84af;
-    border: 0;
-    border-radius: 8px;
-    color: #fff;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    transform: translateY(-2px);
-    }
+        .searchbtn:hover {
+            padding: 8px 14px;
+            background: #6b84af;
+            border: 0;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            transform: translateY(-2px);
+        }
 
     .top-icons {
-    display: flex;
-    gap: 12px;
-    color: #64748b
+        display: flex;
+        gap: 12px;
+        color: #64748b
     }
 
     /* Greeting */
     .greeting {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 14px 0
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 14px 0
     }
 
-    .greeting h2 {
-    margin: 0;
-    font-weight: 800;
-    color: var(--navy);
-    font-size:24px;
-
-    }
+        .greeting h2 {
+            margin: 0;
+            font-weight: 800;
+            color: var(--navy);
+            font-size: 24px;
+        }
 
     .chips {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap
     }
 
     .chip {
-    border: 1px solid var(--border);
-    background: #fff;
-    color: #334155;
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-size: .85rem
+        border: 1px solid var(--border);
+        background: #fff;
+        color: #334155;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: .85rem
     }
 
     /* Grid helpers */
     .grid {
-    display: grid;
-    gap: 12px
+        display: grid;
+        gap: 12px
     }
 
     .cols-4 {
-    grid-template-columns: repeat(4, 1fr)
+        grid-template-columns: repeat(4, 1fr)
     }
 
     .cols-3 {
-    grid-template-columns: repeat(3, 1fr)
+        grid-template-columns: repeat(3, 1fr)
     }
 
     .cols-2 {
-    grid-template-columns: repeat(2, 1fr)
+        grid-template-columns: repeat(2, 1fr)
     }
 
     @@media (max-width:1024px) {
 
-    .cols-4,
-    .cols-3 {
-    grid-template-columns: repeat(2, 1fr)
-    }
+        .cols-4,
+        .cols-3 {
+            grid-template-columns: repeat(2, 1fr)
+        }
     }
 
     @@media (max-width:640px) {
 
-    .cols-4,
-    .cols-3,
-    .cols-2 {
-    grid-template-columns: 1fr
-    }
+        .cols-4,
+        .cols-3,
+        .cols-2 {
+            grid-template-columns: 1fr
+        }
     }
 
     /* Cards */
     .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow)
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow)
     }
 
     .pad {
-    padding: 14px
+        padding: 14px
     }
 
     .header {
-    color: var(--muted);
-    font-weight: 700;
-    letter-spacing: .3px;
-    text-transform: uppercase;
-    font-size: .78rem
+        color: var(--muted);
+        font-weight: 700;
+        letter-spacing: .3px;
+        text-transform: uppercase;
+        font-size: .78rem
     }
 
     .muted {
-    color: var(--muted)
+        color: var(--muted)
     }
 
     /* Stat tiles */
     .tile {
-    position: relative;
-    height: 86px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 16px;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    background: #fff;
-    transition: .2s
+        position: relative;
+        height: 86px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 16px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: #fff;
+        transition: .2s
     }
 
-    .tile:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 22px rgba(0, 0, 0, .06)
-    }
+        .tile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .06)
+        }
 
-    .tile .icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    display: grid;
-    place-items: center;
-    font-size: 20px;
-    background: #0f27470f;
-    color: var(--navy);
-    border: 1px solid var(--border)
-    }
+        .tile .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            background: #0f27470f;
+            color: var(--navy);
+            border: 1px solid var(--border)
+        }
 
-    .tile .count {
-    font-size: 1.6rem;
-    font-weight: 800
-    }
+        .tile .count {
+            font-size: 1.6rem;
+            font-weight: 800
+        }
 
-    .tile .label {
-    color: var(--muted)
-    }
+        .tile .label {
+            color: var(--muted)
+        }
 
     /* Tabs */
     .tabs {
-    display: flex;
-    gap: 8px;
-    margin: 14px 0
+        display: flex;
+        gap: 8px;
+        margin: 14px 0
     }
 
     .tab {
-    padding: 8px 12px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: #fff;
-    cursor: pointer
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: #fff;
+        cursor: pointer
     }
 
-    .tab.active {
-    color: #fff;
-    background: linear-gradient(135deg, var(--navy), #274b87);
-    border-color: transparent
-    }
+        .tab.active {
+            color: #fff;
+            background: linear-gradient(135deg, var(--navy), #274b87);
+            border-color: transparent
+        }
 
     /*    .tabpanes>section {
-    display: none
-    } */
+        display: none
+        } */
 
-    .tabpanes>section.active {
-    display: block
+    .tabpanes > section.active {
+        display: block
     }
 
     /* Feeds */
     .feed {
-    display: flex;
-    gap: 10px;
-    padding: 10px 0;
-    border-bottom: 1px dashed var(--border)
+        display: flex;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px dashed var(--border)
     }
 
-    .feed:last-child {
-    border-bottom: 0
-    }
+        .feed:last-child {
+            border-bottom: 0
+        }
 
     .avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: #0f27470f;
-    color: var(--navy);
-    border: 1px solid var(--border);
-    display: grid;
-    place-items: center;
-    font-weight: 700
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: #0f27470f;
+        color: var(--navy);
+        border: 1px solid var(--border);
+        display: grid;
+        place-items: center;
+        font-weight: 700
     }
 
     /* Progress */
     .progress {
-    height: 12px;
-    width: 100%;
-    background: #eef2ff;
-    border-radius: 999px;
-    overflow: hidden
+        height: 12px;
+        width: 100%;
+        background: #eef2ff;
+        border-radius: 999px;
+        overflow: hidden
     }
 
     .bar {
-    height: 100%;
-    background: linear-gradient(90deg, #facc15, #eab308)
+        height: 100%;
+        background: linear-gradient(90deg, #facc15, #eab308)
     }
 
     /* SVG charts */
     .chart {
-    height: 250px
+        height: 250px
     }
 
     .legend {
-    display: flex;
-    gap: 14px;
-    flex-wrap: wrap;
-    font-size: .85rem;
-    color: var(--muted)
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        font-size: .85rem;
+        color: var(--muted)
     }
 
-    .legend i {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 3px;
-    margin-right: 6px
-    }
+        .legend i {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            margin-right: 6px
+        }
 
     /* Accordion */
     .accordion .acc-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer
     }
 
     .accordion .acc-body {
-    display: none;
-    padding-top: 10px
+        display: none;
+        padding-top: 10px
     }
 
     .accordion.open .acc-body {
-    display: block
+        display: block
     }
 
     footer {
-    color: var(--muted);
-    text-align: center;
-    margin: 28px 0
+        color: var(--muted);
+        text-align: center;
+        margin: 28px 0
     }
 
     .heatmap-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(34px, 1fr));
-    gap: 10px;
-    margin-top: 15px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(34px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
     }
 
     .day-box {
-    width: 40px;
-    height: 40px;
-    border-radius: 6px;
-    transition: background-color 0.3s ease;
-    cursor: default;
+        width: 40px;
+        height: 40px;
+        border-radius: 6px;
+        transition: background-color 0.3s ease;
+        cursor: default;
     }
 
     .rz-chart {
-    box-sizing: border-box;
-    position: relative;
-    height: 250px !important;
-    width: 542px !important;
-    margin-left: -40px !important;
+        box-sizing: border-box;
+        position: relative;
+        height: 250px !important;
+        width: 542px !important;
+        margin-left: -40px !important;
     }
 
     @@media (max-width:640px) {
 
-    .rz-chart {
-    box-sizing: border-box;
-    position: relative;
-    height: 250px !important;
-    width: 357px !important;
-    margin-left: -40px !important;
-    }
+        .rz-chart {
+            box-sizing: border-box;
+            position: relative;
+            height: 250px !important;
+            width: 357px !important;
+            margin-left: -40px !important;
+        }
     }
 
     @@media (min-width: 640px) and (max-width: 768px) {
-    .rz-chart {
-    box-sizing: border-box;
-    position: relative;
-    height: 250px !important;
-    width: 276px !important;
-    margin-left: -40px !important;
-    }
+        .rz-chart {
+            box-sizing: border-box;
+            position: relative;
+            height: 250px !important;
+            width: 276px !important;
+            margin-left: -40px !important;
+        }
     }
 
     @@media (min-width: 768px) and (max-width: 900px) {
-    .rz-chart {
-    box-sizing: border-box;
-    position: relative;
-    height: 250px !important;
-    width: 385px !important;
-    margin-left: -40px !important;
-    }
+        .rz-chart {
+            box-sizing: border-box;
+            position: relative;
+            height: 250px !important;
+            width: 385px !important;
+            margin-left: -40px !important;
+        }
     }
 
     #pipelineChart {
-    width: 100%;
+        width: 100%;
     }
 
     @@media (max-width: 580px) {
-    #pipelineChart .rz-chart-column rect {
-    width: 8px !important; /* bars ka width */
-    }
+        #pipelineChart .rz-chart-column rect {
+            width: 8px !important; /* bars ka width */
+        }
     }
 
     .table-responsive {
-    overflow-x: auto; /* Enable horizontal scroll */
-    position: relative;
+        overflow-x: auto; /* Enable horizontal scroll */
+        position: relative;
     }
+
     table.table thead th {
-    color: #1F365D;
-    background: #F2F0EC;
-    margin-bottom: 0px !important;
+        color: #1F365D;
+        background: #F2F0EC;
+        margin-bottom: 0px !important;
     }
 
 </style>
 
 <div class="container">
     <!-- Topbar -->
-    <div class="topbar " >
+    <div class="topbar ">
         <div class="brand">
             <div class="logo"></div>
             <div>🏛️ HousingCourtFiler.com</div>
@@ -504,132 +504,131 @@
         <div>
             <span style="color: grey; font-size: 14px; font-weight:600;">CASE SEARCH & FILTERS</span>
         </div>
-        <div class="searchbar row" >
-                <div class="col ">
-                    <input class="form-control search-box"
-                    placeholder="Search by Case"
-                    @bind="selectedCase" @onfocusout="FocusOutCase"
-                    @oninput="OnCaseInput"
-                   @onfocus = "OnCaseFocus"
-                    autocomplete="off" />
+        <div class="searchbar row">
+            <div class="col ">
+                <input class="form-control search-box"
+                       placeholder="Search by Case"
+                       @bind="selectedCase" @onfocusout="FocusOutCase"
+                       @oninput="OnCaseInput"
+                       @onfocus="OnCaseFocus"
+                       autocomplete="off" />
 
 
-                    <ul class="list-group position-absolute" style="z-index:1000; font-size:14px"
+                <ul class="list-group position-absolute" style="z-index:1000; font-size:14px"
                     hidden="@(!caseSuggestions.Any() || !caseSuggestionsChecked)">
-                        @if (caseSuggestions.Any())
+                    @if (caseSuggestions.Any())
+                    {
+                        @foreach (var suggestion in caseSuggestions)
                         {
-                            @foreach (var suggestion in caseSuggestions)
-                            {
-                                <li class="list-group-item list-group-item-action"
+                            <li class="list-group-item list-group-item-action"
                                 style="cursor:pointer;"
                                 @onclick="() => SelectCase(suggestion)">
-                                    @suggestion.Casecode
-                                </li>
-                            }
-                        }
-                        else
-                        {
-                            <li class="list-group-item text-muted">
-                                No result found
+                                @suggestion.Casecode
                             </li>
                         }
-                    </ul>
-                </div>     
-                <div class="col ">
-                    <input class="form-control search-box"
-                    placeholder="Search by Client"
-                    @bind="selectedClient"
-                    @onfocusout="FocusOutClient"
-                    @onfocus = "OnClientFocus"
-                    @oninput="OnClientInput"
-                     />
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-muted">
+                            No result found
+                        </li>
+                    }
+                </ul>
+            </div>
+            <div class="col ">
+                <input class="form-control search-box"
+                       placeholder="Search by Client"
+                       @bind="selectedClient"
+                       @onfocusout="FocusOutClient"
+                       @onfocus="OnClientFocus"
+                       @oninput="OnClientInput" />
 
 
-                    <ul class="list-group position-absolute " style="z-index:1000; font-size:14px"
-                       hidden="@( !clientSuggestionsChecked || !clientSuggestions.Any() )">
-                        @if (clientSuggestions.Any())
+                <ul class="list-group position-absolute " style="z-index:1000; font-size:14px"
+                    hidden="@( !clientSuggestionsChecked || !clientSuggestions.Any() )">
+                    @if (clientSuggestions.Any())
+                    {
+                        @foreach (var suggestion in clientSuggestions)
                         {
-                            @foreach (var suggestion in clientSuggestions)
-                            {
-                                <li class="list-group-item list-group-item-action"
+                            <li class="list-group-item list-group-item-action"
                                 style="cursor:pointer;"
                                 @onclick="() => SelectClient(suggestion)">
-                                    @suggestion.ClientCode - @suggestion.FirstName @suggestion.LastName
-                                </li>
-                            }
-                        }
-                        else
-                        {
-                            <li class="list-group-item text-muted">
-                                No result found
+                                @suggestion.ClientCode - @suggestion.FirstName @suggestion.LastName
                             </li>
                         }
-                    </ul>
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-muted">
+                            No result found
+                        </li>
+                    }
+                </ul>
 
 
-                </div>
-                <div class="col ">
-                    <input class="form-control search-box" placeholder="Search by LandLord" @bind="selectedLandlord"
-                    @oninput="OnLandlordInput" @onfocusout="FocusOutLandlord" @onfocus = "OnLandlordsFocus"
-                    autocomplete="off" />
+            </div>
+            <div class="col ">
+                <input class="form-control search-box" placeholder="Search by LandLord" @bind="selectedLandlord"
+                       @oninput="OnLandlordInput" @onfocusout="FocusOutLandlord" @onfocus="OnLandlordsFocus"
+                       autocomplete="off" />
 
 
-                    <ul class="list-group position-absolute" style="z-index:1000; font-size:14px"
+                <ul class="list-group position-absolute" style="z-index:1000; font-size:14px"
                     hidden="@(!landlordSuggestions.Any() || !landlordSuggestionsChecked)">
-                        @if (landlordSuggestions.Any())
+                    @if (landlordSuggestions.Any())
+                    {
+                        @foreach (var suggestion in landlordSuggestions)
                         {
-                            @foreach (var suggestion in landlordSuggestions)
-                            {
-                                <li class="list-group-item list-group-item-action"
+                            <li class="list-group-item list-group-item-action"
                                 style="cursor:pointer;"
                                 @onclick="() => Selectlandlord(suggestion)">
-                                    @suggestion.LandLordCode - @suggestion.FirstName @suggestion.LastName
-                                </li>
-                            }
-                        }
-                        else
-                        {
-                            <li class="list-group-item text-muted">
-                                No result found
+                                @suggestion.LandLordCode - @suggestion.FirstName @suggestion.LastName
                             </li>
                         }
-                    </ul>
-                </div>
-                <div class="col ">
-                    <input class="form-control search-box"
-                    placeholder="Search by Tenant"
-                    @bind="selectedTenant" @onfocusout="FocusOutTenant"
-                    @oninput="OnTenantInput"
-                             @onfocus = "OnTenantsFocus"
-                    autocomplete="off" />
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-muted">
+                            No result found
+                        </li>
+                    }
+                </ul>
+            </div>
+            <div class="col ">
+                <input class="form-control search-box"
+                       placeholder="Search by Tenant"
+                       @bind="selectedTenant" @onfocusout="FocusOutTenant"
+                       @oninput="OnTenantInput"
+                       @onfocus="OnTenantsFocus"
+                       autocomplete="off" />
 
 
-                    <ul class="list-group position-absolute" style="z-index:1000; font-size:14px"
+                <ul class="list-group position-absolute" style="z-index:1000; font-size:14px"
                     hidden="@(!tenantSuggestions.Any() || !tenantSuggestionsChecked)">
-                        @if (tenantSuggestions.Any())
+                    @if (tenantSuggestions.Any())
+                    {
+                        @foreach (var suggestion in tenantSuggestions)
                         {
-                            @foreach (var suggestion in tenantSuggestions)
-                            {
-                                <li class="list-group-item list-group-item-action"
+                            <li class="list-group-item list-group-item-action"
                                 style="cursor:pointer;"
                                 @onclick="() => SelectTenant(suggestion)">
-                                    @suggestion.TenantCode - @suggestion.FirstName @suggestion.LastName
-                                </li>
-                            }
-                        }
-                        else
-                        {
-                            <li class="list-group-item text-muted">
-                                No result found
+                                @suggestion.TenantCode - @suggestion.FirstName @suggestion.LastName
                             </li>
                         }
-                    </ul>
-                </div>
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-muted">
+                            No result found
+                        </li>
+                    }
+                </ul>
+            </div>
 
-                <div class="col-md-2" >
+            <div class="col-md-2">
 
-                    <button class="searchbtn" @onclick="Search" style="border-radius:25px; width:100%;"> <i class="fa fa-search mx-1"></i>  </button>
-                </div>
+                <button class="searchbtn" @onclick="Search" style="border-radius:25px; width:100%;"> <i class="fa fa-search mx-1"></i>  </button>
+            </div>
 
         </div>
 
@@ -732,19 +731,19 @@
                                 <RadzenColumn>
                                     <RadzenChart>
                                         <RadzenColumnSeries Data="@pipelineData"
-                                        CategoryProperty="Month"
-                                        ValueProperty="NonPayment"
-                                        Fill="#002B5C" />
+                                                            CategoryProperty="Month"
+                                                            ValueProperty="NonPayment"
+                                                            Fill="#002B5C" />
 
                                         <RadzenColumnSeries Data="@pipelineData"
-                                        CategoryProperty="Month"
-                                        ValueProperty="Holdover"
-                                        Fill="#00BFFF" />
+                                                            CategoryProperty="Month"
+                                                            ValueProperty="Holdover"
+                                                            Fill="#00BFFF" />
 
                                         <RadzenColumnSeries Data="@pipelineData"
-                                        CategoryProperty="Month"
-                                        ValueProperty="Other"
-                                        Fill="#FFA500" />
+                                                            CategoryProperty="Month"
+                                                            ValueProperty="Other"
+                                                            Fill="#FFA500" />
 
                                         <!-- width 22 + gap via spacing -->
                                         <RadzenColumnOptions Radius="2" Width="@columnWidth" />
@@ -766,9 +765,12 @@
 
 
 
-                    <div class="legend"><span><i style="background:var(--navy)"></i>Nonpayment</span><span><i
-                            style="background:var(--info)"></i>Holdover</span><span><i
-                            style="background:var(--warning)"></i>Other</span>
+                    <div class="legend">
+                        <span><i style="background:var(--navy)"></i>Nonpayment</span><span>
+                            <i style="background:var(--info)"></i>Holdover
+                        </span><span>
+                            <i style="background:var(--warning)"></i>Other
+                        </span>
                     </div>
                 </div>
                 <div class="card pad">
@@ -779,14 +781,14 @@
                                 <RadzenColumn>
                                     <RadzenChart>
                                         <RadzenColumnSeries Data="@financialData"
-                                        CategoryProperty="Month"
-                                        ValueProperty="Collected"
-                                        Fill="#eab308" />
+                                                            CategoryProperty="Month"
+                                                            ValueProperty="Collected"
+                                                            Fill="#eab308" />
 
                                         <RadzenColumnSeries Data="@financialData"
-                                        CategoryProperty="Month"
-                                        ValueProperty="Billed"
-                                        Fill="#c4a000" />
+                                                            CategoryProperty="Month"
+                                                            ValueProperty="Billed"
+                                                            Fill="#c4a000" />
 
 
 
@@ -804,8 +806,11 @@
                             </RadzenRow>
                         </RadzenStack>
                     </div>
-                    <div class="legend"><span><i style="background:var(--gold)"></i>Collected</span><span><i
-                            style="background:#c4a000"></i>Billed</span></div>
+                    <div class="legend">
+                        <span><i style="background:var(--gold)"></i>Collected</span><span>
+                            <i style="background:#c4a000"></i>Billed
+                        </span>
+                    </div>
                 </div>
             </div>
             <div class="grid cols-2" style="margin-top:12px">
@@ -828,25 +833,25 @@
                     <div class="muted" style="margin-bottom:8px">18 / 25 tasks completed</div>
                     <div id="sparkline" style="margin-bottom:-50px">
                         <RadzenStack>
-                            <RadzenChart >
+                            <RadzenChart>
                                 <RadzenLineSeries Smooth="true"
-                                Data="@revenue2024"
-                                CategoryProperty="Date"
-                                Title="2024"
-                                ValueProperty="task"
-                                RenderingOrder="1">
-                                    <RadzenSeriesAnnotation Visible = "annotation"
-                                    TItem="Datatask"
-                                    Data="@revenue2024[7]"
-                                    OffsetY="-16"
-                                    Text="Acquisition" />
+                                                  Data="@revenue2024"
+                                                  CategoryProperty="Date"
+                                                  Title="2024"
+                                                  ValueProperty="task"
+                                                  RenderingOrder="1">
+                                    <RadzenSeriesAnnotation Visible="annotation"
+                                                            TItem="Datatask"
+                                                            Data="@revenue2024[7]"
+                                                            OffsetY="-16"
+                                                            Text="Acquisition" />
 
                                     <RadzenSeriesAnnotation Visible="annotation"
-                                    TItem="Datatask"
-                                    Data="@revenue2024[5]"
-                                    OffsetY="-16"
-                                    Text="IPO"
-                                    Fill="#0a0a0a" />
+                                                            TItem="Datatask"
+                                                            Data="@revenue2024[5]"
+                                                            OffsetY="-16"
+                                                            Text="IPO"
+                                                            Fill="#0a0a0a" />
 
                                     <RadzenMarkers MarkerType="MarkerType.Circle" />
                                 </RadzenLineSeries>
@@ -860,7 +865,7 @@
                             </RadzenChart>
                         </RadzenStack>
 
-                    </div> 
+                    </div>
 
 
 
@@ -880,8 +885,10 @@
                         <div class="feed">
                             <div class="avatar">10</div>
                             <div>
-                                <div style="font-weight:600">Hearing — 10:00 AM</div><small class="muted">Brooklyn Housing Part
-                                    H</small>
+                                <div style="font-weight:600">Hearing — 10:00 AM</div><small class="muted">
+                                    Brooklyn Housing Part
+                                    H
+                                </small>
                             </div>
                         </div>
                         <div class="feed">
@@ -897,28 +904,45 @@
                         <div class="header">Pending Tasks</div><button class="tab small" data-acc="acc-tasks">Expand</button>
                     </div>
                     <div class="acc-body">
-                        <div style="display:flex; justify-content:space-between; margin:6px 0"><span>Predicate Notice
-                                response</span><span
-                            style="background:var(--danger); color:#fff; padding:2px 8px; border-radius:999px">Overdue</span>
+                        <div style="display:flex; justify-content:space-between; margin:6px 0">
+                            <span>
+                                Predicate Notice
+                                response
+                            </span><span style="background:var(--danger); color:#fff; padding:2px 8px; border-radius:999px">Overdue</span>
                         </div>
-                        <div style="display:flex; justify-content:space-between; margin:6px 0"><span>Discovery due</span><span
-                            style="background:var(--warning); color:#fff; padding:2px 8px; border-radius:999px">Due Today</span>
+                        <div style="display:flex; justify-content:space-between; margin:6px 0">
+                            <span>Discovery due</span><span style="background:var(--warning); color:#fff; padding:2px 8px; border-radius:999px">Due Today</span>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="grid cols-3" style="margin-top:12px">
-                <div class="card pad"><strong>Overdue Notices</strong>
-                    <div style="display:flex; gap:8px; margin-top:8px"><span>⛔</span><small class="muted">“Predicate Notice
-                            response window expired — action needed.”</small></div>
+                <div class="card pad">
+                    <strong>Overdue Notices</strong>
+                    <div style="display:flex; gap:8px; margin-top:8px">
+                        <span>⛔</span><small class="muted">
+                            “Predicate Notice
+                            response window expired — action needed.”
+                        </small>
+                    </div>
                 </div>
-                <div class="card pad"><strong>NYSCEF Auto‑Synced Alerts</strong>
-                    <div style="display:flex; gap:8px; margin-top:8px"><span>🔄</span><small class="muted">“Opposing counsel
-                            filed Answer — see attached.”</small></div>
+                <div class="card pad">
+                    <strong>NYSCEF Auto‑Synced Alerts</strong>
+                    <div style="display:flex; gap:8px; margin-top:8px">
+                        <span>🔄</span><small class="muted">
+                            “Opposing counsel
+                            filed Answer — see attached.”
+                        </small>
+                    </div>
                 </div>
-                <div class="card pad"><strong>Case Transfer Notifications</strong>
-                    <div style="display:flex; gap:8px; margin-top:8px"><span>🔀</span><small class="muted">Per‑diem coverage or
-                            reassignment alerts.</small></div>
+                <div class="card pad">
+                    <strong>Case Transfer Notifications</strong>
+                    <div style="display:flex; gap:8px; margin-top:8px">
+                        <span>🔀</span><small class="muted">
+                            Per‑diem coverage or
+                            reassignment alerts.
+                        </small>
+                    </div>
                 </div>
             </div>
         </section>
@@ -967,8 +991,66 @@
     </div>
 
 </div>
-ript>
+@if (showCaseModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header text-white" style="background-color: #1F365D;">
+                    <h5 class="modal-title">
+                        <i class="bi bi-bell-fill me-2"></i> Pending Reminders
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" aria-label="Close"
+                            @onclick="@(() => showCaseModal = false)">
+                    </button>
+                </div>
 
+                <div class="modal-body" style="max-height:360px; overflow-y:auto;">
+                    @foreach (var group in groupedRemainder)
+                    {
+                        <div class="card p-2 mb-2" style="cursor:pointer; border:1px solid #d0d7e1;"
+                             @onclick="@(() => OpenReminderPopup(group))">
+                            <strong>Case @group.Key</strong>
+                            <div class="text-muted">@group.Count() reminders pending</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showReminderModal && selectedGroup != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+
+                <div class="modal-header text-white" style="background-color: #1F365D;">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Reminders for Case @selectedGroup.Key
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" aria-label="Close"
+                            @onclick="CloseReminderPopup">
+                    </button>
+                </div>
+
+                <div class="modal-body" style="max-height:350px; overflow-y:auto;">
+                    @foreach (var r in selectedGroup)
+                    {
+                        <div class="p-2 mb-2 border rounded">
+                            <div class="fw-semibold">@r.ReminderName</div>
+                            <small class="text-muted">
+                                Due: @r.When?.ToString("MMM dd, yyyy")
+                            </small>
+                        </div>
+                    }
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     bool showDataLabels = false;
@@ -995,7 +1077,7 @@ ript>
     private bool tenantSuggestionsChecked = false;
     private List<EditToTenantDto> tenantSuggestions = new List<EditToTenantDto>();
 
-    private string selectedCase= string.Empty;
+    private string selectedCase = string.Empty;
     private bool caseSuggestionsChecked = false;
     private List<CreateToEditLegalCaseModel> caseSuggestions = new List<CreateToEditLegalCaseModel>();
 
@@ -1018,8 +1100,10 @@ ript>
     private CancellationTokenSource _cts;
     private string successMessage;
     private string? loginUser { get; set; }
-      private List<EditToClientDto> ClientList = new();
-       private List<EditToClientDto> filteredClients = new();
+    private List<EditToClientDto> ClientList = new();
+    private List<EditToClientDto> filteredClients = new();
+    private List<EditToRemainderCenterDto> InCompleteRemainder = new();
+    private List<IGrouping<string?, EditToRemainderCenterDto>> groupedRemainder = new();
     protected override async Task OnInitializedAsync()
     {
         spinnerservice.Show();
@@ -1049,21 +1133,26 @@ ript>
 
 
 
-       await userContext.LoadAsync();
+        await userContext.LoadAsync();
 
-        if(!userContext.IsAuthenticated)
+        if (!userContext.IsAuthenticated)
         {
-            navManager.NavigateTo("/",forceLoad: true);
+            navManager.NavigateTo("/", forceLoad: true);
             return;
         }
 
         loggedInUserId = userContext.UserId;
         isAdmin = userContext.IsAdmin;
 
-        totalCases = await _service.GetTotalCasesCountAsync(loggedInUserId , isAdmin);
+        totalCases = await _service.GetTotalCasesCountAsync(loggedInUserId, isAdmin);
         totalCasesHearing = await _caseService.GetAllTodayCaseHearingAsync();
         activeCases = await _service.GetActiveCasesCountAsync(loggedInUserId, isAdmin);
-  //ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
+        //ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
+        InCompleteRemainder = await _remainder.GetAllInCompleteRemainder();
+
+        groupedRemainder = InCompleteRemainder.GroupBy(e => e.CaseCode).ToList();
+        if (groupedRemainder.Any())
+            showCaseModal = true;
 
         spinnerservice.Hide();
     }
@@ -1076,45 +1165,45 @@ ript>
         }
     }
 
-   
-private async Task OnClientFocus()
-{
-    
-    if (string.IsNullOrWhiteSpace(selectedClient))
-    {
-        clientSuggestions = await DashBoardRepository.GetTopClients();
-        clientSuggestionsChecked = true;
-    }
-}
 
-private async Task OnCaseFocus()
-{
-    
-    if (string.IsNullOrWhiteSpace(selectedCase))
+    private async Task OnClientFocus()
     {
-        caseSuggestions = await DashBoardRepository.GetTopCases();
-        caseSuggestionsChecked = true;
-    }
-}
 
-private async Task OnLandlordsFocus()
-{
-    
-    if (string.IsNullOrWhiteSpace(selectedLandlord))
-    {
-        landlordSuggestions = await DashBoardRepository.GetTopLandlords();
-        landlordSuggestionsChecked = true;
+        if (string.IsNullOrWhiteSpace(selectedClient))
+        {
+            clientSuggestions = await DashBoardRepository.GetTopClients();
+            clientSuggestionsChecked = true;
+        }
     }
-}
-private async Task OnTenantsFocus()
-{
-    
-    if (string.IsNullOrWhiteSpace(selectedTenant))
+
+    private async Task OnCaseFocus()
     {
-        tenantSuggestions = await DashBoardRepository.GetTopTenants();
-        tenantSuggestionsChecked = true;
+
+        if (string.IsNullOrWhiteSpace(selectedCase))
+        {
+            caseSuggestions = await DashBoardRepository.GetTopCases();
+            caseSuggestionsChecked = true;
+        }
     }
-}
+
+    private async Task OnLandlordsFocus()
+    {
+
+        if (string.IsNullOrWhiteSpace(selectedLandlord))
+        {
+            landlordSuggestions = await DashBoardRepository.GetTopLandlords();
+            landlordSuggestionsChecked = true;
+        }
+    }
+    private async Task OnTenantsFocus()
+    {
+
+        if (string.IsNullOrWhiteSpace(selectedTenant))
+        {
+            tenantSuggestions = await DashBoardRepository.GetTopTenants();
+            tenantSuggestionsChecked = true;
+        }
+    }
 
     private async Task Search()
     {
@@ -1198,7 +1287,7 @@ private async Task OnTenantsFocus()
     //     else
     //     {
     //         clientSuggestions = new List<EditToClientDto>();
-    //         clientSuggestionsChecked = false; 
+    //         clientSuggestionsChecked = false;
     //     }
     // }catch (TaskCanceledException)
     //     {
@@ -1206,58 +1295,59 @@ private async Task OnTenantsFocus()
     //     }
     // }
 
-private async Task OnClientInput(ChangeEventArgs e)
-{
-    selectedClient = e.Value?.ToString();
-
-    _cts?.Cancel();
-    _cts = new CancellationTokenSource();
-
-    try
+    private async Task OnClientInput(ChangeEventArgs e)
     {
-        await Task.Delay(300, _cts.Token);
+        selectedClient = e.Value?.ToString();
 
-        if (!string.IsNullOrWhiteSpace(selectedClient))
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
+        try
         {
-            clientSuggestions =
-                await DashBoardRepository.GetClientSuggestions(selectedClient);
-            clientSuggestionsChecked = true;
+            await Task.Delay(300, _cts.Token);
+
+            if (!string.IsNullOrWhiteSpace(selectedClient))
+            {
+                clientSuggestions =
+                    await DashBoardRepository.GetClientSuggestions(selectedClient);
+                clientSuggestionsChecked = true;
+            }
+            else
+            {
+                clientSuggestions =
+                    await DashBoardRepository.GetTopClients();
+                clientSuggestionsChecked = true;
+            }
         }
-        else
+        catch (TaskCanceledException)
         {
-            clientSuggestions =
-                await DashBoardRepository.GetTopClients();
-            clientSuggestionsChecked = true;
+            // ignore
         }
     }
-    catch (TaskCanceledException)
-    {
-        // ignore
-    }
-}
 
 
     private async Task OnTenantInput(ChangeEventArgs e)
     {
         selectedTenant = e.Value?.ToString();
-          _cts?.Cancel();
+        _cts?.Cancel();
         _cts = new CancellationTokenSource();
         try
         {
-             await Task.Delay(300, _cts.Token);
-        if (!string.IsNullOrWhiteSpace(selectedTenant))
-        {
-            tenantSuggestions = await DashBoardRepository.GetTenantSuggestions(selectedTenant);
-            tenantSuggestionsChecked = true;
+            await Task.Delay(300, _cts.Token);
+            if (!string.IsNullOrWhiteSpace(selectedTenant))
+            {
+                tenantSuggestions = await DashBoardRepository.GetTenantSuggestions(selectedTenant);
+                tenantSuggestionsChecked = true;
+            }
+            else
+            {
+                tenantSuggestions = new List<EditToTenantDto>();
+                tenantSuggestionsChecked = false;
+            }
         }
-        else
+        catch (TaskCanceledException)
         {
-            tenantSuggestions = new List<EditToTenantDto>();
-            tenantSuggestionsChecked = false;
-        }
-         }catch (TaskCanceledException)
-        {
-            
+
         }
     }
 
@@ -1280,34 +1370,36 @@ private async Task OnClientInput(ChangeEventArgs e)
                 caseSuggestions = new List<CreateToEditLegalCaseModel>();
                 caseSuggestionsChecked = false;
             }
-        }catch (TaskCanceledException)
+        }
+        catch (TaskCanceledException)
         {
-            
+
         }
     }
 
     private async Task OnLandlordInput(ChangeEventArgs e)
     {
         selectedLandlord = e.Value?.ToString();
-           _cts?.Cancel();
+        _cts?.Cancel();
         _cts = new CancellationTokenSource();
         try
         {
             await Task.Delay(300, _cts.Token);
 
-        if (!string.IsNullOrWhiteSpace(selectedLandlord))
-        {
-            landlordSuggestions = await DashBoardRepository.GetLandlordSuggestions(selectedLandlord);
-            landlordSuggestionsChecked = true;
+            if (!string.IsNullOrWhiteSpace(selectedLandlord))
+            {
+                landlordSuggestions = await DashBoardRepository.GetLandlordSuggestions(selectedLandlord);
+                landlordSuggestionsChecked = true;
+            }
+            else
+            {
+                landlordSuggestions = new List<EditToLandlordDto>();
+                landlordSuggestionsChecked = false;
+            }
         }
-        else
+        catch (TaskCanceledException)
         {
-            landlordSuggestions = new List<EditToLandlordDto>();
-            landlordSuggestionsChecked = false;
-        }
-         }catch (TaskCanceledException)
-        {
-            
+
         }
     }
 
@@ -1338,7 +1430,7 @@ private async Task OnClientInput(ChangeEventArgs e)
     }
     private void SelectTenant(EditToTenantDto tenant)
     {
-        selectedTenant = $"{tenant.FirstName} {tenant.LastName}";;
+        selectedTenant = $"{tenant.FirstName} {tenant.LastName}"; ;
         tenantSuggestions.Clear();
         tenantSuggestionsChecked = false;
     }
@@ -1376,7 +1468,7 @@ private async Task OnClientInput(ChangeEventArgs e)
 
     }
 
-     int columnWidth = 15; // default desktop width
+    int columnWidth = 15; // default desktop width
 
     void OnMediaQueryChange(bool matches)
     {
@@ -1431,6 +1523,23 @@ private async Task OnClientInput(ChangeEventArgs e)
             _ => "#FFFFFF"
         };
     }
+    private bool showCaseModal = false;
+    private bool showReminderModal = false;
+    private IGrouping<string?, EditToRemainderCenterDto>? selectedGroup;
+
+    private void OpenReminderPopup(IGrouping<string?, EditToRemainderCenterDto> group)
+    {
+        selectedGroup = group;
+        showCaseModal = false;
+        showReminderModal = true;
+    }
+
+
+    private void CloseReminderPopup()
+    {
+        showReminderModal = false;
+        showCaseModal = true;
+    }
 
 
 
@@ -1456,7 +1565,7 @@ private async Task OnClientInput(ChangeEventArgs e)
         public string Month { get; set; }
         public double Collected { get; set; }
         public double Billed { get; set; }
-     
+
     }
 
 
@@ -1469,17 +1578,17 @@ private async Task OnClientInput(ChangeEventArgs e)
                                         new DataFinacial(){Month="May",Collected=120, Billed=85},
                                         };
 
-                                        
-                    @code {
-                        bool annotation = false;
 
-                        class Datatask
-                        {
-                            public string Date { get; set; }
-                            public int task { get; set; }
-                        }
 
-                        Datatask[] revenue2024 = new Datatask[] {
+    bool annotation = false;
+
+    class Datatask
+    {
+        public string Date { get; set; }
+        public int task { get; set; }
+    }
+
+    Datatask[] revenue2024 = new Datatask[] {
                                         new Datatask
                                         {
                                         Date = "Jan",
@@ -1541,6 +1650,6 @@ private async Task OnClientInput(ChangeEventArgs e)
                                         task = 294000
                                         }
                                         };
-                    }
+
 
 }

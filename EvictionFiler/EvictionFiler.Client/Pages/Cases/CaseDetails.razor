@@ -70,6 +70,7 @@
 @inject IRemianderCenterService _remainders
 @inject IDateRentRepository DateRentRepository
 @inject ICaseWarrantService _casewarrantservice
+@inject IRemianderCenterService _remainder
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization;
 @using EvictionFiler.Domain.Entities
@@ -3850,10 +3851,10 @@
                                         </div>
 
 
-                                        <div class="col-md-6">
+                                        @*<div class="col-md-6">
                                             <label class="form-label required-label">Docket No.</label>
                                             <InputText class="form-control" placeholder="Enter Docket No." @bind-Value="legalcaseDto.Docketno" readonly="@DocketReadonly" @onclick="CheckMarshal" />
-                                        </div>
+                                        </div>*@
 
                                     </div>
                                 </div>
@@ -4890,78 +4891,78 @@
     }
 
 
-    private async Task GenerateNotice()
-    {
-        spinnerservice.Show();
+    // private async Task GenerateNotice()
+    // {
+    //     spinnerservice.Show();
 
-        legalcaseDto.BillAmount = (legalcaseDto.BillAmount ?? 0) + (noticeModel.BillAmount ?? 0);
+    //     legalcaseDto.BillAmount = (legalcaseDto.BillAmount ?? 0) + (noticeModel.BillAmount ?? 0);
 
-        var successcase = await _service.UpdateCaseAsync(legalcaseDto);
-        if (!successcase.HasValue)
-        {
-            return;
-        }
-        else
-        {
-            noticeModel.BillAmount = null;
-        }
+    //     var successcase = await _service.UpdateCaseAsync(legalcaseDto);
+    //     if (!successcase.HasValue)
+    //     {
+    //         return;
+    //     }
+    //     else
+    //     {
+    //         noticeModel.BillAmount = null;
+    //     }
 
-        if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty && noticeModel.FormTypeId.HasValue)
-        {
-            bool success = false;
+    //     if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty && noticeModel.FormTypeId.HasValue)
+    //     {
+    //         bool success = false;
 
-            if (isEditMode)
-            {
-                // UPDATE existing notice
-                success = await _CaseFormService.UpdateCaseFormAsync(new GenrateNoticeModel
-                {
-                    Id = noticeModel.Id,
-                    LegalCaseId = CurrentCaseId.Value,
-                    FormTypeId = noticeModel.FormTypeId,
-                    File = noticeModel.File,
-                    HTML = noticeModel.HTML,
-                    CreatedOn = noticeModel.CreatedOn
-                });
+    //         if (isEditMode)
+    //         {
+    //             // UPDATE existing notice
+    //             success = await _CaseFormService.UpdateCaseFormAsync(new GenrateNoticeModel
+    //             {
+    //                 Id = noticeModel.Id,
+    //                 LegalCaseId = CurrentCaseId.Value,
+    //                 FormTypeId = noticeModel.FormTypeId,
+    //                 File = noticeModel.File,
+    //                 HTML = noticeModel.HTML,
+    //                 CreatedOn = noticeModel.CreatedOn
+    //             });
 
-                if (success)
-                {
-                    ToastService.ShowSuccess("Notice has been updated successfully!");
-                }
-            }
-            else
-            {
-                // CREATE new notice
-                success = await CaseFormRepository.GenerateNoticeAsync(
-                    CurrentCaseId.Value,
-                    noticeModel.FormTypeId.Value,
-                       Guid.Parse(loggedInUserId)
-                );
+    //             if (success)
+    //             {
+    //                 ToastService.ShowSuccess("Notice has been updated successfully!");
+    //             }
+    //         }
+    //         else
+    //         {
+    //             // CREATE new notice
+    //             success = await CaseFormRepository.GenerateNoticeAsync(
+    //                 CurrentCaseId.Value,
+    //                 noticeModel.FormTypeId.Value,
+    //                    Guid.Parse(loggedInUserId)
+    //             );
 
-                if (success)
-                {
-                    ToastService.ShowSuccess("Notice has been generated successfully!");
-                }
-            }
+    //             if (success)
+    //             {
+    //                 ToastService.ShowSuccess("Notice has been generated successfully!");
+    //             }
+    //         }
 
-            if (success)
-            {
-                await LoadCaseForms();
+    //         if (success)
+    //         {
+    //             await LoadCaseForms();
 
-                // Reset form
-                noticeModel = new GenrateNoticeModel();
-                isEditMode = false;
-                CurrentCaseId = caseId;
+    //             // Reset form
+    //             noticeModel = new GenrateNoticeModel();
+    //             isEditMode = false;
+    //             CurrentCaseId = caseId;
 
-                await JS.InvokeVoidAsync("openTab", "activity");
-            }
-        }
-        else
-        {
+    //             await JS.InvokeVoidAsync("openTab", "activity");
+    //         }
+    //     }
+    //     else
+    //     {
 
-        }
+    //     }
 
-        spinnerservice.Hide();
-    }
+    //     spinnerservice.Hide();
+    // }
 
 
     private async Task ViewPdf(string filePath)
@@ -6492,15 +6493,15 @@
 
         // ============= UPDATE CASE =============
 
-        var success = await _service.UpdateCaseAsync(legalcaseDto);
+        var success = await _service.UpdateCourtandIndex(legalcaseDto);
 
-
-
-        if (legalcaseDto.MarshalId != null && legalcaseDto.MarshalId != Guid.Empty)
+        if((legalcaseDto.CourtLocationId == null || legalcaseDto.CourtLocationId == Guid.Empty || !CaseHearings.Any()) && !string.IsNullOrEmpty(legalcaseDto.Index))
         {
-            var marshal = await _marshalService.UpdateMarshalDocketNoAsync(legalcaseDto.MarshalId.Value, legalcaseDto.Docketno);
+            await _remainder.CreateNewReminder(legalcaseDto.Id, "Court date not yet assigned", DateTime.Now.AddDays(7));
         }
-        if (success.HasValue)
+
+
+        if (success)
         {
             ToastService.ShowSuccess("Court details updated successfully!");
             await JS.InvokeVoidAsync("hideModal", "courtModal");
@@ -6513,7 +6514,7 @@
         }
         spinnerservice.Hide();
     }
-
+    
 
     private async Task SaveHearingChanges()
     {
