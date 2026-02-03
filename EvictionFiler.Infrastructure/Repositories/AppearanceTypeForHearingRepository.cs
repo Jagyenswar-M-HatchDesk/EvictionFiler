@@ -12,17 +12,37 @@ using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class AppearanceTypeForHearingRepository : Repository<AppearanceTypeforHearing>, IAppearanceTypeForHearingRepository
     {
 		private readonly MainDbContext _context;
+        private readonly IDbContextFactory<MainDbContext> contextFactory;
 
-		public AppearanceTypeForHearingRepository(MainDbContext context) : base(context)
+        public AppearanceTypeForHearingRepository(MainDbContext context,IDbContextFactory<MainDbContext>contextFactory) : base(context)
 		{
 			_context = context;
-		}
+            this.contextFactory = contextFactory;
+        }
+        public async Task<IEnumerable<AppearanceTypeforHearing>> GetAllAsync1(Expression<Func<AppearanceTypeforHearing, bool>>? predicate = null, params Expression<Func<AppearanceTypeforHearing, object>>[]? includes)
+        {
 
+
+            await using var context = await contextFactory.CreateDbContextAsync();
+
+            IQueryable<AppearanceTypeforHearing> query = context.Set<AppearanceTypeforHearing>().AsNoTracking();
+
+            if (predicate != null)
+                query = query.Where(predicate);
+
+            if (includes != null)
+                query = includes.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
+
+            return await query.ToListAsync().ConfigureAwait(false);
+        }
     }
 }

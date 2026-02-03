@@ -1,0 +1,220 @@
+﻿@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.CaseAppearanceDtos
+@using EvictionFiler.Application.DTOs.CaseHearing
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Client.SpinnerService
+@inject IJSRuntime JS
+@inject SpinnerService spinnerservice
+@inject IToastService ToastService
+@inject ICaseAppearanceService _caseAppreance
+
+
+
+<table class="info-table mb-4" style="border:none;">
+    <thead>
+        <tr>
+            <th colspan="2" class="info-bar">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="info-bar-title">Motion Dates</div>
+                    <button type="button" class="btn btn-sm normal p-1" @onclick="ShowStipulationModal" title="Edit Motions" style="color:white">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                </div>
+            </th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr class="info-row" style="display:flex;">
+            <!-- Column 1 -->
+            <td class="info-block">
+                <div class="label">Motion Due:</div>
+                <div class="value ellipsis">
+                    @(Model.MotionDue.HasValue
+                                        ? Model.MotionDue.Value.ToString(DateFormats.Default)
+                                        : "--")
+                </div>
+            </td>
+
+            <!-- Column 2 -->
+            <td class="info-block">
+                <div class="label">Opposition Due:</div>
+                <div class="value ellipsis">
+                    @(Model.OppositionDue.HasValue
+                                        ? Model.OppositionDue.Value.ToString(DateFormats.Default)
+                                        : "--")
+                </div>
+            </td>
+        </tr>
+
+        <!-- ROW 2 -->
+        <tr class="info-row" style="display:flex;">
+            <!-- Column 1 -->
+            <td class="info-block">
+                <div class="label">Reply Due:</div>
+                <div class="value ellipsis">
+                    @(Model.ReplyDue.HasValue
+                                        ? Model.ReplyDue.Value.ToString(DateFormats.Default)
+                                        : "--")
+                </div>
+            </td>
+
+            <!-- Column 2 -->
+            <td class="info-block">
+                <div class="label">OSC / Return:</div>
+                <div class="value ellipsis">
+                    @(Model.ReturnDate.HasValue
+                                        ? Model.ReturnDate.Value.ToString(DateFormats.Default)
+                                        : "--")
+                </div>
+            </td>
+        </tr>
+
+
+    </tbody>
+</table>
+<table class="info-table" style="border:none;">
+    <thead>
+        <tr>
+            <th colspan="2" class="info-bar">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="info-bar-title">Key Dates</div>
+                    @* <button type="button" class="btn btn-sm normal p-1" @onclick="ShowTenantModal" style="color:white">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>*@
+                </div>
+            </th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr class="info-row" style="display:flex;">
+            <!-- Column 1 -->
+            <td class="info-block">
+                <div class="label">Vacate Date:</div>
+                <div class="value ellipsis">
+                    @(legalcaseDto.RemainderDate.HasValue
+                                        ? legalcaseDto.RemainderDate.Value.ToString(DateFormats.Default)
+                                        : "--")
+                </div>
+            </td>
+
+            <!-- Column 2 -->
+            <td class="info-block">
+                <div class="label">Next Reminder:</div>
+                <div class="value ellipsis">
+                    @(legalcaseDto.RemainderDate.HasValue
+                                        ? legalcaseDto.RemainderDate.Value.ToString(DateFormats.Default)
+                                        : "--")
+                </div>
+            </td>
+        </tr>
+
+
+    </tbody>
+</table>
+<div class="modal fade" id="stipulationModal" tabindex="-1" aria-labelledby="stipulationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-semibold" id="buildingModalLabel">Edit Stipulation Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <EditForm Model="@Model">
+                <DataAnnotationsValidator />
+                <div class="modal-body py-0">
+                    <div class="card border-0">
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Case Type Dropdown -->
+
+
+
+
+
+                                <div class="mt-3 position-relative">
+                                    <!--<button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                                            aria-label="Clear"
+                                            @onclick="ClearSelectedClient">
+                                    </button> -->
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="form-label required-label">Motion Due</label>
+                                            <RadzenDatePicker DateFormat="@DateFormats.Default" class="edit-stip" @bind-Value="Model.MotionDue" />
+
+
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label required-label">Opposition Due</label>
+                                            <RadzenDatePicker DateFormat="@DateFormats.Default" class="edit-stip" @bind-Value="Model.OppositionDue" />
+                                        </div>
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 mt-3">
+                                            <label class="form-label required-label">Reply Due</label>
+                                            <RadzenDatePicker DateFormat="@DateFormats.Default" class="edit-stip" @bind-Value="Model.ReplyDue" />
+                                        </div>
+
+                                        <div class="col-6 mt-3">
+                                            <label class="form-label required-label">Return Date</label>
+                                            <RadzenDatePicker DateFormat="@DateFormats.Default" class="edit-stip" @bind-Value="Model.ReturnDate" />
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                    <button type="button" class="btn btn-secondary buttons" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary base buttons" @onclick="SaveStipulationChanges">Save</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+            @code {
+    private CaseAppearanceDto Model { get; set; }=new();
+    [Parameter] public Guid? CurrentCaseId { get; set; }
+    [Parameter] public IntakeModel legalcaseDto { get; set; } = new();
+    private List<CaseAppearanceDto> Judgements = new();
+    private List<CaseHearingDto> CaseHearings = new();
+    [Parameter] public EventCallback OnFormCreate { get; set; } = new();
+
+
+    private async void ShowStipulationModal()
+    {
+
+        JS.InvokeVoidAsync("showModal", "stipulationModal");
+    }
+
+    private async Task SaveStipulationChanges()
+    {
+        spinnerservice.Show();
+        var result = await _caseAppreance.UpdateCaseAppreance(Model);
+        if (result)
+        {
+            ToastService.ShowSuccess("Stipulation details updated successfully!");
+            await JS.InvokeVoidAsync("hideModal", "stipulationModal");
+
+
+           await  OnFormCreate.InvokeAsync();
+        }
+        else
+        {
+            ToastService.ShowError("Failed to update stipulation details.");
+        }
+
+        spinnerservice.Hide();
+    }
+}

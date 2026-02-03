@@ -10,6 +10,7 @@ using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
+
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Base;
@@ -24,6 +25,7 @@ namespace EvictionFiler.Application.Services
 {
     public class LegalCaseService : ILegalCaseService
     {
+       
         private readonly ICasesRepository _repository;
         private readonly ICaseTypeRepository _caseTypeRepository;
         private readonly ICaseTypeHPDRepository _caseTypeHPDRepository;
@@ -56,6 +58,7 @@ namespace EvictionFiler.Application.Services
         private readonly ICaseNoticeInfoRepository _caseNoticeInfoRepository;
         public LegalCaseService(ICasesRepository repository, ICaseNotesRepository caseNotesRepository, ICaseNoticeInfoRepository caseNoticeInfoRepository, ICaseRespondentRepository respondantRepository, ICasePetitionerRepository petitionerRepository, ICourtTypeRepository courtTypeRepository, ICityRepository cityRepository, ISubCaseTypeRepository subCaseTypeRepository, IServiceMethodRepository serviceMethod, IFilingMethodRepository filingMethod, IArrearLedgerRepository arrearLedger, IReportingTypePerDiemRepository reportingTypePerDiemRepository, IDocumentIntructionsTypesRepository documentIntructionsTypesRepository, IAppearanceTypePerDiemRepository appearanceTypePerDiemRepository, ICaseTypePerDiemRepository caseTypePerDiemRepository, ICaseDocument caseDocument, IReliefPetitionerTypeRepository reliefPetitionerTypeRepository, IReliefRespondenTypeRepository reliefRespondenTypeRepository, IAppearanceTypeRepository appearanceTypeRepository, IDefenseTypeRepository defenseTypeRepository, IHarassmentTypeRepository harassmentTypeRepository, ICaseTypeHPDRepository caseTypeHPDRepository, ITenantRepository tenantRepo, ILandLordRepository landlordrepo, ICaseTypeRepository caseTypeRepository, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
         {
+           
             _repository = repository;
             _tenantRepo = tenantRepo;
             _landlordrepo = landlordrepo;
@@ -84,6 +87,7 @@ namespace EvictionFiler.Application.Services
             _petitionerRepository = petitionerRepository;
             _caseNoticeInfoRepository = caseNoticeInfoRepository;
             _caseNotesRepository = caseNotesRepository;
+           
 
         }
 
@@ -1374,9 +1378,7 @@ namespace EvictionFiler.Application.Services
 
         public async Task<IEnumerable<ServiceMethod>> ServiceMethodList()
         {
-            var doclist = _serviceMethod.GetAllQuerable();
-            var returnlist = await doclist.OrderBy(e => e.Name).ToListAsync();
-            return returnlist;
+            return await _serviceMethod.GetServiceMethodsAsync();
         }
 
         public async Task<IEnumerable<CourtType>> CourtTypeList()

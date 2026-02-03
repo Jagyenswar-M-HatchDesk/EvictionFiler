@@ -63,7 +63,14 @@ builder.Services.AddScoped(sp =>
 
 
 
-builder.Services.AddDbContext<MainDbContext>(
+//builder.Services.AddDbContext<MainDbContext>(
+//    options => options.UseSqlServer(
+//        builder.Configuration.GetConnectionString("Default"),
+//        sqlOptions => sqlOptions.MigrationsAssembly("EvictionFiler.Infrastructure")
+//    )
+
+//);
+builder.Services.AddDbContextFactory<MainDbContext>(
     options => options.UseSqlServer(
         builder.Configuration.GetConnectionString("Default"),
         sqlOptions => sqlOptions.MigrationsAssembly("EvictionFiler.Infrastructure")

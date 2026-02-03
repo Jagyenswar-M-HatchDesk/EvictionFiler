@@ -50,13 +50,30 @@ namespace EvictionFiler.Application.Services
         }
         public async Task<bool> UpdateCaseAppreance(CaseAppearanceDto appearance)
         {
-            var existing = await _repository.GetAsync(appearance.Id);
+            if (appearance.Id == null || appearance.Id == Guid.Empty)
+            {
 
-            existing.MotionDue = appearance.MotionDue;
-            existing.ReplyDue = appearance.ReplyDue;
-            existing.OppositionDue = appearance.OppositionDue;
-            existing.ReturnDate = appearance.ReturnDate;
+                var entity = new CaseAppearance
+                {
+                    MotionDue = appearance.MotionDue,
+                    ReplyDue = appearance.ReplyDue,
+                    OppositionDue = appearance.OppositionDue,
+                    ReturnDate = appearance.ReturnDate
+                };
 
+                await _repository.AddAsync(entity);
+            }
+            else
+
+            {
+
+                var existing = await _repository.GetAsync(appearance.Id);
+
+                existing.MotionDue = appearance.MotionDue;
+                existing.ReplyDue = appearance.ReplyDue;
+                existing.OppositionDue = appearance.OppositionDue;
+                existing.ReturnDate = appearance.ReturnDate;
+            }
             var result = await _unitofwork.SaveChangesAsync();
             return result > 0 ? true : false;
         }

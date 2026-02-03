@@ -2,6 +2,7 @@
 using EvictionFiler.Domain.Entities.Base.Base;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,12 +16,14 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 	public abstract class Repository<T> : IRepository<T> where T : DeletableBaseEntity
 	{
 		private readonly MainDbContext _context;
-		private readonly DbSet<T> _dbSet;
+        private readonly IDbContextFactory<MainDbContext> contextFactory;
+        private readonly DbSet<T> _dbSet;
 
 		protected Repository(MainDbContext context)
 		{
 			_context = context;
-			_dbSet = context.Set<T>();
+            this.contextFactory = contextFactory;
+            _dbSet = context.Set<T>();
 		}
 		public async Task<T> AddAsync(T entity)
 		{
@@ -113,9 +116,11 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 
 		public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null, params Expression<Func<T, object>>[]? includes)
 		{
-			var query = _dbSet.AsNoTracking().AsQueryable(); 
+         
 
-			if (predicate != null)
+            IQueryable<T> query = _dbSet.AsNoTracking();
+
+            if (predicate != null)
 				query = query.Where(predicate);
 
 			if (includes != null)

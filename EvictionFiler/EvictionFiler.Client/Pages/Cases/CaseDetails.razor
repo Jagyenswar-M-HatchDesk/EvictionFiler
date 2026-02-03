@@ -29,6 +29,7 @@
 @using EvictionFiler.Application.Services
 @using EvictionFiler.Client.AuthService
 @using EvictionFiler.Client.Pages.Actions
+@using EvictionFiler.Client.Pages.Motion
 @using EvictionFiler.Client.SpinnerService
 @using EvictionFiler.Domain.Entities.Master
 @using EvictionFiler.Infrastructure.Repositories
@@ -78,6 +79,7 @@
 @inject UserContextService userContext
 
 @attribute [Authorize]
+
 
 @using System.Security.Claims
 @using System.Linq.Expressions
@@ -138,6 +140,9 @@
 
     .bg-brand-accent {
         background-color: var(--brand-accent) !important;
+
+
+
     }
 
     .bg-brand-accent-100 {
@@ -1403,110 +1408,8 @@
 
 
                 <div class="card shadow-sm p-3 border-0">
-                    <table class="info-table mb-4" style="border:none;">
-                        <thead>
-                            <tr>
-                                <th colspan="2" class="info-bar">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="info-bar-title">Motion Dates</div>
-                                        <button type="button" class="btn btn-sm normal p-1" @onclick="ShowStipulationModal" title="Edit Motions" style="color:white">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                    </div>
-                                </th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <tr class="info-row" style="display:flex;">
-                                <!-- Column 1 -->
-                                <td class="info-block">
-                                    <div class="label">Motion Due:</div>
-                                    <div class="value ellipsis">
-                                        @(MotionJudgements.MotionDue.HasValue
-                                                                                ? MotionJudgements.MotionDue.Value.ToString(DateFormats.Default)
-                                                                                : "--")
-                                                                                   </div>
-                                                                               </td>
-
-                                <!-- Column 2 -->
-                                <td class="info-block">
-                                    <div class="label">Opposition Due:</div>
-                                    <div class="value ellipsis">
-                                        @(MotionJudgements.OppositionDue.HasValue
-                                                                                ? MotionJudgements.OppositionDue.Value.ToString(DateFormats.Default)
-                                                                                : "--")
-                                                                                   </div>
-                                                                               </td>
-                                                                           </tr>
-
-                            <!-- ROW 2 -->
-                            <tr class="info-row" style="display:flex;">
-                                <!-- Column 1 -->
-                                <td class="info-block">
-                                    <div class="label">Reply Due:</div>
-                                    <div class="value ellipsis">
-                                        @(MotionJudgements.ReplyDue.HasValue
-                                                                                ? MotionJudgements.ReplyDue.Value.ToString(DateFormats.Default)
-                                                                                : "--")
-                                                                                   </div>
-                                                                               </td>
-
-                                <!-- Column 2 -->
-                                <td class="info-block">
-                                    <div class="label">OSC / Return:</div>
-                                    <div class="value ellipsis">
-                                        @(MotionJudgements.ReturnDate.HasValue
-                                                                                ? MotionJudgements.ReturnDate.Value.ToString(DateFormats.Default)
-                                                                                : "--")
-                                                                                   </div>
-                                                                               </td>
-                                                                           </tr>
-
-
-                        </tbody>
-                    </table>
-
-                    <table class="info-table" style="border:none;">
-                        <thead>
-                            <tr>
-                                <th colspan="2" class="info-bar">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="info-bar-title">Key Dates</div>
-                                        @* <button type="button" class="btn btn-sm normal p-1" @onclick="ShowTenantModal" style="color:white">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>*@
-                                    </div>
-                                </th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <tr class="info-row" style="display:flex;">
-                                <!-- Column 1 -->
-                                <td class="info-block">
-                                    <div class="label">Vacate Date:</div>
-                                    <div class="value ellipsis">
-                                        @(legalcaseDto.RemainderDate.HasValue
-                                                                                ? legalcaseDto.RemainderDate.Value.ToString(DateFormats.Default)
-                                                                                : "--")
-                                                                                   </div>
-                                                                               </td>
-
-                                <!-- Column 2 -->
-                                <td class="info-block">
-                                    <div class="label">Next Reminder:</div>
-                                    <div class="value ellipsis">
-                                        @(legalcaseDto.RemainderDate.HasValue
-                                                                                ? legalcaseDto.RemainderDate.Value.ToString(DateFormats.Default)
-                                                                                : "--")
-                                    </div>
-                                </td>
-                            </tr>
-
-
-                            </tbody>
-                        </table>
+                        <Motion CurrentCaseId="CurrentCaseId" legalcaseDto="legalcaseDto" OnFormCreate="HandleInvokeAction1" />
+                 
                     </div>
 
                     <!-- Court Info -->
@@ -3416,74 +3319,7 @@
     </div>
 
     <!-- client Edit Modal -->
-    <div class="modal fade" id="stipulationModal" tabindex="-1" aria-labelledby="stipulationModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-semibold" id="buildingModalLabel">Edit Stipulation Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <EditForm Model="@MotionJudgements">
-                    <DataAnnotationsValidator />
-                    <div class="modal-body py-0">
-                        <div class="card border-0">
-                            <div class="card-body">
-                                <div class="row">
-                                    <!-- Case Type Dropdown -->
-
-
-
-
-
-                                    <div class="mt-3 position-relative">
-                                        <!--<button type="button" class="btn-close position-absolute top-0 end-0 m-2"
-                                                aria-label="Clear"
-                                                @onclick="ClearSelectedClient">
-                                        </button> -->
-                                        <div class="row">
-                                            <div class="col-6">
-                                                <label class="form-label required-label">Motion Due</label>
-                                                <RadzenDatePicker DateFormat="@DateFormats.Default" class="edit-stip"  @bind-Value="MotionJudgements.MotionDue" />
-
-
-                                            </div>
-                                            <div class="col-6">
-                                                <label class="form-label required-label">Opposition Due</label>
-                                                <RadzenDatePicker DateFormat="@DateFormats.Default" class="edit-stip"  @bind-Value="MotionJudgements.OppositionDue" />
-                                            </div>
-
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-6 mt-3">
-                                                <label class="form-label required-label">Reply Due</label>
-                                                <RadzenDatePicker DateFormat="@DateFormats.Default" class="edit-stip" @bind-Value="MotionJudgements.ReplyDue" />
-                                            </div>
-
-                                            <div class="col-6 mt-3">
-                                                <label class="form-label required-label">Return Date</label>
-                                                <RadzenDatePicker DateFormat="@DateFormats.Default" class="edit-stip" @bind-Value="MotionJudgements.ReturnDate" />
-                                            </div>
-
-                                        </div>
-                                    </div>
-
-
-                                </div>
-
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
-                        <button type="button" class="btn btn-secondary buttons" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary base buttons" @onclick="SaveStipulationChanges">Save</button>
-                    </div>
-                </EditForm>
-            </div>
-        </div>
-    </div>
+   
     <div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
@@ -3757,6 +3593,9 @@
 
                 <EditForm EditContext="_editContext" OnValidSubmit="SaveCourtChanges">
                     <DataAnnotationsValidator />
+
+
+
                     <div class="modal-body">
                         <div class="">
                             <div class=" p-0">
@@ -4169,6 +4008,8 @@
     }
     protected override async Task OnInitializedAsync()
     {
+
+        spinnerservice.Show();
         var flag = navmessage.ConsumeFlag();
         var page = navmessage.ConsumePage();
         var message = navmessage.ConsumeMessage();
@@ -4198,16 +4039,18 @@
         ExemptionReasonList = await ExemptionReasonRepository.GetAllAsync();
         TenancyTypeForBuildingList = await TenancyTypeForBuildingRepository.GetAllAsync();
         RegistrationstatusList = await CaseTypeRepository.GetAllRegistrationstatus();
-        if (!CityList.Any()) CityList = await _service.GetAllCitiesList();
+        if (!CityList.Any())
+            CityList = await _service.GetAllCitiesList();
 
 
-        spinnerservice.Show();
+
         await LoadCaseDetails();
         await LoadCaseForms();
         await LoadHearing();
         await LoadJudgement();
         await LoadCaseDocument();
         await LoadOthers();
+
         CalculateCaseProgress();
         StartProgressAnimation();
         StateHasChanged();
@@ -4663,6 +4506,10 @@
         await LoadHearing();
         await LoadOthers();
     }
+    private async Task HandleInvokeAction1()
+    {
+        await LoadJudgement();
+    }
     private async Task LoadCaseDetails()
     {
         legalcaseDto = await _service.GetCaseByIdAsync(caseId);
@@ -4989,16 +4836,6 @@
         await JS.InvokeVoidAsync("openTab", "activity");
         StateHasChanged();
     }
-
-    private async Task LoadHearing()
-    {
-        CaseHearings = await _caseHearingService.GetAllCaseHeariingByCaseIdAsync(CurrentCaseId.Value);
-        if (CaseHearings.Any())
-        {
-            CaseHearing = CaseHearings.FirstOrDefault()!;
-        }
-        StateHasChanged();
-    }
     private async Task LoadJudgement()
     {
         Judgements = await _caseAppreance.GetAllCaseAppreance(CurrentCaseId.Value);
@@ -5023,6 +4860,18 @@
 
         StateHasChanged();
     }
+    private async Task LoadHearing()
+    {
+        CaseHearings = await _caseHearingService.GetAllCaseHeariingByCaseIdAsync(CurrentCaseId.Value);
+        if (CaseHearings.Any())
+        {
+            CaseHearing = CaseHearings.FirstOrDefault()!;
+        }
+        StateHasChanged();
+    }
+  
+
+
     private async Task LoadOthers()
     {
         var casenotice = await _caseNoticeinfo.GetAllCasenoticeInfo(legalcaseDto.Id);
@@ -5095,6 +4944,7 @@
     private List<TenancyType> TenancyTypeList = new();
 
     private async void ShowTenantModal()
+
     {
         // Copy current data into editable model
         Tenants.Clear();
@@ -5172,11 +5022,11 @@
         StateHasChanged();
         JS.InvokeVoidAsync("showModal", "clientModal");
     }
-    private async void ShowStipulationModal()
-    {
+    // private async void ShowStipulationModal()
+    // {
 
-        JS.InvokeVoidAsync("showModal", "stipulationModal");
-    }
+    //     JS.InvokeVoidAsync("showModal", "stipulationModal");
+    // }
     private async void ShowMarshalModal()
     {
         // Copy current data into editable model
@@ -5978,24 +5828,7 @@
 
         spinnerservice.Hide();
     }
-    private async Task SaveStipulationChanges()
-    {
-        spinnerservice.Show();
-        var result = await _caseAppreance.UpdateCaseAppreance(MotionJudgements);
-        if (result)
-        {
-            ToastService.ShowSuccess("Stipulation details updated successfully!");
-            await JS.InvokeVoidAsync("hideModal", "stipulationModal");
-
-            await LoadJudgement();
-        }
-        else
-        {
-            ToastService.ShowError("Failed to update stipulation details.");
-        }
-
-        spinnerservice.Hide();
-    }
+  
     private async Task SaveClientChanges()
     {
         spinnerservice.Show();

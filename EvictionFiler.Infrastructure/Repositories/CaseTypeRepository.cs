@@ -12,17 +12,20 @@ using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class CaseTypeRepository : Repository<CaseType>, ICaseTypeRepository
 	{
 		private readonly MainDbContext _context;
+        private readonly IDbContextFactory<MainDbContext> contextFactory;
 
-		public CaseTypeRepository(MainDbContext context) : base(context)
+        public CaseTypeRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context)
 		{
 			_context = context;
-		}
+            this.contextFactory = contextFactory;
+        }
 
         public async Task<List<CaseStatus>> GetAllCaseStatus()
         {
@@ -109,7 +112,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<PaymentMethod>> GetAllPaymentMethod()
         {
-            return await _context.MstPaymentMethods.ToListAsync();
+            await using var db = await contextFactory.CreateDbContextAsync();
+            return await db.MstPaymentMethods.ToListAsync();
         }
 
         public async Task<List<PartyRepresentPerDiem>> GetAllpartyRepresentingPerDiem()
@@ -212,7 +216,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<BilingType>> GetAllBilingTypes()
         {
-            return await _context.MstBilingTypes.ToListAsync();
+            await using var db = await contextFactory.CreateDbContextAsync();
+            return await db.MstBilingTypes.ToListAsync();
         }
     }
 }

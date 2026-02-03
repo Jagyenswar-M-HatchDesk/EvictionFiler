@@ -8,27 +8,32 @@ using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class FormTypesRepository : Repository<FormTypes>, IFormTypesRepository
 	{
-		private readonly MainDbContext _context;
+		
+        private readonly IDbContextFactory<MainDbContext> dbContextFactory;
 
-		public FormTypesRepository(MainDbContext context) : base(context)
-		{
-			_context = context;
-		}
+        public FormTypesRepository(IDbContextFactory<MainDbContext> dbContextFactory): base(dbContextFactory.CreateDbContext())
+        {
+           
+            this.dbContextFactory = dbContextFactory;
+        }
 
 		public async Task<List<FormTypes>> GetAllFormTYpes()
 		{
-			return await _context.MstFormTypes.ToListAsync();
+            await using var db = dbContextFactory.CreateDbContext();
+			return await db.MstFormTypes.ToListAsync();
 		}
 
         public async Task<List<FormAddEditViewModelDto>> GetFormTypesByCaseTypeAsync(Guid? caseTypeId)
         {
-            return await _context.MstFormTypes
+            await using var db = dbContextFactory?.CreateDbContext();
+            return await db.MstFormTypes
                 .Where(f => f.CaseTypeId == caseTypeId && f.IsDeleted != true)
                 .Select(f => new FormAddEditViewModelDto
                 {
@@ -38,6 +43,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 })
                 .ToListAsync();
         }
+
 
     }
 }
