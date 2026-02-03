@@ -240,7 +240,7 @@ namespace EvictionFiler.Application.DTOs
         public string? ExemptionBasisOther { get; set; }
         public string? RentRegulationOther { get; set; }
 
-        public Guid? CourtPartId { get; set; }
+        public Guid? CourtPartId { get; set; } = null;
 
         public Guid? ExemptionBasisId { get; set; }
 

@@ -84,11 +84,7 @@ namespace EvictionFiler.Application.Services
             {
                 //var entity = await _caseNoticeInfoRepository.GetAllAsync();
                 var casinfo = await _repo.GetByCaseAndFormTypeAsync(dto.LegalCaseId.Value, dto.FormTypeId.Value);
-                //var casinfo = entity
-                //    .Where(x => x.LegalCaseId == dto.LegalCaseId &&
-                //                x.FormtypeId == dto.FormTypeId)
-                //    .FirstOrDefault();
-
+                
                 if (casinfo == null)
                 {
                     casinfo = new CaseNoticeInfo

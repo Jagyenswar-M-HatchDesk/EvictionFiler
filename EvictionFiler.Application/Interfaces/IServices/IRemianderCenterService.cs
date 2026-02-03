@@ -4,7 +4,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 {
     public interface IRemianderCenterService
     {
-        Task<bool> Create(EditToRemainderCenterDto dto);
+        Task<bool> Create(CreateToRemainderCenterDto dto);
         Task<List<EditToRemainderCenterDto>> GetAllRemainderCenterAsync();
         Task<bool> UpdateRemainderCenterAsync(EditToRemainderCenterDto dto);
         Task<bool> CompleteRemainder(EditToRemainderCenterDto dto);
@@ -13,6 +13,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<bool> DeleteAllRemainderAsync();
         Task<List<EditToRemainderCenterDto?>> GetRemainderCenterByCaseIdAsync(Guid? CaseId);
         //Task<List<EditToClientDto>> SearchRemainderCenter(string searchTerm);
-
+        Task CreateNewReminder(Guid caseId, string Description, DateTime Date);
+        Task<List<EditToRemainderCenterDto>?> GetAllInCompleteRemainder(Guid? userId = null);
     }
 }

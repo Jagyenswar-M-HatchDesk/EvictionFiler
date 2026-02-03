@@ -326,7 +326,7 @@ namespace EvictionFiler.Infrastructure.Repositories
             }
         }
 
-        public async Task<bool> GenerateNoticeAsync(Guid legalCaseId, Guid formTypeId, Guid createdBy)
+        public async Task<string?> GenerateNoticeAsync(Guid legalCaseId, Guid formTypeId, Guid createdBy)
         {
             try
             {
@@ -353,17 +353,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 
                 Log("Template loaded.");
 
-                DateTime noticeDate = CalculateNoticeDate(template.Name);
+               // DateTime noticeDate = CalculateNoticeDate(template.Name);
 
                 // --------------------
                 // LOAD CASE DATA
                 // --------------------
-                var testNotice = await _context.CaseNoticeInfo
-    .Where(x =>
-        x.LegalCaseId == legalCaseId &&
-        x.FormtypeId == formTypeId
-    )
-    .ToListAsync();
+                
 
                 var caseDetails = await
              (
@@ -500,7 +495,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
                      TenancyType = tenancy.Name ?? tenancylc.Name,
 
-                     County = county.Name,
+                     County = county.Name != null ? county.Name : "New York",
                      Court = court.Court,
                      CourtAddress = court.Address,
 
@@ -606,7 +601,7 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{Landlord_Phone}}", caseDetails.LandlordPhone ?? "")
     .Replace("{{LandlordEmail}}", caseDetails.LandlordEmail ?? "")
     .Replace("{{Landlord_Email}}", caseDetails.LandlordEmail ?? "")
-    .Replace("{{LandlordDate}}", noticeDate.ToString(DateFormats.Default))
+    .Replace("{{LandlordDate}}", caseDetails.VacateDate?.ToString(DateFormats.Default) ?? caseDetails.VacateDatelc?.ToString(DateFormats.Default))
     .Replace("{{Notice_Date}}", caseDetails.NoticeDate?.ToString(DateFormats.Default) ?? DateTime.Now.ToString(DateFormats.Default))
     .Replace("{{PropertyAddress}}", caseDetails.PropertyAddress ?? "")
     .Replace("{{Premises_Address}}", caseDetails.PropertyAddress ?? "")
@@ -768,37 +763,18 @@ namespace EvictionFiler.Infrastructure.Repositories
                 Log("DB Save Success.");
                 Log("=== GenerateNoticeAsync COMPLETED ===");
 
-                return true;
+                return template.Name;
             }
             catch (Exception ex)
             {
                 string finalLog = $"ERROR in GenerateNoticeAsync: {ex}";
                 File.AppendAllText(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "pdf_errors.log"), finalLog);
                 Console.WriteLine(finalLog);
-                return false;
+                return null;
             }
         }
 
-        private DateTime CalculateNoticeDate(string formName)
-        {
-            int noticeDays = 0;
-
-            if (string.IsNullOrEmpty(formName))
-                return DateTime.Now;
-
-            if (formName.ToLower().Contains("90 days"))
-                noticeDays = 90;
-            else if (formName.ToLower().Contains("5 days"))
-                noticeDays = 5;
-            else if (formName.ToLower().Contains("60 days"))
-                noticeDays = 60;
-            else if (formName.ToLower().Contains("30 days"))
-                noticeDays = 30;
-
-
-            return DateTime.Now.AddDays(noticeDays);
-        }
-
+       
         //public async Task<byte[]?> GetPdfBytesAsync(Guid id)
         //{
         //    var caseForm = await _context.CaseForms

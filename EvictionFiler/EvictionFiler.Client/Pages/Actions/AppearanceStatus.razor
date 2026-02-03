@@ -10,15 +10,16 @@
 @inject ICourtTodayTypeRepository Courttodayrepo
 @inject IAdjournedReasonRepository adjournedRepo
 @inject ICaseAppearanceService appreanceService
+@inject IRemianderCenterService _remainder
 @inject IToastService ToastService
 
 @* <PageTitle>HousingCourtFiler – Outcome Actions</PageTitle> *@
 <style>
     /* body {
-            background: #f5f7fb;
-            padding-bottom: 90px;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont;
-        } */
+                background: #f5f7fb;
+                padding-bottom: 90px;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont;
+            } */
 
     .header {
         background: #DDB156;
@@ -358,9 +359,9 @@
                                             ? legalcaseDto.RemainderDate.Value.ToString(DateFormats.Default)
                                         : "--")
                 </li>
-                    <li>Next Payment: —</li>
-                </ul>
-            </div>
+                <li>Next Payment: —</li>
+            </ul>
+        </div>
 
             <div class="section" style="background-color:white;margin-bottom:40px;padding: 0px 12px;">
                 <h6>Reminders</h6>
@@ -373,7 +374,7 @@
                     <label class="form-check-label">Payments</label>
                 </div>
             </div>
-        }
+                }
     </EditForm>
 </div>
 
@@ -387,7 +388,7 @@
 
 @code {
     [Parameter] public IntakeModel legalcaseDto { get; set; }
-    
+
     public CaseAppearanceDto model { get; set; } = new();
 
     Guid? Outcome = null;
@@ -467,9 +468,25 @@
     {
         model.LegalCaseId = legalcaseDto.Id;
         var result = await appreanceService.AddCaseAppearance(model);
-        if(result)
+        if (result)
         {
             ToastService.ShowSuccess("Case Appreance Added Successfully!");
+            if (model.MotionDue.HasValue)
+            {
+
+                int MotionOppDaysBeforeReturn = -1; // This is hordcoded and will be pick from config later.
+                await _remainder.CreateNewReminder(legalcaseDto.Id, "Opposition Due (motion)", model.ReturnDate!.Value.AddDays(MotionOppDaysBeforeReturn));
+
+                await _remainder.CreateNewReminder(legalcaseDto.Id, "Reply Due (motion)", model.ReplyDue!.Value.AddDays(MotionOppDaysBeforeReturn));
+            }
+
+            if (ShowWarrant)
+            {
+                int MotionOppDaysBeforeReturn = -1; // This is hordcoded and will be pick from config later.
+                await _remainder.CreateNewReminder(legalcaseDto.Id, "Warrant eligible", model.WarrantDate!.Value.AddDays(MotionOppDaysBeforeReturn));
+
+                await _remainder.CreateNewReminder(legalcaseDto.Id, "Appeal Notice Deadline", model.WarrantDate!.Value.AddDays(30));
+            }
         }
         else
         {
