@@ -241,6 +241,7 @@ builder.Services.AddScoped<ICaseWarrantRepository, CaseWarrantRepository>();
 builder.Services.AddScoped<IAdjournedReasonRepository, AdjournedReasonsRepository>();
 builder.Services.AddScoped<ICaseAppearanceRepository, CaseAppreanceRepository>();
 builder.Services.AddScoped<ICaseAppearanceService, CaseAppearanceService>();
+builder.Services.AddScoped<IChatGptService, ChatGptService>();
 
 var app = builder.Build();
 
@@ -306,6 +307,17 @@ app.MapPost("/api/auth/logout", async (HttpContext http, SignInManager<User> sig
     await http.SignOutAsync(IdentityConstants.ApplicationScheme);
     http.Response.Cookies.Delete(".AspNetCore.Identity.Application");
     return Results.Ok();
+});
+app.MapGet("/api/casefile/{**relativePath}", async (string relativePath) =>
+{
+    var filePath = Path.Combine(caseFormsPath, relativePath);
+
+    if (!File.Exists(filePath))
+        return Results.NotFound($"File '{relativePath}' not found.");
+
+    var stream = File.OpenRead(filePath);
+    var contentType = "application/octet-stream";
+    return Results.File(stream, contentType, Path.GetFileName(filePath));
 });
 
 app.MapRazorPages();

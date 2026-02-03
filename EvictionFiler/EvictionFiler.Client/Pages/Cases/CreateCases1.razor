@@ -898,10 +898,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                                     <div class="col-4">
                                                         <label class="lbl required-label">Client Name</label>
-                                                        <input type="text" class="  form-input"
+                                                        <InputText type="text" class="  form-input"
                                                                placeholder="Enter Name"
-                                                               @bind="legalcaseDto.ClientName"
-                                                               @bind:after="ValidateInput" />
+                                                               @bind-Value="legalcaseDto.ClientName"
+                                                               @bind-Value:after=@(() => ValidateParticularInput(() => legalcaseDto.ClientName, nameof(legalcaseDto.ClientName), "Client Name is Required")) />
                                                         <ValidationMessage For="() => legalcaseDto.ClientName" />
                                                     </div>
                                                     <div class="col-4">
@@ -914,8 +914,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <label class="lbl required-label">Client Type</label>
                                                         <InputSelect class="  form-input"
                                                                      @bind-Value="legalcaseDto.ClientTypeId"
-                                                                     @bind-Value:after="ValidateInput">
-                                                            >
+                                                                     @bind-Value:after=@(() => ValidateParticularInput(() => legalcaseDto.ClientTypeId, nameof(legalcaseDto.ClientTypeId), "Client Tyoe is Required"))>
+                                                            
                                                             <option value="">-- Select --</option>
                                                             @foreach (var Own in ClientTypeList)
                                                             {
@@ -929,7 +929,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                         <InputText class="  form-input"
                                                                    placeholder="Enter Email"
                                                                    @bind-Value="legalcaseDto.ClientEmail"
-                                                                   @bind-Value:after="ValidateInput" />
+                                                                   @bind-Value:after=@(() => ValidateParticularInput(() => legalcaseDto.ClientEmail, nameof(legalcaseDto.ClientEmail), "Client Email is Required")) />
                                                         <ValidationMessage For="() => legalcaseDto.ClientEmail" />
                                                     </div>
                                                     <div class="col-4">
@@ -1059,7 +1059,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                     @if (showLandlordfields)
                                     {
-                                        <div class=@(selectedlandlord != null ? "card inner-card p-3 position-relative " : " position-relative")>
+                                        <div class=@(selectedlandlord != null ? " position-relative " : " position-relative")>
 
                                             <div class="row mt-1">
                                                 <div class="col-md-6">
@@ -6813,6 +6813,13 @@ r.Name == "Other");
     {
         var result = await ValidateCurrentStep();
     }
+    private Task ValidateParticularInput<T>(Expression<Func<T>> accessor, string fieldName, string validationMsg)
+    {
+        Require(accessor, fieldName, validationMsg);
+        _editContext.NotifyValidationStateChanged();
+        return Task.CompletedTask;
+    }
+
     private void GenerateMonths()
     {
         MonthOptions.Clear();
@@ -9013,10 +9020,8 @@ r.Name == "Other");
     {
         if (CaseTypeList.FirstOrDefault(x => x.Id == legalcaseDto.CaseTypeId)?.Name == "Holdover")
         {
-            Console.WriteLine("1");
             if (legalcaseDto.DateTenantMoved != null && legalcaseDto.TenancyTypeId != null)
             {
-                Console.WriteLine("2");
 
                 int length = 0;
 

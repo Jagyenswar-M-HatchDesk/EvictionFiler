@@ -29,7 +29,7 @@ namespace EvictionFiler.Infrastructure.Repositories
         public async Task<List<FormAddEditViewModelDto>> GetFormTypesByCaseTypeAsync(Guid? caseTypeId)
         {
             return await _context.MstFormTypes
-                .Where(f => f.CaseTypeId == caseTypeId && f.IsDeleted != true)
+                .Where(f => f.CaseTypeId == caseTypeId && f.IsDeleted != true).OrderBy(f => f.CreatedOn)
                 .Select(f => new FormAddEditViewModelDto
                 {
                     Id = f.Id,

@@ -60,8 +60,7 @@
 @inject IAppearanceTypeRepository appearanceTypeRepository
 @inject ICourtService courtRepository
 @inject IDocumentTypeRepository DocRepo
-
-
+@inject IChatGptService openAi
 
 @inject SpinnerService spinnerservice
 @rendermode InteractiveAuto
@@ -809,7 +808,7 @@
                                         <button type="button"
                                                 class="section-header"
                                                 @onclick="() => Toggle(nameof(IsMotionOpen))">
-                                            <span>Motion Type</span>
+                                            <span>Notice Type</span>
                                             <i class="chevron @(IsMotionOpen ? "open" : "")"></i>
                                         </button>
 
@@ -820,7 +819,7 @@
                                                     <div class="col-md-8">
                                                         @* <label class="form-label ">Motion</label> *@
                                                         <InputSelect class="form-select" @bind-Value="noticeModel.FormTypeId" @bind-Value:after="FormTypeBindAfter">
-                                                            <option value="" hidden>Motion</option>
+                                                            <option value="" hidden>Notice</option>
                                                             @foreach (var m in FilteredFormTypeList)
                                                             {
                                                                 <option value="@m.Id">@m.Name</option>
@@ -846,7 +845,7 @@
                                     @if (legalcaseDto.CaseTypeName == "NonPayment" || legalcaseDto.CaseTypeName == "Holdover")
                                     {
 
-                                        <div class="motion-section content-lbl">
+                                      @*  <div class="motion-section content-lbl">
                                             <button type="button"
                                                     class="section-header"
                                                     @onclick="() => Toggle(nameof(IsRentOpen))">
@@ -859,7 +858,7 @@
                                                     <!-- YOUR EXISTING FORM FIELDS HERE -->
                                                     <div class="row g-3">
                                                         <div class="col-md-4">
-                                                            @* <label class="form-label ">Rent Due Frequency</label> *@
+                                                            @* <label class="form-label ">Rent Due Frequency</label> *
                                                             <InputSelect class="form-select" @bind-Value="noticeModel.DateRentId">
                                                                 <option value="" hidden>Rent Due Frequency</option>
                                                                 @foreach (var l in DateRentList)
@@ -871,19 +870,19 @@
                                                         </div>
 
                                                         <div class="col-md-4">
-                                                            @* <label class="form-label ">Monthly Rent ($)</label> *@
+                                                            @* <label class="form-label ">Monthly Rent ($)</label> *
                                                             <InputNumber class="form-control" placeholder="Monthly Rent ($)" @bind-Value="noticeModel.MonthlyRent" />
                                                             <ValidationMessage For="() => noticeModel.MonthlyRent" />
 
                                                         </div>
 
                                                         <div class="col-md-4">
-                                                            @* <label class="form-label">Tenant's Share ($)</label> *@
+                                                            @* <label class="form-label">Tenant's Share ($)</label> *
                                                             <InputNumber class="form-control" placeholder="Tenant's Share ($)" @bind-Value="noticeModel.TenantShare" />
                                                         </div>
 
                                                         <div class="col-md-4">
-                                                            @* <label class="form-label ">Tenancy Type</label> *@
+                                                            @* <label class="form-label ">Tenancy Type</label> *
                                                             <InputSelect class="form-select" @bind-Value="noticeModel.TenancyTypeId" @bind-Value:after="CalcNoticeDays">
                                                                 <option value="" hidden>Tenancy Type</option>
                                                                 @foreach (var t in TenancyTypeList)
@@ -894,18 +893,18 @@
                                                         </div>
 
                                                         <div class="col-md-4">
-                                                            @* <label class="form-label">Last Payment Date</label> *@
+                                                            @* <label class="form-label">Last Payment Date</label> *
                                                             <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" InputClass="rz-inputtext-1" Style="width:100%; box-shadow:none; cursor:pointer; " Placeholder="Last Payment Date" @bind-Value="noticeModel.DateofLastPayment" @bind-Value:after="GenerateMonths" />
                                                         </div>
 
                                                         <div class="col-md-4">
-                                                            @* <label class="form-label">Last Payment Amount ($)</label> *@
+                                                            @* <label class="form-label">Last Payment Amount ($)</label> *
                                                             <InputNumber class="form-control" placeholder="Last Payment Amount ($)" @bind-Value="noticeModel.LastPaidAmt" />
                                                         </div>
                                                         @if (legalcaseDto.CaseTypeName == "NonPayment")
                                                         {
                                                             <div class="col-md-4">
-                                                                @* <label class="form-label ">Lease Start </label> *@
+                                                                @* <label class="form-label ">Lease Start </label> *
                                                                 <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" InputClass="rz-inputtext-1" Style="width:100%; box-shadow:none; cursor:pointer; " Placeholder="Lease Start" @bind-Value="noticeModel.LeaseStart" />
 
                                                             </div>
@@ -959,7 +958,7 @@
                                                                 {
                                                                     <div class="row mb-3">
                                                                         <div class="col-4">
-                                                                            @* <label class="form-label ">Month (YYYY-MM) </label> *@
+                                                                            @* <label class="form-label ">Month (YYYY-MM) </label> *
                                                                             <InputSelect class="form-select holdover-form"
                                                                                          @bind-Value="item.Month"
                                                                                          @bind-Value:after="(() => OnMonthChanged(item))">
@@ -974,13 +973,13 @@
                                                                             </InputSelect>
                                                                         </div>
                                                                         <div class="col-3">
-                                                                            @* <label class="form-label  ">Amount ($) </label> *@
+                                                                            @* <label class="form-label  ">Amount ($) </label> *
                                                                             <InputNumber @bind-Value="item.Amount" placeholder="Amount ($)" @bind-Value:after="RecalculateTotal"
                                                                                          class="form-control" />
                                                                         </div>
 
                                                                         <div class="col-3">
-                                                                            @* <label class="form-label  ">Notes </label> *@
+                                                                            @* <label class="form-label  ">Notes </label> *
                                                                             <InputText @bind-Value="item.Notes"
                                                                                        class="form-control" placeholder="Notes " />
                                                                         </div>
@@ -1005,7 +1004,7 @@
                                             </div>
                                         }
 
-
+                                        *@
 
                                         <div class="motion-section content-lbl">
                                             <button type="button"
@@ -1021,7 +1020,7 @@
                                                     <div class="row g-3">
                                                         <div class="col-md-4">
                                                             @* <label class="form-label ">Date Notice Served</label> *@
-                                                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " Placeholder="Date Notice Served" InputClass="rz-inputtext-1"
+                                                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " Placeholder="Notice Created" InputClass="rz-inputtext-1"
                                                                               @bind-Value="noticeModel.DateNoticeServed" />
                                                         </div>
 
@@ -1328,6 +1327,12 @@
                         </div>
                         <div class="tab-pane fade" id="filings" role="tabpanel" aria-labelledby="filings-tab">
                             <h4>Under Construction</h4>
+                            <button type="button" class="btn btn-primary" style="min-width:30% !important" @onclick="GenerateOSC">
+                                Generate OSC
+                            </button>
+                            
+                            <textarea class="form-control mt-3" placeholder="Generated OSC from OpenAI" 
+                                      style="height: 450px; font-family: monospace;" id="htmlEditor">@html</textarea>
                         </div>
                         <div class="tab-pane fade" id="marshal" role="tabpanel" aria-labelledby="marshal-tab">
 
@@ -2356,6 +2361,7 @@
 
     private string? loggedInUserId;
     private string? MarshalName;
+    private string? html;
     private bool isAdmin = false;
     private bool isEditMode = false;
     private bool ShowAppearance = false;
@@ -2438,6 +2444,8 @@
         {
             caseHearing.AppearanceModeId = virtualMode.Id;
         }
+        CalcNoticeDays();
+
         spinnerservice.Hide();
     }
 
@@ -2492,6 +2500,20 @@
 
         // Input reset jab Flat → Hourly switch hota hai
         legalcaseDto.BilingTypeInputValue = null;
+    }
+
+    private async Task GenerateOSC()
+    {
+
+        var result = await openAi.GenerateOSC(legalcaseDto.Id);
+        if(result)
+        {
+            ToastService.ShowSuccess("File Uploaded");
+        }
+        else
+        {
+            ToastService.ShowError("Error Occured");
+        }
     }
     private async Task OnMarshalTabOpen()
     {
@@ -2558,10 +2580,8 @@
     {
         if (legalcaseDto.CaseTypeName == "Holdover")
         {
-            Console.WriteLine("1");
-            if (legalcaseDto.DateTenantMoved != null && noticeModel.TenancyTypeId != null)
+            if (legalcaseDto.DateTenantMoved != null && legalcaseDto.TenancyTypeId != null)
             {
-                Console.WriteLine("2");
 
                 int length = 0;
 
@@ -2589,7 +2609,7 @@
                 }
 
                 noticeModel.CalcNoticeLength = length;
-
+                noticeModel.ExpirationDate = noticeModel.DateNoticeServed.Value.AddDays(length);
                 // ✅ Set PredicateNotice text
                 noticeModel.PredicateNotice = type switch
                 {
@@ -3245,6 +3265,7 @@
             noticeModel.BillAmount = null;
 
         NoticeSelected = true;
+
         StateHasChanged(); // ensure UI refreshes
     }
 

@@ -173,7 +173,7 @@ namespace EvictionFiler.Application.Services.Master
             existing.CaseTypeId = form.CaseTypeId;
             existing.Name = form.Name;
             existing.CategoryId = form.CategoryId;
-            existing.CreatedOn = DateTime.Now;
+            existing.UpdatedOn = DateTime.Now;
 
             // Save changes
             _repository.UpdateAsync(existing);

@@ -410,9 +410,9 @@ namespace EvictionFiler.Infrastructure.Repositories
                  from ledger in al.DefaultIfEmpty()
 
                      // LEFT JOIN Tenancy Type
-                 join tenancy in _context.MstTenancyTypes
-                     on notice.TenancyTypeId equals tenancy.Id into ttl
-                 from tenancy in ttl.DefaultIfEmpty()
+                 //join tenancy in _context.MstTenancyTypes
+                 //    on notice.TenancyTypeId equals tenancy.Id into ttl
+                 //from tenancy in ttl.DefaultIfEmpty()
 
                  join arrearledger in _context.ArrearLedgers
                  on lc.Id equals arrearledger.LegalCaseId into arrearLedgers
@@ -463,18 +463,18 @@ namespace EvictionFiler.Infrastructure.Repositories
                      RentOwned = lc.TotalRentOwed,
                      RentDate = rentdue.Name,
 
-                     LastRent = notice.DateofLastPayment ?? lc.LastPaymentDate,
+                     LastRent =  lc.LastPaymentDate,
 
-                     NoticePeriod = notice.CalcNoticeLength ?? lc.CalculatedNoticeLength,
+                     NoticePeriod = notice.CalcNoticeLength ,
 
                      Noticetype = notice.FormType!.Name,
 
-                     VacateDate =
-        notice != null &&
-        notice.DateNoticeServed.HasValue &&
-        lc.CalculatedNoticeLength.HasValue
-            ? notice.DateNoticeServed.Value.AddDays(lc.CalculatedNoticeLength.Value)
-            : (DateOnly?)null,
+                     VacateDate = notice.ExpirationDate,
+        //notice != null &&
+        //notice.DateNoticeServed.HasValue &&
+        //notice.CalcNoticeLength.HasValue
+        //    ? notice.DateNoticeServed.Value.AddDays(lc.CalculatedNoticeLength.Value)
+        //    : (DateOnly?)null,
 
                      VacateDatelc = lc.CalculatedNoticeLength.HasValue
         ? DateTime.Now.AddDays(lc.CalculatedNoticeLength.Value)
@@ -493,7 +493,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                      NoticeDate = notice.DateNoticeServed,
                      LeaseExpired = lc.LeaseEnd,
 
-                     TenancyType = tenancy.Name ?? tenancylc.Name,
+                     TenancyType =  tenancylc.Name,
 
                      County = county.Name != null ? county.Name : "New York",
                      Court = court.Court,
