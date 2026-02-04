@@ -37,7 +37,7 @@ namespace EvictionFiler.Server.Components.Pages.Account
                
                 return Page();
             }
-            await Task.Delay(1000);
+           
 
             var result = await _signInManager.PasswordSignInAsync(
                 loginModel.Username,

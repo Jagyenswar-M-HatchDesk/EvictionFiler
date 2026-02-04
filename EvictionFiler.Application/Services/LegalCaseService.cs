@@ -228,7 +228,7 @@ namespace EvictionFiler.Application.Services
                     legalCases.ReliefPetitionerType = await _repository.GetReliefPetitionerTypesListTypeIdAsync(legalCase.SelectedReliefPetitionerTypeIds);
                     legalCases.ReliefRespondentType = await _repository.GetReliefRespondentTypesListTypeIdAsync(legalCase.SelectedReliefRespondentTypeIds);
                 }
-                else if (caseType.Name.Equals("Per Diem", StringComparison.OrdinalIgnoreCase))
+                else if (caseType.Name.Equals("Per Diem", StringComparison.OrdinalIgnoreCase) || caseType.Name.Equals("Tenants", StringComparison.OrdinalIgnoreCase))
                 {
                     // 🟣 HPD specific fields
                     legalCases.Id = Guid.NewGuid();
@@ -651,7 +651,7 @@ namespace EvictionFiler.Application.Services
                     };
                     return intakeModel;
                 }
-                if (caseEntity.CaseType.Name == "Per Diem")
+                if (caseEntity.CaseType.Name == "Per Diem" || caseEntity.CaseType.Name == "Tenants")
                 {
                     var billingTypes = await _caseTypeRepository.GetAllBilingTypes();
                     var flatGuid = billingTypes

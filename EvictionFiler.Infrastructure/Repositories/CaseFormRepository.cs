@@ -508,6 +508,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                      RentReulation = building.RegulationStatus!.Name,
                      ManagingAgent = building.ManagingAgent,
                      RegulationBasis = building.ExemptionBasis!.Name ?? building.ExemptionBasisOther,
+                     RegulationBasis1 = building.RegulationStatus!.Name.Contains("Other") ? building.RentRentRegulationOther : building.RegulationStatus!.Name.Contains("Exempt") ? building.ExemptionBasis!.Name.Contains("Other") ? building.ExemptionBasisOther : building.ExemptionBasis!.Name : building.RegulationStatus!.Description,
                      GoodCauseAppliable = building.GoodCause == true ? "good cause applicable" : "not good cause applicable because",
                      GoodCauseExemption = building.ExemptionReason!.Name,
                      Room_Part = $"{courtPart.RoomNo} / {courtPart.Part}",
@@ -639,7 +640,7 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{Monthly_Rent}}", caseDetails.MonthlyRent.ToString() ?? "00")
     .Replace("{{LastRentDate}}", caseDetails.LastRent?.ToString(DateFormats.Default) ?? "")
     .Replace("{{RentRegulationStatus}}", caseDetails.RentReulation ?? "")
-    .Replace("{{RegulationBasis}}", caseDetails.RegulationBasis ?? "")
+    .Replace("{{RegulationBasis}}", caseDetails.RegulationBasis1 ?? "")
     .Replace("{{ManagingAgent}}", caseDetails.ManagingAgent ?? "")
     .Replace("{{GoodCauseApplicable}}", caseDetails.GoodCauseAppliable ?? "")
     .Replace("{{GoodCauseExemption}}", caseDetails.GoodCauseExemption ?? "")

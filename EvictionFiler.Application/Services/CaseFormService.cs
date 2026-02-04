@@ -69,6 +69,26 @@ namespace EvictionFiler.Application.Services
 
             return result;
         }
+        public async Task<List<GenrateNoticeModel>> GetCaseFormsPathByCaseId(Guid caseId)
+        {
+            var query = _caseFormRepository
+                .GetAllQuerable(
+                    x => x.IsDeleted != true && x.LegalCaseId == caseId,
+                    x => x.FormType!
+                );
+
+            var result = query.Select(dto => new GenrateNoticeModel
+            {
+                Id = dto.Id,
+                FormTypeName = dto.FormType.Name ?? "",
+                FormTypeId = dto.FormTypeId,
+                File = dto.File,
+                CreatedOn = dto.CreatedOn,
+                
+            }).OrderBy(e=>e.CreatedOn).ToList();
+
+            return result;
+        }
 
 
 

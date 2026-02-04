@@ -81,6 +81,15 @@ namespace EvictionFiler.Domian.Enums
         //Acknowledgment = 9,
 
     }
+    public enum StepTenants
+    {
+        CaseAndclient = 0,
+        CaseInfo = 1,
+        Background = 2,
+        Document = 3,
+        Reporting = 4,
+
+    }
 
 
 }

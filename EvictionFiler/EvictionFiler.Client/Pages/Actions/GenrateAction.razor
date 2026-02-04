@@ -1326,13 +1326,35 @@
                             }
                         </div>
                         <div class="tab-pane fade" id="filings" role="tabpanel" aria-labelledby="filings-tab">
-                            <h4>Under Construction</h4>
-                            <button type="button" class="btn btn-primary" style="min-width:30% !important" @onclick="GenerateOSC">
-                                Generate OSC
-                            </button>
+                            @* <h4>Under Construction</h4> *@
+                            <div class="row">
+                                <div class="col-4">
+                                    <button type="button" class="btn btn-primary" style="width:85%" @onclick="GenerateOSC">
+                                        Generate OSC
+                                    </button>
+                                </div>
+
+                                <div class="col-4">
+                                    <button type="button" class="btn btn-primary" style="width:85%" @onclick="GenerateMotion">
+                                        Generate Motion
+                                    </button>
+                                </div>
+                            </div>
                             
-                            <textarea class="form-control mt-3" placeholder="Generated OSC from OpenAI" 
-                                      style="height: 450px; font-family: monospace;" id="htmlEditor">@html</textarea>
+                            <div>
+                                @if(GenerateCommand == "OSC")
+                                {
+                                    <label class="form-label mt-3">Generated OSC Content</label>
+                                }
+                                else if(GenerateCommand == "Motion")
+                                {
+                                    <label class="form-label mt-3"> Generated Motion Content</label>
+                                }
+                                <textarea class="form-control " placeholder="Generated content from OpenAI"
+                                          style="height: 450px; font-family: monospace;" id="htmlEditor">@html</textarea>
+                            </div>
+                            
+                            
                         </div>
                         <div class="tab-pane fade" id="marshal" role="tabpanel" aria-labelledby="marshal-tab">
 
@@ -2362,6 +2384,7 @@
     private string? loggedInUserId;
     private string? MarshalName;
     private string? html;
+    private string? GenerateCommand = "OSC";
     private bool isAdmin = false;
     private bool isEditMode = false;
     private bool ShowAppearance = false;
@@ -2504,16 +2527,37 @@
 
     private async Task GenerateOSC()
     {
-
+        spinnerservice.Show();
+        GenerateCommand = "OSC";
         var result = await openAi.GenerateOSC(legalcaseDto.Id);
-        if(result)
+        if(!string.IsNullOrEmpty(result))
         {
-            ToastService.ShowSuccess("File Uploaded");
+            ToastService.ShowSuccess("OSC text Generated");
+            html = result;
+            StateHasChanged();
         }
         else
         {
             ToastService.ShowError("Error Occured");
         }
+        spinnerservice.Hide();
+    }
+    private async Task GenerateMotion()
+    {
+        spinnerservice.Show();
+        GenerateCommand = "Motion";
+        var result = await openAi.GenerateMotion(legalcaseDto.Id);
+        if(!string.IsNullOrEmpty(result))
+        {
+            ToastService.ShowSuccess("Motion text Generated");
+            html = result;
+            StateHasChanged();
+        }
+        else
+        {
+            ToastService.ShowError("Error Occured");
+        }
+        spinnerservice.Hide();
     }
     private async Task OnMarshalTabOpen()
     {

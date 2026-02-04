@@ -20,8 +20,8 @@ namespace EvictionFiler.Application.Services.Master
         {
             var forms = new RegulationStatus
             {
-
                 Name = dto.Name,
+                Description = dto.Description,
                 CreatedOn = DateTime.Now,
 
             };
@@ -70,6 +70,7 @@ namespace EvictionFiler.Application.Services.Master
         {
             Id = x.Id,
             Name = x.Name,
+            Description = x.Description,
             CreatedOn = x.CreatedOn,
             CreatedBy = x.CreatedBy,
             IsActive = x.IsActive,
@@ -96,6 +97,7 @@ namespace EvictionFiler.Application.Services.Master
             {
                 Id = form.Id,
                 Name = form.Name,
+                Description= form.Description,
                 CreatedOn = form.CreatedOn,
                 CreatedBy = form.CreatedBy,
                 IsActive = form.IsActive,
@@ -113,6 +115,7 @@ namespace EvictionFiler.Application.Services.Master
 
             // Pehle existing legal case fields update karo (already hai)
             existing.Name = dto.Name;
+            existing.Description = dto.Description;
             existing.CreatedOn = DateTime.Now;
 
             // Save changes
