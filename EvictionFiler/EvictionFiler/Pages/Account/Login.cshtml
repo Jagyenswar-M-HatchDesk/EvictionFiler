@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="app.css" />
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap" rel="stylesheet">
@@ -121,6 +120,7 @@
 </style>
 
 <form method="post" id="loginForm">
+    @Html.AntiForgeryToken()
     <div class="d-flex flex-column justify-content-center align-items-center vh-100">
         <div class="card p-5 pb-4 shadow mb-0 border-0 login-container" style="background:#fbf5e8;padding-bottom: 48px !important;">
             <div class="text-start mb-3">
@@ -131,23 +131,19 @@
                 Login to your account
             </div>
 
-            @if (Model.AllErrors.Any())
+            @if (ModelState.ErrorCount > 0)
             {
-                <div class=" mb-3 custom-alert text-danger text-center" role="alert" style=" margin-top: 65px;">
-                    <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-                    <ul class="m-0 p-0 list-unstyled">
-                        @foreach (var error in Model.AllErrors)
-                        {
-                            <li>@error</li>
-                        }
-                    </ul>
+                <div class="custom-alert text-danger">
+                    Invalid username or password.
                 </div>
             }
 
             <div class="mb-3 " style="margin-top:@Model.EmailMarginTop; color:#1F365D;">
 
                 <label class="form-label body-medium" asp-for="loginModel.Username" for="emailInput">Username or e-mail <span class="text-danger">*</span></label>
-                <input id="emailInput" asp-for="loginModel.Username" class="form-control form-control-lg form-input text-gray-300 no-outline" placeholder="example@gmail.com" autocomplete="username" aria-label="Email" />
+                <input id="emailInput" asp-for="loginModel.Username" class="form-control form-control-lg form-input text-gray-300 no-outline" placeholder="example@gmail.com" autocomplete="username" aria-label="Email" inputmode="email"
+                       autocapitalize="off"
+                       spellcheck="false" />
                 <span asp-validation-for="loginModel.Username" class="text-danger"></span>
                 
             </div>
@@ -157,7 +153,9 @@
                 <input id="passwordInput" asp-for="loginModel.Password" type="password"
                        class="form-control form-control-lg form-input text-gray-300 no-outline"
                            placeholder="Password" autocomplete="current-password"
-                           aria-label="Password" />
+                           aria-label="Password"
+                       autocapitalize="off"
+                       spellcheck="false" />
                 <span asp-validation-for="loginModel.Password" class="text-danger"></span>
                 
             </div>
@@ -188,9 +186,26 @@
         </div>
     </div>
 </form>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
 
 <script>
-    document.getElementById("loginForm").addEventListener("submit", function () {
+    let submitted = false;
+    document.getElementById("loginForm").addEventListener("submit", function (e) {
+        if (submitted) {
+            e.preventDefault();
+            return false;
+        }
+
+        if (!$(this).valid()) {
+            e.preventDefault();
+            return false;
+        }
+
+        submitted = true;
+
         const btn = document.getElementById("loginBtn");
         const text = document.getElementById("btnText");
         const spinner = document.getElementById("spinner");
