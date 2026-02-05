@@ -1,57 +1,65 @@
 using EvictionFiler.Application.DTOs.UserDto;
-//using EvictionFiler.Client.Services;
 using EvictionFiler.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace EvictionFiler.Server.Components.Pages.Account
 {
+    [EnableRateLimiting("login")]
     public class LoginModel : PageModel
     {
         private readonly SignInManager<User> _signInManager;
-        //private readonly AuthService _authService;
+        private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<User> signInManager)
+        public LoginModel(
+            SignInManager<User> signInManager,
+            ILogger<LoginModel> logger)
         {
             _signInManager = signInManager;
+            _logger = logger;
         }
 
         [BindProperty]
-        public LoginViewModel loginModel { get; set; }
+        public LoginViewModel Login { get; set; } = new();
+
 
         [BindProperty]
         public List<string> AllErrors { get; set; } = new List<string>();
-
-        [BindNever]
-        public string EmailMarginTop => AllErrors.Any() ? "5px" : "60px";
 
         public void OnGet() { }
 
         public async Task<IActionResult> OnPostSubmit()
         {
+            Login.Normalize();
+
             if (!ModelState.IsValid)
             {
                
                 return Page();
             }
-           
 
             var result = await _signInManager.PasswordSignInAsync(
-                loginModel.Username,
-                loginModel.Password,
+                Login.Username,
+                Login.Password,
                 isPersistent: true,
                 lockoutOnFailure: false);
 
-            //var login = await _authService.LoginAsync(loginModel);
             if (result.Succeeded)
             {
-                return Redirect("/dashboard");
+                _logger.LogInformation(
+                    "User {Username} logged in successfully.",
+                    Login.Username);
+
+                return RedirectToPage("/dashboard");
             }
 
-            AllErrors.Add("Invalid Credentials.");
+            _logger.LogWarning(
+                "Failed login attempt for user {Username}.",
+                Login.Username);
+
+            ModelState.AddModelError(string.Empty, "Invalid username or password.");
             return Page();
         }
     }
