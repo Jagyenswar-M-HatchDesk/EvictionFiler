@@ -96,15 +96,23 @@ namespace EvictionFiler.Application.Services
         }
         public async Task<List<IntakeModel>> GetAllCase()
         {
-            var cases = await _repository.GetAllAsync();
+            var cases = await _repository.GetAllAsync(includes:[e => e.Tenants, e => e.CourtLocation] );
 
             var result = cases.Select(x => new IntakeModel
             {
                 Id = x.Id,
-
                 Casecode = x.Casecode,
+                TenantId = x.TenantId,
+                TenantName = x.Tenants?.FirstName + " " + x.Tenants?.LastName,
+                Tenant = new EditToTenantDto
+                {
+                   FirstName = x.Tenants?.FirstName,
+                   LastName = x.Tenants?.LastName,
+                },
+                Index = x.Index,
+                CountyId = x.CourtLocation?.CountyId
 
-            })
+            }).OrderBy(e=>e.Casecode)
              .ToList();
 
             return result;

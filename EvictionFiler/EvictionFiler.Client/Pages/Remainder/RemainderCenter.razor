@@ -443,6 +443,10 @@
                 page-break-after: always
             }
     }
+
+    .action-icon-danger {
+        color: #DC2626 !important;
+    }
 </style>
 
 <div class="wrap">
@@ -467,7 +471,7 @@
                         </div>
                         @if (filteredCase?.Any() == true)
                         {
-                            <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
+                            <ul class="dropdown-menu show" style="position: absolute; width:94% !important; height:500px;overflow-y:auto; cursor:pointer;">
                                 @foreach (var c in filteredCase)
                                 {
                                     <li class="dropdown-item" @onclick="() => SelectedCase(c)">
@@ -547,8 +551,8 @@
                 <div class="row">
                     <div class="col-12">
 
-                        <button class=" btn btn-primary m-2 ms-0" style="padding:4px 8px ; border-radius:10px ; font-size:14px; font-family:Poppins;" id="rcAdd" type="submit">Add Reminder</button>
-                        <button class=" m-2 ms-0" style="padding:4px 6px ; border-radius:10px; background-color:#f3f4f6 ; font-size:14px; font-family:Poppins; border: 1px solid #cac6c6">Export .ics</button>
+                        <button class=" btn btn-primary m-2 ms-0" style="background-color:#1F365D ;border-radius:10px ; font-size:14px; font-family:Poppins;" id="rcAdd" type="submit">Add Reminder</button>
+                        <button class="btn btn-secondary m-2 ms-0" style="background-color:#fff;color:black; border-radius:10px; font-size:14px; font-family:Poppins;">Export .ics</button>
 
 
                     </div>
@@ -585,7 +589,7 @@
                         foreach (var c in Remiandercenters)
                         {
                             <tr>
-                                <td>@c.When</td>
+                                <td>@c.When?.ToString(DateFormats.Default)</td>
                                 <td>@c.CaseCode</td>
                                 <td>@c.CountyName</td>
                                 <td>@c.RemainderTypeName</td>
@@ -596,11 +600,7 @@
                                     <button class=" m-2 ms-0" style="padding:4px 6px ; border-radius:10px; background-color:#f3f4f6 ; font-size:13px;border: 1px solid #cac6c6">Demo Done</button>
                                 </td>
                                 <td class="sticky">
-                                    <button class=" m-2 ms-0" @onclick=" ()=>ConfirmDelete(c.Id)" style="padding:4px 6px ; border-radius:10px; background-color:#f3f4f6 ; font-size:13px;border: 1px solid #cac6c6">Delete</button>
-
-
-
-
+                                    <span class="action-icon-danger value" @onclick="@(() => ConfirmDelete(c.Id))"><i class="fa-solid fa-trash"></i></span>
                                 </td>
 
                             </tr>
@@ -776,9 +776,22 @@
         selectedCase = selected;
         searchCaseText = selected.Casecode ?? string.Empty;
         remainderDto.CaseId = selected.Id;
-
+        remainderDto.TenantName = selected.TenantName;
+        remainderDto.CountyId = selected.CountyId;
+        selectedtenant = selected.Tenant;
+        searchTenantText = selected.TenantName;
+        remainderDto.TenantId = selected.TenantId;
+        remainderDto.Index = selected.Index;
 
         _editContext.NotifyFieldChanged(new FieldIdentifier(remainderDto, nameof(remainderDto.CaseId)));
+        if (remainderDto.TenantId != null && remainderDto.TenantId != Guid.Empty)
+        {
+            _editContext.NotifyFieldChanged(new FieldIdentifier(remainderDto, nameof(remainderDto.TenantId)));
+        }
+        if (remainderDto.CountyId != null && remainderDto.CountyId != Guid.Empty)
+        {
+            _editContext.NotifyFieldChanged(new FieldIdentifier(remainderDto, nameof(remainderDto.CountyId)));
+        }
 
         // Agar filteredCase null nahi hai to clear kar do
         filteredCase?.Clear();

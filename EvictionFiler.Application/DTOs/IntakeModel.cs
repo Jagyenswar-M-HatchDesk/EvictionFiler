@@ -1,4 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.ArrearLedgerDtos;
+using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Base.Base;
 using EvictionFiler.Domain.Entities.Master;
@@ -269,6 +270,7 @@ namespace EvictionFiler.Application.DTOs
         public string? OppAttorneyPhone { get; set; }
         public string? Aps_Agl { get; set; }
 
+        public EditToTenantDto Tenant { get; set; }
 
     }
 }
