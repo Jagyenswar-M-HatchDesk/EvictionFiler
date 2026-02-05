@@ -10,8 +10,10 @@ namespace EvictionFiler.Application.DTOs.MasterDtos.RentRegulationDto
 {
     public class CreateToRentRegulationDto : DeletableBaseEntity
     {
-        [Required(ErrorMessage = "  Rent Regulation Name is required")]
+        [Required(ErrorMessage = "Rent Regulation Name is required")]
         public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Description is required")]
         public string? Description { get; set; }
     }
 }

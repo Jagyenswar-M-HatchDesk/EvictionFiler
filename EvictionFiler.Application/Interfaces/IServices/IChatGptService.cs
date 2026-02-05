@@ -8,6 +8,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 {
     public interface IChatGptService
     {
-        Task<bool> GenerateOSC(Guid CaseId);
+        Task<string?> GenerateOSC(Guid CaseId);
+        Task<string?> GenerateMotion(Guid CaseId);
     }
 }

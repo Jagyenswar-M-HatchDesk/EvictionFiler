@@ -244,6 +244,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new CaseType() { Name = "HPD", CreatedOn = now },
                 new CaseType() { Name = "Per Diem", CreatedOn = now },
                 new CaseType() { Name = "Illegal Lockout", CreatedOn = now },
+                new CaseType() { Name = "Tenants", CreatedOn = now },
             };
         }
 
