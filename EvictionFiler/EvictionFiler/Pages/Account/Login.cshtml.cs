@@ -52,7 +52,7 @@ namespace EvictionFiler.Server.Components.Pages.Account
                     "User {Username} logged in successfully.",
                     Login.Username);
 
-                return RedirectToPage("/dashboard");
+                return Redirect("/dashboard");
             }
 
             _logger.LogWarning(
