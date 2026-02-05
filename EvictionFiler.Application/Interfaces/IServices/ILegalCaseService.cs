@@ -1,6 +1,7 @@
 ﻿using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.ArrearLedgerDtos;
 using EvictionFiler.Application.DTOs.CaseNoticeInfoDtos;
+using EvictionFiler.Application.DTOs.FilingDtos;
 using EvictionFiler.Application.DTOs.LegalCaseDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Domain.Entities;
@@ -59,5 +60,8 @@ namespace EvictionFiler.Application.Interfaces.IServices
 
         Task<bool> UpdateCourtandIndex(IntakeModel legalCase);
         Task<IEnumerable<CaseNotes>> GetAllCaseNotes();
+
+        Task<bool> AddorEditGeneratedContent(FilingDto filing);
+        Task<FilingDto?> GetFilings(Guid CaseId);
     }
 }

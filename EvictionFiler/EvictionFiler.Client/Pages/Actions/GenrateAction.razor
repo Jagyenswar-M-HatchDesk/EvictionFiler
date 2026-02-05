@@ -8,6 +8,7 @@
 @using EvictionFiler.Application.DTOs.CaseNoticeInfoDtos
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.CourtDto
+@using EvictionFiler.Application.DTOs.FilingDtos
 @using EvictionFiler.Application.DTOs.FormTypeDto
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.MarshalsDto
@@ -95,9 +96,9 @@
     }
 
     /* .form-control::placeholder {
-            font-size: 0.9rem;
+                                font-size: 0.9rem;
 
-        } */
+                            } */
 
     .input-group-text {
         background-color: #ECF2FF;
@@ -117,10 +118,10 @@
     }
 
     /* .form-wrapper.hidden {
-                                                                                                transform: translateX(-100%);
-                                                                                                opacity: 0;
-                                                                                                pointer-events: none;
-                                                                                                } */
+                                                                                                                    transform: translateX(-100%);
+                                                                                                                    opacity: 0;
+                                                                                                                    pointer-events: none;
+                                                                                                                    } */
 
     .overlay-form {
         animation: slideIn 1.0s ease forwards;
@@ -435,8 +436,8 @@
     }
 
     /* =========================================================
-                                       Motion Form – Scoped Styling
-                                       ========================================================= */
+                                                           Motion Form – Scoped Styling
+                                                           ========================================================= */
 
     .motion-form {
         --border-color: #e5e7eb;
@@ -526,20 +527,20 @@
 
     /* Toggle (Bootstrap switch enhancement) */
     /* .motion-form .form-switch .form-check-input {
-                                            width: 2.5rem;
-                                            height: 1.25rem;
-                                            cursor: pointer;
-                                        } */
+                                                                width: 2.5rem;
+                                                                height: 1.25rem;
+                                                                cursor: pointer;
+                                                            } */
 
     /* .motion-form .form-switch .form-check-input:checked {
-                                                background-color: var(--primary-dark);
-                                                border-color: var(--primary-dark);
-                                            }
-                                 */
+                                                                    background-color: var(--primary-dark);
+                                                                    border-color: var(--primary-dark);
+                                                                }
+                                                     */
     /* Attachments */
     /*  .motion-form .form-check {
-                                            margin-bottom: 0.5rem;
-                                        } */
+                                                                margin-bottom: 0.5rem;
+                                                            } */
 
     .motion-form .form-check-label {
         font-size: 14px;
@@ -592,8 +593,8 @@
     }
 
     /* =========================================================
-                                       Collapsible Motion Sections (Tab-like)
-                                       ========================================================= */
+                                                           Collapsible Motion Sections (Tab-like)
+                                                           ========================================================= */
 
     .motion-section {
         /* border: 1px solid #e5e7eb; */
@@ -778,7 +779,7 @@
                             <button class="nav-link" id="appearance-tab" data-bs-toggle="tab" data-bs-target="#appearance" type="button" @onclick="() => ShowAppearance = true" role="tab">Appearance Status</button>
                         </li>
                         <li class="col nav-item center" role="presentation" style="padding:0px;">
-                            <button class="nav-link" id="filings-tab" data-bs-toggle="tab" data-bs-target="#filings" type="button" role="tab">Filings</button>
+                            <button class="nav-link" id="filings-tab" data-bs-toggle="tab" data-bs-target="#filings" type="button" @onclick="() => GetFiling()" role="tab">Filings</button>
                         </li>
                         <li class="col nav-item center" role="presentation" style="padding:0px;">
                             <button class="nav-link " id="marshal-tab" data-bs-toggle="tab" data-bs-target="#marshal" type="button" role="tab" @onclick="OnMarshalTabOpen">Marshal</button>
@@ -845,7 +846,7 @@
                                     @if (legalcaseDto.CaseTypeName == "NonPayment" || legalcaseDto.CaseTypeName == "Holdover")
                                     {
 
-                                      @*  <div class="motion-section content-lbl">
+                                        @*  <div class="motion-section content-lbl">
                                             <button type="button"
                                                     class="section-header"
                                                     @onclick="() => Toggle(nameof(IsRentOpen))">
@@ -1327,7 +1328,7 @@
                         </div>
                         <div class="tab-pane fade" id="filings" role="tabpanel" aria-labelledby="filings-tab">
                             @* <h4>Under Construction</h4> *@
-                            <div class="row">
+                            @* <div class="row">
                                 <div class="col-4">
                                     <button type="button" class="btn btn-primary" style="width:85%" @onclick="GenerateOSC">
                                         Generate OSC
@@ -1340,21 +1341,88 @@
                                     </button>
                                 </div>
                             </div>
-                            
-                            <div>
-                                @if(GenerateCommand == "OSC")
-                                {
-                                    <label class="form-label mt-3">Generated OSC Content</label>
-                                }
-                                else if(GenerateCommand == "Motion")
-                                {
-                                    <label class="form-label mt-3"> Generated Motion Content</label>
-                                }
-                                <textarea class="form-control " placeholder="Generated content from OpenAI"
-                                          style="height: 450px; font-family: monospace;" id="htmlEditor">@html</textarea>
+ *@
+                            <div class="form-wrapper  flex-grow-1 p-3 ">
+                                <div class="row">
+
+                                    <ul class="nav nav-tabs nav-tabs-new" id="GeneratedTabs" role="tablist">
+                                        <li class="col nav-item center" role="presentation" style="padding:0px;">
+                                            <button class="nav-link active" id="osc-tab" data-bs-toggle="tab" data-bs-target="#osc" type="button" role="tab">Generated OSC</button>
+                                        </li>
+                                        <li class="col nav-item center" role="presentation" style="padding:0px;">
+                                            <button class="nav-link" id="motion-tab" data-bs-toggle="tab" data-bs-target="#motion" type="button" role="tab">Generated Motion</button>
+                                        </li>
+
+                                    </ul>
+                                    <div class="tab-content mb-3" id="actionTabsContent">
+                                        <div class="tab-pane fade show active" id="osc" role="tabpanel" aria-labelledby="osc-tab">
+                                            <div class="row mb-3 motion-form">
+                                                <label class="form-label mt-3">Generated OSC Content</label>
+                                                <InputTextArea class="form-control " placeholder="Generated OSC content from OpenAI"
+                                                               style="height: 500px;" id="htmlEditor" @bind-Value="CaseFiling.GeneratedOSC" />
+
+                                                <div class="row d-flex justify-content-end mt-4">
+                                                    <div class="col-auto">
+                                                        <button type="button" class="btn btn-primary" style="width:250px" @onclick="GenerateOSC">
+
+
+                                                            @if (IsProcessing)
+                                                            {
+
+                                                                <span>Generating ...</span>
+                                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span>Generate OSC</span>
+                                                            }
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <button type="button" class="btn btn-primary" style="width:120px" @onclick="SaveFiling" disabled="@(CaseFiling?.GeneratedOSC == null)">
+                                                            Save
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane fade" id="motion" role="tabpanel" aria-labelledby="motion-tab">
+                                            <div class="row mb-3 motion-form">
+                                                <label class="form-label mt-3"> Generated Motion Content</label>
+                                                <textarea class="form-control " placeholder="Generated Motion content from OpenAI"
+                                                          style="height: 500px;" id="htmlEditor" @bind="CaseFiling.GeneratedMotion"></textarea>
+
+                                                <div class="row d-flex justify-content-end mt-4">
+                                                    <div class="col-auto">
+
+                                                        <button type="button" class="btn btn-primary" style="width:250px" @onclick="GenerateMotion">
+
+
+                                                            @if (IsProcessing)
+                                                            {
+                                                                <span>Generating ...</span>
+                                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span>Generate Motion</span>
+                                                            }
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <button type="button" class="btn btn-primary" style="width:120px" @onclick="SaveFiling" disabled="@(CaseFiling?.GeneratedMotion == null)">
+                                                            Save
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            
-                            
+
+
+
                         </div>
                         <div class="tab-pane fade" id="marshal" role="tabpanel" aria-labelledby="marshal-tab">
 
@@ -2383,7 +2451,8 @@
 
     private string? loggedInUserId;
     private string? MarshalName;
-    private string? html;
+    private string? generatedOSC;
+    private string? generatedMotion;
     private string? GenerateCommand = "OSC";
     private bool isAdmin = false;
     private bool isEditMode = false;
@@ -2408,20 +2477,14 @@
     private ValidationMessageStore messageStore;
     private EditContext _editContext;
     private bool _showCreateAction = false;
+    private bool IsProcessing = false;
 
     [Parameter]
     public EventCallback OnClose { get; set; }
     // [Parameter] public EventCallback<CreateToClientDto> Submit { get; set; }
     public CaseHearingDto caseHearing = new CaseHearingDto();
     private CreateToRemainderCenterDto remainderDto = new CreateToRemainderCenterDto();
-    // public class UploadItem
-    // {
-    //     public IBrowserFile File { get; set; }
-    //     public int Progress { get; set; } = 0;
-    // }
-
-
-
+    public FilingDto CaseFiling = new FilingDto();
 
     protected override async Task OnInitializedAsync()
     {
@@ -2527,13 +2590,50 @@
 
     private async Task GenerateOSC()
     {
-        spinnerservice.Show();
+        // spinnerservice.Show();
+        IsProcessing = true;
         GenerateCommand = "OSC";
         var result = await openAi.GenerateOSC(legalcaseDto.Id);
-        if(!string.IsNullOrEmpty(result))
+        if (!string.IsNullOrEmpty(result))
         {
             ToastService.ShowSuccess("OSC text Generated");
-            html = result;
+            CaseFiling.GeneratedOSC = result;
+            StateHasChanged();
+        }
+        else
+        {
+            ToastService.ShowError("Error Occured");
+        }
+        IsProcessing = false;
+        // spinnerservice.Hide();
+    }
+    private async Task GenerateMotion()
+    {
+        // spinnerservice.Show();
+        IsProcessing = true;
+        GenerateCommand = "Motion";
+        var result = await openAi.GenerateMotion(legalcaseDto.Id);
+        if (!string.IsNullOrEmpty(result))
+        {
+            ToastService.ShowSuccess("Motion text Generated");
+            CaseFiling.GeneratedMotion = result;
+            StateHasChanged();
+        }
+        else
+        {
+            ToastService.ShowError("Error Occured");
+        }
+        IsProcessing = false;
+        // spinnerservice.Hide();
+    }
+    private async Task SaveFiling()
+    {
+        spinnerservice.Show();
+        CaseFiling.LegalCaseId = legalcaseDto.Id;
+        var result = await _service.AddorEditGeneratedContent(CaseFiling);
+        if (result)
+        {
+            ToastService.ShowSuccess("Filing saved successfully.");
             StateHasChanged();
         }
         else
@@ -2542,21 +2642,11 @@
         }
         spinnerservice.Hide();
     }
-    private async Task GenerateMotion()
+    private async Task GetFiling()
     {
         spinnerservice.Show();
-        GenerateCommand = "Motion";
-        var result = await openAi.GenerateMotion(legalcaseDto.Id);
-        if(!string.IsNullOrEmpty(result))
-        {
-            ToastService.ShowSuccess("Motion text Generated");
-            html = result;
-            StateHasChanged();
-        }
-        else
-        {
-            ToastService.ShowError("Error Occured");
-        }
+        CaseFiling = await _service.GetFilings(legalcaseDto.Id);
+
         spinnerservice.Hide();
     }
     private async Task OnMarshalTabOpen()

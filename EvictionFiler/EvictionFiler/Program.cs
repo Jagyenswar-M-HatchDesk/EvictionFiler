@@ -242,6 +242,7 @@ builder.Services.AddScoped<IAdjournedReasonRepository, AdjournedReasonsRepositor
 builder.Services.AddScoped<ICaseAppearanceRepository, CaseAppreanceRepository>();
 builder.Services.AddScoped<ICaseAppearanceService, CaseAppearanceService>();
 builder.Services.AddScoped<IChatGptService, ChatGptService>();
+builder.Services.AddScoped<ICaseFilingRepository, CaseFilingRepository>();
 
 var app = builder.Build();
 

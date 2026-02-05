@@ -118,7 +118,7 @@ namespace EvictionFiler.Application.Services
         }
         public async Task<string?> GenerateMotion(Guid CaseId)
         {
-            var apiKey = _configuration.GetSection("OpenAI:ChatGpt").Value;
+            var apiKey = _configuration.GetSection("OpenAI:ApiKey").Value;
             if (string.IsNullOrEmpty(apiKey))
             {
                 Console.WriteLine("OPENAI_API_KEY environment variable not set.");

@@ -3,6 +3,7 @@ using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.ArrearLedgerDtos;
 using EvictionFiler.Application.DTOs.CaseNoticeInfoDtos;
 using EvictionFiler.Application.DTOs.ClientDto;
+using EvictionFiler.Application.DTOs.FilingDtos;
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.LegalCaseDto;
 using EvictionFiler.Application.DTOs.OccupantDto;
@@ -54,7 +55,8 @@ namespace EvictionFiler.Application.Services
         private readonly ICaseRespondentRepository _respondantRepository;
         private readonly ICasePetitionerRepository _petitionerRepository;
         private readonly ICaseNoticeInfoRepository _caseNoticeInfoRepository;
-        public LegalCaseService(ICasesRepository repository, ICaseNotesRepository caseNotesRepository, ICaseNoticeInfoRepository caseNoticeInfoRepository, ICaseRespondentRepository respondantRepository, ICasePetitionerRepository petitionerRepository, ICourtTypeRepository courtTypeRepository, ICityRepository cityRepository, ISubCaseTypeRepository subCaseTypeRepository, IServiceMethodRepository serviceMethod, IFilingMethodRepository filingMethod, IArrearLedgerRepository arrearLedger, IReportingTypePerDiemRepository reportingTypePerDiemRepository, IDocumentIntructionsTypesRepository documentIntructionsTypesRepository, IAppearanceTypePerDiemRepository appearanceTypePerDiemRepository, ICaseTypePerDiemRepository caseTypePerDiemRepository, ICaseDocument caseDocument, IReliefPetitionerTypeRepository reliefPetitionerTypeRepository, IReliefRespondenTypeRepository reliefRespondenTypeRepository, IAppearanceTypeRepository appearanceTypeRepository, IDefenseTypeRepository defenseTypeRepository, IHarassmentTypeRepository harassmentTypeRepository, ICaseTypeHPDRepository caseTypeHPDRepository, ITenantRepository tenantRepo, ILandLordRepository landlordrepo, ICaseTypeRepository caseTypeRepository, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
+        private readonly ICaseFilingRepository _caseFilingRepository;
+        public LegalCaseService(ICasesRepository repository, ICaseFilingRepository caseFilingRepository, ICaseNotesRepository caseNotesRepository, ICaseNoticeInfoRepository caseNoticeInfoRepository, ICaseRespondentRepository respondantRepository, ICasePetitionerRepository petitionerRepository, ICourtTypeRepository courtTypeRepository, ICityRepository cityRepository, ISubCaseTypeRepository subCaseTypeRepository, IServiceMethodRepository serviceMethod, IFilingMethodRepository filingMethod, IArrearLedgerRepository arrearLedger, IReportingTypePerDiemRepository reportingTypePerDiemRepository, IDocumentIntructionsTypesRepository documentIntructionsTypesRepository, IAppearanceTypePerDiemRepository appearanceTypePerDiemRepository, ICaseTypePerDiemRepository caseTypePerDiemRepository, ICaseDocument caseDocument, IReliefPetitionerTypeRepository reliefPetitionerTypeRepository, IReliefRespondenTypeRepository reliefRespondenTypeRepository, IAppearanceTypeRepository appearanceTypeRepository, IDefenseTypeRepository defenseTypeRepository, IHarassmentTypeRepository harassmentTypeRepository, ICaseTypeHPDRepository caseTypeHPDRepository, ITenantRepository tenantRepo, ILandLordRepository landlordrepo, ICaseTypeRepository caseTypeRepository, IBuildingRepository buildingrepo, IAdditionalOccupantsRepository additionalOccupantsRepo, IUnitOfWork unitOfWork)
         {
             _repository = repository;
             _tenantRepo = tenantRepo;
@@ -84,7 +86,7 @@ namespace EvictionFiler.Application.Services
             _petitionerRepository = petitionerRepository;
             _caseNoticeInfoRepository = caseNoticeInfoRepository;
             _caseNotesRepository = caseNotesRepository;
-
+            _caseFilingRepository = caseFilingRepository;
         }
 
         public async Task<List<IntakeModel>> SearchCasebyCode(string code)
@@ -1528,6 +1530,41 @@ namespace EvictionFiler.Application.Services
 
         }
 
+        public async Task<bool> AddorEditGeneratedContent(FilingDto filing)
+        {
+            var existing = await _caseFilingRepository.FindAsync(predicate: e => e.LegalCaseId == filing.LegalCaseId);
+            if (existing != null)
+            {
+                if (!string.IsNullOrEmpty(filing.GeneratedMotion)) existing.GeneratedMotion = filing.GeneratedMotion;
+                if (!string.IsNullOrEmpty(filing.GeneratedOSC)) existing.GeneratedOSC = filing.GeneratedOSC;
+
+            }
+            else
+            {
+                var add = new CaseFiling
+                {
+                    GeneratedOSC = filing.GeneratedOSC,
+                    GeneratedMotion = filing.GeneratedMotion,
+                    LegalCaseId = filing.LegalCaseId
+                };
+                await _caseFilingRepository.AddAsync(add);
+            }
+
+            return await _unitOfWork.SaveChangesAsync() > 0;
+        }
+        public async Task<FilingDto?> GetFilings(Guid CaseId)
+        {
+            var existing = await _caseFilingRepository.FindAsync(predicate: e => e.LegalCaseId == CaseId);
+            if (existing == null) return new FilingDto();
+            var result = new FilingDto
+            {
+                GeneratedOSC = existing.GeneratedOSC,
+                GeneratedMotion = existing.GeneratedMotion,
+                LegalCaseId = existing.LegalCaseId
+            };
+
+            return result;
+        }
 
     }
 
