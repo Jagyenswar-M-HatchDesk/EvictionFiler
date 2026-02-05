@@ -10,6 +10,8 @@ using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
@@ -17,11 +19,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 	{
         private readonly MainDbContext _context;
         private readonly IUserRepository _userRepo;
+        private readonly IDbContextFactory<MainDbContext> contextFactory;
 
-        public CasesRepository(MainDbContext context , IUserRepository userRepo) : base(context)
+        public CasesRepository(MainDbContext context , IUserRepository userRepo,IDbContextFactory<MainDbContext>contextFactory) : base(context)
 		{
             _context = context;
             _userRepo = userRepo;
+            this.contextFactory = contextFactory;
         }
 
 
@@ -39,6 +43,34 @@ namespace EvictionFiler.Infrastructure.Repositories
             return cases;
         }
 
+        public async Task<Guid?> UpdateCaseLandlord(LegalCase casedetails)
+        {
+            var existing = _context.LegalCases.Find(casedetails.Id);
+            if (existing == null) return null;
+
+            existing = casedetails;
+
+            _context.LegalCases.Update(existing);
+
+            var result =await _context.SaveChangesAsync();
+            if (result > 0) return casedetails.Id;
+
+            return null;
+        }
+        public async Task<Guid?> UpdateCaseBuilding(LegalCase casedetails)
+        {
+            var existing = _context.LegalCases.Find(casedetails.Id);
+            if (existing == null) return null;
+
+            existing = casedetails;
+
+            _context.LegalCases.Update(existing);
+
+            var result = await _context.SaveChangesAsync();
+            if (result > 0) return casedetails.Id;
+
+            return null;
+        }
         public async Task<int> GetTotalCasesCountAsync(string userId , bool isAdmin)
         {
             if (isAdmin)
@@ -646,7 +678,21 @@ namespace EvictionFiler.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<LegalCase>> GetAlllAsync(Expression<Func<LegalCase, bool>>? predicate = null, params Expression<Func<LegalCase, object>>[]? includes)
+        {
+            await using var db =await  contextFactory.CreateDbContextAsync();
 
+            IQueryable<LegalCase> query = db.Set<LegalCase>();
+            //var query = _dbSet.AsQueryable();
+            if (predicate != null)
+            {
+                query = query.Where(predicate).AsQueryable();
+            }
+            if (includes != null)
+                query = includes.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
+
+            return await query.AsNoTracking().ToListAsync();
+        }
 
     }
 }

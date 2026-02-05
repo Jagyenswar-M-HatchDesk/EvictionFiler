@@ -127,7 +127,9 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<Registrationstatus>> GetAllRegistrationstatus()
         {
-            return await _context.MstRegistrationstatuses.ToListAsync();
+
+            await using var db = await contextFactory.CreateDbContextAsync();
+            return await db.MstRegistrationstatuses.ToListAsync();
         }
 
         public async Task<List<HarassmentTypeDto>> GetAllHarassmentTypes()

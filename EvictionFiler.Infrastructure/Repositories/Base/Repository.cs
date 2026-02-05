@@ -129,8 +129,12 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 			return await query.ToListAsync().ConfigureAwait(false);
 		}
 
+
 		public IQueryable<T> GetAllQuerable(Expression<Func<T, bool>>? predicate = null, params Expression<Func<T, object>>[]? includes)
 		{
+			//using var db = contextFactory.CreateDbContext();
+
+			//IQueryable<T> query = db.Set<T>();
 			var query = _dbSet.AsQueryable();
 			if (predicate != null)
 			{

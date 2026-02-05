@@ -4,6 +4,7 @@ using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Interfaces.IRepository
@@ -30,7 +31,9 @@ namespace EvictionFiler.Application.Interfaces.IRepository
         Task<List<ReportingTypePerDiem>> GetReportingTypePerDiemsIdAsync(List<Guid> ids);
         Task<List<IntakeModel>> SearchCasebyCode(string code);
 
-
+        Task<Guid?> UpdateCaseLandlord(LegalCase casedetails);
+        Task<Guid?> UpdateCaseBuilding(LegalCase casedetails);
+        Task<List<LegalCase>> GetAlllAsync(Expression<Func<LegalCase, bool>>? predicate = null, params Expression<Func<LegalCase, object>>[]? includes);
     }
 
 }

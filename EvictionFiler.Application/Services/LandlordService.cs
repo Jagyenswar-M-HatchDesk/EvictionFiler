@@ -269,11 +269,10 @@ namespace EvictionFiler.Application.Services
 
             }
 
-            _landLordRepository.UpdateAsync(entity);
-            await _unitOfWork.SaveChangesAsync();
-            return true;
+            var result = await _unitOfWork.SaveChangesAsync();
+            if(result > 0) return true;
 
-
+            return false;
         }
 
         public async Task<string> GetLastLandLordCode()
