@@ -30,7 +30,9 @@
 @using EvictionFiler.Client.AuthService
 @using EvictionFiler.Client.Pages.Actions
 @using EvictionFiler.Client.Pages.Building
+@using EvictionFiler.Client.Pages.Clients
 @using EvictionFiler.Client.Pages.Landlord
+@using EvictionFiler.Client.Pages.Marshal
 @using EvictionFiler.Client.Pages.Motion
 @using EvictionFiler.Client.Pages.Tenant
 @using EvictionFiler.Client.SpinnerService
@@ -1279,7 +1281,7 @@
 
 
                 <div class="card shadow-sm p-3 border-0">
-                        <Motion CurrentCaseId="CurrentCaseId" legalcaseDto="legalcaseDto" OnFormCreate="HandleInvokeAction1" />
+                        <Motion CurrentCaseId="CurrentCaseId" legalcaseDto="legalcaseDto"  />
                  
                     </div>
 
@@ -1841,56 +1843,7 @@
                             </div>
                         </div>
                     </div>*@
-                    <!-- Contact Info -->
-                    <div class="card shadow-sm p-3 border-0">
-                        <table class="info-table " style="border:none;">
-                            <thead>
-                                <tr>
-                                    <th colspan="2" class="info-bar" style="background-color:#DDB156;">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="info-bar-title">People & Contact</div>
-                                            <button type="button" class="btn btn-sm normal p-1" @onclick="ShowClientModal" style="color:white">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-                                        </div>
-                                    </th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <tr class="info-row">
-                                    <td class="info-cell label">Email:</td>
-                                    <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(legalcaseDto.ClientEmail) ? "--" : legalcaseDto.ClientEmail)</td>
-                                </tr>
-
-                                <tr class="info-row">
-                                    <td class="info-cell label">Phone No.:</td>
-                                    <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(legalcaseDto.ClientPhone) ? "--" : legalcaseDto.ClientPhone)</td>
-                                </tr>
-
-                                <tr class="info-row">
-                                    <td class="info-cell label">Address:</td>
-                                    <td class="info-cell value ellipsis">
-                                        @{
-                                            var partclient = new List<string>();
-
-                                            if (!string.IsNullOrWhiteSpace(legalcaseDto.Address1)) partclient.Add(legalcaseDto.Address1);
-                                            if (!string.IsNullOrWhiteSpace(legalcaseDto.Address2)) partclient.Add(legalcaseDto.Address2);
-                                            if (!string.IsNullOrWhiteSpace(legalcaseDto.City)) partclient.Add(legalcaseDto.City);
-                                            if (!string.IsNullOrWhiteSpace(legalcaseDto.StateName)) partclient.Add(legalcaseDto.StateName);
-                                            if (!string.IsNullOrWhiteSpace(legalcaseDto.ZipCode)) partclient.Add(legalcaseDto.ZipCode);
-
-                                            var fulllClientAddress = partclient.Count() > 0 ? string.Join(", ", partclient) : "--";
-                                        }
-                                        @fulllClientAddress
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-
-
-                    </div>
+                   <ClientsDetail CurrentCaseId="CurrentCaseId"/>
 
                     <!-- Marshal Info -->
                     <div class="card shadow-sm p-3 border-0">
@@ -2273,281 +2226,7 @@
         };
     </script>
 
-    <!-- Tenant Edit Modal -->
-    <div class="modal fade" id="tenantModal" tabindex="-1" aria-labelledby="tenantModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 800px !important;">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="tenantModalLabel">Edit Tenant Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body row ">
-                    <div class="col-12">
-                        <div class="p-3">
-
-                            <div class="card-body">
-                                <!-- Unit / Apt -->
-                                <EditForm EditContext="_editContext">
-                                <div class="row position-relative">
-
-                                    <div class="col-md-6" @onfocusout="HideTenantDropDown">
-                                        <label class="form-label  required-label">Unit / Apt # (confirm)</label>
-                                        <button type="button" class=" buttons position-absolute top-0 end-0 m-2 mt-0" style="background: transparent; border: none;"
-                                                aria-label="Clear"
-                                                @onclick="OnBindTenantCancel">
-                                            <i class="fa-solid fa-xmark"></i> Clear
-                                        </button>
-
-
-                                        <input type="text" class="form-control"
-                                               placeholder="Enter Unit / Apt"
-                                               @bind-value="searchTenantText"
-                                               @oninput="OnSearchTenantInput" @onblur="SelectTenant" @onclick="ShowAllTenantForHoldover" />
-                                        @if (filteredTenant?.Count() > 0)
-                                        {
-                                            <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
-                                                @foreach (var c in filteredTenant)
-                                                {
-                                                    <li class="dropdown-item" @onclick="() => SelectedTenant(c)">
-                                                        @c.UnitOrApartmentNumber / @c.FirstName @c.LastName
-                                                    </li>
-                                                }
-                                            </ul>
-                                        }
-                                    </div>
-                                </div>
-                                <div class="row mt-3">
-                                    <div class="form-check form-switch" style="padding-left:10px">
-
-                                        <label class="form-check-label form-label mb-0 me-2" for="primaryResidenceSwitch">
-                                            <span class="required-label">Primary Residence?</span> :
-
-                                        </label>
-                                        <input class="form-check-input" style="float:none;"
-                                               type="checkbox"
-                                               id="ownerOccupiedSwitch"
-                                               @bind="legalcaseDto.PrimaryResidence" />
-                                    </div>
-
-
-                                </div>
-
-                                <div class="row mt-3">
-                                    <div class="col-6 g-1 row">
-                                        <label class="lbl edit-tent">Tenants</label>
-                                        @if (Tenants.Count > 0)
-                                        {
-
-                                            @foreach (var tenant in Tenants.Select((t, i) => new { t, i }))
-                                            {
-                                                <div class="col-10">
-                                                    <input class="form-control"
-                                                           placeholder="Tenant Full Name"
-                                                           @bind-value="Tenants[tenant.i]"
-                                                           @onblur="() => OnchangeAdditionalTenant(tenant.i)" />
-                                                </div>
-                                                if (tenant.i > 0)
-                                                {
-                                                    <div class="col-2">
-                                                        <button type="button"
-                                                                class="btn btn-delete" style="border :none;"
-                                                                @onclick="@(() => DeleteAdditionalTenant(tenant.i))">
-                                                            <i class="fa-solid fa-xmark"></i>
-                                                        </button>
-                                                    </div>
-                                                }
-
-                                            }
-
-                                        }
-                                        <div class="col-10">
-                                            <button class="btn btn-sm btn-primary btn-tenant mt-2 edit-tent" @onclick="AddTenant">＋ Add Tenant</button>
-                                        </div>
-
-                                    </div>
-
-                                    <div class="col-6 row g-1">
-                                        <label class="lbl edit-tent">Undertenants / Other Occupants</label>
-                                        @if (UnderTenants.Count > 0)
-                                        {
-
-                                            @foreach (var undertenant in UnderTenants.Select((t, i) => new { t, i }))
-                                            {
-                                                <div class="col-10">
-                                                    <input class="form-control"
-                                                           placeholder="Other Occupant Name"
-                                                           @bind-value="UnderTenants[undertenant.i]"
-                                                           @onblur="() => OnchangeAdditionalOccupants(undertenant.i)" />
-                                                </div>
-                                                <div class="col-2">
-                                                    <button type="button"
-                                                            class="btn btn-delete" style="border :none;"
-                                                            @onclick="@(() => DeleteAdditionalOccupant(undertenant.i))">
-                                                        <i class="fa-solid fa-xmark"></i>
-                                                    </button>
-                                                </div>
-
-                                            }
-                                        }
-                                        <div class="col-10">
-                                            <button class=" btn btn-sm btn-primary btn-tenant mt-2 edit-tent" @onclick="AddUnder">＋ Add Undertenant/Occupant</button>
-
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                                <div class="row mt-3 g-3">
-                                    <div class="col-md-4">
-                                        <label class="form-label required-label">Rent Due Frequency</label>
-                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.RentDueEachMonthOrWeekId">
-                                            <option value="">-- Select --</option>
-                                            @foreach (var l in DateRentList)
-                                            {
-                                                <option value="@l.Id">@l.Name</option>
-                                            }
-                                        </InputSelect>
-                                        <ValidationMessage For="() => legalcaseDto.RentDueEachMonthOrWeekId" />
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label class="form-label required-label">Monthly Rent ($)</label>
-                                        <InputNumber class="form-control" @bind-Value="legalcaseDto.MonthlyRent" />
-                                            <ValidationMessage For="() => legalcaseDto.MonthlyRent" />
-
-                                        </div>
-
-                                    <div class="col-md-4">
-                                        <label class="form-label">Tenant's Share ($)</label>
-                                        <InputNumber class="form-control" @bind-Value="legalcaseDto.TenantShare" />
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label class="form-label required-label">Tenancy Type</label>
-                                        <InputSelect class="form-select" @bind-Value="legalcaseDto.TenancyTypeId" @bind-Value:after="CalcNoticeDays">
-                                            <option value="">-- Select --</option>
-                                            @foreach (var t in TenancyTypeList)
-                                            {
-                                                <option value="@t.Id">@t.Name</option>
-                                            }
-                                        </InputSelect>
-                                            <ValidationMessage For="() => legalcaseDto.TenancyTypeId" />
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label class="form-label">Last Payment Date</label>
-
-                                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="legalcaseDto.LastPaymentDate" @bind-Value:after="GenerateMonths" />
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label class="form-label">Last Payment Amount ($)</label>
-                                        <InputNumber class="form-control" @bind-Value="legalcaseDto.LastPayment" />
-                                    </div>
-                                    @if (legalcaseDto.CaseTypeName == "NonPayment")
-                                    {
-                                        <div class="col-md-4">
-                                            <label class="form-label ">Lease Start </label>
-                                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="legalcaseDto.LeaseStart" />
-
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label ">Lease End </label>
-                                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="legalcaseDto.LeaseEnd" />
-
-                                        </div>
-                                        @*  <div class="col-md-4">
-                                                <label class="form-label" style="align-items: center;display: flex;height: 36px;">Written Lease?</label>
-                                                <div class="d-flex justify-content-start align-items-center  gap-2">
-                                                    <InputRadioGroup @bind-Value="legalcaseDto.WrittenLease">
-                                                        <div class="form-check d-flex justify-content-center gap-2">
-                                                            <InputRadio class="form-check-input" Value="true" style="font-size:15px" />
-                                                            <label class="form-check-label">Yes</label>
-                                                        </div>
-                                                        <div class="form-check  d-flex justify-content-center gap-2">
-                                                            <InputRadio class="form-check-input " Value="false" style="font-size:15px" />
-                                                            <label class="form-check-label">No</label>
-                                                        </div>
-                                                    </InputRadioGroup>
-                                                </div>
-                                            </div> *@
-                                    }
-
-                                </div>
-
-                                <div class="row g-2 mt-2">
-                                    <div class="col">
-                                        <label class="form-label edit-tent">Rent Breakup</label>
-                                        <div class="total-box mt-1">
-                                            <label class="form-label " style="font-size:14px; font-weight:300; margin-bottom:0px;">Total Owed: $ @(legalcaseDto.TotalOwed ?? 00)</label>
-                                        </div>
-
-                                        @foreach (var item in Rows)
-                                        {
-                                            <div class="row mb-3">
-                                                <div class="col-4">
-                                                    <label class="form-label ">Month (YYYY-MM) </label>
-                                                    <InputSelect class="form-select holdover-form"
-                                                                 @bind-Value="item.Month"
-                                                                 @bind-Value:after="(() => OnMonthChanged(item))">
-
-                                                        <option value="">Select month</option>
-
-                                                        @foreach (var m in MonthOptions)
-                                                        {
-                                                            <option value="@m.Value">@m.Display</option>
-                                                        }
-
-                                                    </InputSelect>
-                                                </div>
-                                                <div class="col-3">
-                                                    <label class="form-label  ">Amount ($) </label>
-                                                    <InputNumber @bind-Value="item.Amount" @bind-Value:after="RecalculateTotal"
-                                                                 class="form-control" />
-                                                </div>
-
-                                                <div class="col-3">
-                                                    <label class="form-label  ">Notes </label>
-                                                    <InputText @bind-Value="item.Notes"
-                                                               class="form-control" placeholder="Partial, vouchers, etc." />
-                                                </div>
-
-                                                <div class="col-2" style="justify-content:end; display:flex;">
-                                                    <button type="button" class="remove-btn " @onclick="(() => RemoveRow(item))">
-                                                        <i class="fa-solid fa-xmark"></i>
-                                                    </button>
-                                                </div>
-
-
-                                            </div>
-                                        }
-
-                                        <button type="button" class="add-btn edit-tent" @onclick="AddRow">
-                                            + Add Month
-                                        </button>
-                                    </div>
-                                </div>
-
-
-                                </EditForm>
-
-                            </div>
-                        </div>
-
-
-
-                    </div>
-                </div>
-                <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
-                    <button type="button" class="btn btn-secondary buttons" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary base buttons" @onclick="SaveTenantChanges">Save</button>
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-
+   
    
 
 
@@ -2616,126 +2295,7 @@
         </div>
     </div>
 
-    <!-- client Edit Modal -->
    
-    <div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-semibold" id="buildingModalLabel">Edit Client Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <EditForm Model="@client">
-                    <DataAnnotationsValidator />
-                    <div class="modal-body py-0">
-                        <div class="card border-0">
-                            <div class="card-body">
-                                <div class="row">
-                                    <!-- Case Type Dropdown -->
-                                    @if (!newClient)
-                                    {
-
-
-                                        <div class="col-5 position-relative">
-
-
-                                            <label class="form-label required-label">Client</label>
-
-                                            <InputText type="text" class="form-control"
-                                                       placeholder="Search by client name or code..."
-                                                       @bind-value="searchText"
-                                                       @oninput="OnSearchInput" />
-
-                                            @if (filteredClients?.Count() > 0)
-                                            {
-                                                <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
-                                                    @foreach (var c in filteredClients)
-                                                    {
-                                                        <li class="dropdown-item" @onclick="() => SelectClient(c)">
-                                                            @c.FirstName @c.LastName / @c.ClientCode
-                                                        </li>
-                                                    }
-                                                </ul>
-                                            }
-                                        </div>
-                                        @if (!showClientTextbox)
-                                        {
-                                            <div class="col-3 row">
-                                                <div class="col-md-3 d-flex justify-content-center align-items-end" style="padding-bottom:10px;">
-                                                    <div>
-                                                        OR
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-9 d-flex align-items-end">
-                                                    <button type="button" class="btn" style="background-color:#1F365D !important;height:40px; color:white" @onclick="AddClient">+ ADD</button>
-                                                </div>
-                                            </div>
-                                        }
-                                    }
-                                    @if (showClientTextbox)
-                                    {
-
-
-
-                                        <div class="card p-3 mt-3 position-relative">
-                                            <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
-                                                    aria-label="Clear"
-                                                    @onclick="ClearSelectedClient">
-                                            </button>
-                                            <div class="row">
-                                                <div class="col-4">
-                                                    <label class="form-label">First Name</label>
-                                                    <InputText class="form-control" placeholder="Enter Name" @bind-Value="client.FirstName" />
-                                                </div>
-                                                <div class="col-4">
-                                                    <label class="form-label">Last Name</label>
-                                                    <InputText class="form-control" placeholder="Enter Name" @bind-Value="client.LastName" />
-                                                </div>
-                                                <div class="col-4">
-                                                    <label class="form-label">Client Type</label>
-                                                    <InputSelect class="form-select" @bind-Value="client.ClientTypeId" style="cursor:pointer;">
-                                                        <option value="">-- Select --</option>
-                                                        @foreach (var Own in ClientTypeList)
-                                                        {
-                                                            <option value="@Own.Id">@Own.Name</option>
-                                                        }
-                                                    </InputSelect>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-4 mt-3">
-                                                    <label class="form-label">Email</label>
-                                                    <InputText class="form-control" placeholder="Enter Email" @bind-Value="client.Email" />
-                                                </div>
-
-                                                <div class="col-4 mt-3">
-                                                    <label class="form-label">Phone</label>
-                                                    <InputText class="form-control" placeholder="Enter Number" @bind-Value="client.Phone" />
-                                                </div>
-                                                <div class="col-4 mt-3">
-                                                    <label class="form-label">Reference #</label>
-                                                    <InputText class="form-control" placeholder="Enter Reference" @bind-Value="client.Reference" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    }
-
-                                </div>
-
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
-                        <button type="button" class="btn btn-secondary buttons" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary base buttons" @onclick="SaveClientChanges">Save</button>
-                    </div>
-                </EditForm>
-            </div>
-        </div>
-    </div>
 
     <div class="modal fade" id="marshalModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -3196,7 +2756,7 @@
     private List<CaseHearingDto> CaseHearings = new();
     private List<CaseAppearanceDto> Judgements = new();
     private CaseNoticeInfoDto CaseNoticeInfos = new();
-    private CaseAppearanceDto MotionJudgements = new();
+  
     private IEnumerable<CaseDocument> caseDocuments = new List<CaseDocument>();
     private CaseHearingDto CaseHearing = new();
     private CaseWarrantDto CaseWarranrDto { get; set; } = new();
@@ -3324,7 +2884,7 @@
         await LoadCaseDetails();
         await LoadCaseForms();
         await LoadHearing();
-        await LoadJudgement();
+     
         await LoadCaseDocument();
         await LoadOthers();
 
@@ -3783,10 +3343,7 @@
         await LoadHearing();
         await LoadOthers();
     }
-    private async Task HandleInvokeAction1()
-    {
-        await LoadJudgement();
-    }
+  
     private async Task LoadCaseDetails()
     {
         legalcaseDto = await _service.GetCaseByIdAsync(caseId);
@@ -4113,30 +3670,7 @@
         await JS.InvokeVoidAsync("openTab", "activity");
         StateHasChanged();
     }
-    private async Task LoadJudgement()
-    {
-        Judgements = await _caseAppreance.GetAllCaseAppreance(CurrentCaseId.Value);
-        if (Judgements != null)
-        {
-            if (CaseHearings != null)
-            {
-                int count = Math.Min(Judgements.Count, CaseHearings.Count);
-
-                for (int i = 0; i < count; i++)
-                {
-                    // Assign hearing date to judgement appearance date
-                    Judgements[i].AppreanceDate = CaseHearings[i].HearingDate;
-                }
-            }
-
-            MotionJudgements = Judgements!.Where(e => e.CourtTodayName!.Contains("Motion")).FirstOrDefault()! ?? new CaseAppearanceDto();
-        }
-
-
-
-
-        StateHasChanged();
-    }
+   
     private async Task LoadHearing()
     {
         CaseHearings = await _caseHearingService.GetAllCaseHeariingByCaseIdAsync(CurrentCaseId.Value);
@@ -4225,11 +3759,9 @@
     public EditToClientDto client = new EditToClientDto();
     public List<EditToClientDto> ClientList = new List<EditToClientDto>();
     public IEnumerable<CaseNotes> CaseNotes = new List<CaseNotes>();
-    public List<EditToClientDto> filteredClients = new List<EditToClientDto>();
-    public List<ClientRole> ClientTypeList = new List<ClientRole>();
-    public string searchText { get; set; }
-    public bool showClientTextbox = false;
-    public bool newClient = false;
+   
+    
+  
     bool showCountyDropdown = false;
     bool ShowClearBtn = false;
     bool showCourtPartDropdown = false;
@@ -4240,18 +3772,7 @@
     private ValidationMessageStore messageStore;
     private EditContext _editContext;
 
-    private async void ShowClientModal()
-    {
-        // Copy current data into editable model
 
-        client = await _clientService.GetClientByIdAsync(legalcaseDto.ClientId!.Value) ?? new EditToClientDto();
-
-        ClientTypeList = await _clientRoleRepository.GetAllClientRole();
-        showClientTextbox = true;
-        searchText = $"{client.FirstName} {client.LastName}";
-        StateHasChanged();
-        JS.InvokeVoidAsync("showModal", "clientModal");
-    }
     // private async void ShowStipulationModal()
     // {
 
@@ -4279,56 +3800,7 @@
 
         JS.InvokeVoidAsync("showModal", "marshalModal");
     }
-    private void OnSearchInput(ChangeEventArgs e)
-    {
-        searchText = e.Value.ToString();
-        filteredClients = ClientList
-            .Where(c => c.FirstName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                        || c.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                        || c.ClientCode.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-    }
-    private void SelectClient(EditToClientDto selectedclient)
-    {
-        showClientTextbox = true;
-        searchText = $"{client.FirstName} {client.LastName}";
-        filteredClients.Clear();
-        newClient = false;
-        // Fill card
-        legalcaseDto.ClientId = selectedclient.Id;
-        client.Id = selectedclient.Id;
-        client.FirstName = $"{selectedclient.FirstName}";
-        client.LastName = $"{selectedclient.LastName}";
-        client.Email = selectedclient.Email;
-        client.Phone = selectedclient.Phone;
-        client.Address1 = selectedclient.Address1;
-        client.Address2 = selectedclient.Address2;
-        client.City = selectedclient.City;
-        client.StateId = selectedclient.StateId;
-        client.ZipCode = selectedclient.ZipCode;
-        client.ClientTypeId = selectedclient.ClientTypeId;
-        client.Reference = selectedclient.Reference;
-    }
-    private void ClearSelectedClient()
-    {
-        searchText = string.Empty;
-
-        newClient = false;
-        showClientTextbox = false;
-        searchText = null;
-        client = new EditToClientDto();
-
-        StateHasChanged();
-    }
-    private async void AddClient()
-    {
-        showClientTextbox = true;
-        searchText = null;
-        newClient = true;
-        client = new EditToClientDto();
-        StateHasChanged();
-
-    }
+   
 
     private async Task ShowLandlordModal()
     {
@@ -4669,92 +4141,7 @@
     // Save
    
     
-    private async Task SaveClientChanges()
-    {
-        spinnerservice.Show();
-
-        var addorupdate = false;
-        if (client.Id == null || client.Id == Guid.Empty)
-        {
-            var newClient = new CreateToClientDto()
-            {
-                Address1 = client.Address1,
-                //Address2 = address2,
-                City = client.City,
-                StateId = client.StateId,
-                ZipCode = client.ZipCode,
-                FirstName = client.FirstName,
-                LastName = client.LastName,
-                Reference = client.Reference,
-                ClientTypeId = client.ClientTypeId,
-                Phone = client.Phone,
-                Email = client.Email,
-            };
-
-            var clientId = await _clientService.CreateOnlyClient(newClient);
-            addorupdate = true;
-            legalcaseDto.ClientId = clientId;
-
-        }
-        else
-        {
-            if (client.Id != null)
-            {
-
-                var updateBuilding = new EditToClientDto()
-                {
-                    Id = client.Id,
-                    Address1 = client.Address1,
-                    ClientCode = client.ClientCode,
-                    //Address2 = address2,
-                    ClientTypeId = client.ClientTypeId,
-                    City = client.City,
-                    StateId = client.StateId,
-                    ZipCode = client.ZipCode,
-                    Phone = client.Phone,
-                    Email = client.Email,
-                    Reference = client.Reference,
-                    FirstName = client.FirstName,
-                    LastName = client.LastName,
-
-                };
-
-                await _clientService.UpdateClientformCase(updateBuilding);
-                addorupdate = true;
-            }
-        }
-
-        if (addorupdate)
-        {
-            legalcaseDto.ClientEmail = client.Email;
-            legalcaseDto.Reference = client.Reference;
-            legalcaseDto.ClientTypeId = client.ClientTypeId;
-            legalcaseDto.ClientPhone = client.Phone;
-            legalcaseDto.ClientName = $"{client.FirstName} {client.LastName}";
-            legalcaseDto.City = client.City;
-            legalcaseDto.Address1 = client.Address1;
-            legalcaseDto.ZipCode = client.ZipCode;
-            legalcaseDto.StateId = client.StateId;
-
-            var success = await _service.UpdateCaseAsync(legalcaseDto);
-
-            if (success.HasValue)
-            {
-                ToastService.ShowSuccess("Client details updated successfully!");
-                await JS.InvokeVoidAsync("hideModal", "clientModal");
-
-                await LoadCaseDetails();
-            }
-            else
-            {
-                ToastService.ShowError("Failed to update client details.");
-            }
-        }
-        // Map edited fields
-
-
-        spinnerservice.Hide();
-    }
+  
     private List<CaseType> CaseTypeList = new();
     private void CalcNoticeDays()
     {

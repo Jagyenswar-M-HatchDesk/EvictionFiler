@@ -71,6 +71,20 @@ namespace EvictionFiler.Infrastructure.Repositories
 
             return null;
         }
+        public async Task<Guid?> UpdateClient(LegalCase casedetails)
+        {
+            var existing = _context.LegalCases.Find(casedetails.Id);
+            if (existing == null) return null;
+
+            existing = casedetails;
+
+            _context.LegalCases.Update(existing);
+
+            var result = await _context.SaveChangesAsync();
+            if (result > 0) return casedetails.Id;
+
+            return null;
+        }
         public async Task<int> GetTotalCasesCountAsync(string userId , bool isAdmin)
         {
             if (isAdmin)

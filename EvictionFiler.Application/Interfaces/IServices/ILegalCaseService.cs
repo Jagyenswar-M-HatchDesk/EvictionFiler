@@ -32,6 +32,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<Guid?> UpdateCaseAsync(IntakeModel legalCase);
         Task<Guid?> UpdateCaseForLandlordAsync(IntakeModel legalCase);
         Task<Guid?> UpdateCaseForBuildingAsync(IntakeModel legalCase);
+        Task<Guid?> UpdateCaseForClientAsync(IntakeModel legalCase);
         Task<bool> UpdateMarshalAsync(IntakeModel legalCase);
         Task<bool> UpdateWarrantRequested(IntakeModel legalCase);
         Task<bool> AddDocumentAsync(List<CaseDocument> document);
@@ -64,5 +65,6 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<IntakeModel> GetLandlordByCaseIdAsync(Guid caseId);
         Task<IntakeModel> GetBuildingByCaseIdAsync(Guid caseId);
         Task<IntakeModel> GetTenantByCaseIdAsync(Guid caseId);
+        Task<IntakeModel> GetClientByCaseIdAsync(Guid caseId);
     }
 }

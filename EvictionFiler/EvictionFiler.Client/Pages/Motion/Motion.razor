@@ -31,8 +31,8 @@
             <td class="info-block">
                 <div class="label">Motion Due:</div>
                 <div class="value ellipsis">
-                    @(Model.MotionDue.HasValue
-                                        ? Model.MotionDue.Value.ToString(DateFormats.Default)
+                    @(MotionJudgements.MotionDue.HasValue
+                                        ? MotionJudgements.MotionDue.Value.ToString(DateFormats.Default)
                                         : "--")
                 </div>
             </td>
@@ -41,8 +41,8 @@
             <td class="info-block">
                 <div class="label">Opposition Due:</div>
                 <div class="value ellipsis">
-                    @(Model.OppositionDue.HasValue
-                                        ? Model.OppositionDue.Value.ToString(DateFormats.Default)
+                    @(MotionJudgements.OppositionDue.HasValue
+                                        ? MotionJudgements.OppositionDue.Value.ToString(DateFormats.Default)
                                         : "--")
                 </div>
             </td>
@@ -54,8 +54,8 @@
             <td class="info-block">
                 <div class="label">Reply Due:</div>
                 <div class="value ellipsis">
-                    @(Model.ReplyDue.HasValue
-                                        ? Model.ReplyDue.Value.ToString(DateFormats.Default)
+                    @(MotionJudgements.ReplyDue.HasValue
+                                 ? MotionJudgements.ReplyDue.Value.ToString(DateFormats.Default)
                                         : "--")
                 </div>
             </td>
@@ -64,8 +64,8 @@
             <td class="info-block">
                 <div class="label">OSC / Return:</div>
                 <div class="value ellipsis">
-                    @(Model.ReturnDate.HasValue
-                                        ? Model.ReturnDate.Value.ToString(DateFormats.Default)
+                    @(MotionJudgements.ReturnDate.HasValue
+                                        ? MotionJudgements.ReturnDate.Value.ToString(DateFormats.Default)
                                         : "--")
                 </div>
             </td>
@@ -122,7 +122,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <EditForm Model="@Model">
+            <EditForm Model="@MotionJudgements">
                 <DataAnnotationsValidator />
                 <div class="modal-body py-0">
                     <div class="card border-0">
@@ -142,25 +142,25 @@
                                     <div class="row">
                                         <div class="col-6">
                                             <label class="form-label required-label">Motion Due</label>
-                                            <RadzenDatePicker DateFormat="@DateFormats.Default" class="edit-stip" @bind-Value="Model.MotionDue" />
+                                            <RadzenDatePicker DateFormat="@DateFormats.Default" class="edit-stip" @bind-Value="MotionJudgements.MotionDue" />
 
 
                                         </div>
                                         <div class="col-6">
                                             <label class="form-label required-label">Opposition Due</label>
-                                            <RadzenDatePicker DateFormat="@DateFormats.Default" class="edit-stip" @bind-Value="Model.OppositionDue" />
+                                            <RadzenDatePicker DateFormat="@DateFormats.Default" class="edit-stip" @bind-Value="MotionJudgements.OppositionDue" />
                                         </div>
 
                                     </div>
                                     <div class="row">
                                         <div class="col-6 mt-3">
                                             <label class="form-label required-label">Reply Due</label>
-                                            <RadzenDatePicker DateFormat="@DateFormats.Default" class="edit-stip" @bind-Value="Model.ReplyDue" />
+                                            <RadzenDatePicker DateFormat="@DateFormats.Default" class="edit-stip" @bind-Value="MotionJudgements.ReplyDue" />
                                         </div>
 
                                         <div class="col-6 mt-3">
                                             <label class="form-label required-label">Return Date</label>
-                                            <RadzenDatePicker DateFormat="@DateFormats.Default" class="edit-stip" @bind-Value="Model.ReturnDate" />
+                                            <RadzenDatePicker DateFormat="@DateFormats.Default" class="edit-stip" @bind-Value="MotionJudgements.ReturnDate" />
                                         </div>
 
                                     </div>
@@ -189,15 +189,47 @@
     [Parameter] public IntakeModel legalcaseDto { get; set; } = new();
     private List<CaseAppearanceDto> Judgements = new();
     private List<CaseHearingDto> CaseHearings = new();
+    private CaseAppearanceDto MotionJudgements = new();
     [Parameter] public EventCallback OnFormCreate { get; set; } = new();
 
 
+    protected override async Task OnParametersSetAsync()
+    {
+        if (CurrentCaseId == null || CurrentCaseId == Guid.Empty)
+            return;
+
+        await LoadJudgement();
+
+    }
     private async void ShowStipulationModal()
     {
 
         JS.InvokeVoidAsync("showModal", "stipulationModal");
     }
+    private async Task LoadJudgement()
+    {
+        Judgements = await _caseAppreance.GetAllCaseAppreance(CurrentCaseId.Value);
+        if (Judgements != null)
+        {
+            if (CaseHearings != null)
+            {
+                int count = Math.Min(Judgements.Count, CaseHearings.Count);
 
+                for (int i = 0; i < count; i++)
+                {
+                    // Assign hearing date to judgement appearance date
+                    Judgements[i].AppreanceDate = CaseHearings[i].HearingDate;
+                }
+            }
+
+            MotionJudgements = Judgements!.Where(e => e.CourtTodayName!.Contains("Motion")).FirstOrDefault()! ?? new CaseAppearanceDto();
+        }
+
+
+
+
+        StateHasChanged();
+    }
     private async Task SaveStipulationChanges()
     {
         spinnerservice.Show();

@@ -22,7 +22,7 @@ namespace EvictionFiler.Application.Services
 
         public async Task<List<CaseAppearanceDto>> GetAllCaseAppreance(Guid caseId)
         {
-            var appreaaces = await _repository.GetAllAsync( predicate: x => x.LegalCaseId == caseId, includes: a=>a.CourtToday!);
+            var appreaaces = await _repository.GetAlllAsync( predicate: x => x.LegalCaseId == caseId, includes: a=>a.CourtToday!);
             var result = appreaaces.Select(e => new CaseAppearanceDto
             {
                 Id = e.Id,

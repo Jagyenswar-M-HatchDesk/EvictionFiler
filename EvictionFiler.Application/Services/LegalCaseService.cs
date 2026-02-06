@@ -16,10 +16,13 @@ using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Base;
 using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Linq.Expressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EvictionFiler.Application.Services
 {
@@ -574,7 +577,7 @@ namespace EvictionFiler.Application.Services
 
                         MarshalName = caseEntity.Marshal != null ? $"{caseEntity.Marshal?.FirstName} {caseEntity.Marshal?.LastName}" : string.Empty,
                         MarshalPhone = caseEntity.Marshal != null ? caseEntity.Marshal?.Telephone : string.Empty,
-                        Docketno = caseEntity.Marshal != null ? caseEntity.Marshal?.DocketNo : String.Empty,
+                        Docketno = caseEntity.Marshal != null ? caseEntity.Marshal?.DocketNo : string.Empty,
                         WarrantRequested = caseEntity.WarrantRequested != null ? caseEntity.WarrantRequested : false,
                         Index = caseEntity.Index != null ? caseEntity.Index : null,
                         County = caseEntity.County != null ? caseEntity.County : null,
@@ -920,6 +923,57 @@ namespace EvictionFiler.Application.Services
 
 
                     };
+                    return intakeModel;
+                }
+                return null!;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+            }
+        }
+        public async Task<IntakeModel> GetClientByCaseIdAsync(Guid caseId)
+        {
+            try
+            {
+
+                var caseEntity = (await _repository.GetAlllAsync(
+        predicate: c => c.Id == caseId,
+        c => c.Clients!, c => c.Clients!, c => c.CaseType!)).FirstOrDefault();
+                if (caseEntity == null)
+                    return null!;
+
+                if (caseEntity.CaseType!.Name == "Holdover" || caseEntity.CaseType.Name == "NonPayment" || caseEntity.CaseType.Name == "HPD" || caseEntity.CaseType.Name == "Illegal Lockout")
+                {
+                    var intakeModel = new IntakeModel
+                    {
+                        // for Case
+                        Id = caseEntity.Id,
+                        Casecode = caseEntity.Casecode,
+                        ClientId=caseEntity.ClientId,
+                        CaseTypeId = caseEntity.CaseTypeId,
+                        CreatedOn = caseEntity.CreatedOn,
+                        Status = caseEntity.IsActive ? "Active" : "Inactive",
+
+                        //for Client
+                        ClientCode = caseEntity.Clients.ClientCode,
+                        ClientName = $"{caseEntity.Clients.FirstName} {caseEntity.Clients.LastName}",
+                        ClientTypeId = caseEntity.Clients.ClientTypeId,
+                        ClientEmail = caseEntity.Clients.Email,
+                        ClientPhone = caseEntity.Clients.Phone,
+                        Reference = caseEntity.Reference,
+                        Address1 = caseEntity.Clients.Address1,
+                        Address2 = caseEntity.Clients.Address2,
+                        City = caseEntity.Clients.City,
+                        StateName = caseEntity.Clients.State != null ? caseEntity.Clients.State.Name : string.Empty,
+                        ZipCode = caseEntity.Clients.ZipCode,
+                        MarshalId = caseEntity.MarshalId,
+                        RemainderDate = caseEntity.RemainderCenters?
+                    .OrderByDescending(x => x.When)
+                    .FirstOrDefault()?.When,
+
+                    }
+                ;
                     return intakeModel;
                 }
                 return null!;
@@ -1408,6 +1462,29 @@ namespace EvictionFiler.Application.Services
                 existingCase.BuildingId = legalCase.BuildingId;
 
                 var result = await _repository.UpdateCaseBuilding(existingCase);
+                return result;
+
+            }
+            catch
+            {
+                throw new Exception();
+            }
+        }
+        public async Task<Guid?> UpdateCaseForClientAsync(IntakeModel legalCase)
+        {
+            try
+            {
+                var existingCase = await _repository.GetAsync(legalCase.Id);
+                if (existingCase == null) return null;
+
+
+
+
+                existingCase.CaseTypeId = legalCase.CaseTypeId;
+
+                existingCase.ClientId = legalCase.ClientId;
+
+                var result = await _repository.UpdateClient(existingCase);
                 return result;
 
             }
