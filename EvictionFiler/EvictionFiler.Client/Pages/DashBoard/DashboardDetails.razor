@@ -1,0 +1,93 @@
+﻿@using EvictionFiler.Application.DTOs.RemainderCenterDto
+@using EvictionFiler.Application.Interfaces.IServices
+@inject ICaseHearingService _caseService
+@inject ILegalCaseService _service
+@inject IRemianderCenterService _remainder
+<!-- Quick Snapshot tiles (Top Row) -->
+    <div class="grid cols-4" style="margin-bottom:12px">
+        <a class="tile" href="#hearings">
+            <div class="icon">⚖️</div>
+            <div>
+                <div class="count" id="todayHearings">@totalCasesHearing</div>
+                <div class="label">Hearings Today</div>
+            </div>
+        </a>
+         <a class="tile" href="#deadlines">
+            <div class="icon">🕔</div>
+            <div>
+                <div class="count" id="deadlineCount">5</div>
+                <div class="label">Due Today / Overdue</div>
+            </div>
+        </a>
+        <a class="tile" href="#filed">
+            <div class="icon">📁</div>
+            <div>
+                <div class="count" id="filedWeek">@totalCases</div>
+                <div class="label">Cases Filed This Week</div>
+            </div>
+        </a>
+        <a class="tile" href="#approvals">
+            <div class="icon">✅</div>
+            <div>
+                <div class="count" id="pendingApprovals">4</div>
+                <div class="label">Pending Client Approvals</div>
+            </div>
+        </a>
+    </div>
+
+    <div class="grid cols-4" style="margin-bottom:18px">
+        <a class="tile" href="#balances">
+            <div class="icon">💳</div>
+            <div>
+                <div class="count" id="openBalances">$12k</div>
+                <div class="label">Open Balance Alerts</div>
+            </div>
+        </a>
+        <a class="tile" href="#trust">
+            <div class="icon">🏦</div>
+            <div>
+                <div class="count" id="trustBalances">$8.4k</div>
+                <div class="label">Trust Balances</div>
+            </div>
+        </a>
+        <a class="tile" href="#progress">
+
+            <div class="icon">📈</div>
+            <div>
+                <div class="count" id="taskPct">72%</div>
+                <div class="label">Tasks Completed (wk)</div>
+            </div>
+        </a>
+        <a class="tile" href="#alerts">
+            <div class="icon">🔔</div>
+            <div>
+                <div class="count" id="alertCount">@InCompleteRemainderList.Count()</div>
+                <div class="label">Smart Alerts</div>
+            </div>
+        </a>
+    </div>
+
+@code {
+    [Parameter] public string? loggedInUserId{ get; set; }
+    [Parameter] public bool isAdmin{ get; set; }
+    [Parameter]
+    public EventCallback <List<EditToRemainderCenterDto>>InCompleteRemainder{ get; set; }
+    private int totalCasesHearing = 0;
+    private int totalCases = 0;
+    private List<EditToRemainderCenterDto> InCompleteRemainderList = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        totalCasesHearing = await _caseService.GetAllTodayCaseHearingAsync();
+        totalCases = await _service.GetTotalCasesCountAsync(loggedInUserId,isAdmin);
+        var list= await _remainder.GetAllInCompleteRemainder();
+        if(list!=null)
+        {
+            InCompleteRemainderList = list;
+            await InCompleteRemainder.InvokeAsync(list);
+        }
+
+       
+    }
+
+}

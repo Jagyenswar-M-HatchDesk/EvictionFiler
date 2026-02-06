@@ -1,0 +1,447 @@
+﻿@using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.DTOs.LandLordDto
+@using EvictionFiler.Application.DTOs.LegalCaseDto
+@using EvictionFiler.Application.DTOs.PaginationDto
+@using EvictionFiler.Application.DTOs.TenantDto
+@using EvictionFiler.Client.SpinnerService
+@using EvictionFiler.Application.Interfaces.IRepository
+@using EvictionFiler.Domain.Entities
+@inject IDashBoardRepository DashBoardRepository;
+@inject SpinnerService spinnerservice;
+@inject NavigationManager navManager
+<div class="topbar1 card">
+    <div>
+        <span style="color: grey; font-size: 16px; font-weight:600;">CASE SEARCH & FILTERS</span>
+    </div>
+    <div class="searchbar row">
+        <div class="col ">
+            <input class="form-control search-box"
+                   placeholder="Search by Case"
+                   @bind="selectedCase" @onfocusout="FocusOutCase"
+                   @oninput="OnCaseInput"
+                   @onfocus="OnCaseFocus"
+                   autocomplete="off" />
+
+
+            <ul class="list-group position-absolute" style="z-index:1000; font-size:14px"
+                hidden="@(!caseSuggestions.Any() || !caseSuggestionsChecked)">
+                @if (caseSuggestions.Any())
+                {
+                    @foreach (var suggestion in caseSuggestions)
+                    {
+                        <li class="list-group-item list-group-item-action"
+                            style="cursor:pointer;"
+                            @onclick="() => SelectCase(suggestion)">
+                            @suggestion.Casecode
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item text-muted">
+                        No result found
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="col ">
+            <input class="form-control search-box"
+                   placeholder="Search by Client"
+                   @bind="selectedClient"
+                   @onfocusout="FocusOutClient"
+                   @onfocus="OnClientFocus"
+                   @oninput="OnClientInput" />
+
+
+            <ul class="list-group position-absolute " style="z-index:1000; font-size:14px"
+                hidden="@( !clientSuggestionsChecked || !clientSuggestions.Any() )">
+                @if (clientSuggestions.Any())
+                {
+                    @foreach (var suggestion in clientSuggestions)
+                    {
+                        <li class="list-group-item list-group-item-action"
+                            style="cursor:pointer;"
+                            @onclick="() => SelectClient(suggestion)">
+                            @suggestion.ClientCode - @suggestion.FirstName @suggestion.LastName
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item text-muted">
+                        No result found
+                    </li>
+                }
+            </ul>
+
+
+        </div>
+        <div class="col ">
+            <input class="form-control search-box" placeholder="Search by LandLord" @bind="selectedLandlord"
+                   @oninput="OnLandlordInput" @onfocusout="FocusOutLandlord" @onfocus="OnLandlordsFocus"
+                   autocomplete="off" />
+
+
+            <ul class="list-group position-absolute" style="z-index:1000; font-size:14px"
+                hidden="@(!landlordSuggestions.Any() || !landlordSuggestionsChecked)">
+                @if (landlordSuggestions.Any())
+                {
+                    @foreach (var suggestion in landlordSuggestions)
+                    {
+                        <li class="list-group-item list-group-item-action"
+                            style="cursor:pointer;"
+                            @onclick="() => Selectlandlord(suggestion)">
+                            @suggestion.LandLordCode - @suggestion.FirstName @suggestion.LastName
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item text-muted">
+                        No result found
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="col ">
+            <input class="form-control search-box"
+                   placeholder="Search by Tenant"
+                   @bind="selectedTenant" @onfocusout="FocusOutTenant"
+                   @oninput="OnTenantInput"
+                   @onfocus="OnTenantsFocus"
+                   autocomplete="off" />
+
+
+            <ul class="list-group position-absolute" style="z-index:1000; font-size:14px"
+                hidden="@(!tenantSuggestions.Any() || !tenantSuggestionsChecked)">
+                @if (tenantSuggestions.Any())
+                {
+                    @foreach (var suggestion in tenantSuggestions)
+                    {
+                        <li class="list-group-item list-group-item-action"
+                            style="cursor:pointer;"
+                            @onclick="() => SelectTenant(suggestion)">
+                            @suggestion.TenantCode - @suggestion.FirstName @suggestion.LastName
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item text-muted">
+                        No result found
+                    </li>
+                }
+            </ul>
+        </div>
+
+        <div class="col-md-2">
+
+            <button class="searchbtn" @onclick="Search" style="border-radius:25px; width:100%;"> <i class="fa fa-search mx-1"></i>  </button>
+        </div>
+
+    </div>
+
+
+</div>
+
+@code {
+    private string selectedTenant = string.Empty;
+    private bool tenantSuggestionsChecked = false;
+    private List<EditToTenantDto> tenantSuggestions = new List<EditToTenantDto>();
+
+    private string selectedCase = string.Empty;
+    private bool caseSuggestionsChecked = false;
+    private List<CreateToEditLegalCaseModel> caseSuggestions = new List<CreateToEditLegalCaseModel>();
+
+    private string selectedLandlord = string.Empty;
+    private bool landlordSuggestionsChecked = false;
+    private List<EditToLandlordDto> landlordSuggestions = new List<EditToLandlordDto>();
+
+    private string selectedClient = string.Empty;
+    private bool clientSuggestionsChecked = false;
+    private List<EditToClientDto> clientSuggestions = new List<EditToClientDto>();
+    private CancellationTokenSource _cts;
+    private string searchTermStatus = string.Empty;
+    private string searchTermDate = string.Empty;
+    private string searchText;
+    private bool isSearched = false;
+    private string selectedReasonholdover = string.Empty;
+    private PaginationDto<LegalCase> searchResults;
+    private int currentPage = 1;
+    private int pageSize = 10;
+    private string searchTerm = "";
+
+
+    private async Task OnClientFocus()
+    {
+
+        if (string.IsNullOrWhiteSpace(selectedClient))
+        {
+            clientSuggestions = await DashBoardRepository.GetTopClients();
+            clientSuggestionsChecked = true;
+        }
+    }
+
+    private async Task OnCaseFocus()
+    {
+
+        if (string.IsNullOrWhiteSpace(selectedCase))
+        {
+            caseSuggestions = await DashBoardRepository.GetTopCases();
+            caseSuggestionsChecked = true;
+        }
+    }
+
+    private async Task OnLandlordsFocus()
+    {
+
+        if (string.IsNullOrWhiteSpace(selectedLandlord))
+        {
+            landlordSuggestions = await DashBoardRepository.GetTopLandlords();
+            landlordSuggestionsChecked = true;
+        }
+    }
+    private async Task OnTenantsFocus()
+    {
+
+        if (string.IsNullOrWhiteSpace(selectedTenant))
+        {
+            tenantSuggestions = await DashBoardRepository.GetTopTenants();
+            tenantSuggestionsChecked = true;
+        }
+    }
+
+    private async Task Search()
+    {
+
+        if (string.IsNullOrWhiteSpace(selectedCase) &&
+            string.IsNullOrWhiteSpace(selectedClient) &&
+            string.IsNullOrWhiteSpace(selectedTenant) &&
+            string.IsNullOrWhiteSpace(selectedLandlord) &&
+            string.IsNullOrWhiteSpace(selectedReasonholdover) &&
+            string.IsNullOrWhiteSpace(searchTermDate) &&
+            string.IsNullOrWhiteSpace(searchTermStatus))
+        {
+
+            searchResults = null;
+            isSearched = true;
+
+            spinnerservice.Hide();
+
+            return;
+        }
+
+        spinnerservice.Show();
+        isSearched = true;
+        string url = "/legalcases/search";
+        List<string> queryParams = new();
+
+        if (!string.IsNullOrWhiteSpace(selectedCase))
+            queryParams.Add($"cases={selectedCase}");
+
+        if (!string.IsNullOrWhiteSpace(selectedClient))
+            queryParams.Add($"client={selectedClient}");
+
+        if (!string.IsNullOrWhiteSpace(selectedTenant))
+            queryParams.Add($"tenant={selectedTenant}");
+
+        if (!string.IsNullOrWhiteSpace(selectedLandlord))
+            queryParams.Add($"landlord={selectedLandlord}");
+
+        // Append query string only if we have filters
+        if (queryParams.Any())
+            url += "?" + string.Join("&", queryParams);
+
+        navManager.NavigateTo(url);
+
+      
+     
+    }
+
+   
+
+
+
+
+    private void Resetsearch()
+    {
+        selectedClient = string.Empty;
+        selectedCase = string.Empty;
+        selectedTenant = string.Empty;
+        selectedLandlord = string.Empty;
+        selectedReasonholdover = string.Empty;
+        searchTermDate = string.Empty;
+        searchTermStatus = string.Empty;
+
+        searchResults = null;
+
+    }
+
+
+    private async Task OnClientInput(ChangeEventArgs e)
+    {
+        selectedClient = e.Value?.ToString();
+
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(300, _cts.Token);
+
+            if (!string.IsNullOrWhiteSpace(selectedClient))
+            {
+                clientSuggestions =
+                    await DashBoardRepository.GetClientSuggestions(selectedClient);
+                clientSuggestionsChecked = true;
+            }
+            else
+            {
+                clientSuggestions =
+                    await DashBoardRepository.GetTopClients();
+                clientSuggestionsChecked = true;
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            // ignore
+        }
+    }
+
+
+    private async Task OnTenantInput(ChangeEventArgs e)
+    {
+        selectedTenant = e.Value?.ToString();
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        try
+        {
+            await Task.Delay(300, _cts.Token);
+            if (!string.IsNullOrWhiteSpace(selectedTenant))
+            {
+                tenantSuggestions = await DashBoardRepository.GetTenantSuggestions(selectedTenant);
+                tenantSuggestionsChecked = true;
+            }
+            else
+            {
+                tenantSuggestions = new List<EditToTenantDto>();
+                tenantSuggestionsChecked = false;
+            }
+        }
+        catch (TaskCanceledException)
+        {
+
+        }
+    }
+
+    private async Task OnCaseInput(ChangeEventArgs e)
+    {
+        selectedCase = e.Value?.ToString();
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        try
+        {
+            await Task.Delay(300, _cts.Token);
+
+            if (!string.IsNullOrWhiteSpace(selectedCase))
+            {
+                caseSuggestions = await DashBoardRepository.GetCaseSuggestions(selectedCase);
+                caseSuggestionsChecked = true;
+            }
+            else
+            {
+                caseSuggestions = new List<CreateToEditLegalCaseModel>();
+                caseSuggestionsChecked = false;
+            }
+        }
+        catch (TaskCanceledException)
+        {
+
+        }
+    }
+
+    private async Task OnLandlordInput(ChangeEventArgs e)
+    {
+        selectedLandlord = e.Value?.ToString();
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        try
+        {
+            await Task.Delay(300, _cts.Token);
+
+            if (!string.IsNullOrWhiteSpace(selectedLandlord))
+            {
+                landlordSuggestions = await DashBoardRepository.GetLandlordSuggestions(selectedLandlord);
+                landlordSuggestionsChecked = true;
+            }
+            else
+            {
+                landlordSuggestions = new List<EditToLandlordDto>();
+                landlordSuggestionsChecked = false;
+            }
+        }
+        catch (TaskCanceledException)
+        {
+
+        }
+    }
+
+    private void SelectClient(EditToClientDto client)
+    {
+        selectedClient = $"{client.FirstName} {client.LastName}";
+        clientSuggestions.Clear();
+        clientSuggestionsChecked = false;
+    }
+    private async Task FocusOutClient()
+    {
+        await Task.Delay(500);
+        clientSuggestions.Clear();
+        clientSuggestionsChecked = false;
+    }
+
+    private void Selectlandlord(EditToLandlordDto landlord)
+    {
+        selectedLandlord = $"{landlord.FirstName} {landlord.LastName}";
+        landlordSuggestions.Clear();
+        landlordSuggestionsChecked = false;
+    }
+    private async Task FocusOutLandlord()
+    {
+        await Task.Delay(500);
+        landlordSuggestions.Clear();
+        landlordSuggestionsChecked = false;
+    }
+    private void SelectTenant(EditToTenantDto tenant)
+    {
+        selectedTenant = $"{tenant.FirstName} {tenant.LastName}"; ;
+        tenantSuggestions.Clear();
+        tenantSuggestionsChecked = false;
+    }
+    private async Task FocusOutTenant()
+    {
+        await Task.Delay(500);
+        tenantSuggestions.Clear();
+        tenantSuggestionsChecked = false;
+    }
+
+    private void SelectCase(CreateToEditLegalCaseModel cases)
+    {
+        selectedCase = cases?.Casecode;
+        caseSuggestions.Clear();
+        caseSuggestionsChecked = false;
+    }
+    private async Task FocusOutCase()
+    {
+        await Task.Delay(500);
+        caseSuggestions.Clear();
+        caseSuggestionsChecked = false;
+    }
+    private async Task ChangePage(int page)
+    {
+        if (page >= 1 && page <= Math.Ceiling((double)searchResults.TotalCount / pageSize))
+        {
+            currentPage = page;
+            await Search();
+        }
+    }
+}

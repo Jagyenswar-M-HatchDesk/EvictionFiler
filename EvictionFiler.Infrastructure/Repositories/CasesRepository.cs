@@ -396,7 +396,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 string f = filters.CaseCode;
                 query = query.Where(c =>
                     c.Casecode != null &&
-                    c.Casecode.StartsWith(f, StringComparison.OrdinalIgnoreCase));
+                    c.Casecode.ToLower().StartsWith(f.ToLower()));
             }
 
             // CLIENT
@@ -407,10 +407,10 @@ namespace EvictionFiler.Infrastructure.Repositories
                     c.Clients != null &&
                     (
                         (c.Clients.ClientCode != null &&
-                            c.Clients.ClientCode.StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                            c.Clients.ClientCode.ToLower().StartsWith(f.ToLower()))
                         ||
                         ((c.Clients.FirstName + " " + c.Clients.LastName)
-                            .StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                            .StartsWith(f.ToLower()))
                     ));
             }
 
@@ -422,10 +422,10 @@ namespace EvictionFiler.Infrastructure.Repositories
                     c.Tenants != null &&
                     (
                         (c.Tenants.TenantCode != null &&
-                            c.Tenants.TenantCode.StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                            c.Tenants.TenantCode.ToLower().StartsWith(f.ToLower()))
                         ||
                         ((c.Tenants.FirstName + " " + c.Tenants.LastName)
-                            .StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                            .StartsWith(f.ToLower()))
                     ));
             }
 
@@ -437,10 +437,10 @@ namespace EvictionFiler.Infrastructure.Repositories
                     c.LandLords != null &&
                     (
                         (c.LandLords.LandLordCode != null &&
-                            c.LandLords.LandLordCode.StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                            c.LandLords.LandLordCode.ToLower().StartsWith(f.ToLower()))
                         ||
                         ((c.LandLords.FirstName + " " + c.LandLords.LastName)
-                            .StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                            .StartsWith(f.ToLower()))
                     ));
             }
 
@@ -456,7 +456,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 string f = filters.ReasonHoldover;
                 query = query.Where(x =>
                     x.ReasonHoldover != null &&
-                    x.ReasonHoldover.Name.StartsWith(f, StringComparison.OrdinalIgnoreCase));
+                    x.ReasonHoldover.Name.ToLower().StartsWith(f.ToLower()));
             }
 
             // ACTION DATE
