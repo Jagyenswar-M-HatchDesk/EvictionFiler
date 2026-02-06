@@ -11,7 +11,7 @@
 //{
 //    public class FeesCatalogAttorneyRosterRepository : IFeesCatalogAttorneyRosterRepository
 //    {
-//        private readonly MainDbContext _context;
+//        private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
 //        public FeesCatalogAttorneyRosterRepository(MainDbContext context) => _context = context;
 
 
@@ -53,6 +53,7 @@ using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -60,8 +61,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class FeesCatalogAttorneyRosterRepository : IFeesCatalogAttorneyRosterRepository
     {
-        private readonly MainDbContext _context;
-        public FeesCatalogAttorneyRosterRepository(MainDbContext context) => _context = context;
+        private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory;
+        public FeesCatalogAttorneyRosterRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory)
+        {
+            _context = context;
+            _contextFactory = contextFactory;
+
+        }
 
         public async Task<List<FeesCatalogAttorneyRosterDto>> GetAllAsync()
         {

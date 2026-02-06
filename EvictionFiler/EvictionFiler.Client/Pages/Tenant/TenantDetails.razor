@@ -1,0 +1,194 @@
+﻿@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.Interfaces.IServices
+
+@inject ILegalCaseService _service
+<div class="col-md-4 mt-0">
+
+
+    <table class="info-table">
+        <thead>
+            <tr>
+                <th colspan="2" class="info-bar">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="info-bar-title">Tenant</div>
+                        <button type="button" class="btn btn-sm normal p-1" title="Edit Tenant"  style="color:white">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+
+        @{
+            var partbuilding = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingAddress)) partbuilding.Add(legalcaseDto.BuildingAddress);
+            // if (!string.IsNullOrWhiteSpace(legalcaseDto.Address2)) partlandlord.Add(legalcaseDto.Address2);
+            if (!string.IsNullOrWhiteSpace(legalcaseDto.Borough)) partbuilding.Add(legalcaseDto.Borough);
+            if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingState)) partbuilding.Add(legalcaseDto.BuildingState);
+            if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingZip)) partbuilding.Add(legalcaseDto.BuildingZip);
+
+            var fullbuildingAddress = partbuilding.Count() > 0 ? string.Join(", ", partbuilding) : "--";
+        }
+        <tbody>
+            <tr class="info-row">
+                <td class="info-cell label">Name:</td>
+                <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(legalcaseDto.TenantName) ? "--" : legalcaseDto.TenantName)</td>
+            </tr>
+
+            <tr class="info-row">
+                <td class="info-cell label">Apartment:</td>
+                <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(legalcaseDto.UnitOrApartmentNumber) ? "--" : legalcaseDto.UnitOrApartmentNumber)</td>
+            </tr>
+
+            <tr class="info-row">
+                <td class="info-cell label">Address:</td>
+                <td class="info-cell value ellipsis" style="white-space:normal">
+
+                @(legalcaseDto.TenantId == null || legalcaseDto.TenantId == Guid.Empty ? "--" : fullbuildingAddress)</td>
+            </tr>
+        </tbody>
+    </table>
+
+
+</div>
+
+  
+
+@code {
+    [Parameter] public Guid? CurrentCaseId{ get; set; }
+   
+    private Guid CaseId { get; set; }
+    private IntakeModel legalcaseDto = new IntakeModel();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (CurrentCaseId == null || CurrentCaseId == Guid.Empty)
+            return;
+       
+        await LoadCaseDetails();
+
+    }
+    private async Task LoadCaseDetails()
+    {
+
+        if (CurrentCaseId == null)
+            return;
+        
+
+
+        legalcaseDto = await _service.GetTenantByCaseIdAsync(CurrentCaseId.Value);
+
+
+       
+        if (legalcaseDto != null)
+        {
+
+            legalcaseDto = new IntakeModel
+            {
+                Id = legalcaseDto.Id,
+                ClientId = legalcaseDto.ClientId,
+                Casecode = legalcaseDto.Casecode,
+                CaseTypeId = legalcaseDto.CaseTypeId,
+                
+
+        
+
+                // Tenant
+                TenantId = legalcaseDto.TenantId,
+                TenantName = legalcaseDto.TenantName,
+                UnitNumber = legalcaseDto.UnitNumber,
+                UnitOrApartmentNumber = legalcaseDto.UnitOrApartmentNumber,
+                IsUnitIllegalId = legalcaseDto.IsUnitIllegalId,
+                TenantRecord = legalcaseDto.TenantRecord,
+                HasPossession = legalcaseDto.HasPossession,
+                OtherOccupants = legalcaseDto.OtherOccupants,
+                ApartmentNumber = legalcaseDto.ApartmentNumber,
+                TenancyTypeForBuildingId = legalcaseDto.TenancyTypeForBuildingId,
+                //WrittenLease = legalcaseDto.WrittenLease,
+                OralAgreeMent = legalcaseDto.OralAgreeMent,
+                CaseProgramId = legalcaseDto.CaseProgramId,
+                GoodCauseApplies = legalcaseDto.GoodCauseApplies,
+                //DateTenantMoved = legalcaseDto.DateTenantMoved,
+                LeaseEnd = legalcaseDto.LeaseEnd,
+                //TenancyTypeId = legalcaseDto.TenancyTypeId,
+                DateNoticeServed = legalcaseDto.DateNoticeServed,
+                CalculatedNoticeLength = legalcaseDto.CalculatedNoticeLength,
+                ExpirationDate = legalcaseDto.ExpirationDate,
+                PredicateNotice = legalcaseDto.PredicateNotice,
+                //RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                //MonthlyRent = legalcaseDto.MonthlyRent,
+                //TotalOwed = legalcaseDto.TotalOwed,
+                //TenantShare = legalcaseDto.TenantShare,
+                SocialService = legalcaseDto.SocialService,
+                LastRentPaid = legalcaseDto.LastRentPaid,
+
+               
+
+            };
+
+        }
+       ;
+
+       
+    }
+    async Task HideTenantDropDown(FocusEventArgs e)
+    {
+        
+        await Task.Delay(500);
+        // if (filteredTenant.Any())
+        // {
+        //     filteredTenant.Clear();
+
+        // }
+        StateHasChanged();
+    }
+    // private async void ShowTenantModal()
+
+    //   {
+    //       Tenants.Clear();
+    //       UnderTenants.Clear();
+    //       CaseAdditionalTenantfromDbList.Clear();
+    //       TenantList = await _tenantService.GetTenantsByClientIdAsync(legalcaseDto.BuildingId!.Value);
+
+    //       CaseTypeList = await CaseTypeRepository.GetAllCaseType();
+    //       if (!TenancyTypeList.Any()) TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
+    //       if (!DateRentList.Any()) DateRentList = await DateRentRepository.GetAllDateRent();
+
+    //       if (legalcaseDto.TenantId != null && legalcaseDto.TenantId != Guid.Empty)
+    //       {
+    //           ViewTenant = await _tenantService.GetByIdAsync(legalcaseDto.TenantId!.Value);
+    //           if (!CaseAdditionalTenantfromDbList.Any()) CaseAdditionalTenantfromDbList = await _caseAdditionalTenant.GetAllAdditionalCaseTenantsAsync(legalcaseDto.Id);
+
+
+    //           AdditionalOccupantsFromDbList = await _additionalOccupantService.GetAllAdditionalOccupantsAsync(legalcaseDto.Id);
+    //           AdditionalOccupantsList = AdditionalOccupantsFromDbList.ToList();
+    //           searchTenantText = ViewTenant.UnitOrApartmentNumber!;
+    //           Tenants.Add(legalcaseDto.TenantName);
+    //           if (CaseAdditionalTenantfromDbList.Any())
+    //           {
+    //               Tenants.AddRange(CaseAdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}").ToList());
+    //               AdditionalTenantList.AddRange(CaseAdditionalTenantfromDbList.Select(e => new AddtionalTenantDto
+    //               {
+    //                   FirstName = e.FirstName,
+    //                   LastName = e.LastName,
+    //                   Id = e.Id,
+    //                   LegalCaseId = e.LegalCaseId
+    //               }).ToList());
+    //           }
+
+    //           UnderTenants.AddRange(AdditionalOccupantsFromDbList.Select(e => $"{e.Name}"));
+
+    //           GenerateMonths();
+    //           Rows = legalcaseDto.ArrearLedgers;
+
+    //       }
+
+    //       var undertenaants = new List<string>() { "John Doe", "John Doe" };
+    //       UnderTenants.AddRange(undertenaants);
+
+    //       StateHasChanged();
+    //       JS.InvokeVoidAsync("showModal", "tenantModal");
+    //   }
+
+}

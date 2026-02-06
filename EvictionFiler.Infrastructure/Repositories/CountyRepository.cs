@@ -20,12 +20,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class CountyRepository : Repository<County>, ICountyRepository
 	{
-		private readonly MainDbContext _context;
+		private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
 
-		public CountyRepository(MainDbContext context) : base(context)
-		{
-			_context = context;
-		}
+		public CountyRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context, contextFactory)
+        {
+            _context = context;
+            _contextFactory = contextFactory;
+
+        }
 
         public async Task<List<EditToCountyDto>> SearchCounty(string searchTerm)
         {

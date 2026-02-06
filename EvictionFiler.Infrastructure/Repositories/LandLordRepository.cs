@@ -7,17 +7,20 @@ using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Polly;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
     public class LandLordRepository : Repository<LandLord>,  ILandLordRepository
 	{
-        private readonly MainDbContext _mainDbContext;
+        private readonly MainDbContext _mainDbContext; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
 
-        public LandLordRepository(MainDbContext mainDbContext) : base(mainDbContext)
-        {
-            _mainDbContext = mainDbContext;
+        public LandLordRepository(MainDbContext mainDbContext, IDbContextFactory<MainDbContext> contextFactory) : base(mainDbContext, contextFactory)
+		{
+			_mainDbContext = mainDbContext;
+            _contextFactory = contextFactory;
+
         }
         public async Task<string> GenerateLandlordCodeAsync()
         {

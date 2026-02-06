@@ -6,16 +6,18 @@ using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
     public class AdditionalOccupantsRepository : Repository<AdditionalOccupants>, IAdditionalOccupantsRepository
     {
         private readonly MainDbContext _context;
-
-        public AdditionalOccupantsRepository(MainDbContext context) : base(context)
+        private readonly IDbContextFactory<MainDbContext> _contextFactory;
+        public AdditionalOccupantsRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context, contextFactory)
         {
             _context = context;
+            _contextFactory = contextFactory;
         }
 
         public async Task AddAdditionalOccupant(List<AdditionalOccupantDto> tenant)

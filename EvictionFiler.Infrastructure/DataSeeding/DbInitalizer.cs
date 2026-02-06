@@ -16,64 +16,64 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 			try
 			{
 				await context.Database.MigrateAsync();
-				//await SeedLanguage(context);
+				await SeedLanguage(context);
 
-				//await SeedPremiseType(context);
+				await SeedPremiseType(context);
 				await SeedCaseTypes(context);
-                //            await SeedBuildingTypes(context);
-                //            await SeedCaseTypesHPD(context);
-                //            await SeedBillingTypes(context);
-                //            await SeedPartyRepresent(context);
-                //            await SeedPartyRepresentPerDiem(context);
-                //            await SeedDateRent(context);
-                //            await SeedHarassmentType(context);
-                //            await SeedDefenseType(context);
-                //await SeedAppearanceType(context);
-                //            await SeedAppearanceTypePerDiem(context);
-                //            await SeedReliefPetitionerType(context);
-                //            await SeedReliefRespondentType(context);
-                //            await SeedCaseTypePerdiem(context);
-                //            await SeedRegistrationStatus(context);
-                //            await  SeedDocumentInstructionsTypePerDiem(context);
-                //            await SeedRate(context);
-                //            await SeedPaymentMethod(context);
-                //            await SeedReportingTypePerDiem(context);
-                //            await SeedTenancyTypesForBuilding(context);
-                //            await SeedExemptionReason(context);
-                //            await SeedExemptionBasic(context);
+                await SeedBuildingTypes(context);
+                await SeedCaseTypesHPD(context);
+                await SeedBillingTypes(context);
+                await SeedPartyRepresent(context);
+                await SeedPartyRepresentPerDiem(context);
+                await SeedDateRent(context);
+                await SeedHarassmentType(context);
+                await SeedDefenseType(context);
+				await SeedAppearanceType(context);
+                await SeedAppearanceTypePerDiem(context);
+                await SeedReliefPetitionerType(context);
+                await SeedReliefRespondentType(context);
+                await SeedCaseTypePerdiem(context);
+                await SeedRegistrationStatus(context);
+                await  SeedDocumentInstructionsTypePerDiem(context);
+                await SeedRate(context);
+                await SeedPaymentMethod(context);
+                await SeedReportingTypePerDiem(context);
+                await SeedTenancyTypesForBuilding(context);
+                await SeedExemptionReason(context);
+                await SeedExemptionBasic(context);
 
-                //            await SeedRemainderTypes(context);
-                //            await SeedTypeOfOwner(context);
-                //            await SeedAppearanceTypeforHearing(context);
-                //            await context.SaveChangesAsync();
+                await SeedRemainderTypes(context);
+                await SeedTypeOfOwner(context);
+                await SeedAppearanceTypeforHearing(context);
+                await context.SaveChangesAsync();
 
-                //            await SeedRenewalStatus(context);
-                //            await SeedRegulationStatus(context);
-                //await SeedState(context);
-                //await SeedFormTypes(context);
-                //await SeedLandlordTypes(context);
-                //await SeedReasonHolder(context);
-                //await SeedTenancyTypes(context);
-                //await SeedIsUnitIlligal(context);
-                //await SeedCaseprograms(context);
-                //await SeedClientRoles(context);
-                //await SeedCaseStatus(context);
-                //await SeedCounty(context);
-                //await SeedCategory(context);
-                //            await SeedUnitType(context);
-                //            await SeedFilingMethod(context);
-                //            await SeedServiceMethod(context);
-                //            await SeedSubCaseType(context);
-                //            await SeedCities(context);
-                //            await SeedAppreanceMode(context);
-                //            await SeedVirtualPlatform(context);
-                //            await SeedCourtType(context);
-                //            await SeedReminderCategory(context);
-                //            await SeedReminderEscalates(context);
-                //            await SeedDocumentType(context);
-                //            await SeedCourtTodayTypes(context);
-                //            //await SeedUser(context);
-                //            await SeedAdjournedReason(context);
+                await SeedRenewalStatus(context);
+                await SeedRegulationStatus(context);
+				await SeedState(context);
+				await SeedFormTypes(context);
+				await SeedLandlordTypes(context);
+				await SeedReasonHolder(context);
+				await SeedTenancyTypes(context);
+				await SeedIsUnitIlligal(context);
+				await SeedCaseprograms(context);
+				await SeedClientRoles(context);
+				await SeedCaseStatus(context);
+				await SeedCounty(context);
+				await SeedCategories(context);
+                await SeedUnitType(context);
+                await SeedFilingMethod(context);
+                await SeedServiceMethod(context);
+                await SeedSubCaseType(context);
+                await SeedCities(context);
+                await SeedAppreanceMode(context);
+                await SeedVirtualPlatform(context);
+                await SeedCourtType(context);
+                await SeedReminderCategories(context);
+                await SeedReminderEscalates(context);
+                await SeedDocumentType(context);
+                await SeedCourtTodayTypes(context);
+                //await SeedUser(context);
+                await SeedAdjournedReason(context);
                 await context.SaveChangesAsync();
             }
 			catch (Exception ex)
@@ -137,7 +137,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 }
             }
         }
-        private static async Task SeedReminderCategory(MainDbContext context)
+        private static async Task SeedReminderCategories(MainDbContext context)
         {
             var appearancetypes = InitialDataGenerator.GetReminderCategory();
             foreach (var type in appearancetypes)
@@ -286,7 +286,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             }
         }
 
-        private static async Task SeedCategory(MainDbContext context)
+        private static async Task SeedCategories(MainDbContext context)
         {
             var casetypes = InitialDataGenerator.GetCategory();
             foreach (var type in casetypes)

@@ -17,12 +17,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class DocumentIntructionsTypesRepository : Repository<DocumentTypePerDiem>, IDocumentIntructionsTypesRepository
     {
-		private readonly MainDbContext _context;
+		private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
 
-		public DocumentIntructionsTypesRepository(MainDbContext context) : base(context)
+		public DocumentIntructionsTypesRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context, contextFactory)
 		{
 			_context = context;
-		}
+            _contextFactory = contextFactory;
+
+        }
 
     }
 }

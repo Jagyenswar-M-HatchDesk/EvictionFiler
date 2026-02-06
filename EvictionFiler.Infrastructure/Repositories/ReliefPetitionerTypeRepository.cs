@@ -17,12 +17,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class ReliefPetitionerTypeRepository : Repository<ReliefPetitionerType>, IReliefPetitionerTypeRepository
     {
-		private readonly MainDbContext _context;
+		private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
 
-		public ReliefPetitionerTypeRepository(MainDbContext context) : base(context)
+		public ReliefPetitionerTypeRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context, contextFactory)
 		{
 			_context = context;
-		}
+            _contextFactory = contextFactory;
+
+        }
 
     }
 }

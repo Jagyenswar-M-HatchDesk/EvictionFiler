@@ -17,12 +17,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class CaseTypePerDiemRepository : Repository<CaseTypePerdiem>, ICaseTypePerDiemRepository
     {
-		private readonly MainDbContext _context;
+		private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
 
-		public CaseTypePerDiemRepository(MainDbContext context) : base(context)
+		public CaseTypePerDiemRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context, contextFactory)
 		{
 			_context = context;
-		}
+            _contextFactory = contextFactory;
+
+        }
 
     }
 }

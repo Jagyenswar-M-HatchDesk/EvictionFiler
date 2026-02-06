@@ -29,8 +29,11 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<int> GetActiveCasesCountAsync(string userId, bool isAdmin);
         Task<Guid?> CreateCasesAsync(IntakeModel legalCase);
         Task<IntakeModel> GetCaseByIdAsync(Guid caseId);
+        
         Task<Guid?> UpdateCaseAsync(IntakeModel legalCase);
-
+        Task<Guid?> UpdateCaseForLandlordAsync(IntakeModel legalCase);
+        Task<Guid?> UpdateCaseForBuildingAsync(IntakeModel legalCase);
+        Task<Guid?> UpdateCaseForClientAsync(IntakeModel legalCase);
         Task<bool> UpdateMarshalAsync(IntakeModel legalCase);
         Task<bool> UpdateWarrantRequested(IntakeModel legalCase);
         Task<bool> AddDocumentAsync(List<CaseDocument> document);
@@ -61,6 +64,13 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<bool> UpdateCourtandIndex(IntakeModel legalCase);
         Task<IEnumerable<CaseNotes>> GetAllCaseNotes();
 
+        Task<IEnumerable<CaseNotes>> GetAllCaseNotes(Guid caseId);
+        Task<IntakeModel> GetLandlordByCaseIdAsync(Guid caseId);
+        Task<IntakeModel> GetBuildingByCaseIdAsync(Guid caseId);
+        Task<IntakeModel> GetTenantByCaseIdAsync(Guid caseId);
+        Task<IntakeModel> GetClientByCaseIdAsync(Guid caseId);
+        Task<IntakeModel> GetCourtByCaseIdAsync(Guid caseId);
+        Task<Guid?> UpdateCaseForCourtAsync(IntakeModel legalCase);
         Task<bool> AddorEditGeneratedContent(FilingDto filing);
         Task<FilingDto?> GetFilings(Guid CaseId);
     }

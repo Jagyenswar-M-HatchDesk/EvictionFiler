@@ -337,18 +337,18 @@ namespace EvictionFiler.Application.Services
 
         public async Task<IEnumerable<AppearanceMode>> GetAllModes()
         {
-            var modes = await _modeRepository.GetAllAsync();
+            var modes = await _modeRepository.GetAllAsync1();
             return modes;
         }
 
         public async Task<IEnumerable<AppearanceTypeforHearing>> GetAllAppearanceTypeForHearing()
         {
-            var modes = await _appearanceTypeForHearingRepository.GetAllAsync();
+            var modes = await _appearanceTypeForHearingRepository.GetAllAsync1();
             return modes;
         }
         public async Task<IEnumerable<VirtualPlatform>> GetAllPlatform()
         {
-            var modes = await _virtualRepository.GetAllAsync();
+            var modes = await _virtualRepository.GetAllAsync1();
             return modes;
         }
     }

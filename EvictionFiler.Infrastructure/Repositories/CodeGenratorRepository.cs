@@ -1,20 +1,23 @@
-﻿using System.Linq.Expressions;
-using EvictionFiler.Application.Interfaces.IRepository;
+﻿using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
+using System.Linq.Expressions;
 
 public class CodeGenratorRepository : ICodeGenratorRepository
 {
-	private readonly MainDbContext _context;
+	private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
 
-	public CodeGenratorRepository(MainDbContext context)
+	public CodeGenratorRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory)
 	{
 		_context = context;
-	}
+        _contextFactory = contextFactory;
+
+    }
 
 
 
-	public async Task<string> GenerateCodeAsync<TEntity>(
+    public async Task<string> GenerateCodeAsync<TEntity>(
 		Expression<Func<TEntity, string?>> codeSelector,
 		string prefix
 	) where TEntity : class

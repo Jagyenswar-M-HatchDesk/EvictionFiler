@@ -15,14 +15,16 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class TypeOwnerRepository : Repository<TypeOfOwner>, ITypeOwnerRepository
 	{
-		private readonly MainDbContext _context;
+		private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
 
-		public TypeOwnerRepository(MainDbContext context) : base(context)
+		public TypeOwnerRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context, contextFactory)
 		{
 			_context = context;
-		}
+            _contextFactory = contextFactory;
 
-		public async Task<List<TypeOfOwner>> GetAllOwner()
+        }
+
+        public async Task<List<TypeOfOwner>> GetAllOwner()
 		{
 			return await _context.MstTypeOfOwners.ToListAsync();
 		}

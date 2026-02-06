@@ -6,6 +6,7 @@ using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +17,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class CourtpartRepository : ICourtpartRepository
     {
-        private readonly MainDbContext _mainDbContext;
+        private readonly MainDbContext _mainDbContext; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
 
-        public CourtpartRepository(MainDbContext mainDbContext)
+        public CourtpartRepository(MainDbContext mainDbContext, IDbContextFactory<MainDbContext> contextFactory)
         {
             _mainDbContext = mainDbContext;
+            _contextFactory = contextFactory;
+
         }
 
         public async Task<List<CourtPart>> GetAllCourtDataAsync()

@@ -12,14 +12,16 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class ClientRepository : Repository<Client>,  IClientRepository
     {
-        private readonly MainDbContext _context;
+        private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
 
-        public ClientRepository(MainDbContext context) : base(context)
+        public ClientRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context, contextFactory)
 		{
-            _context = context;
+			_context = context;
+            _contextFactory = contextFactory;
+
         }
 
-		public async Task<List<State>> GetAllStateAsync()
+        public async Task<List<State>> GetAllStateAsync()
 		{
 			return await _context.MstStates.ToListAsync();
 		}

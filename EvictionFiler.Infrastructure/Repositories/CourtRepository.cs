@@ -6,6 +6,7 @@ using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Polly;
 using System;
 using System.Collections.Generic;
@@ -17,16 +18,19 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
    public  class CourtRepository:ICourtRepository
     {
-        private readonly MainDbContext _mainDbContext;
+        private readonly MainDbContext _mainDbContext; 
+        private readonly IDbContextFactory<MainDbContext> contextFactory;
 
-        public CourtRepository(MainDbContext mainDbContext)
+        public CourtRepository(MainDbContext mainDbContext,IDbContextFactory<MainDbContext> contextFactory)
         {
             _mainDbContext = mainDbContext;
+            this.contextFactory = contextFactory;
         }
 
         public async Task<List<Courts>> GetAllCourtDataAsync()
         {
-            return await _mainDbContext.Courts.Include(e => e.CourtParts).Include(e=>e.County).OrderBy(e=>e.Court).Take(10).ToListAsync();
+            await using var db = await contextFactory.CreateDbContextAsync(); 
+            return await db.Courts.Include(e => e.CourtParts).Include(e=>e.County).OrderBy(e=>e.Court).Take(10).ToListAsync();
         }
         public async Task<PaginationDto<Courts>> GetPagedCourtsAsync(int pageNumber, int pageSize, string searchTerm)
         {
@@ -84,8 +88,8 @@ namespace EvictionFiler.Infrastructure.Repositories
         }
         public async Task<Courts> GetCourtByIdAsync(Guid id)
         {
-
-            return await _mainDbContext.Courts.Include(e=>e.CourtParts).Include(e => e.County).Include(e=>e.CourtTypes).Where(e=>e.Id == id).FirstOrDefaultAsync();
+            await using var db= contextFactory.CreateDbContext();
+            return await db.Courts.Include(e=>e.CourtParts).Include(e => e.County).Include(e=>e.CourtTypes).Where(e=>e.Id == id).FirstOrDefaultAsync();
 
 
         }

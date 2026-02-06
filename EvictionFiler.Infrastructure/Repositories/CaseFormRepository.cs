@@ -1,13 +1,14 @@
-﻿using System.Drawing.Printing;
-using System.Globalization;
+﻿using EvictionFiler.Application.Constants;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
-using EvictionFiler.Application.Constants;
+using System.Drawing.Printing;
+using System.Globalization;
 
 
 
@@ -15,15 +16,16 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class CaseFormRepository : Repository<CaseForms>, ICaseFormRepository
     {
-        private readonly MainDbContext _context;
+        private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IConfiguration _config;
 
-        public CaseFormRepository(MainDbContext context, IHttpContextAccessor httpContextAccessor, IConfiguration config) : base(context)
+        public CaseFormRepository(MainDbContext context, IHttpContextAccessor httpContextAccessor, IConfiguration config, IDbContextFactory<MainDbContext> contextFactory) : base(context, contextFactory)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
             _config = config;
+            _contextFactory = contextFactory;
         }
 
         public async Task<bool> GenerateWarrantNoticeAsync(Guid legalCaseId, string formTypeName, Guid createdBy)

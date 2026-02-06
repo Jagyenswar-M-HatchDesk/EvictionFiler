@@ -139,10 +139,7 @@ namespace EvictionFiler.Application.Services
         public async Task<bool> DeleteDetailAsync(Guid id)
         {
             var client = await _caseFormRepository.DeleteAsync(id);
-            var deleterecordes = await _unitOfWork.SaveChangesAsync();
-            if (deleterecordes > 0)
-                return true;
-            return false;
+            return client;
         }
     }
 }

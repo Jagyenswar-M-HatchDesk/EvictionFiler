@@ -17,12 +17,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class DefenseTypeRepository : Repository<DefenseType>, IDefenseTypeRepository
     {
-		private readonly MainDbContext _context;
+		private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
 
-		public DefenseTypeRepository(MainDbContext context) : base(context)
+		public DefenseTypeRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context, contextFactory)
 		{
 			_context = context;
-		}
+            _contextFactory = contextFactory;
+
+        }
 
     }
 }

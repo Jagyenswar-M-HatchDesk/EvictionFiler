@@ -1,0 +1,141 @@
+﻿@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs.FormTypeDto
+@using EvictionFiler.Application.Interfaces.IServices
+@inject ICaseFormService _CaseFormService
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@using EvictionFiler.Client.SpinnerService
+@inject SpinnerService spinnerservice
+@inject IToastService ToastService
+<div class="table-responsive">
+    <table class="info-table mb-4" style="border:none;">
+        <thead style="background-color:#ECF2FF;">
+            <tr>
+
+                <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px;background: #ECF2FF;color: #1F365D">ID</th>
+                <th scope="col" class="info-bar" style="border-radius: 0px;background: #ECF2FF;color: #1F365D">Forms</th>
+                @if (isAdmin)
+                {
+
+                    <th scope="col" class="info-bar" style="border-radius: 0px;background: #ECF2FF;color: #1F365D">Created By</th>
+                }
+                <th scope="col" class="info-bar" style="border-radius: 0px;background: #ECF2FF;color: #1F365D">Created On</th>
+                <th scope="col" style="width:12%;border-radius:0px 8px 0px 0px;background: #ECF2FF;color: #1F365D" class="text-nowrap info-bar">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (caseFormDto != null && caseFormDto.Count() > 0)
+            {
+                int index = 1;
+                @foreach (var form in caseFormDto)
+                {
+                    <tr class="info-row">
+                        <td class="info-block-table">
+                            <div class="value">@index</div>
+
+                        </td>
+                        <td class="info-block-table"><div class="value">@form.FormTypeName</div></td>
+                        @if (isAdmin)
+                        {
+                            <td><div class="value">@form.CreatedByName</div></td>
+                        }
+                        <td class="info-block-table"><div class="value">@form.CreatedOn?.ToString(DateFormats.Default)</div></td>
+                        <td class="d-flex justify-content-between info-block-table" style="gap:2px">
+                            <span class="action-icon value" @onclick="@(() => ViewPdf(form.File))"><i class="fa-solid fa-eye"></i></span>
+                            <span class="action-icon value" @onclick="@(() => EditCaseDetail(form.Id))"><i class="fa-solid fa-pen-to-square"></i></span>
+                            <span class="action-icon-danger value" @onclick="@(() => DeleteCaseDetail(form.Id))"><i class="fa-solid fa-trash"></i></span>
+                        </td>
+                    </tr>
+                    index++;
+                }
+            }
+            else
+            {
+                <tr class="info-row">
+                    <td colspan="4" class="text-muted text-center info-block-table"> <div class="value">No notices generated yet.</div></td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
+
+
+@code {
+    [Parameter]
+    public Guid CaseId { get; set; }
+    [Parameter]
+    public bool isAdmin { get; set; }
+    public bool IsFormGenerated { get; set; } = false;
+    public bool isEditMode { get; set; } = false;
+    [Parameter]
+    public string loggedInUserId { get; set; }
+    private List<GenrateNoticeModel> caseFormDto = new();
+    private GenrateNoticeModel caseForm = new();
+    private GenrateNoticeModel noticeModel = new GenrateNoticeModel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCaseForms();
+    }
+
+    private async Task LoadCaseForms()
+    {
+        caseFormDto = await _CaseFormService.GetCaseFormsByCaseId(CaseId, loggedInUserId, isAdmin);
+        if (caseFormDto.Any())
+        {
+            caseForm = caseFormDto.FirstOrDefault()!;
+        }
+        else
+        {
+            IsFormGenerated = false;
+        }
+        await JS.InvokeVoidAsync("openTab", "activity");
+        StateHasChanged();
+    }
+    private async Task ViewPdf(string filePath)
+    {
+        if (!string.IsNullOrWhiteSpace(filePath))
+        {
+            var fullUrl = Navigation.BaseUri.TrimEnd('/') + filePath;
+            // Navigation.NavigateTo(fullUrl, forceLoad: true);
+            await JS.InvokeVoidAsync("open", fullUrl, "_blank");
+        }
+    }
+
+    public async Task EditCaseDetail(Guid id)
+    {
+        spinnerservice.Show();
+        var result = await _CaseFormService.GetCaseFormByIdAsync(id);
+
+        if (result != null)
+        {
+            noticeModel = new GenrateNoticeModel
+            {
+                Id = result.Id,
+                FormTypeId = result.FormTypeId,
+                File = result.File,
+                HTML = result.HTML,
+                CreatedOn = result.CreatedOn,
+            };
+            isEditMode = true;
+
+        }
+        spinnerservice.Hide();
+        await JS.InvokeVoidAsync("showBootstrapTab", "#actions-tab");
+    }
+    public async Task DeleteCaseDetail(Guid id)
+    {
+        spinnerservice.Show();
+        bool isDeleted = await _CaseFormService.DeleteDetailAsync(id);
+
+        if (isDeleted)
+        {
+            caseFormDto = await _CaseFormService.GetCaseFormsByCaseId(CaseId, loggedInUserId, isAdmin);
+            ToastService.ShowSuccess("File  has been Deleted successfully!");
+            StateHasChanged();
+        }
+        spinnerservice.Hide();
+    }
+}

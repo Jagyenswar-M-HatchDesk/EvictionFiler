@@ -12,8 +12,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class FeesCatalogCourtAppearanceRepository : IFeesCatalogCourtAppearanceRepository
     {
-        private readonly MainDbContext _context;
-        public FeesCatalogCourtAppearanceRepository(MainDbContext context) => _context = context;
+        private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory;
+        public FeesCatalogCourtAppearanceRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory)
+        {
+            _context = context;
+            _contextFactory = contextFactory;
+        }
 
         // Added missing GetByIdAsync
         public Task<FeesCatalogCourtAppearance?> GetByIdAsync(Guid id)
