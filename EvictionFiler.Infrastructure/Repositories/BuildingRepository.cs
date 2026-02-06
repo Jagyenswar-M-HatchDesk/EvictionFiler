@@ -13,11 +13,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class BuildingRepository : Repository<Building>, IBuildingRepository
     {
-        private readonly MainDbContext _context;
+        private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
 
-        public BuildingRepository(MainDbContext context) : base(context)
+        public BuildingRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context, contextFactory)
         {
             _context = context;
+            _contextFactory = contextFactory;
         }
 
         public async Task<string> GenerateBuildingCodeAsync()

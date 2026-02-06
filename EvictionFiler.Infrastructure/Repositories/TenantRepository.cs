@@ -9,20 +9,24 @@ using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Polly;
 using System.Linq;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class TenantRepository : Repository<Tenant>, ITenantRepository
-	{
-		private readonly MainDbContext _dbContext;
-		public TenantRepository(MainDbContext dbContext) : base(dbContext)
-		{
-			_dbContext = dbContext;
-		}
+    {
+        private readonly MainDbContext _dbContext;
+        private readonly IDbContextFactory<MainDbContext> _contextFactory;
+        public TenantRepository(MainDbContext dbContext, IDbContextFactory<MainDbContext> contextFactory) : base(dbContext, contextFactory)
+        {
+            _dbContext = dbContext;
+            _contextFactory = contextFactory;
 
-		public async Task<string> GenerateTenantCodeAsync()
+        }
+
+        public async Task<string> GenerateTenantCodeAsync()
 		{
 			var lastCase = await _dbContext.Tenants
 				.OrderByDescending(c => c.TenantCode)

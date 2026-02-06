@@ -16,29 +16,37 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 	public abstract class Repository<T> : IRepository<T> where T : DeletableBaseEntity
 	{
 		private readonly MainDbContext _context;
-        private readonly IDbContextFactory<MainDbContext> contextFactory;
-        private readonly DbSet<T> _dbSet;
+        private readonly IDbContextFactory<MainDbContext> _contextFactory;
+		private readonly DbSet<T> _dbSet;
 
-		protected Repository(MainDbContext context)
+		protected Repository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory)
 		{
 			_context = context;
-            this.contextFactory = contextFactory;
-            _dbSet = context.Set<T>();
+            _contextFactory = contextFactory;
+			_dbSet = context.Set<T>();
 		}
 		public async Task<T> AddAsync(T entity)
 		{
-			await _dbSet.AddAsync(entity);
+            await using var db = await _contextFactory.CreateDbContextAsync();
+			await db.Set<T>().AddAsync(entity);
+			await db.SaveChangesAsync();
 			return entity;
 		}
 		public async Task AddRangeAsync(IEnumerable<T> entities)
 		{
-			await _dbSet.AddRangeAsync(entities);
+			await using var db = await _contextFactory.CreateDbContextAsync();
+			await db.Set<T>().AddRangeAsync(entities);
+			await db.SaveChangesAsync();
+
 		}
 
 		// Update method ke neeche ya kahin bhi jod sakte ho
 
-		public void UpdateRange(IEnumerable<T> entities)
+		public async Task UpdateRange(IEnumerable<T> entities)
 		{
+			await using var db = await _contextFactory.CreateDbContextAsync();
+			var _dbSet = db.Set<T>();
+
 			if (entities == null)
 				throw new ArgumentNullException(nameof(entities));
 
@@ -56,11 +64,13 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 
 				if (localEntity != null)
 				{
-					_context.Entry(localEntity).State = EntityState.Detached;
+					db.Entry(localEntity).State = EntityState.Detached;
 				}
 
-				_context.Entry(entity).State = EntityState.Modified;
+				db.Entry(entity).State = EntityState.Modified;
 			}
+
+			await db.SaveChangesAsync();
 		}
 
 
@@ -68,34 +78,41 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 
 		public async Task<bool> AnyAsync(Expression<Func<T, bool>>? predicate = null)
 		{
-			return await _dbSet.AnyAsync(predicate!);
+            await using var db = await _contextFactory.CreateDbContextAsync();
+            return await db.Set<T>().AnyAsync(predicate!);
 		}
 
 		public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)
 		{
-			return await _dbSet.CountAsync(predicate!);
+			await using var db = await _contextFactory.CreateDbContextAsync();
+			return await db.Set<T>().CountAsync(predicate!);
 		}
 
 		public async Task<bool> DeleteAsync(Guid id)
 		{
-			var entity = await _dbSet.FindAsync(id);
+			await using var db = await _contextFactory.CreateDbContextAsync();
+			var entity = await db.Set<T>().FindAsync(id);
 			if (entity == null)
 			{
 				return false;
 			}
-			_dbSet.Remove(entity);
-			return true;
+			db.Set<T>().Remove(entity);
+			var result = await db.SaveChangesAsync();
+			if (result > 0) return true;
+			
+			return false;
 
 		}
 		public async Task<bool> SoftDeleteAsync(Guid id)
 		{
-			var entity = await _dbSet.FindAsync(id);
+            await using var db = await _contextFactory.CreateDbContextAsync();
+            var entity = await db.Set<T>().FindAsync(id);
 			if (entity == null)
 			{
 				return false;
 			}
 			entity.IsDeleted = true;
-            _context.Entry(entity).State = EntityState.Modified;
+            db.Entry(entity).State = EntityState.Modified;
 
             return true;
 
@@ -106,7 +123,8 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 
 		public async Task<T?> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[]? includes)
 		{
-			var query = _dbSet.Where(predicate).AsQueryable();
+            await using var db = await _contextFactory.CreateDbContextAsync();
+            var query = db.Set<T>().Where(predicate).AsQueryable();
 			if (includes != null)
 				query = includes.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
 
@@ -116,9 +134,9 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 
 		public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null, params Expression<Func<T, object>>[]? includes)
 		{
-         
 
-            IQueryable<T> query = _dbSet.AsNoTracking();
+            await using var db = await _contextFactory.CreateDbContextAsync();
+            IQueryable<T> query = db.Set<T>().AsNoTracking();
 
             if (predicate != null)
 				query = query.Where(predicate);
@@ -132,9 +150,7 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 
 		public IQueryable<T> GetAllQuerable(Expression<Func<T, bool>>? predicate = null, params Expression<Func<T, object>>[]? includes)
 		{
-			//using var db = contextFactory.CreateDbContext();
-
-			//IQueryable<T> query = db.Set<T>();
+			
 			var query = _dbSet.AsQueryable();
 			if (predicate != null)
 			{
@@ -161,19 +177,22 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 
         public async Task<T?> GetAsync(object id)
 		{
-			if (id == null)
+            await using var db = await _contextFactory.CreateDbContextAsync();
+            if (id == null)
 			{
 				throw new ArgumentNullException(nameof(id));
 			}
-			return await _dbSet.FindAsync(id);
+			return await db.Set<T>().FindAsync(id);
 		}
 
-        public T UpdateAsync(T entity)
+        public async Task<T> UpdateAsync(T entity)
         {
+            await using var db = await _contextFactory.CreateDbContextAsync();
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
-            _dbSet.Attach(entity);
-            return entity;
+			db.Attach(entity);
+			await db.SaveChangesAsync();
+			return entity;
         }
 
 

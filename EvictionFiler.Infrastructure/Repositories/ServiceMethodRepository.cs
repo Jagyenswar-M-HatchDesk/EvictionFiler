@@ -17,7 +17,7 @@ namespace EvictionFiler.Infrastructure.Repositories
         private readonly MainDbContext _context;
         private readonly IDbContextFactory<MainDbContext> dbContextFactory;
 
-        public ServiceMethodRepository(MainDbContext context, IDbContextFactory<MainDbContext> dbContextFactory) : base(context) 
+        public ServiceMethodRepository(MainDbContext context, IDbContextFactory<MainDbContext> dbContextFactory) : base(context, dbContextFactory) 
         {
             _context = context;
             this.dbContextFactory = dbContextFactory;

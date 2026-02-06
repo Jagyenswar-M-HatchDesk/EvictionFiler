@@ -17,12 +17,14 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class RemainderTypeRepository : Repository<RemainderType>, IRemainderTypeRepository
     {
-		private readonly MainDbContext _context;
+		private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
 
-		public RemainderTypeRepository(MainDbContext context) : base(context)
-		{
-			_context = context;
-		}
+		public RemainderTypeRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context, contextFactory)
+        {
+            _context = context;
+            _contextFactory = contextFactory;
+
+        }
 
         public async Task<List<RemainderType>> GetAllRemainderTypes()
         {

@@ -1,0 +1,577 @@
+﻿@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.CourtDto
+@using EvictionFiler.Application.DTOs.CourtPart
+@using EvictionFiler.Application.DTOs.MasterDtos.CountyDto
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Application.Interfaces.IServices.Master
+@using EvictionFiler.Domain.Entities.Master
+@using EvictionFiler.Client.SpinnerService
+@inject SpinnerService spinnerservice
+
+@inject ICourtService _courtService
+@inject ICountyService countyService
+@inject ILegalCaseService _legalCaseService
+@inject IJSRuntime JS
+@inject IToastService ToastService
+
+<table class="info-table mb-4" style="border:none;">
+    <thead>
+        <tr>
+            <th colspan="2" class="info-bar">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="info-bar-title">Court & Opposing</div>
+                    <button type="button" class="btn btn-sm normal p-1" @onclick="ShowCourtModal" title="Edit Courts" style="color:white">
+                        @if (isNewCourt)
+                        {
+                            <i class="fa-solid fa-plus"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-pencil"></i>
+
+                        }
+                    </button>
+                </div>
+            </th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr class="info-row" style="display:flex;">
+            <!-- Column 1 -->
+            <td class="info-block">
+                <div class="label">Court:</div>
+                <div class="value ellipsis">
+                    @(string.IsNullOrWhiteSpace(LegalCaseDto?.Court) ? "--" : LegalCaseDto?.Court)
+                </div>
+            </td>
+
+            <!-- Column 2 -->
+            <td class="info-block">
+                <div class="label">Room:</div>
+                <div class="value ellipsis">
+                    @(string.IsNullOrWhiteSpace(LegalCaseDto?.CourtRoomNo) ? "--" : LegalCaseDto?.CourtRoomNo)
+                </div>
+            </td>
+        </tr>
+
+        <!-- ROW 2 -->
+        <tr class="info-row" style="display:flex;">
+            <!-- Column 1 -->
+            <td class="info-block">
+                <div class="label">Part:</div>
+                <div class="value ellipsis">
+                    @(string.IsNullOrWhiteSpace(LegalCaseDto?.CourtPart) ? "--" : LegalCaseDto?.CourtPart)
+                </div>
+            </td>
+
+            <!-- Column 2 -->
+            <td class="info-block">
+                <div class="label">Judge:</div>
+                <div class="value ellipsis">
+                    @(string.IsNullOrWhiteSpace(LegalCaseDto?.Judge) ? "--" : LegalCaseDto?.Judge)
+                </div>
+            </td>
+        </tr>
+        <tr class="info-row" style="display:flex;">
+            <!-- Column 1 -->
+            <td class="info-block">
+                <div class="label">Next Court Date:</div>
+                <div class="value ellipsis">
+                    @(LegalCaseDto?.NextCourtDate == null ? "--" : LegalCaseDto?.NextCourtDate?.ToString(DateFormats.Default))
+                </div>
+            </td>
+
+            <!-- Column 2 -->
+            <td class="info-block">
+                <div class="label">Index No.:</div>
+                <div class="value ellipsis">
+                    @(string.IsNullOrWhiteSpace(LegalCaseDto?.Index) ? "--" : LegalCaseDto?.Index)
+                </div>
+            </td>
+        </tr>
+
+
+    </tbody>
+</table>
+
+<div class="modal fade" id="courtModal" tabindex="-1" aria-labelledby="CourtModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-semibold" id="buildingModalLabel">Edit Court Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <EditForm Model="@LegalCaseDto" OnValidSubmit="SaveCourtChanges">
+                <DataAnnotationsValidator />
+
+
+
+                <div class="modal-body">
+                    <div class="">
+                        <div class=" p-0">
+
+                            <!-- Search + Add Section -->
+                            <!-- Add/Edit Fields -->
+
+                            <div class=" rounded-3 p-3 position-relative">
+                                @if (ShowClearBtn)
+                                {
+                                    <div>
+                                        <button type="button"
+                                                class=" m-2 buttons"
+                                                style="background: transparent; border: none; z-index: 9999; position:absolute; top:-15px ; right:0px"
+                                                @onclick="OnBindCourtCancel">
+                                            <i class="fa-solid fa-xmark"></i> Clear
+                                        </button>
+                                    </div>
+                                }
+
+
+
+                                <div class="row g-3" style="margin:0px;">
+                                    <div class=@(showCountyDropdown ? "col-md-3" : "col-md-6")>
+                                        <label class="form-label required-label ">Court Type </label>
+                                        <InputSelect class="form-select" @bind-Value="LegalCaseDto.CourtTypeId" style="cursor:pointer;" @bind-Value:after="SelectCourtType">
+                                            @foreach (var l in CourtTypeList)
+                                            {
+                                                <option value="@l.Id">@l.Name</option>
+                                            }
+                                        </InputSelect>
+                                    </div>
+                                    <!-- Court Location -->
+
+                                    <div class=@(showCountyDropdown ? "col-md-3" : "d-none")>
+
+                                        <label class="form-label required-label">County </label>
+                                        <InputSelect class="form-select" @bind-Value="LegalCaseDto.CountyId" style="cursor:pointer;" @bind-Value:after="SelectCounty">
+                                            @foreach (var l in CountyList)
+                                            {
+                                                <option value="@l.Id">@l.Name</option>
+                                            }
+                                        </InputSelect>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label required-label">Court </label>
+                                        <InputSelect class="form-select" @bind-Value="LegalCaseDto.CourtLocationId" style="cursor:pointer;" @onmousedown="ShowAllCourts" @bind-Value:after="SelectCourt">
+                                            <option value="">-- Select --</option>
+                                            @foreach (var l in filteredCourts)
+                                            {
+                                                <option value="@l.Id">@l.Court</option>
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="() => LegalCaseDto.CourtLocationId" />
+                                    </div>
+
+                                    <!-- Part / Room # -->
+                                    @if (!showCourtPartDropdown)
+                                    {
+                                        <div class="col-md-6">
+                                            <label class="form-label required-label">Part / Room #</label>
+                                            <InputText type="text" name="partRoom" class="form-control" @bind-Value="LegalCaseDto.CourtRoom" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Judge</label>
+                                            <InputText class="form-control" @bind-Value="LegalCaseDto.Judge" placeholder="Enter Judge" />
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="col-md-6">
+                                            <label class="form-label required-label">Part / Room #</label>
+                                            <InputSelect class="form-select" @bind-Value="LegalCaseDto.CourtPartId" style="cursor:pointer;" @bind-Value:after="SelectCourtPart">
+                                                @foreach (var l in CourtPartList)
+                                                {
+                                                    <option value="@l.Id">@l.Part - @l.RoomNo</option>
+                                                }
+                                            </InputSelect>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label required-label">Judge</label>
+                                            <InputText class="form-control" @bind-Value="LegalCaseDto.Judge" placeholder="Enter Judge" />
+                                        </div>
+                                    }
+
+
+                                    <div class="col-md-6">
+                                        <label class="form-label required-label ">Index</label>
+                                        <InputText class="form-control" placeholder="Enter Index" @bind-Value="LegalCaseDto.Index" />
+                                    </div>
+
+
+                                    @* <div class="col-md-6">
+                             <label class="form-label required-label">Docket No.</label>
+                             <InputText class="form-control" placeholder="Enter Docket No." @bind-Value="LegalCaseDto.Docketno" readonly="@DocketReadonly" @onclick="CheckMarshal" />
+                         </div> *@
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                    <button type="button" class="btn btn-secondary buttons" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary base buttons">Save</button>
+                </div>
+            </EditForm>
+           
+        </div>
+    </div>
+</div>
+@code {
+    public IntakeModel LegalCaseDto { get; set; } = new();
+    [Parameter]
+    public Guid? CaseId { get; set; }
+    // private IntakeModel LegalCaseDto { get; set; } = new();
+    private IEnumerable<CourtType> CourtTypeList = new List<CourtType>();
+    private List<EditToCountyDto> CountyList = new();
+    private List<CourtPartDto> CourtPartList = new();
+    private List<CourtDto> CourtLocationList = new();
+    public List<CourtPartDto> filteredCourtsPart = new List<CourtPartDto>();
+    private bool showCountyDropdown = false;
+    private bool ShowClearBtn = false;
+    private bool showCourtPartDropdown = false;
+    public List<CourtDto> filteredCourts = new List<CourtDto>();
+    private bool isNewCourt { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        LegalCaseDto = await _legalCaseService.GetCourtByCaseIdAsync(CaseId.Value);
+    }
+    private async Task ShowCourtModal()
+    {
+        // Load lists if empty
+        if (!CourtTypeList.Any())
+            CourtTypeList = await _legalCaseService.CourtTypeList();
+
+        if (!CountyList.Any())
+            CountyList = await countyService.GetAllCounty();
+
+        if (!CourtLocationList.Any())
+            CourtLocationList = await _courtService.GetAllCourtDataAsync();
+
+        // Load CourtPartList if CourtLocationId exists
+        if (LegalCaseDto.CourtLocationId != null && LegalCaseDto.CourtLocationId != Guid.Empty)
+        {
+            var location = CourtLocationList.FirstOrDefault(e => e.Id == LegalCaseDto.CourtLocationId);
+            if (location != null)
+                CourtPartList = location.CourtPart;
+        }
+
+
+        if (LegalCaseDto.CourtTypeId != null && LegalCaseDto.CourtTypeId != Guid.Empty)
+        {
+            var casetype = CourtTypeList.FirstOrDefault(e => e.Id == LegalCaseDto.CourtTypeId);
+            if (casetype != null && !string.IsNullOrEmpty(casetype.Name) && casetype.Name.Contains("NYC"))
+            {
+                showCountyDropdown = true;
+                ShowClearBtn = true;
+            }
+        }
+        else
+        {
+            var nycCourtType = CourtTypeList.FirstOrDefault(e => !string.IsNullOrEmpty(e.Name) && e.Name.Contains("NYC"));
+            if (nycCourtType != null)
+                LegalCaseDto.CourtTypeId = nycCourtType.Id;
+
+            showCountyDropdown = true;
+            ShowClearBtn = true;
+
+            if (LegalCaseDto.CountyId == null || LegalCaseDto.CountyId == Guid.Empty)
+            {
+                if (!string.IsNullOrEmpty(LegalCaseDto.Borough))
+                {
+                    var county = CountyList.FirstOrDefault(e => !string.IsNullOrEmpty(e.Name) && e.Name.Contains(LegalCaseDto.Borough));
+                    if (county != null)
+                        LegalCaseDto.CountyId = county.Id;
+                }
+            }
+        }
+        if (LegalCaseDto.CourtPartId != null && LegalCaseDto.CourtPartId != Guid.Empty)
+        {
+            showCourtPartDropdown = true;
+            var location = CourtLocationList.FirstOrDefault(e => e.Id == LegalCaseDto.CourtLocationId);
+            if (location != null)
+                filteredCourtsPart = location.CourtPart?.ToList() ?? new List<CourtPartDto>();
+        }
+
+        await ShowAllCourts();
+        await JS.InvokeVoidAsync("showModal", "courtModal");
+    }
+
+    private async Task ShowAllCourts()
+    {
+        if (LegalCaseDto.CountyId != null)
+        {
+            // Sirf selected county ke courts dikhao
+            filteredCourts = CourtLocationList
+                                .Where(x => x.CountyId == LegalCaseDto.CountyId)
+                                .ToList();
+        }
+        else
+        {
+
+            filteredCourts = await _courtService.GetAllCourtDataAsync();
+        }
+
+    }
+    private async Task SaveCourtChanges()
+    {
+        //if (!await ValidateCurrentStep("Court")) return;
+        spinnerservice.Show();
+
+        // bool addOrUpdate = false;
+
+        // // if (string.IsNullOrWhiteSpace(court.SelectedCourtPart.Part))
+        // // {
+        // //     await JS.InvokeVoidAsync("alert", "Part is Required");
+        // //     await JS.InvokeVoidAsync("hideModal", "courtModal");
+        // //     await JS.InvokeVoidAsync("showModal", "courtModal");
+        // //     spinnerservice.Hide();
+        // //     return;
+        // // }
+
+        // // ============= ADD COURT =============
+        // if (court.Id == null || court.Id == Guid.Empty)
+        // {
+        //     var newCourt = new CourtDto
+        //     {
+        //         Court = court.Court,
+        //         Address = court.Address,
+        //         Phone = court.Phone,
+        //         Notes = court.Notes
+        //     };
+
+        //     // 1️⃣ Insert Court
+        //     var courtId = await _courtService.AddCourtAsync(newCourt);
+
+        //     if (courtId != Guid.Empty)
+        //     {
+        //         // 2️⃣ Ensure CourtPart has CourtId
+        //         court.SelectedCourtPart.CourtId = courtId;
+
+        //         // 3️⃣ Insert CourtPart
+        //         var courtPartIds = await courtpartService.AddCourtPartListAsync(
+        //                                  new List<CourtPartDto> { court.SelectedCourtPart });
+
+        //         if (courtPartIds != null)
+        //         {
+        //             LegalCaseDto.CourtPartId = courtPartIds.First();
+        //         }
+
+        //         // 4️⃣ Assign CourtId to Case
+        //         LegalCaseDto.CourtId = courtId;
+
+        //         addOrUpdate = true;
+        //     }
+        // }
+        // // ============= UPDATE COURT =============
+        // else
+        // {
+        //     // If NEW CourtPart added under existing COURT
+        //     if (court.SelectedCourtPart.Id == Guid.Empty)
+        //     {
+        //         court.SelectedCourtPart.CourtId = court.Id;
+
+        //         var newPartList = await courtpartService.AddCourtPartListAsync(
+        //                               new List<CourtPartDto> { court.SelectedCourtPart });
+
+        //         if (newPartList != null)
+        //         {
+        //             LegalCaseDto.CourtPartId = newPartList.First();
+        //         }
+        //     }
+        //     else
+        //     {
+        //         // Existing part selected
+        //         LegalCaseDto.CourtPartId = court.SelectedCourtPart.Id;
+        //     }
+
+        //     LegalCaseDto.CourtRoomNo = court.SelectedCourtPart.RoomNo;
+        //     LegalCaseDto.CourtPart = court.SelectedCourtPart.Part;
+        //     LegalCaseDto.CourtId = court.Id;
+
+        //     addOrUpdate = true;
+        // }
+
+        // ============= UPDATE CASE =============
+
+        var success = await _legalCaseService.UpdateCaseForCourtAsync(LegalCaseDto);
+        
+        if (success.HasValue)
+        {
+            ToastService.ShowSuccess("Court details updated successfully!");
+            await JS.InvokeVoidAsync("hideModal", "courtModal");
+
+            await LoadData();
+        }
+        else
+        {
+            ToastService.ShowError("Failed to update Court details.");
+        }
+        spinnerservice.Hide();
+    }
+    private void OnBindCourtCancel()
+    {
+        LegalCaseDto.CourtLocationId = null;
+        LegalCaseDto.CourtTypeId = null;
+        LegalCaseDto.CountyId = null;
+        showCountyDropdown = false;
+        showCourtPartDropdown = false;
+        LegalCaseDto.CourtPartId = null;
+        LegalCaseDto.Judge = null;
+        LegalCaseDto.Court = null;
+        LegalCaseDto.CourtRoom = null;
+        LegalCaseDto.CourtRoomNo = null;
+        LegalCaseDto.CourtPart = null;
+
+        ShowClearBtn = false;
+
+    }
+    private void SelectCourtPart()
+    {
+
+        if (LegalCaseDto.CourtPartId != null && LegalCaseDto.CourtPartId != Guid.Empty)
+        {
+            var courtpart = CourtPartList.Where(x => x.Id == LegalCaseDto.CourtPartId)
+                                .FirstOrDefault();
+            LegalCaseDto.Judge = courtpart.Judge;
+
+            LegalCaseDto.CourtRoom = courtpart.RoomNo;
+            LegalCaseDto.CourtRoomNo = courtpart.RoomNo;
+            LegalCaseDto.CourtPart = courtpart.Part;
+        }
+        ShowClearBtn = true;
+        StateHasChanged();
+    }
+    private async Task SelectCourtType()
+    {
+        var CourtType = CourtTypeList.FirstOrDefault(ty => ty.Id == LegalCaseDto.CourtTypeId);
+        var query = CourtLocationList.ToList();
+        if (CourtType!.Name.Contains("NYC"))
+        {
+            LegalCaseDto.CountyId = null;
+            showCountyDropdown = true;
+            // showCourtPartDropdown = true;
+            filteredCourts = query.Where(x => !x.CountyName.Contains("Nassau") && !x.CountyName.Contains("Westchester"))
+                                   .ToList();
+        }
+        else if (CourtType.Name.Contains("Nassau"))
+        {
+            showCountyDropdown = false;
+            showCourtPartDropdown = false;
+            var county = CountyList.Where(e => e.Name.Contains("Nassau")).FirstOrDefault();
+            LegalCaseDto.CountyId = county.Id;
+            filteredCourts = query.Where(x => x.CountyName.Contains("Nassau"))
+                                   .ToList();
+
+        }
+        else if (CourtType.Name.Contains("Westchester"))
+        {
+            showCountyDropdown = false;
+            showCourtPartDropdown = false;
+            var county = CountyList.Where(e => e.Name.Contains("Westchester")).FirstOrDefault();
+            LegalCaseDto.CountyId = county.Id;
+            filteredCourts = query.Where(x => x.CountyName.Contains("Westchester"))
+                                   .ToList();
+        }
+
+        ShowClearBtn = true;
+        StateHasChanged();
+    }
+    private void SelectCounty()
+    {
+
+        if (LegalCaseDto.CountyId != null && LegalCaseDto.CountyId != Guid.Empty)
+        {
+            filteredCourts = CourtLocationList.Where(x => x.CountyId == LegalCaseDto.CountyId)
+                                .ToList();
+        }
+        ShowClearBtn = true;
+        StateHasChanged();
+    }
+
+    private async Task SelectCourt()
+    {
+        var selectedCourtId = LegalCaseDto.CourtLocationId;
+
+        var court = CourtLocationList.Where(ct => ct.Id == LegalCaseDto.CourtLocationId).FirstOrDefault();
+        var Courttype = CourtTypeList.Where(cts => cts.Name.Contains(court.CountyName)).FirstOrDefault();
+        if (Courttype == null)
+        {
+            Courttype = CourtTypeList.Where(cts => cts.Name.Contains("NYC")).FirstOrDefault();
+        }
+        if (court.CourtPart.Any())
+        {
+            showCourtPartDropdown = true;
+            CourtPartList = court.CourtPart.ToList();
+        }
+
+
+
+
+        if ((LegalCaseDto.CourtTypeId == null || LegalCaseDto.CourtTypeId == Guid.Empty) && LegalCaseDto.CourtTypeId != Courttype.Id)
+        {
+
+            var CourtType = new CourtType();
+            var query = CourtTypeList.ToList();
+            if (court.CountyName.Contains("Nassau") || court.CountyName.Contains("Westchester"))
+            {
+                CourtType = query.Where(x => x.Name.Contains(LegalCaseDto.County))
+                                  .FirstOrDefault();
+            }
+            else
+            {
+                showCountyDropdown = true;
+                CourtType = query.Where(x => !x.Name.Contains("Nassau") && !x.Name.Contains("Westchester"))
+                                    .FirstOrDefault();
+            }
+            LegalCaseDto.CourtTypeId = CourtType.Id;
+            await SelectCourtType();
+        }
+
+        if ((LegalCaseDto.CountyId == null || LegalCaseDto.CountyId == Guid.Empty) && LegalCaseDto.CountyId != court.CountyId)
+        {
+            var county = CountyList.FirstOrDefault(cts => cts.Id == court.CountyId);
+            // if (court.CountyName.Contains("Nassau") || court.CountyName.Contains("Westchester"))
+            // {
+            LegalCaseDto.CountyId = county.Id;
+            LegalCaseDto.County = county?.Name;
+
+            // }
+            SelectCounty();
+        }
+
+        await InvokeAsync(StateHasChanged);
+        LegalCaseDto.CourtLocationId = null;
+        await Task.Delay(10);
+
+        if (filteredCourts.Any(x => x.Id == selectedCourtId))
+        {
+            LegalCaseDto.CourtLocationId = selectedCourtId;
+            LegalCaseDto.Court = court.Court;
+            LegalCaseDto.CourtLocation = court.Court;
+
+            ShowClearBtn = true;
+        }
+        else
+        {
+            // Optional: clear the selection if invalid
+            LegalCaseDto.CourtLocationId = Guid.Empty;
+        }
+
+        StateHasChanged();
+    }
+
+    
+}

@@ -15,12 +15,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class VirtualPlatformRepository : Repository<VirtualPlatform> , IVirtualPlatformRepository
     {
-        private readonly MainDbContext _mainDbContext;
+        private readonly MainDbContext _maindbcontext; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
         private readonly IDbContextFactory<MainDbContext> contextFactory;
 
-        public VirtualPlatformRepository(MainDbContext mainDbContext,IDbContextFactory<MainDbContext> contextFactory) : base(mainDbContext) 
+        public VirtualPlatformRepository(MainDbContext mainDbContext,IDbContextFactory<MainDbContext> contextFactory) : base(mainDbContext, contextFactory) 
         {
-            _mainDbContext = mainDbContext;
+            _maindbcontext = mainDbContext;
             this.contextFactory = contextFactory;
         }
         public async Task<IEnumerable<VirtualPlatform>> GetAllAsync1(Expression<Func<VirtualPlatform, bool>>? predicate = null, params Expression<Func<VirtualPlatform, object>>[]? includes)

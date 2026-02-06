@@ -15,14 +15,16 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class PremiseTypeRepository : Repository<PremiseType>, IPremiseTypeRepository
 	{
-		private readonly MainDbContext _context;
+		private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
 
-		public PremiseTypeRepository(MainDbContext context) : base(context)
+		public PremiseTypeRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context, contextFactory)
 		{
 			_context = context;
-		}
+            _contextFactory = contextFactory;
 
-		public async Task<List<PremiseType>> GetAllPremiseType()
+        }
+
+        public async Task<List<PremiseType>> GetAllPremiseType()
 		{
 			return await _context.MstPremiseTypes.ToListAsync();
 		}

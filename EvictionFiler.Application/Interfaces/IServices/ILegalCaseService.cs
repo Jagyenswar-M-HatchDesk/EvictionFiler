@@ -61,10 +61,12 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<bool> DeleteAdditionalpetitioner(CaseAdditionalPetitioner petitioner);
 
 
-        Task<IEnumerable<CaseNotes>> GetAllCaseNotes();
+        Task<IEnumerable<CaseNotes>> GetAllCaseNotes(Guid caseId);
         Task<IntakeModel> GetLandlordByCaseIdAsync(Guid caseId);
         Task<IntakeModel> GetBuildingByCaseIdAsync(Guid caseId);
         Task<IntakeModel> GetTenantByCaseIdAsync(Guid caseId);
         Task<IntakeModel> GetClientByCaseIdAsync(Guid caseId);
+        Task<IntakeModel> GetCourtByCaseIdAsync(Guid caseId);
+        Task<Guid?> UpdateCaseForCourtAsync(IntakeModel legalCase);
     }
 }

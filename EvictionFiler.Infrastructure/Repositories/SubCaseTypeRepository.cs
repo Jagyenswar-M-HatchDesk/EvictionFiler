@@ -2,6 +2,8 @@
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +15,12 @@ namespace EvictionFiler.Infrastructure.Repositories
     
     public class SubCaseTypeRepository : Repository<SubCaseType>, ISubCaseTypeRepository
     {
-        private readonly MainDbContext _mainDbContext;
-        public SubCaseTypeRepository(MainDbContext mainDbContext) : base(mainDbContext)
+        private readonly MainDbContext _maindbcontext; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
+        public SubCaseTypeRepository(MainDbContext mainDbContext , IDbContextFactory<MainDbContext> contextFactory) : base(mainDbContext , contextFactory)
         {
-            _mainDbContext = mainDbContext;
+            _maindbcontext = mainDbContext;
+            _contextFactory = contextFactory;
+
         }
     }
 }

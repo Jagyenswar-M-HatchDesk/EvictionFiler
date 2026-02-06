@@ -4,6 +4,7 @@ using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,11 +15,11 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class AdditionalTenantsRepository : Repository<AdditioanlTenants>, IAdditionalTenantsRepository
     {
-        private readonly MainDbContext _context;
-
-        public AdditionalTenantsRepository(MainDbContext context) : base(context)
+        private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
+        public AdditionalTenantsRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context, contextFactory)
         {
             _context = context;
+            _contextFactory = contextFactory;
         }
 
         public async Task AddAdditionalTenant(List<AddtionalTenantDto> tenant)

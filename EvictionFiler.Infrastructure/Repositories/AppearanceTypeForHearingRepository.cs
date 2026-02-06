@@ -20,10 +20,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class AppearanceTypeForHearingRepository : Repository<AppearanceTypeforHearing>, IAppearanceTypeForHearingRepository
     {
-		private readonly MainDbContext _context;
+		private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
         private readonly IDbContextFactory<MainDbContext> contextFactory;
 
-        public AppearanceTypeForHearingRepository(MainDbContext context,IDbContextFactory<MainDbContext>contextFactory) : base(context)
+        public AppearanceTypeForHearingRepository(MainDbContext context,IDbContextFactory<MainDbContext>contextFactory) : base(context, contextFactory)
 		{
 			_context = context;
             this.contextFactory = contextFactory;

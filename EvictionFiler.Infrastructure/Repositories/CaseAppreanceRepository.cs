@@ -15,10 +15,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class CaseAppreanceRepository : Repository<CaseAppearance>, ICaseAppearanceRepository
     {
-        private readonly MainDbContext _mainDbContext;
+        private readonly MainDbContext _mainDbContext; 
         private readonly IDbContextFactory<MainDbContext> contextFactory;
 
-        public CaseAppreanceRepository(MainDbContext mainDbContext,IDbContextFactory<MainDbContext>contextFactory) : base(mainDbContext) 
+        public CaseAppreanceRepository(MainDbContext mainDbContext,IDbContextFactory<MainDbContext> contextFactory) : base(mainDbContext, contextFactory) 
         {
             _mainDbContext = mainDbContext;
             this.contextFactory = contextFactory;

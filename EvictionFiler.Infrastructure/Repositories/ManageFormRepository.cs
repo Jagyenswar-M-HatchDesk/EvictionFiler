@@ -13,10 +13,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class ManageFormRepository : Repository<FormTypes>,IManageFormRepository
     {
-        private readonly MainDbContext _context;
-        public ManageFormRepository(MainDbContext context) : base(context)
-        { 
+        private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
+        public ManageFormRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context, contextFactory)
+        {
             _context = context;
+            _contextFactory = contextFactory;
+
         }
 
         public async Task<List<FormTypes>> GetAllForm()

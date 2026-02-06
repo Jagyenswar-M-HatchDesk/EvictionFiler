@@ -15,12 +15,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class FormTypesRepository : Repository<FormTypes>, IFormTypesRepository
 	{
-		
+		private readonly MainDbContext _mainDbContext;
         private readonly IDbContextFactory<MainDbContext> dbContextFactory;
 
-        public FormTypesRepository(IDbContextFactory<MainDbContext> dbContextFactory): base(dbContextFactory.CreateDbContext())
+        public FormTypesRepository(MainDbContext mainDbContext, IDbContextFactory<MainDbContext> dbContextFactory): base(mainDbContext,dbContextFactory)
         {
-           
+           _mainDbContext = mainDbContext;
             this.dbContextFactory = dbContextFactory;
         }
 

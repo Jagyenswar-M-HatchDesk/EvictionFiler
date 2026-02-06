@@ -1,0 +1,70 @@
+﻿@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Domain.Entities
+@inject ILegalCaseService _legalcaseSerice
+
+<div class="table-responsive">
+    <table class="info-table mb-4" style="border:none;">
+        <thead>
+            <tr>
+                <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px;">ID</th>
+                <th scope="col" class="info-bar" style="border-radius:0px;">Notes</th>
+                @if (isAdmin)
+                {
+
+                    <th scope="col" class="info-bar" style="border-radius:0px;">Created By</th>
+                }
+                <th scope="col" class="info-bar" style="border-radius:0px;">Created On</th>
+                <th scope="col" style="width:12%;border-radius:0px 8px 0px 0px;" class="text-nowrap info-bar">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (CaseNotes != null && CaseNotes.Count() > 0)
+            {
+                int index = 1;
+                @foreach (var notes in CaseNotes)
+                {
+                    <tr class="info-row">
+                        <td class="info-block-table">
+                            <div class="value">@index</div>
+
+                        </td>
+                        <td class="info-block-table"><div class="value">@notes.Notes</div></td>
+                        @if (isAdmin)
+                        {
+                            <td class="info-block-table"><div class="value">@notes.CreatedBy</div></td>
+                        }
+                        <td class="info-block-table"><div class="value">@notes.CreatedOn.ToString(DateFormats.Default)</div></td>
+                        <td class="d-flex justify-content-between info-block-table" style="gap:2px">
+
+                            <span class="action-icon value"><i class="fa-solid fa-pen-to-square"></i></span>
+                            <span class="action-icon-danger value"><i class="fa-solid fa-trash"></i></span>
+                        </td>
+                    </tr>
+                    index++;
+                }
+            }
+            else
+            {
+                <tr class="info-row">
+                    <td colspan="4" class="text-muted text-center info-block-table"> <div class="value">No notes submitted yet.</div></td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
+
+
+@code {
+    [Parameter]
+    public Guid CaseId { get; set; }
+    [Parameter]
+    public bool isAdmin { get; set; }
+
+    public IEnumerable<CaseNotes> CaseNotes = new List<CaseNotes>();
+    protected override async Task OnInitializedAsync()
+    {
+        CaseNotes = await _legalcaseSerice.GetAllCaseNotes(CaseId);
+    }
+}

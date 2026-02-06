@@ -14,10 +14,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class ExemptionReasonRepository : Repository<ExemptionReason> , IExemptionReasonRepository
     {
-        private readonly MainDbContext _context;
+        private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
         private readonly IDbContextFactory<MainDbContext> contextFactory;
 
-        public ExemptionReasonRepository(MainDbContext context,IDbContextFactory<MainDbContext>contextFactory) : base(context) 
+        public ExemptionReasonRepository(MainDbContext context,IDbContextFactory<MainDbContext>contextFactory) : base(context, contextFactory) 
         {
             _context = context;
             this.contextFactory = contextFactory;

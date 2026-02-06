@@ -9,10 +9,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class TenancyTypeRepository : Repository<TenancyType>, ITenancyTypeRepository
 	{
-		private readonly MainDbContext _context;
+		private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
         private readonly IDbContextFactory<MainDbContext> contextFactory;
 
-        public TenancyTypeRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context)
+        public TenancyTypeRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context, contextFactory)
 	{
 		_context = context;
             this.contextFactory = contextFactory;

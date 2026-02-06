@@ -12,8 +12,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class FeesCatalogRepository : IFeesCatalogRepository
     {
-        private readonly MainDbContext _context;
-        public FeesCatalogRepository(MainDbContext context) => _context = context;
+        private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory;
+        public FeesCatalogRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory)
+        {
+            _context = context;
+            _contextFactory = contextFactory;
+        }
 
         public Task<FeesCatalog?> GetByIdAsync(Guid id)
         {

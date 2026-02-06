@@ -18,10 +18,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class CaseTypeRepository : Repository<CaseType>, ICaseTypeRepository
 	{
-		private readonly MainDbContext _context;
+		private readonly MainDbContext _context; 
         private readonly IDbContextFactory<MainDbContext> contextFactory;
 
-        public CaseTypeRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context)
+        public CaseTypeRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory) : base(context, contextFactory)
 		{
 			_context = context;
             this.contextFactory = contextFactory;

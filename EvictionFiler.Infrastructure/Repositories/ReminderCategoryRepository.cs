@@ -15,10 +15,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class ReminderCategoryRepository : Repository<ReminderCategory> , IReminderCategoryRepository
     {
-        private readonly MainDbContext _mainDbContext;
+        private readonly MainDbContext _mainDbContext; 
         private readonly IDbContextFactory<MainDbContext> contextFactory;
 
-        public ReminderCategoryRepository(MainDbContext mainDbContext,IDbContextFactory<MainDbContext>contextFactory) : base(mainDbContext) 
+        public ReminderCategoryRepository(MainDbContext mainDbContext,IDbContextFactory<MainDbContext>contextFactory) : base(mainDbContext, contextFactory) 
         {
             _mainDbContext = mainDbContext;
             this.contextFactory = contextFactory;

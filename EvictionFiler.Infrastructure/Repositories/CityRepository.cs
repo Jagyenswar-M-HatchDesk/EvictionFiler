@@ -15,12 +15,12 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class CityRepository : Repository<City> , ICityRepository
     {
-        private readonly MainDbContext _mainDbContext;
+        private readonly MainDbContext _maindbcontext;  
         private readonly IDbContextFactory<MainDbContext> contextFactory;
 
-        public CityRepository(MainDbContext mainDbContext,IDbContextFactory<MainDbContext>contextFactory) : base(mainDbContext) 
+        public CityRepository(MainDbContext mainDbContext,IDbContextFactory<MainDbContext>contextFactory) : base(mainDbContext, contextFactory) 
         {
-            _mainDbContext = mainDbContext;
+            _maindbcontext = mainDbContext;
             this.contextFactory = contextFactory;
         }
         public async Task<List<City>> GetAlllAsync(Expression<Func<City, bool>>? predicate = null, params Expression<Func<City, object>>[]? includes)

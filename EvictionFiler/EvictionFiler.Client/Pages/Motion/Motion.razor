@@ -2,12 +2,15 @@
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.CaseAppearanceDtos
 @using EvictionFiler.Application.DTOs.CaseHearing
+@using EvictionFiler.Application.DTOs.CaseNoticeInfoDtos
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Client.SpinnerService
 @inject IJSRuntime JS
 @inject SpinnerService spinnerservice
 @inject IToastService ToastService
 @inject ICaseAppearanceService _caseAppreance
+@inject ICaseNoticeInfoService _caseNoticeinfo
+@inject IRemianderCenterService _remainder
 
 
 
@@ -183,7 +186,7 @@
     </div>
 </div>
 
-            @code {
+@code {
     private CaseAppearanceDto Model { get; set; }=new();
     [Parameter] public Guid? CurrentCaseId { get; set; }
     [Parameter] public IntakeModel legalcaseDto { get; set; } = new();
@@ -191,7 +194,9 @@
     private List<CaseHearingDto> CaseHearings = new();
     private CaseAppearanceDto MotionJudgements = new();
     [Parameter] public EventCallback OnFormCreate { get; set; } = new();
-
+    private CaseNoticeInfoDto CaseNoticeInfos = new();
+    private DateOnly? VacateDate { get; set; }
+    private DateTime? NextRemainder { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -199,6 +204,7 @@
             return;
 
         await LoadJudgement();
+        await LoadOthers();
 
     }
     private async void ShowStipulationModal()
@@ -228,6 +234,29 @@
 
 
 
+        StateHasChanged();
+    }
+    private async Task LoadOthers()
+    {
+        var casenotice = await _caseNoticeinfo.GetAllCasenoticeInfo(legalcaseDto.Id);
+        if (casenotice != null)
+        {
+            CaseNoticeInfos = casenotice.Where(e => e.FormTypeName.Contains("Demand")).FirstOrDefault() ?? new CaseNoticeInfoDto();
+            var date = CaseNoticeInfos.DateNoticeServed?.AddDays(CaseNoticeInfos.CalcNoticeLength ?? 0);
+            VacateDate = CaseNoticeInfos.DateNoticeServed.HasValue ? date : null;
+        }
+        NextRemainder = CaseHearings.Where(e => e.HearingDate > DateTime.Now).OrderBy(ed => ed.HearingDate).Select(ab => ab.HearingDate).FirstOrDefault();
+
+        var remainders = await _remainder.GetRemainderCenterByCaseIdAsync(legalcaseDto.Id);
+        // remainders = remainders.OrderBy(e => e.When).ToList();
+        if (remainders != null)
+        {
+            legalcaseDto.RemainderDate = remainders
+        .Where(r => r.When > DateTime.Now)
+        .OrderBy(r => r.When)
+        .Select(r => r.When)
+        .FirstOrDefault();
+        }
         StateHasChanged();
     }
     private async Task SaveStipulationChanges()

@@ -17,11 +17,11 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class CasesRepository : Repository<LegalCase>, ICasesRepository
 	{
-        private readonly MainDbContext _context;
+        private readonly MainDbContext _context; 
         private readonly IUserRepository _userRepo;
         private readonly IDbContextFactory<MainDbContext> contextFactory;
 
-        public CasesRepository(MainDbContext context , IUserRepository userRepo,IDbContextFactory<MainDbContext>contextFactory) : base(context)
+        public CasesRepository(MainDbContext context , IUserRepository userRepo,IDbContextFactory<MainDbContext>contextFactory) : base(context, contextFactory)
 		{
             _context = context;
             _userRepo = userRepo;
@@ -53,6 +53,25 @@ namespace EvictionFiler.Infrastructure.Repositories
             _context.LegalCases.Update(existing);
 
             var result =await _context.SaveChangesAsync();
+            if (result > 0) return casedetails.Id;
+
+            return null;
+        }
+        public async Task<Guid?> UpdateCaseCourt(IntakeModel casedetails)
+        {
+            await using var db = await contextFactory.CreateDbContextAsync();
+            var existingCase = db.LegalCases.Find(casedetails.Id);
+            if (existingCase == null) return null;
+
+            existingCase.CourtLocationId = casedetails.CourtLocationId;
+
+            existingCase.CourtPartId = casedetails.CourtPartId;
+            existingCase.CourtTypeId = casedetails.CourtTypeId;
+            existingCase.CourtId = casedetails.CourtId;
+
+            db.LegalCases.Update(existingCase);
+
+            var result =await db.SaveChangesAsync();
             if (result > 0) return casedetails.Id;
 
             return null;

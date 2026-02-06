@@ -18,7 +18,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
    public  class CourtRepository:ICourtRepository
     {
-        private readonly MainDbContext _mainDbContext;
+        private readonly MainDbContext _mainDbContext; 
         private readonly IDbContextFactory<MainDbContext> contextFactory;
 
         public CourtRepository(MainDbContext mainDbContext,IDbContextFactory<MainDbContext> contextFactory)
@@ -29,7 +29,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<Courts>> GetAllCourtDataAsync()
         {
-            return await _mainDbContext.Courts.Include(e => e.CourtParts).Include(e=>e.County).OrderBy(e=>e.Court).Take(10).ToListAsync();
+            await using var db = await contextFactory.CreateDbContextAsync(); 
+            return await db.Courts.Include(e => e.CourtParts).Include(e=>e.County).OrderBy(e=>e.Court).Take(10).ToListAsync();
         }
         public async Task<PaginationDto<Courts>> GetPagedCourtsAsync(int pageNumber, int pageSize, string searchTerm)
         {

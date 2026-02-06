@@ -14,14 +14,14 @@ using System.Threading.Tasks;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
-    public class AppearanceModeRepository :  Repository<AppearanceMode>, IAppearanceModeRepository
+    public class AppearanceModeRepository : Repository<AppearanceMode>, IAppearanceModeRepository
     {
-            private readonly MainDbContext _mainDbContext;
+        private readonly MainDbContext _maindbcontext;
         private readonly IDbContextFactory<MainDbContext> contextFactory;
 
-        public AppearanceModeRepository(MainDbContext mainDbContext,IDbContextFactory<MainDbContext> contextFactory) : base(mainDbContext)
-            {
-                _mainDbContext = mainDbContext;
+        public AppearanceModeRepository(MainDbContext mainDbContext, IDbContextFactory<MainDbContext> contextFactory) : base(mainDbContext, contextFactory)
+        {
+            _maindbcontext = mainDbContext;
             this.contextFactory = contextFactory;
         }
         public async Task<IEnumerable<AppearanceMode>> GetAllAsync1(Expression<Func<AppearanceMode, bool>>? predicate = null, params Expression<Func<AppearanceMode, object>>[]? includes)

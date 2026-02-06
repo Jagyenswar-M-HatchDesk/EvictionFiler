@@ -2,6 +2,7 @@
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,10 +13,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class CourtTodayTypeRepository : Repository<CourtToday>, ICourtTodayTypeRepository
     {
-        private readonly MainDbContext _mainDbContext;
-        public CourtTodayTypeRepository(MainDbContext mainDbContext) : base(mainDbContext) 
+        private readonly MainDbContext _maindbcontext; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
+        public CourtTodayTypeRepository(MainDbContext maindbcontext, IDbContextFactory<MainDbContext> contextFactory) : base(maindbcontext, contextFactory)
         {
-            _mainDbContext = mainDbContext;
+            _maindbcontext = maindbcontext;
         }
     }
 }

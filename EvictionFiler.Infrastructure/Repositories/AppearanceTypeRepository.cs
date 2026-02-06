@@ -20,10 +20,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
 	public class AppearanceTypeRepository : Repository<AppearanceType>, IAppearanceTypeRepository
 	{
-		private readonly MainDbContext _context;
+		private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
         private readonly IDbContextFactory<MainDbContext> contextFactory;
 
-        public AppearanceTypeRepository(MainDbContext context,IDbContextFactory<MainDbContext>contextFactory) : base(context)
+        public AppearanceTypeRepository(MainDbContext context,IDbContextFactory<MainDbContext>contextFactory) : base(context , contextFactory)
 		{
 			_context = context;
             this.contextFactory = contextFactory;

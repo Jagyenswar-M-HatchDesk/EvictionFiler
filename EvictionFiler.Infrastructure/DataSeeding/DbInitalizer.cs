@@ -59,7 +59,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				await SeedClientRoles(context);
 				await SeedCaseStatus(context);
 				await SeedCounty(context);
-				await SeedCategory(context);
+				await SeedCategories(context);
                 await SeedUnitType(context);
                 await SeedFilingMethod(context);
                 await SeedServiceMethod(context);
@@ -68,7 +68,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 await SeedAppreanceMode(context);
                 await SeedVirtualPlatform(context);
                 await SeedCourtType(context);
-                await SeedReminderCategory(context);
+                await SeedReminderCategories(context);
                 await SeedReminderEscalates(context);
                 await SeedDocumentType(context);
                 await SeedCourtTodayTypes(context);
@@ -137,7 +137,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 }
             }
         }
-        private static async Task SeedReminderCategory(MainDbContext context)
+        private static async Task SeedReminderCategories(MainDbContext context)
         {
             var appearancetypes = InitialDataGenerator.GetReminderCategory();
             foreach (var type in appearancetypes)
@@ -286,7 +286,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
             }
         }
 
-        private static async Task SeedCategory(MainDbContext context)
+        private static async Task SeedCategories(MainDbContext context)
         {
             var casetypes = InitialDataGenerator.GetCategory();
             foreach (var type in casetypes)

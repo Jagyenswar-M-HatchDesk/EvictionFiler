@@ -9,6 +9,7 @@ using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,11 +20,13 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class DashBoardRepository : IDashBoardRepository
     {
-        private readonly MainDbContext _context;
+        private readonly MainDbContext _context; private readonly IDbContextFactory<MainDbContext> _contextFactory; 
 
-        public DashBoardRepository(MainDbContext context) 
+        public DashBoardRepository(MainDbContext context, IDbContextFactory<MainDbContext> contextFactory)
         {
             _context = context;
+            _contextFactory = contextFactory;
+
         }
 
         public async Task<List<EditToTenantDto>> GetTenantSuggestions(string term)
