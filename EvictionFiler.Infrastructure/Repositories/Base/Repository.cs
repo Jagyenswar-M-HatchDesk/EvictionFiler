@@ -185,14 +185,18 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 			return await db.Set<T>().FindAsync(id);
 		}
 
-        public async Task<T> UpdateAsync(T entity)
+        public async Task<T?> UpdateAsync(T entity)
         {
-            await using var db = await _contextFactory.CreateDbContextAsync();
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
-			db.Attach(entity);
-			await db.SaveChangesAsync();
-			return entity;
+
+            await using var db = await _contextFactory.CreateDbContextAsync();
+
+            db.Entry(entity).State = EntityState.Modified;
+
+            var result = await db.SaveChangesAsync();
+
+            return result > 0 ? entity : default;
         }
 
 

@@ -24,6 +24,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task AddAdditionalTenant(List<AddtionalTenantDto> tenant)
         {
+            await using var db = await _contextFactory.CreateDbContextAsync(); 
             try
             {
                 var newtenant = tenant.Select(e => new AdditioanlTenants()
@@ -38,8 +39,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 
                 }).ToList();
 
-                await _context.AdditioanlTenants.AddRangeAsync(newtenant);
-                var result = _context.SaveChanges();
+                await db.AdditioanlTenants.AddRangeAsync(newtenant);
+                var result = db.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -49,6 +50,8 @@ namespace EvictionFiler.Infrastructure.Repositories
         }
         public async Task<bool> UpdateAdditionalTenant(List<AddtionalTenantDto> tenant)
         {
+            await using var db = await _contextFactory.CreateDbContextAsync();
+
             try
             {
                 foreach (var item in tenant)
@@ -62,9 +65,9 @@ namespace EvictionFiler.Infrastructure.Repositories
                     existing.TenantId = item.TenantId;
                     existing.IsDeleted = item.IsDeleted;
 
-                    _context.AdditioanlTenants.Update(existing);
+                    db.AdditioanlTenants.Update(existing);
                 }
-                var result = _context.SaveChanges();
+                var result = db.SaveChanges();
 
                 if (result > 0) return true;
 
@@ -79,9 +82,11 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<AdditioanlTenants>> GetAdditionalTenants(Guid? Id)
         {
+            await using var db = await _contextFactory.CreateDbContextAsync();
+
             try
             {
-                var tenants = await _context.AdditioanlTenants.Where(e => e.TenantId == Id).ToListAsync();
+                var tenants = await db.AdditioanlTenants.Where(e => e.TenantId == Id).ToListAsync();
                 if (tenants.Count > 0) return tenants;
 
                 return new List<AdditioanlTenants>();
@@ -95,9 +100,11 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<AdditioanlTenants> GetAdditionalTenantsById(Guid? Id)
         {
+            await using var db = await _contextFactory.CreateDbContextAsync();
+
             try
             {
-                var tenant = await _context.AdditioanlTenants.Where(e => e.Id == Id).FirstOrDefaultAsync();
+                var tenant = await db.AdditioanlTenants.Where(e => e.Id == Id).FirstOrDefaultAsync();
                 if (tenant != null) return tenant;
 
                 return new AdditioanlTenants();

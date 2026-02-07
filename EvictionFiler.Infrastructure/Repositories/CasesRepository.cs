@@ -19,7 +19,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 {
     public class CasesRepository : Repository<LegalCase>, ICasesRepository
 	{
-        private readonly MainDbContext _context; 
+        private readonly MainDbContext _context;
         private readonly IUserRepository _userRepo;
         private readonly IDbContextFactory<MainDbContext> contextFactory;
 
@@ -33,7 +33,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<IntakeModel>> SearchCasebyCode(string code)
         {
-            var cases = await _context.LegalCases.Where(e => e.Casecode.Contains(code)).Select(dto => new IntakeModel
+            await using var db = await contextFactory.CreateDbContextAsync();
+            var cases = await db.LegalCases.Where(e => e.Casecode.Contains(code)).Select(dto => new IntakeModel
             {
 
                 Casecode = dto.Casecode,
@@ -45,19 +46,42 @@ namespace EvictionFiler.Infrastructure.Repositories
             return cases;
         }
 
-        public async Task<Guid?> UpdateCaseLandlord(LegalCase casedetails)
+        public async Task<Guid?> UpdateCaseLandlord(IntakeModel casedetails)
         {
-            var existing = _context.LegalCases.Find(casedetails.Id);
-            if (existing == null) return null;
+            await using var db = await contextFactory.CreateDbContextAsync();
+            var existingCase = db.LegalCases.Find(casedetails.Id);
+            if (existingCase == null) return null;
 
-            existing = casedetails;
+            existingCase.BuildingId = casedetails.BuildingId;
 
-            _context.LegalCases.Update(existing);
+            
 
-            var result =await _context.SaveChangesAsync();
+            db.LegalCases.Update(existingCase);
+
+            var result = await db.SaveChangesAsync();
             if (result > 0) return casedetails.Id;
 
             return null;
+
+            
+        }
+        public async Task<Guid?> UpdateCaseTenant(IntakeModel casedetails)
+        {
+
+            await using var db = await contextFactory.CreateDbContextAsync();
+            var existingCase = db.LegalCases.Find(casedetails.Id);
+            if (existingCase == null) return null;
+
+            existingCase.TenantId = casedetails.TenantId;
+
+            
+            db.LegalCases.Update(existingCase);
+
+            var result = await db.SaveChangesAsync();
+            if (result > 0) return casedetails.Id;
+
+            return null;
+
         }
         public async Task<Guid?> UpdateCaseCourt(IntakeModel casedetails)
         {
@@ -78,43 +102,49 @@ namespace EvictionFiler.Infrastructure.Repositories
 
             return null;
         }
-        public async Task<Guid?> UpdateCaseBuilding(LegalCase casedetails)
+        public async Task<Guid?> UpdateCaseBuilding(IntakeModel casedetails)
         {
-            var existing = _context.LegalCases.Find(casedetails.Id);
-            if (existing == null) return null;
+            await using var db = await contextFactory.CreateDbContextAsync();
+            var existingCase = db.LegalCases.Find(casedetails.Id);
+            if (existingCase == null) return null;
 
-            existing = casedetails;
+            existingCase.BuildingId = casedetails.BuildingId;
 
-            _context.LegalCases.Update(existing);
 
-            var result = await _context.SaveChangesAsync();
+            db.LegalCases.Update(existingCase);
+
+            var result = await db.SaveChangesAsync();
             if (result > 0) return casedetails.Id;
 
             return null;
         }
-        public async Task<Guid?> UpdateClient(LegalCase casedetails)
+        public async Task<Guid?> UpdateClient(IntakeModel casedetails)
         {
-            var existing = _context.LegalCases.Find(casedetails.Id);
-            if (existing == null) return null;
+            await using var db = await contextFactory.CreateDbContextAsync();
+            var existingCase = db.LegalCases.Find(casedetails.Id);
+            if (existingCase == null) return null;
 
-            existing = casedetails;
+            existingCase.ClientId = casedetails.ClientId;
 
-            _context.LegalCases.Update(existing);
+            
+            db.LegalCases.Update(existingCase);
 
-            var result = await _context.SaveChangesAsync();
+            var result = await db.SaveChangesAsync();
             if (result > 0) return casedetails.Id;
 
             return null;
         }
         public async Task<int> GetTotalCasesCountAsync(string userId , bool isAdmin)
         {
+            await using var db = await contextFactory.CreateDbContextAsync();
+
             if (isAdmin)
             {
                 var today = DateTime.Today;
                 var startOfWeek = today.AddDays(-(int)today.DayOfWeek + 1); // Monday
                 var endOfWeek = startOfWeek.AddDays(7);
 
-                var count = await _context.LegalCases
+                var count = await db.LegalCases
                     .Where(e => e.CreatedOn >= startOfWeek && e.CreatedOn < endOfWeek)
                     .CountAsync();
 
@@ -129,7 +159,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 var startOfWeek = today.AddDays(-(int)today.DayOfWeek + 1); // Monday
                 var endOfWeek = startOfWeek.AddDays(7);
 
-                var count = await _context.LegalCases
+                var count = await db.LegalCases
                     .Where(e => e.CreatedOn >= startOfWeek && e.CreatedOn < endOfWeek && e.CreatedBy == userGuid)
                     .CountAsync();
                 return count;
@@ -138,17 +168,19 @@ namespace EvictionFiler.Infrastructure.Repositories
         }
         public async Task<int> GetActiveCasesCountAsync(string userId, bool isAdmin)
         {
+            await using var db = await contextFactory.CreateDbContextAsync();
+
             if (isAdmin)
             {
                
-                return await _context.LegalCases
+                return await db.LegalCases
                                      .Where(c => c.IsActive)
                                      .CountAsync();
             }
             else
             {
                 var userGuid = Guid.Parse(userId);
-                return await _context.LegalCases
+                return await db.LegalCases
                                      .Where(c => c.IsActive && c.CreatedBy == userGuid) 
                                      .CountAsync();
             }
@@ -157,9 +189,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<LegalCase>> GetTodayCasesAsync()
         {
+            await using var db = await contextFactory.CreateDbContextAsync();
 
             var today = DateTime.Today;
-            var query = _context.LegalCases
+            var query = db.LegalCases
         .AsNoTracking()
         .Where(c => c.CreatedOn.Date == today);
 
@@ -240,7 +273,9 @@ namespace EvictionFiler.Infrastructure.Repositories
         }
         public async Task<List<LegalCase>> GetAllCasesAsync()
         {
-            var query = _context.LegalCases
+            await using var db = await contextFactory.CreateDbContextAsync();
+
+            var query = db.LegalCases
                 .AsNoTracking();
 
 
@@ -451,7 +486,9 @@ namespace EvictionFiler.Infrastructure.Repositories
         //}
         public async Task<PaginationDto<LegalCase>> GetAllCasesAsync(int pageNumber, int pageSize, CaseFilterDto filters, string userId, bool isAdmin)
         {
-            IQueryable<LegalCase> query = _context.LegalCases
+            await using var db = await contextFactory.CreateDbContextAsync();
+
+            IQueryable<LegalCase> query = db.LegalCases
                 .AsNoTracking();
 
             // Preload users ONCE
@@ -613,7 +650,9 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<string> GenerateCaseCodeAsync()
 		{
-			var lastCase = await _context.LegalCases
+            await using var db = await contextFactory.CreateDbContextAsync();
+
+            var lastCase = await db.LegalCases
 				.OrderByDescending(c => c.Casecode)
 				.Select(c => c.Casecode)
 				.FirstOrDefaultAsync();
@@ -635,20 +674,24 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<CaseTypeHPD>> GetHPDByIdsAsync(List<Guid> ids)
         {
+            await using var db = await contextFactory.CreateDbContextAsync();
+
             if (ids == null || !ids.Any())
                 return new List<CaseTypeHPD>();
 
-            return await _context.MstCaseTypesHPD
+            return await db.MstCaseTypesHPD
                 .Where(h => ids.Contains(h.Id))
                 .ToListAsync();
         }
 
         public async Task<List<CaseTypePerdiem>> GetCaseTypePerDiemByIdsAsync(List<Guid> ids)
         {
+            await using var db = await contextFactory.CreateDbContextAsync();
+
             if (ids == null || !ids.Any())
                 return new List<CaseTypePerdiem>();
 
-            return await _context.MstCaseTypePerdiems
+            return await db.MstCaseTypePerdiems
                 .Where(h => ids.Contains(h.Id))
                 .ToListAsync();
         }
@@ -657,79 +700,95 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<HarassmentType>> GetHarassmentTypeIdAsync(List<Guid> ids)
         {
+            await using var db = await contextFactory.CreateDbContextAsync();
+
             if (ids == null || !ids.Any())
                 return new List<HarassmentType>();
 
-            return await _context.MstHarassmentTypes
+            return await db.MstHarassmentTypes
                 .Where(h => ids.Contains(h.Id))
                 .ToListAsync();
         }
 
         public async Task<List<DefenseType>> GetDefenseTypeIdAsync(List<Guid> ids)
         {
+            await using var db = await contextFactory.CreateDbContextAsync();
+
             if (ids == null || !ids.Any())
                 return new List<DefenseType>();
 
-            return await _context.MstDefenseTypes
+            return await db.MstDefenseTypes
                 .Where(h => ids.Contains(h.Id))
                 .ToListAsync();
         }
         public async Task<List<AppearanceType>> GetApperenceTypeIdAsync(List<Guid> ids)
         {
+            await using var db = await contextFactory.CreateDbContextAsync();
+
             if (ids == null || !ids.Any())
                 return new List<AppearanceType>();
 
-            return await _context.MstAppearanceTypes
+            return await db.MstAppearanceTypes
                 .Where(h => ids.Contains(h.Id))
                 .ToListAsync();
         }
 
         public async Task<List<AppearanceTypePerDiem>> GetApperenceTypePerDiemIdAsync(List<Guid> ids)
         {
+            await using var db = await contextFactory.CreateDbContextAsync();
+
             if (ids == null || !ids.Any())
                 return new List<AppearanceTypePerDiem>();
 
-            return await _context.MstAppearanceTypesPerDiems
+            return await db.MstAppearanceTypesPerDiems
                 .Where(h => ids.Contains(h.Id))
                 .ToListAsync();
         }
 
         public async Task<List<DocumentTypePerDiem>> GetDocumentIntructionsTypsIdAsync(List<Guid> ids)
         {
+            await using var db = await contextFactory.CreateDbContextAsync();
+
             if (ids == null || !ids.Any())
                 return new List<DocumentTypePerDiem>();
 
-            return await _context.MstDocumentTypePerDiems
+            return await db.MstDocumentTypePerDiems
                 .Where(h => ids.Contains(h.Id))
                 .ToListAsync();
         }
 
         public async Task<List<ReportingTypePerDiem>> GetReportingTypePerDiemsIdAsync(List<Guid> ids)
         {
+            await using var db = await contextFactory.CreateDbContextAsync();
+
             if (ids == null || !ids.Any())
                 return new List<ReportingTypePerDiem>();
 
-            return await _context.MstReportingTypePerDiems
+            return await db.MstReportingTypePerDiems
                 .Where(h => ids.Contains(h.Id))
                 .ToListAsync();
         }
 
         public async Task<List<ReliefPetitionerType>> GetReliefPetitionerTypesListTypeIdAsync(List<Guid> ids)
         {
+            await using var db = await contextFactory.CreateDbContextAsync();
+
             if (ids == null || !ids.Any())
                 return new List<ReliefPetitionerType>();
 
-            return await _context.MstReliefPetitionerTypes
+            return await db.MstReliefPetitionerTypes
                 .Where(h => ids.Contains(h.Id))
                 .ToListAsync();
         }
 
         public async Task<List<ReliefRespondentType>> GetReliefRespondentTypesListTypeIdAsync(List<Guid> ids)
         {
+            await using var db = await contextFactory.CreateDbContextAsync();
+
             if (ids == null || !ids.Any())
                 return new List<ReliefRespondentType>();
 
-            return await _context.MstReliefRespondentTypes
+            return await db.MstReliefRespondentTypes
                 .Where(h => ids.Contains(h.Id))
                 .ToListAsync();
         }

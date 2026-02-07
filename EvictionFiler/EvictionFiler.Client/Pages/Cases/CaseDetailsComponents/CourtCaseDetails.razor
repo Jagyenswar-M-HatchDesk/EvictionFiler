@@ -1,5 +1,6 @@
 ﻿@using Blazored.Toast.Services
 @using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.CaseHearing
 @using EvictionFiler.Application.DTOs.CourtDto
 @using EvictionFiler.Application.DTOs.CourtPart
 @using EvictionFiler.Application.DTOs.MasterDtos.CountyDto
@@ -14,6 +15,8 @@
 @inject ILegalCaseService _legalCaseService
 @inject IJSRuntime JS
 @inject IToastService ToastService
+@inject IRemianderCenterService _remainder
+@inject ICaseHearingService _CaseHearing
 <div class="" style="position:relative;">
     @if (isLoading)
     {
@@ -254,6 +257,7 @@
     public List<CourtDto> filteredCourts = new List<CourtDto>();
     private bool isNewCourt { get; set; }
     private bool isLoading { get; set; } = true;
+    private List<CaseHearingDto> CaseHearings = new();
 
 
     protected override async Task OnInitializedAsync()
@@ -281,11 +285,15 @@
         if (!CourtTypeList.Any())
             CourtTypeList = await _legalCaseService.CourtTypeList();
 
+
         if (!CountyList.Any())
             CountyList = await countyService.GetAllCounty();
 
         if (!CourtLocationList.Any())
             CourtLocationList = await _courtService.GetAllCourtDataAsync();
+
+        if (!CaseHearings.Any())
+            CaseHearings = await _CaseHearing.GetAllCaseHeariingByCaseIdAsync(CaseId.Value);
 
         // Load CourtPartList if CourtLocationId exists
         if (LegalCaseDto.CourtLocationId != null && LegalCaseDto.CourtLocationId != Guid.Empty)
@@ -354,7 +362,7 @@
     }
     private async Task SaveCourtChanges()
     {
-        //if (!await ValidateCurrentStep("Court")) return;
+        // if (!await ValidateCurrentStep("Court")) return;
         spinnerservice.Show();
 
         // bool addOrUpdate = false;
@@ -393,11 +401,11 @@
 
         //         if (courtPartIds != null)
         //         {
-        //             LegalCaseDto.CourtPartId = courtPartIds.First();
+        //             legalcaseDto.CourtPartId = courtPartIds.First();
         //         }
 
         //         // 4️⃣ Assign CourtId to Case
-        //         LegalCaseDto.CourtId = courtId;
+        //         legalcaseDto.CourtId = courtId;
 
         //         addOrUpdate = true;
         //     }
@@ -415,27 +423,33 @@
 
         //         if (newPartList != null)
         //         {
-        //             LegalCaseDto.CourtPartId = newPartList.First();
+        //             legalcaseDto.CourtPartId = newPartList.First();
         //         }
         //     }
         //     else
         //     {
         //         // Existing part selected
-        //         LegalCaseDto.CourtPartId = court.SelectedCourtPart.Id;
+        //         legalcaseDto.CourtPartId = court.SelectedCourtPart.Id;
         //     }
 
-        //     LegalCaseDto.CourtRoomNo = court.SelectedCourtPart.RoomNo;
-        //     LegalCaseDto.CourtPart = court.SelectedCourtPart.Part;
-        //     LegalCaseDto.CourtId = court.Id;
+        //     legalcaseDto.CourtRoomNo = court.SelectedCourtPart.RoomNo;
+        //     legalcaseDto.CourtPart = court.SelectedCourtPart.Part;
+        //     legalcaseDto.CourtId = court.Id;
 
         //     addOrUpdate = true;
         // }
 
         // ============= UPDATE CASE =============
 
-        var success = await _legalCaseService.UpdateCaseForCourtAsync(LegalCaseDto);
+        var success = await _legalCaseService.UpdateCourtandIndex(LegalCaseDto);
 
-        if (success.HasValue)
+        if ((LegalCaseDto.CourtLocationId == null || LegalCaseDto.CourtLocationId == Guid.Empty || !CaseHearings.Any()) && !string.IsNullOrEmpty(LegalCaseDto.Index))
+        {
+            await _remainder.CreateNewReminder(LegalCaseDto.Id, "Court date not yet assigned", DateTime.Now.AddDays(7));
+        }
+
+
+        if (success)
         {
             ToastService.ShowSuccess("Court details updated successfully!");
             await JS.InvokeVoidAsync("hideModal", "courtModal");
@@ -448,6 +462,7 @@
         }
         spinnerservice.Hide();
     }
+
     private void OnBindCourtCancel()
     {
         LegalCaseDto.CourtLocationId = null;

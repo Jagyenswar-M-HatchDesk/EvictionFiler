@@ -22,6 +22,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task AddAdditionalOccupant(List<AdditionalOccupantDto> tenant)
         {
+            await using var db = await _contextFactory.CreateDbContextAsync();
+
             try
             {
                 var newoccupants = tenant.Select(e => new AdditionalOccupants()
@@ -35,8 +37,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 
                 }).ToList();
 
-                await _context.AdditionalOccupants.AddRangeAsync(newoccupants);
-                var result = _context.SaveChanges();
+                await db.AdditionalOccupants.AddRangeAsync(newoccupants);
+                var result = db.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -47,6 +49,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<bool> UpdateAdditionalOccupant(List<AdditionalOccupantDto> occupant)
         {
+            await using var db = await _contextFactory.CreateDbContextAsync();
+
             try
             {
                 foreach(var toupdate in occupant)
@@ -56,10 +60,10 @@ namespace EvictionFiler.Infrastructure.Repositories
 
                     existing.Name = toupdate.Name;
 
-                    _context.AdditionalOccupants.Update(existing);
+                    db.AdditionalOccupants.Update(existing);
                     
                 }
-                var result = await _context.SaveChangesAsync();
+                var result = await db.SaveChangesAsync();
                 if (result > 0) return true;
 
                 return false;
@@ -73,24 +77,30 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<List<AdditionalOccupants>> GetAllOccupantsByCaseId(Guid legalcaseId)
         {
-            var occupants = await _context.AdditionalOccupants.Where(e => e.LegalCaseId == legalcaseId).ToListAsync();
+            await using var db = await _contextFactory.CreateDbContextAsync();
+
+            var occupants = await db.AdditionalOccupants.Where(e => e.LegalCaseId == legalcaseId).ToListAsync();
             return occupants;
         }
 
         public async Task<AdditionalOccupants> GetAllOccupantsById(Guid Id)
         {
-            var occupants = await _context.AdditionalOccupants.Where(e => e.Id == Id).FirstOrDefaultAsync();
+            await using var db = await _contextFactory.CreateDbContextAsync();
+
+            var occupants = await db.AdditionalOccupants.Where(e => e.Id == Id).FirstOrDefaultAsync();
             return occupants;
         }
         public async Task<bool> DeleteOccupants(Guid Id)
         {
-            var occupants = await _context.AdditionalOccupants.FindAsync(Id);
+            await using var db = await _contextFactory.CreateDbContextAsync();
+
+            var occupants = await db.AdditionalOccupants.FindAsync(Id);
             if (occupants == null)
             {
                 return false;
             }
-            _context.AdditionalOccupants.Remove(occupants);
-            var result = await _context.SaveChangesAsync();
+            db.AdditionalOccupants.Remove(occupants);
+            var result = await db.SaveChangesAsync();
             return result > 0 ? true : false;
         }
     }

@@ -1400,6 +1400,7 @@ namespace EvictionFiler.Application.Services
                         CreatedOn = caseEntity.CreatedOn,
                         Status = caseEntity.IsActive ? "Active" : "Inactive",
 
+                        BuildingId = caseEntity.BuildingId,
                         Buildingcode = caseEntity.Buildings?.BuildingCode,
                         Mdr = caseEntity.Buildings?.MDRNumber,
                         Borough = caseEntity.Buildings?.Cities != null ? caseEntity.Buildings?.Cities?.Name : null,
@@ -1948,21 +1949,28 @@ namespace EvictionFiler.Application.Services
         {
             try
             {
-                var existingCase = await _repository.GetAsync(legalCase.Id);
-                if (existingCase == null) return null;
+                
 
-
-
-
-                existingCase.CaseTypeId = legalCase.CaseTypeId;
-
-                existingCase.LandLordId = legalCase.LandlordId;
-
-                var result = await _repository.UpdateCaseLandlord(existingCase);
+                var result = await _repository.UpdateCaseLandlord(legalCase);
                 return result;
 
             }
             catch
+            {
+                throw new Exception();
+            }
+        }
+        public async Task<Guid?> UpdateCaseForTenantAsync(IntakeModel legalCase)
+        {
+            try
+            {
+                
+
+                var result = await _repository.UpdateCaseLandlord(legalCase);
+                return result;
+
+            }
+            catch(Exception ex)
             {
                 throw new Exception();
             }
@@ -1985,17 +1993,9 @@ namespace EvictionFiler.Application.Services
         {
             try
             {
-                var existingCase = await _repository.GetAsync(legalCase.Id);
-                if (existingCase == null) return null;
+                
 
-
-
-
-                existingCase.CaseTypeId = legalCase.CaseTypeId;
-
-                existingCase.BuildingId = legalCase.BuildingId;
-
-                var result = await _repository.UpdateCaseBuilding(existingCase);
+                var result = await _repository.UpdateCaseBuilding(legalCase);
                 return result;
 
             }
@@ -2008,17 +2008,8 @@ namespace EvictionFiler.Application.Services
         {
             try
             {
-                var existingCase = await _repository.GetAsync(legalCase.Id);
-                if (existingCase == null) return null;
-
-
-
-
-                existingCase.CaseTypeId = legalCase.CaseTypeId;
-
-                existingCase.ClientId = legalCase.ClientId;
-
-                var result = await _repository.UpdateClient(existingCase);
+                
+                var result = await _repository.UpdateClient(legalCase);
                 return result;
 
             }
@@ -2240,6 +2231,7 @@ namespace EvictionFiler.Application.Services
 
         public async Task<bool> UpdateArrearLedgerAsync(List<ArrearLedgerDto> Ledger)
         {
+
             try
             {
                 foreach (var row in Ledger)
@@ -2249,10 +2241,12 @@ namespace EvictionFiler.Application.Services
                     existingLedger.Amount = row.Amount;
                     existingLedger.Notes = row.Notes;
                     existingLedger.Month = row.Month;
-                }
 
-                //await _arrearLedger.UpdateRange(LedgerList);
-                return await _unitOfWork.SaveChangesAsync() > 0;
+                    var result =await _arrearLedger.UpdateAsync(existingLedger);
+
+                }
+                return true;
+                //return await _unitOfWork.SaveChangesAsync() > 0;
             }
             catch (Exception ex)
             {

@@ -350,36 +350,23 @@ namespace EvictionFiler.Application.Services
                 {
                     entity.FirstName = t.FirstName;
                     entity.LastName = t.LastName;
-                    entity.SSN = t.SSN;
-                    entity.Phone = t.Phone;
-                    entity.Email = t.Email;
-                    entity.LanguageId = t.LanguageId;
 
-                    entity.HasPossession = t.HasPossession;
                     entity.HasRegulatedTenancy = t.HasRegulatedTenancy;
                     //entity.Additionaltenants = t.Additionaltenants;
-                    entity.OtherOccupants = t.OtherOccupants;
 
-                    entity.TenantRecord = t.TenantRecord;
-                    entity.HasPriorCase = t.HasPriorCase;
                     entity.TenancyTypeId = t.TenancyTypeId;
                     entity.PrimaryResidence = t.PrimaryResidence;
-                    entity.RenewalOffer = t.RenewalOffer;
                     //entity.RentDueEachMonthOrWeek = t.RentDueEachMonthOrWeek;
-                    entity.SocialServices = t.SocialServices;
                     entity.MonthlyRent = t.MonthlyRent;
 
                     entity.TenantShare = t.TenantShare;
-                    entity.ERAPPaymentReceivedDate = t.ERAPPaymentReceivedDate;
                     entity.UnitOrApartmentNumber = t.UnitOrApartmentNumber;
                     entity.RentDueEachMonthOrWeekId = t.RentDueEachMonthOrWeekId;
-                    entity.IsUnitIllegalId = t.IsUnitIllegalId;
                     entity.BuildinId = t.BuildingId;
                 }
 
-                _repo.UpdateAsync(entity);
-                var result = await _unitOfWork.SaveChangesAsync();
-                if (result > 0) return true;
+                var result =await _repo.UpdateAsync(entity);
+                if (result != null) return true;
 
                 return false;
 
