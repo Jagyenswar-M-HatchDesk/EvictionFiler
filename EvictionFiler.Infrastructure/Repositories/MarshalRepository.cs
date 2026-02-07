@@ -10,10 +10,12 @@ namespace EvictionFiler.Infrastructure.Repositories
     public class MarshalRepository : IMarshalRepositroy
     {
         private readonly MainDbContext _db;
+        private readonly IDbContextFactory<MainDbContext> _contextFactory;
 
-        public MarshalRepository(MainDbContext db)
+        public MarshalRepository(MainDbContext db, IDbContextFactory<MainDbContext> contextFactory)
         {
             _db = db;
+            _contextFactory = contextFactory;
         }
 
         public async Task<IEnumerable<Marshal>> GetAllMarshalAsync()
@@ -38,7 +40,8 @@ namespace EvictionFiler.Infrastructure.Repositories
         }
         public async Task<Marshal> GetMarshalByIdAsync(Guid id)
         {
-            return await _db.Marshal.FirstOrDefaultAsync(x => x.Id == id) ?? new();
+            await using var db = await _contextFactory.CreateDbContextAsync();
+            return await db.Marshal.FirstOrDefaultAsync(x => x.Id == id) ?? new();
         }
         public async Task<Marshal> AddMarshalAsync(Marshal marshal)
         {

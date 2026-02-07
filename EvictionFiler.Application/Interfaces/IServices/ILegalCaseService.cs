@@ -16,6 +16,8 @@ namespace EvictionFiler.Application.Interfaces.IServices
 {
     public interface ILegalCaseService
     {
+        Task<IntakeModel> GetCaseDetailsByIdAsync(Guid caseId);
+        Task<IntakeModel> GetMarshalCaseIdAsync(Guid caseId);
         Task<bool> AddLegalCasesAsync(CreateToEditLegalCaseModel dto);
         //Task<PaginationDto<LegalCase>> GetAllAsync(int pageNumber, int pageSize , string searchTerm);
         Task<PaginationDto<LegalCase>> GetAllAsync(int pageNumber, int pageSize, CaseFilterDto Filters, string userId, bool isAdmin);
@@ -62,7 +64,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<bool> DeleteAdditionalpetitioner(CaseAdditionalPetitioner petitioner);
 
         Task<bool> UpdateCourtandIndex(IntakeModel legalCase);
-        Task<IEnumerable<CaseNotes>> GetAllCaseNotes();
+       
 
         Task<IEnumerable<CaseNotes>> GetAllCaseNotes(Guid caseId);
         Task<IntakeModel> GetLandlordByCaseIdAsync(Guid caseId);

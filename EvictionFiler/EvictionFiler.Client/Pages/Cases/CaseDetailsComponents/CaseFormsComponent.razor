@@ -7,61 +7,74 @@
 @using EvictionFiler.Client.SpinnerService
 @inject SpinnerService spinnerservice
 @inject IToastService ToastService
-<div class="table-responsive">
-    <table class="info-table mb-4" style="border:none;">
-        <thead style="background-color:#ECF2FF;">
-            <tr>
+<div style="position:relative;overflow:auto">
+    @if (isLoading)
+    {
+        <div class="spinnerContainer" style="position:absolute !important">
+            <div class="text-center">
+                <div class="spinner-border spinnerIcon" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-dark">Loading...</p>
+            </div>
+        </div>
+    }
+    
+        <div class="table-responsive">
+            <table class="info-table mb-4" style="border:none;">
+                <thead style="background-color:#ECF2FF;">
+                    <tr>
 
-                <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px;background: #ECF2FF;color: #1F365D">ID</th>
-                <th scope="col" class="info-bar" style="border-radius: 0px;background: #ECF2FF;color: #1F365D">Forms</th>
-                @if (isAdmin)
-                {
-
-                    <th scope="col" class="info-bar" style="border-radius: 0px;background: #ECF2FF;color: #1F365D">Created By</th>
-                }
-                <th scope="col" class="info-bar" style="border-radius: 0px;background: #ECF2FF;color: #1F365D">Created On</th>
-                <th scope="col" style="width:12%;border-radius:0px 8px 0px 0px;background: #ECF2FF;color: #1F365D" class="text-nowrap info-bar">Actions</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @if (caseFormDto != null && caseFormDto.Count() > 0)
-            {
-                int index = 1;
-                @foreach (var form in caseFormDto)
-                {
-                    <tr class="info-row">
-                        <td class="info-block-table">
-                            <div class="value">@index</div>
-
-                        </td>
-                        <td class="info-block-table"><div class="value">@form.FormTypeName</div></td>
+                        <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px;background: #ECF2FF;color: #1F365D">ID</th>
+                        <th scope="col" class="info-bar" style="border-radius: 0px;background: #ECF2FF;color: #1F365D">Forms</th>
                         @if (isAdmin)
                         {
-                            <td><div class="value">@form.CreatedByName</div></td>
+
+                            <th scope="col" class="info-bar" style="border-radius: 0px;background: #ECF2FF;color: #1F365D">Created By</th>
                         }
-                        <td class="info-block-table"><div class="value">@form.CreatedOn?.ToString(DateFormats.Default)</div></td>
-                        <td class="d-flex justify-content-between info-block-table" style="gap:2px">
-                            <span class="action-icon value" @onclick="@(() => ViewPdf(form.File))"><i class="fa-solid fa-eye"></i></span>
-                            <span class="action-icon value" @onclick="@(() => EditCaseDetail(form.Id))"><i class="fa-solid fa-pen-to-square"></i></span>
-                            <span class="action-icon-danger value" @onclick="@(() => DeleteCaseDetail(form.Id))"><i class="fa-solid fa-trash"></i></span>
-                        </td>
+                        <th scope="col" class="info-bar" style="border-radius: 0px;background: #ECF2FF;color: #1F365D">Created On</th>
+                        <th scope="col" style="width:12%;border-radius:0px 8px 0px 0px;background: #ECF2FF;color: #1F365D" class="text-nowrap info-bar">Actions</th>
                     </tr>
-                    index++;
-                }
-            }
-            else
-            {
-                <tr class="info-row">
-                    <td colspan="4" class="text-muted text-center info-block-table"> <div class="value">No notices generated yet.</div></td>
-                </tr>
-            }
+                </thead>
 
-        </tbody>
-    </table>
+                <tbody>
+                    @if (caseFormDto != null && caseFormDto.Count() > 0)
+                    {
+                        int index = 1;
+                        @foreach (var form in caseFormDto)
+                        {
+                            <tr class="info-row">
+                                <td class="info-block-table">
+                                    <div class="value">@index</div>
+
+                                </td>
+                                <td class="info-block-table"><div class="value">@form.FormTypeName</div></td>
+                                @if (isAdmin)
+                                {
+                                    <td><div class="value">@form.CreatedByName</div></td>
+                                }
+                                <td class="info-block-table"><div class="value">@form.CreatedOn?.ToString(DateFormats.Default)</div></td>
+                                <td class="d-flex justify-content-between info-block-table" style="gap:2px">
+                                    <span class="action-icon value" @onclick="@(() => ViewPdf(form.File))"><i class="fa-solid fa-eye"></i></span>
+                                    <span class="action-icon value" @onclick="@(() => EditCaseDetail(form.Id))"><i class="fa-solid fa-pen-to-square"></i></span>
+                                    <span class="action-icon-danger value" @onclick="@(() => DeleteCaseDetail(form.Id))"><i class="fa-solid fa-trash"></i></span>
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    }
+                    else
+                    {
+                        <tr class="info-row">
+                            <td colspan="4" class="text-muted text-center info-block-table"> <div class="value">No notices generated yet.</div></td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    
 </div>
-
-
 @code {
     [Parameter]
     public Guid CaseId { get; set; }
@@ -69,6 +82,7 @@
     public bool isAdmin { get; set; }
     public bool IsFormGenerated { get; set; } = false;
     public bool isEditMode { get; set; } = false;
+    public bool isLoading { get; set; } = true;
     [Parameter]
     public string loggedInUserId { get; set; }
     private List<GenrateNoticeModel> caseFormDto = new();
@@ -77,7 +91,9 @@
 
     protected override async Task OnInitializedAsync()
     {
+        isLoading = true;
         await LoadCaseForms();
+        isLoading = false;
     }
 
     private async Task LoadCaseForms()

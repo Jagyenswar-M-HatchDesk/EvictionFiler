@@ -37,6 +37,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
         Task<List<LegalCase>> GetAlllAsync(Expression<Func<LegalCase, bool>>? predicate = null, params Expression<Func<LegalCase, object>>[]? includes);
 
         Task<Guid?> UpdateCaseCourt(IntakeModel casedetails);
+        Task<bool> UpdateMarshal(IntakeModel legalCase);
     }
 
 }

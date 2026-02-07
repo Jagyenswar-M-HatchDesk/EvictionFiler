@@ -24,52 +24,8 @@ namespace EvictionFiler.Application.Services
 
         public async Task<bool> AddCaseWarrant(CaseWarrantDto dto)
         {
-            try
-            {
-                var existing = await _caseWarrantRepository.FindAsync(predicate: e => e.LegalCaseId == dto.LegalcaseId);
-                if (existing != null)
-                {
-                    existing.ReFileDate = dto.ReFileDate;
-                    existing.WarrantRequested = dto.WarrantRequested;
-                    existing.WarrantIssued = dto.WarrantIssued;
-                    existing.WarrantRejected = dto.WarrantRejected;
-                    existing.EvictionExecuted = dto.EvictionExecuted;
-                    existing.ExecutionEligible = dto.ExecutionEligible;
-                    existing.NoticeServed = dto.NoticeServed;
-                    existing.MarshalId = dto.MarshalId;
-                    existing.LegalCaseId = dto.LegalcaseId;
-                    existing.UpdatedOn = DateTime.Now;
-
-                    var result = await _unitOfWork.SaveChangesAsync();
-                    return result > 0 ? true : false;
-                }
-                else
-                {
-                    var addeddata = new CaseWarrant
-                    {
-                        ReFileDate = dto.ReFileDate,
-                        WarrantRequested = dto.WarrantRequested,
-                        WarrantIssued = dto.WarrantIssued,
-                        WarrantRejected = dto.WarrantRejected,
-                        EvictionExecuted = dto.EvictionExecuted,
-                        ExecutionEligible = dto.ExecutionEligible,
-                        NoticeServed = dto.NoticeServed,
-                        MarshalId = dto.MarshalId,
-                        LegalCaseId = dto.LegalcaseId,
-                        CreatedOn = DateTime.Now,
-                    };
-
-                    var added = await _caseWarrantRepository.AddAsync(addeddata);
-                    var result = await _unitOfWork.SaveChangesAsync();
-                    return result > 0 ? true : false;
-                }
-
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
-
+            var result =await _caseWarrantRepository.AddEditCaseWarrant(dto);
+            return result;
 
         }
 

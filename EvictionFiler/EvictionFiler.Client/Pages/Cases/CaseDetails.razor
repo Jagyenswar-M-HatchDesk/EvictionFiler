@@ -1247,10 +1247,10 @@
                                         <div class="info-title">Tenant</div>
                                     </div>
                                 </div>
-                                <LandlordDetails CurrentCaseId="CurrentCaseId" />
-                                <BuildingDetails LandlordId="legalcaseDto.LandlordId" CurrentCaseId="CurrentCaseId" />
+                                <LandlordDetails caseId="caseId" />
+                                <BuildingDetails LandlordId="legalcaseDto.LandlordId" caseId="caseId" />
 
-                                <TenantDetails CurrentCaseId="CurrentCaseId" />
+                                <TenantDetails CaseId="caseId" />
 
                             </div>
                         </div>
@@ -1276,7 +1276,7 @@
 
 
                     <div class="card shadow-sm p-3 border-0">
-                        <Motion CurrentCaseId="CurrentCaseId" legalcaseDto="legalcaseDto" />
+                        <Motion CurrentCaseId="caseId" legalcaseDto="legalcaseDto" />
 
                     </div>
 
@@ -1302,479 +1302,18 @@
 
                     </div>
 
-                    <!-- Tabs: Activity / Timeline / Actions -->
-                    @*  <div class="card shadow-sm border-0">
-                        <div class="card-header bg-transparent">
-                            <ul class="nav nav-tabs card-header-tabs" id="caseTabs" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active font14" id="activity-tab" data-bs-toggle="tab" @onclick="@(() => selectedTimeline = false)" data-bs-target="#activity" type="button" role="tab" aria-controls="activity" aria-selected="true">Activity</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link font14" id="timeline-tab" data-bs-toggle="tab" @onclick="@(() => selectedTimeline = true)" data-bs-target="#timeline" type="button" role="tab" aria-controls="timeline" aria-selected="false">Timeline</button>
-                                </li>
-
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link font14" id="warrant-tab" data-bs-toggle="tab" @onclick="@(() => selectedTimeline = false)" data-bs-target="#warrant" type="button" role="tab" aria-controls="warrant" aria-selected="false">Warrant</button>
-                                </li>
-
-                            </ul>
-                        </div>
-                        <div class="card-body tab-content" style=@(selectedTimeline ? "height: 450px; overflow: auto;" : "")>
-                            <!-- Activity -->
-                            <div class="tab-pane fade show active" id="activity" role="tabpanel" aria-labelledby="activity-tab">
-                                <div class="table-responsive font14">
-
-                                    <table class="table table-hover align-middle text-center" id="activityTable" style="width:700px">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th scope="col">ID</th>
-                                                <th scope="col">Forms</th>
-                                            @if (isAdmin)
-                                                {
-
-                                                    <th scope="col">Created By</th>
-                                                }
-                                                <th scope="col">Created On</th>
-                                                <th scope="col" style="width:12%;" class="text-nowrap">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @if (caseFormDto != null && caseFormDto.Count() > 0)
-                                            {
-                                                int index = 1;
-                                                @foreach (var form in caseFormDto)
-                                                {
-                                                    <tr>
-                                                        <td>@index</td>
-                                                        <td>@form.FormTypeName</td>
-                                                        @if (isAdmin)
-                                                        {
-                                                            <td>@form.CreatedByName</td>
-                                                        }
-                                                        <td>@form.CreatedOn?.ToString(DateFormats.Default)</td>
-                                                        <td class="d-flex justify-content-between" style="gap:2px">
-                                                            <span class="action-icon" @onclick="@(() => ViewPdf(form.File))"><i class="fa-solid fa-eye"></i></span>
-                                                            <span class="action-icon" @onclick="@(() => EditCaseDetail(form.Id))"><i class="fa-solid fa-pen-to-square"></i></span>
-                                                            <span class="action-icon-danger" @onclick="@(() => DeleteCaseDetail(form.Id))"><i class="fa-solid fa-trash"></i></span>
-                                                        </td>
-                                                    </tr>
-                                                    index++;
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <tr>
-                                                    <td colspan="4" class="text-muted text-center">No notices generated yet.</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <!-- Timeline -->
-                            <div class="tab-pane fade" id="timeline" role="tabpanel" aria-labelledby="timeline-tab">
-                                <div class="mb-3">
-                                    <div class="progress" role="progressbar" aria-label="Timeline progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                                        <div class="progress-bar bg-brand-primary" id="timelineProgress" style="width:0%">0%</div>
-                                    </div>
-                                    <div class="text-secondary field-label small1 mt-1">Filed → Service → Hearing → Judgment → Enforcement</div>
-                                </div>
-                                <div class="timeline" id="timelineList">
-                                    <div class="item" data-status="completed">
-                                        <span class="dot bg-success"></span>
-                                        <div class="text-secondary field-label small1 mx-2">@legalcaseDto.CreatedOn.ToString(DateFormats.Default) </div>
-                                        <div class="fw-semibold font14 mx-2">Case Created</div>
-                                        <div class="text-secondary field-label small1 mx-2">Initial intake and file opened</div>
-                                    </div>
-                                    @if (caseFormDto.Count() > 0)
-                                    {
-                                        @foreach (var item in caseFormDto)
-                                        {
-                                            <div class="item" data-status="completed">
-                                                <span class="dot bg-success"></span>
-                                                <div class="text-secondary field-label small1 mx-2">@(item.CreatedOn?.ToString(DateFormats.Default) ?? "---")</div>
-                                                <div class="fw-semibold font14 mx-2">Notice Served</div>
-                                                <div class="text-secondary field-label small1 mx-2">@(item.FormTypeName ?? "---")</div>
-                                            </div>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <div class="item" data-status="upcoming">
-                                            <span class="dot bg-brand-primary"></span>
-                                            <div class="text-secondary field-label small1 mx-2">---</div>
-                                            <div class="fw-semibold font14 mx-2">Notice Not Generated</div>
-                                            <div class="text-secondary field-label small1 mx-2">Pending Notice</div>
-                                        </div>
-                                    }
-
-                                    @if (CaseHearings.Count() > 0)
-                                    {
-                                        @foreach (var item in CaseHearings)
-                                        {
-                                            <div class="item" data-status="current">
-                                                <span class="dot bg-brand-primary"></span>
-                                                <div class="text-secondary field-label small1 mx-2">@(item.HearingDate?.ToString(DateFormats.Default))</div>
-                                                <div class="fw-semibold font14 mx-2">Hearing Scheduled</div>
-                                                <div class="text-secondary field-label small1 mx-2">Awaiting confirmation from court</div>
-                                            </div>
-                                        }
-                                    }
-                                    else
-                                    {
-
-                                        <div class="item" data-status="upcoming">
-                                            <span class="dot"></span>
-                                            <div class="text-secondary field-label small1 mx-2">--</div>
-                                            <div class="fw-semibold font14 mx-2">Hearing Scheduled</div>
-                                            <div class="text-secondary field-label small1 mx-2">Awaiting confirmation from court</div>
-                                        </div>
-                                    }
-
-                                    @if (Judgements.Count() > 0)
-                                    {
-                                        @foreach (var item in Judgements)
-                                        {
-                                            <div class="item" data-status="current">
-                                                <span class="dot bg-brand-primary"></span>
-                                                <div class="text-secondary field-label small1 mx-2">@item.AppreanceDate?.ToString(DateFormats.Default)</div>
-                                                <div class="fw-semibold font14 mx-2">@item.CourtTodayName</div>
-                                                <div class="text-secondary field-label small1 mx-2"></div>
-                                            </div>
-                                        }
-                                    }
-                                    else
-                                    {
-
-                                        <div class="item" data-status="upcoming">
-                                            <span class="dot"></span>
-                                            <div class="text-secondary field-label small1 mx-2">--</div>
-                                            <div class="fw-semibold font14 mx-2">Judgment</div>
-                                            <div class="text-secondary field-label small1 mx-2">Pending hearing</div>
-                                        </div>
-                                    }
-
-                                    <div class="item" data-status="upcoming">
-                                        <span class="dot"></span>
-                                        <div class="text-secondary field-label small1 mx-2">--</div>
-                                        <div class="fw-semibold font14 mx-2">Warrant/Enforcement</div>
-                                        <div class="text-secondary field-label small1 mx-2">To be requested if applicable</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Warrant -->
-                            <div class="tab-pane fade" id="warrant" role="tabpanel" aria-labelledby="warrant-tab">
-                                <div class="row mb-3 d-flex align-items-center">
-
-                                    <div class="fw-semibold font14 col-12">Assign Marshal</div>
-                                </div>
-                                <div class="row mt-2">
-
-                                    <div class="col-6 position-relative" @onfocusout="HideMarshalDropDown">
-
-                                        @if (!isMarshalAssigned)
-                                        {
-                                            <!-- Search Box -->
-
-                                            <InputText class="holdover-forms search-box" placeholder="Search by marshal name.." @bind-value="searchmarshalText" @oninput="OnSearchMarshalInput"
-                                                       @onclick="ShowAllmarshal" />
-                                            <button class="search-btn" type="button">
-                                                <i class="fa fa-search"></i>
-                                            </button>
-
-
-
-
-                                            @if (filteredmarshal?.Any() == true)
-                                            {
-                                                <ul class="dropdown-menu show" style="position:absolute; width:94%; cursor:pointer;">
-                                                    @foreach (var c in filteredmarshal)
-                                                    {
-                                                        <li class="dropdown-item" @onclick="() => Selectedmarshal(c)">
-                                                            @c.FirstName  @c.LastName
-                                                        </li>
-                                                    }
-                                                </ul>
-                                            }
-
-                                        }
-                                        else
-                                        {
-                                            <!-- Selected Marshal -->
-                                            <label class="holdover-form bg-light font14 fw-bold d-flex align-items-center">
-                                                @(selectedmarshal != null ? selectedmarshal.FirstName + " " + selectedmarshal.LastName : "")
-                                            </label>
-
-                                        }
-
-                                    </div>
-
-                                    <div class="col-6 d-flex justify-content-between">
-                                        @if (!isMarshalAssigned)
-                                        {
-                                            <button class="btn bg-brand-primary base font14 text-white" @onclick="SubmitMarshal">Assign</button>
-
-                                        }
-                                        else
-                                        {
-                                            <button class="btn bg-brand-primary base font14 text-white" @onclick="ResetMarshal">Reset</button>
-
-                                        }
-
-
-                                        <button class="btn bg-brand-primary font14 base text-white ms-2"
-                                                @onclick="GenrateMarshalForm"
-                                                disabled="@(isMarshalAssigned == false)">
-                                            Generate
-                                        </button>
-
-
-                                    </div>
-
-
-                                </div>
-                                <div class="row mt-2">
-                                    <div class="col-12">
-                                        @if (showMarshalError)
-                                        {
-                                            <div class="text-danger small1 mt-1">Please select a marshal.</div>
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Actions -->
-                            <div class="tab-pane fade" id="actions" role="tabpanel" aria-labelledby="actions-tab">
-                                <div class="d-flex flex-wrap gap-2 mb-3">
-                                    <button class="btn btn-secondary ">Send to Marshal</button>
-                                    <button class="btn btn-secondary">Send to Process Server</button>
-                                    <button class="btn btn-outline-secondary">Upload / View Documents</button>
-                                    <button class="btn btn-outline-secondary">Add Notes</button>
-                                    <button class="btn btn-outline-secondary" @onclick="OpenHearingPopup">Add Hearing</button>
-                                </div>
-                                <EditForm Model="noticeModel" FormName="NoticeForm" OnValidSubmit="GenerateNotice">
-                                    <DataAnnotationsValidator />
-                                    <div class="row g-2 align-items-end">
-                                        <div class="col-12 col-md-6">
-                                            <label for="formType" class="form-label">File a Motion</label>
-                                            <select class="form-select" @bind="noticeModel.FormTypeId" @bind:after="FormTypeBindAfter">
-                                                <option value="">-- Select --</option>
-                                                @foreach (var formType in FilteredFormTypeList)
-                                                {
-                                                    <option value="@formType.Id">@formType.Name @(formType.Rate != null ? $"- (${formType.Rate}) " : "")</option>
-                                                }
-                                            </select>
-                                            <ValidationMessage For="() => noticeModel.FormTypeId" />
-                                        </div>
-                                        <div class="col-auto">
-                                            <div class=" input-group" style="width:140px">
-                                                <span class="input-group-text">$</span>
-                                                <input class="form-control" type="number" @bind="noticeModel.BillAmount">
-                                            </div>
-                                            <ValidationMessage For="() => noticeModel.BillAmount" />
-                                        </div>
-                                        <div class="col-auto">
-                                            <button class="btn bg-brand-primary base">  @(isEditMode ? "Update" : "Generate")</button>
-                                        </div>
-                                    </div>
-
-                                </EditForm>
-                            </div>
-                        </div>
-                    </div>*@
+                    
                 </div>
 
                 <!-- Right -->
                 <div class="col-12 col-lg-5 d-flex flex-column gap-4">
                     <!-- Payment Info -->
-                    <!-- <div class="card shadow-sm border-0">
-                        <div class="card-header bg-transparent">
-                            <div class="fw-semibold d-flex align-items-center gap-2"><i class="bi bi-cash-coin"></i> Payment Information</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3 small1" id="paymentsGrid">
-                                <div class="col-12 col-md-6 col-lg-6"><div class="border rounded-3 p-3"><div class="text-secondary field-label">Account Balance</div><div class="fw-medium field-value">--</div></div></div>
-                                <div class="col-12 col-md-6 col-lg-6"><div class="border rounded-3 p-3"><div class="text-secondary field-label">Account Credit</div><div class="fw-medium field-value">--</div></div></div>
-
-                            </div>
-                            <div class="row g-3 mt-2 small1" id="paymentsGrid">
-
-                                <div class="col-12 col-md-6 col-lg-6"><div class="border rounded-3 p-3"><div class="text-secondary field-label">Balance on Case</div><div class="fw-medium field-value">@(legalcaseDto.BillAmount ?? 0)</div></div></div>
-                                <div class="col-12 col-md-6 col-lg-6"><div class="border rounded-3 p-3"><div class="text-secondary field-label">Last Payment</div><div class="fw-medium field-value">--</div></div></div>
-
-                            </div>
-                            <div class="row g-3 mt-2 small1" id="paymentsGrid">
-                                <div class="col-12 col-md-6 col-lg-6"><div class="border rounded-3 p-3"><div class="text-secondary field-label">Open Receivables</div><div class="fw-medium field-value">--</div></div></div>
-                            </div>
-                        </div>
-                    </div> -->
-                    <!-- Stipulation & Reminders -->
-                    @* <div class="card shadow-sm border-0">
-                    <div class="card-header d-flex justify-content-between align-items-center bg-transparent">
-                        <div class="fw-semibold d-flex font14 align-items-center gap-2"><i class="bi bi-cash-coin"></i>Stipulation & Reminders</div>
-                        <button type="button" class="btn btn-sm normal p-1" title="Edit Client" @onclick="ShowStipulationModal">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                    </div>
-                    <div class="card-body">
-
-                        <div class="border rounded-3 p-3">
-                            <h6 class="font14">Motion Schedule</h6>
-                            <div class="row g-3 small1" id="paymentsGrid">
-                                <div class="col-12 col-md-6 col-lg-6 mt-0"><div class=" pt-3 d-flex" style="align-items:baseline"><div class=" text-secondary field-label">Motion Due:</div><div class=" fw-medium field-value text-end1">@(MotionJudgements.MotionDue.HasValue? MotionJudgements.MotionDue.Value.ToString(DateFormats.Default) : "--")</div></div></div>
-                                <div class="col-12 col-md-6 col-lg-6 mt-0"><div class=" pt-3 d-flex" style="align-items:baseline"><div class=" text-secondary field-label">Opposition Due:</div><div class=" fw-medium field-value text-end1">@(MotionJudgements.OppositionDue.HasValue? MotionJudgements.OppositionDue.Value.ToString(DateFormats.Default) : "--")</div></div></div>
-
-                            </div>
-                            <div class="row g-3 mt-2 small1" id="paymentsGrid">
-                                <div class="col-12 col-md-6 col-lg-6 mt-0"><div class=" d-flex" style="align-items:baseline"><div class=" text-secondary field-label">Reply Due:</div><div class=" fw-medium field-value text-end1">@(MotionJudgements.ReplyDue.HasValue? MotionJudgements.ReplyDue.Value.ToString(DateFormats.Default) : "--")</div></div></div>
-                                <div class="col-12 col-md-6 col-lg-6 mt-0"><div class=" d-flex" style="align-items:baseline"><div class=" text-secondary field-label">OSC / Return:</div><div class=" fw-medium field-value text-end1">@(MotionJudgements.ReturnDate.HasValue? MotionJudgements.ReturnDate.Value.ToString(DateFormats.Default) : "--")</div></div></div>
-
-                            </div>
-                        </div>
-
-                        <div class="border rounded-3  p-3 mt-4 small1">
-                            <h6 class="mt-0 font14">Key Dates</h6>
-                            <div class="row g-3 mt-2" id="paymentsGrid">
-                                <div class="col-12 col-md-6 col-lg-6 mt-0"><div class="d-flex pt-2" style="align-items:baseline"><div class=" text-secondary field-label">Vacate Dat</div><div class=" text-end1 fw-medium field-value">@(legalcaseDto.ExpirationDate.HasValue? legalcaseDto.ExpirationDate.Value.ToString(DateFormats.Default) : "--")</div></div></div>
-                                <div class="col-12 col-md-6 col-lg-6 mt-0">
-                                    <div class="pt-2 d-flex" style="align-items:baseline">
-                                        <div class=" text-secondary field-label">Next Reminder</div><div class=" text-end1 fw-medium field-value">
-                                            @(legalcaseDto.RemainderDate.HasValue
-                                                                                        ? legalcaseDto.RemainderDate.Value.ToString(DateFormats.Default)
-                                                                                        : "--")
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-
-
-                            </div>
-                        </div>
-                    </div>*@
-                    <ClientsDetail CurrentCaseId="CurrentCaseId" />
+                   
+                    
+                    <ClientsDetail CurrentCaseId="caseId" />
 
                     <!-- Marshal Info -->
-                    <div class="card shadow-sm p-3 border-0">
-                        <table class="info-table " style="border:none;">
-                            <thead>
-                                <tr>
-                                    <th colspan="2" class="info-bar">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="info-bar-title">Marshal</div>
-                                            <button type="button" class="btn btn-sm normal p-1" @onclick="ShowMarshalModal" style="color:white">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-                                        </div>
-                                    </th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <tr class="info-row">
-                                    <td class="info-cell label">Name:</td>
-                                    <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(legalcaseDto.MarshalName) ? "--" : legalcaseDto.MarshalName)</td>
-                                </tr>
-
-                                <tr class="info-row">
-                                    <td class="info-cell label">Phone No.:</td>
-                                    <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(legalcaseDto.MarshalPhone) ? "--" : legalcaseDto.MarshalPhone)</td>
-                                </tr>
-
-                                <tr class="info-row">
-                                    <td class="info-cell label">Docket No.:</td>
-                                    <td class="info-cell value ellipsis">
-                                        @(string.IsNullOrWhiteSpace(legalcaseDto.Docketno) ? "--" : legalcaseDto.Docketno)
-
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-
-
-                    </div>
-                    <div class="card shadow-sm p-3 border-0 pb-4">
-                        <table class="info-table " style="border:none;">
-                            <thead>
-                                <tr>
-                                    <th colspan="2" class="info-bar" style="background-color: #DDB156;">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="info-bar-title">Warrant</div>
-                                            <button type="button" class="btn btn-sm normal p-1" @onclick="ShowMarshalModal" style="color:white">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-                                        </div>
-                                    </th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <tr class="info-row">
-                                    <td class="info-cell label">Warrant Status:</td>
-                                    <td class="info-cell value ellipsis">@(legalcaseDto.WarrantRequested ? "Requested" : "Not Requested")</td>
-                                </tr>
-
-                                <tr class="info-row">
-                                    <td class="info-cell label">Scheduled Eviction:</td>
-                                    <td class="info-cell value ellipsis">--</td>
-                                </tr>
-
-                                <tr class="info-row">
-                                    <td class="info-cell label">Warrant Requested:</td>
-                                    <td class="info-cell value ellipsis">
-                                        @(caseWarrantDto.WarrantIssued?.ToString(DateFormats.Default) ?? "--")
-
-                                    </td>
-                                </tr>
-                                <tr class="info-row">
-                                    <td class="info-cell label">Warrant Issued:</td>
-                                    <td class="info-cell value ellipsis">
-                                        @(caseWarrantDto.WarrantIssued?.ToString(DateFormats.Default) ?? "--")
-
-                                    </td>
-                                </tr>
-                                <tr class="info-row">
-                                    <td class="info-cell label">Warrant Rejected:</td>
-                                    <td class="info-cell value ellipsis">
-                                        @(caseWarrantDto.WarrantRejected?.ToString(DateFormats.Default) ?? "--")
-
-                                    </td>
-                                </tr>
-                                <tr class="info-row">
-                                    <td class="info-cell label">Notice Served: </td>
-                                    <td class="info-cell value ellipsis">
-                                        @(caseWarrantDto.NoticeServed?.ToString(DateFormats.Default) ?? "--")
-
-                                    </td>
-                                </tr>
-                                <tr class="info-row">
-                                    <td class="info-cell label">Execution Eligible:</td>
-                                    <td class="info-cell value ellipsis">
-                                        @(caseWarrantDto.ExecutionEligible?.ToString(DateFormats.Default) ?? "--")
-
-                                    </td>
-                                </tr>
-                                <tr class="info-row">
-                                    <td class="info-cell label">Eviction Executed:</td>
-                                    <td class="info-cell value ellipsis">
-                                        @(caseWarrantDto.EvictionExecuted?.ToString(DateFormats.Default) ?? "--")
-
-                                    </td>
-                                </tr>
-                                <tr class="info-row">
-                                    <td class="info-cell label">Re-File:</td>
-                                    <td class="info-cell value ellipsis">
-                                        @(caseWarrantDto.ReFileDate?.ToString(DateFormats.Default) ?? "--")
-
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
+                    <MarshalandWarrantCaseDetails CaseId="caseId" loggedInUserId="loggedInUserId" />
                     <!-- Rent Description -->
                     @*<div class="card shadow-sm border-0">
                         <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
@@ -1859,123 +1398,8 @@
                 </div>
             </section>
             <section class="row g-4 mt-1">
-
-                <div class="col-12 col-lg-12 d-flex flex-column gap-4">
-                    <div class="card shadow-sm border-0 p-3">
-                        <div class="info-bar">Timeline</div>
-                        <div class=para>
-                            <p class="text-secondary">Filed<span class="arrow ms-1 me-1">→</span>Service<span class="arrow ms-1 me-1">→</span>Judgment<span class="arrow ms-1 me-1">→</span>Environment</p>
-                        </div>
-
-
-
-                        <div class="timeline" id="timelineList">
-                            <div class="item" data-status="completed">
-                                <span class="dot"></span>
-
-                                <div class="text-secondary field-label font14 mx-2">@legalcaseDto.CreatedOn.ToString(DateFormats.Default)</div>
-                                <div class="fw-semibold label mx-2">Case Created</div>
-                                <div class="text-secondary field-label font14 mx-2">Initial Intake And File Opened</div>
-
-
-                            </div>
-                            @if (caseFormDto.Count() > 0)
-                            {
-                                @foreach (var item in caseFormDto)
-                                {
-
-                                    <div class="item" data-status="completed">
-                                        <span class="dot"></span>
-                                        <div class="text-secondary field-label font14 mx-2">@(item.CreatedOn?.ToString(DateFormats.Default) ?? "---")</div>
-                                        <div class="fw-semibold label mx-2">Notice Served</div>
-                                        <div class="text-secondary field-label font14 mx-2">@(item.FormTypeName ?? "---")</div>
-
-
-                                    </div>
-                                }
-                            }
-                            else
-                            {
-
-                                <div class="item" data-status="upcoming">
-                                    <span class="dot"></span>
-                                    <div class="text-secondary field-label font14 mx-2">--</div>
-                                    <div class="fw-semibold label mx-2">Notice Not Generated</div>
-                                    <div class="text-secondary field-label font14 mx-2">Pending Notice</div>
-
-
-                                </div>
-                            }
-                            @if (CaseHearings.Count() > 0)
-                            {
-                                @foreach (var item in CaseHearings)
-                                {
-                                    <div class="item" data-status="current">
-                                        <span class="dot"></span>
-                                        <div class="text-secondary field-label font14 mx-2">@(item.HearingDate?.ToString(DateFormats.Default))</div>
-                                        <div class="fw-semibold label mx-2">Hearing Scheduled</div>
-                                        <div class="text-secondary field-label font14 mx-2">Awaiting confirmation from court</div>
-
-
-                                    </div>
-
-                                }
-                            }
-                            else
-                            {
-
-                                <div class="item" data-status="upcoming">
-                                    <span class="dot"></span>
-
-                                    <div class="text-secondary field-label font14 mx-2">--</div>
-                                    <div class="fw-semibold label mx-2">Hearing Scheduled</div>
-                                    <div class="text-secondary field-label font14 mx-2">Awaiting confirmation from court</div>
-
-                                </div>
-
-                            }
-
-                            @if (Judgements.Count() > 0)
-                            {
-                                @foreach (var item in Judgements)
-                                {
-                                    <div class="item" data-status="current">
-                                        <span class="dot"></span>
-
-                                        <div class="text-secondary field-label font14 mx-2">@item.AppreanceDate?.ToString(DateFormats.Default)</div>
-                                        <div class="fw-semibold label mx-2">@item.CourtTodayName</div>
-                                        <div class="text-secondary field-label font14 mx-2"></div>
-
-
-                                    </div>
-                                }
-                            }
-                            else
-                            {
-
-                                <div class="item" data-status="upcoming">
-                                    <span class="dot"></span>
-
-                                    <div class="text-secondary field-label font14 mx-2">--</div>
-                                    <div class="fw-semibold label mx-2">Judgment</div>
-                                    <div class="text-secondary field-label font14 mx-2">Pending hearing</div>
-
-
-                                </div>
-                            }
-                            <div class="item" data-status="upcoming">
-                                <span class="dot"></span>
-                                <div class="text-secondary field-label font14 mx-2">--</div>
-                                <div class="fw-semibold label mx-2">Warrant/Enforcement</div>
-                                <div class="text-secondary field-label font14 mx-2">To be requested if applicable</div>
-
-
-                            </div>
-
-                        </div>
-
-                    </div>
-                </div>
+                <TimeLineCaseDetailsComponent CaseId="caseId" isAdmin="isAdmin" loggedInUserId="loggedInUserId" />
+               
             </section>
         </main>
     }
@@ -2061,151 +1485,7 @@
 
 
 
-    <div class="modal fade" id="marshalModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-semibold" id="buildingModalLabel">Edit Marshal Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="p-3">
-                    <div class="row mb-3 d-flex align-items-center">
-
-                        <div class="fw-semibold col-12 required-label">Assign Marshal</div>
-                    </div>
-                    <div class="row mt-2">
-
-                        <div class="col-6 position-relative" @onfocusout="HideMarshalDropDown">
-
-                            @if (!isMarshalAssigned)
-                            {
-                                <!-- Search Box -->
-
-                                <InputText class="form-control search-box" placeholder="Search by marshal name.." @bind-value="searchmarshalText" @oninput="OnSearchMarshalInput"
-                                           @onclick="ShowAllmarshal" />
-                                <button class="search-btn" type="button">
-                                    <i class="fa fa-search"></i>
-                                </button>
-
-
-
-
-                                @if (filteredmarshal?.Any() == true)
-                                {
-                                    <ul class="dropdown-menu show" style="position:absolute; width:94%; cursor:pointer;">
-                                        @foreach (var c in filteredmarshal)
-                                        {
-                                            <li class="dropdown-item" @onclick="() => Selectedmarshal(c)">
-                                                @c.FirstName  @c.LastName
-                                            </li>
-                                        }
-                                    </ul>
-                                }
-
-                            }
-                            else
-                            {
-                                <!-- Selected Marshal -->
-                                <label class="form-control bg-light fw-bold d-flex align-items-center">
-                                    @(selectedmarshal != null ? selectedmarshal.FirstName + " " + selectedmarshal.LastName : "")
-                                </label>
-
-                            }
-
-                        </div>
-
-                        <div class="col-6 d-flex justify-content-between">
-                            @if (!isMarshalAssigned)
-                            {
-                                <button class="btn bg-brand-accent base text-white buttons" @onclick="SubmitMarshal">Assign</button>
-
-                            }
-                            else
-                            {
-                                <button class="btn btn-secondary" @onclick="ResetMarshal">Reset</button>
-
-                            }
-
-
-                            <!-- <button class="btn bg-brand-primary base text-white ms-2"
-                                     @onclick="GenrateMarshalForm"
-                                     disabled="@(isMarshalAssigned == false)">
-                                 Generate
-                             </button> -->
-
-
-                        </div>
-
-
-                    </div>
-                    <div class="row mt-2">
-                        <div class="col-12">
-                            @if (showMarshalError)
-                            {
-                                <div class="text-danger small mt-1">Please select a marshal.</div>
-                            }
-                        </div>
-                    </div>
-
-                    <hr />
-                    <EditForm Model="@CaseWarranrDto">
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label class="required-label">Warrant Requested</label>
-                                <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="CaseWarranrDto.WarrantRequested" @bind-Value:after="() => ToShow = true" />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="required-label">Warrant Issued</label>
-                                <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="CaseWarranrDto.WarrantIssued" @bind-Value:after="() => ToShow = true" />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="required-label">Warrant Rejected</label>
-                                <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="CaseWarranrDto.WarrantRejected" @bind-Value:after="() => ToShow = true" />
-                            </div>
-
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label class="required-label">Notice Served</label>
-                                <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="CaseWarranrDto.NoticeServed" @bind-Value:after="() => ToShow = true" />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="required-label">Execution Eligible</label>
-                                <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="CaseWarranrDto.ExecutionEligible" @bind-Value:after="() => ToShow = true" />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="required-label">Re-file / Re-mail</label>
-                                <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="CaseWarranrDto.ReFileDate" @bind-Value:after="() => ToShow = true" />
-                            </div>
-                        </div>
-                        <div class="row mb-4">
-                            <div class="col-md-4">
-                                <label class="required-label">Eviction Executed</label>
-                                <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="CaseWarranrDto.EvictionExecuted" @bind-Value:after="() => ToShow = true" />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="required-label">Status</label>
-                                <InputSelect class="form-select" @bind-Value="CaseWarranrDto.Status">
-                                    @foreach (var s in StatusList)
-                                    {
-                                        <option value="@s">@s</option>
-                                    }
-                                </InputSelect>
-                            </div>
-                        </div>
-                        <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
-                            <button type="button" class="btn btn-secondary buttons" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary base buttons" @onclick="() => SubmitMarshalDates(false)">Save</button>
-                            <button type="submit" class="btn btn-primary base buttons" @onclick="() => SubmitMarshalDates(true)" disabled="@(isMarshalAssigned == false)">Save & Generate</button>
-                        </div>
-                    </EditForm>
-                </div>
-
-            </div>
-        </div>
-    </div>
-    
+   
     <!-- Alert Modal (shown when no court info exists) -->
     @if (showCourtInfoAlert || IsFormGenerated)
     {
@@ -2409,7 +1689,6 @@
     private bool _showCreateAction = false;
     private bool _showCourtPartList = false;
     private bool _showCourtList = false;
-    private List<DateRent> DateRentList = new();
     private int FinalProgress { get; set; } = 0;     // Total calculated progress
     private int AnimatedProgress { get; set; } = 0;  // Animating value
     private System.Timers.Timer animationTimer;
@@ -2431,27 +1710,23 @@
     private string searchTenantText;
     private List<EditToBuildingDto> filteredBuildings = new();
     private List<EditToLandlordDto> filteredlandlords = new();
-    private List<EditToTenantDto> filteredTenant = new();
     private List<State> StateList = new();
     private List<RegulationStatus> RegulationList = new();
     private IEnumerable<City> CityList = new List<City>();
     private List<EditToBuildingDto> BuildingList = new();
     private List<EditToRemainderCenterDto> RemainderCenterList = new();
     private List<EditToLandlordDto> LandlordList = new();
-    private List<EditToTenantDto> TenantList = new();
-    private List<string> Tenants = new();
-    private List<string> UnderTenants = new();
-    private List<AdditioanlTenants> AdditionalTenantfromDbList = new();
-    private List<CaseAdditionalTenants> CaseAdditionalTenantfromDbList = new();
-    private List<AddtionalTenantDto> AdditionalTenantList = new();
-    private List<AdditionalOccupantDto> AdditionalOccupantsList = new();
-    private List<AdditionalOccupantDto> AdditionalOccupantsFromDbList = new();
+    // private List<string> Tenants = new();
+    // private List<string> UnderTenants = new();
+    // private List<AdditioanlTenants> AdditionalTenantfromDbList = new();
+    // private List<CaseAdditionalTenants> CaseAdditionalTenantfromDbList = new();
+    // private List<AddtionalTenantDto> AdditionalTenantList = new();
+    // private List<AdditionalOccupantDto> AdditionalOccupantsList = new();
+    // private List<AdditionalOccupantDto> AdditionalOccupantsFromDbList = new();
     private bool showCourtInfoAlert = false;
     private bool IsFormGenerated = false;
     private bool ShowMarshalPopup = false;
     private bool DocketReadonly = false;
-    public EditToTenantDto selectedTenant = new EditToTenantDto();
-    public EditToTenantDto ViewTenant = new EditToTenantDto();
     public CourtDto court = new CourtDto();
     public CaseHearingDto caseHearing = new CaseHearingDto();
     public CaseWarrantDto caseWarrantDto = new CaseWarrantDto();
@@ -2521,11 +1796,7 @@
 
 
         await LoadCaseDetails();
-        await LoadCaseForms();
-        await LoadHearing();
-
-        //await LoadCaseDocument();
-        await LoadOthers();
+        
 
         CalculateCaseProgress();
         StartProgressAnimation();
@@ -2674,7 +1945,7 @@
             StateHasChanged();
             return;
         }
-        // spinnerservice.Show();
+         spinnerservice.Show();
 
         var result = await _service.UpdateMarshalAsync(legalcaseDto);
 
@@ -2856,72 +2127,7 @@
         ShowCourtPartDropdown = false;
     }
 
-    public record MonthItem(string Value, string Display);
-    private List<MonthItem> MonthOptions = new();
-    private List<ArrearLedgerDto> Rows = new();
-    private List<ArrearLedgerDto> RowstoDelete = new();
-
-    private void OnMonthChanged(ArrearLedgerDto row)
-    {
-        StateHasChanged();
-    }
-    private void GenerateMonths()
-    {
-        MonthOptions.Clear();
-
-        if (legalcaseDto.LastPaymentDate is null)
-            return;
-
-        DateTime start = new DateTime(
-            legalcaseDto.LastPaymentDate.Value.Year,
-            legalcaseDto.LastPaymentDate.Value.Month,
-            1);
-
-        DateTime end = new DateTime(
-            DateTime.Today.Year,
-            DateTime.Today.Month,
-            1);
-
-        // Iterate month-by-month
-        for (DateTime dt = start; dt <= end; dt = dt.AddMonths(1))
-        {
-            string value = $"{dt:yyyy-MM}"; // stored value
-            string display = $"{dt:yyyy}-{CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(dt.Month)}";
-
-            MonthOptions.Add(new MonthItem(value, display));
-        }
-        if (!Rows.Any())
-        {
-            Rows.Add(new ArrearLedgerDto());
-        }
-    }
-    private void RecalculateTotal()
-    {
-        legalcaseDto.TotalOwed = Rows.Sum(x => x.Amount);
-        StateHasChanged();
-    }
-
-    private void AddRow()
-    {
-        Rows.Add(new ArrearLedgerDto());
-    }
-
-    private void RemoveRow(ArrearLedgerDto row)
-    {
-        Rows.Remove(row);
-        if (row.Id != null && row.Id != Guid.Empty)
-        {
-            RowstoDelete.Add(row);
-        }
-
-    }
-
-    private void OnAmountChanged(ArrearLedgerDto row, double value)
-    {
-
-        row.Amount = value;
-        StateHasChanged();
-    }
+    
 
     private void CalculateCaseProgress()
     {
@@ -2985,23 +2191,8 @@
 
     private async Task LoadCaseDetails()
     {
-        legalcaseDto = await _service.GetCaseByIdAsync(caseId);
-        if (legalcaseDto.MarshalId != null && legalcaseDto.MarshalId != Guid.Empty)
-        {
-            selectedmarshal = await _marshalService.GetMarshalByIdAsync(legalcaseDto.MarshalId.Value);
-            isMarshalAssigned = true;
-        }
-        else
-        {
-            isMarshalAssigned = false;
-            selectedmarshal = null;
-            searchmarshalText = string.Empty;
-        }
-        if (legalcaseDto != null && legalcaseDto.CaseTypeId != null)
-        {
-            FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
-
-        }
+        legalcaseDto = await _service.GetCaseDetailsByIdAsync(caseId);
+        
 
         // feecatalogDto = await _feeCatalogService.GetAllAsync();
         // var feeLookup = feecatalogDto.ToDictionary(f => f.Label.ToLower(), f => f.Rate);
@@ -3164,13 +2355,7 @@
         }
         ;
 
-        courts = await _courtService.GetAllCourtDataAsync();
-        //courts = new List<CourtDto>();
-        if (!courts.Any())
-        {
-            isNewCourt = true;
-            showCourtFields = true;
-        }
+        
     }
 
     public async Task EditCaseDetail(Guid id)
@@ -3324,26 +2509,25 @@
 
     private async Task LoadOthers()
     {
-        var casenotice = await _caseNoticeinfo.GetAllCasenoticeInfo(legalcaseDto.Id);
-        if (casenotice != null)
-        {
-            CaseNoticeInfos = casenotice.Where(e => e.FormTypeName.Contains("Demand")).FirstOrDefault() ?? new CaseNoticeInfoDto();
-            legalcaseDto.ExpirationDate = CaseNoticeInfos.DateNoticeServed.HasValue ? CaseNoticeInfos.DateNoticeServed.Value.AddDays(CaseNoticeInfos.CalcNoticeLength ?? 0) : null;
-        }
-        legalcaseDto.NextCourtDate = CaseHearings.Where(e => e.HearingDate > DateTime.Now).OrderBy(ed => ed.HearingDate).Select(ab => ab.HearingDate).FirstOrDefault();
+        // var casenotice = await _caseNoticeinfo.GetAllCasenoticeInfo(legalcaseDto.Id);
+        // if (casenotice != null)
+        // {
+        //     CaseNoticeInfos = casenotice.Where(e => e.FormTypeName.Contains("Demand")).FirstOrDefault() ?? new CaseNoticeInfoDto();
+        //     legalcaseDto.ExpirationDate = CaseNoticeInfos.DateNoticeServed.HasValue ? CaseNoticeInfos.DateNoticeServed.Value.AddDays(CaseNoticeInfos.CalcNoticeLength ?? 0) : null;
+        // }
+        // legalcaseDto.NextCourtDate = CaseHearings.Where(e => e.HearingDate > DateTime.Now).OrderBy(ed => ed.HearingDate).Select(ab => ab.HearingDate).FirstOrDefault();
 
-        var remainders = await _remainders.GetRemainderCenterByCaseIdAsync(legalcaseDto.Id);
-        // remainders = remainders.OrderBy(e => e.When).ToList();
-        if (remainders != null)
-        {
-            legalcaseDto.RemainderDate = remainders
-        .Where(r => r.When > DateTime.Now)
-        .OrderBy(r => r.When)
-        .Select(r => r.When)
-        .FirstOrDefault();
-        }
+        // var remainders = await _remainders.GetRemainderCenterByCaseIdAsync(legalcaseDto.Id);
+        // // remainders = remainders.OrderBy(e => e.When).ToList();
+        // if (remainders != null)
+        // {
+        //     legalcaseDto.RemainderDate = remainders
+        // .Where(r => r.When > DateTime.Now)
+        // .OrderBy(r => r.When)
+        // .Select(r => r.When)
+        // .FirstOrDefault();
+        // }
 
-        caseWarrantDto = await _casewarrantservice.GetWarrantDetails(legalcaseDto.Id);
 
         //CaseNotes = await _service.GetAllCaseNotes();
 
@@ -3391,7 +2575,7 @@
 
     //private TenantModel tenantEditModel = new();
     //private BuildingModel buildingEditModel = new();
-    private List<TenancyType> TenancyTypeList = new();
+   
 
 
 
@@ -3726,24 +2910,7 @@
         caseHearing.HearingTime = TimeOnly.FromTimeSpan(TimeSpan.FromHours(10));
     }
 
-    private void OnBindTenantCancel()
-    {
-        Tenants.Clear();
-        searchTenantText = null;
-        legalcaseDto.TenantId = null;
-        legalcaseDto.TenantName = null;
-        legalcaseDto.MonthlyRent = null;
-        legalcaseDto.TenancyTypeId = null;
-        legalcaseDto.RentDueEachMonthOrWeekId = null;
-        legalcaseDto.PrimaryResidence = false;
-        legalcaseDto.LastPaymentDate = null;
-        legalcaseDto.LastPayment = null;
-        legalcaseDto.TotalOwed = null;
-        RowstoDelete.AddRange(Rows.Where(e => e.Id != null && e.Id != Guid.Empty).ToList());
-        AdditionalTenantfromDbList = new List<AdditioanlTenants>();
-        AdditionalTenantList = new List<AddtionalTenantDto>();
-    }
-
+   
 
 
     private async Task SaveRentChanges()
@@ -3781,274 +2948,14 @@
 
 
 
-    private List<CaseType> CaseTypeList = new();
-    private void CalcNoticeDays()
-    {
-        if (CaseTypeList.FirstOrDefault(x => x.Id == legalcaseDto.CaseTypeId)?.Name == "Holdover")
-        {
-            Console.WriteLine("1");
-            if (legalcaseDto.DateTenantMoved != null && legalcaseDto.TenancyTypeId != null)
-            {
-                Console.WriteLine("2");
-
-                int length = 0;
-
-                var type = TenancyTypeList
-                    .Where(a => a.Id == legalcaseDto.TenancyTypeId)
-                    .Select(e => e.Name?.ToLower())
-                    .FirstOrDefault();
-
-                // ✅ Special case tenancy types get fixed 10 days
-                if (new[] { "squatter", "licensee", "referee" }.Contains(type))
-                {
-                    length = 10;
-                }
-                else
-                {
-                    // ✅ Otherwise calculate by years
-                    var yrs = DiffYears(legalcaseDto.DateTenantMoved?.ToDateTime(TimeOnly.MinValue), DateTime.Today);
-
-                    if (yrs < 1)
-                        length = 30;
-                    else if (yrs < 2)
-                        length = 60;
-                    else
-                        length = 90;
-                }
-
-                legalcaseDto.CalculatedNoticeLength = length;
-
-                // ✅ Set PredicateNotice text
-                legalcaseDto.PredicateNotice = type switch
-                {
-                    "licensee" => "10 Days Notice - Tenant Of Record Vacated (Licensee)",
-                    "referee" => "10 Days Notice - Referee Deed / Prior Owner",
-                    "squatter" => "10 Days Notice - Squatter / Intruder",
-                    "month-to-month" => $"{length} Days Notice - Month to Month",
-                    _ => ""
-                };
-            }
-        }
-    }
+   
     private int DiffYears(DateTime? from, DateTime? to)
     {
         if (!from.HasValue || !to.HasValue) return 0;
         return (int)((to.Value - from.Value).TotalDays / 365);
     }
 
-    private async Task SaveTenantChanges()
-    {
-        if (!await ValidateCurrentStep("Tenant")) return;
-        spinnerservice.Show();
-
-
-        var addorupdate = false;
-
-        if (selectedTenant == null)
-        {
-            var parts = Tenants[0].Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-            var firstName = parts.FirstOrDefault() ?? "";
-            var lastName = parts.Length > 1 ? parts.Last() : "";
-            var newTenant = new CreateToTenantDto()
-            {
-                FirstName = firstName,
-                LastName = lastName,
-                UnitOrApartmentNumber = legalcaseDto.UnitOrApartmentNumber ?? searchTenantText,
-                BuildingId = legalcaseDto.BuildingId,
-                PrimaryResidence = legalcaseDto.PrimaryResidence,
-                TenancyTypeId = legalcaseDto.TenancyTypeId,
-                MonthlyRent = legalcaseDto.MonthlyRent,
-                TenantShare = legalcaseDto.TenantShare,
-                RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
-
-            };
-            var tenantId = await _tenantService.AddTenantfromCase(newTenant);
-            // IsNewTenant = true;
-            legalcaseDto.TenantId = tenantId;
-
-        }
-        else
-        {
-            if (Tenants.Count > 0 && selectedTenant != null)
-            {
-                var mainTenantName = Tenants[0]?.Trim();
-                if (!string.IsNullOrWhiteSpace(mainTenantName))
-                {
-                    var parts = mainTenantName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-                    var firstName = parts.Length > 0 ? parts[0] : "";
-                    var lastName = parts.Length > 1 ? parts[1] : "";
-
-                    // Only update if anything actually changed
-                    if (HasTenantChanged(selectedTenant, legalcaseDto, firstName, lastName))
-                    {
-                        var updateTenant = new EditToTenantDto
-                        {
-                            Id = legalcaseDto.TenantId ?? Guid.Empty,
-                            FirstName = firstName,
-                            LastName = lastName,
-                            BuildingId = legalcaseDto.BuildingId,
-                            UnitOrApartmentNumber = legalcaseDto.UnitOrApartmentNumber,
-                            MonthlyRent = legalcaseDto.MonthlyRent,
-                            TenantShare = legalcaseDto.TenantShare,
-                            RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
-                            TotalRentOwed = legalcaseDto.TotalOwed,
-                            TenancyTypeId = legalcaseDto.TenancyTypeId,
-                            PrimaryResidence = legalcaseDto.PrimaryResidence,
-                            SocialServices = legalcaseDto.SocialService,
-                            UpdatedOn = DateTime.Now
-                        };
-
-                        await _tenantService.UpdateTenantAsync(updateTenant);
-                    }
-                }
-            }
-
-        }
-
-        if (AdditionalTenantList.Count > 0)
-        {
-            foreach (var t in AdditionalTenantList)
-            {
-                t.TenantId = legalcaseDto.TenantId;
-            }
-
-            var toadd = AdditionalTenantList.Where(e => e.Id == null || e.Id == Guid.Empty && e.IsDeleted == false).ToList();
-            var toupdate = AdditionalTenantList.Where(e => e.Id != null && e.Id != Guid.Empty && e.IsDeleted == false).ToList();
-            if (toadd.Any())
-            {
-                await _additionalTenantService.AddAdditionalTenantAsync(toadd);
-            }
-            if (toupdate.Any())
-            {
-                await _additionalTenantService.UpdateAdditionalTenantAsync(toupdate);
-            }
-
-        }
-
-
-        var success = await _service.UpdateCaseAsync(legalcaseDto);
-
-        if (success.HasValue)
-        {
-            if (AdditionalTenantList.Any())
-            {
-
-
-                var toAdd = AdditionalTenantList
-                    .Where(o => o.IsDeleted != true && (o.LegalCaseId == null || o.LegalCaseId == Guid.Empty))
-                    .ToList();
-
-                var toUpdate = AdditionalTenantList
-                .Where(o => o.IsDeleted != true && (o.LegalCaseId != null && o.LegalCaseId != Guid.Empty))
-                .ToList();
-
-                var toDelete = AdditionalTenantList
-                    .Where(o => o.IsDeleted == true && (o.LegalCaseId != null && o.LegalCaseId != Guid.Empty))
-                    .ToList();
-                foreach (var occupant in toAdd)
-                {
-                    occupant.LegalCaseId = legalcaseDto.Id;
-                }
-                if (toUpdate.Any())
-                    await _caseAdditionalTenant.UpdateAdditionalCaseTenantAsync(toUpdate);
-
-                if (toAdd.Any())
-                    await _caseAdditionalTenant.AddAdditionalCaseTenantAsync(toAdd);
-
-                if (toDelete.Any())
-                    await _caseAdditionalTenant.DeleteAdditionalCaseTenants(toDelete);
-            }
-            if (AdditionalOccupantsList.Any())
-            {
-                foreach (var occupant in AdditionalOccupantsList)
-                {
-                    occupant.LegalCaseId = success;
-                }
-
-                var toAdd = AdditionalOccupantsList
-                    .Where(o => o.IsDeleted != true && (o.Id == null || o.Id == Guid.Empty))
-                    .ToList();
-
-                var toUpdate = AdditionalOccupantsList
-                .Where(o => o.IsDeleted != true && (o.Id != null && o.Id != Guid.Empty))
-                .ToList();
-
-                var toDelete = AdditionalOccupantsList
-                    .Where(o => o.IsDeleted == true)
-                    .ToList();
-
-                if (toUpdate.Any())
-                    await _additionalOccupantService.UpdateAdditionalOccupantsAsync(toUpdate);
-
-                if (toAdd.Any())
-                    await _additionalOccupantService.AddAdditionalOccupantsAsync(toAdd);
-
-                if (toDelete.Any())
-                    await _additionalOccupantService.DeleteAdditionalOccupants(toDelete);
-            }
-            if (Rows.Count > 0)
-            {
-                var addrows = Rows.Where(e => (e.Id == null || e.Id == Guid.Empty) && (e.Amount != null || e.Month != null)).Select(e => new ArrearLedgerDto()
-                {
-                    LegalCaseId = legalcaseDto.Id,
-                    CaseNoticeId = null,
-                    Notes = e.Notes,
-                    Amount = e.Amount,
-                    Month = e.Month,
-                }).ToList();
-                if (addrows.Any())
-                {
-                    await _service.AddArrearLedgerAsync(addrows);
-                }
-
-                var updaterows = Rows.Where(e => e.Id != null && e.Id != Guid.Empty).Select(e => new ArrearLedgerDto()
-                {
-                    Id = e.Id,
-                    LegalCaseId = legalcaseDto.Id,
-                    CaseNoticeId = null,
-                    Notes = e.Notes,
-                    Amount = e.Amount,
-                    Month = e.Month,
-                }).ToList();
-                if (updaterows.Any())
-                {
-                    await _service.UpdateArrearLedgerAsync(updaterows);
-                }
-            }
-
-            if (RowstoDelete.Any())
-            {
-                await _service.DeleteArrearLedger(RowstoDelete);
-            }
-
-            ToastService.ShowSuccess("Tenant details updated successfully!");
-            await JS.InvokeVoidAsync("hideModal", "tenantModal");
-
-            await LoadCaseDetails();
-        }
-        else
-        {
-            ToastService.ShowError("Failed to update tenant details.");
-        }
-
-        // Map edited fields
-
-
-        spinnerservice.Hide();
-    }
-    private bool HasTenantChanged(EditToTenantDto existing, IntakeModel current, string firstName, string lastName)
-    {
-        return existing.FirstName != firstName
-            || existing.LastName != lastName
-            || existing.UnitOrApartmentNumber != current.UnitOrApartmentNumber
-            || existing.MonthlyRent != current.MonthlyRent
-            || existing.TenantShare != current.TenantShare
-            || existing.RentDueEachMonthOrWeekId != current.RentDueEachMonthOrWeekId
-            || existing.TotalRentOwed != current.TotalOwed
-            || existing.TenancyTypeId != current.TenancyTypeId
-            || existing.SocialServices != current.SocialService;
-    }
+    
 
     private async Task<bool> ValidateCurrentStep(string modal)
     {
@@ -4249,300 +3156,10 @@
         LoadHearing();
         spinnerservice.Hide();
     }
-    private async Task ShowAllTenantForHoldover()
-    {
-        if (legalcaseDto.BuildingId == null || legalcaseDto.BuildingId == Guid.Empty)
-        {
-            filteredTenant = new List<EditToTenantDto>();
-            return;
-        }
-        else
-        {
-            filteredTenant = await _tenantService.GetTenantsByBuildingIdAsync(legalcaseDto.BuildingId.Value);
+    
+   
 
-        }
-    }
-    async Task HideTenantDropDown(FocusEventArgs e)
-    {
-        // small1 delay to allow click on dropdown item to register before hiding
-        await Task.Delay(500);
-        if (filteredTenant.Any())
-        {
-            filteredTenant.Clear();
-
-        }
-        StateHasChanged();
-    }
-    private async Task OnSearchTenantInput(ChangeEventArgs e)
-    {
-        searchTenantText = e.Value?.ToString() ?? "";
-        _cts?.Cancel();
-        _cts = new CancellationTokenSource();
-        try
-        {
-
-            await Task.Delay(300, _cts.Token);
-            // ⭐ Empty input → load all tenants (ONLY here)
-            if (string.IsNullOrWhiteSpace(searchTenantText))
-            {
-                await ShowAllTenantForHoldover();
-                return;
-            }
-
-            // ⭐ 1st & 2nd character → DO NOTHING (keep list unchanged)
-            if (searchTenantText.Length < 3)
-            {
-                // ❗ No reload here (important)
-                return;
-            }
-            if (legalcaseDto.BuildingId == null || legalcaseDto.BuildingId == Guid.Empty)
-            {
-                filteredTenant = new List<EditToTenantDto>();
-                return;
-            }
-            else
-            {
-                // ⭐ 3+ characters → server search
-                filteredTenant = await _tenantService.SearchTenantsAsync(
-                    searchTenantText,
-                    legalcaseDto.BuildingId.Value);
-            }
-
-
-
-
-        }
-        catch (TaskCanceledException)
-        {
-            // Old task cancelled → ignore
-        }
-
-    }
-
-
-    private void SelectTenant()
-    {
-        legalcaseDto.ApartmentNumber = searchTenantText;
-    }
-
-    private async void SelectedTenant(EditToTenantDto tenant)
-    {
-
-        selectedTenant = tenant;
-        Tenants.Clear();
-        foreach (var item in AdditionalTenantList)
-        {
-            item.IsDeleted = true;
-        }
-        Tenants.Add($"{tenant.FirstName} {tenant.LastName}");
-
-
-
-        searchTenantText = $"{tenant.UnitOrApartmentNumber}";
-
-        legalcaseDto.UnitOrApartmentNumber = tenant.UnitOrApartmentNumber;
-        legalcaseDto.TenantName = tenant.FirstName + " " + tenant.LastName;
-        legalcaseDto.TenantId = tenant.Id;
-        TenancytypeId = tenant.TenancyTypeId;
-        PrimaryResidence = tenant.PrimaryResidence;
-
-
-
-        AdditionalTenantfromDbList = await _additionalTenantService.GetAllAdditionalTenantsAsync(legalcaseDto.TenantId);
-        if (AdditionalTenantfromDbList.Count > 0)
-        {
-            Tenants.AddRange(AdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}").ToList());
-            AdditionalTenantList.AddRange(AdditionalTenantfromDbList.Select(e => new AddtionalTenantDto
-            {
-                FirstName = e.FirstName,
-                LastName = e.LastName,
-                TenantId = e.TenantId,
-                Id = e.Id
-            }));
-        }
-        filteredTenant?.Clear();
-
-
-        StateHasChanged();
-
-
-    }
-
-    void DeleteAdditionalTenant(int index)
-    {
-        // Index 0 = primary tenant → never delete
-        if (index <= 0 || index >= Tenants.Count)
-            return;
-
-        var name = Tenants[index]?.Trim();
-
-        // Remove UI row
-        Tenants.RemoveAt(index);
-
-        if (string.IsNullOrWhiteSpace(name))
-            return;
-
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var firstName = parts.FirstOrDefault() ?? "";
-        var lastName = parts.Length > 1 ? parts.Last() : "";
-
-        var occupant = AdditionalTenantList
-            .FirstOrDefault(x =>
-                x.FirstName == firstName &&
-                x.LastName == lastName &&
-                x.IsDeleted != true);
-
-        if (occupant == null)
-            return;
-
-        // Persisted → soft delete
-        if (occupant.Id != Guid.Empty)
-        {
-            occupant.IsDeleted = true;
-            occupant.IsActive = false;
-            occupant.IsVisible = false;
-        }
-        else
-        {
-            // New → hard delete
-            AdditionalTenantList.Remove(occupant);
-        }
-    }
-
-    void OnchangeAdditionalTenant(int index)
-    {
-        // index 0 = primary tenant
-        if (index <= 0 || index >= Tenants.Count)
-        {
-            if (legalcaseDto.TenantName == null)
-            {
-                legalcaseDto.TenantName = Tenants[0];
-            }
-            return;
-
-        }
-
-        var name = Tenants[index]?.Trim();
-        if (string.IsNullOrWhiteSpace(name))
-            return;
-
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var firstName = parts.FirstOrDefault() ?? "";
-        var lastName = parts.Length > 1 ? parts.Last() : "";
-
-        // Map UI row → ACTIVE additional tenants only
-        int activeIndex = index - 1;
-
-        var activeTenants = AdditionalTenantList
-            .Where(x => x.IsDeleted != true)
-            .ToList();
-
-        if (activeIndex < activeTenants.Count)
-        {
-            // RENAME / UPDATE existing tenant
-            var dto = activeTenants[activeIndex];
-
-            dto.FirstName = firstName;
-            dto.LastName = lastName;
-            dto.BuildingId = legalcaseDto.BuildingId;
-            dto.UnitorApartmentNumber = legalcaseDto.UnitOrApartmentNumber;
-        }
-        else
-        {
-            // NEW additional tenant
-            AdditionalTenantList.Add(new AddtionalTenantDto
-            {
-                FirstName = firstName,
-                LastName = lastName,
-                TenantId = legalcaseDto?.TenantId ?? Guid.Empty,
-                BuildingId = legalcaseDto.BuildingId,
-                UnitorApartmentNumber = legalcaseDto.UnitOrApartmentNumber,
-                CreatedOn = DateTime.Now,
-                IsActive = true,
-                IsDeleted = false,
-                IsVisible = true
-            });
-        }
-    }
-    void AddTenant()
-    {
-        Tenants.Add(string.Empty);
-    }
-
-
-    int defaultCount = 2;
-    void AddUnder()
-    {
-        int insertIndex = UnderTenants.Count - defaultCount;
-        UnderTenants.Insert(insertIndex, string.Empty);
-    }
-    void DeleteAdditionalOccupant(int index)
-    {
-        // Safety check
-        if (index < 0 || index >= UnderTenants.Count)
-            return;
-
-        // Remove from UI text list
-        UnderTenants.RemoveAt(index);
-
-        // Remove or mark deleted in DTO list
-        if (index < AdditionalOccupantsList.Count)
-        {
-            var occupant = AdditionalOccupantsList[index];
-
-            // If it already exists in DB → soft delete
-            if (occupant.Id != Guid.Empty)
-            {
-                occupant.IsDeleted = true;
-                occupant.IsActive = false;
-                occupant.IsVisible = false;
-            }
-            else
-            {
-                // New, unsaved → remove completely
-                AdditionalOccupantsList.RemoveAt(index);
-            }
-        }
-    }
-
-
-    void OnchangeAdditionalOccupants(int index)
-    {
-        var name = UnderTenants[index];
-
-        // If cleared, remove from AdditionalTenantList
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            var existing = AdditionalOccupantsList.ElementAtOrDefault(index);
-            if (existing != null)
-            {
-                AdditionalOccupantsList.RemoveAt(index);
-                UnderTenants.RemoveAt(index);
-            }
-            return;
-        }
-
-        // Update or add
-        if (index < AdditionalOccupantsList.Count)
-        {
-            AdditionalOccupantsList[index].Name = name;
-        }
-        else
-        {
-            var additional = new AdditionalOccupantDto()
-            {
-                Name = name,
-                CreatedOn = DateTime.Now,
-                IsActive = true,
-                IsDeleted = false, // better to keep false
-                IsVisible = true
-            };
-
-            AdditionalOccupantsList.Add(additional);
-        }
-
-
-    }
+   
     private async Task OpenHearingPopup()
     {
         if (legalcaseDto.CourtLocationId == null || legalcaseDto.CourtLocationId == Guid.Empty)

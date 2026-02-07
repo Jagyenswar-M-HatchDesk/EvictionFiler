@@ -2,6 +2,19 @@
 @using EvictionFiler.Domain.Entities
 @inject ILegalCaseService _legalcaseSerice
 
+<div style="position:relative;overflow:auto;" >
+@if(isLoading)
+{
+    <div class="spinnerContainer" style="position:absolute !important">
+        <div class="text-center">
+            <div class="spinner-border spinnerIcon" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-dark">Loading...</p>
+        </div>
+    </div>
+}
+
 <div class="table-responsive">
     <table class="info-table mb-4" style="border:none;">
         <thead>
@@ -55,16 +68,19 @@
     </table>
 </div>
 
-
+</div>
 @code {
     [Parameter]
     public Guid CaseId { get; set; }
     [Parameter]
     public bool isAdmin { get; set; }
+    public bool isLoading { get; set; } = true;
 
     public IEnumerable<CaseNotes> CaseNotes = new List<CaseNotes>();
     protected override async Task OnInitializedAsync()
     {
+        isLoading = true;
         CaseNotes = await _legalcaseSerice.GetAllCaseNotes(CaseId);
+        isLoading = false;
     }
 }

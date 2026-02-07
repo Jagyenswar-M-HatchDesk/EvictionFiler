@@ -20,56 +20,70 @@
 @inject IExemptionBasicRepository ExemptionBasicRepository;
 @inject IStateRepository _stateRepository
 @inject IBuildingRepository _buildingRepository
-<div class="col-md-4 mt-0">
 
-    <!-- Top Section with Badge + Title -->
-    <!-- Dark Bar -->
-    <table class="info-table">
-        <thead>
-            <tr>
-                <th colspan="2" class="info-bar">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="info-bar-title">Building</div>
-                        <button type="button" class="btn btn-sm normal p-1" title="Edit Building" @onclick="ShowBuildingModal" style="color:white">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                    </div>
-                </th>
-            </tr>
-        </thead>
 
-        <tbody>
-            <tr class="info-row">
-                <td class="info-cell label">Key:</td>
-                <td class="info-cell value ellipsis">--</td>
-            </tr>
 
-            <tr class="info-row">
-                <td class="info-cell label">MDR:</td>
-                <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(legalcaseDto.Mdr) ? "--" : legalcaseDto.Mdr)</td>
-            </tr>
+<div class="col-md-4 mt-0" style="position:relative;">
+    @if (isLoading)
+    {
+        <div class="spinnerContainer" style="position:absolute !important">
+            <div class="text-center">
+                <div class="spinner-border spinnerIcon" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-dark">Loading...</p>
+            </div>
+        </div>
+    }
+    
+        <!-- Top Section with Badge + Title -->
+        <!-- Dark Bar -->
+        <table class="info-table">
+            <thead>
+                <tr>
+                    <th colspan="2" class="info-bar">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="info-bar-title">Building</div>
+                            <button type="button" class="btn btn-sm normal p-1" title="Edit Building" @onclick="ShowBuildingModal" style="color:white">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
 
-            <tr class="info-row">
-                <td class="info-cell label">Address:</td>
-                <td class="info-cell value ellipsis" style="white-space:normal">
-                    @{
-                        var partbuilding = new List<string>();
+            <tbody>
+                <tr class="info-row">
+                    <td class="info-cell label">Key:</td>
+                    <td class="info-cell value ellipsis">--</td>
+                </tr>
 
-                        if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingAddress)) partbuilding.Add(legalcaseDto.BuildingAddress);
-                        // if (!string.IsNullOrWhiteSpace(legalcaseDto.Address2)) partlandlord.Add(legalcaseDto.Address2);
-                        if (!string.IsNullOrWhiteSpace(legalcaseDto.Borough)) partbuilding.Add(legalcaseDto.Borough);
-                        if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingState)) partbuilding.Add(legalcaseDto.BuildingState);
-                        if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingZip)) partbuilding.Add(legalcaseDto.BuildingZip);
+                <tr class="info-row">
+                    <td class="info-cell label">MDR:</td>
+                    <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(legalcaseDto.Mdr) ? "--" : legalcaseDto.Mdr)</td>
+                </tr>
 
-                        var fullbuildingAddress = partbuilding.Count() > 0 ? string.Join(", ", partbuilding) : "--";
-                    }
-                    @fullbuildingAddress
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    </div>
+                <tr class="info-row">
+                    <td class="info-cell label">Address:</td>
+                    <td class="info-cell value ellipsis" style="white-space:normal">
+                        @{
+                            var partbuilding = new List<string>();
 
+                            if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingAddress)) partbuilding.Add(legalcaseDto.BuildingAddress);
+                            // if (!string.IsNullOrWhiteSpace(legalcaseDto.Address2)) partlandlord.Add(legalcaseDto.Address2);
+                            if (!string.IsNullOrWhiteSpace(legalcaseDto.Borough)) partbuilding.Add(legalcaseDto.Borough);
+                            if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingState)) partbuilding.Add(legalcaseDto.BuildingState);
+                            if (!string.IsNullOrWhiteSpace(legalcaseDto.BuildingZip)) partbuilding.Add(legalcaseDto.BuildingZip);
+
+                            var fullbuildingAddress = partbuilding.Count() > 0 ? string.Join(", ", partbuilding) : "--";
+                        }
+                        @fullbuildingAddress
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    
+</div>
 <!-- Building Edit Modal -->
 <div class="modal fade" id="buildingModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 55%;">
@@ -542,15 +556,14 @@
         </div>
     </div>
 </div>
-    
+
 
 
 @code {
     [Parameter]
-    public Guid? CurrentCaseId { get; set; }
-    [Parameter]
     public Guid? LandlordId { get; set; }
-    private Guid caseId { get; set; }
+    [Parameter]
+    public Guid? caseId { get; set; }
     private IntakeModel legalcaseDto = new IntakeModel();
     private EditToBuildingDto editBuildingModel = new();
     private IEnumerable<ExemptionReason> ExemptionReasonList = new List<ExemptionReason>();
@@ -565,6 +578,7 @@
     private CancellationTokenSource _cts;
     private List<State> StateList = new();
     private bool IsNewBuilding = false;
+    private bool isLoading = true;
     private List<EditToBuildingDto> BuildingList = new();
     bool ShowExemptionBasic =>
 RegulationList.Any(r =>
@@ -589,16 +603,16 @@ RegulationList.Any(r =>
             editBuildingModel.RegistrationStatusId = RegistrationstatusList.Where(e => e.Name.Equals("Registered")).FirstOrDefault().Id;
         }
     }
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
-        if (CurrentCaseId == null || CurrentCaseId == Guid.Empty)
-            return;
+
+        isLoading = true;
         ExemptionReasonList = await ExemptionReasonRepository.GetAllAsync5();
         RegistrationstatusList = await CaseTypeRepository.GetAllRegistrationstatus();
         if (!CityList.Any())
             CityList = await _service.GetAllCitiesList();
         await LoadCaseDetails();
-
+        isLoading = false;
     }
     private void OnBindBuildingAfter()
     {
@@ -620,13 +634,9 @@ RegulationList.Any(r =>
         // legalcaseDto = await _service.GetLandlordByIdAsync(CurrentCaseId!.Value);
 
         // caseId = CurrentCaseId!.Value;
-        spinnerservice.Show();
-        if (CurrentCaseId == null)
-            return;
+        // spinnerservice.Show();
 
-        caseId = CurrentCaseId.Value;
-
-        legalcaseDto = await _service.GetBuildingByCaseIdAsync(caseId);
+        legalcaseDto = await _service.GetBuildingByCaseIdAsync(caseId.Value);
         if (legalcaseDto != null)
         {
 
@@ -673,7 +683,7 @@ RegulationList.Any(r =>
 
         }
       ;
-        spinnerservice.Hide();
+        // spinnerservice.Hide();
 
     }
     private void SelectBuilding(EditToBuildingDto selected)
@@ -892,7 +902,7 @@ RegulationList.Any(r =>
         StateList = await _stateRepository.GetAllState();
         if (legalcaseDto.BuildingId != null && legalcaseDto.BuildingId != Guid.Empty)
         {
-            
+
             //IsNewBuilding = true;
             // Prefill edit model from case
             editBuildingModel = await _buildingRepository.GetBuildingByIdAsync(legalcaseDto.BuildingId!.Value);

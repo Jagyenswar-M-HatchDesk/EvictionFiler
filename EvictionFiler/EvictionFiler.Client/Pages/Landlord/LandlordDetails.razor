@@ -12,55 +12,69 @@
 @inject IJSRuntime JS
 @inject SpinnerService spinnerservice
 
- 
+
 
 @inject IBuildingRepository _buildingRepository
 @inject ILegalCaseService _service
-<div class="col-md-4 mt-0">
 
 
-    <table class="info-table">
-        <thead>
-            <tr>
-                <th colspan="2" class="info-bar">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="info-bar-title">LandLord</div>
-                        <button type="button" class="btn btn-sm normal p-1" @onclick="ShowLandlordModal" title="Edit Landlord" style="color:white">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                    </div>
-                </th>
-            </tr>
-        </thead>
+<div class="col-md-4 mt-0" style="display:flex; position:relative;">
+    @if (isLoading)
+    {
+        <div class="spinnerContainer" style="position:absolute !important">
+            <div class="text-center">
+                <div class="spinner-border spinnerIcon" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-dark">Loading...</p>
+            </div>
+        </div>
+    }
+    
 
-        <tbody>
-            <tr class="info-row">
-                <td class="info-cell label">Name:</td>
-                <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(legalcaseDto.landlordName) ? "--" : legalcaseDto.landlordName)</td>
-            </tr>
+        <table class="info-table">
+            <thead>
+                <tr>
+                    <th colspan="2" class="info-bar">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="info-bar-title">LandLord</div>
+                            <button type="button" class="btn btn-sm normal p-1" @onclick="ShowLandlordModal" title="Edit Landlord" style="color:white">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
 
-            <tr class="info-row">
-                <td class="info-cell label">Contact Person:</td>
-                <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(legalcaseDto.ContactPersonName) ? "--" : legalcaseDto.ContactPersonName)</td>
-            </tr>
+            <tbody>
+                <tr class="info-row">
+                    <td class="info-cell label">Name:</td>
+                    <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(legalcaseDto.landlordName) ? "--" : legalcaseDto.landlordName)</td>
+                </tr>
 
-            <tr class="info-row">
-                <td class="info-cell label">Address:</td>
-                <td class="info-cell value ellipsis" style="white-space:normal">
-                    @{
-                        var partlandlord = new List<string>();
+                <tr class="info-row">
+                    <td class="info-cell label">Contact Person:</td>
+                    <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(legalcaseDto.ContactPersonName) ? "--" : legalcaseDto.ContactPersonName)</td>
+                </tr>
 
-                        if (!string.IsNullOrWhiteSpace(legalcaseDto.LandlordAddress)) partlandlord.Add(legalcaseDto.LandlordAddress);
+                <tr class="info-row">
+                    <td class="info-cell label">Address:</td>
+                    <td class="info-cell value ellipsis" style="white-space:normal">
+                        @{
+                            var partlandlord = new List<string>();
+
+                            if (!string.IsNullOrWhiteSpace(legalcaseDto.LandlordAddress)) partlandlord.Add(legalcaseDto.LandlordAddress);
 
 
-                        var fulllandlordAddress = partlandlord.Count() > 0 ? string.Join(", ", partlandlord) : "--";
-                    }
-                    @fulllandlordAddress
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                            var fulllandlordAddress = partlandlord.Count() > 0 ? string.Join(", ", partlandlord) : "--";
+                        }
+                        @fulllandlordAddress
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
+    
 
 
 </div>
@@ -171,8 +185,7 @@
 
 @code {
     [Parameter]
-    public Guid? CurrentCaseId { get; set; }
-    private Guid caseId{ get; set; }
+    public Guid caseId { get; set; }
     private IntakeModel legalcaseDto = new IntakeModel();
     private bool showLandlordFields = false;
     private EditToLandlordDto editLandlordModel = new();
@@ -182,17 +195,17 @@
     private bool IsNewLandlord = false;
     private List<EditToBuildingDto> BuildingList = new();
     private List<EditToLandlordDto> filteredlandlords = new();
-
+    private bool isLoading = true;
     // protected override async Task OnInitializedAsync()
     // {
     //     await LoadCaseDetails();
     // }
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
-        if (CurrentCaseId == null || CurrentCaseId == Guid.Empty)
-            return;
 
+        isLoading = true;
         await LoadCaseDetails();
+        isLoading = false;
     }
 
 
@@ -201,10 +214,9 @@
         // legalcaseDto = await _service.GetLandlordByIdAsync(CurrentCaseId!.Value);
 
         // caseId = CurrentCaseId!.Value;
-        if (CurrentCaseId == null)
-            return;
 
-        caseId = CurrentCaseId.Value;
+
+        // caseId = CurrentCaseId.Value;
 
         legalcaseDto = await _service.GetLandlordByCaseIdAsync(caseId);
         if (legalcaseDto != null)
@@ -294,14 +306,14 @@
     }
     private async Task ShowLandlordModal()
     {
-        if (legalcaseDto.LandlordId != null && legalcaseDto.LandlordId!=Guid.Empty)
+        if (legalcaseDto.LandlordId != null && legalcaseDto.LandlordId != Guid.Empty)
         {
             editLandlordModel = await _landLordRepository.GetLandlordByIdAsync(legalcaseDto.LandlordId!.Value);
             // BuildingList = await _buildingRepository.GetBuildingsByLandlordIdAsync(legalcaseDto.ClientId!.Value);
             searchLandlordText = editLandlordModel.LandLordCode;
             showLandlordFields = true;
         }
-        
+
         await JS.InvokeVoidAsync("showModal", "landlordModal");
     }
     private async Task ShowAllLandlords()
@@ -421,7 +433,7 @@
 
 
             var success = await _service.UpdateCaseForLandlordAsync(legalcaseDto);
-           
+
             if (success.HasValue)
             {
                 ToastService.ShowSuccess("Landlord details updated successfully!");

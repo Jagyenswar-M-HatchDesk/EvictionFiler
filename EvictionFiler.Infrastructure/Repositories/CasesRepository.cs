@@ -1,9 +1,11 @@
-﻿using EvictionFiler.Application.DTOs;
+﻿using EvictionFiler.Application;
+using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.LegalCaseDto;
 using EvictionFiler.Application.DTOs.MasterDtos.HarassmentTypeDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
+using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
@@ -215,6 +217,27 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         }
 
+        public async Task<bool> UpdateMarshal(IntakeModel legalCase)
+        {
+            await using var db = await contextFactory.CreateDbContextAsync();
+            try
+            {
+                var existingCase = await db.LegalCases.FindAsync(legalCase.Id);
+                if (existingCase == null) return false;
+
+                existingCase.MarshalId = legalCase.MarshalId!;
+
+                var result = await db.SaveChangesAsync();
+
+                if (result > 0) return true;
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+            }
+        }
         public async Task<List<LegalCase>> GetAllCasesAsync()
         {
             var query = _context.LegalCases

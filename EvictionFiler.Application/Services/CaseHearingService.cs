@@ -272,14 +272,13 @@ namespace EvictionFiler.Application.Services
         public async Task<List<CaseHearingDto>> GetAllCaseHeariingByCaseIdAsync(Guid id)
         {
             var calanders = await _caseHearingRepository
-                  .GetAllQuerable(x => x.IsDeleted != true && x.LegalCaseId == id, x => x.LegalCase, x => x.Courts)
-                  .ToListAsync();
+                  .GetAllAsync(predicate:x => x.IsDeleted != true && x.LegalCaseId == id,includes:[ x => x.LegalCase, x => x.Courts])                  ;
 
             var result = calanders.Select(dto => new CaseHearingDto
             {
                 Id = dto.Id,
 
-                HearingDate = dto.HearingDate ?? DateTime.Today,
+                HearingDate = dto.HearingDate,
 
                 HearingTime = (dto.HearingTime == default || dto.HearingTime == TimeOnly.MinValue)
     ? TimeOnly.FromTimeSpan(TimeSpan.FromHours(9.5))

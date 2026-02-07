@@ -9,63 +9,79 @@
 @using EvictionFiler.Client.SpinnerService
 @inject SpinnerService spinnerservice
 
-<div class="table-responsive">
-    <table class="info-table mb-4" style="border:none;">
-        <thead style="background-color:#ECF2FF;">
-            <tr>
-                <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px;background: #ECF2FF;color: #1F365D">Uploaded Documents</th>
-                <th scope="col" class="info-bar" style="border-radius:0px;background: #ECF2FF;color: #1F365D">Created On</th>
-                <th scope="col" style="width:12%;border-radius:0px 8px 0px 0px;background: #ECF2FF;color: #1F365D" class="text-nowrap info-bar">Actions</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @if (caseDocuments != null && caseDocuments.Count() > 0)
-            {
-                @foreach (var docs in caseDocuments)
-                {
-                    <tr class="info-row">
-
-                        <td class="info-block-table"><div class="value">@docs.Name</div></td>
-
-                        <td class="info-block-table"><div class="value">@docs.CreatedOn.ToString(DateFormats.Default)</div></td>
-                        <td class="d-flex justify-content-between info-block-table" style="gap:2px">
-
-                            <span class="action-icon value">
-                                <i class="fa-solid fa-eye text-navy me-2" style="cursor:pointer"
-                                   @onclick="@(() => PreviewDocument(docs.Path))"
-                                   title="Preview"></i>
-
-                            </span>
-                            <span class="action-icon-danger value">
-                                <i class="fa-solid fa-trash text-navy me-2" style="cursor:pointer"
-                                   @onclick="@(() => DeleteCaseDocument(docs.Id))"
-                                   title="Delete"></i>
-                            </span>
-                        </td>
+<div style="position:relative; overflow:auto;">
+    @if (isLoading)
+    {
+        <div class="spinnerContainer" style="position:absolute !important">
+            <div class="text-center">
+                <div class="spinner-border spinnerIcon" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-dark">Loading...</p>
+            </div>
+        </div>
+    }
+    
+        <div class="table-responsive">
+            <table class="info-table mb-4" style="border:none;">
+                <thead style="background-color:#ECF2FF;">
+                    <tr>
+                        <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px;background: #ECF2FF;color: #1F365D">Uploaded Documents</th>
+                        <th scope="col" class="info-bar" style="border-radius:0px;background: #ECF2FF;color: #1F365D">Created On</th>
+                        <th scope="col" style="width:12%;border-radius:0px 8px 0px 0px;background: #ECF2FF;color: #1F365D" class="text-nowrap info-bar">Actions</th>
                     </tr>
-                }
-            }
-            else
-            {
-                <tr class="info-row">
-                    <td colspan="4" class="text-muted text-center info-block-table"> <div class="value">No Document uploaded yet.</div></td>
-                </tr>
-            }
+                </thead>
 
-        </tbody>
-    </table>
+                <tbody>
+                    @if (caseDocuments != null && caseDocuments.Count() > 0)
+                    {
+                        @foreach (var docs in caseDocuments)
+                        {
+                            <tr class="info-row">
+
+                                <td class="info-block-table"><div class="value">@docs.Name</div></td>
+
+                                <td class="info-block-table"><div class="value">@docs.CreatedOn.ToString(DateFormats.Default)</div></td>
+                                <td class="d-flex justify-content-between info-block-table" style="gap:2px">
+
+                                    <span class="action-icon value">
+                                        <i class="fa-solid fa-eye text-navy me-2" style="cursor:pointer"
+                                           @onclick="@(() => PreviewDocument(docs.Path))"
+                                           title="Preview"></i>
+
+                                    </span>
+                                    <span class="action-icon-danger value">
+                                        <i class="fa-solid fa-trash text-navy me-2" style="cursor:pointer"
+                                           @onclick="@(() => DeleteCaseDocument(docs.Id))"
+                                           title="Delete"></i>
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr class="info-row">
+                            <td colspan="4" class="text-muted text-center info-block-table"> <div class="value">No Document uploaded yet.</div></td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    
 </div>
-
-
 @code {
     [Parameter]
     public Guid CaseId { get; set; }
+    private bool isLoading = false;
     private IEnumerable<CaseDocument> caseDocuments = new List<CaseDocument>();
 
     protected override async Task OnInitializedAsync()
     {
+        isLoading = true;
         await LoadCaseDocument();
+        isLoading = false;
     }
 
     private async Task LoadCaseDocument()

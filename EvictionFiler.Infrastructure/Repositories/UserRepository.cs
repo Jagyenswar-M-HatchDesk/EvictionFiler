@@ -12,31 +12,36 @@ namespace EvictionFiler.Infrastructure.Repositories
     {
 
         private readonly MainDbContext _db;
+        private readonly IDbContextFactory<MainDbContext> _contextFactory;
         private readonly IConfiguration _config;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
 
-        public UserRepository(MainDbContext db, IConfiguration config, UserManager<User> userManager, RoleManager<Role> roleManager)
+        public UserRepository(MainDbContext db, IDbContextFactory<MainDbContext> contextFactory, IConfiguration config, UserManager<User> userManager, RoleManager<Role> roleManager)
         {
             _db = db;
             _config = config;
             _userManager = userManager;
             _roleManager = roleManager;
+            _contextFactory = contextFactory;
         }
 
         public async Task<User?> GetByEmailAsync(string email)
         {
-            return await _db.Users.Include(e => e.Role).FirstOrDefaultAsync(u => u.Email == email);
+            await using var db = await _contextFactory.CreateDbContextAsync();
+            return await db.Users.Include(e => e.Role).FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task AddAsync(User user)
         {
-            await _db.Users.AddAsync(user);
+            await using var db = await _contextFactory.CreateDbContextAsync();
+            await db.Users.AddAsync(user);
         }
 
         public async Task SaveChangesAsync()
         {
-            await _db.SaveChangesAsync();
+            await using var db = await _contextFactory.CreateDbContextAsync();
+            await db.SaveChangesAsync();
         }
 
         public async Task<bool> RegisterTenant(RegisterDto model)
@@ -108,18 +113,21 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<IEnumerable<User>> GetAllUser()
         {
-            var alluser = await _db.Users.Include(e => e.Role).ToListAsync();
+            await using var db = await _contextFactory.CreateDbContextAsync();
+            var alluser = await db.Users.Include(e => e.Role).ToListAsync();
             return alluser;
         }
 
         public async Task<User?> GetByIdAsync(Guid id)
         {
-            return await _db.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id == id);
+            await using var db = await _contextFactory.CreateDbContextAsync();
+            return await db.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<bool> UpdateUserAsync(User updatedUser)
         {
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == updatedUser.Id);
+            await using var db = await _contextFactory.CreateDbContextAsync();
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Id == updatedUser.Id);
             if (user == null) return false;
 
             user.FirstName = updatedUser.FirstName;
@@ -137,14 +145,15 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<bool> DeleteUserAsync(Guid id)
         {
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == id);
+            await using var db = await _contextFactory.CreateDbContextAsync();
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
             if (user == null) return false;
 
             user.IsDeleted = true;
             user.UpdatedOn = DateTime.UtcNow;
 
-            _db.Users.Update(user);
-            await _db.SaveChangesAsync();
+            db.Users.Update(user);
+            await db.SaveChangesAsync();
             return true;
         }
 

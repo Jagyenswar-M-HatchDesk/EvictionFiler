@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Application.Interfaces.IRepository.Base;
+﻿using EvictionFiler.Application.DTOs.CaseWarrantDtos;
+using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -10,5 +11,6 @@ namespace EvictionFiler.Application.Interfaces.IRepository
 {
     public interface ICaseWarrantRepository : IRepository<CaseWarrant>
     {
+        Task<bool> AddEditCaseWarrant(CaseWarrantDto dto);
     }
 }

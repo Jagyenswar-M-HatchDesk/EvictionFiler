@@ -13,7 +13,23 @@
 @inject SpinnerService spinnerservice
 
  <!-- Contact Info -->
-<div class="card shadow-sm p-3 border-0">
+
+
+    
+
+<div class="card shadow-sm p-3 border-0" >
+    <div style="position:relative;">
+    @if (isLoading)
+    {
+        <div class="spinnerContainer" style="position:absolute !important">
+            <div class="text-center">
+                <div class="spinner-border spinnerIcon" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-dark">Loading...</p>
+            </div>
+        </div>
+    }
     <table class="info-table " style="border:none;">
         <thead>
             <tr>
@@ -59,7 +75,7 @@
         </tbody>
     </table>
 
-
+    </div>
 
 </div>
 
@@ -192,24 +208,21 @@
     public string searchText { get; set; }
     public bool showClientTextbox = false;
     public bool newClient = false;
+    public bool isLoading = true;
     public List<EditToClientDto> filteredClients = new List<EditToClientDto>();
     public EditToClientDto client = new EditToClientDto();
     public List<EditToClientDto> ClientList = new List<EditToClientDto>();
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
-        if (CurrentCaseId == null || CurrentCaseId == Guid.Empty)
-            return;
 
+        isLoading = true;
         await LoadCaseDetails();
+        isLoading = false;
     }
     private async Task LoadCaseDetails()
     {
 
-        if (CurrentCaseId == null)
-            return;
-
-
-
+        
         legalcaseDto = await _service.GetClientByCaseIdAsync(CurrentCaseId.Value);
 
 

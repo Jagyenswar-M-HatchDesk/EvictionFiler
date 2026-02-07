@@ -1,0 +1,600 @@
+﻿@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.CaseWarrantDtos
+@using EvictionFiler.Application.DTOs.MarshalsDto
+@using EvictionFiler.Application.Interfaces.IRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Client.SpinnerService
+@using EvictionFiler.Domain.Entities.Master
+@using EvictionFiler.Infrastructure.Repositories
+@inject SpinnerService spinnerservice
+@inject IJSRuntime JS
+@inject ILegalCaseService _legalcaseService
+@inject IMarshalService _marshalService
+@inject IToastService ToastService
+@inject ICaseWarrantService caseWarrantService
+@inject ICaseFormRepository CaseFormRepository
+<div class="card shadow-sm p-3 border-0">
+    <div style="position:relative">
+        @if (isLoading)
+        {
+            <div class="spinnerContainer" style="position:absolute !important">
+                <div class="text-center">
+                    <div class="spinner-border spinnerIcon" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-dark">Loading...</p>
+                </div>
+            </div>
+        }
+        <table class="info-table " style="border:none;">
+            <thead>
+                <tr>
+                    <th colspan="2" class="info-bar">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="info-bar-title">Marshal</div>
+                            <button type="button" class="btn btn-sm normal p-1" @onclick="ShowMarshalModal" style="color:white">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr class="info-row">
+                    <td class="info-cell label">Name:</td>
+                    <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(legalcaseDto.MarshalName) ? "--" : legalcaseDto.MarshalName)</td>
+                </tr>
+
+                <tr class="info-row">
+                    <td class="info-cell label">Phone No.:</td>
+                    <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(legalcaseDto.MarshalPhone) ? "--" : legalcaseDto.MarshalPhone)</td>
+                </tr>
+
+                <tr class="info-row">
+                    <td class="info-cell label">Docket No.:</td>
+                    <td class="info-cell value ellipsis">
+                        @(string.IsNullOrWhiteSpace(legalcaseDto.Docketno) ? "--" : legalcaseDto.Docketno)
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
+<div class="card shadow-sm p-3 border-0 pb-4">
+    <div style="position:relative">
+        @if (isDateLoading)
+        {
+            <div class="spinnerContainer" style="position:absolute !important">
+                <div class="text-center">
+                    <div class="spinner-border spinnerIcon" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-dark">Loading...</p>
+                </div>
+            </div>
+        }
+        <table class="info-table " style="border:none;">
+            <thead>
+                <tr>
+                    <th colspan="2" class="info-bar" style="background-color: #DDB156;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="info-bar-title">Warrant</div>
+                            <button type="button" class="btn btn-sm normal p-1" @onclick="ShowMarshalModal" style="color:white">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr class="info-row">
+                    <td class="info-cell label">Warrant Status:</td>
+                    <td class="info-cell value ellipsis">@(legalcaseDto.WarrantRequested ? "Requested" : "Not Requested")</td>
+                </tr>
+
+                <tr class="info-row">
+                    <td class="info-cell label">Scheduled Eviction:</td>
+                    <td class="info-cell value ellipsis">--</td>
+                </tr>
+
+                <tr class="info-row">
+                    <td class="info-cell label">Warrant Requested:</td>
+                    <td class="info-cell value ellipsis">
+                        @(caseWarrantDto.WarrantIssued?.ToString(DateFormats.Default) ?? "--")
+
+                    </td>
+                </tr>
+                <tr class="info-row">
+                    <td class="info-cell label">Warrant Issued:</td>
+                    <td class="info-cell value ellipsis">
+                        @(caseWarrantDto.WarrantIssued?.ToString(DateFormats.Default) ?? "--")
+
+                    </td>
+                </tr>
+                <tr class="info-row">
+                    <td class="info-cell label">Warrant Rejected:</td>
+                    <td class="info-cell value ellipsis">
+                        @(caseWarrantDto.WarrantRejected?.ToString(DateFormats.Default) ?? "--")
+
+                    </td>
+                </tr>
+                <tr class="info-row">
+                    <td class="info-cell label">Notice Served: </td>
+                    <td class="info-cell value ellipsis">
+                        @(caseWarrantDto.NoticeServed?.ToString(DateFormats.Default) ?? "--")
+
+                    </td>
+                </tr>
+                <tr class="info-row">
+                    <td class="info-cell label">Execution Eligible:</td>
+                    <td class="info-cell value ellipsis">
+                        @(caseWarrantDto.ExecutionEligible?.ToString(DateFormats.Default) ?? "--")
+
+                    </td>
+                </tr>
+                <tr class="info-row">
+                    <td class="info-cell label">Eviction Executed:</td>
+                    <td class="info-cell value ellipsis">
+                        @(caseWarrantDto.EvictionExecuted?.ToString(DateFormats.Default) ?? "--")
+
+                    </td>
+                </tr>
+                <tr class="info-row">
+                    <td class="info-cell label">Re-File:</td>
+                    <td class="info-cell value ellipsis">
+                        @(caseWarrantDto.ReFileDate?.ToString(DateFormats.Default) ?? "--")
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="marshalModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-semibold" id="buildingModalLabel">Edit Marshal Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="p-3">
+                <div class="row mb-3 d-flex align-items-center">
+
+                    <div class="fw-semibold col-12 required-label">Assign Marshal</div>
+                </div>
+                <div class="row mt-2">
+
+                    <div class="col-6 position-relative" @onfocusout="HideMarshalDropDown">
+
+                        @if (!isMarshalAssigned)
+                        {
+                            <!-- Search Box -->
+
+                            <InputText class="form-control search-box" placeholder="Search by marshal name.." @bind-value="searchmarshalText" @oninput="OnSearchMarshalInput"
+                                       @onclick="ShowAllmarshal" />
+                            <button class="search-btn" type="button">
+                                <i class="fa fa-search"></i>
+                            </button>
+
+
+
+
+                            @if (filteredmarshal?.Any() == true)
+                            {
+                                <ul class="dropdown-menu show" style="position:absolute; width:94%; cursor:pointer;">
+                                    @foreach (var c in filteredmarshal)
+                                    {
+                                        <li class="dropdown-item" @onclick="() => Selectedmarshal(c)">
+                                            @c.FirstName  @c.LastName
+                                        </li>
+                                    }
+                                </ul>
+                            }
+
+                        }
+                        else
+                        {
+                            <!-- Selected Marshal -->
+                            <label class="form-control bg-light fw-bold d-flex align-items-center">
+                                @(selectedmarshal != null ? selectedmarshal.FirstName + " " + selectedmarshal.LastName : "")
+                            </label>
+
+                        }
+
+                    </div>
+
+                    <div class="col-6 d-flex justify-content-between">
+                        @if (!isMarshalAssigned)
+                        {
+                            <button class="btn bg-brand-accent base text-white buttons" @onclick="SubmitMarshal">Assign</button>
+
+                        }
+                        else
+                        {
+                            <button class="btn btn-secondary" @onclick="ResetMarshal">Reset</button>
+
+                        }
+
+
+                        <!-- <button class="btn bg-brand-primary base text-white ms-2"
+                                 @onclick="GenrateMarshalForm"
+                                 disabled="@(isMarshalAssigned == false)">
+                             Generate
+                         </button> -->
+
+
+                    </div>
+
+
+                </div>
+                <div class="row mt-2">
+                    <div class="col-12">
+                        @if (showMarshalError)
+                        {
+                            <div class="text-danger small mt-1">Please select a marshal.</div>
+                        }
+                    </div>
+                </div>
+
+                <hr />
+                <EditForm Model="@CaseWarranrDto">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="required-label">Warrant Requested</label>
+                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="CaseWarranrDto.WarrantRequested" @bind-Value:after="() => ToShow = true" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="required-label">Warrant Issued</label>
+                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="CaseWarranrDto.WarrantIssued" @bind-Value:after="() => ToShow = true" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="required-label">Warrant Rejected</label>
+                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="CaseWarranrDto.WarrantRejected" @bind-Value:after="() => ToShow = true" />
+                        </div>
+
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="required-label">Notice Served</label>
+                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="CaseWarranrDto.NoticeServed" @bind-Value:after="() => ToShow = true" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="required-label">Execution Eligible</label>
+                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="CaseWarranrDto.ExecutionEligible" @bind-Value:after="() => ToShow = true" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="required-label">Re-file / Re-mail</label>
+                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="CaseWarranrDto.ReFileDate" @bind-Value:after="() => ToShow = true" />
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <label class="required-label">Eviction Executed</label>
+                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="CaseWarranrDto.EvictionExecuted" @bind-Value:after="() => ToShow = true" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="required-label">Status</label>
+                            <InputSelect class="form-select" @bind-Value="CaseWarranrDto.Status">
+                                @foreach (var s in StatusList)
+                                {
+                                    <option value="@s">@s</option>
+                                }
+                            </InputSelect>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                        <button type="button" class="btn btn-secondary buttons" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary base buttons" @onclick="() => SubmitMarshalDates(false)">Save</button>
+                        <button type="submit" class="btn btn-primary base buttons" @onclick="() => SubmitMarshalDates(true)" disabled="@(isMarshalAssigned == false)">Save & Generate</button>
+                    </div>
+                </EditForm>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public Guid? CaseId { get; set; }
+   
+    [Parameter]
+    public string? loggedInUserId { get; set; }
+    private CaseWarrantDto CaseWarranrDto { get; set; } = new();
+    public CaseWarrantDto caseWarrantDto = new CaseWarrantDto();
+    private IntakeModel legalcaseDto = new();
+    private bool isMarshalAssigned = false;
+    private string searchmarshalText;
+    private List<MarshalDto> filteredmarshal = new();
+    private MarshalDto selectedmarshal;
+    private bool showMarshalError = false;
+    private bool isLoading = false;
+    private bool isDateLoading = false;
+    private readonly string[] StatusList =
+    {
+        "Pending", "Issued", "Rejected", "Served", "Scheduled", "Executed", "Stayed"
+    };
+    private bool ToShow = false;
+    private CancellationTokenSource _cts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOthers();
+    }
+    private async Task LoadOthers()
+    {
+        isLoading = true;
+        isDateLoading = true;
+        legalcaseDto = await _legalcaseService.GetMarshalCaseIdAsync(CaseId.Value);
+        if (legalcaseDto.MarshalId != null && legalcaseDto.MarshalId != Guid.Empty)
+        {
+            selectedmarshal = await _marshalService.GetMarshalByIdAsync(legalcaseDto.MarshalId.Value);
+            isMarshalAssigned = true;
+        }
+        else
+        {
+            isMarshalAssigned = false;
+            selectedmarshal = null;
+            searchmarshalText = string.Empty;
+        }
+        isLoading = false;
+
+        caseWarrantDto = await caseWarrantService.GetWarrantDetails(legalcaseDto.Id);
+
+        isDateLoading = false;
+
+    }
+    private void ResetMarshal()
+    {
+        spinnerservice.Show();
+        isMarshalAssigned = false;
+        selectedmarshal = null;
+        legalcaseDto.MarshalId = null;     // Marshal unassign
+        searchmarshalText = "";            // Clear search box
+        filteredmarshal?.Clear();
+        showMarshalError = false;// Clear list
+
+        StateHasChanged();
+        spinnerservice.Hide();
+    }
+    async Task HideMarshalDropDown(FocusEventArgs e)
+    {
+        // small1 delay to allow click on dropdown item to register before hiding
+        await Task.Delay(500);
+        if (filteredmarshal.Any())
+        {
+            filteredmarshal.Clear();
+
+        }
+        StateHasChanged();
+    }
+    private async void Selectedmarshal(MarshalDto marshal)
+    {
+
+        selectedmarshal = marshal;
+        // searchmarshalText = marshal.Name!;
+        searchmarshalText = $"{marshal.FirstName} {marshal.LastName}";
+
+
+        legalcaseDto.MarshalId = marshal.Id;
+        // legalcaseDto.MarshalName = searchmarshalText;
+        // legalcaseDto.MarshalPhone = marshal.Telephone;
+        // legalcaseDto.Docketno = marshal.DocketNo;
+
+
+        filteredmarshal?.Clear();
+        // isMarshalAssigned = true;
+
+        StateHasChanged();
+
+
+    }
+    private async Task SubmitMarshal()
+    {
+        showMarshalError = false; // reset old errors
+
+        if (legalcaseDto.MarshalId == null || legalcaseDto.MarshalId == Guid.Empty)
+        {
+            showMarshalError = true;
+            StateHasChanged();
+            return;
+        }
+        spinnerservice.Show();
+
+        var result = await _legalcaseService.UpdateMarshalAsync(legalcaseDto);
+
+        if (result)
+        {
+            ToastService.ShowSuccess("Marshal Assign  successfully!");
+            legalcaseDto.MarshalName = searchmarshalText;
+            legalcaseDto.MarshalPhone = selectedmarshal.Telephone;
+            legalcaseDto.Docketno = selectedmarshal.DocketNo;
+            // await LoadCaseDetails();
+            isMarshalAssigned = true;
+        }
+        else
+        {
+            ToastService.ShowError("Failed to asign Marshal .");
+        }
+        StateHasChanged();
+        spinnerservice.Hide();
+
+    }
+
+    private async void ShowMarshalModal()
+    {
+        // Copy current data into editable model
+
+        // CaseWarranrDto = caseWarrantDto.Clone();
+        CaseWarranrDto = new CaseWarrantDto
+        {
+            Id = caseWarrantDto.Id,
+            WarrantRequested = caseWarrantDto.WarrantRequested,
+            WarrantIssued = caseWarrantDto.WarrantIssued,
+            WarrantRejected = caseWarrantDto.WarrantRejected,
+            NoticeServed = caseWarrantDto.NoticeServed,
+            ExecutionEligible = caseWarrantDto.ExecutionEligible,
+            EvictionExecuted = caseWarrantDto.EvictionExecuted,
+            ReFileDate = caseWarrantDto.ReFileDate,
+            Status = caseWarrantDto.Status,
+            LegalcaseId = caseWarrantDto.LegalcaseId
+            // add other properties here
+        };
+
+
+        JS.InvokeVoidAsync("showModal", "marshalModal");
+    }
+
+    private async Task SubmitMarshalDates(bool formgeneration)
+    {
+        showMarshalError = false; // reset old errors
+
+        if (legalcaseDto.MarshalId == null || legalcaseDto.MarshalId == Guid.Empty)
+        {
+            showMarshalError = true;
+            StateHasChanged();
+            return;
+        }
+        // spinnerservice.Show();
+
+        var result = await _legalcaseService.UpdateMarshalAsync(legalcaseDto);
+
+        if (result)
+        {
+            ToastService.ShowSuccess("Marshal Assign  successfully!");
+            // await LoadCaseDetails();
+            isMarshalAssigned = true;
+        }
+        else
+        {
+            if (!isMarshalAssigned)
+            {
+                ToastService.ShowError("Failed to asign Marshal .");
+            }
+        }
+
+
+
+        // var toadd = new CaseWarrantDto
+        // {
+        //     WarrantIssued = model.WarrantIssued,
+        //     WarrantRejected = model.WarrantRejected,
+        //     WarrantRequested = model.WarrantRejected,
+        //     EvictionExecuted = model.EvictionExecuted,
+        //     ExecutionEligible = model.ExecutionEligible,
+        //     NoticeServed = model.NoticeServed,
+        //     ReFileDate = model.ReFileDate,
+        //     Status = model.Status,
+        //     MarshalId = legalcaseDto.MarshalId,
+        //     LegalcaseId = legalcaseDto.Id
+        // };
+
+        var resultcasewarrant = await caseWarrantService.AddCaseWarrant(CaseWarranrDto);
+
+        if (resultcasewarrant)
+        {
+            ToastService.ShowSuccess("Case Warrant Added successfully!");
+            await LoadOthers();
+            await JS.InvokeVoidAsync("hideModal", "marshalModal");
+
+        }
+        else
+        {
+            ToastService.ShowError("Error occured in adding Case Warrant!");
+        }
+
+        if (formgeneration)
+        {
+            await GenrateMarshalForm();
+        }
+
+        StateHasChanged();
+    }
+    private async Task ShowAllmarshal()
+    {
+        filteredmarshal = (await _marshalService.GetAllMarshalAsync()).ToList();
+        StateHasChanged();
+    }
+    private async Task GenrateMarshalForm()
+    {
+
+        spinnerservice.Show();
+        if (CaseId.HasValue && CaseId.Value != Guid.Empty)
+        {
+            bool success = false;
+
+
+            // CREATE new notice
+            success = await CaseFormRepository.GenerateWarrantNoticeAsync(
+                    CaseId.Value,
+                    "Request for Warrant (CIV-LT-100)",
+                       // "Written Demand to Terminate (move out)",
+                       Guid.Parse(loggedInUserId)
+                );
+
+            if (success)
+            {
+                ToastService.ShowSuccess("Warrant Notice has been generated successfully!");
+                legalcaseDto.WarrantRequested = true;
+                var result = _legalcaseService.UpdateWarrantRequested(legalcaseDto);
+                // await LoadCaseForms();
+                await JS.InvokeVoidAsync("openTab", "activity");
+            }
+        }
+
+
+
+
+
+        spinnerservice.Hide();
+
+    }
+
+    private async Task OnSearchMarshalInput(ChangeEventArgs e)
+    {
+        searchmarshalText = e.Value?.ToString() ?? "";
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        try
+        {
+
+            await Task.Delay(300, _cts.Token);
+            // ⭐ Empty input → load all tenants (ONLY here)
+            if (string.IsNullOrWhiteSpace(searchmarshalText))
+            {
+                await ShowAllmarshal();
+                return;
+            }
+
+            // ⭐ 1st & 2nd character → DO NOTHING (keep list unchanged)
+            if (searchmarshalText.Length < 3)
+            {
+                // ❗ No reload here (important)
+                return;
+            }
+
+            else
+            {
+                // ⭐ 3+ characters → server search
+
+                filteredmarshal = await _marshalService.SearchMarshalbyname(searchmarshalText);
+            }
+
+        }
+        catch (TaskCanceledException)
+        {
+            // Old task cancelled → ignore
+        }
+
+    }
+
+}
