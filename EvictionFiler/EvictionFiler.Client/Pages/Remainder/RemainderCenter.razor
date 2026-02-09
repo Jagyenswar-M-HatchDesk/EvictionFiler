@@ -124,8 +124,14 @@
         color: black;
         height: 2.5rem;
         font-size: 14px;
+        border-radius:12px;
+        min-height:47.5px;
+        border: 1px solid #1F365D;
     }
 
+    .search-notes{
+        border: 1px solid #1F365D;
+    }
         .search-box::placeholder {
             color: darkgrey;
         }
@@ -447,13 +453,26 @@
     .action-icon-danger {
         color: #DC2626 !important;
     }
+
+    .rz-inputtext {
+        box-shadow: none !important;
+        min-height: 47.5px;
+        border: 1px solid #1F365D !important;
+    }
+    .btn-export:hover{
+        color:black !important;
+    }
 </style>
 
 <div class="wrap">
 
     <!-- Filters -->
-    <section class="card panel p-3">
-        <h2 style="font-size:20px; font-weight: 700"> Reminders Center</h2>
+    <section class="card panel  p-3">
+        <div class="d-flex justify-content-between align-items-center">
+        <h2 style=" margin:0;font-size:20px; font-weight: 700"> Reminders Center</h2>
+            <button class=" btn btn-primary m-2 ms-0" style="background-color:#1F365D ;border-radius:10px ; font-size:14px; font-family:Poppins;" id="rcAdd" type="submit" @onclick=OpenModal">Add Reminder</button>
+
+        </div>
         <div class="card-body">
             <EditForm EditContext="_editContext" OnValidSubmit="SubmitAsync">
                 <DataAnnotationsValidator />
@@ -535,24 +554,22 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label  required-label">When</label>
-                        <input type="datetime-local" class="form-control search-box"
-                               placeholder="mm/dd/yyyy --:-- --"
-                               @bind-value="remainderDto.When" />
+
+
+                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; "
+                                          @bind-Value="remainderDto.When"
+                                          id="dateRefereeDeed"
+                                          placeholder="mm/dd/yyyy --:-- --" />
 
                     </div>
                 </div>
 
-                <div class="row mt-2 p-0 ms-0 me-0">
-
-                    <label class="form-label p-0">Note</label>
-                    <InputTextArea class="form-control search-notes" rows="3" placeholder="Write notes" @bind-Value="remainderDto.Notes"></InputTextArea>
-
-                </div>
+              
                 <div class="row">
                     <div class="col-12">
 
-                        <button class=" btn btn-primary m-2 ms-0" style="background-color:#1F365D ;border-radius:10px ; font-size:14px; font-family:Poppins;" id="rcAdd" type="submit">Add Reminder</button>
-                        <button class="btn btn-secondary m-2 ms-0" style="background-color:#fff;color:black; border-radius:10px; font-size:14px; font-family:Poppins;">Export .ics</button>
+                        <button class=" btn btn-primary m-2 ms-0" style="background-color:#1F365D ;border-radius:10px ; font-size:14px; font-family:Poppins; padding:0 36px; margin-top: 15px !important;" id="rcAdd" type="submit">Search</button>
+                        <button class="btn btn-export btn-secondary m-2 ms-0" style="background-color:#fff;color:black; border-radius:10px; font-size:14px; font-family:Poppins;margin-top: 15px !important;">Export .ics</button>
 
 
                     </div>
@@ -562,7 +579,144 @@
             </EditForm>
         </div>
     </section>
+    @if (showModal)
+    {
+        <div class="modal fade show" style="display:block; background:rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content">
 
+                    <!-- Modal Header -->
+                    <div class="modal-header text-white" style="background-color: #1F365D;">
+                       
+                        <h5 class="modal-title" style=" margin:0;font-size:20px; font-weight: 700"> <i class="bi bi-bell-fill me-2"></i>Reminders Center</h5>
+                        <button type="button" class="btn-close btn-close-white" @onclick="CloseModel"></button>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="modal-body">
+                        <div class="card-body">
+                            <EditForm EditContext="_editContext" OnValidSubmit="SubmitAsync">
+                                <DataAnnotationsValidator />
+                                <div class="row g-3">
+
+                                    <div class="col-md-4 position-relative" @onfocusout="HideCaseDropDown">
+                                        <label class="form-label  required-label">Case<span class="text-danger">*</span></label>
+                                        <div class="position-relative">
+                                            <InputText type="text" class="form-control  search-box"
+                                                       placeholder="Search Case"
+                                                       @bind-value="searchCaseText"
+                                                       @oninput="OnSearchCaseInput" @onclick="ShowAllCase" />
+                                            <i class="fa fa-search"
+                                               style="position:absolute; right:15px; top:50%; transform:translateY(-50%); color:#1F365D; font-size:19.2px"></i>
+                                        </div>
+                                        @if (filteredCase?.Any() == true)
+                                        {
+                                            <ul class="dropdown-menu show" style="position: absolute; width:94% !important; height:500px;overflow-y:auto; cursor:pointer;">
+                                                @foreach (var c in filteredCase)
+                                                {
+                                                    <li class="dropdown-item" @onclick="() => SelectedCase(c)">
+                                                        @c.Casecode
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+
+                                        <ValidationMessage For="() => remainderDto.CaseId" />
+                                    </div>
+
+
+                                    <div class="col-md-4">
+                                        <label for="f-part" class="form-label">County<span class="text-danger">*</span></label>
+                                        <InputSelect class="form-select search-box" @bind-Value="remainderDto.CountyId">
+                                            <option value="">-- Select --</option>
+                                            @foreach (var l in CountyList)
+                                            {
+                                                <option value="@l.Id">@l.Name</option>
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => remainderDto.CountyId)" />
+                                    </div>
+                                    <div class="col-md-4 position-relative" @onfocusout="HideTenantDropDown">
+                                        <label class="form-label  required-label">Tenant<span class="text-danger">*</span></label>
+                                        <InputText type="text" class="form-control search-box"
+                                                   placeholder="Search tenant name"
+                                                   @bind-value="searchTenantText"
+                                                   @oninput="OnSearchTenantInput" @onclick="ShowAllTenant" />
+                                        @if (filteredTenant?.Any() == true)
+                                        {
+                                            <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
+                                                @foreach (var c in filteredTenant)
+                                                {
+                                                    <li class="dropdown-item" @onclick="() => SelectedTenant(c)">
+                                                        @c.FirstName @c.LastName
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                        <ValidationMessage For="@(() => remainderDto.TenantId)" />
+                                    </div>
+                                </div>
+
+                                <div class="row mt-2 g-3">
+                                    <div class="col-md-4">
+                                        <label for="f-index" class="form-label">Index</label>
+                                        <InputText id="f-from" class="form-control search-box" placeholder="Enter Index" @bind-Value="remainderDto.Index" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="f-part" class="form-label">Type<span class="text-danger">*</span></label>
+                                        <InputSelect class="form-select search-box" @bind-Value="remainderDto.RemainderTypeId">
+                                            <option value="">-- Select --</option>
+                                            @foreach (var l in RemainderTypeList)
+                                            {
+                                                <option value="@l.Id">@l.Name</option>
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => remainderDto.RemainderTypeId)" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        @* <label class="form-label  required-label">When</label>
+                        <input type="datetime-local" class="form-control search-box"
+                               placeholder="mm/dd/yyyy --:-- --"
+                               @bind-value="remainderDto.When" /> *@
+
+                                        <label class="form-label  required-label">When</label>
+
+
+                                        <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; "
+                                                          @bind-Value="remainderDto.When"
+                                                          id="dateRefereeDeed"
+                                                          placeholder="mm/dd/yyyy --:-- --" />
+
+                                    </div>
+                                </div>
+
+                                <div class="row mt-2 p-0 ms-0 me-0">
+
+                                    <label class="form-label p-0">Note</label>
+                                    <InputTextArea class="form-control search-notes" rows="3" placeholder="Write notes" @bind-Value="remainderDto.Notes"></InputTextArea>
+
+                                </div>
+
+
+                                <div class="row">
+                                    <div class="col-12">
+
+                                        <button class=" btn btn-primary m-2 ms-0" style="background-color:#1F365D ;border-radius:10px ; font-size:14px; font-family:Poppins; margin-top: 15px !important;" id="rcAdd" type="submit">Add Remainder</button>
+                                       
+
+                                    </div>
+                                </div>
+
+
+                            </EditForm>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 
     <!-- Results -->
     <section class="card" style="margin-top:14px">
@@ -687,6 +841,7 @@
     private bool showClearModal = false;
     private bool showDeleteModal = false;
     private Guid deleteId;
+    private bool showModal = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -722,6 +877,14 @@
 
         await InvokeAsync(StateHasChanged);
 
+    }
+    private void OpenModal()
+    {
+        showModal = true;
+    }
+    private void CloseModel()
+    {
+        showModal = false;
     }
 
     private async Task CloseModal()
