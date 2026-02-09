@@ -1,15 +1,9 @@
 ﻿using EvictionFiler.Application.DTOs.CalanderDto;
-using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Services
 {

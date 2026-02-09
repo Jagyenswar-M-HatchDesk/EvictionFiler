@@ -9,12 +9,6 @@ using EvictionFiler.Application.DTOs.MasterDtos.ReliefRespondentTypeDto;
 using EvictionFiler.Application.DTOs.MasterDtos.ReportingRequirementPerDiemDto;
 using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Domain.Entities.Master;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Interfaces.IRepository.MasterRepository
 {

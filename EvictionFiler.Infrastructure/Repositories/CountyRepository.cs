@@ -1,15 +1,7 @@
-﻿using EvictionFiler.Application.DTOs.CourtDto;
-using EvictionFiler.Application.DTOs.MasterDtos.ApperenceTypeDto;
-using EvictionFiler.Application.DTOs.MasterDtos.CountyDto;
+﻿using EvictionFiler.Application.DTOs.MasterDtos.CountyDto;
 
 //using EvictionFiler.Application.DTOs.MasterDtos.CountyHPDDto;
 //using EvictionFiler.Application.DTOs.MasterDtos.CountyPerDiemDto;
-using EvictionFiler.Application.DTOs.MasterDtos.DefenseTypeDto;
-using EvictionFiler.Application.DTOs.MasterDtos.DocumentInstructionPerDiemDto;
-using EvictionFiler.Application.DTOs.MasterDtos.HarassmentTypeDto;
-using EvictionFiler.Application.DTOs.MasterDtos.ReliefPetitionerTypeDto;
-using EvictionFiler.Application.DTOs.MasterDtos.ReliefRespondentTypeDto;
-using EvictionFiler.Application.DTOs.MasterDtos.ReportingRequirementPerDiemDto;
 using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;

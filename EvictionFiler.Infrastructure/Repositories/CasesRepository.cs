@@ -1,18 +1,13 @@
-﻿using EvictionFiler.Application;
-using EvictionFiler.Application.DTOs;
+﻿using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.LegalCaseDto;
-using EvictionFiler.Application.DTOs.MasterDtos.HarassmentTypeDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
-using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
-using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace EvictionFiler.Infrastructure.Repositories

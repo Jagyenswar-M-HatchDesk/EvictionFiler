@@ -1,7 +1,6 @@
 ﻿using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.ArrearLedgerDtos;
-using EvictionFiler.Application.DTOs.CaseNoticeInfoDtos;
 using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.FilingDtos;
 using EvictionFiler.Application.DTOs.LandLordDto;
@@ -14,16 +13,9 @@ using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Domain.Entities;
-using EvictionFiler.Domain.Entities.Base;
 using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System;
-using System.Diagnostics.Metrics;
-using System.Linq;
 using System.Linq.Expressions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EvictionFiler.Application.Services
 {

@@ -1,6 +1,4 @@
-﻿using EvictionFiler.Application.DTOs.ApartmentDto;
-
-namespace EvictionFiler.Application.DTOs.TenantDto
+﻿namespace EvictionFiler.Application.DTOs.TenantDto
 {
 	public class EditToTenantDto : CreateToTenantDto
 	{

@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using EvictionFiler.Domain.Entities.Base;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EvictionFiler.Domain.Entities.Base.Base;
 
 namespace EvictionFiler.Domain.Entities
 {
-	public class AdditionalOccupants : DeletableBaseEntity
-	{
+	public class AdditionalOccupants : DeletableGuidEntity
+    {
 		[MaxLength(50)]
 		public string Name { get; set; } = string.Empty;
 		[MaxLength(500)]

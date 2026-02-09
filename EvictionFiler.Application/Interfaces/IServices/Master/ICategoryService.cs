@@ -1,7 +1,6 @@
 ﻿
 
 using EvictionFiler.Application.DTOs.MasterDtos.CategoryDto;
-using EvictionFiler.Application.DTOs.MasterDtos.CategoryDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 
 namespace EvictionFiler.Application.Interfaces.IServices.Master

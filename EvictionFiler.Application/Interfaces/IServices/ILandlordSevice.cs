@@ -1,5 +1,4 @@
 ﻿using EvictionFiler.Application.DTOs.LandLordDto;
-using EvictionFiler.Domain.Entities.Master;
 
 namespace EvictionFiler.Application.Interfaces.IServices
 {

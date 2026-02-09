@@ -1,14 +1,9 @@
-﻿using EvictionFiler.Domain.Entities.Base.Base;
-using System;
-using System.Collections.Generic;
+﻿using EvictionFiler.Domain.Entities.Base;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.DTOs.MasterDtos.TenancyTypeDto
 {
-    public class CreateToTenancyTypeDto : DeletableBaseEntity
+    public class CreateToTenancyTypeDto : DeletableGuidEntity
     {
         [Required(ErrorMessage = "  Tenancy type Name is required")]
         public string Name { get; set; } = string.Empty;

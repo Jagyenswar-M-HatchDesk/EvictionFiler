@@ -50,12 +50,8 @@
 using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
-using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {

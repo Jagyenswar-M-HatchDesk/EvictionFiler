@@ -1,13 +1,6 @@
-﻿using EvictionFiler.Domain.Entities.Base.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EvictionFiler.Domain.Entities.Master
+﻿namespace EvictionFiler.Domain.Entities.Master
 {
-    public class VirtualPlatform : DeletableBaseEntity
+    public class VirtualPlatform : DeletableGuidEntity
     {
         public Guid Id { get; set; }
         public string? Name { get; set; }

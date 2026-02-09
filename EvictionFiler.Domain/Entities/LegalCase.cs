@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using EvictionFiler.Domain.Entities.Base.Base;
+using EvictionFiler.Domain.Entities.Base;
 using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace EvictionFiler.Domain.Entities
 {
-	public class LegalCase : DeletableBaseEntity
+	public class LegalCase : DeletableGuidEntity
 	{
 		[Required]
 		public string Casecode { get; set; } = string.Empty;

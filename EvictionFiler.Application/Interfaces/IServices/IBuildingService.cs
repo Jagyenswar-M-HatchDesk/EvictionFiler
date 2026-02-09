@@ -1,6 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.BuildingDto;
-using EvictionFiler.Domain.Entities.Master;
 
 namespace EvictionFiler.Application.Interfaces.IServices
 {

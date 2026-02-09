@@ -1,17 +1,10 @@
 ﻿using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
-using EvictionFiler.Application.DTOs.MasterDtos.CountyDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
-using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Application.Interfaces.IServices;
-using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
-using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
-using System.Numerics;
-using System.Runtime.Intrinsics.X86;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace EvictionFiler.Application.Services
 {

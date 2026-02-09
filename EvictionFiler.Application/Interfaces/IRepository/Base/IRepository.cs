@@ -2,28 +2,36 @@
 
 namespace EvictionFiler.Application.Interfaces.IRepository.Base
 {
-	public interface IRepository<T>
-	{
-		Task<T> AddAsync(T entity);
-		Task AddRangeAsync(IEnumerable<T> entities);
-        //Task RemoveRange(IEnumerable<T> entities);
-        Task UpdateRange(IEnumerable<T> entities);
-        Task<T?> UpdateAsync(T entity);
-
-
+	public interface IRepository<TEntity> where TEntity : class
+    {
+		Task<TEntity> AddAsync(TEntity entity);
+		Task AddRangeAsync(IEnumerable<TEntity> entities);
+        Task UpdateRange(IEnumerable<TEntity> entities);
+        Task<TEntity?> UpdateAsync(TEntity entity);
 		Task<bool> DeleteAsync(Guid id);
-		Task<T?> GetAsync(object id);
-		Task<T?> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[]? includes);
-		Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null, params Expression<Func<T, object>>[]? includes);
-		IQueryable<T> GetAllQuerable(Expression<Func<T, bool>>? predicate = null, params Expression<Func<T, object>>[]? includes);
-		Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
-		Task<bool> AnyAsync(Expression<Func<T, bool>>? predicate = null);
+        Task<bool> SoftDeleteAsync(Guid id);
 
-		Task<bool> SoftDeleteAsync(Guid id);
+        Task<TEntity?> GetAsync(
+			Guid? id);
 
-		public IQueryable<T> GetAllQueryablewithThenInclude(Expression<Func<T, bool>>? predicate = null, Func<IQueryable<T>, IQueryable<T>>? include = null);
+		Task<TEntity?> FindAsync(
+			Expression<Func<TEntity, bool>> predicate, 
+			params Expression<Func<TEntity, object>>[]? includes);
 
+		Task<IEnumerable<TEntity>> GetAllAsync(
+			Expression<Func<TEntity, bool>>? predicate = null, 
+			params Expression<Func<TEntity, object>>[]? includes);
 
+		IQueryable<TEntity> GetAllQuerable(
+			Expression<Func<TEntity, bool>>? predicate = null,
+			params Expression<Func<TEntity, object>>[]? includes);
 
+		Task<int> CountAsync(
+			Expression<Func<TEntity, bool>>? 
+			predicate = null);
+
+		Task<bool> AnyAsync(
+			Expression<Func<TEntity, bool>>?
+			predicate = null);
     }
 }

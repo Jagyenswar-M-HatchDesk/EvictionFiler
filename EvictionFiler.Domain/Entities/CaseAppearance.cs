@@ -1,16 +1,11 @@
-﻿using EvictionFiler.Domain.Entities.Base.Base;
+﻿using EvictionFiler.Domain.Entities.Base;
 using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Domain.Entities
 {
-    public class CaseAppearance : DeletableBaseEntity
+    public class CaseAppearance : DeletableGuidEntity
     {
         public Guid? CourtTodayId { get; set; }
         [ForeignKey("CourtTodayId")]

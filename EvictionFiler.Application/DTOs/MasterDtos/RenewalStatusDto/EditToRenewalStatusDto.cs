@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EvictionFiler.Application.DTOs.MasterDtos.RenewalStatusDto
+﻿namespace EvictionFiler.Application.DTOs.MasterDtos.RenewalStatusDto
 {
     public class EditToRenewalStatusDto : CreateToRenewalStatusDto
     {

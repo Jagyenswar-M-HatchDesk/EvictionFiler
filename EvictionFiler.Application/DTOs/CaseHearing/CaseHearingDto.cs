@@ -1,15 +1,8 @@
-﻿using EvictionFiler.Domain.Entities;
-using EvictionFiler.Domain.Entities.Base.Base;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using EvictionFiler.Domain.Entities.Base;
 
 namespace EvictionFiler.Application.DTOs.CaseHearing
 {
-    public class CaseHearingDto : DeletableBaseEntity
+    public class CaseHearingDto : DeletableGuidEntity
     {
         public Guid Id { get; set; }
         public DateTime? HearingDate { get; set; }

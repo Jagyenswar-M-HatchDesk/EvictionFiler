@@ -1,17 +1,9 @@
-﻿using EvictionFiler.Application.DTOs.CourtDto;
-using EvictionFiler.Application.DTOs.CourtPart;
+﻿using EvictionFiler.Application.DTOs.CourtPart;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository;
-using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {

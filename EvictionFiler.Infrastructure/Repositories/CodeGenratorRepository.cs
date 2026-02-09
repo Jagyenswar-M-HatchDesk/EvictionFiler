@@ -1,7 +1,6 @@
 ﻿using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using System.Linq.Expressions;
 
 public class CodeGenratorRepository : ICodeGenratorRepository

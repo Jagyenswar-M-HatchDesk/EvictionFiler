@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EvictionFiler.Application.DTOs.CaseWarrantDtos
+﻿namespace EvictionFiler.Application.DTOs.CaseWarrantDtos
 {
     public class CaseWarrantDto
     {

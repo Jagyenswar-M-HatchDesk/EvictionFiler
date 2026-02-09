@@ -1,9 +1,9 @@
-﻿using EvictionFiler.Domain.Entities.Base.Base;
+﻿using EvictionFiler.Domain.Entities.Base;
 using System.ComponentModel.DataAnnotations;
 
 namespace EvictionFiler.Domain.Entities
 {
-    public class Marshal : DeletableBaseEntity
+    public class Marshal : DeletableGuidEntity
     {
         [Key]
         public Guid Id { get; set; }

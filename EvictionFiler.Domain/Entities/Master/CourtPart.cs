@@ -1,10 +1,9 @@
-﻿using EvictionFiler.Domain.Entities.Base.Base;
-using System.ComponentModel.DataAnnotations;
+﻿using EvictionFiler.Domain.Entities.Base;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvictionFiler.Domain.Entities.Master
 {
-	public class CourtPart : DeletableBaseEntity
+	public class CourtPart : DeletableGuidEntity
 	{
         public Guid Id { get; set; }
 

@@ -1,9 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using EvictionFiler.Domain.Entities.Base.Base;
+﻿using EvictionFiler.Domain.Entities.Base;
+using System.ComponentModel.DataAnnotations;
 
 namespace EvictionFiler.Domain.Entities.Master
 {
-	public class ClientRole : DeletableBaseEntity
+	public class ClientRole : DeletableGuidEntity
 	{
 		[MaxLength(50)]
 		public string Name { get; set; } = string.Empty;

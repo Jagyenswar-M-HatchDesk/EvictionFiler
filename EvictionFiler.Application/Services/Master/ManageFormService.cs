@@ -1,18 +1,8 @@
-﻿using EvictionFiler.Application.DTOs.ClientDto;
-using EvictionFiler.Application.DTOs.FormTypeDto;
-using EvictionFiler.Application.DTOs.LegalCaseDto;
+﻿using EvictionFiler.Application.DTOs.FormTypeDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
-using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Application.Interfaces.IServices;
-using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Services.Master
 {

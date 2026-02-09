@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EvictionFiler.Application.DTOs.ApartmentDto;
+﻿using EvictionFiler.Application.DTOs.ApartmentDto;
 
 namespace EvictionFiler.Application.DTOs.LandLordDto
 {

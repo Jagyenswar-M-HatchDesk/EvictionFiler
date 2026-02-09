@@ -3,14 +3,12 @@ using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.OccupantDto;
 using EvictionFiler.Application.DTOs.TenantDto;
-using EvictionFiler.Domain.Entities.Base.Base;
-using EvictionFiler.Domain.Entities.Master;
+using EvictionFiler.Domain.Entities.Base;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvictionFiler.Application.DTOs.LegalCaseDto
 {
-	public class CreateToEditLegalCaseModel : DeletableBaseEntity
+	public class CreateToEditLegalCaseModel : DeletableGuidEntity
 	{
 		public Guid Id { get; set; }
 		public Guid ClientId { get; set; }

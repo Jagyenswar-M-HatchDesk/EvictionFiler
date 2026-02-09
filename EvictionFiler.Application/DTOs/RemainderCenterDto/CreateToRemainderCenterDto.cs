@@ -1,9 +1,9 @@
-﻿using EvictionFiler.Domain.Entities.Base.Base;
+﻿using EvictionFiler.Domain.Entities.Base;
 using System.ComponentModel.DataAnnotations;
 
 namespace EvictionFiler.Application.DTOs.RemainderCenterDto
 {
-    public class CreateToRemainderCenterDto : DeletableBaseEntity
+    public class CreateToRemainderCenterDto : DeletableGuidEntity
     {
         public string CaseCode { get; set; } = string.Empty;
         [Required(ErrorMessage = "Case is required.")]

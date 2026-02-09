@@ -1,19 +1,12 @@
 ﻿using EvictionFiler.Application.DTOs.ArrearLedgerDtos;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Domain.Entities;
-using EvictionFiler.Domain.Entities.Base.Base;
+using EvictionFiler.Domain.Entities.Base;
 using EvictionFiler.Domain.Entities.Master;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.DTOs
 {
-    public class IntakeModel : DeletableBaseEntity
+    public class IntakeModel : DeletableGuidEntity
     {
         //public Guid Id { get; set; }
         //[Required(ErrorMessage = "Client is required")]

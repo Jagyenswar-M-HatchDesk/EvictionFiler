@@ -1,6 +1,4 @@
-﻿using EvictionFiler.Application.DTOs.CalanderDto;
-using EvictionFiler.Application.DTOs.CaseHearing;
-using EvictionFiler.Application.DTOs.LegalCaseDto;
+﻿using EvictionFiler.Application.DTOs.CaseHearing;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
@@ -9,11 +7,6 @@ using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Services
 {

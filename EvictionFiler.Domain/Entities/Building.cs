@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using EvictionFiler.Domain.Entities.Base.Base;
+using EvictionFiler.Domain.Entities.Base;
 using EvictionFiler.Domain.Entities.Master;
 
 namespace EvictionFiler.Domain.Entities
 {
-    public class Building : DeletableBaseEntity
+    public class Building : DeletableGuidEntity
     {
 		[Required]
 		public string BuildingCode { get; set; } = string.Empty;

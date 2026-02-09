@@ -1,11 +1,11 @@
 ﻿
 using System.ComponentModel.DataAnnotations.Schema;
-using EvictionFiler.Domain.Entities.Base.Base;
+using EvictionFiler.Domain.Entities.Base;
 using EvictionFiler.Domain.Entities.Master;
 
 namespace EvictionFiler.Domain.Entities
 {
-	public class CaseForms : DeletableBaseEntity
+	public class CaseForms : DeletableGuidEntity
 	{
 		public string? HTML { get; set; }
 		public string? File { get; set; }

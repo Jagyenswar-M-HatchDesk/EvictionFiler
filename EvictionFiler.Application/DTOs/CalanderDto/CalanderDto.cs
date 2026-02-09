@@ -1,15 +1,8 @@
-﻿using EvictionFiler.Domain.Entities.Base.Base;
-using EvictionFiler.Domain.Entities.Master;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using EvictionFiler.Domain.Entities.Base;
 
 namespace EvictionFiler.Application.DTOs.CalanderDto
 {
-    public class CalanderDto : DeletableBaseEntity
+    public class CalanderDto : DeletableGuidEntity
     {
         public DateTime DateFrom { get; set; }
         public DateTime DateTo { get; set; }

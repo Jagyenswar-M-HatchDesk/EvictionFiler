@@ -1,19 +1,12 @@
 ﻿
 using EvictionFiler.Application.Constants;
 using EvictionFiler.Application.Interfaces.IServices;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using OpenAI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using static System.Net.WebRequestMethods;
 
 namespace EvictionFiler.Application.Services
 {

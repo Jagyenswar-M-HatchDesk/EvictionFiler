@@ -1,5 +1,4 @@
-﻿using EvictionFiler.Application.DTOs.ClientDto;
-using EvictionFiler.Application.DTOs.MasterDtos.LandlordTypeDto;
+﻿using EvictionFiler.Application.DTOs.MasterDtos.LandlordTypeDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 
 

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EvictionFiler.Application.DTOs.MasterDtos.BilingTypeDto
+﻿namespace EvictionFiler.Application.DTOs.MasterDtos.BilingTypeDto
 {
     public class BilingTypeDto
     {

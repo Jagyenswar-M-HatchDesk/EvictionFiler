@@ -1,14 +1,9 @@
-﻿using EvictionFiler.Domain.Entities.Base.Base;
-using System;
-using System.Collections.Generic;
+﻿using EvictionFiler.Domain.Entities.Base;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.DTOs.MasterDtos.ReasonHoldoverDto
 {
-    public class CreateToReasonHoldoverDto : DeletableBaseEntity
+    public class CreateToReasonHoldoverDto : DeletableGuidEntity
     {
         [Required(ErrorMessage = "  Reason Holder  is required")]
         public string Name { get; set; } = string.Empty;

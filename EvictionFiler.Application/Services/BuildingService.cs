@@ -1,12 +1,8 @@
 ﻿using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.BuildingDto;
-using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
-using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
-using EvictionFiler.Domain.Entities.Master;
-using Microsoft.EntityFrameworkCore;
 
 namespace EvictionFiler.Application.Services
 {

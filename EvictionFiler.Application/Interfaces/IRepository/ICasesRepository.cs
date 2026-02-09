@@ -5,7 +5,6 @@ using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Interfaces.IRepository
 {

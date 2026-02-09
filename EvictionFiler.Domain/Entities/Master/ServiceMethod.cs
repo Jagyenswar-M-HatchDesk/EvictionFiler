@@ -1,14 +1,8 @@
-﻿using EvictionFiler.Domain.Entities.Base.Base;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace EvictionFiler.Domain.Entities.Master
 {
-    public class ServiceMethod : DeletableBaseEntity
+    public class ServiceMethod : DeletableGuidEntity
     {
         [Key]
         public Guid Id { get; set; }

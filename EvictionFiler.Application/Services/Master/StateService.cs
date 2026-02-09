@@ -1,5 +1,4 @@
-﻿using EvictionFiler.Application.DTOs.FormTypeDto;
-using EvictionFiler.Application.DTOs.MasterDtos.StateDto;
+﻿using EvictionFiler.Application.DTOs.MasterDtos.StateDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Application.Interfaces.IServices.Master;

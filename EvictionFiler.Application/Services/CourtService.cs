@@ -1,5 +1,4 @@
-﻿using EvictionFiler.Application.DTOs.ClientDto;
-using EvictionFiler.Application.DTOs.CourtDto;
+﻿using EvictionFiler.Application.DTOs.CourtDto;
 using EvictionFiler.Application.DTOs.CourtPart;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.Interfaces.IRepository;

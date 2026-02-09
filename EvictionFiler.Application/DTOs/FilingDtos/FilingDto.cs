@@ -1,15 +1,8 @@
-﻿using EvictionFiler.Domain.Entities;
-using EvictionFiler.Domain.Entities.Base.Base;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using EvictionFiler.Domain.Entities.Base;
 
 namespace EvictionFiler.Application.DTOs.FilingDtos
 {
-    public class FilingDto : DeletableBaseEntity
+    public class FilingDto : DeletableGuidEntity
     {
         public Guid Id { get; set; }
         public string? GeneratedOSC { get; set; }

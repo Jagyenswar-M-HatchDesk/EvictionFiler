@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using EvictionFiler.Domain.Entities.Base.Base;
 
 namespace EvictionFiler.Domain.Entities.Master
 {
-	public class RegulationStatus : DeletableBaseEntity
+	public class RegulationStatus : DeletableGuidEntity
 	{
 		[MaxLength(50)]
 		public string  Name { get; set; } = string.Empty;

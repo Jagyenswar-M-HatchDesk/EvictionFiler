@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using EvictionFiler.Domain.Entities.Base.Base;
 
 namespace EvictionFiler.Domain.Entities.Master
 {
-	public class LandlordType : DeletableBaseEntity
+	public class LandlordType : DeletableGuidEntity
 	{
 		[MaxLength(100)]
 		public string Name { get; set; } = string.Empty;

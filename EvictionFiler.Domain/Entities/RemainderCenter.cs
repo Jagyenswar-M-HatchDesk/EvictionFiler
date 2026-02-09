@@ -1,16 +1,10 @@
-﻿using EvictionFiler.Domain.Entities.Base.Base;
-using EvictionFiler.Domain.Entities.Master;
-using System;
-using System.Collections.Generic;
+﻿using EvictionFiler.Domain.Entities.Master;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Domain.Entities
 {
-    public class RemainderCenter : DeletableBaseEntity
+    public class RemainderCenter : DeletableGuidEntity
     {
         [MaxLength(50)]
         public string CaseName { get; set; } = string.Empty;

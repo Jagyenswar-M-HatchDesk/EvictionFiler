@@ -1,11 +1,6 @@
 ﻿using EvictionFiler.Application.DTOs.CourtDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Interfaces.IRepository
 {

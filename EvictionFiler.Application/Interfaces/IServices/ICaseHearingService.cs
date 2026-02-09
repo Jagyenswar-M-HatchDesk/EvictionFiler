@@ -1,11 +1,6 @@
 ﻿using EvictionFiler.Application.DTOs.CaseHearing;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Domain.Entities.Master;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Interfaces.IServices
 {

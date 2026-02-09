@@ -1,16 +1,9 @@
-﻿using EvictionFiler.Application.Interfaces.IRepository.Base;
-using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
+﻿using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Domain.Entities.Master;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {

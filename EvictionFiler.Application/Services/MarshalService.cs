@@ -1,5 +1,4 @@
 ﻿using EvictionFiler.Application.DTOs.MarshalsDto;
-using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Domain.Entities;

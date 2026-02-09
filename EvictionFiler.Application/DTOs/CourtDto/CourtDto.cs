@@ -1,10 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.CourtPart;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.DTOs.CourtDto
 {

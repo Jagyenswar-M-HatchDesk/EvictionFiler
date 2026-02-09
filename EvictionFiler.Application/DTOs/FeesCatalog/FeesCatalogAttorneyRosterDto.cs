@@ -1,8 +1,4 @@
-﻿
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace EvictionFiler.Application.DTOs
+﻿namespace EvictionFiler.Application.DTOs
 {
     public class FeesCatalogAttorneyRosterDto
     {

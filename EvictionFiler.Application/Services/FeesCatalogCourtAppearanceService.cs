@@ -3,10 +3,7 @@
 using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
-using EvictionFiler.Application.Interfaces.IServices.Master;
 using EvictionFiler.Domain.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Services.Master
 {

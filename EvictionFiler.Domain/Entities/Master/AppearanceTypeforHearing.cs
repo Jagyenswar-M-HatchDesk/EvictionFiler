@@ -1,14 +1,9 @@
-﻿using EvictionFiler.Domain.Entities.Base.Base;
-using System;
-using System.Collections.Generic;
+﻿using EvictionFiler.Domain.Entities.Base;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Domain.Entities.Master
 {
-    public class AppearanceTypeforHearing : DeletableBaseEntity
+    public class AppearanceTypeforHearing : DeletableGuidEntity
     {
         [MaxLength(250)]
         public string Name { get; set; } = string.Empty;

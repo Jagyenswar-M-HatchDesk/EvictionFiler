@@ -2,9 +2,6 @@
 
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using EvictionFiler.Domain.Entities;
-using EvictionFiler.Domain.Entities.Master;
 
 namespace EvictionFiler.Application.DTOs.FormTypeDto
 {

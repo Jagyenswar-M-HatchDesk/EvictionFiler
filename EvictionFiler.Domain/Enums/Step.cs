@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EvictionFiler.Domian.Enums
+﻿namespace EvictionFiler.Domian.Enums
 {
     
     public enum StepHoldover

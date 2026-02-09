@@ -1,15 +1,10 @@
-﻿using EvictionFiler.Domain.Entities.Base.Base;
+﻿using EvictionFiler.Domain.Entities.Base;
 using EvictionFiler.Domain.Entities.Master;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Domain.Entities
 {
-    public class CaseHearing : DeletableBaseEntity
+    public class CaseHearing : DeletableGuidEntity
     {
 
         public Guid Id { get; set; }

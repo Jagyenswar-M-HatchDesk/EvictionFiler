@@ -1,9 +1,6 @@
 ﻿using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace EvictionFiler.Infrastructure.DataSeeding
 {

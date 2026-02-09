@@ -1,10 +1,9 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
-using EvictionFiler.Domain.Entities.Base.Base;
 
 namespace EvictionFiler.Domain.Entities.Master
 {
-	public class ReasonHoldover : DeletableBaseEntity
+	public class ReasonHoldover : DeletableGuidEntity
 	{
 		[MaxLength(50)]
 		public string Name { get; set; } = string.Empty;

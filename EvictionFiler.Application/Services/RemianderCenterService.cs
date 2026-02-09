@@ -3,10 +3,7 @@ using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
-using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using static Azure.Core.HttpHeader;
 
 namespace EvictionFiler.Application.Services
 {

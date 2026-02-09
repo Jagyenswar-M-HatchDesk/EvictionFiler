@@ -1,13 +1,8 @@
-﻿using EvictionFiler.Domain.Entities.Base.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using EvictionFiler.Domain.Entities.Base;
 
 namespace EvictionFiler.Domain.Entities.Master
 {
-    public class AppearanceMode : DeletableBaseEntity
+    public class AppearanceMode : DeletableGuidEntity
     {
         public Guid Id { get; set; }
 

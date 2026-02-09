@@ -1,7 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
-using EvictionFiler.Domain.Entities.Master;
-using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Interfaces.IServices
 {
