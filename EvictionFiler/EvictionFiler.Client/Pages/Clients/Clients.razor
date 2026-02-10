@@ -1,4 +1,6 @@
 ﻿@page "/clients"
+@using EvictionFiler.Application.Common.Interfaces
+@using EvictionFiler.Application.Common.Models
 @using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.LandLordDto
@@ -11,6 +13,7 @@
 @using Microsoft.AspNetCore.Components.Authorization;
 @using System.Security.Claims
 @inject AuthenticationStateProvider _authStateProvider
+@inject ILoggedInUserService _loggedInUserService
 @inject SpinnerService Spinnerservice
  @inject IClientService clientservice
  @inject ILandlordSevice landLordService
@@ -296,7 +299,7 @@
     private CreateToClientDto _clientModel;
     private EditToClientDto _editClientModel = new();
     private EditToClientDto createToClient = new();
-   
+
 
     private List<EditToClientDto> clients = new();
     private string activeTab = string.Empty;
@@ -307,65 +310,57 @@
 
     private string? loggedInUserId;
     private bool isAdmin = false;
+    private LoggedInUser? identityUser;
 
     protected override async Task OnInitializedAsync()
     {
         Spinnerservice.Show();
-        //isLoading = true;
-        var uri = new Uri(navManager.Uri);
-        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-
-        if (query.TryGetValue("success", out var isSuccess) && isSuccess == "true")
+        var loggedInUser = await _loggedInUserService.GetAsync();
+        if (loggedInUser.IsAuthenticated)
         {
-            successMessage = "Client submitted successfully!";
-            StateHasChanged();
+            this.identityUser = loggedInUser;
+            var uri = new Uri(navManager.Uri);
+            var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+            if (query != null && query.Any())
+            {
+                if (query.TryGetValue("success", out var isSuccess) && isSuccess == "true")
+                {
+                    successMessage = "Client submitted successfully!";
+                    StateHasChanged();
 
-            await Task.Delay(2000);
-            successMessage = string.Empty;
-            StateHasChanged();
+                    await Task.Delay(2000);
+                    successMessage = string.Empty;
+                    StateHasChanged();
 
-            navManager.NavigateTo("/clients", forceLoad: false);
+                    navManager.NavigateTo("/clients", forceLoad: false);
+                }
+                else if (query.TryGetValue("edit", out var isEdit) && isEdit == "true")
+                {
+                    successMessage = "Client updated successfully!";
+                    StateHasChanged();
+
+                    await Task.Delay(2000);
+                    successMessage = string.Empty;
+                    StateHasChanged();
+
+                    navManager.NavigateTo("/clients", forceLoad: false);
+                }
+            }
+            await LoadClients();
         }
-
-        // ✅ Edit success message
-        else if (query.TryGetValue("edit", out var isEdit) && isEdit == "true")
-        {
-            successMessage = "Client updated successfully!";
-            StateHasChanged();
-
-            await Task.Delay(2000);
-            successMessage = string.Empty;
-            StateHasChanged();
-
-            navManager.NavigateTo("/clients", forceLoad: false);
-        }
-
-        var authState = await _authStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity != null && user.Identity.IsAuthenticated)
-        {
-            loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
-        }
-
-
-        await Task.Delay(1000);
-        await LoadClients();
-        //isLoading = false;
         Spinnerservice.Hide();
     }
 
 
     private async Task LoadClients()
     {
-        if (!string.IsNullOrEmpty(loggedInUserId))
+        if (!string.IsNullOrEmpty(identityUser?.UserId))
         {
             pagedClients = await clientservice.GetAllClientsAsync(
                 currentPage,
                 pageSize,
                 searchTerm,
-                loggedInUserId,
+                identityUser?.UserId??string.Empty,
                 isAdmin
             );
         }

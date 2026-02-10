@@ -14,8 +14,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<bool> AddHearing(CaseHearingDto dto);
         Task<PaginationDto<CaseHearingDto>> GetAllCaseHeariingAsync(int pageNumber, int pageSize, string userId, bool isAdmin);
         Task<List<CaseHearingDto>> GetAllCaseHeariingByCaseIdAsync(Guid id);
-        Task<int> GetAllTodayCaseHearingAsync();
-
+        Task<int> GetAllTodayCaseHearingAsync(string userId, bool isAdmin);
         Task<IEnumerable<AppearanceMode>> GetAllModes();
         Task<IEnumerable<VirtualPlatform>> GetAllPlatform();
         Task<IEnumerable<AppearanceTypeforHearing>> GetAllAppearanceTypeForHearing();
