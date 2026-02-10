@@ -1,5 +1,7 @@
 ﻿@page "/dashboard"
 <PageTitle>Dashboard - Housing CourtFiler</PageTitle>
+@using EvictionFiler.Application.Common.Interfaces
+@using EvictionFiler.Application.Common.Models
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.DashboardDto
 @using EvictionFiler.Application.DTOs.LandLordDto
@@ -30,6 +32,7 @@
 @inject IClientService _clientService
 @inject NavigationManager navManager
 @inject UserContextService userContext
+@inject ILoggedInUserService _loggedInUserService
 @attribute [Authorize]
 
 
@@ -660,7 +663,7 @@
         <a class="tile" href="#deadlines">
             <div class="icon">🕔</div>
             <div>
-                <div class="count" id="deadlineCount">5</div>
+                <div class="count" id="deadlineCount">0</div>
                 <div class="label">Due Today / Overdue</div>
             </div>
         </a>
@@ -674,7 +677,7 @@
         <a class="tile" href="#approvals">
             <div class="icon">✅</div>
             <div>
-                <div class="count" id="pendingApprovals">4</div>
+                <div class="count" id="pendingApprovals">0</div>
                 <div class="label">Pending Client Approvals</div>
             </div>
         </a>
@@ -684,28 +687,28 @@
         <a class="tile" href="#balances">
             <div class="icon">💳</div>
             <div>
-                <div class="count" id="openBalances">$12k</div>
+                <div class="count" id="openBalances">$0k</div>
                 <div class="label">Open Balance Alerts</div>
             </div>
         </a>
         <a class="tile" href="#trust">
             <div class="icon">🏦</div>
             <div>
-                <div class="count" id="trustBalances">$8.4k</div>
+                <div class="count" id="trustBalances">$0k</div>
                 <div class="label">Trust Balances</div>
             </div>
         </a>
         <a class="tile" href="#progress">
             <div class="icon">📈</div>
             <div>
-                <div class="count" id="taskPct">72%</div>
+                <div class="count" id="taskPct">0%</div>
                 <div class="label">Tasks Completed (wk)</div>
             </div>
         </a>
         <a class="tile" href="#alerts">
             <div class="icon">🔔</div>
             <div>
-                <div class="count" id="alertCount">6</div>
+                <div class="count" id="alertCount">0</div>
                 <div class="label">Smart Alerts</div>
             </div>
         </a>
@@ -1107,51 +1110,49 @@
     private List<EditToClientDto> filteredClients = new();
     private List<EditToRemainderCenterDto> InCompleteRemainder = new();
     private List<IGrouping<string?, EditToRemainderCenterDto>> groupedRemainder = new();
+    private LoggedInUser? identityUser;
+
+
     protected override async Task OnInitializedAsync()
     {
         spinnerservice.Show();
-
-        var uri = new Uri(navManager.Uri);
-        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-
-        if (query.TryGetValue("success", out var isSuccess) && isSuccess == "true")
-        {
-            successMessage = "Case Added successfully!";
-            await Task.Delay(1000);
-            successMessage = string.Empty;
-
-            navManager.NavigateTo("dashboard", forceLoad: true);
-        }
-        else if (query.TryGetValue("edit", out var isEdit) && isEdit == "true")
-        {
-            successMessage = "Case updated successfully!";
-            StateHasChanged();
-
-            await Task.Delay(2000);
-            successMessage = string.Empty;
-            StateHasChanged();
-
-            navManager.NavigateTo("/dashboard", forceLoad: false);
-        }
-
-
-
-        await userContext.LoadAsync();
-
-        if (!userContext.IsAuthenticated)
+        var loggedInUser = await _loggedInUserService.GetAsync();
+        if (loggedInUser==null || !loggedInUser.IsAuthenticated)
         {
             navManager.NavigateTo("/", forceLoad: true);
             return;
         }
+        this.identityUser = loggedInUser;
+        var uri = new Uri(navManager.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        if (query != null && query.Any())
+        {
+            if (query.TryGetValue("success", out var isSuccess) && isSuccess == "true")
+            {
+                successMessage = "Case Added successfully!";
+                await Task.Delay(1000);
+                successMessage = string.Empty;
 
-        loggedInUserId = userContext.UserId;
-        isAdmin = userContext.IsAdmin;
+                navManager.NavigateTo("dashboard", forceLoad: true);
+            }
+            else if (query.TryGetValue("edit", out var isEdit) && isEdit == "true")
+            {
+                successMessage = "Case updated successfully!";
+                StateHasChanged();
 
-        totalCases = await _service.GetTotalCasesCountAsync(loggedInUserId, isAdmin);
-        totalCasesHearing = await _caseService.GetAllTodayCaseHearingAsync();
-        activeCases = await _service.GetActiveCasesCountAsync(loggedInUserId, isAdmin);
-        //ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
-        InCompleteRemainder = await _remainder.GetAllInCompleteRemainder();
+                await Task.Delay(2000);
+                successMessage = string.Empty;
+                StateHasChanged();
+
+                navManager.NavigateTo("/dashboard", forceLoad: false);
+            }
+        }
+
+        totalCases = await _service.GetTotalCasesCountAsync(loggedInUser.UserId??string.Empty, loggedInUser.IsSuperAdmin);
+        totalCasesHearing = await _caseService.GetAllTodayCaseHearingAsync(loggedInUser.UserId ?? string.Empty, loggedInUser.IsSuperAdmin);
+        activeCases = await _service.GetActiveCasesCountAsync(loggedInUser.UserId ?? string.Empty, loggedInUser.IsSuperAdmin);
+
+        InCompleteRemainder = await _remainder.GetAllInCompleteRemainder(Guid.Parse(loggedInUser.UserId??string.Empty));
 
         groupedRemainder = InCompleteRemainder.GroupBy(e => e.CaseCode).ToList();
         if (groupedRemainder.Any())

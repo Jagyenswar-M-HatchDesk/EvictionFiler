@@ -1,5 +1,7 @@
 ﻿@page "/legalcases"
 @page "/legalcases/search"
+@using EvictionFiler.Application.Common.Interfaces
+@using EvictionFiler.Application.Common.Models
 @using EvictionFiler.Application.Constants
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ApartmentDto
@@ -18,6 +20,7 @@
 @using Microsoft.AspNetCore.Components.Authorization;
 @using System.Security.Claims
 @inject AuthenticationStateProvider _authStateProvider
+@inject ILoggedInUserService _loggedInUserService
 @inject ILegalCaseService _service
 @inject IClientService _clientservice
 @using EvictionFiler.Client.SpinnerService
@@ -658,7 +661,7 @@
     private string searchTermDept = string.Empty;
     private string searchTermDate = string.Empty;
     private string searchTermResonHoldover = string.Empty;
-   
+
     private List<CaseType> CaseTypeList = new();
 
     private string showClient = string.Empty;
@@ -679,11 +682,14 @@
     private int currentPage = 1;
     private int pageSize => IsGridView ? 12 : 10;
     private string? loggedInUserId;
+    private bool isSuperAdmin = false;
     private bool isAdmin = false;
     private bool IsClearbtndisable = true;
     private bool IsGridView = true;
     private CancellationTokenSource _cts;
     private bool ShowAdvancedFilters = false;
+
+    private LoggedInUser? identityUser;
 
     // private void EditCase(Guid caseId)
     // {
@@ -708,46 +714,41 @@
     protected override async Task OnInitializedAsync()
     {
         spinnerservice.Show();
-        
-        var uri = new Uri(navManager.Uri);
-        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-
-        var authState = await _authStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity != null && user.Identity.IsAuthenticated)
+        var loggedInUser = await _loggedInUserService.GetAsync();
+        if (loggedInUser.IsAuthenticated)
         {
-            loggedInUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            isAdmin = user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            this.identityUser = loggedInUser;
+            var uri = new Uri(navManager.Uri);
+            var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+            if(query!=null && query.Any())
+            {
+                if (query.TryGetValue("cases", out var caseVal))
+                {
+                    searchcasecode = caseVal;
+                    IsClearbtndisable = false;
+                }
+
+                if (query.TryGetValue("tenant", out var tenantVal))
+                {
+                    searchTermTenant = tenantVal;
+                    IsClearbtndisable = false;
+                }
+
+                if (query.TryGetValue("client", out var clientVal))
+                {
+                    searchTermClient = clientVal;
+                    IsClearbtndisable = false;
+                }
+
+                if (query.TryGetValue("landlord", out var landlordVal))
+                {
+                    searchTermLandLord = landlordVal;
+                    IsClearbtndisable = false;
+                }
+            }
+            CaseTypeList = await CaseTypeRepository.GetAllCaseType();
+            await GetAllCases();
         }
-
-        if (query.TryGetValue("cases", out var caseVal))
-        {
-            searchcasecode = caseVal;
-            IsClearbtndisable = false;
-        }
-
-        if (query.TryGetValue("tenant", out var tenantVal))
-        {
-            searchTermTenant = tenantVal;
-            IsClearbtndisable = false;
-        }
-
-        if (query.TryGetValue("client", out var clientVal))
-        {
-            searchTermClient = clientVal;
-            IsClearbtndisable = false;
-        }
-
-        if (query.TryGetValue("landlord", out var landlordVal))
-        {
-            searchTermLandLord = landlordVal;
-            IsClearbtndisable = false;
-        }
-        CaseTypeList = await CaseTypeRepository.GetAllCaseType();
-
-
-        await GetAllCases();
         spinnerservice.Hide();
     }
 
@@ -768,10 +769,7 @@
 
         };
 
-        pagedcases = await _service.GetAllAsync(currentPage, pageSize, filters, loggedInUserId,
-                isAdmin);
-
-
+        pagedcases = await _service.GetAllAsync(currentPage, pageSize, filters, identityUser?.UserId??string.Empty, identityUser?.IsSuperAdmin??false);
     }
 
     private async Task OnCaseTypeChanged()
