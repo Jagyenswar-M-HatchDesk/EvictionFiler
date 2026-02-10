@@ -1,0 +1,354 @@
+﻿@page "/staffmembers"
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.UserDto
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Client.SpinnerService
+@using EvictionFiler.Domain.Entities
+@using Microsoft.AspNetCore.Authorization
+@inject IUserservices _userService
+@inject SpinnerService spinnerservice
+@inject UserContextService userContext
+
+<PageTitle>Users - Housing Court Filer</PageTitle>
+@attribute [Authorize]
+<!-- Bootstrap CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+
+<style>
+    .status-active {
+    background-color: #28a745;
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 1rem;
+    font-size: 10px;
+    }
+
+    .container {
+    /* background-color: #F2F0EC; */
+    border: solid 1px #F2F0EC;
+    box-shadow: 0 15px 20px #F2F0EC !important;
+    max-width:100%;
+    }
+
+    .btn-primary {
+    background-color: #1F365D;
+    border-color: #1F365D;
+    }
+
+    .btn-primary:hover {
+    background-color: #162646;
+    border-color: #162646;
+    }
+
+    .page-link {
+    color: #1F365D;
+    }
+
+    .page-link.active,
+    .page-item.active .page-link {
+    background-color: #1F365D;
+    border-color: #1F365D;
+    color: #F2F0EC;
+    }
+
+    table.table thead th {
+    color: #1F365D;
+    background: #F2F0EC;
+    margin-bottom: 0px !important;
+    }
+
+    h5, p, small {
+    color: #1F365D;
+    }
+
+    .adv-btn {
+    color: #1F365D;
+    background: #FFF;
+    }
+
+    .adv-btn:hover {
+    color: #FFF;
+    background: #1F365D;
+    }
+
+    .adv-btn.active-adv-btn {
+    background-color: #1F365D !important;
+    color: #F2F0EC !important;
+    border-color: #1F365D !important;
+    }
+    .add-btn
+    {
+        font-size:14px;
+        font-family:'Poppins';
+    }
+
+    .table-responsive {
+    overflow-x: auto; /* Enable horizontal scroll */
+    position: relative;
+        white-space: nowrap;
+    }
+
+    
+
+    th.sticky, td.sticky {
+    position: sticky;
+    right: 0;
+    background: #F2F0EC; /* Same as container background */
+    z-index: 2;
+    text-align: center;
+    }
+
+    /* Make sure header sticky stays above other cells */
+    th.sticky {
+    z-index: 3;
+    }
+</style>
+<style>
+    .search-box {
+    width: 100%;
+    padding-right: 3rem; /* space for the button */
+    padding-left: 1rem;
+    /* border-radius: 1.5rem; */
+    border: 2px solid #1F365D;
+    background-color: #FFF; /* dark background */
+    color: black;
+    height: 2.5rem;
+    }
+
+    .search-box::placeholder {
+    color: darkgrey;
+    }
+
+    .search-box:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+    background: #c6d1e3;
+    }
+
+    .search-btn {
+    position: absolute;
+    right: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: #1F365D;
+    cursor: pointer;
+    padding: 0;
+    font-size: 1.2rem;
+    }
+
+    .search-btn:hover {
+    color: #1F365D;
+    }
+    .head
+    {
+        font-weight: 700;
+    }
+</style>
+
+
+<body class="p-4">
+
+    <div class="container p-4 rounded shadow-sm">
+
+        <!-- Title Row -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="m-0 head">Manage Staff Members</h5>
+        </div>
+
+        <!-- Search Filters -->
+        <div class="g-2 mb-3 d-flex justify-content-between align-items-center">
+            <!-- Four default search boxes -->
+            <button class="btn btn-primary add-btn" @onclick="AddUser">Add New Staff</button>
+            <div class="position-relative w-50">
+                <input class="form-control border border-primary text-navy" placeholder="Search.." @bind="searchTerm" @bind:event="oninput" />
+                <button class="search-btn" type="button">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Data Table -->
+        <div class="table-responsive mb-3">
+            <table class="table table-hover align-middle text-center" style="margin-bottom: 0px;">
+                <thead>
+                    <tr>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        <th>Created At</th>
+                        <th class="sticky">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @* <tr>
+                        <td>Jagyenswar</td>
+                        <td>Meher</td>
+                        <td>jm@gmail.com</td>
+                        <td>7723099993</td>
+                        <td>Property Manager</td>
+                        <td>06-27-2025</td>
+                        <td class="sticky"><i class="fa-solid fa-pen-to-square"></i><span class="status-active ms-2">Active</span></td>
+                    </tr>
+                    <tr>
+                        <td>Siddharth</td>
+                        <td>Kanoujia</td>
+                        <td>sk@gmail.comL</td>
+                        <td>7988324752</td>
+                        <td>Property Manager</td>
+                        <td>06-27-2025</td>
+                        <td class="sticky"><i class="fa-solid fa-pen-to-square"></i><span class="status-active ms-2">Active</span></td>
+                    </tr> *@
+                    @if (cases.Count() > 0)
+                    {
+                        @foreach (var user in cases)
+                        {
+                            if (user != null)
+                            {
+                                <tr>
+                                    <td>@(user.FirstName ?? "")</td>
+                                    <td>@(user.LastName ?? "")</td>
+                                    <td>@(user.Email ?? "")</td>
+                                    <td>@(user.PhoneNumber ?? "")</td>
+                                    <td>@(user.Role?.Name ?? "")</td>
+                                    <td>@(user?.CreatedOn)</td>
+                                    <td class="sticky"><i class="fa-solid fa-trash" @onclick="() => DeleteUser(user.Id)"></i><span class="status-active ms-2">Active</span></td>
+                                </tr>
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-muted">No Users found.</td>
+                        </tr>
+                    }
+                    <!-- repeat more data here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between mt-3">
+            <small>Showing 1 to 10 of 11 entries</small>
+            <nav>
+                <ul class="pagination mb-0">
+                    <li class="page-item disabled"><a class="page-link" href="#">←</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">→</a></li>
+                </ul>
+            </nav>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <CreateEditStaffMember @ref="createEditStaff" Submit="Handle" />
+</body>
+
+
+@code {
+    private string searchTerm = string.Empty;
+
+    private Guid FirmId;
+    private CreateEditStaffMember createEditStaff;
+
+    private async Task AddUser()
+    {
+        var modal = new RegisterDto();
+        createEditStaff.Show(modal, User.FirmId.Value);
+
+        // var alluser = _userService.GetAllStaffMembers(User.FirmId.Value);
+    }
+    private async Task EditUser(User user)
+    {
+        var modal = new RegisterDto()
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email  = user.Email,
+            FirmId = user.FirmId,
+        };
+        createEditStaff.Show(modal, User.FirmId.Value);
+
+        // var alluser = _userService.GetAllStaffMembers(User.FirmId.Value);
+    }
+    private CancellationTokenSource _cts;
+
+    public async Task Handle()
+    {
+        // Your existing DB logic here
+        _cts?.Cancel(); // cancel previous call
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+        await Task.Delay(1000, token);
+        createEditStaff.Hide();
+        allUsers = await _userService.GetAllStaffMembers(User.FirmId.Value);
+
+        StateHasChanged();
+    }
+    private IEnumerable<User> allUsers = new List<User>();
+    private User User = new User();
+
+    private IEnumerable<User> cases =>
+       string.IsNullOrWhiteSpace(searchTerm)
+       ? allUsers
+       : allUsers.Where(c =>
+           (!string.IsNullOrWhiteSpace(c.FirstName) && c.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+           (!string.IsNullOrWhiteSpace(c.LastName) && c.LastName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+           (!string.IsNullOrWhiteSpace(c.Email) && c.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+           (!string.IsNullOrWhiteSpace(c.PhoneNumber) && c.PhoneNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+    protected override async Task OnInitializedAsync()
+    {
+
+        spinnerservice.Show();
+        await userContext.LoadAsync();
+        User = await _userService.GetUserById(Guid.Parse(userContext.UserId));
+        await GetAllCases();
+        spinnerservice.Hide();
+    }
+
+
+
+    private async Task GetAllCases()
+    {
+        allUsers = await _userService.GetAllStaffMembers(User.FirmId.Value);
+        StateHasChanged();
+    }
+    private async Task DeleteUser(Guid Id)
+    {
+        await _userService.DeleteUser(Id);
+        await GetAllCases();
+        StateHasChanged();
+    }
+
+    // private void FilterUsers()
+    // {
+    //     if (!string.IsNullOrWhiteSpace(searchTerm))
+    //     {
+    //         var term = searchTerm.Trim().ToLower();
+    //         cases = allUsers.Where(user =>
+    //             (user.FirstName?.ToLower().Contains(term) ?? false) ||
+    //             (user.LastName?.ToLower().Contains(term) ?? false) ||
+    //             (user.Email?.ToLower().Contains(term) ?? false) ||
+    //             (user.PhoneNumber?.ToLower().Contains(term) ?? false) ||
+    //             (user.Roles?.Name?.ToLower().Contains(term) ?? false));
+    //     }
+    //     else
+    //     {
+    //         cases = allUsers;
+    //     }
+    // }
+
+
+
+}

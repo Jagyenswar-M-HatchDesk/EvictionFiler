@@ -65,12 +65,40 @@ namespace EvictionFiler.Application.Services
             if (!registerResult) return false;
             return true;
         }
+        public async Task<bool> UpdateUserAsync(RegisterDto model)
+        {
+            var registerResult = await _userRepository.UpdateUserAsync(model);
+            if (!registerResult) return false;
+            return true;
+        }
+        public async Task<bool> DeleteUser(Guid Id)
+        {
+            var registerResult = await _userRepository.DeleteUserAsync(Id);
+            if (!registerResult) return false;
+            return true;
+        }
+        public async Task<bool> RegisterStaffMemberAsync(RegisterDto model, Guid? Id=null)
+        {
+            var registerResult = await _userRepository.RegisterTenant(model, Id);
+            if (!registerResult) return false;
+            return true;
+        }
        
 
         public async Task<IEnumerable<User>> GetAllUserAsync()
         {
             var users = await _userRepository.GetAllUser();
             return users;
+        }
+        public async Task<IEnumerable<User>> GetAllStaffMembers(Guid FirmId)
+        {
+            var staff = await _userRepository.GetAllStaffMember(FirmId);
+            return staff;
+        }
+        public async Task<User> GetUserById(Guid UserId)
+        {
+            var staff = await _userRepository.GetByIdAsync(UserId);
+            return staff;
         }
     }
 }

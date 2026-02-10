@@ -14,5 +14,9 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<string?> LoginAsync(string email, string password);
         Task<bool> RegisterTenantAsync(RegisterDto model, Guid? Id = null);
         Task<IEnumerable<User>> GetAllUserAsync();
+        Task<bool> DeleteUser(Guid Id);
+        Task<bool> UpdateUserAsync(RegisterDto model);
+        Task<IEnumerable<User>> GetAllStaffMembers(Guid FirmId);
+        Task<User> GetUserById(Guid UserId);
     }
 }
