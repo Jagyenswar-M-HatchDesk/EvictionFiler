@@ -1,0 +1,411 @@
+﻿@page "/roles"
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Client.SpinnerService
+@using EvictionFiler.Domain.Entities
+@inject IRolesService _rolesService
+@inject NavigationManager navManager
+
+@inject SpinnerService spinnerservice
+<style>
+    
+    .container {
+        /* background-color: #F2F0EC; */
+        border: solid 1px #F2F0EC;
+        box-shadow: 0 15px 20px #F2F0EC !important;
+        max-width: 100%;
+    }
+
+    table.table thead th {
+        color: #1F365D;
+        background: #F2F0EC;
+        margin-bottom: 0px !important;
+    }
+
+    .table-responsive {
+        overflow-x: auto; /* Enable horizontal scroll */
+        position: relative;
+        white-space: nowrap;
+    }
+
+
+
+    th.sticky, td.sticky {
+        position: sticky;
+        right: 0;
+        background: #F2F0EC; /* Same as container background */
+        z-index: 2;
+        text-align: center;
+    }
+
+    /* Make sure header sticky stays above other cells */
+    th.sticky {
+        z-index: 3;
+    }
+    .form-control{
+        border-radius: 20px !important;
+        min-height:45px !important;
+    }
+
+    .form-check {
+        border-radius: 20px !important;
+        min-height: 45px !important;
+    }
+    h5 {
+        color: #1F365D;
+    }
+
+    .head {
+        font-weight: 700;
+    }
+
+    .role-card {
+        display: flex;
+        flex-direction: column;
+        border-radius: 16px;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
+        border: none;
+        height: 100%;
+        transition: transform .25s ease;
+    }
+
+        /* .case-card:hover {
+            transform: translateY(-5px);
+        } */
+
+    .role-header {
+        background: #1F365D;
+        color: #fff;
+        padding: 10px 11px;
+        border-radius: 16px 16px 0 0;
+        font-size: 16px;
+        font-weight: 500;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .badge-type {
+        background: #eef2ff;
+        color: #1f3c88;
+        font-weight: 500;
+    }
+    .btn.primary {
+        background: var(--brand);
+        border-color: transparent;
+        color: #fff
+    }
+    .btn.base {
+        background: #1F365D !important;
+        color: #fff;
+    }
+    /* Card Body */
+    .role-body {
+        padding: 10px;
+        font-size: 15px;
+        flex-grow: 1;
+    }
+
+        .role-body .title {
+            font: 500 16px 'Lato';
+            color: #1F365D;
+        }
+
+        .role-body .value {
+            font: 500 14px 'Lato';
+            color: #1F365D;
+            text-align: right;
+        }
+
+    /* -------------------------------------------------------
+               Info Rows (Bottom Data)
+            --------------------------------------------------------*/
+    .card-footer-data {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .label-1 {
+        font: 500 16px 'Lato';
+        color: #1F365D;
+    }
+
+    .value-1 {
+        font: 500 14px 'Lato';
+        color: #1F365D;
+    }
+</style>
+<body class="p-4">
+
+    <div class="container p-4 rounded shadow-sm">
+
+        <!-- Title Row -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="m-0 head">Manage Roles</h5>
+            <div class="d-flex flex-fill gap-4 justify-content-end">
+                <div class="btn-group view-toggle">
+                    <button id="cardViewBtn" class=@(IsGridView ? "btn btn-primary btn-grid btn-sm" : "btn btn-grid btn-outline-secondary btn-sm") @onclick="OnViewTypeChange">
+                        <i class="bi bi-grid"></i>
+                    </button>
+                    <button id="tableViewBtn" class=@(IsGridView ? "btn btn-table btn-outline-secondary btn-sm" : "btn btn-table btn-primary btn-sm") @onclick="OnViewTypeChange">
+                        <i class="bi bi-table"></i>
+                    </button>
+                </div>
+                </div>
+        </div> 
+        @if(IsGridView)
+        {
+        <div class="row g-4">
+            @{
+                int srNo = 1;
+            }
+            @if (allRoles != null )
+            {
+                
+                @foreach (var role in allRoles)
+                {
+
+             
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card role-card">
+                            <div class="role-header">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span style="font-size:16px; font-weight:600;">@srNo</span>
+
+                                    
+                                
+                                    @* <span class="badge badge-type" style="margin-bottom:0px !important">
+                                                @(cas.IsActive == true? "Active" : cas.IsDeleted == true ? "InActive" : "Not Set")
+                                                </span> *@
+                                    <span class="badge badge-type
+                                                                                                                             @(role.IsActive ? "bg-success text-white" : role.IsDeleted == true ? "bg-secondary text-white" : "bg-warning text-dark")" style="margin-bottom:0px !important">
+                                        @(role.IsActive ? "Active" : role.IsDeleted == true ? "InActive" : "Not Set")
+                                    </span>
+
+
+
+                                </div>
+
+                                <div class="role-actions d-flex">
+
+                                    <i class="fa-solid fa-pen-to-square text-navy me-2" style="cursor:pointer"
+                                       @onclick="@(() => EditRole(role.Id))"
+                                       title="Edit"></i>
+
+                                </div>
+                            </div>
+                            <div class="role-body">
+                                <div class="mt-2 mb-1 row"><span class="col-auto title">Name: </span><span class="col value">@role.Name</span></div>
+                                <div class="mb-1 row"><span class="col-auto title">Description: </span><span class="col value">@role.Description</span></div>
+                              
+
+
+
+                            </div>
+                            @* <hr style="margin:0;" />
+                            <div class="row p-3">
+                                <div class="col-10" style="align-content:end;">
+                                 
+                                    
+                                        <div class="card-footer-data" style="margin-bottom:0px"><span class="label-1">Created On: </span><span class="value-1">@role.CreatedOn?.ToString(DateFormats.Default)</span></div>
+                                   
+                                  
+                                        
+                                    
+                                </div> *@
+
+                              @*   <div class="col-2">
+                                  
+                                    <span class="badge badge-type
+                                                                                                                     @(role.IsActive ? "bg-success text-white" : role.IsDeleted == true ? "bg-secondary text-white" : "bg-warning text-dark")" style="margin-bottom:0px !important">
+                                        @(role.IsActive ? "Active" : role.IsDeleted == true ? "InActive" : "Not Set")
+                                    </span>
+
+
+
+                                </div> *@
+
+                            @* </div> *@
+                        </div>
+                    </div>
+
+                    srNo++;
+                }
+            }
+            else
+            {
+
+                <p class="text-muted text-center fs-5">No Cases found.</p>
+
+            }
+
+        </div>
+      }
+      else
+        {
+            <div class="table-responsive mb-3">
+                <table class="table table-hover align-middle text-center" style="margin-bottom: 0px;">
+                    <thead>
+                        <tr>
+                            <th>Sr.No</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                           
+                           
+                            <th class="sticky">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                     
+                        @{
+                            int srNo = 1;
+                                 }
+                        @if (allRoles.Count() > 0)
+                        {
+                            @foreach (var user in allRoles)
+                            {
+                                if (user != null)
+                                {
+                                    <tr>
+                                        <td>@srNo</td>
+                                        <td>@(user.Name ?? "")</td>
+                                        <td>@(user.Description?? "")</td>
+                                   
+                                      
+                                        <td class="sticky"><i class="fa-solid fa-pen-to-square"  style="cursor:pointer" title="Edit" @onclick="@(() => EditRole(user.Id))"></i><span class="status-active ms-2">Active</span></td>
+                                    </tr>
+                                    srNo++;
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-muted">No Roles found.</td>
+                            </tr>
+                        }
+                        <!-- repeat more data here -->
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        </div>
+        </body>
+@if (ShowEditModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.5)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header text-white" style="background-color: #1F365D;">
+                    <h4 class="modal-title">Edit Role</h4>
+                    <button class="btn-close btn-close-white" @onclick="CloseModal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="  mb-2 ">
+                        <label style="font-weight:600">Name<span class="text-danger">*</span></label>
+                        <input class="form-control w-50 mt-1" @bind="editRole.Name" />
+                    </div>
+
+                    <div class="  mb-2">
+                        <label style="font-weight:600">Description</label>
+                        <textarea class="form-control mt-1"
+                                  rows="2" 
+                                  @bind="editRole.Description">
+                                </textarea>
+                        @* <input class="form-control" @bind="editRole.Description" /> *@
+                    </div>
+
+                    <div class="form-check mt-2">
+                        <input type="checkbox" class="form-check-input" @bind="editRole.IsActive" />
+                        <label class="form-check-label" style="font-weight:600">Is Active</label>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary " @onclick="CloseModal">Cancel</button>
+                    <button class="btn btn-primary base" @onclick="UpdateRole">Save</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+
+            
+@code {
+
+    private IEnumerable<Role> allRoles = new List<Role>();
+    private bool IsGridView = true;
+    private bool ShowEditModal = false;
+    private Role editRole = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        spinnerservice.Show();
+        await GetAllRoles();
+        // _editContext = new EditContext(registerDto);
+        // messageStore = new ValidationMessageStore(_editContext);
+        spinnerservice.Hide();
+    }
+
+    private async Task EditRole(Guid roleId)
+    {
+        var role = await _rolesService.GetRoleByIdAsync(roleId);
+        if (role != null)
+        {
+            editRole = new Role
+            {
+                Id = role.Id,
+                Name = role.Name,
+                Description = role.Description,
+                IsActive = role.IsActive
+            };
+
+            ShowEditModal = true;
+        }
+    }
+    private async Task UpdateRole()
+    {
+        try
+        {
+            spinnerservice.Show();
+
+
+            var result = await _rolesService.UpdateRoleAsync(editRole);
+
+            if (result)
+            {
+                ShowEditModal = false;
+                await GetAllRoles();   
+            }
+        }
+        finally
+        {
+            spinnerservice.Hide();
+        }
+       
+    }
+
+    private void CloseModal()
+    {
+        ShowEditModal = false;
+    }
+
+
+    private async Task GetAllRoles()
+    {
+        allRoles = await _rolesService.GetAllRolesAsync();
+        StateHasChanged();
+    }
+    private async Task OnViewTypeChange()
+    {
+        IsGridView = !IsGridView;
+    }
+
+
+}

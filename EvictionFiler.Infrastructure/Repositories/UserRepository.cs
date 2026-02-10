@@ -112,6 +112,8 @@ namespace EvictionFiler.Infrastructure.Repositories
             var alluser = await _db.Users.Include(e => e.Role).ToListAsync();
             return alluser;
         }
+       
+       
 
         public async Task<User?> GetByIdAsync(Guid id)
         {
