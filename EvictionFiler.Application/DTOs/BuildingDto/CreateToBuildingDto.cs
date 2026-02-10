@@ -20,7 +20,9 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 		public Guid? PremiseTypeId { get; set; }
 		public string? PremiseTypeName { get; set; }
 
-		[Required(ErrorMessage = "RegulationStatus is Required")]
+        [Required(ErrorMessage = "City is Required")]
+        public Guid? BoroughorCityId { get; set; }
+        [Required(ErrorMessage = "RegulationStatus is Required")]
 		public Guid? RegulationStatusId { get; set; }
 		public string? RegulationStatusName { get; set; }
 		public string? PetitionerInterest { get; set; }
@@ -43,9 +45,12 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 		public Guid? LandlordId { get; set; }
 
         public string? ExemptionBasisName { get; set; }
+        [Required(ErrorMessage = "Exemption  required")]
         public string? ExemptionBasisother { get; set; }
+        [Required(ErrorMessage = "RentRegualtion Required")]
         public string? RentRegulationOther { get; set; }
         public string? ExemptionReasonName { get; set; }
+        public string? ExemptionReasonId { get; set; }
         public string? TenancyTypeForBuildingName { get; set; }
         [Required(ErrorMessage = "Exemption basic  required")]
         public Guid? ExemptionBasisId { get; set; }

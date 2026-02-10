@@ -177,7 +177,7 @@ namespace EvictionFiler.Application.Services
                 ExemptionBasisId = appartment.ExemptionBasisId,
                 ExemptionreasonId = appartment.ExemptionReasonId,
                 PrimaryResidence = appartment.PrimaryResidence,
-                GoodCause = appartment.GoodCause,
+                GoodCause = appartment.GoodCause??false,
                 OwnerOccupied = appartment.OwnerOccupied,
                 TenancyTypeForBuildingId = appartment.TenancyTypeForBuildingId,
                 LandlordId = appartment.LandlordId,

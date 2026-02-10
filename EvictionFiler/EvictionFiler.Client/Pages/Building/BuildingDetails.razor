@@ -8,6 +8,7 @@
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Domain.Entities.Master
 @using EvictionFiler.Infrastructure.Repositories
+@using System.Linq.Expressions
 @inject ICaseTypeRepository CaseTypeRepository
 @inject IExemptionReasonRepository ExemptionReasonRepository
 @inject ILegalCaseService _service
@@ -93,7 +94,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <EditForm Model="@editBuildingModel">
+            <EditForm EditContext="@_editContext" OnValidSubmit="SaveBuildingChanges">
                 <DataAnnotationsValidator />
                 <div class="modal-body">
                     <div class=" border-0">
@@ -149,22 +150,25 @@
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <label class="form-label required-label">Street Address </label>
-                                            <InputText class="form-control" @bind-Value="editBuildingModel.Address1" placeholder="Enter Address" />
-                                            <ValidationMessage For="() => editBuildingModel.Address1" />
+                                            <InputText class="form-control" @bind-Value="legalcaseDto.Address1"
+                                                       @bind-Value:after=@(() => ValidateParticularInput(() => legalcaseDto.Address1, nameof(legalcaseDto.Address1), "Street Address is required")) placeholder="Enter Address" />
+                                            <ValidationMessage For="() => legalcaseDto.Address1" />
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label required-label">MDR Number </label>
-                                            <InputText class="form-control" @bind-Value="editBuildingModel.MDRNumber" placeholder="Enter MDR Number" />
+                                            <InputText class="form-control" @bind-Value="legalcaseDto.MDRNumber"
+                                                       @bind-Value:after=@(() => ValidateParticularInput(() => legalcaseDto.MDRNumber, nameof(legalcaseDto.MDRNumber), "MDR Number is required")) placeholder ="Enter MDR Number" />
 
 
-                                            <ValidationMessage For="() => editBuildingModel.MDRNumber" />
+                                            <ValidationMessage For="() => legalcaseDto.MDRNumber" />
 
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label required-label">No. of Units </label>
-                                            <InputText class="form-control" @bind-Value="editBuildingModel.BuildingUnits" placeholder="Enter Units" />
+                                            <InputText class="form-control" @bind-Value="legalcaseDto.BuildingUnits" 
+                                                       @bind-Value:after=@(() => ValidateParticularInput(() => legalcaseDto.BuildingUnits, nameof(legalcaseDto.BuildingUnits), "Units is required")) placeholder ="Enter Units" />
 
-                                            <ValidationMessage For="() => editBuildingModel.BuildingUnits" />
+                                            <ValidationMessage For="() => legalcaseDto.BuildingUnits" />
 
                                         </div>
                                         @*<div class="col-md-2">
@@ -188,26 +192,29 @@
                                         <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:21%" : "")>
                                             <label class="form-label required-label">County</label>
                                             <InputSelect class="form-select"
-                                                         @bind-Value="editBuildingModel.CityId">
+                                                         @bind-Value="legalcaseDto.BoroughorCityId"
+                                                         @bind-Value:after=@(() => ValidateParticularInput(() => legalcaseDto.BoroughorCityId, nameof(legalcaseDto.BoroughorCityId), "Select Country"))>
                                                 <option value="">-- Select --</option>
                                                 @foreach (var s in CityList)
                                                 {
                                                     <option value="@s.Id">@s.Name</option>
                                                 }
                                             </InputSelect>
+                                            <ValidationMessage For="() => legalcaseDto.BoroughorCityId" />
                                         </div>
 
                                         <!-- Rent Regulation -->
                                         <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:22%" : "")>
                                             <label class="form-label required-label">Rent Regulation</label>
                                             <InputSelect class="form-select"
-                                                         @bind-Value="editBuildingModel.RegulationStatusId">
+                                                         @bind-Value="legalcaseDto.RegulationStatusId" @bind-Value:after="BindRentRegulation">
                                                 <option value="">-- Select --</option>
                                                 @foreach (var l in RegulationList)
                                                 {
                                                     <option value="@l.Id">@l.Name</option>
                                                 }
                                             </InputSelect>
+                                            <ValidationMessage For="() => legalcaseDto.RegulationStatusId" />
                                         </div>
 
                                         @if (ShowExemptionBasic)
@@ -218,13 +225,14 @@
                                                     Exemption Basic
                                                 </label>
                                                 <InputSelect class="form-select"
-                                                             @bind-Value="editBuildingModel.ExemptionBasisId">
+                                                             @bind-Value="legalcaseDto.ExemptionBasisId" @bind-Value:after="BindExemptionBasis">
                                                     <option value="">-- Select --</option>
                                                     @foreach (var s in ExemptionBasicList)
                                                     {
                                                         <option value="@s.Id">@s.Name</option>
                                                     }
                                                 </InputSelect>
+                                                <ValidationMessage For="() => legalcaseDto.ExemptionBasisId" />
                                             </div>
                                         }
                                         @if (ShowExemptionOther)
@@ -234,7 +242,9 @@
                                                 <label class="form-label ">
                                                     Exemption
                                                 </label>
-                                                <InputText class="form-control" @bind-Value="editBuildingModel.ExemptionBasisother" placeholder="Enter Exemption" />
+                                                <InputText class="form-control" @bind-Value="legalcaseDto.ExemptionBasisOther"
+                                                           @bind-Value:after=@(() => ValidateParticularInput(() => legalcaseDto.ExemptionBasisOther, nameof(legalcaseDto.ExemptionBasisOther), "Other Exemption")) placeholder ="Enter Exemption" />
+                                                <ValidationMessage For="() => legalcaseDto.ExemptionBasisOther" />
                                             </div>
                                         }
                                         @if (ShowRentOther)
@@ -244,7 +254,11 @@
                                                 <label class="form-label ">
                                                     Other Regulation
                                                 </label>
-                                                <InputText class="form-control" @bind-Value="editBuildingModel.RentRegulationOther" placeholder="Enter Other Reulation" />
+                                                <InputText class="form-control" @bind-Value="legalcaseDto.RentRegulationOther" 
+                                                           @bind-Value:after=@(() => ValidateParticularInput(() => legalcaseDto.RentRegulationOther, nameof(legalcaseDto.RentRegulationOther), "Other Rent Regulation")) placeholder ="Enter Other Reulation" />
+
+
+                                                <ValidationMessage For="() => legalcaseDto.RentRegulationOther" />
                                             </div>
                                         }
                                     </div>
@@ -284,18 +298,21 @@
                                         <div class="row g-3 mt-3">
                                             <div class="col-md-6">
                                                 <label class="form-label required-label">State</label>
-                                                <InputSelect class="form-select" @bind-Value="editBuildingModel.StateId">
+                                                <InputSelect class="form-select" @bind-Value="legalcaseDto.StateId"> 
+                                                                                
                                                     @foreach (var s in StateList)
                                                     {
                                                         <option value="@s.Id">@s.Name</option>
                                                     }
                                                 </InputSelect>
-                                                <ValidationMessage For="() => editBuildingModel.StateId" />
+                                                <ValidationMessage For="() => legalcaseDto.StateId" />
                                             </div>
 
                                             <div class="col-md-6">
                                                 <label class="form-label required-label">Zip Code</label>
-                                                <InputText class="form-control" @bind-Value="editBuildingModel.Zipcode" placeholder="Enter Zipcode" />
+                                                <InputText class="form-control" @bind-Value="legalcaseDto.Zipcode" 
+                                                           @bind-Value:after=@(() => ValidateParticularInput(() => legalcaseDto.ZipCode, nameof(legalcaseDto.ZipCode), "Enter ZipCode")) placeholder ="Enter Zipcode" />
+                                                <ValidationMessage For="() => legalcaseDto.BuildingZip" />
                                             </div>
                                         </div>
                                     }
@@ -433,7 +450,8 @@
                                             <label class="form-label required-label ">
                                                 Building Type
                                             </label>
-                                            <InputSelect class="form-select" @bind-Value="editBuildingModel.PremiseTypeId">
+                                            <InputSelect class="form-select" @bind-Value="legalcaseDto.PremiseTypeId"
+                                                         @bind-Value:after=@(() => ValidateParticularInput(() => legalcaseDto.PremiseTypeId, nameof(legalcaseDto.PremiseTypeId), "Please select a regulation"))>
                                                 <option value="">-- Select --</option>
                                                 @foreach (var s in PremiseTypesList)
                                                 {
@@ -441,7 +459,7 @@
                                                 }
                                             </InputSelect>
 
-                                            <ValidationMessage For="() => editBuildingModel.PremiseTypeId" />
+                                            <ValidationMessage For="() => legalcaseDto.PremiseTypeId" />
 
 
                                         </div>
@@ -457,20 +475,21 @@
                                                 @if (RegistrationstatusList != null && RegistrationstatusList.Any())
                                                 {
                                                     <div style="display: flex;flex-wrap: wrap; column-gap: 33px;">
-                                                        <InputRadioGroup @bind-Value="editBuildingModel.RegistrationStatusId" class="d-flex flex-wrap">
+                                                        <InputRadioGroup @bind-Value="legalcaseDto.RegistrationStatusTypeId" 
+                                                                         @bind-Value:after=@(() => ValidateParticularInput(() => legalcaseDto.RegistrationStatusTypeId, nameof(legalcaseDto.RegistrationStatusTypeId), "Select Registration Status")) class ="d-flex flex-wrap">
                                                             @foreach (var Type in RegistrationstatusList)
                                                             {
                                                                 <div class="col-auto">
                                                                     <div class="form-check">
                                                                         <InputRadio class="form-check-input"
                                                                                     id="@($"RegStatus_{Type.Id}")"
-                                                                                    Value="@Type.Id" disabled="@(editBuildingModel.OwnerOccupied == true)" />
+                                                                                    Value="@Type.Id" disabled="@(legalcaseDto.OwnerOccupied == true)" />
                                                                         <label class="form-check-label edit-build" for="@($"RegStatus_{Type.Id}")">@Type.Name</label>
                                                                     </div>
                                                                 </div>
                                                             }
                                                         </InputRadioGroup>
-                                                        <ValidationMessage For="() => editBuildingModel.RegistrationStatusId" />
+                                                        <ValidationMessage For="() => legalcaseDto.RegistrationStatusTypeId" />
 
 
                                                     </div>
@@ -494,7 +513,7 @@
                                                 <input class="form-check-input" style="float:none"
                                                        type="checkbox"
                                                        id="ownerOccupiedSwitch"
-                                                       @bind="editBuildingModel.OwnerOccupied" @bind:after="SelectedOwnerOccupied" />
+                                                       @bind="legalcaseDto.OwnerOccupied" @bind:after="SelectedOwnerOccupied" />
                                             </div>
 
 
@@ -514,19 +533,20 @@
                                                 <input class="form-check-input" style="float:none"
                                                        type="checkbox"
                                                        id="GoodCauseSwitch"
-                                                       @bind="editBuildingModel.GoodCause" />
+                                                       @bind="legalcaseDto.GoodCause"
+                                                       @bind:after="BindGoodCause" />
                                             </div>
 
 
                                         </div>
 
-                                        @if (editBuildingModel.GoodCause.Value != true)
+                                        @if (legalcaseDto.GoodCause != true)
                                         {
                                             <div class="col-md-4">
                                                 <label class="form-label required-label ">
                                                     Exemption Reason
                                                 </label>
-                                                <InputSelect class="form-select" @bind-Value="editBuildingModel.ExemptionreasonId">
+                                                <InputSelect class="form-select" @bind-Value="legalcaseDto.ExemptionReasonId">
                                                     <option value="">-- Select --</option>
                                                     @foreach (var s in ExemptionReasonList)
                                                     {
@@ -534,7 +554,7 @@
                                                     }
                                                 </InputSelect>
 
-                                                <ValidationMessage For="() => editBuildingModel.ExemptionreasonId" />
+                                                <ValidationMessage For="() => legalcaseDto.ExemptionReasonId" />
 
 
                                             </div>
@@ -550,7 +570,7 @@
 
                 <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
                     <button type="button" class="btn btn-secondary buttons " data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary base buttons" @onclick="SaveBuildingChanges">Save</button>
+                    <button type="button" class="btn btn-primary base buttons" @onclick="SaveBuildingChanges">Save</button>
                 </div>
             </EditForm>
         </div>
@@ -580,20 +600,26 @@
     private bool IsNewBuilding = false;
     private bool isLoading = true;
     private List<EditToBuildingDto> BuildingList = new();
-    bool ShowExemptionBasic =>
-RegulationList.Any(r =>
-   r.Id == editBuildingModel.RegulationStatusId &&
-   r.Name == "Exempt");
+    private bool ShowExemptionBasic = false;
+    private bool ShowExemptionOther = false;
+    private bool ShowRentOther = false;
+    private EditContext _editContext;
+    private ValidationMessageStore messageStore;
 
-    bool ShowRentOther =>
- RegulationList.Any(r =>
-     r.Id == editBuildingModel.RegulationStatusId &&
-     r.Name == "Other");
+    //     bool ShowExemptionBasic =>
+    // RegulationList.Any(r =>
+    //    r.Id == editBuildingModel.RegulationStatusId &&
+    //    r.Name == "Exempt");
 
-    bool ShowExemptionOther =>
-    ExemptionBasicList.Any(r =>
-        r.Id == editBuildingModel.ExemptionBasisId &&
-        r.Name == "Other");
+    //     bool ShowRentOther =>
+    //  RegulationList.Any(r =>
+    //      r.Id == editBuildingModel.RegulationStatusId &&
+    //      r.Name == "Other");
+
+    //     bool ShowExemptionOther =>
+    //     ExemptionBasicList.Any(r =>
+    //         r.Id == editBuildingModel.ExemptionBasisId &&
+    //         r.Name == "Other");
 
     string ColumnClass => ShowExemptionBasic || ShowRentOther ? "col-md-4" : "col-md-6";
     private async Task SelectedOwnerOccupied()
@@ -607,6 +633,8 @@ RegulationList.Any(r =>
     {
 
         isLoading = true;
+        _editContext = new EditContext(legalcaseDto);
+        messageStore = new ValidationMessageStore(_editContext);
         ExemptionReasonList = await ExemptionReasonRepository.GetAllAsync5();
         RegistrationstatusList = await CaseTypeRepository.GetAllRegistrationstatus();
         if (!CityList.Any())
@@ -617,7 +645,7 @@ RegulationList.Any(r =>
     private void OnBindBuildingAfter()
     {
         showBuildingFields = true;
-        editBuildingModel.GoodCause = true;
+        legalcaseDto.GoodCause = true;
         IsNewBuilding = true;
     }
     private void OnBindBuildingCancel()
@@ -688,23 +716,23 @@ RegulationList.Any(r =>
     }
     private void SelectBuilding(EditToBuildingDto selected)
     {
-        editBuildingModel.Id = selected.Id;
-        editBuildingModel.Address1 = selected.Address1;
-        editBuildingModel.CityId = selected.CityId;
-        editBuildingModel.MDRNumber = selected.MDRNumber;
-        editBuildingModel.Zipcode = selected.Zipcode;
-        editBuildingModel.ApartmentCode = selected.ApartmentCode;
-        editBuildingModel.BuildingUnits = selected.BuildingUnits;
-        editBuildingModel.RegulationStatusId = selected.RegulationStatusId;
-        editBuildingModel.TenancyTypeForBuildingId = selected.TenancyTypeForBuildingId;
-        editBuildingModel.ExemptionBasisId = selected.ExemptionBasisId;
-        editBuildingModel.ExemptionreasonId = selected.ExemptionreasonId;
-        editBuildingModel.PrimaryResidence = selected.PrimaryResidence;
-        editBuildingModel.OwnerOccupied = selected.OwnerOccupied;
-        editBuildingModel.RegistrationStatusId = selected.RegistrationStatusId;
-        editBuildingModel.GoodCause = selected.GoodCause;
-        editBuildingModel.RentRegulationOther = selected.RentRegulationOther;
-        editBuildingModel.ExemptionBasisother = selected.ExemptionBasisother;
+        legalcaseDto.Id = selected.Id;
+        legalcaseDto.Address1 = selected.Address1;
+        legalcaseDto.BoroughorCityId = selected.BoroughorCityId;
+        legalcaseDto.Mdr = selected.MDRNumber;
+        legalcaseDto.Zipcode = selected.Zipcode;
+        legalcaseDto.ApartmentCode = selected.ApartmentCode;
+        legalcaseDto.BuildingUnits = selected.BuildingUnits;
+        legalcaseDto.RegulationStatusId = selected.RegulationStatusId;
+        legalcaseDto.TenancyTypeForBuildingId = selected.TenancyTypeForBuildingId;
+        legalcaseDto.ExemptionBasisId = selected.ExemptionBasisId;
+        legalcaseDto.ExemptionReasonId = selected.ExemptionreasonId;
+        legalcaseDto.PrimaryResidence = selected.PrimaryResidence??false;
+        legalcaseDto.OwnerOccupied = selected.OwnerOccupied;
+        legalcaseDto.RegistrationStatusTypeId = selected.RegistrationStatusId;
+        legalcaseDto.GoodCause = selected.GoodCause??false;
+        legalcaseDto.RentRegulationOther = selected.RentRegulationOther;
+        legalcaseDto.ExemptionBasisOther = selected.ExemptionBasisother;
 
         filteredBuildings.Clear();
         searchBuildingText = selected.BuildingCode;
@@ -712,38 +740,41 @@ RegulationList.Any(r =>
         showBuildingFields = true;
         IsNewBuilding = false;
         legalcaseDto.BuildingId = selected.Id;
+        _editContext.NotifyValidationStateChanged();
     }
 
     private async Task SaveBuildingChanges()
     {
-        spinnerservice.Show();
 
+        if (!await ValidateCurrentStep("Building")) return;
+
+        spinnerservice.Show();
         var addorupdate = false;
         if (editBuildingModel.Id == null || editBuildingModel.Id == Guid.Empty)
         {
             var newBuilding = new CreateToBuildingDto()
             {
-                Address1 = editBuildingModel.Address1,
+                Address1 = legalcaseDto.Address1,
                 //Address2 = address2,
-                CityId = editBuildingModel.CityId,
-                StateId = editBuildingModel.StateId,
-                Zipcode = editBuildingModel.Zipcode,
-                BuildingUnits = editBuildingModel.BuildingUnits,
-                ApartmentCode = editBuildingModel.ApartmentCode,
-                MDRNumber = editBuildingModel.MDRNumber,
-                RegulationStatusId = editBuildingModel.RegulationStatusId,
-                RegistrationStatusId = editBuildingModel.RegistrationStatusId,
+                BoroughorCityId = legalcaseDto.BoroughorCityId,
+                StateId = legalcaseDto.StateId,
+                Zipcode = legalcaseDto.Zipcode,
+                BuildingUnits = legalcaseDto.BuildingUnits,
+                ApartmentCode = legalcaseDto.ApartmentCode,
+                MDRNumber = legalcaseDto.MDRNumber,
+                RegulationStatusId = legalcaseDto.RegulationStatusId,
+                RegistrationStatusId = legalcaseDto.RegistrationStatusTypeId,
 
-                ExemptionBasisId = editBuildingModel.ExemptionBasisId,
-                ExemptionreasonId = editBuildingModel.ExemptionreasonId,
-                TenancyTypeForBuildingId = editBuildingModel.TenancyTypeForBuildingId,
-                PrimaryResidence = editBuildingModel.PrimaryResidence,
-                GoodCause = editBuildingModel.GoodCause,
-                OwnerOccupied = editBuildingModel.OwnerOccupied,
+                ExemptionBasisId = legalcaseDto.ExemptionBasisId,
+                ExemptionreasonId = legalcaseDto.ExemptionReasonId,
+                TenancyTypeForBuildingId = legalcaseDto.TenancyTypeForBuildingId,
+                PrimaryResidence = legalcaseDto.PrimaryResidence,
+                GoodCause = legalcaseDto.GoodCause,
+                OwnerOccupied = legalcaseDto.OwnerOccupied,
                 LandlordId = legalcaseDto.LandlordId,
-                PremiseTypeId = editBuildingModel.PremiseTypeId,
-                ExemptionBasisother = editBuildingModel.ExemptionBasisother,
-                RentRegulationOther = editBuildingModel.RentRegulationOther,
+                PremiseTypeId = legalcaseDto.PremiseTypeId,
+                ExemptionBasisother = legalcaseDto.ExemptionBasisOther,
+                RentRegulationOther = legalcaseDto.RentRegulationOther,
 
             };
 
@@ -759,27 +790,27 @@ RegulationList.Any(r =>
 
                 var updateBuilding = new EditToBuildingDto()
                 {
-                    Id = editBuildingModel.Id,
-                    Address1 = editBuildingModel.Address1,
-                    BuildingCode = editBuildingModel.BuildingCode,
+                    Id = legalcaseDto.Id,
+                    Address1 = legalcaseDto.Address1,
+                    BuildingCode = legalcaseDto.Buildingcode,
                     //Address2 = address2,
-                    CityId = editBuildingModel.CityId,
-                    StateId = editBuildingModel.StateId,
-                    Zipcode = editBuildingModel.Zipcode,
-                    BuildingUnits = editBuildingModel.BuildingUnits,
-                    ApartmentCode = editBuildingModel.ApartmentCode,
-                    RegistrationStatusId = editBuildingModel.RegistrationStatusId,
-                    MDRNumber = editBuildingModel.MDRNumber,
-                    RegulationStatusId = editBuildingModel.RegulationStatusId,
-                    ExemptionBasisId = editBuildingModel.ExemptionBasisId,
-                    ExemptionreasonId = editBuildingModel.ExemptionreasonId,
-                    TenancyTypeForBuildingId = editBuildingModel.TenancyTypeForBuildingId,
-                    PrimaryResidence = editBuildingModel.PrimaryResidence,
-                    GoodCause = editBuildingModel.GoodCause,
-                    PremiseTypeId = editBuildingModel.PremiseTypeId,
-                    OwnerOccupied = editBuildingModel.OwnerOccupied,
-                    ExemptionBasisother = editBuildingModel.ExemptionBasisother,
-                    RentRegulationOther = editBuildingModel.RentRegulationOther,
+                    BoroughorCityId = legalcaseDto.BoroughorCityId,
+                    StateId =legalcaseDto.StateId,
+                    Zipcode = legalcaseDto.Zipcode,
+                    BuildingUnits = legalcaseDto.BuildingUnits,
+                    ApartmentCode = legalcaseDto.ApartmentCode,
+                    RegistrationStatusId = legalcaseDto.RegistrationStatusTypeId,
+                    MDRNumber = legalcaseDto.MDRNumber,
+                    RegulationStatusId = legalcaseDto.RegulationStatusId,
+                    ExemptionBasisId = legalcaseDto.ExemptionBasisId,
+                    ExemptionreasonId = legalcaseDto.ExemptionReasonId,
+                    TenancyTypeForBuildingId = legalcaseDto.TenancyTypeForBuildingId,
+                    PrimaryResidence = legalcaseDto.PrimaryResidence,
+                    GoodCause = legalcaseDto.GoodCause,
+                    PremiseTypeId = legalcaseDto.PremiseTypeId,
+                    OwnerOccupied = legalcaseDto.OwnerOccupied,
+                    ExemptionBasisother = legalcaseDto.ExemptionBasisOther,
+                    RentRegulationOther = legalcaseDto.RentRegulationOther,
                 };
 
                 await _buildingService.UpdateonlyBuildingfromCase(updateBuilding);
@@ -789,22 +820,22 @@ RegulationList.Any(r =>
 
         if (addorupdate)
         {
-            legalcaseDto.BuildingAddress = editBuildingModel.Address1;
-            legalcaseDto.BoroughorCityId = editBuildingModel.CityId;
-            legalcaseDto.Mdr = editBuildingModel.MDRNumber;
-            legalcaseDto.BuildingZip = editBuildingModel.Zipcode;
-            legalcaseDto.BuildingStateId = editBuildingModel.StateId;
-            legalcaseDto.Units = editBuildingModel.BuildingUnits;
-            legalcaseDto.RegulationStatusId = editBuildingModel.RegulationStatusId;
-            legalcaseDto.PremiseTypeId = editBuildingModel.PremiseTypeId;
-            legalcaseDto.UnitOrApartmentNumber = editBuildingModel.ApartmentCode;
-            legalcaseDto.ExemptionBasisId = editBuildingModel.ExemptionBasisId;
-            legalcaseDto.ExemptionReasonId = editBuildingModel.ExemptionreasonId;
-            legalcaseDto.TenancyTypeForBuildingId = editBuildingModel.TenancyTypeForBuildingId;
-            // legalcaseDto.PrimaryResidence = editBuildingModel.PrimaryResidence;
-            legalcaseDto.OwnerOccupied = editBuildingModel.OwnerOccupied != null ? editBuildingModel.OwnerOccupied.Value : false;
-            legalcaseDto.GoodCause = editBuildingModel.GoodCause != null ? editBuildingModel.GoodCause.Value : false;
-            legalcaseDto.RegistrationStatusTypeId = editBuildingModel.RegistrationStatusId;
+            // legalcaseDto.BuildingAddress = editBuildingModel.Address1;
+            // legalcaseDto.BoroughorCityId = editBuildingModel.CityId;
+            // legalcaseDto.Mdr = editBuildingModel.MDRNumber;
+            // legalcaseDto.BuildingZip = editBuildingModel.Zipcode;
+            // legalcaseDto.BuildingStateId = editBuildingModel.StateId;
+            // legalcaseDto.Units = editBuildingModel.BuildingUnits;
+            // legalcaseDto.RegulationStatusId = editBuildingModel.RegulationStatusId;
+            // legalcaseDto.PremiseTypeId = editBuildingModel.PremiseTypeId;
+            // legalcaseDto.UnitOrApartmentNumber = editBuildingModel.ApartmentCode;
+            // legalcaseDto.ExemptionBasisId = editBuildingModel.ExemptionBasisId;
+            // legalcaseDto.ExemptionReasonId = editBuildingModel.ExemptionreasonId;
+            // legalcaseDto.TenancyTypeForBuildingId = editBuildingModel.TenancyTypeForBuildingId;
+
+            // legalcaseDto.OwnerOccupied = editBuildingModel.OwnerOccupied != null ? editBuildingModel.OwnerOccupied.Value : false;
+            // legalcaseDto.GoodCause = editBuildingModel.GoodCause != null ? editBuildingModel.GoodCause.Value : false;
+            // legalcaseDto.RegistrationStatusTypeId = editBuildingModel.RegistrationStatusId;
 
             var success = await _service.UpdateCaseForBuildingAsync(legalcaseDto);
 
@@ -916,6 +947,85 @@ RegulationList.Any(r =>
         }
         await JS.InvokeVoidAsync("showModal", "buildingModal");
     }
+    private async Task BindRentRegulation()
+    {
+        ShowExemptionBasic = false;
+        ShowRentOther = false;
+        ShowExemptionOther = false;
+        if (RegulationList.Any(r => r.Id == legalcaseDto.RegulationStatusId && r.Name == "Exempt"))
+        {
+            ShowExemptionBasic = true;
+            messageStore.Clear(() => legalcaseDto.RentRegulationOther);
+        }
+        else if (RegulationList.Any(r => r.Id == legalcaseDto.RegulationStatusId && r.Name == "Other"))
+        {
+            ShowRentOther = true;
+        }
+        else
+        {
+            legalcaseDto.RentRegulationOther = null;
+            legalcaseDto.ExemptionBasisOther = null;
+            legalcaseDto.ExemptionBasisId = null;
+            ShowExemptionBasic = false;
+            ShowRentOther = false;
+            ShowExemptionOther = false;
+            messageStore.Clear(() => legalcaseDto.RentRegulationOther);
+            messageStore.Clear(() => legalcaseDto.ExemptionBasisOther);
+
+        }
+
+        await ValidateParticularInput(() => legalcaseDto.RegulationStatusId, nameof(legalcaseDto.RegulationStatusId), "Select Rent Regulation");
+    }
+    private async Task BindExemptionBasis()
+    {
+
+        if (ExemptionBasicList.Any(r => r.Id == legalcaseDto.ExemptionBasisId && r.Name == "Other") && ShowExemptionBasic)
+        {
+            ShowExemptionOther = true;
+        }
+        else
+        {
+            legalcaseDto.ExemptionBasisOther = null;
+            ShowExemptionOther = false;
+            messageStore.Clear(() => legalcaseDto.ExemptionBasisOther);
+        }
+        await ValidateParticularInput(() => legalcaseDto.ExemptionBasisId, nameof(legalcaseDto.ExemptionBasisId), "Select Exemption Basis");
+    }
+    private async Task BindGoodCause()
+    {
+        if (legalcaseDto.GoodCause == true)
+        {
+            legalcaseDto.ExemptionReasonId = null;
+            messageStore.Clear(() => legalcaseDto.ExemptionReasonId);
+        }
+
+    }
+    private Task ValidateParticularInput<T>(Expression<Func<T>> accessor, string fieldName, string validationMsg)
+    {
+        Require(accessor, fieldName, validationMsg);
+        // _editContext.NotifyValidationStateChanged();
+        return Task.CompletedTask;
+    }
+    private void Require<T>(Expression<Func<T>> accessor, string fieldName, string message)
+    {
+        var value = accessor.Compile().Invoke();
+        var fieldIdentifier = new FieldIdentifier(legalcaseDto, fieldName);
+
+        // Clear old message first
+        messageStore.Clear(fieldIdentifier);
+
+        // Add message if invalid
+        bool isEmpty = value == null ||
+                       (value is string s && string.IsNullOrWhiteSpace(s)) ||
+                       (value is Guid g && g == Guid.Empty);
+
+        if (isEmpty)
+        {
+            messageStore.Add(fieldIdentifier, message);
+        }
+
+        _editContext.NotifyValidationStateChanged();
+    }
     private string FullBuildingAddress
     {
         get
@@ -937,5 +1047,51 @@ RegulationList.Any(r =>
             return parts.Count > 0 ? string.Join(", ", parts) : "--";
         }
     }
+    private async Task<bool> ValidateCurrentStep(string modal)
+    {
+        messageStore.Clear();
+       
+           
+        
+
+      
+            // Require(() => legalcaseDto.BuildingId, nameof(legalcaseDto.BuildingId), "Building is required");
+
+        
+        if (IsNewBuilding)
+        {
+            Require(() => legalcaseDto.ZipCode, nameof(legalcaseDto.ZipCode), "Zipcode is Required");
+            Require(() => legalcaseDto.StateId, nameof(legalcaseDto.StateId), "Please select a state");
+            // Require(() => legalcaseDto.ManagingAgent, nameof(legalcaseDto.ManagingAgent), "Please select a state");
+        
+        }
+        Require(() => legalcaseDto.MDRNumber, nameof(legalcaseDto.MDRNumber), "MDR is required");
+            Require(() => legalcaseDto.BoroughorCityId, nameof(legalcaseDto.BoroughorCityId), "City is required");
+        
+       
+            Require(() => legalcaseDto.BuildingUnits, nameof(legalcaseDto.BuildingUnits), "Units is required");
+        
+
+       
+            Require(() => legalcaseDto.Address1, nameof(legalcaseDto.Address1), "Address is required");
+       
+            // Require(() => legalcaseDto.RegulationStatusId, nameof(legalcaseDto.RegulationStatusId), "Please select a regulation");
+            // Require(() => legalcaseDto.PremiseTypeId, nameof(legalcaseDto.PremiseTypeId), "Please select a regulation");
+            // Require(() => legalcaseDto.RegistrationStatusTypeId, nameof(legalcaseDto.RegistrationStatusTypeId), "Select Registration Status");
+
+        
+        _editContext.NotifyValidationStateChanged();
+
+        // Get current validation messages (optional: for logging)
+        var errors = _editContext.GetValidationMessages().ToList();
+        Console.WriteLine($"Validation errors : {string.Join(", ", errors)}");
+
+        // Check if form is valid
+        bool isValid = !_editContext.GetValidationMessages().Any();
+
+        // Return validity
+        return isValid;
+
+        }
 
 }

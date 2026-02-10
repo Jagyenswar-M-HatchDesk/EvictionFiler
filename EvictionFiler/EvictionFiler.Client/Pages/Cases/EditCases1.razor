@@ -313,7 +313,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     input.txt,
     select.sel {
         width: 100%;
-        padding: 12px 14px;
+        padding: 10px 10px;
         border: 1px solid #cbd5e1;
         border-radius: 12px;
         background: #fff;
@@ -598,7 +598,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
 
      select.form-input{
-        appearance: none;
+       
         
          height:47.48px;
     }
@@ -1148,7 +1148,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                             <div class="row mt-4">
 
                                                 <!-- County -->
-                                                <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:25%" : "")>
+                                                <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:20%" : "")>
                                                     <label class="lbl required-label">County</label>
                                                     <InputSelect class="form-input"
                                                                  @bind-Value="legalcaseDto.BoroughorCityId" @bind-Value:after="ValidateInput"
@@ -1163,10 +1163,10 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 </div>
 
                                                 <!-- Rent Regulation -->
-                                                <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:20%" : "")>
+                                                <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:23%" : "")>
                                                     <label class="lbl required-label">Rent Regulation</label>
                                                     <InputSelect class="form-input"
-                                                                 @bind-Value="legalcaseDto.RegulationStatusId" @bind-Value:after="ValidateInput"
+                                                                 @bind-Value="legalcaseDto.RegulationStatusId" @bind-Value:after="BindRentRegulation"
                                                                  disabled="@isBuildingSelected">
                                                         <option value="">-- Select --</option>
                                                         @foreach (var l in RegulationList)
@@ -1180,12 +1180,12 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                 @if (ShowExemptionBasic)
                                                 {
                                                     <!-- Exemption Basic -->
-                                                    <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:20%" : "")>
-                                                        <label class="lbl ">
+                                                    <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:23%" : "")>
+                                                        <label class=@(isBuildingSelected ? "lbl ":"lbl required-label")>
                                                             Exemption Basic
                                                         </label>
                                                         <InputSelect class="form-input"
-                                                                     @bind-Value="legalcaseDto.ExemptionBasisId"
+                                                                     @bind-Value="legalcaseDto.ExemptionBasisId" @bind-Value:after="BindExemptionBasis"
                                                                      disabled="@isBuildingSelected">
                                                             <option value="">-- Select --</option>
                                                             @foreach (var s in ExemptionBasicList)
@@ -1193,26 +1193,33 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                 <option value="@s.Id">@s.Name</option>
                                                             }
                                                         </InputSelect>
+                                                        <ValidationMessage For="() => legalcaseDto.ExemptionBasisId" />
                                                     </div>
+
+                                       
                                                 }
                                                 @if (ShowExemptionOther)
                                                 {
                                                     <!-- Exemption Basic -->
                                                     <div class="col">
-                                                        <label class="lbl ">
+                                                        <label class=@(isBuildingSelected ? "lbl " : "lbl required-label")>
                                                             Exemption
                                                         </label>
-                                                        <InputText class="form-input" @bind-Value="legalcaseDto.ExemptionBasisOther" placeholder="Enter Exemption" disabled="@isBuildingSelected" />
+                                                        <InputText class="form-input" @bind-Value="legalcaseDto.ExemptionBasisOther"
+                                                                                     @bind-Value:after=@(() => ValidateParticularInput(() => legalcaseDto.ExemptionBasisOther, nameof(legalcaseDto.ExemptionBasisOther), "Other Exemption")) placeholder="Enter Exemption" disabled="@isBuildingSelected" />
+                                                        <ValidationMessage For="() => legalcaseDto.ExemptionBasisOther" />
                                                     </div>
                                                 }
                                                 @if (ShowRentOther)
                                                 {
                                                     <!-- Exemption Basic -->
                                                     <div class="col">
-                                                        <label class="lbl  ">
+                                                        <label class=@(isBuildingSelected ? "lbl " : "lbl required-label")>
                                                             Other Regulation
                                                         </label>
-                                                        <InputText class="form-input" @bind-Value="legalcaseDto.RentRegulationOther" placeholder="Enter Other Reulation" disabled="@isBuildingSelected" />
+                                                        <InputText class="form-input" @bind-Value="legalcaseDto.RentRegulationOther"                  
+                                                                                  @bind-Value:after=@(() => ValidateParticularInput(() => legalcaseDto.RentRegulationOther, nameof(legalcaseDto.RentRegulationOther), "Other Rent Regulation")) placeholder="Enter Other Reulation" disabled="@isBuildingSelected" />
+                                                        <ValidationMessage For="() => legalcaseDto.RentRegulationOther" />
                                                     </div>
                                                 }
                                             </div>
@@ -1337,6 +1344,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                type="checkbox"
                                                                id="GoodcauseSwitch"
                                                                @bind="legalcaseDto.GoodCause"
+                                                               @bind:after="BindGoodCause"
                                                                disabled="@isBuildingSelected" />
                                                     </div>
 
@@ -5998,6 +6006,11 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     private string searchTerm = "";
     private string LastrentPaid = "";
     private bool isLoading = true;
+    private bool ShowExemptionBasic = false;
+
+    private bool ShowExemptionOther = false;
+
+    private bool ShowRentOther = false;
 
     private List<CaseTypePerDiemDto> CaseTypePerDiemList = new();
     private List<PremiseType> PremiseTypesList = new();
@@ -6025,20 +6038,20 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     private IEnumerable<ExemptionReason> ExemptionReasonList = new List<ExemptionReason>();
     private IEnumerable<TenancyTypeForBuilding> TenancyTypeForBuildingList = new List<TenancyTypeForBuilding>();
 
-    bool ShowExemptionBasic =>
-    RegulationList.Any(r =>
-        r.Id == legalcaseDto.RegulationStatusId &&
-        r.Name == "Exempt");
+//     bool ShowExemptionBasic =>
+//     RegulationList.Any(r =>
+//         r.Id == legalcaseDto.RegulationStatusId &&
+//         r.Name == "Exempt");
 
-    bool ShowExemptionOther =>
-      ExemptionBasicList.Any(r =>
-          r.Id == legalcaseDto.ExemptionBasisId &&
-          r.Name == "Other");
+//     bool ShowExemptionOther =>
+//       ExemptionBasicList.Any(r =>
+//           r.Id == legalcaseDto.ExemptionBasisId &&
+//           r.Name == "Other");
 
-    bool ShowRentOther =>
-RegulationList.Any(r =>
-r.Id == legalcaseDto.RegulationStatusId &&
-r.Name == "Other");
+//     bool ShowRentOther =>
+// RegulationList.Any(r =>
+// r.Id == legalcaseDto.RegulationStatusId &&
+// r.Name == "Other");
     string ColumnClass => ShowExemptionBasic || ShowRentOther ? "col-md-4" : "col-md-6";
 
     protected override async Task OnInitializedAsync()
@@ -6292,10 +6305,69 @@ r.Name == "Other");
     private List<CaseAdditionalPetitioner> AdditionalPetitionersDelete { get; set; } = new();
     private List<CaseAdditionalRespondent> AdditionalRespondent { get; set; } = new();
     private List<CaseAdditionalRespondent> AdditionalRespondentDelete { get; set; } = new();
-
+     
     private async Task ValidateInput()
     {
         var result = await ValidateCurrentStep();
+    }
+    private async Task BindRentRegulation()
+    {
+        ShowExemptionBasic = false;
+        ShowRentOther = false;
+        ShowExemptionOther = false;
+        if (RegulationList.Any(r => r.Id == legalcaseDto.RegulationStatusId && r.Name == "Exempt"))
+        {
+            ShowExemptionBasic = true;
+            messageStore.Clear(() => legalcaseDto.RentRegulationOther);
+        }
+        else if (RegulationList.Any(r => r.Id == legalcaseDto.RegulationStatusId && r.Name == "Other"))
+        {
+            ShowRentOther = true;
+        }
+        else
+        {
+            legalcaseDto.RentRegulationOther = null;
+            legalcaseDto.ExemptionBasisOther = null;
+            legalcaseDto.ExemptionBasisId = null;
+            ShowExemptionBasic = false;
+            ShowRentOther = false;
+            ShowExemptionOther = false;
+            messageStore.Clear(() => legalcaseDto.RentRegulationOther);
+            messageStore.Clear(() => legalcaseDto.ExemptionBasisOther);
+
+        }
+
+        await ValidateParticularInput(() => legalcaseDto.RegulationStatusId, nameof(legalcaseDto.RegulationStatusId), "Select Rent Regulation");
+    }
+    private async Task BindExemptionBasis()
+    {
+
+        if (ExemptionBasicList.Any(r => r.Id == legalcaseDto.ExemptionBasisId && r.Name == "Other") && ShowExemptionBasic)
+        {
+            ShowExemptionOther = true;
+        }
+        else
+        {
+            legalcaseDto.ExemptionBasisOther = null;
+            ShowExemptionOther = false;
+            messageStore.Clear(() => legalcaseDto.ExemptionBasisOther);
+        }
+        await ValidateParticularInput(() => legalcaseDto.ExemptionBasisId, nameof(legalcaseDto.ExemptionBasisId), "Select Exemption Basis");
+    }
+     private async Task BindGoodCause()
+    {
+        if (legalcaseDto.GoodCause == true)
+        {
+            legalcaseDto.ExemptionReasonId = null;
+            messageStore.Clear(() => legalcaseDto.ExemptionReasonId);
+        }
+        
+    }
+    private Task ValidateParticularInput<T>(Expression<Func<T>> accessor, string fieldName, string validationMsg)
+    {
+        Require(accessor, fieldName, validationMsg);
+        _editContext.NotifyValidationStateChanged();
+        return Task.CompletedTask;
     }
 
     private async Task Next()

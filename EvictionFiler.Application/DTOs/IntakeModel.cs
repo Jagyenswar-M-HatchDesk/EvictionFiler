@@ -46,16 +46,23 @@ namespace EvictionFiler.Application.DTOs
         public string LandLordTypeName { get; set; }
 
         public string Mdr { get; set; }
+
+        public string MDRNumber { get; set; }
         public string? BuildingZip { get; set; }
+        public string? Zipcode { get; set; }
         public string? Units { get; set; }
         public string? UnitOrApartmentNumber { get; set; }
         public string? ApartmentNumber { get; set; }
+
+        public string? ApartmentCode{ get; set; }
 
         public Guid? BuildingId { get; set; }
         public Guid? CourtLocationId { get; set; }
         public Guid? FilingMethodId { get; set; }
         public Guid? BuildingStateId { get; set; }
         public string? BuildingState { get; set; }
+
+        public string? BuildingUnits { get; set; }
         public string BuildingAddress { get; set; }
         public Guid? RegulationStatusId { get; set; }
         public string RegulationStatusName { get; set; }
@@ -138,6 +145,7 @@ namespace EvictionFiler.Application.DTOs
         public Guid? ClientTypeId { get; set; }
         public string? Address1 { get; set; } = string.Empty;
         public string? Address2 { get; set; }
+        public Guid? CityId { get; set; }
         public string? City { get; set; } = string.Empty;
         public Guid? StateId { get; set; }
         public string? StateName { get; set; }
@@ -251,11 +259,12 @@ namespace EvictionFiler.Application.DTOs
 
         public Guid? TenancyTypeForBuildingId { get; set; }
 
-        public bool OwnerOccupied { get; set; }
+        public bool? OwnerOccupied { get; set; }
 
         public bool PrimaryResidence { get; set; }
 
         public bool GoodCause { get; set; }
+
         public bool WarrantRequested { get; set; }
 
         public List<ArrearLedgerDto> ArrearLedgers { get; set; } = new List<ArrearLedgerDto>();
