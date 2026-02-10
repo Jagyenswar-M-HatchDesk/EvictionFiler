@@ -151,7 +151,7 @@ namespace EvictionFiler.Infrastructure.Repositories
        
         public async Task<IEnumerable<User>> GetAllUser()
         {
-            var alluser = await _db.Users.Include(e => e.Role).ToListAsync();
+            var alluser = await _db.Users.Include(e => e.Role).Include(e=>e.Firms).Where(e=>e.IsActive ==true && e.IsDeleted == false).ToListAsync();
             return alluser;
         }
         public async Task<IEnumerable<User>> GetAllStaffMember(Guid Firmid)
