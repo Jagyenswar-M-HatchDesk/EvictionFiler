@@ -47,7 +47,6 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
         public string? RentRegulationOther { get; set; }
         public string? ExemptionReasonName { get; set; }
         public string? TenancyTypeForBuildingName { get; set; }
-        [Required(ErrorMessage = "Exemption basic  required")]
         public Guid? ExemptionBasisId { get; set; }
         public Guid? ExemptionreasonId { get; set; }
         //[Required(ErrorMessage = "Tenancy type required")]
