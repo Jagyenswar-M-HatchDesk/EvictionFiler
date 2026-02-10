@@ -257,6 +257,9 @@ builder.Services.AddScoped<ICaseAppearanceRepository, CaseAppreanceRepository>()
 builder.Services.AddScoped<ICaseAppearanceService, CaseAppearanceService>();
 builder.Services.AddScoped<IChatGptService, ChatGptService>();
 builder.Services.AddScoped<ICaseFilingRepository, CaseFilingRepository>();
+builder.Services.AddScoped<IFirmService, FirmService>();
+builder.Services.AddScoped<IFirmRepository, FirmRepository>();
+builder.Services.AddScoped<ISubscriptionTypeRepository, SubscriptionTypeRepository>();
 
 var app = builder.Build();
 

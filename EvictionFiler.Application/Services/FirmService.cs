@@ -1,0 +1,46 @@
+﻿using EvictionFiler.Application.DTOs.FirmDtos;
+using EvictionFiler.Application.DTOs.UserDto;
+using EvictionFiler.Application.Interfaces.IRepository;
+using EvictionFiler.Application.Interfaces.IServices;
+using EvictionFiler.Application.Interfaces.IUserRepository;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EvictionFiler.Application.Services
+{
+    public class FirmService : IFirmService
+    {
+        private readonly IUserRepository _userRepo;
+        private readonly IFirmRepository _firmRepo;
+        public FirmService(IUserRepository userRepo, IFirmRepository firmRepo)
+        {
+            _firmRepo = firmRepo;
+            _userRepo = userRepo;
+        }
+
+        public async Task<bool> RegisterFirm(RegisterDto model, FirmDto dto)
+        {
+            var firmId = await _firmRepo.RegisterFirm(dto);
+            var result = await _userRepo.RegisterTenant(model, firmId);
+            return result;
+        }
+
+        public async Task<IEnumerable<FirmDto>> GetAllFirms()
+        {
+            var firms = await _firmRepo.GetAllAsync(includes:e=>e.SubscriptionTypes!);
+            return firms.Select(e=> new FirmDto
+            {
+                Name = e.Name,
+                Phone = e.Phone,
+                FAX = e.FAX,
+                Email = e.Email,
+                Address = e.Address,
+                Id = e.Id,
+                SubscriptionName = e.SubscriptionTypes?.Name
+            });
+        }
+    }
+}

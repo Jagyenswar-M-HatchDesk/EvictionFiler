@@ -97,6 +97,8 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<AdjournedReason> MstAdjournedReasons { get; set; }
         public DbSet<CaseNotes> CaseNotes { get; set; }
         public DbSet<CaseFiling> CaseFilings { get; set; }
+        public DbSet<SubscriptionType> SubscriptionTypes { get; set; }
+        public DbSet<Firms> Firms { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -105,9 +107,10 @@ namespace EvictionFiler.Infrastructure.DbContexts
     .ToTable("FeesCatalog", schema: "dbo");
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Role>().HasData(
-                new Role { Id = Guid.Parse("f5ab29da-356e-42df-a3ad-d91bbf644550"), Name = "Admin", NormalizedName = "ADMIN" },
-                new Role { Id = Guid.Parse("56355bf6-e335-428a-b718-00cb79e5273d"), Name = "Law Firm", NormalizedName = "LAW FIRM" },
-                new Role { Id = Guid.Parse("2bb5c3bf-8dd8-4415-9090-1d428c792533"), Name = "Property Manager", NormalizedName = "PROPERTY MANAGER" }
+                new Role { Id = Guid.Parse("f5ab29da-356e-42df-a3ad-d91bbf644550"), Name = "Admin", NormalizedName = "ADMIN", Description="Owner of a firm." },
+                new Role { Id = Guid.Parse("56355bf6-e335-428a-b718-00cb79e5273d"), Name = "Super Admin", NormalizedName = "SUPER ADMIN", Description = "Owner of a product." },
+                new Role { Id = Guid.Parse("2bb5c3bf-8dd8-4415-9090-1d428c792533"), Name = "Staff Member", NormalizedName = "STAFF MEMBER", Description = "Employee of a firm." },
+                new Role { Id = Guid.Parse("5bb5c3bf-8dd8-4415-9090-1d428c792533"), Name = "Client", NormalizedName = "CLIENT", Description = "Client of a firm." }
 
             );
 
@@ -116,14 +119,14 @@ namespace EvictionFiler.Infrastructure.DbContexts
                 new User
                 {
                     Id = Guid.Parse("84722e9d-806c-4f49-94d7-a55de8d2d76e"),
-                    FirstName = "Admin",
+                    FirstName = "Super Admin",
                     CreatedOn = new DateTime(2024, 6, 19, 12, 0, 0, DateTimeKind.Utc),
-                    Email = "admin@gmail.com",
-                    UserName = "admin@gmail.com",
-                    NormalizedEmail = "ADMIN@GMAIL.COM",
-                    NormalizedUserName = "ADMIN@GMAIL.COM",
+                    Email = "superadmin@gmail.com",
+                    UserName = "superadmin@gmail.com",
+                    NormalizedEmail = "SUPERADMIN@GMAIL.COM",
+                    NormalizedUserName = "SUPERADMIN@GMAIL.COM",
                     IsActive = true,
-                    RoleId = Guid.Parse("f5ab29da-356e-42df-a3ad-d91bbf644550"),
+                    RoleId = Guid.Parse("56355bf6-e335-428a-b718-00cb79e5273d"),
                     EmailConfirmed = true,
                     SecurityStamp = "38fef087-d2ad-4e78-9823-123456789abc",
                     ConcurrencyStamp = "12456e31-62c3-4db3-a8fc-987654321def",
@@ -136,7 +139,7 @@ namespace EvictionFiler.Infrastructure.DbContexts
                 new IdentityUserRole<Guid>
                 {
                     UserId = Guid.Parse("84722e9d-806c-4f49-94d7-a55de8d2d76e"),
-                    RoleId = Guid.Parse("f5ab29da-356e-42df-a3ad-d91bbf644550")
+                    RoleId = Guid.Parse("56355bf6-e335-428a-b718-00cb79e5273d")
                 }
             );
         }

@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using EvictionFiler.Application.DTOs.FirmDtos;
 using EvictionFiler.Application.DTOs.UserDto;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
@@ -58,12 +59,13 @@ namespace EvictionFiler.Application.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public async Task<bool> RegisterTenantAsync(RegisterDto model)
+        public async Task<bool> RegisterTenantAsync(RegisterDto model, Guid? Id=null)
         {
-            var registerResult = await _userRepository.RegisterTenant(model);
+            var registerResult = await _userRepository.RegisterTenant(model, Id);
             if (!registerResult) return false;
             return true;
         }
+       
 
         public async Task<IEnumerable<User>> GetAllUserAsync()
         {

@@ -1,6 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.FirmDtos;
 using EvictionFiler.Application.DTOs.UserDto;
-using EvictionFiler.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +8,9 @@ using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Interfaces.IServices
 {
-    public interface IUserservices
+    public interface IFirmService
     {
-        Task<string?> LoginAsync(string email, string password);
-        Task<bool> RegisterTenantAsync(RegisterDto model, Guid? Id = null);
-        Task<IEnumerable<User>> GetAllUserAsync();
+        Task<IEnumerable<FirmDto>> GetAllFirms();
+        Task<bool> RegisterFirm(RegisterDto model, FirmDto dto);
     }
 }

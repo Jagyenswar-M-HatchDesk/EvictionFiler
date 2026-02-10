@@ -4,6 +4,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EvictionFiler.Infrastructure.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260209121749_addtblFirm_subscription")]
+    partial class addtblFirm_subscription
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -5249,7 +5252,7 @@ namespace EvictionFiler.Infrastructure.Migrations
                         new
                         {
                             UserId = new Guid("84722e9d-806c-4f49-94d7-a55de8d2d76e"),
-                            RoleId = new Guid("56355bf6-e335-428a-b718-00cb79e5273d")
+                            RoleId = new Guid("f5ab29da-356e-42df-a3ad-d91bbf644550")
                         });
                 });
 

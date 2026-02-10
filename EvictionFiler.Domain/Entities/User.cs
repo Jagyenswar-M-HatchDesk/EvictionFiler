@@ -19,6 +19,11 @@ namespace EvictionFiler.Domain.Entities
         [DeleteBehavior(DeleteBehavior.Restrict)]
         public virtual Role? Role { get; set; }
 
+        public Guid? FirmId { get; set; }
+
+        [ForeignKey("FirmId")]
+        public virtual Firms? Firms { get; set; }
+
         [ForeignKey("TenantId")]
         [DeleteBehavior(DeleteBehavior.Restrict)]
         public virtual UserDatabase? Tenants { get; set; }

@@ -20,6 +20,8 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 
 				//await SeedPremiseType(context);
 				await SeedCaseTypes(context);
+                await SeedUserRoles(context);
+                await SeedSubscriptionType(context);
                 //            await SeedBuildingTypes(context);
                 //            await SeedCaseTypesHPD(context);
                 //            await SeedBillingTypes(context);
@@ -90,6 +92,28 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 if (context.MstAppearanceTypesForHearing.FirstOrDefault(d => d.Name == type.Name) == null)
                 {
                     await context.MstAppearanceTypesForHearing.AddAsync(type);
+                }
+            }
+        }
+        private static async Task SeedUserRoles(MainDbContext context)
+        {
+            var appearancetypes = InitialDataGenerator.GetUserRoles();
+            foreach (var type in appearancetypes)
+            {
+                if (context.Roles.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.Roles.AddAsync(type);
+                }
+            }
+        }
+        private static async Task SeedSubscriptionType(MainDbContext context)
+        {
+            var appearancetypes = InitialDataGenerator.GetSubscriptionTypes();
+            foreach (var type in appearancetypes)
+            {
+                if (context.SubscriptionTypes.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.SubscriptionTypes.AddAsync(type);
                 }
             }
         }

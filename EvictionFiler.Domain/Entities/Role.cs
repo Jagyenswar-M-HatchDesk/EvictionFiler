@@ -4,6 +4,7 @@ namespace EvictionFiler.Domain.Entities
 {
     public class Role : IdentityRole<Guid>
     {
+        public string? Description { get; set; }
         public bool IsActive { get; set; } = true;
         public bool? IsDeleted { get; set; }
 		public Guid CreatedBy { get; set; }

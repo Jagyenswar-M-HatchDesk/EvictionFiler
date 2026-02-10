@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Application.DTOs.UserDto;
+﻿using EvictionFiler.Application.DTOs.FirmDtos;
+using EvictionFiler.Application.DTOs.UserDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
@@ -39,7 +40,7 @@ namespace EvictionFiler.Infrastructure.Repositories
             await _db.SaveChangesAsync();
         }
 
-        public async Task<bool> RegisterTenant(RegisterDto model)
+        public async Task<bool> RegisterTenant(RegisterDto model, Guid? FirmId)
         {
             try
             {
@@ -86,6 +87,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     UpdatedOn = DateTime.UtcNow,
                     RoleId = role.Id,
                     IsActive = true,
+                    FirmId = FirmId
                    
                 };
 
@@ -104,8 +106,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 return false;
             }
         }
-
-
+       
         public async Task<IEnumerable<User>> GetAllUser()
         {
             var alluser = await _db.Users.Include(e => e.Role).ToListAsync();

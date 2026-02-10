@@ -32,6 +32,28 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                
             };
         }
+        public static IEnumerable<Role> GetUserRoles()
+        {
+            var now = DateTime.UtcNow;
+            return new List<Role>
+            {
+                new Role() { Name = "Super Admin", Description="Owner of the app.", CreatedOn = now },
+                new Role() { Name = "Admin", Description="Owner of a firm.", CreatedOn = now },
+                new Role() { Name = "Staff Member", Description="Employee of a firm", CreatedOn = now },
+                new Role() { Name = "Client", Description="Client of a firm.", CreatedOn = now },
+               
+            };
+        }
+        public static IEnumerable<SubscriptionType> GetSubscriptionTypes()
+        {
+            var now = DateTime.UtcNow;
+            return new List<SubscriptionType>
+            {
+                new SubscriptionType() { Name = "Enterprises", CreatedOn = now },
+                new SubscriptionType() { Name = "PayAsYouGo", CreatedOn = now },
+               
+            };
+        }
         
         public static IEnumerable<User> GetUser()
         {
