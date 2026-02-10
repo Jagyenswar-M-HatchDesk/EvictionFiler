@@ -183,21 +183,22 @@
         </div>
 
         
-        <EditForm Model="@registerDto" OnValidSubmit="@NextStep" FormName="CreateUser">
+        <EditForm EditContext="_editContext" OnValidSubmit="@NextStep" FormName="CreateUser">
             <DataAnnotationsValidator />
 
             @* -------------------- STEP 1: USER INFO -------------------- *@
             @if (CurrentStep == 2)
             {
                 <div class="input-form">
-                    <ValidationSummary />
 
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <label class="form-label color-text">First Name</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
-                                <InputText class="form-input" style="width:91%;" @bind-Value="registerDto.FirstName" placeholder="Enter First Name" />
+                                <InputText class="form-input" style="width:91%;" @bind-Value="registerDto.FirstName"
+                                           @bind-Value:after=@(() => ValidateParticularInput(() => registerDto.FirstName, nameof(registerDto.FirstName), "First Name is required."))
+                                placeholder="Enter First Name" />
                                 <ValidationMessage For="() => registerDto.FirstName" />
 
                             </div>
@@ -212,7 +213,9 @@
                             <label class="form-label color-text">Last Name</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
-                                <InputText class="form-input" style="width:91%;" @bind-Value="registerDto.LastName" placeholder="Enter Last Name" />
+                                <InputText class="form-input" style="width:91%;" @bind-Value="registerDto.LastName"
+                                           @bind-Value:after=@(() => ValidateParticularInput(() => registerDto.LastName, nameof(registerDto.LastName), "Last Name is required."))
+                                           placeholder="Enter Last Name" />
                                 <ValidationMessage For="() => registerDto.LastName" />
 
                             </div>
@@ -224,7 +227,9 @@
                             <label class="form-label color-text">Email</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fa-regular fa-at color-text"></i></span>
-                                <InputText class="form-input" style="width:91%;" @bind-Value="registerDto.Email" placeholder="Enter Email" />
+                                <InputText class="form-input" style="width:91%;" @bind-Value="registerDto.Email"
+                                           @bind-Value:after=@(() => ValidateParticularInput(() => registerDto.Email, nameof(registerDto.Email), "Email is required."))
+                                           placeholder="Enter Email" />
                                 <ValidationMessage For="() => registerDto.Email" />
 
                             </div>
@@ -270,7 +275,9 @@
                 <div class="input-form">
                     <label class="form-label color-text">Choose Subscription</label>
 
-                    <InputRadioGroup @bind-Value="Firms.SubscriptionTypeId">
+                    <InputRadioGroup @bind-Value="registerDto.SubscriptionId"
+                                     @bind-Value:after=@(() => ValidateParticularInput(() => registerDto.SubscriptionId, nameof(registerDto.SubscriptionId), "Select a subscription.")) >
+                    
                         @foreach(var subs in SubscriptionTypes)
                         {
                             <div class="card p-3 mt-3">
@@ -334,12 +341,18 @@
         _ => "0%"
     };
 
+    protected override async Task OnInitializedAsync()
+    {
+        _editContext = new EditContext(registerDto);
+        messageStore = new ValidationMessageStore(_editContext);
+
+    }
+
 
     public async Task Show(RegisterDto model)
     {
         registerDto = model;
         // _editContext = context;
-        // messageStore = new ValidationMessageStore(_editContext);
         SubscriptionTypes = await _subscription.GetAllAsync();
         CurrentStep = 1;
         IsVisible = true;
@@ -366,7 +379,7 @@
 
     private async Task NextStep()
     {
-        // if (!await ValidateCurrentStep()) return;
+        if (!await ValidateCurrentStep()) return;
 
         if (CurrentStep < 3)
             CurrentStep++;
@@ -398,8 +411,8 @@
         else if(CurrentStep == 2)
         {
             Require(() => registerDto.FirstName, nameof(registerDto.FirstName), "First Name is required.");
-            Require(() => registerDto.FirstName, nameof(registerDto.FirstName), "Last Name is required.");
-            Require(() => registerDto.FirstName, nameof(registerDto.FirstName), "Email Name is required.");
+            Require(() => registerDto.LastName, nameof(registerDto.LastName), "Last Name is required.");
+            Require(() => registerDto.Email, nameof(registerDto.Email), "Email is required.");
 
         }
 
@@ -457,7 +470,7 @@
         // You can attach Firm + Subscription logic here if API expects it:
         // registerDto.SubscriptionType = SelectedSubscription;
         // registerDto.Company = Firm;
-
+        Firms.SubscriptionTypeId = registerDto.SubscriptionId;
         var result = await _firmService.RegisterFirm(registerDto, Firms);
 
         if (result)

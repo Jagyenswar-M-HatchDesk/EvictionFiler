@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -177,6 +178,7 @@ builder.Services.AddScoped<IDocumentTypeRepository, DocumentTypeRepository>();
 builder.Services.AddScoped<ICourtTodayTypeRepository, CourtTodayTypeRepository>();
 builder.Services.AddScoped<ICaseNoticeInfoService, CaseNoticeInfoService>();
 builder.Services.AddScoped<ICaseNotesRepository, CaseNotesRepository>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddAuthorization();
 

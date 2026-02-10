@@ -30,7 +30,11 @@ namespace EvictionFiler.Infrastructure.Repositories
             var newFirm = new Firms();
             if (dto != null)
             {
-                var firm = await _mainDbContext.Firms.Where(e => e.Name.ToLower().Contains(dto.Name.ToLower())).FirstOrDefaultAsync();
+                var firm = new Firms();
+                if (dto.Name != null)
+                {
+                    firm = await _mainDbContext.Firms.Where(e => e.Name.ToLower().Contains(dto.Name.ToLower())).FirstOrDefaultAsync();
+                }
                 if (firm == null)
                 {
                     newFirm = new Firms()
