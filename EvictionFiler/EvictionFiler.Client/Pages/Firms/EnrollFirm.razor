@@ -126,6 +126,16 @@
         border-top-left-radius: 12px;
         border-bottom-left-radius: 12px;
     }
+
+    .card{
+        cursor:pointer;
+    }
+
+    .required-label::after {
+        content: " *";
+        color: red;
+    }
+
 </style>
 
 
@@ -193,7 +203,7 @@
 
                     <div class="row mb-3">
                         <div class="col-md-12">
-                            <label class="form-label color-text">First Name</label>
+                            <label class="form-label required-label color-text">First Name</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
                                 <InputText class="form-input" style="width:91%;" @bind-Value="registerDto.FirstName"
@@ -210,7 +220,7 @@
                        
 
                         <div class="col-md-12">
-                            <label class="form-label color-text">Last Name</label>
+                            <label class="form-label required-label color-text">Last Name</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
                                 <InputText class="form-input" style="width:91%;" @bind-Value="registerDto.LastName"
@@ -224,7 +234,7 @@
 
                     <div class="row mb-3">
                         <div class="col-md-12">
-                            <label class="form-label color-text">Email</label>
+                            <label class="form-label required-label color-text">Email</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fa-regular fa-at color-text"></i></span>
                                 <InputText class="form-input" style="width:91%;" @bind-Value="registerDto.Email"
@@ -236,12 +246,12 @@
                         </div>
                     </div>
 
-                    <div class="mb-4">
+                   @*  <div class="mb-4">
                         <label class="form-label color-text">Role</label>
                         <select class="form-select form-input"  @bind="registerDto.Role" disabled> 
                             <option disabled selected value="Admin">Admin</option>
                         </select>
-                    </div>
+                    </div> *@
                 </div>
             }
 
@@ -273,23 +283,33 @@
             @if (CurrentStep == 1)
             {
                 <div class="input-form">
-                    <label class="form-label color-text">Choose Subscription</label>
+                    <label class="form-label required-label color-text">Choose Subscription</label>
 
                     <InputRadioGroup @bind-Value="registerDto.SubscriptionId"
-                                     @bind-Value:after=@(() => ValidateParticularInput(() => registerDto.SubscriptionId, nameof(registerDto.SubscriptionId), "Select a subscription.")) >
-                    
-                        @foreach(var subs in SubscriptionTypes)
+                                     @bind-Value:after=@(() =>
+                                     ValidateParticularInput(() => registerDto.SubscriptionId,
+                                     nameof(registerDto.SubscriptionId),
+                                     "Select a subscription."))>
+
+                    @foreach (var subs in SubscriptionTypes)
                         {
-                            <div class="card p-3 mt-3">
-                                <div class="form-check mt-2">
-                                    <InputRadio class="form-check-input" Value="subs.Id" />
-                                    <label class="form-check-label">@subs.Name</label>
+                            <div class="card p-3 mt-3 @(registerDto.SubscriptionId == subs.Id ? "shadow-sm" : "")"
+                                 style="cursor:pointer;"
+                                 @onclick="() => SelectSubscription(subs.Id)">
+
+                                <div class="form-check mt-1">
+                                    <InputRadio class="form-check-input"
+                                                Value="subs.Id" />
+                                    <label class="form-check-label ms-2">
+                                        @subs.Name
+                                    </label>
                                 </div>
+
                             </div>
-                            
                         }
 
                     </InputRadioGroup>
+
                     <ValidationMessage For="() => registerDto.SubscriptionId" />
                 </div>
             }
@@ -348,6 +368,13 @@
 
     }
 
+    private void SelectSubscription(Guid id)
+    {
+        registerDto.SubscriptionId = id;
+        _editContext.NotifyFieldChanged(
+            new FieldIdentifier(registerDto, nameof(registerDto.SubscriptionId))
+        );
+    }
 
     public async Task Show(RegisterDto model)
     {
