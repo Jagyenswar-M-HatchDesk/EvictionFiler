@@ -180,6 +180,8 @@ builder.Services.AddScoped<IDocumentTypeRepository, DocumentTypeRepository>();
 builder.Services.AddScoped<ICourtTodayTypeRepository, CourtTodayTypeRepository>();
 builder.Services.AddScoped<ICaseNoticeInfoService, CaseNoticeInfoService>();
 builder.Services.AddScoped<ICaseNotesRepository, CaseNotesRepository>();
+builder.Services.AddScoped<IRolesService,RolesService>();
+builder.Services.AddScoped<IRolesRepository, RolesRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddAuthorization();
