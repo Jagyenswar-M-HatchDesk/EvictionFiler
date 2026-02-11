@@ -27,7 +27,8 @@ namespace EvictionFiler.Infrastructure.Repositories
 
         public async Task<IEnumerable<Role>> GetAllRoles()
         {
-            var allRoles = await _mainDbContext.Roles.ToListAsync();
+            var allRoles = await _mainDbContext.Roles
+                .Where(r => r.IsDeleted != true).ToListAsync();
             return allRoles;
         }
         public async Task<Role?> GetByIdAsync(Guid id)
@@ -46,6 +47,17 @@ namespace EvictionFiler.Infrastructure.Repositories
             role.UpdatedOn = DateTime.UtcNow;
             role.IsActive = updatedRole.IsActive;
 
+            _mainDbContext.Roles.Update(role);
+            await _mainDbContext.SaveChangesAsync();
+            return true;
+        }
+        public async Task<bool> DeleteRoleAsync(Guid id)
+        {
+            var role = await _mainDbContext.Roles.FirstOrDefaultAsync(u => u.Id == id);
+            if (role == null) return false;
+            role.IsDeleted = true;
+            role.IsActive = false;
+            role.UpdatedOn = DateTime.UtcNow;
             _mainDbContext.Roles.Update(role);
             await _mainDbContext.SaveChangesAsync();
             return true;

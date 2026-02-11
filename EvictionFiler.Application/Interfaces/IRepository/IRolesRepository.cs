@@ -12,5 +12,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
         Task<IEnumerable<Role>> GetAllRoles();
         Task<Role?> GetByIdAsync(Guid id);
         Task<bool> UpdateRoleAsync(Role updatedRole);
+
+        Task<bool> DeleteRoleAsync(Guid id);
     }
 }

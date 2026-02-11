@@ -1,10 +1,11 @@
 ﻿@page "/roles"
+@using EvictionFiler.Application.DTOs.RolesDto
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Client.SpinnerService
 @using EvictionFiler.Domain.Entities
 @inject IRolesService _rolesService
 @inject NavigationManager navManager
-
+@inject IJSRuntime JS
 @inject SpinnerService spinnerservice
 <style>
     
@@ -169,7 +170,7 @@
                         <div class="card role-card">
                             <div class="role-header">
                                 <div class="d-flex align-items-center gap-2">
-                                    <span style="font-size:16px; font-weight:600;">@srNo</span>
+                                 
 
                                     
                                 
@@ -190,6 +191,7 @@
                                     <i class="fa-solid fa-pen-to-square text-navy me-2" style="cursor:pointer"
                                        @onclick="@(() => EditRole(role.Id))"
                                        title="Edit"></i>
+                                        <i class="fa-solid fa-trash-can text-navy  me-2" title="Delete" style="cursor:pointer" @onclick="@(() => DeleteRole(role.Id))" ></i>
 
                                 </div>
                             </div>
@@ -246,7 +248,7 @@
                 <table class="table table-hover align-middle text-center" style="margin-bottom: 0px;">
                     <thead>
                         <tr>
-                            <th>Sr.No</th>
+                            <th>S.No</th>
                             <th>Name</th>
                             <th>Description</th>
                            
@@ -271,8 +273,19 @@
                                         <td>@(user.Description?? "")</td>
                                    
                                       
-                                        <td class="sticky"><i class="fa-solid fa-pen-to-square"  style="cursor:pointer" title="Edit" @onclick="@(() => EditRole(user.Id))"></i><span class="status-active ms-2">Active</span></td>
+                                        <td class="sticky"><i class="fa-solid fa-pen-to-square"  style="cursor:pointer" title="Edit" @onclick="@(() => EditRole(user.Id))"></i>
+                                        <i class="fa-solid fa-trash-can text-danger me-2"
+                                           style="cursor:pointer"
+                                           title="Delete"
+                                           @onclick="@(() => DeleteRole(user.Id))"></i>
+
+                                        <!-- Status -->
+                                        <span class="status-active ms-1">
+                                            @(user.IsActive ? "Active" : user.IsDeleted == true ? "Inactive" : "Not Set")
+                                        </span>
+                                        </td>
                                     </tr>
+                                    
                                     srNo++;
                                 }
                             }
@@ -292,7 +305,7 @@
 
         </div>
         </body>
-@if (ShowEditModal)
+@* @if (ShowEditModal)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.5)">
         <div class="modal-dialog modal-dialog-centered">
@@ -316,11 +329,14 @@
                                   rows="2" 
                                   @bind="editRole.Description">
                                 </textarea>
-                        @* <input class="form-control" @bind="editRole.Description" /> *@
+                        
                     </div>
 
                     <div class="form-check mt-2">
                         <input type="checkbox" class="form-check-input" @bind="editRole.IsActive" />
+                   
+                        <input type="checkbox" class="form-check-input" />
+                        
                         <label class="form-check-label" style="font-weight:600">Is Active</label>
                     </div>
 
@@ -334,15 +350,70 @@
             </div>
         </div>
     </div>
+} *@
+@if (ShowEditModal)
+{
+    <div class="offcanvas offcanvas-end show border-start shadow bg-white"
+         tabindex="-1"
+         style="visibility:visible; width:420px;">
+
+     
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title fw-bold">Edit Role </h5>
+            <button type="button" class="btn-close" @onclick="CloseModal"></button>
+        </div>
+
+     
+        <div class="offcanvas-body">
+
+            <EditForm Model="@editRole" OnValidSubmit="UpdateRole">
+                <DataAnnotationsValidator />
+
+               
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Name<span class="text-danger">*</span></label>
+                    <InputText class="form-control" @bind-Value="editRole.Name" />
+                    <ValidationMessage For="@(() => editRole.Name)" class="text-danger" />
+                </div>
+
+       
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Description</label>
+                    <InputTextArea class="form-control"
+                                   rows="3"
+                                   @bind-Value="editRole.Description" />
+                </div>
+
+               
+                <div class="form-check mb-3">
+                    <InputCheckbox class="form-check-input" @bind-Value="editRole.IsActive" />
+                    <label class="form-check-label fw-semibold">Is Active</label>
+                </div>
+
+      
+                <div class="d-flex justify-content-start gap-2 mt-4">
+                    <button type="button" class="btn btn-outline-secondary fw-semibold" style="font-size:14px; font-family:'Poppins';" @onclick="CloseModal">Cancel</button>
+                    <button type="submit" class="btn btn-navy base text-white fw-semibold" style="font-size:14px; font-family:'Poppins'; background:#1F365D;width:75px;">Save</button>
+                </div>
+
+            </EditForm>
+
+        </div>
+    </div>
+
+   
+    <div class="offcanvas-backdrop fade show"></div>
 }
 
             
 @code {
 
-    private IEnumerable<Role> allRoles = new List<Role>();
+    private IEnumerable<RolesDto> allRoles = new List<RolesDto>();
     private bool IsGridView = true;
     private bool ShowEditModal = false;
-    private Role editRole = new();
+    private RolesDto editRole = new();
+  
+    
 
     protected override async Task OnInitializedAsync()
     {
@@ -358,7 +429,7 @@
         var role = await _rolesService.GetRoleByIdAsync(roleId);
         if (role != null)
         {
-            editRole = new Role
+            editRole = new RolesDto
             {
                 Id = role.Id,
                 Name = role.Name,
@@ -367,6 +438,26 @@
             };
 
             ShowEditModal = true;
+        }
+    }
+    private async Task DeleteRole(Guid roleId)
+    {
+        
+
+        try
+        {
+            spinnerservice.Show();
+
+            var result = await _rolesService.DeleteRoleAsync(roleId);
+
+            if (result)
+            {
+                await GetAllRoles();
+            }
+        }
+        finally
+        {
+            spinnerservice.Hide();
         }
     }
     private async Task UpdateRole()

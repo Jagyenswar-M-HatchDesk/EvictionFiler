@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Domain.Entities;
+﻿using EvictionFiler.Application.DTOs.RolesDto;
+using EvictionFiler.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,9 @@ namespace EvictionFiler.Application.Interfaces.IServices
 {
     public interface IRolesService
     {
-        Task<IEnumerable<Role>> GetAllRolesAsync();
-        Task<Role?> GetRoleByIdAsync(Guid id);
-        Task<bool> UpdateRoleAsync(Role role);
+        Task<IEnumerable<RolesDto>> GetAllRolesAsync();
+        Task<RolesDto?> GetRoleByIdAsync(Guid id);
+        Task<bool> UpdateRoleAsync(RolesDto role);
+        Task<bool> DeleteRoleAsync(Guid id);
     }
 }
