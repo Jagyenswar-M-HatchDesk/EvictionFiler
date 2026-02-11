@@ -2,6 +2,7 @@
 //using Blazored.SessionStorage;
 using Blazored.Toast;
 using EvictionFiler.Application;
+using EvictionFiler.Application.Common.Interfaces;
 using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
@@ -17,6 +18,7 @@ using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Extensions;
+using EvictionFiler.Infrastructure.Identity;
 using EvictionFiler.Infrastructure.Repositories;
 using EvictionFiler.Server.Components;
 using Microsoft.AspNetCore.Authentication;
@@ -24,6 +26,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -179,6 +182,7 @@ builder.Services.AddScoped<ICaseNoticeInfoService, CaseNoticeInfoService>();
 builder.Services.AddScoped<ICaseNotesRepository, CaseNotesRepository>();
 builder.Services.AddScoped<IRolesService,RolesService>();
 builder.Services.AddScoped<IRolesRepository, RolesRepository>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddAuthorization();
 
@@ -262,6 +266,7 @@ builder.Services.AddScoped<ICaseFilingRepository, CaseFilingRepository>();
 builder.Services.AddScoped<IFirmService, FirmService>();
 builder.Services.AddScoped<IFirmRepository, FirmRepository>();
 builder.Services.AddScoped<ISubscriptionTypeRepository, SubscriptionTypeRepository>();
+builder.Services.AddScoped<ILoggedInUserService, LoggedInUserService>();
 
 var app = builder.Build();
 

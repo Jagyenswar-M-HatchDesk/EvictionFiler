@@ -70,12 +70,17 @@ namespace EvictionFiler.Application.Services
             return result > 0;
 
         }
-        public async Task<int> GetAllTodayCaseHearingAsync()
+        public async Task<int> GetAllTodayCaseHearingAsync(string userId, bool isAdmin)
         {
-            var calanders = await _caseHearingRepository
-                  .GetAllQuerable(x => x.HearingDate.HasValue && x.HearingDate.Value.Date == DateTime.Today)
-                  .CountAsync();
-            return calanders;
+            var query =  _caseHearingRepository
+                     .GetAllQuerable(x => x.HearingDate.HasValue && x.HearingDate.Value.Date == DateTime.Today);
+
+            if (!isAdmin)
+            {
+                var userGuid = Guid.Parse(userId);
+                query = query.Where(c => c.CreatedBy == userGuid);
+            }
+            return await query.CountAsync();
         }
         //    public async Task<PaginationDto<CaseHearingDto>> GetAllCaseHeariingAsync(int pageNumber, int pageSize, string userId, bool isAdmin)
         //    {

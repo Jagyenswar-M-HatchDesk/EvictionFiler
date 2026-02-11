@@ -15,16 +15,23 @@ namespace EvictionFiler.Application.Services
     {
         private readonly IUserRepository _userRepo;
         private readonly IFirmRepository _firmRepo;
-        public FirmService(IUserRepository userRepo, IFirmRepository firmRepo)
+        private readonly IEmailService _emailService;
+        public FirmService(IUserRepository userRepo, IFirmRepository firmRepo, IEmailService emailService)
         {
             _firmRepo = firmRepo;
             _userRepo = userRepo;
+            _emailService = emailService;
+
         }
 
         public async Task<bool> RegisterFirm(RegisterDto model, FirmDto dto)
         {
             var firmId = await _firmRepo.RegisterFirm(dto);
             var result = await _userRepo.RegisterTenant(model, firmId);
+            if(result)
+            {
+               await _emailService.SendFirmEnrollEmailAsync(model.Email, $"{model.FirstName} {model.LastName}", dto.Name, model.Password);
+            }
             return result;
         }
 

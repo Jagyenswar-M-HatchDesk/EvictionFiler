@@ -1,0 +1,139 @@
+﻿@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.UserDto
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Client.SpinnerService
+@inject SpinnerService spinnerservice
+@inject IJSRuntime JS
+@inject IUserservices _userService
+
+<style>
+    .offcanvas.show {
+        transform: translateX(0%);
+    }
+
+    .offcanvas {
+        transform: translateX(100%);
+        width: 500px !important;
+    }
+
+    .color-text {
+        color: #1F365D;
+    }
+
+    .btn-lg {
+        font-family: 'Poppins';
+        font-size: 14px;
+    }
+
+    .input-group-text {
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+    }
+</style>
+<div class="offcanvas offcanvas-end show border-start shadow" tabindex="-1" id="createUser"
+     style="visibility:@(IsVisible ? "visible" : "hidden"); transition: transform 0.9s ease-in-out;"
+     aria-labelledby="createUserLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="createUserLabel">Add New Staff Member</h5>
+        <button type="button" class="btn-close text-reset" @onclick="Hide"></button>
+    </div>
+
+    <div class="offcanvas-body">
+        <EditForm Model="@registerDto" OnValidSubmit="SubmitUser" FormName="CreateUser">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <label class="form-label color-text">First Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
+                        <InputText class="form-input" style="width:91%" @bind-Value="registerDto.FirstName" placeholder="Enter First Name" />
+                    </div>
+                </div>
+
+               
+            </div>
+            <div class="row mb-3">
+               
+
+                <div class="col-md-12">
+                    <label class="form-label color-text">Last Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
+                        <InputText class="form-input" style="width:91%" @bind-Value="registerDto.LastName" placeholder="Enter Last Name" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <label class="form-label color-text">Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-regular fa-at color-text"></i></span>
+                        <InputText class="form-input" style="width:91%" @bind-Value="registerDto.Email" placeholder="Enter Email" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label color-text">Role</label>
+                <select class="form-select form-input" @bind="registerDto.Role" >
+                    <option selected Value="Staff Member">Staff Member</option>
+                </select>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public RegisterDto registerDto { get; set; } = new RegisterDto();
+    [Parameter] public EventCallback<RegisterDto> Submit { get; set; }
+
+    private bool IsVisible { get; set; } = false;
+
+    public void Show(RegisterDto model, Guid FirmID)
+    {
+        registerDto = model;
+        registerDto.FirmId = FirmID;
+        IsVisible = true;
+        StateHasChanged();
+    }
+
+    public void Hide()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+
+    public async Task SubmitUser()
+    {
+        spinnerservice.Show();
+        if(registerDto.Id == null || registerDto.Id == Guid.Empty)
+        {
+            registerDto.Password = "Abcd@1234";
+            var result = await _userService.RegisterTenantAsync(registerDto);
+            if (result)
+            {
+                await Submit.InvokeAsync();
+                Hide();
+            }
+        }
+        else
+        {
+            var result = await _userService.UpdateUserAsync(registerDto);
+            if (result)
+            {
+                await Submit.InvokeAsync();
+                Hide();
+            }
+        }
+        spinnerservice.Hide();
+    }
+}
+

@@ -1,4 +1,4 @@
-﻿@page "/users"
+﻿@page "/staffmembers"
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.UserDto
 @using EvictionFiler.Application.Interfaces.IServices
@@ -7,6 +7,8 @@
 @using Microsoft.AspNetCore.Authorization
 @inject IUserservices _userService
 @inject SpinnerService spinnerservice
+@inject UserContextService userContext
+
 <PageTitle>Users - Housing Court Filer</PageTitle>
 @attribute [Authorize]
 <!-- Bootstrap CSS -->
@@ -143,6 +145,41 @@
     {
         font-weight: 700;
     }
+
+    .form-input {
+        box-shadow: none !important;
+        width: 100%;
+        font-size: 14px;
+        padding: 12px 14px;
+        border: 1px solid #1F365D;
+        border-radius: 12px;
+        background: #fff;
+        color: #1F365D;
+        outline: none;
+        min-height: 45px;
+    }
+
+        .form-input option:checked,
+        .form-input option:hover,
+        .form-input option:focus {
+            background-color: #f5f5f5 !important; /* Light grey */
+            color: #1F365D !important;
+        }
+
+        /* Remove highlight outline when opening */
+        .form-input:focus {
+            border-color: #1F365D !important;
+            box-shadow: 0 0 0 0 !important;
+            outline: none !important;
+        }
+
+        .form-input:disabled {
+            background-color: lightgrey;
+        }
+
+        .form-input.modified.valid {
+            outline: none;
+        }
 </style>
 
 
@@ -152,13 +189,13 @@
 
         <!-- Title Row -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="m-0 head">Manage Users</h5>
+            <h5 class="m-0 head">Manage Staff Members</h5>
         </div>
 
         <!-- Search Filters -->
         <div class="g-2 mb-3 d-flex justify-content-between align-items-center">
             <!-- Four default search boxes -->
-            <button class="btn btn-primary add-btn" @onclick="AddUser">Add New</button>
+            <button class="btn btn-primary add-btn" @onclick="AddUser">Add New Staff</button>
             <div class="position-relative w-50">
                 <input class="form-control border border-primary text-navy" placeholder="Search.." @bind="searchTerm" @bind:event="oninput" />
                 <button class="search-btn" type="button">
@@ -173,11 +210,11 @@
             <table class="table table-hover align-middle text-center" style="margin-bottom: 0px;">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Firm Name</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
                         <th>Email</th>
-                        <th>Role</th>
                         <th>Phone</th>
+                        <th>Role</th>
                         <th>Created At</th>
                         <th class="sticky">Action</th>
                     </tr>
@@ -208,22 +245,13 @@
                             if (user != null)
                             {
                                 <tr>
-                                    <td>@($"{user.FirstName} {user.LastName}" ?? "")</td>
-                                    <td>@(user.Firms?.Name ?? "")</td>
+                                    <td>@(user.FirstName ?? "")</td>
+                                    <td>@(user.LastName ?? "")</td>
                                     <td>@(user.Email ?? "")</td>
-                                    @if (user.Role?.Name == "Admin")
-                                    {
-                                        <td>Firm Admin</td>
-
-                                    }
-                                    else
-                                    {
-                                        <td>@(user.Role?.Name ?? "")</td>
-
-                                    }
                                     <td>@(user.PhoneNumber ?? "")</td>
+                                    <td>@(user.Role?.Name ?? "")</td>
                                     <td>@(user?.CreatedOn?.ToString(DateFormats.Default))</td>
-                                    <td class="sticky"><i class="fa-solid fa-pen-to-square"></i><span class="status-active ms-2">Active</span></td>
+                                    <td class="sticky"><i class="fa-solid fa-trash" @onclick="() => DeleteUser(user.Id)"></i><i class="fa-solid fa-pen-to-square" style="margin-left: 10px;" @onclick="() => EditUser(user)"></i><span class="status-active ms-2">Active</span></td>
                                 </tr>
                             }
                         }
@@ -258,22 +286,37 @@
     <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
-    <CreateUsers @ref="createUserRef" Submit="Handle" />
+    <CreateEditStaffMember @ref="createEditStaff" Submit="Handle" />
 </body>
 
 
 @code {
     private string searchTerm = string.Empty;
 
-
-    private CreateUsers createUserRef;
+    private Guid FirmId;
+    private CreateEditStaffMember createEditStaff;
 
     private async Task AddUser()
     {
         var modal = new RegisterDto();
-        createUserRef.Show(modal);
+        createEditStaff.Show(modal, User.FirmId.Value);
 
-        var alluser = _userService.GetAllUserAsync();
+        // var alluser = _userService.GetAllStaffMembers(User.FirmId.Value);
+    }
+    private async Task EditUser(User user)
+    {
+        var modal = new RegisterDto()
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email  = user.Email,
+            FirmId = user.FirmId,
+            Role = user.Role?.Name!,
+        };
+        createEditStaff.Show(modal, User.FirmId.Value);
+
+        // var alluser = _userService.GetAllStaffMembers(User.FirmId.Value);
     }
     private CancellationTokenSource _cts;
 
@@ -284,12 +327,13 @@
         _cts = new CancellationTokenSource();
         var token = _cts.Token;
         await Task.Delay(1000, token);
-        createUserRef.Hide();
-        allUsers = await _userService.GetAllUserAsync();
+        createEditStaff.Hide();
+        allUsers = await _userService.GetAllStaffMembers(User.FirmId.Value);
 
         StateHasChanged();
     }
     private IEnumerable<User> allUsers = new List<User>();
+    private User User = new User();
 
     private IEnumerable<User> cases =>
        string.IsNullOrWhiteSpace(searchTerm)
@@ -301,7 +345,10 @@
            (!string.IsNullOrWhiteSpace(c.PhoneNumber) && c.PhoneNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
     protected override async Task OnInitializedAsync()
     {
+
         spinnerservice.Show();
+        await userContext.LoadAsync();
+        User = await _userService.GetUserById(Guid.Parse(userContext.UserId));
         await GetAllCases();
         spinnerservice.Hide();
     }
@@ -310,7 +357,13 @@
 
     private async Task GetAllCases()
     {
-        allUsers = await _userService.GetAllUserAsync();
+        allUsers = await _userService.GetAllStaffMembers(User.FirmId.Value);
+        StateHasChanged();
+    }
+    private async Task DeleteUser(Guid Id)
+    {
+        await _userService.DeleteUser(Id);
+        await GetAllCases();
         StateHasChanged();
     }
 

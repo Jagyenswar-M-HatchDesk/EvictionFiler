@@ -8,7 +8,7 @@ namespace EvictionFiler.Application.DTOs.UserDto
 {
     public class RegisterDto
     {
-
+        public Guid Id { get; set; }
         public string FirstName { get; set; } = "";
         public string LastName { get; set; } = "";
         public string MiddleName { get; set; } = "";
@@ -16,6 +16,7 @@ namespace EvictionFiler.Application.DTOs.UserDto
         public string Email { get; set; } = "";
         public string Password { get; set; } = "";
         public string Role { get; set; } = "";
-        public string SubscriptionId { get; set; } = "";
+        public Guid? SubscriptionId { get; set; } 
+        public Guid? FirmId { get; set; } 
     }
 }

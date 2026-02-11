@@ -181,6 +181,7 @@
 
 </style>
 @using System.Collections.Generic
+@using System.Linq.Expressions
 
 
 <div class="offcanvas offcanvas-end show border-start shadow bg-white"
@@ -633,7 +634,6 @@
                 {
 
                     <EditForm id="buildingForm" Model="@building" OnValidSubmit="SaveBuildingAsync">
-                        <ValidationSummary />
                         <DataAnnotationsValidator />
 
                         <div class="row mb-3">
@@ -684,7 +684,7 @@
                                 <label>Petitioner Interest</label>
                                 <InputText class="form-control" @bind-Value="building.PetitionerInterest" placeholder="Enter Intrest" />
                             </div>
-                            <div class="col-md-4" style=@(ShowExemptionOther ? "width:20%" : "")>
+                           @*  <div class="col-md-4" style=@(ShowExemptionOther ? "width:20%" : "")>
                                 <label class="required-label" for="RentStatus">Rent Regulation</label>
                                 <InputSelect class="form-select" @bind-Value="building.RegulationStatusId">
                                     <option value="">-- Select --</option>
@@ -710,7 +710,7 @@
                                             <option value="@r.Id">@r.Name</option>
                                         }
                                     </InputSelect>
-                                    @* <ValidationMessage For="@(() => building.ExemptionBasisId)" /> *@
+                                    @* <ValidationMessage For="@(() => building.ExemptionBasisId)" /> *
                                 </div>
                             }
                             @if (SelectedRegulationName?.Equals("Other", StringComparison.OrdinalIgnoreCase) == true)
@@ -734,8 +734,66 @@
                                     <InputText class="form-control" @bind-Value="building.ExemptionBasisother" placeholder="Enter Exemption" />
                                 </div>
                             }
+ *@
 
+                            <!-- Rent Regulation -->
+                            <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:20%" : "")>
+                                <label class="lbl required-label">Rent Regulation</label>
+                                <InputSelect class="  form-select"
+                                             @bind-Value="building.RegulationStatusId"
+                                             @bind-Value:after="BindRentRegulation"
+                                             >
+                                    <option value="">-- Select --</option>
+                                    @foreach (var l in RegulationList)
+                                    {
+                                        <option value="@l.Id">@l.Name</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="() => building.RegulationStatusId" />
+                            </div>
 
+                            @if (ShowExemptionBasic)
+                            {
+                                <!-- Exemption Basic -->
+                                <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:20%" : "")>
+                                    <label class="lbl required-label">
+                                        Exemption Basic
+                                    </label>
+                                    <InputSelect class="  form-select"
+                                                 @bind-Value="building.ExemptionBasisId" @bind-Value:after="BindExemptionBasis"
+                                                 >
+                                        <option value="">-- Select --</option>
+                                        @foreach (var s in ExemptionBasicList)
+                                        {
+                                            <option value="@s.Id">@s.Name</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="() => building.ExemptionBasisId" />
+                                </div>
+                            }
+                            @if (ShowExemptionOther)
+                            {
+                                <!-- Exemption Basic -->
+                                <div class="col">
+                                    <label class="lbl required-label">
+                                        Exemption
+                                    </label>
+                                    <InputText class="  form-control" @bind-Value="building.ExemptionBasisother" placeholder="Enter Exemption"  />
+                                    <ValidationMessage For="() => building.ExemptionBasisother" />
+                                </div>
+                            }
+                            @if (ShowRentOther)
+                            {
+                                <!-- Exemption Basic -->
+                                <div class="col">
+                                    <label class="lbl required-label">
+                                        Other Regulation
+                                    </label>
+                                    <InputText class="  form-control" @bind-Value="building.RentRegulationOther"
+                                               @bind-Value:after=@(() => ValidateParticularInput(() => building.RentRegulationOther, nameof(building.RentRegulationOther), "Other Rent Regulation")) placeholder="Enter Other Reulation" />
+                                    <ValidationMessage For="() => building.RentRegulationOther" />
+                                </div>
+                            }
                         </div>
 
                         <div class="row mb-3">
@@ -1561,7 +1619,7 @@
 
 @code {
     [Parameter] public EditToClientDto createClient { get; set; } = new();
-   
+
 
     [Parameter]
     public EventCallback OnClose { get; set; }
@@ -1607,11 +1665,13 @@
 
 
     private bool showCancelPopup = false;
-
+    private EditContext _editContextBuilding;
+    private ValidationMessageStore messageStoreBuilding;
 
     protected override async Task OnInitializedAsync()
     {
-
+        _editContextBuilding = new EditContext(building);
+        messageStoreBuilding = new ValidationMessageStore(_editContextBuilding);
         if (createClient != null)
         {
 
@@ -1648,10 +1708,17 @@
             ?.FirstOrDefault(x => x.Id == building.RegulationStatusId)
             ?.Name;
 
-    bool ShowExemptionOther =>
-       ExemptionBasicList.Any(r =>
-           r.Id == building.ExemptionBasisId &&
-           r.Name == "Other");
+    // bool ShowExemptionOther =>
+    //    ExemptionBasicList.Any(r =>
+    //        r.Id == building.ExemptionBasisId &&
+    //        r.Name == "Other");
+
+    private bool ShowExemptionBasic = false;
+
+    private bool ShowExemptionOther = false;
+
+    private bool ShowRentOther = false;
+    string ColumnClass => ShowExemptionBasic || ShowRentOther ? "col-md-4" : "col-md-6";
 
     private async Task SelectedOwnerOccupied()
     {
@@ -1687,10 +1754,138 @@
             tenant.CompletedAddress = string.Empty;
         }
     }
-
-    private Task SaveBuildingAsync()
-
+    private void Require<T>(Expression<Func<T>> accessor, string fieldName, string message)
     {
+        var value = accessor.Compile().Invoke();
+        var fieldIdentifier = new FieldIdentifier(building, fieldName);
+
+        // Clear old message first
+        messageStoreBuilding.Clear(fieldIdentifier);
+
+        // Add message if invalid
+        bool isEmpty = value == null ||
+                       (value is string s && string.IsNullOrWhiteSpace(s)) ||
+                       (value is Guid g && g == Guid.Empty);
+
+        if (isEmpty)
+        {
+            messageStoreBuilding.Add(fieldIdentifier, message);
+        }
+
+        _editContextBuilding.NotifyValidationStateChanged();
+    }
+
+
+    private async Task<bool> ValidateCurrentStep()
+    {
+        messageStoreBuilding.Clear();
+
+        if(activeTab == "Building")
+        {
+            Require(() => building.MDRNumber, nameof(building.MDRNumber), "MDR is required");
+
+            Require(() => building.Zipcode, nameof(building.Zipcode), "Zipcode is Required");
+            Require(() => building.StateId, nameof(building.StateId), "Select state");
+            Require(() => building.ManagingAgent, nameof(building.ManagingAgent), "Agent is Required");
+            Require(() => building.CityId, nameof(building.CityId), "Select City");
+            Require(() => building.BuildingUnits, nameof(building.BuildingUnits), "Units is required");
+            Require(() => building.Address1, nameof(building.Address1), "Address is required");
+            Require(() => building.RegulationStatusId, nameof(building.RegulationStatusId), "Select Rent Regulation");
+            Require(() => building.RegistrationStatusId, nameof(building.RegulationStatusId), "Select Registration Status");
+            Require(() => building.PremiseTypeId, nameof(building.PremiseTypeId), "Select Building Type Status");
+            if (ShowExemptionBasic)
+            {
+                Require(() => building.ExemptionBasisId, nameof(building.ExemptionBasisId), "Select Exception Basis");
+            }
+            if (ShowExemptionOther)
+            {
+                Require(() => building.ExemptionBasisother, nameof(building.ExemptionBasisother), "Other Exemption is required");
+            }
+            if (ShowRentOther)
+            {
+                Require(() => building.RentRegulationOther, nameof(building.RentRegulationOther), "Other Regulation is required");
+            }
+            if (building.GoodCause != true)
+            {
+                Require(() => building.ExemptionreasonId, nameof(building.ExemptionreasonId), "Select Exemption");
+            }
+        }
+
+        // Notify UI about validation changes
+        _editContextBuilding.NotifyValidationStateChanged();
+
+        // Get current validation messages (optional: for logging)
+        var errors = _editContextBuilding.GetValidationMessages().ToList();
+
+        // Check if form is valid
+        bool isValid = !_editContextBuilding.GetValidationMessages().Any();
+
+        // Return validity
+        return isValid;
+
+    }
+    private async Task BindRentRegulation()
+    {
+        if (RegulationList.Any(r => r.Id == building.RegulationStatusId && r.Name == "Exempt"))
+        {
+            ShowExemptionBasic = true;
+            ShowRentOther = false;
+
+            messageStoreBuilding.Clear(() => building.RentRegulationOther);
+        }
+        else if (RegulationList.Any(r => r.Id == building.RegulationStatusId && r.Name == "Other"))
+        {
+            ShowRentOther = true;
+        }
+        else
+        {
+            building.RentRegulationOther = null;
+            building.ExemptionBasisother = null;
+            building.ExemptionBasisId = null;
+            ShowExemptionBasic = false;
+            ShowRentOther = false;
+            ShowExemptionOther = false;
+            messageStoreBuilding.Clear(() => building.RentRegulationOther);
+            messageStoreBuilding.Clear(() => building.ExemptionBasisother);
+
+        }
+
+        await ValidateParticularInput(() => building.RegulationStatusId, nameof(building.RegulationStatusId), "Select Rent Regulation");
+    }
+    private async Task BindExemptionBasis()
+    {
+        if (ExemptionBasicList.Any(r => r.Id == building.ExemptionBasisId && r.Name == "Other") && ShowExemptionBasic)
+        {
+            ShowExemptionOther = true;
+        }
+        else
+        {
+            building.ExemptionBasisother = null;
+            ShowExemptionOther = false;
+            messageStoreBuilding.Clear(() => building.ExemptionBasisother);
+        }
+        await ValidateParticularInput(() => building.ExemptionBasisId, nameof(building.ExemptionBasisId), "Select Exemption Basis");
+    }
+    private async Task BindGoodCause()
+    {
+        if (building.GoodCause == true)
+        {
+            building.ExemptionreasonId = null;
+            messageStoreBuilding.Clear(() => building.ExemptionreasonId);
+        }
+
+    }
+    private Task ValidateParticularInput<T>(Expression<Func<T>> accessor, string fieldName, string validationMsg)
+    {
+        Require(accessor, fieldName, validationMsg);
+        _editContextBuilding.NotifyValidationStateChanged();
+        return Task.CompletedTask;
+    }
+
+
+    private async Task SaveBuildingAsync()
+    {
+        if (!await ValidateCurrentStep()) return;
         if (building.Id == Guid.Empty)
         {
             building.Id = Guid.NewGuid();
@@ -1737,7 +1932,7 @@
         building.GoodCause = true;
         building.StateId = StatesList.Where(e => e.Name.Contains("New York")).Select(e => e.Id).FirstOrDefault();
         showBuildingForm = false;
-        return Task.CompletedTask;
+        // return await Task.CompletedTask;
     }
 
 

@@ -40,6 +40,48 @@ namespace EvictionFiler.Infrastructure.Repositories
             await _db.SaveChangesAsync();
         }
 
+        //public async Task<bool> RegisterStaff(RegisterDto model, Guid? FirmId)
+        //{
+        //    try
+        //    {
+        //        var role = await _roleManager.FindByNameAsync(model.Role);
+        //        if (role == null)
+        //        {
+        //            role = new Role { Name = model.Role };
+        //            await _roleManager.CreateAsync(role);
+        //        }
+
+        //        var user = new User
+        //        {
+        //            FirstName = model.FirstName,
+        //            LastName = model.LastName,
+        //            MiddleName = model.MiddleName,
+        //            Email = model.Email,
+        //            UserName = model.Email,
+        //            CreatedOn = DateTime.UtcNow,
+        //            UpdatedOn = DateTime.UtcNow,
+        //            RoleId = role.Id,
+        //            IsActive = true,
+        //            FirmId = FirmId
+                   
+        //        };
+
+        //        var createResult = await _userManager.CreateAsync(user, model.Password);
+        //        if (!createResult.Succeeded)
+        //        {
+                   
+        //            return false;
+        //        }
+
+        //        await _userManager.AddToRoleAsync(user, model.Role);
+        //        return true;
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        return false;
+        //    }
+        //}
+       
         public async Task<bool> RegisterTenant(RegisterDto model, Guid? FirmId)
         {
             try
@@ -87,7 +129,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     UpdatedOn = DateTime.UtcNow,
                     RoleId = role.Id,
                     IsActive = true,
-                    FirmId = FirmId
+                    FirmId = model.FirmId
                    
                 };
 
@@ -109,18 +151,21 @@ namespace EvictionFiler.Infrastructure.Repositories
        
         public async Task<IEnumerable<User>> GetAllUser()
         {
-            var alluser = await _db.Users.Include(e => e.Role).ToListAsync();
+            var alluser = await _db.Users.Include(e => e.Role).Include(e=>e.Firms).Where(e=>e.IsActive ==true && e.IsDeleted == false).ToListAsync();
             return alluser;
         }
-       
-       
+        public async Task<IEnumerable<User>> GetAllStaffMember(Guid Firmid)
+        {
+            var allstaff = await _db.Users.Where(e=>e.FirmId == Firmid && e.IsActive == true && e.IsDeleted == false && e.Role.Name.StartsWith("Staff")).Include(e => e.Role).ToListAsync();
+            return allstaff;
+        }
 
         public async Task<User?> GetByIdAsync(Guid id)
         {
-            return await _db.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id == id);
+            return await _db.Users.Include(u => u.Role).Include(u=>u.Firms).FirstOrDefaultAsync(u => u.Id == id);
         }
 
-        public async Task<bool> UpdateUserAsync(User updatedUser)
+        public async Task<bool> UpdateUserAsync(RegisterDto updatedUser)
         {
             var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == updatedUser.Id);
             if (user == null) return false;
@@ -131,11 +176,12 @@ namespace EvictionFiler.Infrastructure.Repositories
             user.Email = updatedUser.Email;
             user.UserName = updatedUser.Email;
             user.UpdatedOn = DateTime.UtcNow;
-            user.IsActive = updatedUser.IsActive;
 
             _db.Users.Update(user);
-            await _db.SaveChangesAsync();
-            return true;
+            var result = await _db.SaveChangesAsync();
+            if(result >0)return true;
+
+            return false;
         }
 
         public async Task<bool> DeleteUserAsync(Guid id)
