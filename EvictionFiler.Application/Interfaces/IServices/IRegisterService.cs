@@ -9,6 +9,6 @@ namespace EvictionFiler.Application.Interfaces.IServices
 {
    public interface IRegisterService
     {
-        Task<(bool Success, string Message)> RegisterAsync(RegisterDto dto);
+        Task<(bool Success, string Message)> RegisterAsync(RegisterDto dto, string SubscriptionName );
     }
 }

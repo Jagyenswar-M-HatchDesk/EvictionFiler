@@ -32,7 +32,7 @@ namespace EvictionFiler.Application.Services
             
         }
 
-        public async Task<(bool Success, string Message)> RegisterAsync(RegisterDto dto)
+        public async Task<(bool Success, string Message)> RegisterAsync(RegisterDto dto, string SubscriptionName)
         {
             
 
@@ -44,13 +44,16 @@ namespace EvictionFiler.Application.Services
 
                 if (role == null)
                     return (false, $"Role '{roleName}' not found");
-               
+                var subscriptionId = await _repo.GetSubscriptionIdByNameAsync(SubscriptionName);
+
+                if (subscriptionId == null || subscriptionId == Guid.Empty)
+                    return (false, "Default subscription not configured");
                 var firmId = Guid.NewGuid();
                 var firm = new Firms
                 {
                     Id = firmId,
                     Name = dto.FirstName,
-                    SubscriptionTypeId = dto.SubscriptionId,
+                    SubscriptionTypeId = subscriptionId,
                     
                     CreatedOn = DateTime.UtcNow
                 };
