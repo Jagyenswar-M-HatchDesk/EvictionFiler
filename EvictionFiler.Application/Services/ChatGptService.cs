@@ -75,13 +75,13 @@ namespace EvictionFiler.Application.Services
 
                 var contentItems = new List<object>
                 {
-                    new { type = "input_text", text = OpenAIPrompts.OSCPrompt }
+                    new { type = "input_text", text = OpenAIPrompts.DefaultsOSC }
                 };
 
-                foreach (var fid in uploadedFileIds)
-                {
-                    contentItems.Add(new { type = "input_file", file_id = fid });
-                }
+                //foreach (var fid in uploadedFileIds)
+                //{
+                //    contentItems.Add(new { type = "input_file", file_id = fid });
+                //}
 
                 var requestBody = new
                 {

@@ -99,6 +99,7 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<CaseFiling> CaseFilings { get; set; }
         public DbSet<SubscriptionType> SubscriptionTypes { get; set; }
         public DbSet<Firms> Firms { get; set; }
+        public DbSet<Transactions> Transactions { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

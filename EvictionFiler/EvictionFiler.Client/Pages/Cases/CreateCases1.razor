@@ -5967,7 +5967,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 }
                 else
                 {
-                    <button type="button" class="btn btn-success" style="height: 45px; width: 115px;" @onclick="SubmitAsync">Submit</button>
+                    <button type="button" class="btn btn-success" style="height: 45px; width: 115px;" @onclick="OpenPayment">Submit</button>
                 }
             </div>
         }
@@ -5984,7 +5984,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 }
                 else
                 {
-                    <button type="button" class="btn btn-success" style="height: 45px; width: 115px;" @onclick="SubmitAsync">Submit</button>
+                    <button type="button" class="btn btn-success" style="height: 45px; width: 115px;" @onclick="OpenPayment">Submit</button>
                 }
 
 
@@ -6001,7 +6001,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 }
                 else
                 {
-                    <button type="button" class="btn btn-success" style="height: 45px; width: 115px;" @onclick="SubmitAsync">Submit</button>
+                    <button type="button" class="btn btn-success" style="height: 45px; width: 115px;" @onclick="OpenPayment">Submit</button>
                 }
 
 
@@ -6011,6 +6011,27 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
 
 </div>
+@if (IsOpen)
+{
+    <div class="modal fade show d-block" tabindex="-1" 
+         style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Complete Payment</h5>
+                    <button type="button" class="btn-close" 
+                            @onclick="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <Payments UserId="loggedInUserId" OnSuccessTranx="HandleSuccess" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
 
 @code {
 
@@ -6029,10 +6050,26 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     private bool ShowExemptionOther = false ;
 
     private bool ShowRentOther = false;
+    private bool IsOpen = false;
 
     string ColumnClass => ShowExemptionBasic || ShowRentOther ? "col-md-4" : "col-md-6";
 
     // private decimal TotalOwed => Rows.Sum(x => x.Amount);
+    private async Task HandleSuccess(bool isSuccess)
+    {
+        if(isSuccess)
+        {
+            await SubmitAsync();
+        }
+    }
+    private async Task Close()
+    {
+        IsOpen = false;        
+    }
+    private async Task OpenPayment()
+    {
+        IsOpen = true;        
+    }
     private void OnMonthChanged(ArrearLedgerDto row)
     {
         StateHasChanged();

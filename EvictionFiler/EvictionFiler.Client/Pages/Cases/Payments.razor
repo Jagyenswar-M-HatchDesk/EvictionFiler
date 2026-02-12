@@ -1,0 +1,163 @@
+﻿@using EvictionFiler.Application.Interfaces.IServices
+@inject IJSRuntime JS
+@inject HttpClient Http
+@inject ICloverService CloverService
+@inject ITransactionService TransactionService
+@using EvictionFiler.Client.SpinnerService
+@inject SpinnerService spinnerService
+<style>
+    #CARD_NAME_ID, #CARD_NUMBER_ID, #CARD_DATE_ID, #CARD_CVV_ID, #CARD_POSTAL_CODE_ID, #PAYMENT_REQUEST_BUTTON_ID {
+        border: 1px solid !important;
+        height: 40px !important;
+        /* width: 100% !important; */
+        /* visibility: visible; */
+        padding: 10px !important;
+        border-radius: 12px !important;
+        margin-bottom: 15px !important;
+    }
+
+    .btn-pay{
+        width:100%;
+        background-color: #1F365D;
+        border-radius:12px;
+        min-height: 45px;
+    }
+</style>
+<div>
+    <div style="display:flex; align-items:center;justify-content:center;">
+        <h3>Card Information</h3>
+    </div>
+    <div class="row">
+        <div id="card-name"></div>
+
+    </div>
+    <div>
+        <div id="card-number"></div>
+    </div>
+    <div class="row">
+        <div class="col-6" id="card-date"></div>
+        <div class="col-6" id="card-cvv"></div>
+    </div>
+    <div class="row">
+        <div id="card-postal-code"></div>
+    </div>
+    <div  style="display:flex; align-items:center;justify-content:center;">
+        <button class="btn-pay btn-pay btn-primary" @onclick="ProcessPayment">
+            Pay Now
+        </button>
+    </div>
+
+   @*  <div style="display:flex; align-items:center;justify-content:space-between;">
+        <hr style="width:40%"/>
+        <p>or Pay with</p>
+        <hr style="width:40%"/>
+    </div>
+    <div id="payment-request-button"></div> *@
+</div>
+<script>
+        window.cloverPayment = {
+
+        init: function (publicKey, merchantId) {
+
+            const clover = new Clover(publicKey, {
+                merchantId: merchantId
+            });
+
+            const elements = clover.elements();
+    //         const paymentRequestButton = elements.create('PAYMENT_REQUEST_BUTTON', {
+    //     paymentReqData: {
+    //         currency: 'usd',
+    //         country: 'US',
+    //         total: {
+    //             label: 'Eviction Filing',
+    //             amount: 2000 // in cents
+    //         }
+    //     }
+    // });
+
+    // paymentRequestButton.mount('#payment-request-button');
+
+    // paymentRequestButton.addEventListener('paymentMethod', function (ev) {
+    //     console.log("Wallet token:", ev);
+    //     // ev.token will contain clv_ token
+    // });
+             const cardName = elements.create('CARD_NAME');
+            const cardNumber = elements.create('CARD_NUMBER');
+            const cardDate = elements.create('CARD_DATE');
+            const cardCvv = elements.create('CARD_CVV');
+            const cardPostalCode = elements.create('CARD_POSTAL_CODE');
+
+            cardName.mount('#card-name');
+            cardNumber.mount('#card-number');
+            cardDate.mount('#card-date');
+            cardCvv.mount('#card-cvv');
+            cardPostalCode.mount('#card-postal-code');
+
+            window._cloverInstance = clover;
+        },
+
+        createToken: async function () {
+            const result = await window._cloverInstance.createToken();
+
+            if (result.errors) {
+                return { success: false };
+            }
+
+            return { success: true, token: result.token };
+        }
+    };
+
+</script>
+@code {
+    [Parameter]
+    public EventCallback<bool> OnSuccessTranx { get; set; }
+    [Parameter]
+    public string? UserId { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync(
+                "cloverPayment.init",
+                "43ba624d8636628fe2c210086b5ec4ab",
+                "Z7JTAEZA30R31"
+            );
+        }
+    }
+
+    private async Task ProcessPayment()
+    {
+        var result = await JS.InvokeAsync<TokenResult>("cloverPayment.createToken");
+
+        if (!result.Success)
+        {
+            Console.WriteLine("Token failed");
+            return;
+        }
+        spinnerService.Show();
+        var response = await CloverService.CreateChargeAsync(result.Token, 2000);
+        if(response != null)
+        {
+            if (response.Status.ToLower() == "succeeded")
+            {
+                if(UserId != null)
+                {
+                    response.CreatedBy = Guid.Parse(UserId);
+                }
+                var resultTranx = await TransactionService.AddTransaction(response);
+                if(resultTranx)
+                {
+                    await OnSuccessTranx.InvokeAsync(resultTranx);
+                }
+            }
+        }
+        
+    }
+
+    public class TokenResult
+    {
+        public bool Success { get; set; }
+        public string Token { get; set; }
+    }
+}
