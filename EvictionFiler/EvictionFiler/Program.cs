@@ -267,6 +267,9 @@ builder.Services.AddScoped<IFirmService, FirmService>();
 builder.Services.AddScoped<IFirmRepository, FirmRepository>();
 builder.Services.AddScoped<ISubscriptionTypeRepository, SubscriptionTypeRepository>();
 builder.Services.AddScoped<ILoggedInUserService, LoggedInUserService>();
+builder.Services.AddScoped<IRegisterRepository, RegisterRepository>();
+builder.Services.AddScoped<IRegisterService, RegisterService>();
+
 
 var app = builder.Build();
 
