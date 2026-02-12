@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,12 +12,20 @@ namespace EvictionFiler.Application.DTOs.UserDto
         public Guid Id { get; set; }
         public string FirstName { get; set; } = "";
         public string LastName { get; set; } = "";
-        public string MiddleName { get; set; } = "";
-        public string Username { get; set; } = "";
+        public string? MiddleName { get; set; }
+       
+
+
+        
         public string Email { get; set; } = "";
+
+       
         public string Password { get; set; } = "";
-        public string Role { get; set; } = "";
-        public Guid? SubscriptionId { get; set; } 
+
+        
+        public string ConfirmPassword { get; set; } = "";
+        public string Role { get; set; } = "Admin";
+        public Guid? SubscriptionId { get; set; } = Guid.Parse("C32BEA17-5A70-4A8A-30B7-08DE687FC1DD");
         public Guid? FirmId { get; set; } 
     }
 }

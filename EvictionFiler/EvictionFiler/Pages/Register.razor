@@ -1,0 +1,404 @@
+﻿
+@page "/register"
+@layout EmptyLayout
+@using System.ComponentModel.DataAnnotations
+@using EvictionFiler.Application.DTOs.UserDto
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Server.Components.Layout
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Linq.Expressions
+@inject IRegisterService _registerService
+
+@inject NavigationManager Nav
+
+<style>
+    /* =========================================================
+       Base / Reset
+       ========================================================= */
+    body {
+        margin: 0;
+        background-color: #f7f7f7;
+    }
+
+    /* =========================================================
+       Typography Utilities
+       ========================================================= */
+    .display-sub {
+        font-size: 26px;
+        font-weight: 400;
+        letter-spacing: -1px;
+    }
+
+    .body-medium {
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 18px;
+        color: #1F365D;
+    }
+
+    .title-h4-semi-bold {
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    /* =========================================================
+       Register Layout & Card
+       ========================================================= */
+    .register-container {
+        width: 100%;
+        max-width: 680px;
+        border-radius: 8px;
+    }
+
+    .register-card {
+        background-color: #fbf5e8;
+        padding-top: 10px !important;
+    }
+
+    /* =========================================================
+       Register Header
+       ========================================================= */
+    .register-header {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .register-logo {
+        max-width: 145px;
+        height: auto;
+    }
+
+    .register-title {
+        font-size: 1.8rem;
+        font-weight: 500;
+        color: #1F365D;
+        margin: 0;
+        letter-spacing: -0.3px;
+        text-align: center;
+         width: 42%;
+    }
+
+    /* =========================================================
+       Inputs – Enterprise Style
+       ========================================================= */
+    .form-input {
+        width: 100%;
+        min-height: 46px;
+        padding: 12px 14px;
+        font-size: 14px;
+        color: #1F365D;
+        background-color: #ffffff;
+        border: 1px solid #cfd6e4;
+        border-radius: 10px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .form-input:hover {
+            border-color: #9fb0cf;
+        }
+
+        .form-input:focus {
+            border-color: #1F365D;
+            box-shadow: 0 0 0 3px rgba(31, 54, 93, 0.15);
+            outline: none;
+        }
+
+        .form-input::placeholder {
+            color: #9aa6bf;
+        }
+
+        /* Validation Error */
+        .form-input.input-validation-error {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15);
+        }
+
+        /* Disabled */
+        .form-input:disabled {
+            background-color: #f2f4f8;
+            color: #8a94a6;
+        }
+
+    /* Autofill Fix */
+    input.form-input:-webkit-autofill {
+        -webkit-text-fill-color: #1F365D;
+        -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+    }
+
+    /* =========================================================
+       Button
+       ========================================================= */
+    .register-btn-wrapper {
+        background-color: #1F365D;
+        border-radius: 7px;
+    }
+
+        .register-btn-wrapper button {
+            background-color: #1F365D;
+            border: none;
+            height: 46px;
+            border-radius: 7px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+            .register-btn-wrapper button:hover {
+                background-color: #172b4a;
+            }
+
+            .register-btn-wrapper button:disabled {
+                background-color: #7c8aa5;
+                cursor: not-allowed;
+            }
+
+    /* =========================================================
+       Links
+       ========================================================= */
+    .login-link {
+        color: #1F365D;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+        .login-link:hover {
+            text-decoration: underline;
+        }
+
+    /* =========================================================
+       Validation Summary
+       ========================================================= */
+    .validation-message {
+        color: #dc3545;
+        font-size: 13px;
+    }
+
+    /* =========================================================
+       Responsive
+       ========================================================= */
+   @@media (max-width: 768px) {
+        .register-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .register-title {
+            font-size: 1.3rem;
+        }
+    }
+
+</style>
+
+<div class="d-flex flex-column justify-content-center align-items-center vh-100">
+    <div class="card p-5 pb-5 shadow mb-0 border-0 register-container register-card">
+
+        <div class="register-header mb-1 text-center">
+            <img src="images/PHOTO-2025-06-18-02-45-29.jpg"
+                 class="register-logo"
+                 alt="Housing CourtFiler logo" />
+
+            <h1 class="register-title">Create new account</h1>
+        </div>
+
+        <EditForm EditContext="_editContext" OnValidSubmit="HandleRegister">
+            <DataAnnotationsValidator />
+           
+
+            <!-- First Name -->
+          
+            <div class="row mb-3">
+
+                <!-- First Name -->
+                <div class="col-md-6">
+                    <label class="form-label">First Name <span class="text-danger">*</span></label>
+                    <InputText class="form-control form-control-lg"
+                               @bind-Value="registerModel.FirstName"
+                               @bind-Value:after="@(() => ValidateField(() => registerModel.FirstName, nameof(registerModel.FirstName),"First name is required"))" placeholder="Firstname" />
+                    <ValidationMessage For="@(() => registerModel.FirstName)" />
+                </div>
+
+                <!-- Last Name -->
+                <div class="col-md-6">
+                    <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                    <InputText class="form-control form-control-lg"
+                               @bind-Value="registerModel.LastName"
+                               @bind-Value:after="@(() => ValidateField(() => registerModel.LastName, nameof(registerModel.LastName),"Last name is required"))"
+                               placeholder="Lastname" />
+                    <ValidationMessage For="@(() => registerModel.LastName)" />
+                </div>
+
+            </div>
+
+
+           
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label class="form-label">Email <span class="text-danger">*</span></label>
+                <InputText class="form-control form-control-lg"
+                           @bind-Value="registerModel.Email"
+                           @bind-Value:after="@(() => ValidateField(() => registerModel.Email, nameof(registerModel.Email),"Email  is required"))"
+                           placeholder="E-mail" />
+                <ValidationMessage For="@(() => registerModel.Email)" />
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label class="form-label">Password <span class="text-danger">*</span></label>
+                <InputText type="password"
+                           class="form-control form-control-lg"
+                           @bind-Value="registerModel.Password"
+                           @bind-Value:after="@(() => ValidateField(() => registerModel.Password, nameof(registerModel.Password),"Password is required"))"
+                           placeholder="Password" />
+                <ValidationMessage For="@(() => registerModel.Password)" />
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-3">
+                <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                <InputText type="password"
+                           class="form-control form-control-lg"
+                           @bind-Value="registerModel.ConfirmPassword"
+                           @bind-Value:after="@(() => ValidateField(() => registerModel.ConfirmPassword, nameof(registerModel.ConfirmPassword),"ConfirmPassword is required"))"
+                           placeholder="Re-enter password" />
+                <ValidationMessage For="@(() => registerModel.ConfirmPassword)" />
+            </div>
+
+            <!-- Register Button -->
+            <div class="d-grid">
+                <button type="submit" class="btn" style="background-color:#1F365D;color:white;" disabled="@isLoading">
+                    @if (isLoading)
+                    {
+                        <span class="spinner-border spinner-border-sm"></span>
+                        <span class="ms-2">Registering...</span>
+                    }
+                    else
+                    {
+                        <span>Register</span>
+                    }
+                </button>
+            </div>
+
+        </EditForm>
+
+        <div class="text-center mt-3">
+            Already have an account?
+            <a href="/">Login</a>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    private RegisterDto registerModel = new();
+    private bool isLoading = false;
+    private ValidationMessageStore messageStore;
+    private EditContext _editContext;
+
+    protected override void OnInitialized()
+    {
+        _editContext = new EditContext(registerModel);
+        messageStore = new ValidationMessageStore(_editContext);
+    }
+
+    private async Task HandleRegister()
+    {
+        if (!ValidateForm())
+            return;
+        isLoading = true;
+        var result = await _registerService.RegisterAsync(registerModel);
+       
+        await Task.Delay(1500);
+
+        isLoading = false;
+
+       
+        Nav.NavigateTo("/",true);
+    }
+
+    private Task ValidateField<T>(Expression<Func<T>> accessor, string fieldName, string message)
+    {
+        Require(accessor, fieldName, message);
+        _editContext.NotifyValidationStateChanged();
+        return Task.CompletedTask;
+    }
+
+    private bool ValidateForm()
+    {
+        messageStore.Clear();
+
+        Require(() => registerModel.FirstName, nameof(registerModel.FirstName), "First name is required");
+        if (!string.IsNullOrWhiteSpace(registerModel.FirstName))
+        {
+            if (registerModel.FirstName.Length < 2 || registerModel.FirstName.Length > 20)
+            {
+                AddError(nameof(registerModel.FirstName), "First name must be between 2 and 20 characters");
+            }
+        }
+        Require(() => registerModel.LastName, nameof(registerModel.LastName), "Last name is required");
+        if (!string.IsNullOrWhiteSpace(registerModel.LastName))
+        {
+            if (registerModel.LastName.Length < 2 || registerModel.LastName.Length > 20)
+            {
+                AddError(nameof(registerModel.LastName), "Last name must be between 2 and 20 characters");
+            }
+        }
+        Require(() => registerModel.Email, nameof(registerModel.Email), "Email is required");
+        if (!string.IsNullOrWhiteSpace(registerModel.Email))
+        {
+            if (registerModel.Email.Length < 5 || registerModel.Email.Length > 100)
+            {
+                AddError(nameof(registerModel.Email), "Email must be between 5 and 100 characters");
+            }
+
+            var emailRegex = new System.Text.RegularExpressions.Regex(
+                @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+            if (!emailRegex.IsMatch(registerModel.Email))
+            {
+                AddError(nameof(registerModel.Email), "Invalid email format");
+            }
+        }
+        Require(() => registerModel.Password, nameof(registerModel.Password), "Password is required");
+        Require(() => registerModel.ConfirmPassword, nameof(registerModel.ConfirmPassword), "Confirm password is required");
+
+        // Password match check
+        if (registerModel.Password != registerModel.ConfirmPassword)
+        {
+            var field = new FieldIdentifier(registerModel, nameof(registerModel.ConfirmPassword));
+            messageStore.Add(field, "Passwords do not match");
+        }
+
+        _editContext.NotifyValidationStateChanged();
+
+        return !_editContext.GetValidationMessages().Any();
+    }
+    private void AddError(string fieldName, string message)
+    {
+        var field = new FieldIdentifier(registerModel, fieldName);
+        messageStore.Add(field, message);
+    }
+
+
+    private void Require<T>(Expression<Func<T>> accessor, string fieldName, string message)
+    {
+        var value = accessor.Compile().Invoke();
+        var field = new FieldIdentifier(registerModel, fieldName);
+
+        messageStore.Clear(field);
+
+        bool empty =
+            value == null ||
+            (value is string s && string.IsNullOrWhiteSpace(s));
+
+        if (empty)
+            messageStore.Add(field, message);
+    }
+
+    
+}
+
