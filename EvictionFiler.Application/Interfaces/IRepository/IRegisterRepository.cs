@@ -11,7 +11,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
     {
         Task AddFirmAsync(Firms firm);
 
-
+        Task<Guid?> GetSubscriptionIdByNameAsync(string name);
         Task SaveChangesAsync();
        
     }

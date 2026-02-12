@@ -25,7 +25,7 @@ namespace EvictionFiler.Application.DTOs.UserDto
         
         public string ConfirmPassword { get; set; } = "";
         public string Role { get; set; } = "Admin";
-        public Guid? SubscriptionId { get; set; } = Guid.Parse("C32BEA17-5A70-4A8A-30B7-08DE687FC1DD");
+        public Guid? SubscriptionId { get; set; } 
         public Guid? FirmId { get; set; } 
     }
 }

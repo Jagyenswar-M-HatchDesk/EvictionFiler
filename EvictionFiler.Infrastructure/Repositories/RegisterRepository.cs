@@ -2,6 +2,7 @@
 using EvictionFiler.Domain.Entities;
 
 using EvictionFiler.Infrastructure.DbContexts;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,8 +19,14 @@ namespace EvictionFiler.Infrastructure.Repositories
         {
             _db = db;
         }
-       
 
+        public async Task<Guid?> GetSubscriptionIdByNameAsync(string name)
+        {
+            return await _db.SubscriptionTypes
+                            .Where(x => x.Name == name)
+                            .Select(x => x.Id)
+                            .FirstOrDefaultAsync();
+        }
         public async Task AddFirmAsync(Firms firm)
         {
             await _db.Firms.AddAsync(firm);
