@@ -33,12 +33,26 @@ namespace EvictionFiler.Application.Services
 
             var userRoles = await _userManager.GetRolesAsync(user);
 
+            var firmData= await _userRepository.GetFirmSubscriptionAsync(user.Id);
+            var companyId = firmData.FirmId?.ToString() ?? "";
+            var subscriptionId = firmData.Firms.SubscriptionTypeId?.ToString() ?? "";
+            var subscriptionName = firmData.Firms.SubscriptionTypes.Name ?? "";
+
             var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Name, user.FirstName +" " + user.LastName ?? ""),
             new Claim(ClaimTypes.Email, user.Email ?? ""),
+         
         };
+            if (firmData.FirmId != null)
+                claims.Add(new Claim("CompanyId", companyId));
+
+            if (subscriptionId != null)
+                claims.Add(new Claim("SubscriptionId", subscriptionId));
+
+            if (!string.IsNullOrEmpty(subscriptionName))
+                claims.Add(new Claim("SubscriptionName", subscriptionName));
 
             foreach (var role in userRoles)
             {

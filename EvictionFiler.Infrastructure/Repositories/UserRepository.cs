@@ -197,6 +197,22 @@ namespace EvictionFiler.Infrastructure.Repositories
             return true;
         }
 
-
+        public async Task<User?> GetFirmSubscriptionAsync(Guid? userId)
+        {
+            var data = await _db.Users
+      .Include(u => u.Firms)
+      .ThenInclude(f => f.SubscriptionTypes)
+      .FirstOrDefaultAsync(u => u.Id == userId);
+            //var data=await _db.Users.Where(u => u.Id == userId)
+            //                .Select(u => new
+            //                {
+            //                    FirmId = u.FirmId,
+            //                    SubscriptionId = u.Firms != null ? u.Firms.SubscriptionTypeId : null,
+            //                    SubscriptionName = u.Firms != null ? u.Firms.SubscriptionTypes.Name : null
+            //                })
+            //                .FirstOrDefaultAsync();
+            return data;
+            
+        }
     }
 }
