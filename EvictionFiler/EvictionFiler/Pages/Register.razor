@@ -1,5 +1,5 @@
 ﻿
-@page "/register"
+@page "/signup"
 @layout EmptyLayout
 @using System.ComponentModel.DataAnnotations
 @using EvictionFiler.Application.DTOs.UserDto
@@ -78,7 +78,7 @@
         margin: 0;
         letter-spacing: -0.3px;
         text-align: center;
-         width: 42%;
+         width: 50%;
     }
 
     /* =========================================================
@@ -86,8 +86,8 @@
        ========================================================= */
     .form-input {
         width: 100%;
-        min-height: 46px;
-        padding: 12px 14px;
+        min-height: 47px;
+        padding: 12px 12px;
         font-size: 14px;
         color: #1F365D;
         background-color: #ffffff;
@@ -107,11 +107,13 @@
         }
 
         .form-input::placeholder {
-            color: #9aa6bf;
+           
+            font-weight: 400;
+            font-size: 14px 
         }
 
-        /* Validation Error */
-        .form-input.input-validation-error {
+        
+        .form-input.invalid {
             border-color: #dc3545;
             box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15);
         }
@@ -154,30 +156,38 @@
                 cursor: not-allowed;
             }
 
-    /* =========================================================
-       Links
-       ========================================================= */
     .login-link {
         color: #1F365D;
-        font-weight: 500;
         cursor: pointer;
     }
 
-        .login-link:hover {
-            text-decoration: underline;
-        }
+    .login-link {
+        font-size: 16px;
+    }
 
-    /* =========================================================
-       Validation Summary
-       ========================================================= */
+  
     .validation-message {
         color: #dc3545;
         font-size: 13px;
     }
 
+    /* Autofill fix (Chrome / Edge) */
+    input.form-input:-webkit-autofill,
+    input.form-input:-webkit-autofill:hover,
+    input.form-input:-webkit-autofill:focus {
+        -webkit-text-fill-color: #1F365D;
+        -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+        transition: background-color 9999s ease-in-out 0s;
+    }
+
     /* =========================================================
-       Responsive
+       Accessibility & Focus Helpers
        ========================================================= */
+    .no-outline:focus {
+        outline: none;
+        box-shadow: none;
+    }
+   
    @@media (max-width: 768px) {
         .register-header {
             flex-direction: column;
@@ -203,7 +213,7 @@
             <h1 class="register-title">Create new account</h1>
         </div>
 
-        <EditForm EditContext="_editContext" OnValidSubmit="HandleRegister">
+        <EditForm EditContext="_editContext" OnValidSubmit="HandleRegister" autocomplete="off">
             <DataAnnotationsValidator />
            
 
@@ -214,7 +224,7 @@
                 <!-- First Name -->
                 <div class="col-md-6">
                     <label class="form-label">First Name <span class="text-danger">*</span></label>
-                    <InputText class="form-control form-control-lg"
+                    <InputText class="form-control form-control-lg form-input"
                                @bind-Value="registerModel.FirstName"
                                @bind-Value:after="@(() => ValidateField(() => registerModel.FirstName, nameof(registerModel.FirstName),"First name is required"))" placeholder="Firstname" />
                     <ValidationMessage For="@(() => registerModel.FirstName)" />
@@ -223,7 +233,7 @@
                 <!-- Last Name -->
                 <div class="col-md-6">
                     <label class="form-label">Last Name <span class="text-danger">*</span></label>
-                    <InputText class="form-control form-control-lg"
+                    <InputText class="form-control form-control-lg form-input"
                                @bind-Value="registerModel.LastName"
                                @bind-Value:after="@(() => ValidateField(() => registerModel.LastName, nameof(registerModel.LastName),"Last name is required"))"
                                placeholder="Lastname" />
@@ -238,10 +248,10 @@
             <!-- Email -->
             <div class="mb-3">
                 <label class="form-label">Email <span class="text-danger">*</span></label>
-                <InputText class="form-control form-control-lg"
+                <InputText class="form-control form-control-lg form-input"
                            @bind-Value="registerModel.Email"
                            @bind-Value:after="@(() => ValidateField(() => registerModel.Email, nameof(registerModel.Email),"Email  is required"))"
-                           placeholder="E-mail" />
+                           placeholder="E-mail" autocomplete="new-email" />
                 <ValidationMessage For="@(() => registerModel.Email)" />
             </div>
 
@@ -249,10 +259,10 @@
             <div class="mb-3">
                 <label class="form-label">Password <span class="text-danger">*</span></label>
                 <InputText type="password"
-                           class="form-control form-control-lg"
+                           class="form-control form-control-lg form-input"
                            @bind-Value="registerModel.Password"
                            @bind-Value:after="@(() => ValidateField(() => registerModel.Password, nameof(registerModel.Password),"Password is required"))"
-                           placeholder="Password" />
+                           placeholder="Password" autocomplete="new-password" />
                 <ValidationMessage For="@(() => registerModel.Password)" />
             </div>
 
@@ -260,7 +270,7 @@
             <div class="mb-3">
                 <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
                 <InputText type="password"
-                           class="form-control form-control-lg"
+                           class="form-control form-control-lg form-input"
                            @bind-Value="registerModel.ConfirmPassword"
                            @bind-Value:after="@(() => ValidateField(() => registerModel.ConfirmPassword, nameof(registerModel.ConfirmPassword),"ConfirmPassword is required"))"
                            placeholder="Re-enter password" />
@@ -284,9 +294,9 @@
 
         </EditForm>
 
-        <div class="text-center mt-3">
+        <div class="text-center mt-3 body-medium">
             Already have an account?
-            <a href="/">Login</a>
+            <a href="/" class="text-brand-100 login-link">Login</a>
         </div>
     </div>
 </div>
