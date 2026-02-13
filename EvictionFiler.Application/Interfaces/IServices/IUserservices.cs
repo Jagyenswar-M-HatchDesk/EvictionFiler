@@ -18,5 +18,6 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<bool> UpdateUserAsync(RegisterDto model);
         Task<IEnumerable<User>> GetAllStaffMembers(Guid FirmId);
         Task<User> GetUserById(Guid UserId);
+        Task<UserDto?> GetUserByIdAsync(Guid UserId);
     }
 }

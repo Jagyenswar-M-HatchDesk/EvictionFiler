@@ -100,5 +100,10 @@ namespace EvictionFiler.Application.Services
             var staff = await _userRepository.GetByIdAsync(UserId);
             return staff;
         }
+
+        public async Task<UserDto?> GetUserByIdAsync(Guid UserId)
+        {
+            return await _userRepository.GetUserByIdAsync(UserId);
+        }
     }
 }

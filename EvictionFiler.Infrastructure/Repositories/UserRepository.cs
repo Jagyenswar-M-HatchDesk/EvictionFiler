@@ -63,13 +63,13 @@ namespace EvictionFiler.Infrastructure.Repositories
         //            RoleId = role.Id,
         //            IsActive = true,
         //            FirmId = FirmId
-                   
+
         //        };
 
         //        var createResult = await _userManager.CreateAsync(user, model.Password);
         //        if (!createResult.Succeeded)
         //        {
-                   
+
         //            return false;
         //        }
 
@@ -81,7 +81,7 @@ namespace EvictionFiler.Infrastructure.Repositories
         //        return false;
         //    }
         //}
-       
+
         public async Task<bool> RegisterTenant(RegisterDto model, Guid? FirmId)
         {
             try
@@ -130,39 +130,39 @@ namespace EvictionFiler.Infrastructure.Repositories
                     RoleId = role.Id,
                     IsActive = true,
                     FirmId = model.FirmId
-                   
+
                 };
 
                 var createResult = await _userManager.CreateAsync(user, model.Password);
                 if (!createResult.Succeeded)
                 {
-                   
+
                     return false;
                 }
 
                 await _userManager.AddToRoleAsync(user, model.Role);
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return false;
             }
         }
-       
+
         public async Task<IEnumerable<User>> GetAllUser()
         {
-            var alluser = await _db.Users.Include(e => e.Role).Include(e=>e.Firms).Where(e=>e.IsActive ==true && e.IsDeleted == false).ToListAsync();
+            var alluser = await _db.Users.Include(e => e.Role).Include(e => e.Firms).Where(e => e.IsActive == true && e.IsDeleted == false).ToListAsync();
             return alluser;
         }
         public async Task<IEnumerable<User>> GetAllStaffMember(Guid Firmid)
         {
-            var allstaff = await _db.Users.Where(e=>e.FirmId == Firmid && e.IsActive == true && e.IsDeleted == false && e.Role.Name.StartsWith("Staff")).Include(e => e.Role).ToListAsync();
+            var allstaff = await _db.Users.Where(e => e.FirmId == Firmid && e.IsActive == true && e.IsDeleted == false && e.Role.Name.StartsWith("Staff")).Include(e => e.Role).ToListAsync();
             return allstaff;
         }
 
         public async Task<User?> GetByIdAsync(Guid id)
         {
-            return await _db.Users.Include(u => u.Role).Include(u=>u.Firms).FirstOrDefaultAsync(u => u.Id == id);
+            return await _db.Users.Include(u => u.Role).Include(u => u.Firms).FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<bool> UpdateUserAsync(RegisterDto updatedUser)
@@ -179,7 +179,7 @@ namespace EvictionFiler.Infrastructure.Repositories
 
             _db.Users.Update(user);
             var result = await _db.SaveChangesAsync();
-            if(result >0)return true;
+            if (result > 0) return true;
 
             return false;
         }
@@ -197,6 +197,34 @@ namespace EvictionFiler.Infrastructure.Repositories
             return true;
         }
 
-
+        public async Task<UserDto?> GetUserByIdAsync(Guid id)
+        {
+            var user = await _db.Users
+                      .AsNoTracking()
+                      .Where(u => u.Id == id)
+                      .Select(u => new UserDto()
+                      {
+                          UserId = u.Id,
+                          FirstName = u.FirstName,
+                          LastName = u.LastName,
+                          Email = u.Email,
+                          Role = u.Role != null ? new UserRoleDto() { RoleId = u.Role.Id, RoleName = u.Role.Name ?? string.Empty } : null,
+                          Firm = u.Firms != null ?
+                                                      new UserFirmDto()
+                                                      {
+                                                          FirmId = u.Firms.Id,
+                                                          FirmName = u.Firms.Name ?? string.Empty,
+                                                          UserSubscription = u.Firms.SubscriptionTypes != null
+                                                             ? new UserSubscriptionDto()
+                                                             {
+                                                                 SubscriptionId = u.Firms.SubscriptionTypes.Id,
+                                                                 SubscriptionName = u.Firms.SubscriptionTypes.Name ?? string.Empty
+                                                             }
+                                                             : null
+                                                      }
+                                                    : null
+                      }).FirstOrDefaultAsync();
+            return user;
+        }
     }
 }

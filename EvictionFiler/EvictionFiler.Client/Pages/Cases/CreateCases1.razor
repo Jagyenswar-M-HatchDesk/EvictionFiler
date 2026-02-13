@@ -2,6 +2,8 @@
 
 @using System.ComponentModel.DataAnnotations
 @using System.Linq.Expressions
+@using EvictionFiler.Application.Common.Interfaces
+@using EvictionFiler.Application.Common.Models
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.ArrearLedgerDtos
@@ -63,6 +65,7 @@
 @inject ITenancyTypeForBuildingRepository TenancyTypeForBuildingRepository;
 @inject IExemptionBasicRepository ExemptionBasicRepository;
 @inject IExemptionReasonRepository ExemptionReasonRepository;
+@inject ILoggedInUserService _loggedInUserService
 
 
 @using EvictionFiler.Client.SpinnerService
@@ -5967,7 +5970,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 }
                 else
                 {
-                    <button type="button" class="btn btn-success" style="height: 45px; width: 115px;" @onclick="OpenPayment">Submit</button>
+                    @if(this.identityUser !=null &&  (this.identityUser.IsSuperAdmin || this.identityUser.Subscription == SubscriptionTypes.Enterprises))
+                    {
+                        <button type="button" class="btn btn-Primary" style="height: 45px; width: 115px;" @onclick="SubmitAsync">Submit</button>
+                    }
+                    else
+                    {
+                         <button type="button" class="btn btn-success" style="height: 45px; width: 115px;" @onclick="OpenPayment">Pay Now</button>
+                    }
                 }
             </div>
         }
@@ -6289,6 +6299,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
     bool isBuildingSelected = false;
     private CancellationTokenSource _cts;
     bool IsExistingBuildingSelected => selectedbuilding != null;
+    private LoggedInUser? identityUser;
 
 
 
@@ -6316,16 +6327,18 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
         ClientTypeList = await ClientRoleRepository.GetAllClientRole();
 
-        await userContext.LoadAsync();
-
-        if (!userContext.IsAuthenticated)
+        
+        var loggedInUser = await _loggedInUserService.GetAsync();
+        if(loggedInUser == null || !loggedInUser.IsAuthenticated)
         {
             nav.NavigateTo("/", forceLoad: true);
             return;
         }
 
-        loggedInUserId = userContext.UserId;
-        isAdmin = userContext.IsAdmin;
+        this.identityUser = loggedInUser;
+     
+        loggedInUserId = this.identityUser.UserId;
+        isAdmin = this.identityUser.IsSuperAdmin;
 
 
         legalcaseDto.SubCaseTypeId = SubCaseTypeList.Where(e => e.Name.StartsWith("Residential")).FirstOrDefault().Id;
