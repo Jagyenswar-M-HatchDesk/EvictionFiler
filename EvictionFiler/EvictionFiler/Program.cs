@@ -272,6 +272,9 @@ builder.Services.AddScoped<ISubscriptionTypeRepository, SubscriptionTypeReposito
 builder.Services.AddScoped<ILoggedInUserService, LoggedInUserService>();
 builder.Services.AddScoped<IRegisterRepository, RegisterRepository>();
 builder.Services.AddScoped<IRegisterService, RegisterService>();
+builder.Services.AddScoped<
+    IUserClaimsPrincipalFactory<User>,
+    ApplicationUserClaimsPrincipalFactory>();
 
 
 var app = builder.Build();

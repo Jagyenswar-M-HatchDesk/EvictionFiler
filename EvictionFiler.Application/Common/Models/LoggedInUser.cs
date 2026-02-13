@@ -15,5 +15,10 @@ namespace EvictionFiler.Application.Common.Models
         public bool IsAdmin => IsInRole(ApplicationRoles.Admin);
         public bool IsStaffMember => IsInRole(ApplicationRoles.StaffMember);
         public bool IsClient => IsInRole(ApplicationRoles.Client);
+
+        public string Name { get; init; } = string.Empty;
+        public string Email {get; init; } = string.Empty;
+        public string Firm { get; init; } = string.Empty;
+        public string Subscription { get; init; } = string.Empty;
     }
 }

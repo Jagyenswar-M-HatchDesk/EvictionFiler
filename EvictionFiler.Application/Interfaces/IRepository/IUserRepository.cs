@@ -15,6 +15,6 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
         Task<bool> UpdateUserAsync(RegisterDto updatedUser);
         Task<bool> DeleteUserAsync(Guid id);
         Task<IEnumerable<User>> GetAllStaffMember(Guid Firmid);
-        //Task<bool> RegisterStaff(RegisterDto model, Guid? FirmId);
+        Task<UserDto?> GetUserByIdAsync(Guid id);
     }
 }

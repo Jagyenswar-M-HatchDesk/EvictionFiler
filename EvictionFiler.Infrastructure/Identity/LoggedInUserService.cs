@@ -28,7 +28,11 @@ namespace EvictionFiler.Infrastructure.Identity
             {
                 IsAuthenticated = true,
                 UserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value,
-                Roles = user.FindAll(ClaimTypes.Role).Select(r => r.Value).ToArray()
+                Roles = user.FindAll(ClaimTypes.Role).Select(r => r.Value).ToArray(),
+                Subscription = user.FindFirst("subscription")?.Value ?? string.Empty,
+                Email = user.Identity.Name ?? string.Empty,
+                Name = user.FindFirst("Name")?.Value ?? string.Empty,
+                Firm = user.FindFirst("Firm")?.Value ?? string.Empty,
             };
         }
     }
