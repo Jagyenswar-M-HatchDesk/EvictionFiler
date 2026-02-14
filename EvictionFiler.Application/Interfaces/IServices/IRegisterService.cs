@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Application.DTOs.UserDto;
+﻿using EvictionFiler.Application.DTOs.FirmDtos;
+using EvictionFiler.Application.DTOs.UserDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace EvictionFiler.Application.Interfaces.IServices
 {
    public interface IRegisterService
     {
-        Task<(bool Success, string Message)> RegisterAsync(RegisterDto dto, string SubscriptionName );
+        Task<(bool Success, string Message)> RegisterAsync(RegisterDto dto, FirmDto? Dto, string SubscriptionName );
     }
 }
