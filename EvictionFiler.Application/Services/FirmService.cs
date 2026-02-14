@@ -34,6 +34,7 @@ namespace EvictionFiler.Application.Services
             }
             return result;
         }
+     
 
         public async Task<IEnumerable<FirmDto>> GetAllFirms()
         {
