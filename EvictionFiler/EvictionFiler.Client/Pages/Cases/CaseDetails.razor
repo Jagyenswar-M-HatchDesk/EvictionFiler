@@ -1163,6 +1163,12 @@
         font-size: 16px;
     }
 
+    .flex-col
+    {
+        display:flex;
+        flex-direction:column;
+    }
+
 </style>
 
 
@@ -1752,7 +1758,7 @@
 
                                                         @* <i class="fa-solid fa-dice-d6" style="font-size:34px;color:#1F365D !important;"></i> *@
                                                     </div>
-                                                Marshal</div>
+                                                Marshal & Warrant</div>
                                                 <button type="button" class="btn btn-sm normal p-1" @onclick="ShowMarshalModal" style="color:white">
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
@@ -1789,10 +1795,88 @@
                     </div>
 
 
+                    <div class="row mb-4">
+                        <div class="col-4">
+                            <div class="info-table mb-4" style="border:none;">
+                                <div class="info-bar">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="info-bar-title">
+                                            <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:20px !important;margin-right:10px;">
 
-                    <!-- Court Info -->
-                    <div class="card shadow-sm p-3 border-0">
-                        <table class="info-table mb-4" style="border:none;">
+                                                @* <i class="fa-solid fa-dice-d6" style="font-size:34px;color:#1F365D !important;"></i> *@
+                                            </div>
+                                        Court & Opposing</div>
+                                        <button type="button" class="btn btn-sm normal p-1" @onclick="ShowCourtModal" title="Edit Courts" style="color:white">
+                                            @if (isNewCourt)
+                                            {
+                                                <i class="fa-solid fa-plus"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-pencil"></i>
+
+                                            }
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="info-row col-4" style="display:flex;">
+                                        <!-- Column 1 -->
+                                        <div class="info-block flex-col">
+                                            <div class="label">Court:</div>
+                                            <div class="value ellipsis">
+                                                @(string.IsNullOrWhiteSpace(legalcaseDto.Court) ? "--" : legalcaseDto.Court)
+                                            </div>
+                                        </div>
+                                        <div class="info-block flex-col">
+                                            <div class="label">Judge:</div>
+                                            <div class="value ellipsis">
+                                                @(string.IsNullOrWhiteSpace(legalcaseDto.Judge) ? "--" : legalcaseDto.Judge)
+                                            </div>
+                                        </div>
+                                        <!-- Column 2 -->
+
+                                    </div>
+
+                                    <!-- ROW 2 -->
+                                    <div class="info-row col-4" style="display:flex;">
+                                        <!-- Column 1 -->
+                                        <div class="info-block flex-col">
+                                            <div class="label">Part:</div>
+                                            <div class="value ellipsis">
+                                                @(string.IsNullOrWhiteSpace(legalcaseDto.CourtPart) ? "--" : legalcaseDto.CourtPart)
+                                            </div>
+                                        </div>
+
+                                        <!-- Column 2 -->
+                                        <div class="info-block flex-col">
+                                            <div class="label">Next Court Date:</div>
+                                            <div class="value ellipsis">
+                                                @(legalcaseDto.NextCourtDate == null ? "--" : legalcaseDto.NextCourtDate?.ToString(DateFormats.Default))
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="info-row col-4" style="display:flex;">
+                                        <!-- Column 1 -->
+                                        <div class="info-block flex-col">
+                                            <div class="label">Room:</div>
+                                            <div class="value ellipsis">
+                                                @(string.IsNullOrWhiteSpace(legalcaseDto.CourtRoomNo) ? "--" : legalcaseDto.CourtRoomNo)
+                                            </div>
+                                        </div>
+
+                                        <!-- Column 2 -->
+                                        <div class="info-block flex-col">
+                                            <div class="label">Index No.:</div>
+                                            <div class="value ellipsis">
+                                                @(string.IsNullOrWhiteSpace(legalcaseDto.Index) ? "--" : legalcaseDto.Index)
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            @* <table class="info-table mb-4" style="border:none;">
                             <thead>
                                 <tr>
                                     <th colspan="2" class="info-bar">
@@ -1873,128 +1957,497 @@
                             </tbody>
                         </table>
 
-
-                    </div>
-
-                    <div class="bg-transparent">
-                        <div class="Details-header"> Case Documents</div>
-                    </div>
-
-                    <div class="card shadow-sm p-3 border-0" style="height:336px;">
-                        <div class="table-responsive">
-                            <table class="info-table mb-4" style="border:none;">
-                                <thead style="background-color:#ECF2FF;">
-                                    <tr>
-
-                                        <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px;background: #ECF2FF;color: #1F365D">ID</th>
-                                        <th scope="col" class="info-bar" style="border-radius: 0px;background: #ECF2FF;color: #1F365D">Forms</th>
-                                        @if (isAdmin)
-                                        {
-
-                                            <th scope="col" class="info-bar" style="border-radius: 0px;background: #ECF2FF;color: #1F365D">Created By</th>
-                                        }
-                                        <th scope="col" class="info-bar" style="border-radius: 0px;background: #ECF2FF;color: #1F365D">Created On</th>
-                                        <th scope="col" style="width:12%;border-radius:0px 8px 0px 0px;background: #ECF2FF;color: #1F365D" class="text-nowrap info-bar">Actions</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    @if (caseFormDto != null && caseFormDto.Count() > 0)
-                                    {
-                                        int index = 1;
-                                        @foreach (var form in caseFormDto)
-                                        {
-                                            <tr class="info-row">
-                                                <td class="info-block-table">
-                                                    <div class="value">@index</div>
-
-                                                </td>
-                                                <td class="info-block-table"><div class="value">@form.FormTypeName</div></td>
-                                                @if (isAdmin)
-                                                {
-                                                    <td><div class="value">@form.CreatedByName</div></td>
-                                                }
-                                                <td class="info-block-table"><div class="value">@form.CreatedOn?.ToString(DateFormats.Default)</div></td>
-                                                <td class="d-flex justify-content-between info-block-table" style="gap:2px">
-                                                    <span class="action-icon value" @onclick="@(() => ViewPdf(form.File))"><i class="fa-solid fa-eye"></i></span>
-                                                    <span class="action-icon value" @onclick="@(() => EditCaseDetail(form.Id))"><i class="fa-solid fa-pen-to-square"></i></span>
-                                                    <span class="action-icon-danger value" @onclick="@(() => DeleteCaseDetail(form.Id))"><i class="fa-solid fa-trash"></i></span>
-                                                </td>
-                                            </tr>
-                                            index++;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <tr class="info-row">
-                                            <td colspan="4" class="text-muted text-center info-block-table"> <div class="value">No notices generated yet.</div></td>
-                                        </tr>
-                                    }
-
-                                </tbody>
-                            </table>
+                        *@
                         </div>
 
+                        <div class="col-8">
+                            <div class="info-table " style="border:none;">
+                                <div class="info-bar">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="info-bar-title">
+                                        <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:20px !important;margin-right:10px;">
+
+                                                        @* <i class="fa-solid fa-dice-d6" style="font-size:34px;color:#1F365D !important;"></i> *@
+                                                    </div>
+                                        Marshal & Warrant </div>
+                                        <button type="button" class="btn btn-sm normal p-1" @onclick="ShowMarshalModal" style="color:white">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Warrant Issued:</div>
+                                        <div class="info-cell value ellipsis">
+                                            @(caseWarrantDto.WarrantIssued?.ToString(DateFormats.Default) ?? "--")
+
+                                        </div>
+                                    </div>
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Warrant Rejected:</div>
+                                        <div class="info-cell value ellipsis">
+                                            @(caseWarrantDto.WarrantRejected?.ToString(DateFormats.Default) ?? "--")
+
+                                        </div>
+                                    </div>
+
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Notice Served: </div>
+                                        <div class="info-cell value ellipsis">
+                                            @(caseWarrantDto.NoticeServed?.ToString(DateFormats.Default) ?? "--")
+
+                                        </div>
+                                    </div>
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Warrant Status:</div>
+                                        <div class="info-cell value ellipsis">@(legalcaseDto.WarrantRequested ? "Requested" : "Not Requested")</div>
+                                    </div>
+
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Execution Eligible:</div>
+                                        <div class="info-cell value ellipsis">
+                                            @(caseWarrantDto.ExecutionEligible?.ToString(DateFormats.Default) ?? "--")
+
+                                        </div>
+                                    </div>
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Warrant Requested:</div>
+                                        <div class="info-cell value ellipsis">
+                                            @(caseWarrantDto.WarrantIssued?.ToString(DateFormats.Default) ?? "--")
+
+                                        </div>
+                                    </div>
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Eviction Executed:</div>
+                                        <div class="info-cell value ellipsis">
+                                            @(caseWarrantDto.EvictionExecuted?.ToString(DateFormats.Default) ?? "--")
+
+                                        </div>
+                                    </div>
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Scheduled Eviction:</div>
+                                        <div class="info-cell value ellipsis">--</div>
+                                    </div>
 
 
+
+
+
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Re-File:</div>
+                                        <div class="info-cell value ellipsis">
+                                            @(caseWarrantDto.ReFileDate?.ToString(DateFormats.Default) ?? "--")
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            @* <table class="info-table " style="border:none;">
+                            <thead>
+                                <tr>
+                                    <th colspan="2" class="info-bar" >
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="info-bar-title">Warrant</div>
+                                            <button type="button" class="btn btn-sm normal p-1" @onclick="ShowMarshalModal" style="color:white">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr class="info-row">
+                                    <td class="info-cell label">Warrant Status:</td>
+                                    <td class="info-cell value ellipsis">@(legalcaseDto.WarrantRequested ? "Requested" : "Not Requested")</td>
+                                </tr>
+
+                                <tr class="info-row">
+                                    <td class="info-cell label">Scheduled Eviction:</td>
+                                    <td class="info-cell value ellipsis">--</td>
+                                </tr>
+
+                                <tr class="info-row">
+                                    <td class="info-cell label">Warrant Requested:</td>
+                                    <td class="info-cell value ellipsis">
+                                        @(caseWarrantDto.WarrantIssued?.ToString(DateFormats.Default) ?? "--")
+
+                                    </td>
+                                </tr>
+                                <tr class="info-row">
+                                    <td class="info-cell label">Warrant Issued:</td>
+                                    <td class="info-cell value ellipsis">
+                                        @(caseWarrantDto.WarrantIssued?.ToString(DateFormats.Default) ?? "--")
+
+                                    </td>
+                                </tr>
+                                <tr class="info-row">
+                                    <td class="info-cell label">Warrant Rejected:</td>
+                                    <td class="info-cell value ellipsis">
+                                        @(caseWarrantDto.WarrantRejected?.ToString(DateFormats.Default) ?? "--")
+
+                                    </td>
+                                </tr>
+                                <tr class="info-row">
+                                    <td class="info-cell label">Notice Served: </td>
+                                    <td class="info-cell value ellipsis">
+                                        @(caseWarrantDto.NoticeServed?.ToString(DateFormats.Default) ?? "--")
+
+                                    </td>
+                                </tr>
+                                <tr class="info-row">
+                                    <td class="info-cell label">Execution Eligible:</td>
+                                    <td class="info-cell value ellipsis">
+                                        @(caseWarrantDto.ExecutionEligible?.ToString(DateFormats.Default) ?? "--")
+
+                                    </td>
+                                </tr>
+                                <tr class="info-row">
+                                    <td class="info-cell label">Eviction Executed:</td>
+                                    <td class="info-cell value ellipsis">
+                                        @(caseWarrantDto.EvictionExecuted?.ToString(DateFormats.Default) ?? "--")
+
+                                    </td>
+                                </tr>
+                                <tr class="info-row">
+                                    <td class="info-cell label">Re-File:</td>
+                                    <td class="info-cell value ellipsis">
+                                        @(caseWarrantDto.ReFileDate?.ToString(DateFormats.Default) ?? "--")
+
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        *@
+                        </div>
                     </div>
-                    <div class="card shadow-sm p-3 border-0" style="height:180px;">
-                        <div class="table-responsive">
-                            <table class="info-table mb-4" style="border:none;">
-                                <thead>
-                                    <tr>
-                                        <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px;">ID</th>
-                                        <th scope="col" class="info-bar" style="border-radius:0px;">Notes</th>
-                                        @if (isAdmin)
-                                        {
+                    <!-- Court Info -->
+                    
+                    <div class="row mb-4">
+                        <div class="col-4">
+                            <div class="bg-transparent mb-4">
+                                <div class="Details-header"> Case Documents</div>
+                            </div>
 
-                                            <th scope="col" class="info-bar" style="border-radius:0px;">Created By</th>
-                                        }
-                                        <th scope="col" class="info-bar" style="border-radius:0px;">Created On</th>
-                                        <th scope="col" style="width:12%;border-radius:0px 8px 0px 0px;" class="text-nowrap info-bar">Actions</th>
-                                    </tr>
-                                </thead>
+                            <div class="mb-4">
+                                <div class="table-responsive" style="height:205px;">
+                                    <table class="info-table" style="border:none; ">
+                                        <thead >
+                                            <tr>
 
-                                <tbody>
-                                    @if (CaseNotes != null && CaseNotes.Count() > 0)
-                                    {
-                                        int index = 1;
-                                        @foreach (var notes in CaseNotes)
-                                        {
-                                            <tr class="info-row">
-                                                <td class="info-block-table">
-                                                    <div class="value">@index</div>
+                                                <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px;  display:flex;align-items:center;">
+                                                    <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:20px !important;margin-right:10px;">
 
-                                                </td>
-                                                <td class="info-block-table"><div class="value">@notes.Notes</div></td>
+                                                        @* <i class="fa-solid fa-dice-d6" style="font-size:34px;color:#1F365D !important;"></i> *@
+                                                    </div>
+                                                ID</th>
+                                                <th scope="col" class="info-bar" style="border-radius: 0px;">Forms</th>
                                                 @if (isAdmin)
                                                 {
-                                                    <td class="info-block-table"><div class="value">@notes.CreatedBy</div></td>
+
+                                                    <th scope="col" class="info-bar" style="border-radius: 0px;">Created By</th>
                                                 }
-                                                <td class="info-block-table"><div class="value">@notes.CreatedOn.ToString(DateFormats.Default)</div></td>
-                                                <td class="d-flex justify-content-between info-block-table" style="gap:2px">
-
-                                                    <span class="action-icon value"><i class="fa-solid fa-pen-to-square"></i></span>
-                                                    <span class="action-icon-danger value"><i class="fa-solid fa-trash"></i></span>
-                                                </td>
+                                                <th scope="col" class="info-bar" style="border-radius: 0px;">Created On</th>
+                                                <th scope="col" style="width:12%;border-radius:0px 8px 0px 0px;" class="text-nowrap info-bar">Actions</th>
                                             </tr>
-                                            index++;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <tr class="info-row">
-                                            <td colspan="4" class="text-muted text-center info-block-table"> <div class="value">No notes submitted yet.</div></td>
-                                        </tr>
-                                    }
+                                        </thead>
 
-                                </tbody>
-                            </table>
+                                        <tbody>
+                                            @if (caseFormDto != null && caseFormDto.Count() > 0)
+                                            {
+                                                int index = 1;
+                                                @foreach (var form in caseFormDto)
+                                                {
+                                                    <tr class="info-row" style="display:table-row">
+                                                        <td class="info-block-table">
+                                                            <div class="value">@index</div>
+
+                                                        </td>
+                                                        <td class="info-block-table"><div class="value">@form.FormTypeName</div></td>
+                                                        @if (isAdmin)
+                                                        {
+                                                            <td><div class="value">@form.CreatedByName</div></td>
+                                                        }
+                                                        <td class="info-block-table"><div class="value">@form.CreatedOn?.ToString(DateFormats.Default)</div></td>
+                                                        <td class="d-flex justify-content-between info-block-table" style="gap:2px">
+                                                            <span class="action-icon value" @onclick="@(() => ViewPdf(form.File))"><i class="fa-solid fa-eye"></i></span>
+                                                            <span class="action-icon value" @onclick="@(() => EditCaseDetail(form.Id))"><i class="fa-solid fa-pen-to-square"></i></span>
+                                                            <span class="action-icon-danger value" @onclick="@(() => DeleteCaseDetail(form.Id))"><i class="fa-solid fa-trash"></i></span>
+                                                        </td>
+                                                    </tr>
+                                                    index++;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <tr class="info-row">
+                                                    <td colspan="4" class="text-muted text-center info-block-table"> <div class="value">No notices generated yet.</div></td>
+                                                </tr>
+                                            }
+
+                                        </tbody>
+                                    </table>
+                                </div>
+
+
+
+                            </div>
+                            <div class="" >
+                                <div class="table-responsive" style="height:160px;">
+                                    <table class="info-table" >
+                                        <thead>
+                                            <tr>
+
+                                                <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px; display:flex;align-items:center;">
+                                                    <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:20px !important;margin-right:10px;">
+
+                                                        @* <i class="fa-solid fa-dice-d6" style="font-size:34px;color:#1F365D !important;"></i> *@
+                                                    </div>
+                                                Uploaded Documents</th>
+                                                <th scope="col" class="info-bar" style="border-radius:0px;">Created On</th>
+                                                <th scope="col" style="width:12%;border-radius:0px 8px 0px 0px;" class="text-nowrap info-bar">Actions</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            @if (caseDocuments != null && caseDocuments.Count() > 0)
+                                            {
+                                                @foreach (var docs in caseDocuments)
+                                                {
+                                                    <tr class="info-row" style="display:table-row;">
+
+                                                        <td class="info-block-table"><div class="value">@docs.Name</div></td>
+
+                                                        <td class="info-block-table"><div class="value">@docs.CreatedOn.ToString(DateFormats.Default)</div></td>
+                                                        <td class="d-flex justify-content-between info-block-table" style="gap:2px">
+
+                                                            <span class="action-icon value">
+                                                                <i class="fa-solid fa-eye text-navy me-2" style="cursor:pointer"
+                                                                   @onclick="@(() => PreviewDocument(docs.Path))"
+                                                                   title="Preview"></i>
+
+                                                            </span>
+                                                            <span class="action-icon-danger value">
+                                                                <i class="fa-solid fa-trash text-navy me-2" style="cursor:pointer"
+                                                                   @onclick="@(() => DeleteCaseDocument(docs.Id))"
+                                                                   title="Delete"></i>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <tr class="info-row">
+                                                    <td colspan="4" class="text-muted text-center info-block-table"> <div class="value">No Document uploaded yet.</div></td>
+                                                </tr>
+                                            }
+
+                                        </tbody>
+                                    </table>
+                                </div>
+
+
+
+                            </div>
+
                         </div>
+                        <div class="col-8 row">
+                            <div class="col-12 mb-4" >
+                                <div class="table-responsive" style="height:160px;">
+                                    <table class="info-table" >
+                                        <thead>
+                                            <tr>
+                                                
+                                                <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px; display:flex;align-items:center;">
+                                                    <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:20px !important;margin-right:10px;">
+
+                                                        @* <i class="fa-solid fa-dice-d6" style="font-size:34px;color:#1F365D !important;"></i> *@
+                                                    </div>
+                                                ID</th>
+                                                <th scope="col" class="info-bar" style="border-radius:0px;">Notes</th>
+                                                @if (isAdmin)
+                                                {
+
+                                                    <th scope="col" class="info-bar" style="border-radius:0px;">Created By</th>
+                                                }
+                                                <th scope="col" class="info-bar" style="border-radius:0px;">Created On</th>
+                                                <th scope="col" style="width:12%;border-radius:0px 8px 0px 0px;" class="text-nowrap info-bar">Actions</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            @if (CaseNotes != null && CaseNotes.Count() > 0)
+                                            {
+                                                int index = 1;
+                                                @foreach (var notes in CaseNotes)
+                                                {
+                                                    <tr class="info-row" style="display:table-row;">
+                                                        <td class="info-block-table">
+                                                            <div class="value">@index</div>
+
+                                                        </td>
+                                                        <td class="info-block-table"><div class="value">@notes.Notes</div></td>
+                                                        @if (isAdmin)
+                                                        {
+                                                            <td class="info-block-table"><div class="value">@notes.CreatedBy</div></td>
+                                                        }
+                                                        <td class="info-block-table"><div class="value">@notes.CreatedOn.ToString(DateFormats.Default)</div></td>
+                                                        <td class="d-flex justify-content-between info-block-table" style="gap:2px">
+
+                                                            <span class="action-icon value"><i class="fa-solid fa-pen-to-square"></i></span>
+                                                            <span class="action-icon-danger value"><i class="fa-solid fa-trash"></i></span>
+                                                        </td>
+                                                    </tr>
+                                                    index++;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <tr class="info-row">
+                                                    <td colspan="4" class="text-muted text-center info-block-table"> <div class="value">No notes submitted yet.</div></td>
+                                                </tr>
+                                            }
+
+                                        </tbody>
+                                    </table>
+                                </div>
 
 
 
+                            </div>
+                            <div class="col-9">
+                                <div class="" style="background-color:white;">
+                                    <div class="info-bar">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="info-bar-title">
+                                                <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:20px !important;margin-right:10px;">
+
+                                                    @* <i class="fa-solid fa-dice-d6" style="font-size:34px;color:#1F365D !important;"></i> *@
+                                                </div>Timeline
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                    <div class=para>
+                                        <p class="text-secondary">Filed<span class="arrow ms-1 me-1">→</span>Service<span class="arrow ms-1 me-1">→</span>Judgment<span class="arrow ms-1 me-1">→</span>Environment</p>
+                                    </div>
+
+
+
+                                    <div class="timeline" id="timelineList">
+                                        <div class="item" data-status="completed">
+                                            <span class="dot"></span>
+
+                                            <div class="text-secondary field-label font14 mx-2">@legalcaseDto.CreatedOn.ToString(DateFormats.Default)</div>
+                                            <div class="fw-semibold label mx-2">Case Created</div>
+                                            <div class="text-secondary field-label font14 mx-2">Initial Intake And File Opened</div>
+
+
+                                        </div>
+                                        @if (caseFormDto.Count() > 0)
+                                        {
+                                            @foreach (var item in caseFormDto)
+                                            {
+
+                                                <div class="item" data-status="completed">
+                                                    <span class="dot"></span>
+                                                    <div class="text-secondary field-label font14 mx-2">@(item.CreatedOn?.ToString(DateFormats.Default) ?? "---")</div>
+                                                    <div class="fw-semibold label mx-2">Notice Served</div>
+                                                    <div class="text-secondary field-label font14 mx-2">@(item.FormTypeName ?? "---")</div>
+
+
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+
+                                            <div class="item" data-status="upcoming">
+                                                <span class="dot"></span>
+                                                <div class="text-secondary field-label font14 mx-2">--</div>
+                                                <div class="fw-semibold label mx-2">Notice Not Generated</div>
+                                                <div class="text-secondary field-label font14 mx-2">Pending Notice</div>
+
+
+                                            </div>
+                                        }
+                                        @if (CaseHearings.Count() > 0)
+                                        {
+                                            @foreach (var item in CaseHearings)
+                                            {
+                                                <div class="item" data-status="current">
+                                                    <span class="dot"></span>
+                                                    <div class="text-secondary field-label font14 mx-2">@(item.HearingDate?.ToString(DateFormats.Default))</div>
+                                                    <div class="fw-semibold label mx-2">Hearing Scheduled</div>
+                                                    <div class="text-secondary field-label font14 mx-2">Awaiting confirmation from court</div>
+
+
+                                                </div>
+
+                                            }
+                                        }
+                                        else
+                                        {
+
+                                            <div class="item" data-status="upcoming">
+                                                <span class="dot"></span>
+
+                                                <div class="text-secondary field-label font14 mx-2">--</div>
+                                                <div class="fw-semibold label mx-2">Hearing Scheduled</div>
+                                                <div class="text-secondary field-label font14 mx-2">Awaiting confirmation from court</div>
+
+                                            </div>
+
+                                        }
+
+                                        @if (Judgements.Count() > 0)
+                                        {
+                                            @foreach (var item in Judgements)
+                                            {
+                                                <div class="item" data-status="current">
+                                                    <span class="dot"></span>
+
+                                                    <div class="text-secondary field-label font14 mx-2">@item.AppreanceDate?.ToString(DateFormats.Default)</div>
+                                                    <div class="fw-semibold label mx-2">@item.CourtTodayName</div>
+                                                    <div class="text-secondary field-label font14 mx-2"></div>
+
+
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+
+                                            <div class="item" data-status="upcoming">
+                                                <span class="dot"></span>
+
+                                                <div class="text-secondary field-label font14 mx-2">--</div>
+                                                <div class="fw-semibold label mx-2">Judgment</div>
+                                                <div class="text-secondary field-label font14 mx-2">Pending hearing</div>
+
+
+                                            </div>
+                                        }
+                                        <div class="item" data-status="upcoming">
+                                            <span class="dot"></span>
+                                            <div class="text-secondary field-label font14 mx-2">--</div>
+                                            <div class="fw-semibold label mx-2">Warrant/Enforcement</div>
+                                            <div class="text-secondary field-label font14 mx-2">To be requested if applicable</div>
+
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                        
                     </div>
+                    
 
                     <!-- Tabs: Activity / Timeline / Actions -->
                     @*  <div class="card shadow-sm border-0">
@@ -2440,7 +2893,7 @@
 
                     </div>
 
-                    *@
+                    *
                     <div class="card shadow-sm p-3 border-0 pb-4">
                         <table class="info-table " style="border:none;">
                             <thead>
@@ -2541,7 +2994,7 @@
                             </div>
                         </div>
                     </div>
-                    *@
+                    *
                     <div class="card shadow-sm p-3 border-0" style="height:180px;">
                         <div class="table-responsive">
                             <table class="info-table mb-4" style="border:none;">
@@ -2650,7 +3103,7 @@
                     </div>*@
                 </div>
             </section>
-            <section class="row g-4 mt-1">
+           @* <section class="row g-4 mt-1">
 
                 <div class="col-12 col-lg-12 d-flex flex-column gap-4">
                     <div class="card shadow-sm border-0 p-3">
@@ -2769,6 +3222,7 @@
                     </div>
                 </div>
             </section>
+            *@
         </main>
     }
 

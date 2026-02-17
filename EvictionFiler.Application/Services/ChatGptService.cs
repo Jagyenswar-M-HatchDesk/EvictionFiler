@@ -33,10 +33,10 @@ namespace EvictionFiler.Application.Services
 
         public async Task<string?> GenerateOSC(Guid CaseId)
         {
-            var apiKey = _configuration.GetSection("OpenAI:ApiKey").Value;
+            var apiKey = _configuration.GetSection("GenerateContent:ApiKey").Value;
             if (string.IsNullOrEmpty(apiKey))
             {
-                Console.WriteLine("OPENAI_API_KEY environment variable not set.");
+                Console.WriteLine("API_KEY environment variable not set.");
                 return null;
             }
 
@@ -53,7 +53,6 @@ namespace EvictionFiler.Application.Services
                     var bytes = await _httpClient.GetByteArrayAsync($"/api/casefile/{url}");
                     await using var stream = new MemoryStream(bytes);
 
-                    // 2. Upload to OpenAI (SDK DOES support this)
                     var fileClient = client.GetOpenAIFileClient();
                     var uploaded = await fileClient.UploadFileAsync(
                         file: stream,
@@ -63,7 +62,6 @@ namespace EvictionFiler.Application.Services
 
                     var uploadedFileId = uploaded.Value.Id;
                     uploadedFileIds.Add(uploadedFileId);
-                    Console.WriteLine($"Uploaded OpenAI File ID: {uploadedFileId}");
                 }
 
 
@@ -75,7 +73,7 @@ namespace EvictionFiler.Application.Services
 
                 var contentItems = new List<object>
                 {
-                    new { type = "input_text", text = OpenAIPrompts.DefaultsOSC }
+                    new { type = "input_text", text = GenerateContentPrompts.DefaultsOSC }
                 };
 
                 //foreach (var fid in uploadedFileIds)
@@ -118,10 +116,10 @@ namespace EvictionFiler.Application.Services
         }
         public async Task<string?> GenerateMotion(Guid CaseId)
         {
-            var apiKey = _configuration.GetSection("OpenAI:ApiKey").Value;
+            var apiKey = _configuration.GetSection("GenerateContent:ApiKey").Value;
             if (string.IsNullOrEmpty(apiKey))
             {
-                Console.WriteLine("OPENAI_API_KEY environment variable not set.");
+                Console.WriteLine("API_KEY environment variable not set.");
                 return null;
             }
 
@@ -138,7 +136,6 @@ namespace EvictionFiler.Application.Services
                     var bytes = await _httpClient.GetByteArrayAsync($"/api/casefile/{url}");
                     await using var stream = new MemoryStream(bytes);
 
-                    // 2. Upload to OpenAI (SDK DOES support this)
                     var fileClient = client.GetOpenAIFileClient();
                     var uploaded = await fileClient.UploadFileAsync(
                         file: stream,
@@ -160,7 +157,7 @@ namespace EvictionFiler.Application.Services
 
                 var contentItems = new List<object>
                 {
-                    new { type = "input_text", text = OpenAIPrompts.MotionPrompt }
+                    new { type = "input_text", text = GenerateContentPrompts.MotionPrompt }
                 };
 
                 foreach (var fid in uploadedFileIds)
