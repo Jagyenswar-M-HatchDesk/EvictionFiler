@@ -1,4 +1,5 @@
-﻿@using EvictionFiler.Application.Interfaces.IServices
+﻿@page "/payment"
+@using EvictionFiler.Application.Interfaces.IServices
 @inject IJSRuntime JS
 @inject HttpClient Http
 @inject ICloverService CloverService
@@ -16,46 +17,268 @@
         margin-bottom: 15px !important;
     }
 
-    .btn-pay{
-        width:100%;
+    .btn-pay {
+        width: 100%;
         background-color: #1F365D;
-        border-radius:12px;
+        border-radius: 12px;
         min-height: 45px;
     }
+
+    .form-group {
+        /* margin-bottom: 18px; */
+        display: flex;
+        flex-direction: column;
+    }
+
+        .form-group label {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #374151;
+        }
+
+        .form-group input:focus {
+            border-color: #1e3a8a; /* your theme blue */
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15);
+            outline: none;
+        }
+
+    /* Row Layout */
+    .row-group {
+        display: flex;
+        gap: 14px;
+    }
+
+        .row-group .form-group {
+            flex: 1;
+        }
+
+    .btn-pay:hover {
+        background: #162d6d;
+        transform: translateY(-1px);
+    }
+
+    /* Hide original positioning */
+    .clover-footer,
+    #recaptcha-container {
+        position: static !important;
+        width: 100% !important;
+        /* margin-top: 12px !important; */
+    }
+
+    /* Make it blend into modal */
+    .clover-footer {
+        /* background: transparent !important; */
+        /* padding: 8px 0 !important; */
+        font-size: 14px !important;
+        text-align: center !important;
+    }
+
+    /* Wrap inside modal */
+    .clover-compliance-wrapper {
+        margin-top: 18px;
+        border-top: 1px solid #e5e7eb;
+        /* padding-top: 12px; */
+    }
+
+    .modal-content {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .grecaptcha-badge {
+        position: absolute !important;
+        bottom: 10px !important;
+        /* right: 10px !important; */
+        left: auto !important;
+    }
+
+    .test-link {
+        margin: 10px 0 8px 0;
+    }
+
+        .test-link a {
+            font-size: 14px;
+            color: #1F365D !important;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+            .test-link a:hover {
+                text-decoration: underline !important;
+            }
+
+    .test-card-box {
+        background: #f3f4f6;
+        padding: 14px;
+        border-radius: 10px;
+        font-size: 13px;
+        margin-bottom: 18px;
+    }
+
 </style>
-<div>
-    <div style="display:flex; align-items:center;justify-content:center;">
-        <h3>Card Information</h3>
-    </div>
-    <div class="row">
-        <div id="card-name"></div>
 
-    </div>
-    <div>
-        <div id="card-number"></div>
-    </div>
-    <div class="row">
-        <div class="col-6" id="card-date"></div>
-        <div class="col-6" id="card-cvv"></div>
-    </div>
-    <div class="row">
-        <div id="card-postal-code"></div>
-    </div>
-    <div  style="display:flex; align-items:center;justify-content:center;">
-        <button class="btn-pay btn-pay btn-primary" @onclick="ProcessPayment">
-            Pay Now
-        </button>
-    </div>
+<div class="modal fade show d-block" tabindex="-1"
+     style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
 
-   @*  <div style="display:flex; align-items:center;justify-content:space-between;">
-        <hr style="width:40%"/>
-        <p>or Pay with</p>
-        <hr style="width:40%"/>
+            <div class="modal-header">
+                <h5 class="modal-title">Complete Payment</h5>
+                <button type="button" class="btn-close"
+                        @onclick="CloseTranx"></button>
+            </div>
+
+           @*  <div class="modal-body">
+                <div>
+                    <div style="display:flex; align-items:center;justify-content:center;">
+                        <h3>Card Information</h3>
+                    </div>
+                    <div class="row form-group">
+                        <label>Cardholder Name</label>
+                        <div id="card-name"></div>
+
+                    </div>
+                    <div class="row form-group">
+                        <label>Card Number</label>
+                        <div id="card-number"></div>
+                    </div>
+                    <div class="row row-group">
+                        <div class="col-3 form-group">
+                            <label>Expiry</label>
+                            <div id="card-date"></div>
+                        </div>
+                        <div class="col-3 form-group">
+                            <label>CVV</label>
+                            <div id="card-cvv"></div>
+                        </div>
+                        <div class="col-6 form-group">
+                            <label>ZIP</label>
+                            <div id="card-postal-code"></div>
+                        </div>
+
+                    </div>
+
+                    <div style="display:flex; align-items:center;justify-content:center;">
+                        <button class="btn-pay btn-pay btn-primary" @onclick="ProcessPayment">
+                            Pay $20
+                        </button>
+                    </div>
+
+                   @*  <div style="display:flex; align-items:center;justify-content:space-between;">
+                        <hr style="width:45%" />
+                        <p>or Pay with</p>
+                        <hr style="width:45%" />
+                    </div>
+                    <div id="payment-request-button"></div> *
+                </div>
+            </div> *@
+            <div class="modal-body">
+
+                @if (!IsProcessing && !IsSuccess)
+                {
+                    <!-- PAYMENT FORM -->
+                    <div>
+                        <div class="text-center">
+                            <h3>Card Information</h3>
+                        </div>
+
+                        <div class="row form-group">
+                            <label>Cardholder Name</label>
+                            <div id="card-name"></div>
+                        </div>
+
+                        <div class="row form-group">
+                            <label>Card Number</label>
+                            <div id="card-number"></div>
+                        </div>
+
+                        <div class="row row-group">
+                            <div class="col-3 form-group">
+                                <label>Expiry</label>
+                                <div id="card-date"></div>
+                            </div>
+                            <div class="col-3 form-group">
+                                <label>CVV</label>
+                                <div id="card-cvv"></div>
+                            </div>
+                            <div class="col-6 form-group">
+                                <label>ZIP</label>
+                                <div id="card-postal-code"></div>
+                            </div>
+                        </div>
+
+                        <div class="test-link">
+                            <a @onclick="ToggleTestCard">Use Test Card</a>
+                        </div>
+
+                        @if (showTestInfo)
+                        {
+                            <div class="test-card-box" style="position:relative">
+                                <button type="button"
+                                        class="btn-close position-absolute  end-0 m-2"
+                                        @onclick="ToggleTestCard" style="top: 7px;">
+                                </button>
+                                <p><strong>Test Card Details</strong></p>
+                                <ul>
+                                    <li>Name: John Doe</li>
+                                    <li>Card: 4242 4242 4242 4242</li>
+                                    <li>Expiry: 12/30</li>
+                                    <li>CVV: 123</li>
+                                    <li>ZIP: 12345</li>
+                                </ul>
+                            </div>
+                        }
+
+
+                        <div class="text-center">
+                            <button class="btn-pay btn-primary"
+                                    @onclick="ProcessPayment">
+                                Pay $20
+                            </button>
+                        </div>
+                    </div>
+                }
+
+                @if (IsProcessing && !IsSuccess)
+                {
+                    <!-- PROCESSING STATE -->
+                    <div class="state-screen">
+                        <div class="spinner-border text-primary"
+                             style="width: 4rem; height: 4rem;"
+                             role="status">
+                        </div>
+                        <h5 class="mt-4">Processing Payment...</h5>
+                        <p class="text-muted">Please do not close this window</p>
+                    </div>
+                }
+
+                @if (IsSuccess)
+                {
+                    <!-- SUCCESS STATE WITH GIF -->
+                    <div class="state-screen">
+                        <img src="/images/tick-gif.gif"
+                             class="success-gif"
+                             alt="Payment Successful" />
+                        <h4 class="mt-4">Payment Successful</h4>
+                    </div>
+                }
+
+            </div>
+
+            <div class="clover-compliance-wrapper">
+                <div id="clover-footer-container"></div>
+                <div id="recaptcha-container-wrapper"></div>
+            </div>
+        </div>
     </div>
-    <div id="payment-request-button"></div> *@
 </div>
+
 <script>
         window.cloverPayment = {
+
+            _observer: null,
+        _cloverInstance: null,
 
         init: function (publicKey, merchantId) {
 
@@ -94,6 +317,55 @@
             cardPostalCode.mount('#card-postal-code');
 
             window._cloverInstance = clover;
+
+            window.cloverPayment.observeCompliance();
+        },
+
+         observeCompliance: function () {
+
+            const moveElements = () => {
+
+                const footer = document.querySelector('.clover-footer');
+                const recaptchaContainer = document.getElementById('recaptcha-container');
+                const recaptchaBadge = document.querySelector('.grecaptcha-badge');
+
+                const footerTarget = document.getElementById('clover-footer-container');
+                const recaptchaTarget = document.getElementById('recaptcha-container-wrapper');
+
+                // Move Clover footer
+                if (footer && footerTarget && !footerTarget.contains(footer)) {
+                    footerTarget.appendChild(footer);
+                }
+
+                // Move reCAPTCHA container
+                if (recaptchaContainer && recaptchaTarget && !recaptchaTarget.contains(recaptchaContainer)) {
+                    recaptchaTarget.appendChild(recaptchaContainer);
+                }
+
+                // Fix Google badge positioning (remove fixed viewport positioning)
+                // if (recaptchaBadge) {
+                //     recaptchaBadge.style.position = "static";
+                //     recaptchaBadge.style.transform = "none";
+                //     recaptchaBadge.style.marginTop = "8px";
+                //     // recaptchaBadge.style.right = "0";
+                //     recaptchaBadge.style.bottom = "0";
+                // }
+            };
+
+            // Initial attempt
+            moveElements();
+
+            // Create observer
+            const observer = new MutationObserver(() => {
+                moveElements();
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+
+            window.cloverPayment._observer = observer;
         },
 
         createToken: async function () {
@@ -104,15 +376,33 @@
             }
 
             return { success: true, token: result.token };
+        },
+
+        destroy: function () {
+            if (window.cloverPayment._observer) {
+                window.cloverPayment._observer.disconnect();
+            }
         }
     };
 
 </script>
 @code {
     [Parameter]
-    public EventCallback<bool> OnSuccessTranx { get; set; }
+    public EventCallback<bool?> OnSuccessTranx { get; set; }
+    [Parameter]
+    public EventCallback<bool?> OnCloseTranx { get; set; }
     [Parameter]
     public string? UserId { get; set; }
+
+    private bool IsProcessing = false;
+    private bool IsSuccess = false;
+
+    private bool showTestInfo = false;
+
+    private void ToggleTestCard()
+    {
+        showTestInfo = !showTestInfo;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -126,33 +416,73 @@
         }
     }
 
+    // private async Task ProcessPayment()
+    // {
+    //     var result = await JS.InvokeAsync<TokenResult>("cloverPayment.createToken");
+
+    //     if (!result.Success)
+    //     {
+    //         Console.WriteLine("Token failed");
+    //         return;
+    //     }
+    //     spinnerService.Show();
+    //     var response = await CloverService.CreateChargeAsync(result.Token, 2000);
+    //     if (response != null)
+    //     {
+    //         if (response.Status.ToLower() == "succeeded")
+    //         {
+    //             if (UserId != null)
+    //             {
+    //                 response.CreatedBy = Guid.Parse(UserId);
+    //             }
+    //             var resultTranx = await TransactionService.AddTransaction(response);
+    //             if (resultTranx)
+    //             {
+    //                 await OnSuccessTranx.InvokeAsync(resultTranx);
+    //             }
+    //         }
+    //     }
+
+    // }
     private async Task ProcessPayment()
     {
+        if (IsProcessing) return;
+
+        IsProcessing = true;
+        IsSuccess = false;
+        StateHasChanged();
+
         var result = await JS.InvokeAsync<TokenResult>("cloverPayment.createToken");
 
         if (!result.Success)
         {
-            Console.WriteLine("Token failed");
+            IsProcessing = false;
+            StateHasChanged();
             return;
         }
-        spinnerService.Show();
+
         var response = await CloverService.CreateChargeAsync(result.Token, 2000);
-        if(response != null)
+
+        if (response != null && response.Status.ToLower() == "succeeded")
         {
-            if (response.Status.ToLower() == "succeeded")
-            {
-                if(UserId != null)
-                {
-                    response.CreatedBy = Guid.Parse(UserId);
-                }
-                var resultTranx = await TransactionService.AddTransaction(response);
-                if(resultTranx)
-                {
-                    await OnSuccessTranx.InvokeAsync(resultTranx);
-                }
-            }
+            IsProcessing = false;
+            IsSuccess = true;
+            StateHasChanged();
+
+            await Task.Delay(2000); // show tick animation
+
+            await OnSuccessTranx.InvokeAsync(true);
         }
-        
+        else
+        {
+            IsProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task CloseTranx()
+    {
+        await OnCloseTranx.InvokeAsync();
     }
 
     public class TokenResult
