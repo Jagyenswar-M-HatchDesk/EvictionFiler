@@ -2,6 +2,7 @@
 @page "/signup"
 @layout EmptyLayout
 @using System.ComponentModel.DataAnnotations
+@using EvictionFiler.Application.DTOs.FirmDtos
 @using EvictionFiler.Application.DTOs.UserDto
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Server.Components.Layout
@@ -35,6 +36,9 @@
         line-height: 18px;
         color: #1F365D;
     }
+   .btn-company{
+        width:150px;
+    }
 
     .title-h4-semi-bold {
         font-size: 16px;
@@ -64,6 +68,10 @@
         display: flex;
         align-items: center;
         gap: 18px;
+    }
+    .register-head
+    {
+        height:75px;
     }
 
     .register-logo {
@@ -170,6 +178,14 @@
         color: #dc3545;
         font-size: 13px;
     }
+    .back-btn {
+    
+    left: 10px;
+    top: 10px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
 
     /* Autofill fix (Chrome / Edge) */
     input.form-input:-webkit-autofill,
@@ -205,109 +221,190 @@
 <div class="d-flex flex-column justify-content-center align-items-center vh-100">
     <div class="card p-5 pb-5 shadow mb-0 border-0 register-container register-card">
 
-        <div class="register-header mb-1 text-center">
+        
+      @if(CurrentStep==1)
+            {
+                <div class="register-header  mb-1 text-center">
             <img src="images/PHOTO-2025-06-18-02-45-29.jpg"
                  class="register-logo"
                  alt="Housing CourtFiler logo" />
-
-            <h1 class="register-title">Create new account</h1>
-        </div>
+                <h1 class="register-title">Create new account</h1>
+                   </div>
+            }
+            @if(CurrentStep==2)
+            {
+                
+                <div class="register-header register-head  mb-1 text-center">
+            <img src="images/PHOTO-2025-06-18-02-45-29.jpg"
+                 class="register-logo"
+                 alt="Housing CourtFiler logo" />
+                <h1 class="register-title">Company Information</h1>
+                   </div>
+                   
+            }
+            
+     
 
         <EditForm EditContext="_editContext" OnValidSubmit="HandleRegister" autocomplete="off">
             <DataAnnotationsValidator />
            
-
-            <!-- First Name -->
-          
-            <div class="row mb-3">
-
+            @if (CurrentStep == 1)
+            {
                 <!-- First Name -->
-                <div class="col-md-6">
-                    <label class="form-label">First Name <span class="text-danger">*</span></label>
-                    <InputText class="form-control form-control-lg form-input"
-                               @bind-Value="registerModel.FirstName"
-                               @bind-Value:after="@(() => ValidateField(() => registerModel.FirstName, nameof(registerModel.FirstName),"First name is required"))" placeholder="Firstname" />
-                    <ValidationMessage For="@(() => registerModel.FirstName)" />
+
+                <div class="row mb-3">
+
+                    <!-- First Name -->
+                    <div class="col-md-6">
+                        <label class="form-label">First Name <span class="text-danger">*</span></label>
+                        <InputText class="form-control form-control-lg form-input"
+                        @bind-Value="registerModel.FirstName"
+                        @bind-Value:after="@(() => ValidateField(() => registerModel.FirstName, nameof(registerModel.FirstName),"First name is required"))" placeholder="Firstname" />
+                        <ValidationMessage For="@(() => registerModel.FirstName)" />
+                    </div>
+
+                    <!-- Last Name -->
+                    <div class="col-md-6">
+                        <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                        <InputText class="form-control form-control-lg form-input"
+                        @bind-Value="registerModel.LastName"
+                        @bind-Value:after="@(() => ValidateField(() => registerModel.LastName, nameof(registerModel.LastName),"Last name is required"))"
+                        placeholder="Lastname" />
+                        <ValidationMessage For="@(() => registerModel.LastName)" />
+                    </div>
+
                 </div>
 
-                <!-- Last Name -->
-                <div class="col-md-6">
-                    <label class="form-label">Last Name <span class="text-danger">*</span></label>
+
+
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label class="form-label">Email <span class="text-danger">*</span></label>
                     <InputText class="form-control form-control-lg form-input"
-                               @bind-Value="registerModel.LastName"
-                               @bind-Value:after="@(() => ValidateField(() => registerModel.LastName, nameof(registerModel.LastName),"Last name is required"))"
-                               placeholder="Lastname" />
-                    <ValidationMessage For="@(() => registerModel.LastName)" />
+                    @bind-Value="registerModel.Email"
+                    @bind-Value:after="@(() => ValidateField(() => registerModel.Email, nameof(registerModel.Email),"Email  is required"))"
+                    placeholder="E-mail" autocomplete="new-email" />
+                    <ValidationMessage For="@(() => registerModel.Email)" />
                 </div>
 
+                <!-- Password -->
+                <div class="mb-3">
+                    <label class="form-label">Password <span class="text-danger">*</span></label>
+                    <InputText type="password"
+                    class="form-control form-control-lg form-input"
+                    @bind-Value="registerModel.Password"
+                    @bind-Value:after="@(() => ValidateField(() => registerModel.Password, nameof(registerModel.Password),"Password is required"))"
+                    placeholder="Password" autocomplete="new-password" />
+                    <ValidationMessage For="@(() => registerModel.Password)" />
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-3">
+                    <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                    <InputText type="password"
+                    class="form-control form-control-lg form-input"
+                    @bind-Value="registerModel.ConfirmPassword"
+                    @bind-Value:after="@(() => ValidateField(() => registerModel.ConfirmPassword, nameof(registerModel.ConfirmPassword),"ConfirmPassword is required"))"
+                    placeholder="Re-enter password" />
+                    <ValidationMessage For="@(() => registerModel.ConfirmPassword)" />
+                </div>
+
+                <!-- Register Button -->
+                <div class="d-grid">
+                    <button type="button" class="btn" style="background-color:#1F365D;color:white;" onclick="@Nextstep" disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm"></span>
+                            <span class="ms-2">Registering...</span>
+                        }
+                        else
+                        {
+                            <span>Register</span>
+                        }
+                    </button>
+                </div>
+                }
+            @if (CurrentStep == 2)
+            {
+                <div class="input-form">
+                    <label class="form-label color-text">Company Name</label>
+                    <InputText class="form-input mb-3" @bind-Value="Firms.Name" placeholder="Companyname" />
+
+                    <label class="form-label color-text">Company Email</label>
+                    <InputText class="form-input mb-3" @bind-Value="Firms.Email" placeholder="Email" />
+
+                    <label class="form-label color-text">Phone</label>
+                    <InputText class="form-input mb-3" @bind-Value="Firms.Phone" placeholder=" Phone number " />
+
+                    <label class="form-label color-text">FAX</label>
+                    <InputText class="form-input mb-3" @bind-Value="Firms.FAX" placeholder="  Fax number" />
+
+                    <label class="form-label color-text">Address</label>
+                    <InputText class="form-input mb-3" @bind-Value="Firms.Address" placeholder=" Enter Address" />
+
+                    <label class="form-label color-text">Website</label>
+                    <InputText class="form-input mb-3" @bind-Value="Firms.Website" placeholder="Enter website" />
+                </div>
+
+                <div class="d-flex gap-2  justify-content-between mt-3">
+
+                    <button  class="btn btn-company btn-outline-secondary"
+                            @onclick="SkipCompany" disabled="@isSkipLoading">
+                        @if (isSkipLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm"></span>
+                            <span class="ms-2">Registering...</span>
+                        }
+                        else
+                        {
+                            <span>Skip</span>
+
+                        }
+                    </button>
+                    <button class="btn btn-company" style="background-color:#1F365D;color:white;"
+                            @onclick="HandleRegister"
+                            
+                    disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm"></span>
+                            <span class="ms-2">Registering...</span>
+                        }
+                        else
+                        {
+                            <span>Register</span>
+                        }
+                    </button>
+
+                  
+
+                </div>
+            }
+                </EditForm>
+
+        @if (CurrentStep == 1)
+        {
+            <div class="text-center mt-3 body-medium">
+                Already have an account?
+                <a href="/" class="text-brand-100 login-link">Login</a>
             </div>
+        }
 
-
-           
-
-            <!-- Email -->
-            <div class="mb-3">
-                <label class="form-label">Email <span class="text-danger">*</span></label>
-                <InputText class="form-control form-control-lg form-input"
-                           @bind-Value="registerModel.Email"
-                           @bind-Value:after="@(() => ValidateField(() => registerModel.Email, nameof(registerModel.Email),"Email  is required"))"
-                           placeholder="E-mail" autocomplete="new-email" />
-                <ValidationMessage For="@(() => registerModel.Email)" />
-            </div>
-
-            <!-- Password -->
-            <div class="mb-3">
-                <label class="form-label">Password <span class="text-danger">*</span></label>
-                <InputText type="password"
-                           class="form-control form-control-lg form-input"
-                           @bind-Value="registerModel.Password"
-                           @bind-Value:after="@(() => ValidateField(() => registerModel.Password, nameof(registerModel.Password),"Password is required"))"
-                           placeholder="Password" autocomplete="new-password" />
-                <ValidationMessage For="@(() => registerModel.Password)" />
-            </div>
-
-            <!-- Confirm Password -->
-            <div class="mb-3">
-                <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
-                <InputText type="password"
-                           class="form-control form-control-lg form-input"
-                           @bind-Value="registerModel.ConfirmPassword"
-                           @bind-Value:after="@(() => ValidateField(() => registerModel.ConfirmPassword, nameof(registerModel.ConfirmPassword),"ConfirmPassword is required"))"
-                           placeholder="Re-enter password" />
-                <ValidationMessage For="@(() => registerModel.ConfirmPassword)" />
-            </div>
-
-            <!-- Register Button -->
-            <div class="d-grid">
-                <button type="submit" class="btn" style="background-color:#1F365D;color:white;" disabled="@isLoading">
-                    @if (isLoading)
-                    {
-                        <span class="spinner-border spinner-border-sm"></span>
-                        <span class="ms-2">Registering...</span>
-                    }
-                    else
-                    {
-                        <span>Register</span>
-                    }
-                </button>
-            </div>
-
-        </EditForm>
-
-        <div class="text-center mt-3 body-medium">
-            Already have an account?
-            <a href="/" class="text-brand-100 login-link">Login</a>
-        </div>
     </div>
 </div>
 
 @code {
 
     private RegisterDto registerModel = new();
+    private FirmDto? Firms = new();
     private bool isLoading = false;
     private ValidationMessageStore messageStore;
     private EditContext _editContext;
     private string SubscriptionName = "PayAsYouGo";
+    private int CurrentStep = 1;
+    private bool isSkipLoading=false;
+     
 
     protected override void OnInitialized()
     {
@@ -315,20 +412,66 @@
         messageStore = new ValidationMessageStore(_editContext);
     }
 
+    private string GetStepTitle()
+    {
+        return CurrentStep switch
+        {
+            1 => "User information",
+            2 => "Company Information",
+            _ => "Add New User"
+        };
+    }
+    private async Task Nextstep()
+    {
+        if (!ValidateCurrentStep())
+            return;
+           
+        if(CurrentStep<2)
+        {
+            CurrentStep++;
+        }
+        StateHasChanged();
+    }
+    private async Task PreStep()
+    {
+        if(CurrentStep>1)
+        {
+            CurrentStep--;
+        }
+        StateHasChanged();
+    }
+     void GoBackToStep1()
+    {
+        CurrentStep = 1;
+    }
     private async Task HandleRegister()
     {
-        if (!ValidateForm())
+        if (!ValidateCurrentStep())
             return;
+     
         isLoading = true;
-        var result = await _registerService.RegisterAsync(registerModel, SubscriptionName);
-       
-        await Task.Delay(1500);
+        
+       await RegisterUser();
 
         isLoading = false;
 
-       
+
         Nav.NavigateTo("/",true);
     }
+    private async Task SkipCompany()
+    {
+        isSkipLoading = true;
+        Firms = null;  
+        await RegisterUser();
+      
+
+        isSkipLoading = false;
+    }
+    private async Task RegisterUser()
+{
+    var result = await _registerService.RegisterAsync(registerModel, Firms, SubscriptionName);
+    await Task.Delay(1500);
+}
 
     private Task ValidateField<T>(Expression<Func<T>> accessor, string fieldName, string message)
     {
@@ -337,51 +480,54 @@
         return Task.CompletedTask;
     }
 
-    private bool ValidateForm()
+    private bool ValidateCurrentStep()
     {
         messageStore.Clear();
-
-        Require(() => registerModel.FirstName, nameof(registerModel.FirstName), "First name is required");
-        if (!string.IsNullOrWhiteSpace(registerModel.FirstName))
+        if (CurrentStep == 1)
         {
-            if (registerModel.FirstName.Length < 2 || registerModel.FirstName.Length > 20)
-            {
-                AddError(nameof(registerModel.FirstName), "First name must be between 2 and 20 characters");
-            }
-        }
-        Require(() => registerModel.LastName, nameof(registerModel.LastName), "Last name is required");
-        if (!string.IsNullOrWhiteSpace(registerModel.LastName))
-        {
-            if (registerModel.LastName.Length < 2 || registerModel.LastName.Length > 20)
-            {
-                AddError(nameof(registerModel.LastName), "Last name must be between 2 and 20 characters");
-            }
-        }
-        Require(() => registerModel.Email, nameof(registerModel.Email), "Email is required");
-        if (!string.IsNullOrWhiteSpace(registerModel.Email))
-        {
-            if (registerModel.Email.Length < 5 || registerModel.Email.Length > 100)
-            {
-                AddError(nameof(registerModel.Email), "Email must be between 5 and 100 characters");
-            }
 
-            var emailRegex = new System.Text.RegularExpressions.Regex(
-                @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
-                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-
-            if (!emailRegex.IsMatch(registerModel.Email))
+            Require(() => registerModel.FirstName, nameof(registerModel.FirstName), "First name is required");
+            if (!string.IsNullOrWhiteSpace(registerModel.FirstName))
             {
-                AddError(nameof(registerModel.Email), "Invalid email format");
+                if (registerModel.FirstName.Length < 2 || registerModel.FirstName.Length > 20)
+                {
+                    AddError(nameof(registerModel.FirstName), "First name must be between 2 and 20 characters");
+                }
             }
-        }
-        Require(() => registerModel.Password, nameof(registerModel.Password), "Password is required");
-        Require(() => registerModel.ConfirmPassword, nameof(registerModel.ConfirmPassword), "Confirm password is required");
+            Require(() => registerModel.LastName, nameof(registerModel.LastName), "Last name is required");
+            if (!string.IsNullOrWhiteSpace(registerModel.LastName))
+            {
+                if (registerModel.LastName.Length < 2 || registerModel.LastName.Length > 20)
+                {
+                    AddError(nameof(registerModel.LastName), "Last name must be between 2 and 20 characters");
+                }
+            }
+            Require(() => registerModel.Email, nameof(registerModel.Email), "Email is required");
+            if (!string.IsNullOrWhiteSpace(registerModel.Email))
+            {
+                if (registerModel.Email.Length < 5 || registerModel.Email.Length > 100)
+                {
+                    AddError(nameof(registerModel.Email), "Email must be between 5 and 100 characters");
+                }
 
-        // Password match check
-        if (registerModel.Password != registerModel.ConfirmPassword)
-        {
-            var field = new FieldIdentifier(registerModel, nameof(registerModel.ConfirmPassword));
-            messageStore.Add(field, "Passwords do not match");
+                var emailRegex = new System.Text.RegularExpressions.Regex(
+                    @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+                if (!emailRegex.IsMatch(registerModel.Email))
+                {
+                    AddError(nameof(registerModel.Email), "Invalid email format");
+                }
+            }
+            Require(() => registerModel.Password, nameof(registerModel.Password), "Password is required");
+            Require(() => registerModel.ConfirmPassword, nameof(registerModel.ConfirmPassword), "Confirm password is required");
+
+            // Password match check
+            if (registerModel.Password != registerModel.ConfirmPassword)
+            {
+                var field = new FieldIdentifier(registerModel, nameof(registerModel.ConfirmPassword));
+                messageStore.Add(field, "Passwords do not match");
+            }
         }
 
         _editContext.NotifyValidationStateChanged();
@@ -409,7 +555,7 @@
         if (empty)
             messageStore.Add(field, message);
     }
-
+    
     
 }
 

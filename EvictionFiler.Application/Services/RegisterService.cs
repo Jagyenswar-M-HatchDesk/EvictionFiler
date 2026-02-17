@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Application.DTOs.UserDto;
+﻿using EvictionFiler.Application.DTOs.FirmDtos;
+using EvictionFiler.Application.DTOs.UserDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Domain.Entities;
@@ -18,48 +19,72 @@ namespace EvictionFiler.Application.Services
         private readonly IRegisterRepository _repo;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
-       
+        private readonly IFirmRepository _firmRepository;
+        private readonly IEmailService _emailService;
 
         public RegisterService(
             IRegisterRepository repo,
             UserManager<User> userManager,
-            RoleManager<Role> roleManager
+            RoleManager<Role> roleManager,
+            IFirmRepository firmRepository,
+            IEmailService emailService
             )
         {
             _repo = repo;
             _userManager = userManager;
             _roleManager = roleManager;
-            
+            _firmRepository = firmRepository;
+            _emailService = emailService;
         }
 
-        public async Task<(bool Success, string Message)> RegisterAsync(RegisterDto dto, string SubscriptionName)
+       
+        public async Task<(bool Success, string Message)> RegisterAsync(RegisterDto dto,FirmDto? Dto, string SubscriptionName)
         {
             
 
             try
             {
+               
                 string roleName = string.IsNullOrWhiteSpace(dto.Role) ? "Admin" : dto.Role;
 
                 var role = await _roleManager.FindByNameAsync(roleName);
 
                 if (role == null)
                     return (false, $"Role '{roleName}' not found");
+
                 var subscriptionId = await _repo.GetSubscriptionIdByNameAsync(SubscriptionName);
 
                 if (subscriptionId == null || subscriptionId == Guid.Empty)
                     return (false, "Default subscription not configured");
-                var firmId = Guid.NewGuid();
-                var firm = new Firms
+                //Guid? firmId = null;
+                Guid firmId;
+                if (Dto != null && !string.IsNullOrWhiteSpace(Dto.Name))
                 {
-                    Id = firmId,
-                    Name = dto.FirstName,
-                    SubscriptionTypeId = subscriptionId,
-                    
-                    CreatedOn = DateTime.UtcNow
-                };
 
-                await _repo.AddFirmAsync(firm);
-                await _repo.SaveChangesAsync();
+
+                    Dto.SubscriptionTypeId = subscriptionId;
+
+                    Guid?  createdFirmId= await _firmRepository.RegisterFirm(Dto);
+                    if (!createdFirmId.HasValue || createdFirmId == Guid.Empty)
+                        return (false, "Firm creation failed");
+
+                    firmId = createdFirmId.Value;
+                }
+                else
+                {
+                    firmId = Guid.NewGuid();
+                    var firm = new Firms
+                    {
+                        Id = firmId,
+                        Name = dto.FirstName,
+                        SubscriptionTypeId = subscriptionId,
+
+                        CreatedOn = DateTime.UtcNow
+                    };
+
+                    await _repo.AddFirmAsync(firm);
+                    await _repo.SaveChangesAsync();
+                }
                 var user = new User
                 {
                     Id = Guid.NewGuid(),
@@ -75,20 +100,26 @@ namespace EvictionFiler.Application.Services
                     RoleId=role.Id,
                     FirmId=firmId,
                     IsActive = true,
-                 
-
-
-
-
+ 
 
                 };
 
                 var result = await _userManager.CreateAsync(user, dto.Password);
 
-                if (!result.Succeeded)
-                    return (false, string.Join(", ", result.Errors.Select(x => x.Description)));
+                //if (result.Succeeded && firmId.HasValue && Dto != null)
+                //{
+                //    await _emailService.SendFirmEnrollEmailAsync(user.Email, $"{user.FirstName} {user.LastName}", Dto.Name, password);
+                //}
 
-                
+                //if (!result.Succeeded)
+                //    return (false, string.Join(", ", result.Errors.Select(x => x.Description)));
+
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(x => x.Description));
+                    return (false, errors);
+                }
 
 
 
