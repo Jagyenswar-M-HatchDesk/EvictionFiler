@@ -1,13 +1,14 @@
-﻿using System.Drawing.Printing;
-using System.Globalization;
+﻿using EvictionFiler.Application.Constants;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using EvictionFiler.Application.Constants;
+using System.Drawing.Printing;
+using System.Globalization;
+using System.Text;
 
 
 
@@ -571,17 +572,19 @@ namespace EvictionFiler.Infrastructure.Repositories
                 {
                     otherTenantsText =
 
-                        string.Join(",", otherTenantsList) + " (Tenant)";
+                        string.Join(",", otherTenantsList) ;
                 }
+                otherTenantsText += " (Tenant)";
 
                 string occupantsText = "";
                 if (occupantList.Any())
                 {
                     occupantsText =
 
-                       "<br>" + string.Join(",", occupantList) + ", John Doe, Jane Doe (Under Tenant)";
+                       "<br>" + string.Join(",", occupantList) ;
                 }
 
+                occupantsText += ", John Doe, Jane Doe (Under Tenant)";
 
                 // Parse last rent
                 string lastRentMonth = "";
@@ -656,35 +659,96 @@ namespace EvictionFiler.Infrastructure.Repositories
                     string tenantValue = i < tenants.Count ? tenants[i].FullName : "";
                     filledHtml = filledHtml.Replace($"{{TenantName{i + 1}}}", tenantValue);
                 }
-                for (int i = 0; i < 12; i++)
+                //        for (int i = 0; i < 12; i++)
+                //        {
+                //            var ledger = i < caseDetails.ArrearLedgers.Count
+                //                ? caseDetails.ArrearLedgers[i]
+                //                : null;
+
+                //            string? arrearledgerAmount = null;
+
+                //            string? monthName = null;
+                //            string? year = null;
+                //            //if (ledger != null)
+                //            //{
+                //            //    arrearledgerAmount = ledger?.Amount.ToString();
+
+                //            //    if (!string.IsNullOrEmpty(ledger?.Month))
+                //            //    {
+                //            //        // Month value is in format yyyy-MM
+                //            //        var dt = DateTime.ParseExact(ledger.Month, "yyyy-MM", null);
+
+                //            //        monthName = dt.ToString("MMMM"); // e.g., November
+                //            //        year = dt.ToString("yy");      // e.g., 2025
+                //            //    }
+                //            //}
+
+                //            string rowHtml = "";
+
+                //            if (ledger != null && !string.IsNullOrEmpty(ledger.Month))
+                //            {
+                //                var dt = DateTime.ParseExact(ledger.Month, "yyyy-MM", null);
+                //                monthName = dt.ToString("MMMM");
+                //                year = dt.ToString("yy");
+
+                //                rowHtml = $@"
+                //<div class='rent-item'>
+                //    {monthName} {year} – ${ledger.Amount}
+                //</div>";
+                //            }
+
+                //            filledHtml = filledHtml.Replace($"{{{{RentRow{i + 1}}}}}", rowHtml );
+
+                //        }
+                if (template.Name.ToLower().Contains("petition"))
                 {
-                    var ledger = i < caseDetails.ArrearLedgers.Count
-                        ? caseDetails.ArrearLedgers[i]
-                        : null;
+                    var rentRowsBuilder = new StringBuilder();
 
-                    string? arrearledgerAmount = null;
-
-                    string? monthName = null;
-                    string? year = null;
-                    if (ledger != null)
+                    foreach (var ledger in caseDetails.ArrearLedgers)
                     {
-                        arrearledgerAmount = ledger?.Amount.ToString();
+                        if (string.IsNullOrWhiteSpace(ledger.Month))
+                            continue;
 
-                        if (!string.IsNullOrEmpty(ledger?.Month))
-                        {
-                            // Month value is in format yyyy-MM
-                            var dt = DateTime.ParseExact(ledger.Month, "yyyy-MM", null);
+                        var dt = DateTime.ParseExact(ledger.Month, "yyyy-MM", null);
+                        var monthName = dt.ToString("MMMM");
+                        var year = dt.ToString("yy");
 
-                            monthName = dt.ToString("MMMM"); // e.g., November
-                            year = dt.ToString("yy");      // e.g., 2025
-                        }
+                        rentRowsBuilder.Append($@"
+            <div>
+                $<span class='field-input' style='width:80px;'>{ledger.Amount}</span>
+                for month of
+                <span class='field-input' style='width:100px;'>{monthName}</span>,
+                20<span class='field-input' style='width:20px;'>{year}</span>
+            </div>");
                     }
-                    
 
-                    filledHtml = filledHtml.Replace($"{{{{arRent{i + 1}}}}}", arrearledgerAmount ?? "_____");
-                    filledHtml = filledHtml.Replace($"{{{{arMonth{i + 1}}}}}", monthName ?? "_______");
-                    filledHtml = filledHtml.Replace($"{{{{ary{i + 1}}}}}", year ?? "____");
+                    filledHtml = filledHtml.Replace("{{RentBreakdownRows}}",
+                        rentRowsBuilder.ToString());
                 }
+                else
+                {
+                    var rentRowsBuilder = new StringBuilder();
+
+                    foreach (var ledger in caseDetails.ArrearLedgers)
+                    {
+                        if (string.IsNullOrWhiteSpace(ledger.Month))
+                            continue;
+
+                        var dt = DateTime.ParseExact(ledger.Month, "yyyy-MM", null);
+                        var monthName = dt.ToString("MMMM");
+                        var year = dt.ToString("yy");
+
+                        rentRowsBuilder.Append($@"
+        <div class='rent-item'>
+            {monthName} {year} – ${ledger.Amount}
+        </div>");
+                    }
+
+                    filledHtml = filledHtml.Replace("{{RentBreakdownRows}}",
+                        rentRowsBuilder.ToString() ?? "");
+
+                }
+
 
                 if (caseDetails.LeaseEnd != null)
                     filledHtml = filledHtml.Replace("{{lease_expired}}", "checked");
