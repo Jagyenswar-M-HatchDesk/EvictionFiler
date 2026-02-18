@@ -11,6 +11,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
     public interface IFirmService
     {
         Task<IEnumerable<FirmDto>> GetAllFirms();
+        Task<bool> AddNewFirm(FirmDto dto);
         Task<bool> RegisterFirm(RegisterDto model, FirmDto dto);
     }
 }
