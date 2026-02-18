@@ -27,11 +27,11 @@ namespace EvictionFiler.Application.Services.Master
         }
 
 
-        public async Task<PaginationDto<FormAddEditViewModelDto>> GetAllFormAsync(int pageNumber, int pageSize, string searchTerm)
+        public async Task<PaginationDto<FormAddEditViewModelDto>> GetAllFormAsync(int pageNumber, int pageSize, string searchTerm, Guid? FirmId)
         {
             var query = _repository.GetAllQuerable
                 (
-                x => x.IsDeleted != true,
+                x => x.IsDeleted != true && (x.FirmId ==FirmId || x.FirmId == null) ,
                     x => x.CaseType,
                     x => x.Category
                );
