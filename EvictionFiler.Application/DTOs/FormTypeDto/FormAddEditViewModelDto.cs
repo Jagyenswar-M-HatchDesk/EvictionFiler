@@ -26,6 +26,7 @@ namespace EvictionFiler.Application.DTOs.FormTypeDto
 
         public decimal? BillAmount { get; set; }
         public Guid? UnitId { get; set; }
+        public Guid? FirmId { get; set; }
         public string? UnitName { get; set; }
         public string? Rate { get; set; }
         public string? Code { get; set; }

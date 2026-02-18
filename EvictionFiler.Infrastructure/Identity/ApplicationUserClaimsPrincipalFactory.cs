@@ -32,6 +32,7 @@ namespace EvictionFiler.Infrastructure.Identity
             }
             identity.AddClaim(new Claim("Name", string.Join(" ", [userclaims.FirstName, userclaims.LastName])));
             identity.AddClaim(new Claim("Firm", userclaims.Firm?.FirmName ?? string.Empty));
+            identity.AddClaim(new Claim("FirmId", userclaims.Firm?.FirmId.ToString() ?? string.Empty));
             identity.AddClaim(new Claim("SubscriptionType", userclaims.Firm?.UserSubscription?.SubscriptionName ?? string.Empty));
 
             return identity;

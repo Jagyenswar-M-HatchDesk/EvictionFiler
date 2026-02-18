@@ -129,7 +129,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     UpdatedOn = DateTime.UtcNow,
                     RoleId = role.Id,
                     IsActive = true,
-                    FirmId = model.FirmId
+                    FirmId = model.FirmId ?? FirmId,
 
                 };
 
