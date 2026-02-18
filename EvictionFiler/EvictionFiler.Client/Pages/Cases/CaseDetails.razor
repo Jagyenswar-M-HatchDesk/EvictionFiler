@@ -4919,6 +4919,7 @@
     private bool isEditMode = false;
     private bool isNewCourt = false;
     private bool _showCreateAction = false;
+    private bool _showCreateActionbtn = false;
     private bool _showCourtPartList = false;
     private bool _showCourtList = false;
     private List<DateRent> DateRentList = new();
@@ -5015,6 +5016,8 @@
             editBuildingModel.RegistrationStatusId = RegistrationstatusList.Where(e => e.Name.Equals("Registered")).FirstOrDefault().Id;
         }
     }
+
+
     protected override async Task OnInitializedAsync()
     {
         var flag = navmessage.ConsumeFlag();
@@ -5411,18 +5414,41 @@
             DateTime.Today.Month,
             1);
 
+        var requiredMonths = new List<string>();
         // Iterate month-by-month
-        for (DateTime dt = start; dt <= end; dt = dt.AddMonths(1))
+        for (DateTime dt = start.AddMonths(1); dt <= end; dt = dt.AddMonths(1))
         {
             string value = $"{dt:yyyy-MM}"; // stored value
             string display = $"{dt:yyyy}-{CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(dt.Month)}";
 
             MonthOptions.Add(new MonthItem(value, display));
+            requiredMonths.Add(value);
         }
-        if (!Rows.Any())
+
+        // ---- ADD MISSING ROWS ----
+        foreach (var month in requiredMonths)
         {
-            Rows.Add(new ArrearLedgerDto());
+            if (!Rows.Any(r => r.Month == month))
+            {
+                Rows.Add(new ArrearLedgerDto
+                {
+                    Month = month,
+                    Amount= legalcaseDto.MonthlyRent.Value,
+                    LegalCaseId = legalcaseDto.Id,
+                });
+            }
         }
+
+        // ---- REMOVE EXTRA ROWS ----
+        var rowsToRemove = Rows
+            .Where(r => !requiredMonths.Contains(r.Month))
+            .ToList();
+
+        foreach (var row in rowsToRemove)
+        {
+            RemoveRow(row); // this will track delete correctly
+        }
+        RecalculateTotal();
     }
     private void RecalculateTotal()
     {
@@ -5492,14 +5518,17 @@
         animationTimer.Start();
     }
 
-    private void ShowCreateAction()
+    private async Task ShowCreateAction()
     {
-        noticeModel = new GenrateNoticeModel();
         _showCreateAction = true;
+        await Task.Delay(100);
+        noticeModel = new GenrateNoticeModel();
+        await JS.InvokeVoidAsync("showModal", "generateActions");
     }
 
     private async Task HandleCloseCreateAction()
     {
+        await JS.InvokeVoidAsync("hideModal", "generateActions");
         _showCreateAction = false;
         await HandleInvokeAction();
     }
@@ -7159,6 +7188,7 @@
                     Notes = e.Notes,
                     Amount = e.Amount,
                     Month = e.Month,
+                    
                 }).ToList();
                 if (updaterows.Any())
                 {
@@ -7186,6 +7216,7 @@
 
         spinnerservice.Hide();
     }
+
     private bool HasTenantChanged(EditToTenantDto existing, IntakeModel current, string firstName, string lastName)
     {
         return existing.FirstName != firstName

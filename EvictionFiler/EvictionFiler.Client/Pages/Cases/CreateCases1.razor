@@ -6147,20 +6147,43 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
             DateTime.Today.Month,
             1);
 
+        var requiredMonths = new List<string>();
         // Iterate month-by-month
-        for (DateTime dt = start; dt <= end; dt = dt.AddMonths(1))
+        for (DateTime dt = start.AddMonths(1); dt <= end; dt = dt.AddMonths(1))
         {
             string value = $"{dt:yyyy-MM}"; // stored value
             string display = $"{dt:yyyy}-{CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(dt.Month)}";
 
             MonthOptions.Add(new MonthItem(value, display));
+            requiredMonths.Add(value);
         }
 
-        if (!Rows.Any())
+        // ---- ADD MISSING ROWS ----
+        foreach (var month in requiredMonths)
         {
-            Rows.Add(new ArrearLedgerDto());
+            if (!Rows.Any(r => r.Month == month))
+            {
+                Rows.Add(new ArrearLedgerDto
+                {
+                    Month = month,
+                    Amount = legalcaseDto.MonthlyRent.Value,
+                    LegalCaseId = legalcaseDto.Id,
+                });
+            }
         }
+
+        // ---- REMOVE EXTRA ROWS ----
+        var rowsToRemove = Rows
+            .Where(r => !requiredMonths.Contains(r.Month))
+            .ToList();
+
+        foreach (var row in rowsToRemove)
+        {
+            RemoveRow(row); // this will track delete correctly
+        }
+        RecalculateTotal();
     }
+
     private void RecalculateTotal()
     {
         legalcaseDto.TotalOwed = Rows.Sum(x => x.Amount);
