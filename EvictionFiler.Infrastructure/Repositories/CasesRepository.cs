@@ -480,6 +480,13 @@ namespace EvictionFiler.Infrastructure.Repositories
                     query = query.Where(x => x.IsActive == false && x.IsDeleted == true);
                 }
             }
+            // Firms
+            if (filters.FirmId != null && filters.FirmId != Guid.Empty)
+            {
+               
+                 query = query.Where(x => x.CreatedBy == filters.FirmId);
+                
+            }
 
             /* ---------------------------------------------------
                PAGING

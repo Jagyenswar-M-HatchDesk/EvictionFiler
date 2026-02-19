@@ -18,6 +18,7 @@ namespace EvictionFiler.Application.DTOs.LegalCaseDto
             public string? Status { get; set; }
             public string? ActionDate { get; set; }
         public Guid? CaseTypeId { get; set; }
+        public Guid? FirmId { get; set; }
 
 
     }
