@@ -1,5 +1,7 @@
 ﻿@page "/Drafting/Manage-Forms"
 
+@using EvictionFiler.Application.Common.Interfaces
+@using EvictionFiler.Application.Common.Models
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.FormTypeDto
 @using EvictionFiler.Application.DTOs.PaginationDto
@@ -14,7 +16,9 @@
 @inject NavigationManager navManager
 @inject IManageFormService ManageFormService
 @attribute [Authorize]
-
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject ILoggedInUserService _loggedInUserService
 <PageTitle>Manage Forms - Housing Court Filer</PageTitle>
 
 
@@ -268,10 +272,35 @@
     private int pageSize = 10;
     private string searchTerm = "";
     private PaginationDto<FormAddEditViewModelDto> pagedforms;
+    private LoggedInUser? identityUser;
+    private bool isAdmin { get; set; }
+    private string? loggedInUserId;
+    private Guid? FirmId;
+
 
     protected override async Task OnInitializedAsync()
     {
         Spinnerservice.Show();
+        var loggedInUser = await _loggedInUserService.GetAsync();
+        if (loggedInUser == null || !loggedInUser.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/", forceLoad: true);
+            return;
+        }
+
+        this.identityUser = loggedInUser;
+
+        loggedInUserId = this.identityUser.UserId;
+        isAdmin = this.identityUser.IsSuperAdmin;
+
+        if (Guid.TryParse(this.identityUser.FirmId, out var firmId))
+        {
+            FirmId = firmId;
+        }
+        else
+        {
+            FirmId = null; // or Guid.Empty depending on your model
+        }
         //isLoading = true;
         var uri = new Uri(navManager.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
@@ -307,7 +336,7 @@
 
     private async Task LoadForms()
     {
-        pagedforms = await ManageFormService.GetAllFormAsync(currentPage, pageSize, searchTerm);
+        pagedforms = await ManageFormService.GetAllFormAsync(currentPage, pageSize, searchTerm, FirmId);
     }
 
 
@@ -377,7 +406,7 @@
         if (isDeleted)
         {
         
-            pagedforms = await ManageFormService.GetAllFormAsync(currentPage, pageSize , searchTerm);
+            pagedforms = await ManageFormService.GetAllFormAsync(currentPage, pageSize , searchTerm, FirmId);
             StateHasChanged();
         }
     }

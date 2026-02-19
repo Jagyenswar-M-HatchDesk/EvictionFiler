@@ -19,6 +19,7 @@ namespace EvictionFiler.Application.Common.Models
         public string Name { get; init; } = string.Empty;
         public string Email {get; init; } = string.Empty;
         public string Firm { get; init; } = string.Empty;
+        public string FirmId { get; init; } = string.Empty;
         public string Subscription { get; init; } = string.Empty;
     }
 }

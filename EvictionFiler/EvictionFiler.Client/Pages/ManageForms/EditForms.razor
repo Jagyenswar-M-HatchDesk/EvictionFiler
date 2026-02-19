@@ -1,4 +1,6 @@
-﻿@using EvictionFiler.Application.DTOs
+﻿@using EvictionFiler.Application.Common.Interfaces
+@using EvictionFiler.Application.Common.Models
+@using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.FormTypeDto
 @using EvictionFiler.Application.DTOs.UserDto
 @using EvictionFiler.Application.Interfaces.IRepository
@@ -14,6 +16,7 @@
 @inject SpinnerService spinnerservice
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
+@inject ILoggedInUserService _loggedInUserService
 
 <style>
     .offcanvas.show {
@@ -159,16 +162,30 @@
     [Parameter] public EventCallback OnClose { get; set; }
 
     private List<CaseType> CaseTypeList = new();
-  
+
     private List<Category> CategoryList = new();
     private bool IsPreviewVisible { get; set; } = false;
     private string htmlContent;
     private RadzenHtmlEditor htmlEditor;
+    private LoggedInUser? identityUser;
+    private bool isAdmin { get; set; }
+    private string? loggedInUserId;
 
 
     protected override async Task OnInitializedAsync()
     {
-   
+        var loggedInUser = await _loggedInUserService.GetAsync();
+        if (loggedInUser == null || !loggedInUser.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/", forceLoad: true);
+            return;
+        }
+
+        this.identityUser = loggedInUser;
+
+        loggedInUserId = this.identityUser.UserId;
+        isAdmin = this.identityUser.IsSuperAdmin;
+
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
         CategoryList = await CategoryRepository.GetAllCategory();
         html = editForm.HTML;
@@ -182,11 +199,20 @@
 
     private async Task SubmitFormAsync()
     {
-         Console.WriteLine("SubmitFormAsync HIT");
-    Console.WriteLine("HTML value: " + editForm.HTML);
+        Console.WriteLine("SubmitFormAsync HIT");
+        Console.WriteLine("HTML value: " + editForm.HTML);
         spinnerservice.Show();
         if (editForm == null)
             return;
+
+        if (!string.IsNullOrEmpty(this.identityUser.FirmId) && this.identityUser.FirmId != "00000000-0000-0000-0000-000000000000")
+        {
+            editForm.FirmId = Guid.Parse(this.identityUser.FirmId);
+        }
+        else
+        {
+            editForm.FirmId = null; // or Guid.Empty depending on your model
+        }
 
         var isSaved = await ManageFormService.UpdateFormAsync(editForm);
         if (isSaved)

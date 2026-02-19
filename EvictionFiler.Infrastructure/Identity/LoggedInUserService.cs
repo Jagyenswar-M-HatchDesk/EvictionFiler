@@ -33,6 +33,7 @@ namespace EvictionFiler.Infrastructure.Identity
                 Email = user.Identity.Name ?? string.Empty,
                 Name = user.FindFirst("Name")?.Value ?? string.Empty,
                 Firm = user.FindFirst("Firm")?.Value ?? string.Empty,
+                FirmId = user.FindFirst("FirmId")?.Value ?? string.Empty,
             };
         }
     }
