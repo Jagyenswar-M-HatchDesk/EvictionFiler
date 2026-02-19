@@ -37,6 +37,10 @@ namespace EvictionFiler.Infrastructure.Repositories
                 {
                     firm = await _mainDbContext.Firms.Where(e => e.Name.ToLower().Contains(dto.Name.ToLower())).FirstOrDefaultAsync();
                 }
+                if (firm != null)
+                {
+                    return null; 
+                }
                 if (firm == null)
                 {
                     newFirm = new Firms()
@@ -69,6 +73,7 @@ namespace EvictionFiler.Infrastructure.Repositories
             var firm = await _mainDbContext.Firms.FirstOrDefaultAsync(f => f.Id == dto.Id);
             if (firm == null)
                 return false;
+
 
             // Update fields
             firm.Name = dto.Name;

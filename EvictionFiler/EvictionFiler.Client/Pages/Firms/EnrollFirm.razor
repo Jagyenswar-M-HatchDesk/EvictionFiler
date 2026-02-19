@@ -1,4 +1,5 @@
-﻿@using EvictionFiler.Application.DTOs
+﻿@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.FirmDtos
 @using EvictionFiler.Application.DTOs.UserDto
 @using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
@@ -11,6 +12,7 @@
 @inject IUserservices _userService
 @inject IFirmService _firmService
 @inject ISubscriptionTypeRepository _subscription
+@inject IToastService _toastService
 
 <style>
     .offcanvas.show { transform: translateX(0%); }
@@ -138,6 +140,11 @@
 
 </style>
 
+<style>
+    .blazored-toast-container {
+        z-index: 999999 !important; /* Offcanvas se upar */
+    }
+</style>
 <div class="offcanvas offcanvas-end show border-start shadow" tabindex="-1" id="createUser"
      style="visibility:@(IsVisible ? "visible" : "hidden"); transition: transform 0.9s ease-in-out;"
      aria-labelledby="createUserLabel">
@@ -446,6 +453,16 @@
             // Require(() => registerDto.LastName, nameof(registerDto.LastName), "Last Name is required.");
             Require(() => registerDto.Email, nameof(registerDto.Email), "Email is required.");
 
+            if (!string.IsNullOrWhiteSpace(registerDto.Email))
+            {
+                var exists = await _userService.IsEmailExistsAsync(registerDto.Email, registerDto.Id);
+                if (exists)
+                {
+                    var field = new FieldIdentifier(registerDto, nameof(registerDto.Email));
+                    messageStore.Add(field, "Email already exists.");
+                }
+            }
+
         }
 
         //Require(() => legalcaseDto.CourtLocationId, nameof(legalcaseDto.CourtLocationId), "Court Location is required");
@@ -508,21 +525,37 @@
         }
         else
         {
- 
-        registerDto.Password = "Abcd@1234";
 
-        // You can attach Firm + Subscription logic here if API expects it:
-        // registerDto.SubscriptionType = SelectedSubscription;
-        // registerDto.Company = Firm;
-        Firms.SubscriptionTypeId = registerDto.SubscriptionId;
-        var result = await _firmService.RegisterFirm(registerDto, Firms);
+            registerDto.Password = "Abcd@1234";
 
-        if (result)
-        {
-            await Submit.InvokeAsync();
-            Hide();
+            // You can attach Firm + Subscription logic here if API expects it:
+            // registerDto.SubscriptionType = SelectedSubscription;
+            // registerDto.Company = Firm;
+            Firms.SubscriptionTypeId = registerDto.SubscriptionId;
+            var result = await _firmService.RegisterFirm(registerDto, Firms);
+
+            if (result == true)
+            {
+                await Submit.InvokeAsync();
+                Hide();
+                _toastService.ShowSuccess("Firm created successfully.");
+
+            }
+            // if (!result)
+            // {
+            //     var field = new FieldIdentifier(registerDto, nameof(registerDto.Email));
+            //     messageStore.Add(field, "Email already exists.");
+            //     _editContext.NotifyValidationStateChanged();
+            //     spinnerservice.Hide();
+            //     return;
+            // }
+            else 
+            {
+                _toastService.ShowWarning("Firm name already present. Please choose a different firm");
+            }
+            
         }
-        }
+  
         spinnerservice.Hide();
     }
 

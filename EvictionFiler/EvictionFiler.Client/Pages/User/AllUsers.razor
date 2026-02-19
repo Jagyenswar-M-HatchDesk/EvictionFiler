@@ -1,5 +1,6 @@
 ﻿@page "/Settings/users"
 @using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.PaginationDto
 @using EvictionFiler.Application.DTOs.UserDto
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Client.SpinnerService
@@ -99,6 +100,12 @@
     /* Make sure header sticky stays above other cells */
     th.sticky {
     z-index: 3;
+    }
+    .border
+    {
+        border: 1px solid #1F365D !important;
+        border-radius: 12px;
+        min-height:45px;
     }
 </style>
 <style>
@@ -241,23 +248,26 @@
                 </button>
             </div>
             <div class="position-relative w-50">
-                <input class="form-control border border-primary text-navy" placeholder="Search.." @bind="searchTerm" @bind:event="oninput" />
+                <input class="form-control border border-primary text-navy" placeholder="Search.." @bind="searchTerm" @oninput="OnSearchChanged"  />
                 <button class="search-btn" type="button">
                     <i class="fa fa-search"></i>
                 </button>
             </div>
             </div>
             </div>
+
+           
+
         @if (IsGridView)
         {
             <div class="row g-4">
                 @{
                     int srNo = 1;
                 }
-                @if (cases != null)
+                @if (pagedUsers != null && pagedUsers.Items.Any())
                 {
 
-                    @foreach (var user in cases)
+                    @foreach (var user in pagedUsers.Items)
                     {
 
 
@@ -362,9 +372,9 @@
                         <td>06-27-2025</td>
                         <td class="sticky"><i class="fa-solid fa-pen-to-square"></i><span class="status-active ms-2">Active</span></td>
                     </tr> *@
-                    @if (cases.Count() > 0)
+                        @if (pagedUsers != null && pagedUsers.Items.Any())
                     {
-                        @foreach (var user in cases)
+                        @foreach (var user in pagedUsers.Items)
                         {
                             if (user != null)
                             {
@@ -401,18 +411,34 @@
             </table>
         </div>
 
-        <!-- Pagination -->
-        <div class="d-flex justify-content-between mt-3">
-            <small>Showing 1 to 10 of 11 entries</small>
-            <nav>
-                <ul class="pagination mb-0">
-                    <li class="page-item disabled"><a class="page-link" href="#">←</a></li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">→</a></li>
-                </ul>
-            </nav>
-        </div>
+        
+        }
+        @if (pagedUsers != null && pagedUsers.TotalCount > 0)
+        {
+            <div class="d-flex justify-content-between mt-3">
+                <small style="font-size:14px">
+                    Showing @(((currentPage - 1) * pageSize) + 1)
+                    to @(Math.Min(currentPage * pageSize, pagedUsers.TotalCount))
+                    of @pagedUsers.TotalCount entries
+                </small>
+                <nav>
+                    <ul class="pagination mb-0" style="font-size:14px">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(currentPage - 1)">←</button>
+                        </li>
+                        @for (int i = 1; i <= Math.Ceiling((double)pagedUsers.TotalCount / pageSize); i++)
+                        {
+                            var pageNumber = i;
+                            <li class="page-item @(pageNumber == currentPage ? "active" : "")">
+                                <button class="page-link" @onclick="() => ChangePage(pageNumber)">@pageNumber</button>
+                            </li>
+                        }
+                        <li class="page-item @(currentPage == Math.Ceiling((double)pagedUsers.TotalCount / pageSize) ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(currentPage + 1)">→</button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
         }
     </div>
 
@@ -426,18 +452,23 @@
 
 @code {
     private string searchTerm = string.Empty;
-    
+
 
     private CreateUsers createUserRef;
     private EditUsers editUserRef;
     private bool IsGridView = true;
+    private string search = "";
+
+    private int currentPage = 1;
+    private int pageSize => IsGridView ? 12 : 10;
+    private PaginationDto<User> pagedUsers;
 
     private async Task AddUser()
     {
         var modal = new RegisterDto();
         createUserRef.Show(modal);
 
-        var alluser = _userService.GetAllUserAsync();
+       
     }
     private async Task EditUser(User user)
     {
@@ -456,6 +487,23 @@
     }
     private CancellationTokenSource _cts;
 
+    private async Task OnSearchChanged(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
+        try
+        {
+            await Task.Delay(200, token);   // debounce (avoid too many API calls)
+            currentPage = 1;                // reset to first page on search
+            await GetAllUsers();
+        }
+        catch (TaskCanceledException) { }
+    }
+
     public async Task Handle(RegisterDto register)
     {
         // Your existing DB logic here
@@ -468,6 +516,14 @@
         allUsers = await _userService.GetAllUserAsync();
 
         StateHasChanged();
+    }
+    private async Task ChangePage(int page)
+    {
+        if (page >= 1 && page <= Math.Ceiling((double)pagedUsers.TotalCount / pageSize))
+        {
+            currentPage = page;
+            await GetAllUsers();
+        }
     }
     public async Task Handle1(RegisterDto dto)
     {
@@ -484,18 +540,18 @@
     }
     private IEnumerable<User> allUsers = new List<User>();
 
-    private IEnumerable<User> cases =>
-       string.IsNullOrWhiteSpace(searchTerm)
-       ? allUsers
-       : allUsers.Where(c =>
-           (!string.IsNullOrWhiteSpace(c.FirstName) && c.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
-           (!string.IsNullOrWhiteSpace(c.LastName) && c.LastName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
-           (!string.IsNullOrWhiteSpace(c.Email) && c.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
-           (!string.IsNullOrWhiteSpace(c.PhoneNumber) && c.PhoneNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+    // private IEnumerable<User> cases =>
+    //    string.IsNullOrWhiteSpace(searchTerm)
+    //    ? allUsers
+    //    : allUsers.Where(c =>
+    //        (!string.IsNullOrWhiteSpace(c.FirstName) && c.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+    //        (!string.IsNullOrWhiteSpace(c.LastName) && c.LastName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+    //        (!string.IsNullOrWhiteSpace(c.Email) && c.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+    //        (!string.IsNullOrWhiteSpace(c.PhoneNumber) && c.PhoneNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
     protected override async Task OnInitializedAsync()
     {
         spinnerservice.Show();
-        await GetAllCases();
+        await GetAllUsers();
         spinnerservice.Hide();
     }
 
@@ -504,9 +560,10 @@
     {
         IsGridView = !IsGridView;
     }
-    private async Task GetAllCases()
+    private async Task GetAllUsers()
     {
-        allUsers = await _userService.GetAllUserAsync();
+        
+        pagedUsers = await _userService.GetAllUsersAsync(currentPage, pageSize, searchTerm);
         StateHasChanged();
     }
 

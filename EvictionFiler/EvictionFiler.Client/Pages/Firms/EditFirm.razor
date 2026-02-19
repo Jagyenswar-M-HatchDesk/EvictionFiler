@@ -1,13 +1,17 @@
-﻿@using EvictionFiler.Application.DTOs.FirmDtos
+﻿@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs.FirmDtos
 @using EvictionFiler.Application.DTOs.UserDto
 @using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
 @using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Application.Services
 @using EvictionFiler.Client.SpinnerService
 @using System.Linq.Expressions
 @using EvictionFiler.Domain.Entities
 @inject IFirmService _firmService
+@inject IUserservices _userService
 @inject SpinnerService spinnerservice
 @inject ISubscriptionTypeRepository _subscription
+@inject IToastService _toastService
 
 <style>
     .offcanvas.show {
@@ -202,7 +206,7 @@
 
         @if (_editContext != null)
         {
-            <EditForm EditContext="_editContext">
+            <EditForm EditContext="_editContext" OnValidSubmit="@NextStep">
                 <DataAnnotationsValidator />
 
                 <!-- STEP 1: SUBSCRIPTION -->
@@ -324,7 +328,7 @@
 
                     @if (CurrentStep < 3)
                     {
-                        <button type="submit" style="width:120px;" class="btn btn-primary btn-lg" @onclick="NextStep">Next</button>
+                        <button type="submit" style="width:120px;" class="btn btn-primary btn-lg">Next</button>
                     }
                     else
                     {
@@ -358,15 +362,17 @@
     {
         _editContext = new EditContext(registerDto);
         messageStore = new ValidationMessageStore(_editContext);
-        //SubscriptionTypes = await _subscription.GetAllAsync();
     }
+
     // SHOW EDIT
     public async Task ShowForEdit(RegisterDto user, FirmDto firm, string subscriptionName)
     {
         registerDto = user;
         Firms = firm;
-         SubscriptionTypes = await _subscription.GetAllAsync();
+        SubscriptionTypes = await _subscription.GetAllAsync();
         SelectedSubscriptionName = subscriptionName;
+
+        _originalEmail = user.Email;
 
         _editContext = new EditContext(registerDto);
         messageStore = new ValidationMessageStore(_editContext);
@@ -384,9 +390,15 @@
         IsVisible = false;
     }
 
-    private void NextStep()
+    private async Task NextStep()
     {
-        if (CurrentStep < 3) CurrentStep++;
+        //if (CurrentStep < 3) CurrentStep++;
+        if (!await ValidateCurrentStep()) return;
+
+        if (CurrentStep < 3)
+            CurrentStep++;
+
+        StateHasChanged();
     }
 
     private void PrevStep()
@@ -406,6 +418,7 @@
         {
             await Submit.InvokeAsync();
             Hide();
+            _toastService.ShowSuccess("Firm updated successfully.");
         }
 
         spinnerservice.Hide();
@@ -433,6 +446,8 @@
         return Task.CompletedTask;
     }
 
+    private string? _originalEmail;
+
     private async Task<bool> ValidateCurrentStep()
     {
         messageStore.Clear();
@@ -446,10 +461,18 @@
             Require(() => registerDto.FirstName, nameof(registerDto.FirstName), "First Name is required.");
             Require(() => registerDto.Email, nameof(registerDto.Email), "Email is required.");
 
+            if (!string.Equals(registerDto.Email, _originalEmail, StringComparison.OrdinalIgnoreCase))
+            {
+                var exists = await _userService.IsEmailExistsAsync(registerDto.Email, registerDto.Id);
+                if (exists)
+                {
+                    var field = new FieldIdentifier(registerDto, nameof(registerDto.Email));
+                    messageStore.Add(field, "Email already exists.");
+                }
+            }
         }
-        _editContext.NotifyValidationStateChanged();
 
-        // Get current validation messages (optional: for logging)
+        _editContext.NotifyValidationStateChanged();
         var errors = _editContext.GetValidationMessages().ToList();
         Console.WriteLine($"Validation errors : {string.Join(", ", errors)}");
 
@@ -459,15 +482,14 @@
         // Return validity
         return isValid;
     }
+
     private void Require<T>(Expression<Func<T>> accessor, string fieldName, string message)
     {
         var value = accessor.Compile().Invoke();
         var fieldIdentifier = new FieldIdentifier(registerDto, fieldName);
 
-        // Clear old message first
         messageStore.Clear(fieldIdentifier);
 
-        // Add message if invalid
         bool isEmpty = value == null ||
                        (value is string s && string.IsNullOrWhiteSpace(s)) ||
                        (value is Guid g && g == Guid.Empty);
