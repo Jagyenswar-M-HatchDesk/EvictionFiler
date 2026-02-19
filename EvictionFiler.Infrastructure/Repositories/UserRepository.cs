@@ -1,4 +1,5 @@
 ﻿using EvictionFiler.Application.DTOs.FirmDtos;
+using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.DTOs.UserDto;
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
@@ -6,8 +7,9 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using System.Data;
 using Polly;
+using System.Data;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
@@ -156,6 +158,51 @@ namespace EvictionFiler.Infrastructure.Repositories
             var alluser = await _db.Users.Include(e => e.Role).Include(e => e.Firms).Where(e => e.IsActive == true && e.IsDeleted == false).ToListAsync();
             return alluser;
         }
+        public async Task<PaginationDto<User>> GetAllUsers(int pageNumber, int pageSize,  string? search)
+        {
+            var alluser = _db.Users.Include(e => e.Role).Include(e => e.Firms).Where(e => e.IsActive == true && e.IsDeleted == false).AsQueryable();
+            if(!string.IsNullOrEmpty(search))
+            {
+                               alluser = alluser.Where(u => u.FirstName.Contains(search) || u.LastName.Contains(search) || u.Email.Contains(search));
+            }
+
+            var totalCount = await alluser.CountAsync();
+            var items = await alluser.Skip((pageNumber - 1) * pageSize).Take(pageSize).Select(c => new User
+            {
+                Id = c.Id,
+                FirstName = c.FirstName,
+                LastName = c.LastName,
+                MiddleName = c.MiddleName,
+                Email = c.Email,
+                UserName = c.UserName,
+                CreatedOn = c.CreatedOn,
+                UpdatedOn = c.UpdatedOn,
+                RoleId = c.RoleId,
+                IsActive = c.IsActive,
+                FirmId = c.FirmId,
+                Role = c.Role != null ? new Role
+                {
+                    Id = c.Role.Id,
+                    Name = c.Role.Name
+                } : null,
+
+                Firms = c.Firms != null ? new Firms
+                {
+                    Id = c.Firms.Id,
+                    Name = c.Firms.Name
+                } : null
+            })
+                .ToListAsync();
+
+            return new PaginationDto<User>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = pageNumber
+            };
+
+        } 
         public async Task<IEnumerable<User>> GetAllStaffMember(Guid Firmid)
         {
             var allstaff = await _db.Users.Where(e => e.FirmId == Firmid && e.IsActive == true && e.IsDeleted == false && e.Role.Name.StartsWith("Staff")).Include(e => e.Role).ToListAsync();
