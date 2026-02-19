@@ -59,7 +59,7 @@ namespace EvictionFiler.Application.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public async Task<bool> RegisterTenantAsync(RegisterDto model, Guid? Id=null)
+        public async Task<bool> RegisterTenantAsync(RegisterDto model, Guid? Id = null)
         {
             var registerResult = await _userRepository.RegisterTenant(model, Id);
             if (!registerResult) return false;
@@ -77,13 +77,13 @@ namespace EvictionFiler.Application.Services
             if (!registerResult) return false;
             return true;
         }
-        public async Task<bool> RegisterStaffMemberAsync(RegisterDto model, Guid? Id=null)
+        public async Task<bool> RegisterStaffMemberAsync(RegisterDto model, Guid? Id = null)
         {
             var registerResult = await _userRepository.RegisterTenant(model, Id);
             if (!registerResult) return false;
             return true;
         }
-       
+
 
         public async Task<IEnumerable<User>> GetAllUserAsync()
         {
@@ -105,5 +105,53 @@ namespace EvictionFiler.Application.Services
         {
             return await _userRepository.GetUserByIdAsync(UserId);
         }
+
+        public async Task<UserDto?> GetFirmOwnerAsync(Guid firmId)
+        {
+            var user = await _userRepository.GetFirmOwnerAsync(firmId);
+            if (user == null) return null;
+
+            return new UserDto
+            {
+                UserId = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                Role = user.Role != null ? new UserRoleDto
+                {
+                    RoleId = user.Role.Id,
+                    RoleName = user.Role.Name ?? string.Empty
+                } : null,
+                Firm = user.Firms != null ? new UserFirmDto
+                {
+                    FirmId = user.Firms.Id,
+                    FirmName = user.Firms.Name ?? string.Empty,
+                    UserSubscription = user.Firms.SubscriptionTypes != null ? new UserSubscriptionDto
+                    {
+                        SubscriptionId = user.Firms.SubscriptionTypes.Id,
+                        SubscriptionName = user.Firms.SubscriptionTypes.Name ?? string.Empty
+                    } : null
+                } : null
+            };
+        }
+
+        public async Task<List<UserDto>> GetUsersByFirmIdAsync(Guid firmId)
+        {
+            var users = await _userRepository.GetUsersByFirmIdAsync(firmId);
+
+            return users.Select(user => new UserDto
+            {
+                UserId = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                Role = user.Role != null ? new UserRoleDto
+                {
+                    RoleId = user.Role.Id,
+                    RoleName = user.Role.Name ?? string.Empty
+                } : null
+            }).ToList();
+        }
+
     }
 }

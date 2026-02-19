@@ -58,5 +58,30 @@ namespace EvictionFiler.Infrastructure.Repositories
 
             return null;
         }
+
+        public async Task<bool> UpdateFirm(FirmDto dto)
+        {
+            if (dto == null || dto.Id == Guid.Empty)
+                return false;
+
+            var firm = await _mainDbContext.Firms.FirstOrDefaultAsync(f => f.Id == dto.Id);
+            if (firm == null)
+                return false;
+
+            // Update fields
+            firm.Name = dto.Name;
+            firm.Email = dto.Email;
+            firm.Phone = dto.Phone;
+            firm.FAX = dto.FAX;
+            firm.Address = dto.Address;
+            firm.Website = dto.Website;
+            firm.SubscriptionTypeId = dto.SubscriptionTypeId;
+            firm.UpdatedOn = DateTime.UtcNow;
+
+            _mainDbContext.Firms.Update(firm);
+            var result = await _mainDbContext.SaveChangesAsync();
+            return result > 0;
+        }
+
     }
 }

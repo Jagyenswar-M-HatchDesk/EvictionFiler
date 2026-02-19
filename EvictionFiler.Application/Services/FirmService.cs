@@ -50,5 +50,21 @@ namespace EvictionFiler.Application.Services
                 SubscriptionName = e.SubscriptionTypes?.Name
             });
         }
+
+        // New: UpdateFirm method
+        public async Task<bool> UpdateFirm(RegisterDto model, FirmDto dto)
+        {
+            if (dto.Id == Guid.Empty) return false;
+
+            // Update firm
+            var firmUpdated = await _firmRepo.UpdateFirm(dto);
+            if (!firmUpdated) return false;
+
+            // Update user
+            var userUpdated = await _userRepo.UpdateUserAsync(model);
+            return userUpdated;
+        }
+
+
     }
 }
