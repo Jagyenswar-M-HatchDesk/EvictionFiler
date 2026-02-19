@@ -1,52 +1,52 @@
-﻿ @using EvictionFiler.Application.DTOs
-@using EvictionFiler.Application.DTOs.FirmDtos
+﻿@using EvictionFiler.Application.DTOs.FirmDtos
 @using EvictionFiler.Application.DTOs.UserDto
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Application.Services
 @using EvictionFiler.Client.SpinnerService
+@using System.Threading.Tasks
 @using System.Linq.Expressions
 @inject SpinnerService spinnerservice
 @inject IFirmService FirmService
 @inject IJSRuntime JS
 @inject IUserservices _userService
-
 <style>
     .offcanvas.show {
-    transform: translateX(0%);
+        transform: translateX(0%);
     }
 
     .offcanvas {
-    transform: translateX(100%);
-    width : 500px !important;
+        transform: translateX(100%);
+        width: 500px !important;
     }
-    .color-text{
-    color: #1F365D;
+
+    .color-text {
+        color: #1F365D;
     }
-    .btn-lg
-    {
-        font-family:'Poppins';
-        font-size:14px;
+
+    .btn-lg {
+        font-family: 'Poppins';
+        font-size: 14px;
     }
-    .btn-add
-    {
-         padding: 0.375rem 0.75rem;
+
+    .btn-add {
+        padding: 0.375rem 0.75rem;
         display: flex;
         align-items: center;
         justify-content: center;
-        width:45px;
+        width: 45px;
     }
 
 </style>
-<div class="offcanvas offcanvas-end show border-start shadow" tabindex="-1" id="createUser"
-style="visibility:@(IsVisible ? "visible" : "hidden"); transition: transform 0.9s ease-in-out;"
-aria-labelledby="createUserLabel">
+<div class="offcanvas offcanvas-end show border-start shadow" tabindex="-1" id="editUser"
+     style="visibility:@(IsVisible ? "visible" : "hidden"); transition: transform 0.9s ease-in-out;"
+     aria-labelledby="editUserLabel">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="createUserLabel">Add New User</h5>
+        <h5 class="offcanvas-title" id="createUserLabel">Edit User</h5>
         <button type="button" class="btn-close text-reset" @onclick="Hide"></button>
     </div>
 
     <div class="offcanvas-body">
-        <EditForm EditContext="_editContext" OnValidSubmit="SubmitUser" FormName="CreateUser">
+        <EditForm EditContext="_editContext" OnValidSubmit="UpdateUser" FormName="EditUser">
             <DataAnnotationsValidator />
            
 
@@ -55,8 +55,8 @@ aria-labelledby="createUserLabel">
                     <label class="form-label color-text">First Name<span class="text-danger">*</span></label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
-                        <InputText class="form-control" @bind-Value="registerDto.FirstName"
-                                   @bind-Value:after=@(() => ValidateParticularInput(() => registerDto.FirstName, nameof(registerDto.FirstName), "First Name is required.")) placeholder ="Enter First Name" />
+                        <InputText class="form-control" @bind-Value="registerDto.FirstName" 
+                                   @bind-Value:after=@(() => ValidateParticularInput(() => registerDto.FirstName, nameof(registerDto.FirstName), "First Name is required.")) placeholder="Enter First Name" />
                         <ValidationMessage For="() => registerDto.FirstName" />
                     </div>
                 </div>
@@ -81,6 +81,7 @@ aria-labelledby="createUserLabel">
                     </div>
                 </div>
             </div>
+
             @* <div class="mb-4">
                 <label class="form-label color-text">Role</label>
                 <select class="form-select" @bind="registerDto.Role">
@@ -91,34 +92,34 @@ aria-labelledby="createUserLabel">
 
                 </select>
             </div> *@
-           
             <div class="mb-4">
-                
+
                 <label class="form-label color-text">Firm<span class="text-danger">*</span></label>
                 <div class=" d-flex align-items-center gap-2">
                     <div>
-                <select class="form-select" style="min-width:320px;" @bind="registerDto.FirmId"
-                @bind:after=@(() => ValidateParticularInput(() => registerDto.FirmId, nameof(registerDto.FirmId), "Firm is required.")) >
-                    <option disabled selected value="">-- Select --</option>
-                    @if (allFirms != null && allFirms.Any())
-                    {
-                        @foreach (var firm in allFirms)
-                        {
-                            <option value="@firm.Id">@firm.Name</option>
-                    }
-                    }
-                    
-                </select>
+                        <select class="form-select" style="min-width:320px;" @bind="registerDto.FirmId"
+                                @bind:after=@(() => ValidateParticularInput(() => registerDto.FirmId, nameof(registerDto.FirmId), "Firm is required."))>
+                            <option disabled selected value="">-- Select --</option>
+                            @if (allFirms != null && allFirms.Any())
+                            {
+                                @foreach (var firm in allFirms)
+                                {
+                                    <option value="@firm.Id">@firm.Name</option>
+                                }
+                            }
+
+                        </select>
                         <ValidationMessage For="() => registerDto.FirmId" />
-                </div>
-                
-                <button type="button" class="btn btn-primary btn-lg btn-add" @onclick="AddFirm">
-                    <i class="fa-solid fa-plus"></i></button>
+                    </div>
+
+                    <button type="button" class="btn btn-primary btn-lg btn-add" @onclick="AddFirm">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
                 </div>
             </div>
 
             <div class="d-flex justify-content-end">
-                <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+                <button type="submit" class="btn btn-primary btn-lg">Update</button>
             </div>
         </EditForm>
         <AddNewFirm @ref="createFirmRef" Submit="Handle" />
@@ -134,27 +135,19 @@ aria-labelledby="createUserLabel">
     private ValidationMessageStore messageStore;
     private EditContext _editContext;
     private bool IsVisible { get; set; } = false;
-
     protected override void OnParametersSet()
     {
         _editContext = new EditContext(registerDto);
         messageStore = new ValidationMessageStore(_editContext);
     }
-
-    public async  Task Show(RegisterDto model)
+    public async Task Show(RegisterDto model)
     {
-        registerDto = model;
-
-        _editContext = new EditContext(registerDto);        
+        registerDto = model ?? new RegisterDto();
+        _editContext = new EditContext(registerDto);
         messageStore = new ValidationMessageStore(_editContext);
+
         IsVisible = true;
         await GetAllFirm();
-        StateHasChanged();
-    }
-
-    public void Hide()
-    {
-        IsVisible = false;
         StateHasChanged();
     }
     private async Task GetAllFirm()
@@ -167,7 +160,7 @@ aria-labelledby="createUserLabel">
         var modal = new FirmDto();
         createFirmRef.Show(modal);
 
-    }   
+    }
     private CancellationTokenSource _cts;
     public async Task Handle()
     {
@@ -177,10 +170,17 @@ aria-labelledby="createUserLabel">
         await Task.Delay(1000, token);
         createFirmRef.Hide();
 
-       await GetAllFirm();
+        await GetAllFirm();
 
         StateHasChanged();
     }
+
+    public void Hide()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+
     private Task ValidateParticularInput<T>(Expression<Func<T>> accessor, string fieldName, string validationMsg)
     {
         Require(accessor, fieldName, validationMsg);
@@ -191,26 +191,29 @@ aria-labelledby="createUserLabel">
     {
         messageStore.Clear();
 
-     
-            Require(() => registerDto.FirstName, nameof(registerDto.FirstName), "First Name is required.");
-            
-            Require(() => registerDto.Email, nameof(registerDto.Email), "Email is required.");
+
+        Require(() => registerDto.FirstName, nameof(registerDto.FirstName), "First Name is required.");
+
+        Require(() => registerDto.Email, nameof(registerDto.Email), "Email is required.");
+
         Require(() => registerDto.FirmId, nameof(registerDto.FirmId), "Firm is required.");
-      
+        
+     
+
 
 
 
 
         _editContext.NotifyValidationStateChanged();
 
-        
+
         var errors = _editContext.GetValidationMessages().ToList();
         Console.WriteLine($"Validation errors : {string.Join(", ", errors)}");
 
-       
+
         bool isValid = !_editContext.GetValidationMessages().Any();
 
-        
+
         return isValid;
     }
     private void Require<T>(Expression<Func<T>> accessor, string fieldName, string message)
@@ -233,23 +236,20 @@ aria-labelledby="createUserLabel">
 
         _editContext.NotifyValidationStateChanged();
     }
-
-    public async Task SubmitUser()
+    public async Task UpdateUser()
     {
-        if(ValidateCurrentStep().Result == false)
+        if (ValidateCurrentStep().Result == false)
         {
             return;
         }
         spinnerservice.Show();
-       
-        registerDto.Password = "Abcd@1234";
-        var result = await _userService.RegisterTenantAsync(registerDto); 
+        var result = await _userService.UpdateUserAsync(registerDto);
         if (result)
         {
-            await Submit.InvokeAsync(); 
+            await Submit.InvokeAsync(registerDto);
             Hide();
         }
         spinnerservice.Hide();
     }
+    
 }
-

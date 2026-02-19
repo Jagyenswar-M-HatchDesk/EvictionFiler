@@ -34,7 +34,13 @@ namespace EvictionFiler.Application.Services
             }
             return result;
         }
-     
+
+        public async Task<bool> AddNewFirm(FirmDto dto)
+        {
+            var firmId = await _firmRepo.RegisterFirm(dto);
+            return firmId != null;
+        }
+         
 
         public async Task<IEnumerable<FirmDto>> GetAllFirms()
         {

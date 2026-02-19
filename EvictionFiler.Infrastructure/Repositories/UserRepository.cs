@@ -6,6 +6,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System.Data;
 using Polly;
 
 namespace EvictionFiler.Infrastructure.Repositories
@@ -169,6 +170,12 @@ namespace EvictionFiler.Infrastructure.Repositories
         public async Task<bool> UpdateUserAsync(RegisterDto updatedUser)
         {
             var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == updatedUser.Id);
+            var role = await _roleManager.FindByNameAsync(updatedUser.Role);
+            if (role == null)
+            {
+                role = new Role { Name = updatedUser.Role };
+                await _roleManager.CreateAsync(role);
+            }
             if (user == null) return false;
 
             user.FirstName = updatedUser.FirstName;
@@ -177,6 +184,10 @@ namespace EvictionFiler.Infrastructure.Repositories
             user.Email = updatedUser.Email;
             user.UserName = updatedUser.Email;
             user.UpdatedOn = DateTime.UtcNow;
+            user.PhoneNumber = updatedUser.Phone??null;
+            user.RoleId = role.Id;
+            user.IsActive = true;
+            user.FirmId = updatedUser.FirmId;
 
             _db.Users.Update(user);
             var result = await _db.SaveChangesAsync();
