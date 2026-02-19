@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Application.DTOs.FirmDtos;
+﻿using EvictionFiler.Application.DTOs.ClientDto;
+using EvictionFiler.Application.DTOs.FirmDtos;
 using EvictionFiler.Application.DTOs.UserDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IUserRepository;
@@ -6,6 +7,7 @@ using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
+using Polly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -81,6 +83,46 @@ namespace EvictionFiler.Infrastructure.Repositories
             _mainDbContext.Firms.Update(firm);
             var result = await _mainDbContext.SaveChangesAsync();
             return result > 0;
+        }
+
+        public async Task<List<FirmDto>> GetTopFirms()
+        {
+            return await _mainDbContext.Firms.Include(e => e.SubscriptionTypes)
+                .OrderBy(c => c.Name)
+                .Take(10)
+                .Select(c => new FirmDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    SubscriptionName = c.SubscriptionTypes != null
+                            ? c.SubscriptionTypes.Name
+                            : null,
+                    SubscriptionTypeId = c.SubscriptionTypeId,
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<FirmDto>> GetFirmSuggestions(string term)
+        {
+            term = term.ToLower().Trim();
+
+            IQueryable<FirmDto> query;
+
+
+            query = _mainDbContext.Firms
+                .Where(c => c.Name.ToLower().StartsWith(term))
+                    .Select(c => new FirmDto
+                    {
+                        Id = c.Id,
+                        Name = c.Name,
+                        SubscriptionName = c.SubscriptionTypes != null
+                            ? c.SubscriptionTypes.Name
+                            : null,
+                        SubscriptionTypeId = c.SubscriptionTypeId,
+                    });
+
+
+            return await query.Take(5).ToListAsync();
         }
 
     }

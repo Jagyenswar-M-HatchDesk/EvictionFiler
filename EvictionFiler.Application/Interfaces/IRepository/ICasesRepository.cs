@@ -30,7 +30,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
         Task<List<ReportingTypePerDiem>> GetReportingTypePerDiemsIdAsync(List<Guid> ids);
         Task<List<IntakeModel>> SearchCasebyCode(string code);
 
-
+        Task<List<PipeLineChartItem>> GetPipelineChartDataAsync(string userId, bool isAdmin);
     }
 
 }

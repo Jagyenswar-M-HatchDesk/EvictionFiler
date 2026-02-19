@@ -16,6 +16,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 {
     public interface ILegalCaseService
     {
+        Task<List<PipeLineChartItem>> GetPipelineChartItems(string userId, bool isAdmin);
         Task<bool> AddLegalCasesAsync(CreateToEditLegalCaseModel dto);
         //Task<PaginationDto<LegalCase>> GetAllAsync(int pageNumber, int pageSize , string searchTerm);
         Task<PaginationDto<LegalCase>> GetAllAsync(int pageNumber, int pageSize, CaseFilterDto Filters, string userId, bool isAdmin);

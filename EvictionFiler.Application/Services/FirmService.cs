@@ -28,9 +28,9 @@ namespace EvictionFiler.Application.Services
         {
             var firmId = await _firmRepo.RegisterFirm(dto);
             var result = await _userRepo.RegisterTenant(model, firmId);
-            if(result)
+            if (result)
             {
-               await _emailService.SendFirmEnrollEmailAsync(model.Email, $"{model.FirstName} {model.LastName}", dto.Name, model.Password);
+                await _emailService.SendFirmEnrollEmailAsync(model.Email, $"{model.FirstName} {model.LastName}", dto.Name, model.Password);
             }
             return result;
         }
@@ -40,12 +40,12 @@ namespace EvictionFiler.Application.Services
             var firmId = await _firmRepo.RegisterFirm(dto);
             return firmId != null;
         }
-         
+
 
         public async Task<IEnumerable<FirmDto>> GetAllFirms()
         {
-            var firms = await _firmRepo.GetAllAsync(includes:e=>e.SubscriptionTypes!);
-            return firms.Select(e=> new FirmDto
+            var firms = await _firmRepo.GetAllAsync(includes: e => e.SubscriptionTypes!);
+            return firms.Select(e => new FirmDto
             {
                 Name = e.Name,
                 Phone = e.Phone,
@@ -72,5 +72,15 @@ namespace EvictionFiler.Application.Services
         }
 
 
+
+
+        public async Task<List<FirmDto>> GetTopFirms()
+        {
+            return await _firmRepo.GetTopFirms();
+        }
+        public async Task<List<FirmDto>> GetFirmSuggestions(string term)
+        {
+            return await _firmRepo.GetFirmSuggestions(term);
+        }
     }
 }

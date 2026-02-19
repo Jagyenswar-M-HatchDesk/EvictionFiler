@@ -122,17 +122,19 @@ namespace EvictionFiler.Application.Services
 
             return result;
         }
-        public async Task<List<EditToRemainderCenterDto>?> GetAllInCompleteRemainder(Guid? userId = null)
+        public async Task<List<EditToRemainderCenterDto>?> GetAllInCompleteRemainder(bool isSuperAdmin, Guid? userId = null)
         {
             try 
             {
+               
+
                 var calanders = await _remainderCenterRepo
-                .GetAllQuerable(x => x.IsDeleted != true && x.IsComplete != true && x.When <= DateTime.Now, x => x.RemainderType, x => x.County, x => x.Tenant, x => x.Case, x => x.ReminderEscalates, x => x.ReminderCategory)
+                .GetAllQuerable(x => x.IsDeleted != true && x.IsComplete != true && x.When <= DateTime.Now, x => x.RemainderType, x => x.County, x => x.Tenant, x => x.Case, x => x.ReminderEscalates, x=>x.User,x => x.ReminderCategory)
                 .ToListAsync();
 
-                if (userId != null)
+                if (userId != null && !isSuperAdmin)
                 {
-                    calanders = calanders.Where(e => e.CreatedBy == userId).ToList();
+                    calanders = calanders.Where(e => e.User?.FirmId == userId).ToList();
                 }
 
                 var result = calanders.Select(dto => new EditToRemainderCenterDto

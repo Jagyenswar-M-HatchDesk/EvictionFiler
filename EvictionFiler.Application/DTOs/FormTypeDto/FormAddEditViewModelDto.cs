@@ -28,6 +28,7 @@ namespace EvictionFiler.Application.DTOs.FormTypeDto
         public Guid? UnitId { get; set; }
         public Guid? FirmId { get; set; }
         public string? UnitName { get; set; }
+        public string? FirmName { get; set; }
         public string? Rate { get; set; }
         public string? Code { get; set; }
         public bool IsChanged { get; set; } = false;

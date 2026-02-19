@@ -5,6 +5,9 @@ namespace EvictionFiler.Domain.Entities.Base.Base
 	public class AuditableBaseEntity :  BaseEntity
 	{
 		public Guid CreatedBy { get; set; }
+		public Guid? CreatedById { get; set; }
+		[ForeignKey("CreatedById")]
+		public User? User { get; set; }
 		public DateTime CreatedOn { get; set; }
 		public bool IsActive { get; set; }	= true;
 		public DateTime? UpdatedOn { get; set; }
