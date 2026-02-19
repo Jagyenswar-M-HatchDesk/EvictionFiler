@@ -24,9 +24,13 @@ namespace EvictionFiler.Application.Services
 
         }
 
-        public async Task<bool> RegisterFirm(RegisterDto model, FirmDto dto)
+        public async Task<bool?> RegisterFirm(RegisterDto model, FirmDto dto)
         {
             var firmId = await _firmRepo.RegisterFirm(dto);
+            if (firmId == null)
+            {
+                return false;
+            }
             var result = await _userRepo.RegisterTenant(model, firmId);
             if(result)
             {

@@ -251,5 +251,15 @@ namespace EvictionFiler.Infrastructure.Repositories
             return await _db.Users.Include(u => u.Role).Where(u => u.FirmId == firmId).ToListAsync();
         }
 
+        public async Task<bool> IsEmailExistsAsync(string email, Guid? excludeUserId = null)
+        {
+            //return await _db.Users.AnyAsync(u => u.Email.ToLower() == email.ToLower() && (excludeUserId == null || u.Id != excludeUserId));
+            return await _db.Users
+        .AnyAsync(u =>
+            u.Email.ToLower() == email &&
+            (!excludeUserId.HasValue || u.Id != excludeUserId.Value)
+        );
+        }
+
     }
 }

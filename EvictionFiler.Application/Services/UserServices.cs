@@ -153,5 +153,9 @@ namespace EvictionFiler.Application.Services
             }).ToList();
         }
 
+        public Task<bool> IsEmailExistsAsync(string email, Guid? excludeUserId = null)
+        {
+            return _userRepository.IsEmailExistsAsync(email, excludeUserId);
+        }
     }
 }

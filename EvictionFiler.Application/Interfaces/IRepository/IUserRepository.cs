@@ -21,6 +21,6 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
 
         Task<List<User>> GetUsersByFirmIdAsync(Guid firmId);
 
-
+        Task<bool> IsEmailExistsAsync(string email, Guid? excludeUserId = null);
     }
 }
