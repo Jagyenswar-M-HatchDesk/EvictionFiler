@@ -12,7 +12,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
     public interface IManageFormService
     {
       
-        Task<PaginationDto<FormAddEditViewModelDto>> GetAllFormAsync(int pageNumber, int pageSize, string searchTerm);
+        Task<PaginationDto<FormAddEditViewModelDto>> GetAllFormAsync(int pageNumber, int pageSize, string searchTerm, Guid? FirmId);
         Task<bool> CreateForm(FormAddEditViewModelDto dto);
         Task<FormAddEditViewModelDto?> GetFormByIdAsync(Guid? id);
         Task<bool> DeleteFormAsync(Guid id);

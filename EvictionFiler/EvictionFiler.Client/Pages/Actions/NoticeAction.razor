@@ -903,19 +903,59 @@
         StateHasChanged();
     }
 
+    // private void GenerateMonths()
+    // {
+    //     MonthOptions.Clear();
+    //     LastDaterentfilled = true;
+
+    //     if (noticeModel.DateofLastPayment is null)
+    //         return;
+
+    //     LastdateSelected = true;
+    //     IsLedgerOpen = true;
+    //     DateTime start = new DateTime(
+    //         noticeModel.DateofLastPayment.Value.Year,
+    //         noticeModel.DateofLastPayment.Value.Month,
+    //         1);
+
+    //     DateTime end = new DateTime(
+    //         DateTime.Today.Year,
+    //         DateTime.Today.Month,
+    //         1);
+
+    //     // Iterate month-by-month
+    //     for (DateTime dt = start; dt <= end; dt = dt.AddMonths(1))
+    //     {
+    //         string value = $"{dt:yyyy-MM}"; // stored value
+    //         string display = $"{dt:yyyy}-{CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(dt.Month)}";
+
+    //         MonthOptions.Add(new MonthItem(value, display));
+    //     }
+    //     if (Rows.Any())
+    //     {
+    //         if (Rows.Last().Month != null)
+    //         {
+    //             Rows.Add(new ArrearLedgerDto());
+    //         }
+    //     }
+
+    //     if (!Rows.Any())
+    //     {
+    //         Rows.Add(new ArrearLedgerDto());
+    //     }
+
+    // }
+
     private void GenerateMonths()
     {
         MonthOptions.Clear();
-        LastDaterentfilled = true;
 
-        if (noticeModel.DateofLastPayment is null)
+        if (legalcaseDto.LastPaymentDate is null)
             return;
 
-        LastdateSelected = true;
-        IsLedgerOpen = true;
         DateTime start = new DateTime(
-            noticeModel.DateofLastPayment.Value.Year,
-            noticeModel.DateofLastPayment.Value.Month,
+            legalcaseDto.LastPaymentDate.Value.Year,
+            legalcaseDto.LastPaymentDate.Value.Month,
             1);
 
         DateTime end = new DateTime(
@@ -923,28 +963,43 @@
             DateTime.Today.Month,
             1);
 
+        var requiredMonths = new List<string>();
         // Iterate month-by-month
-        for (DateTime dt = start; dt <= end; dt = dt.AddMonths(1))
+        for (DateTime dt = start.AddMonths(1); dt <= end; dt = dt.AddMonths(1))
         {
             string value = $"{dt:yyyy-MM}"; // stored value
             string display = $"{dt:yyyy}-{CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(dt.Month)}";
 
             MonthOptions.Add(new MonthItem(value, display));
+            requiredMonths.Add(value);
         }
-        if (Rows.Any())
+
+        // ---- ADD MISSING ROWS ----
+        foreach (var month in requiredMonths)
         {
-            if (Rows.Last().Month != null)
+            if (!Rows.Any(r => r.Month == month))
             {
-                Rows.Add(new ArrearLedgerDto());
+                Rows.Add(new ArrearLedgerDto
+                {
+                    Month = month,
+                    Amount = legalcaseDto.MonthlyRent.Value,
+                    LegalCaseId = legalcaseDto.Id,
+                });
             }
         }
 
-        if (!Rows.Any())
-        {
-            Rows.Add(new ArrearLedgerDto());
-        }
+        // ---- REMOVE EXTRA ROWS ----
+        var rowsToRemove = Rows
+            .Where(r => !requiredMonths.Contains(r.Month))
+            .ToList();
 
+        foreach (var row in rowsToRemove)
+        {
+            RemoveRow(row); // this will track delete correctly
+        }
+        RecalculateTotal();
     }
+
     private void FormTypeBindAfter()
     {
         var selectedForm = FilteredFormTypeList

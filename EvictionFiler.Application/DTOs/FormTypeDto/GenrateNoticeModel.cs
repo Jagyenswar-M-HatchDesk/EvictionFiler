@@ -16,6 +16,7 @@ namespace EvictionFiler.Application.DTOs.FormTypeDto
 		public Guid? LegalCaseId { get; set; }
 		[Required]
 		public Guid? FormTypeId { get; set; }
+		public Guid? FirmId { get; set; }
 		public string? FormTypeName { get; set; }
 		public DateTime? CreatedOn { get; set; }
 

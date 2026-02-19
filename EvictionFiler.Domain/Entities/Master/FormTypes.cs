@@ -28,6 +28,10 @@ namespace EvictionFiler.Domain.Entities.Master
         public Guid? UnitId { get; set; }
         [ForeignKey("UnitId")]
         public Unit? Units { get; set; }
+        public Guid? FirmId { get; set; }
+
+        [ForeignKey("FirmId")]
+        public Firms? Firms { get; set; }
         public string? Rate { get; set; }
 
 		[NotMapped]

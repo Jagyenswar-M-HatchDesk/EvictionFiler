@@ -138,7 +138,6 @@
 
 </style>
 
-
 <div class="offcanvas offcanvas-end show border-start shadow" tabindex="-1" id="createUser"
      style="visibility:@(IsVisible ? "visible" : "hidden"); transition: transform 0.9s ease-in-out;"
      aria-labelledby="createUserLabel">
@@ -163,7 +162,6 @@
                     <div class="step-label">Subscription</div>
                 </div>
 
-
                 <!-- STEP 2 -->
                 <div class="step-item"
                      @onclick="() => { if (CurrentStep >= 2) GoToStep(2); }"
@@ -171,7 +169,6 @@
                     <div class="step-circle @(CurrentStep >= 2 ? "active-step" : "")">2</div>
                     <div class="step-label">Owner Info</div>
                 </div>
-
 
                 <!-- STEP 3 -->
                 <div class="step-item"
@@ -220,13 +217,13 @@
                        
 
                         <div class="col-md-12">
-                            <label class="form-label required-label color-text">Last Name</label>
+                            <label class="form-label  color-text">Last Name</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
                                 <InputText class="form-input" style="width:91%;" @bind-Value="registerDto.LastName"
-                                           @bind-Value:after=@(() => ValidateParticularInput(() => registerDto.LastName, nameof(registerDto.LastName), "Last Name is required."))
                                            placeholder="Enter Last Name" />
-                                <ValidationMessage For="() => registerDto.LastName" />
+                                @*  @bind-Value:after=@(() => ValidateParticularInput(() => registerDto.LastName, nameof(registerDto.LastName), "Last Name is required.")) *@
+                               @*  <ValidationMessage For="() => registerDto.LastName" /> *@
 
                             </div>
                         </div>
@@ -387,11 +384,19 @@
         StateHasChanged();
     }
 
+    // public void Hide()
+    // {
+    //     IsVisible = false;
+    //     StateHasChanged();
+    // }
     public void Hide()
     {
         IsVisible = false;
-        StateHasChanged();
+        registerDto = new RegisterDto();
+        Firms = new FirmDto();
+        CurrentStep = 1;
     }
+
 
     private string GetStepTitle()
     {
@@ -438,7 +443,7 @@
         else if(CurrentStep == 2)
         {
             Require(() => registerDto.FirstName, nameof(registerDto.FirstName), "First Name is required.");
-            Require(() => registerDto.LastName, nameof(registerDto.LastName), "Last Name is required.");
+            // Require(() => registerDto.LastName, nameof(registerDto.LastName), "Last Name is required.");
             Require(() => registerDto.Email, nameof(registerDto.Email), "Email is required.");
 
         }
@@ -491,7 +496,19 @@
     public async Task SubmitUser()
     {
         spinnerservice.Show();
-
+        if (Firms.Id != Guid.Empty)
+        {
+            // Update mode
+            var result = await _firmService.UpdateFirm(registerDto, Firms);
+            if (result)
+            {
+                await Submit.InvokeAsync();
+                Hide();
+            }
+        }
+        else
+        {
+ 
         registerDto.Password = "Abcd@1234";
 
         // You can attach Firm + Subscription logic here if API expects it:
@@ -505,7 +522,10 @@
             await Submit.InvokeAsync();
             Hide();
         }
-
+        }
         spinnerservice.Hide();
     }
+
+  
+
 }

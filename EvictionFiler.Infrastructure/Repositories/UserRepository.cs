@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Data;
+using Polly;
 
 namespace EvictionFiler.Infrastructure.Repositories
 {
@@ -130,7 +131,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     UpdatedOn = DateTime.UtcNow,
                     RoleId = role.Id,
                     IsActive = true,
-                    FirmId = model.FirmId??FirmId
+                    FirmId = model.FirmId ?? FirmId
 
                 };
 
@@ -237,5 +238,18 @@ namespace EvictionFiler.Infrastructure.Repositories
                       }).FirstOrDefaultAsync();
             return user;
         }
+
+        public async Task<User?> GetFirmOwnerAsync(Guid firmId)
+        {
+            var user = await _db.Users.Include(u => u.Role).Include(u => u.Firms).ThenInclude(f => f.SubscriptionTypes)
+                .FirstOrDefaultAsync(u => u.FirmId == firmId && u.Role != null && u.Role.Name.ToLower() == "admin" && u.IsActive && !(u.IsDeleted ?? false));           
+            return user;
+        }
+
+        public async Task<List<User>> GetUsersByFirmIdAsync(Guid firmId)
+        {
+            return await _db.Users.Include(u => u.Role).Where(u => u.FirmId == firmId).ToListAsync();
+        }
+
     }
 }

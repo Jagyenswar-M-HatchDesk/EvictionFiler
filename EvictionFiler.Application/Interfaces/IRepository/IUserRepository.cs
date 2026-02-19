@@ -16,5 +16,11 @@ namespace EvictionFiler.Application.Interfaces.IUserRepository
         Task<bool> DeleteUserAsync(Guid id);
         Task<IEnumerable<User>> GetAllStaffMember(Guid Firmid);
         Task<UserDto?> GetUserByIdAsync(Guid id);
+
+        Task<User?> GetFirmOwnerAsync(Guid firmId);
+
+        Task<List<User>> GetUsersByFirmIdAsync(Guid firmId);
+
+
     }
 }
