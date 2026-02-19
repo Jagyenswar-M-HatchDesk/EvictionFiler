@@ -12,8 +12,10 @@ namespace EvictionFiler.Application.Interfaces.IServices
     {
         Task<IEnumerable<FirmDto>> GetAllFirms();
         Task<bool> AddNewFirm(FirmDto dto);
-        Task<bool> RegisterFirm(RegisterDto model, FirmDto dto);
+        Task<bool?> RegisterFirm(RegisterDto model, FirmDto dto);
 
         Task<bool> UpdateFirm(RegisterDto model, FirmDto dto);
+        Task<List<FirmDto>> GetTopFirms();
+        Task<List<FirmDto>> GetFirmSuggestions(string term);
     }
 }

@@ -6,6 +6,7 @@
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ApartmentDto
 @using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.DTOs.FirmDtos
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.DTOs.LegalCaseDto
 @using EvictionFiler.Application.DTOs.PaginationDto
@@ -23,6 +24,7 @@
 @inject ILoggedInUserService _loggedInUserService
 @inject ILegalCaseService _service
 @inject IClientService _clientservice
+@inject IFirmService _firmService
 @using EvictionFiler.Client.SpinnerService
 @using Microsoft.AspNetCore.WebUtilities
 @inject SpinnerService spinnerservice
@@ -301,6 +303,10 @@
             font-size:14px;
             font-family:'Poppins';
         }
+
+    .view-toggle{
+        width:100px;
+    }
 </style>
 
 
@@ -334,6 +340,22 @@
                         <option value=""> All Case Types</option>
 
                         @foreach (var l in CaseTypeList)
+                        {
+                            <option value="@l.Id">@l.Name</option>
+                        }
+                    </select>
+
+
+                    @* <ValidationMessage For="() => legalcaseDto.CaseTypeId" /> *@
+                </div>
+                <div class="col-4">
+                    <select id="casetype" class="form-input" style="min-height: 45px;"
+                            @bind="selectedFirmId"
+                            @bind:after="OnCaseTypeChanged">
+
+                        <option value=""> All Firms</option>
+
+                        @foreach (var l in FirmsList)
                         {
                             <option value="@l.Id">@l.Name</option>
                         }
@@ -663,6 +685,7 @@
     private string searchTermResonHoldover = string.Empty;
 
     private List<CaseType> CaseTypeList = new();
+    private IEnumerable<FirmDto> FirmsList = new List<FirmDto>();
 
     private string showClient = string.Empty;
     private bool ViewSearch = false;
@@ -674,6 +697,7 @@
     private string successMessage;
     private Guid selectedClientId = new Guid();
     private Guid? selectedCaseTypeId = null;
+    private Guid? selectedFirmId = null;
     private PaginationDto<LegalCase> pagedcases;
 
     private string searchTerm = "";
@@ -747,6 +771,7 @@
                 }
             }
             CaseTypeList = await CaseTypeRepository.GetAllCaseType();
+            FirmsList = await _firmService.GetAllFirms();
             await GetAllCases();
         }
         spinnerservice.Hide();
@@ -765,8 +790,8 @@
             ReasonHoldover = searchTermResonHoldover,
             ActionDate = searchTermDate,
             Status = searchTermStatus,
-            CaseTypeId = selectedCaseTypeId
-
+            CaseTypeId = selectedCaseTypeId,
+            FirmId = selectedFirmId
         };
 
         pagedcases = await _service.GetAllAsync(currentPage, pageSize, filters, identityUser?.UserId??string.Empty, identityUser?.IsSuperAdmin??false);

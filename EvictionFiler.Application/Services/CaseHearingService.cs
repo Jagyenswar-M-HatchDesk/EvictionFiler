@@ -73,12 +73,12 @@ namespace EvictionFiler.Application.Services
         public async Task<int> GetAllTodayCaseHearingAsync(string userId, bool isAdmin)
         {
             var query =  _caseHearingRepository
-                     .GetAllQuerable(x => x.HearingDate.HasValue && x.HearingDate.Value.Date == DateTime.Today);
+                     .GetAllQuerable(x => x.HearingDate.HasValue && x.HearingDate.Value.Date == DateTime.Today, e=>e.User);
 
             if (!isAdmin)
             {
                 var userGuid = Guid.Parse(userId);
-                query = query.Where(c => c.CreatedBy == userGuid);
+                query = query.Where(c => c.User.FirmId == userGuid);
             }
             return await query.CountAsync();
         }

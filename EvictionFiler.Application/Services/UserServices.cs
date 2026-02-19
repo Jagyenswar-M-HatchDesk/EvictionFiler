@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using EvictionFiler.Application.DTOs.FirmDtos;
+using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.DTOs.UserDto;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IUserRepository;
@@ -90,6 +91,11 @@ namespace EvictionFiler.Application.Services
             var users = await _userRepository.GetAllUser();
             return users;
         }
+        public async Task<PaginationDto<User>> GetAllUsersAsync( int pageNumber, int pageSize, string? search)
+        {
+            var users = await _userRepository.GetAllUsers( pageNumber, pageSize, search);
+            return users;
+        }
         public async Task<IEnumerable<User>> GetAllStaffMembers(Guid FirmId)
         {
             var staff = await _userRepository.GetAllStaffMember(FirmId);
@@ -153,5 +159,9 @@ namespace EvictionFiler.Application.Services
             }).ToList();
         }
 
+        public Task<bool> IsEmailExistsAsync(string email, Guid? excludeUserId = null)
+        {
+            return _userRepository.IsEmailExistsAsync(email, excludeUserId);
+        }
     }
 }

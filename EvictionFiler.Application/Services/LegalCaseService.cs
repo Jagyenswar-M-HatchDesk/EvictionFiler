@@ -312,6 +312,10 @@ namespace EvictionFiler.Application.Services
         {
             return await _repository.GetActiveCasesCountAsync(userId, isAdmin);
         }
+        public async Task<List<PipeLineChartItem>> GetPipelineChartItems(string userId, bool isAdmin)
+        {
+            return await _repository.GetPipelineChartDataAsync(userId, isAdmin);
+        }
 
         public async Task<bool> AddLegalCasesAsync(CreateToEditLegalCaseModel legalCase)
         {

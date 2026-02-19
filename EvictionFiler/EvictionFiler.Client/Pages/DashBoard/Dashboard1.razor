@@ -2,6 +2,7 @@
 <PageTitle>Dashboard - Housing CourtFiler</PageTitle>
 @using EvictionFiler.Application.Common.Interfaces
 @using EvictionFiler.Application.Common.Models
+@using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.ClientDto
 @using EvictionFiler.Application.DTOs.DashboardDto
 @using EvictionFiler.Application.DTOs.LandLordDto
@@ -541,36 +542,7 @@
             <span style="color: grey; font-size: 16px; font-weight:600;">CASE SEARCH & FILTERS</span>
         </div>
         <div class="searchbar row">
-            <div class="col ">
-                <input class="form-control search-box"
-                       placeholder="Search by Case"
-                       @bind="selectedCase" @onfocusout="FocusOutCase"
-                       @oninput="OnCaseInput"
-                       @onfocus="OnCaseFocus"
-                       autocomplete="off" />
-
-
-                <ul class="list-group position-absolute" style="z-index:1000; font-size:14px"
-                    hidden="@(!caseSuggestions.Any() || !caseSuggestionsChecked)">
-                    @if (caseSuggestions.Any())
-                    {
-                        @foreach (var suggestion in caseSuggestions)
-                        {
-                            <li class="list-group-item list-group-item-action"
-                                style="cursor:pointer;"
-                                @onclick="() => SelectCase(suggestion)">
-                                @suggestion.Casecode
-                            </li>
-                        }
-                    }
-                    else
-                    {
-                        <li class="list-group-item text-muted">
-                            No result found
-                        </li>
-                    }
-                </ul>
-            </div>
+           
             <div class="col ">
                 <input class="form-control search-box"
                        placeholder="Search by Client"
@@ -660,7 +632,36 @@
                     }
                 </ul>
             </div>
+            <div class="col ">
+                <input class="form-control search-box"
+                       placeholder="Search by Case"
+                       @bind="selectedCase" @onfocusout="FocusOutCase"
+                       @oninput="OnCaseInput"
+                       @onfocus="OnCaseFocus"
+                       autocomplete="off" />
 
+
+                <ul class="list-group position-absolute" style="z-index:1000; font-size:14px"
+                    hidden="@(!caseSuggestions.Any() || !caseSuggestionsChecked)">
+                    @if (caseSuggestions.Any())
+                    {
+                        @foreach (var suggestion in caseSuggestions)
+                        {
+                            <li class="list-group-item list-group-item-action"
+                                style="cursor:pointer;"
+                                @onclick="() => SelectCase(suggestion)">
+                                @suggestion.Casecode
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-muted">
+                            No result found
+                        </li>
+                    }
+                </ul>
+            </div>
             <div class="col-md-2">
 
                 <button class="searchbtn" @onclick="Search" style="border-radius:25px; width:100%;"> <i class="fa fa-search mx-1"></i>  </button>
@@ -673,7 +674,7 @@
 
     <!-- Greeting & suggestions -->
     <div class="greeting">
-        <h2 id="greet">Good Morning, @loginUser </h2>
+        <h2 id="greet">Good Morning, @identityUser.Name </h2>
         <div class="chips">
             <span class="chip">“Show me holdovers filed this week”</span>
             <span class="chip">“Deadlines in Queens today”</span>
@@ -683,11 +684,12 @@
 
     <!-- Quick Snapshot tiles (Top Row) -->
     <div class="grid cols-4" style="margin-bottom:12px">
-        <a class="tile" href="#hearings">
+        <a class="tile" href="/calender">
             <div class="icon">⚖️</div>
             <div>
                 <div class="count" id="todayHearings">@totalCasesHearing</div>
                 <div class="label">Hearings Today</div>
+
             </div>
         </a>
         <a class="tile" href="#deadlines">
@@ -697,7 +699,7 @@
                 <div class="label">Due Today / Overdue</div>
             </div>
         </a>
-        <a class="tile" href="#filed">
+        <a class="tile" href="/legalcases">
             <div class="icon">📁</div>
             <div>
                 <div class="count" id="filedWeek">@totalCases</div>
@@ -706,6 +708,7 @@
         </a>
         <a class="tile" href="#approvals">
             <div class="icon">✅</div>
+
             <div>
                 <div class="count" id="pendingApprovals">0</div>
                 <div class="label">Pending Client Approvals</div>
@@ -735,10 +738,10 @@
                 <div class="label">Tasks Completed (wk)</div>
             </div>
         </a>
-        <a class="tile" href="#alerts">
+        <a class="tile" href="/remainder-center">
             <div class="icon">🔔</div>
             <div>
-                <div class="count" id="alertCount">0</div>
+                <div class="count" id="alertCount">@totalRemainder</div>
                 <div class="label">Smart Alerts</div>
             </div>
         </a>
@@ -785,7 +788,7 @@
                                         <RadzenColumnOptions Radius="2" Width="@columnWidth" />
 
                                         <!-- axis hidden but padding increased to add gap between categories -->
-                                        <RadzenCategoryAxis Visible="false" Padding="30" />
+                                        <RadzenCategoryAxis Visible="true" Padding="20" />
                                         <RadzenLegend Visible="false" />
                                         <RadzenValueAxis Visible="false">
                                             <RadzenGridLines Visible="false" />
@@ -1126,6 +1129,7 @@
 
     private int ActiveIndex = 0;
     private int totalCases = 0;
+    private int totalRemainder = 0;
     private int totalCasesHearing = 0;
     private int activeCases = 0;
     private bool IsPrevDisabled => ActiveIndex == 0;
@@ -1178,16 +1182,17 @@
             }
         }
 
-        totalCases = await _service.GetTotalCasesCountAsync(loggedInUser.UserId??string.Empty, loggedInUser.IsSuperAdmin);
-        totalCasesHearing = await _caseService.GetAllTodayCaseHearingAsync(loggedInUser.UserId ?? string.Empty, loggedInUser.IsSuperAdmin);
-        activeCases = await _service.GetActiveCasesCountAsync(loggedInUser.UserId ?? string.Empty, loggedInUser.IsSuperAdmin);
+        totalCases = await _service.GetTotalCasesCountAsync(loggedInUser.FirmId??string.Empty, loggedInUser.IsSuperAdmin);
+        totalCasesHearing = await _caseService.GetAllTodayCaseHearingAsync(loggedInUser.FirmId ?? string.Empty, loggedInUser.IsSuperAdmin);
+        //activeCases = await _service.GetActiveCasesCountAsync(loggedInUser.UserId ?? string.Empty, loggedInUser.IsSuperAdmin);
+        pipelineData = await _service.GetPipelineChartItems(loggedInUser.FirmId ?? string.Empty, loggedInUser.IsSuperAdmin);
 
-        InCompleteRemainder = await _remainder.GetAllInCompleteRemainder(Guid.Parse(loggedInUser.UserId??string.Empty));
+        InCompleteRemainder = await _remainder.GetAllInCompleteRemainder(identityUser.IsSuperAdmin, Guid.Parse(loggedInUser.UserId??string.Empty));
 
         groupedRemainder = InCompleteRemainder.GroupBy(e => e.CaseCode).ToList();
         if (groupedRemainder.Any())
             showCaseModal = true;
-
+        totalRemainder = InCompleteRemainder.Count();
         spinnerservice.Hide();
     }
     private async Task ChangePage(int page)
@@ -1585,14 +1590,8 @@
         public double Other { get; set; }
     }
 
-    List<DataItem> pipelineData = new List<DataItem>()
-                                        {
-                                        new DataItem(){Month="Jan", NonPayment=50, Holdover=30, Other=10},
-                                        new DataItem(){Month="Feb", NonPayment=100, Holdover=60, Other=15},
-                                        new DataItem(){Month="Mar", NonPayment=70, Holdover=95, Other=12},
-                                        new DataItem(){Month="Apr", NonPayment=60, Holdover=75, Other=18},
-                                        new DataItem(){Month="May", NonPayment=120, Holdover=85, Other=8},
-                                        };
+    public List<PipeLineChartItem> pipelineData = new List<PipeLineChartItem>();
+
 
     class DataFinacial
     {

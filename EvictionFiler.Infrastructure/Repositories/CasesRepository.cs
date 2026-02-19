@@ -62,8 +62,8 @@ namespace EvictionFiler.Infrastructure.Repositories
                 var startOfWeek = today.AddDays(-(int)today.DayOfWeek + 1); // Monday
                 var endOfWeek = startOfWeek.AddDays(7);
 
-                var count = await _context.LegalCases
-                    .Where(e => e.CreatedOn >= startOfWeek && e.CreatedOn < endOfWeek && e.CreatedBy == userGuid)
+                var count = await _context.LegalCases.Include(e=>e.User)
+                    .Where(e => e.CreatedOn >= startOfWeek && e.CreatedOn < endOfWeek && e.User.FirmId == userGuid)
                     .CountAsync();
                 return count;
 
@@ -85,6 +85,69 @@ namespace EvictionFiler.Infrastructure.Repositories
                                      .Where(c => c.IsActive && c.CreatedBy == userGuid) 
                                      .CountAsync();
             }
+        }
+        //public async Task<List<PipeLineChartItem>> GetPipelineChartDataAsync(string userId, bool isAdmin)
+        //{
+        //    var query = _context.LegalCases.Include(e=>e.CaseType)
+        //        .Where(c => c.IsActive);
+
+        //    if (!isAdmin)
+        //    {
+        //        var userGuid = Guid.Parse(userId);
+        //        query = query.Where(c => c.CreatedBy == userGuid);
+        //    }
+
+        //    return await query
+        //        .GroupBy(c => new { c.CreatedOn.Year, c.CreatedOn.Month })
+        //        .Select(g => new PipeLineChartItem
+        //        {
+        //            Month = new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMM"),
+        //            NonPayment = g.Count(x => x.CaseType.Name.ToLower() == "nonpayment"),
+        //            Holdover = g.Count(x => x.CaseType.Name.ToLower() == "holdover"),
+        //            Other = g.Count(x => x.CaseType.Name.ToLower() != "nonpayment" && x.CaseType.Name.ToLower() != "holdover")
+        //        })
+        //        .OrderBy(x => DateTime.ParseExact(x.Month, "MMM", null).Month)
+        //        .ToListAsync();
+        //}
+
+        public async Task<List<PipeLineChartItem>> GetPipelineChartDataAsync(string userId, bool isAdmin)
+        {
+            var query = _context.LegalCases
+                .Include(e => e.CaseType).Include(e=>e.User)
+                .Where(c => c.IsActive);
+
+            if (!isAdmin)
+            {
+                var userGuid = Guid.Parse(userId);
+                query = query.Where(c => c.User.FirmId == userGuid);
+            }
+
+            // 1️⃣ RAW SQL-safe query
+            var raw = await query
+                .GroupBy(c => new { c.CreatedOn.Year, c.CreatedOn.Month })
+                .Select(g => new
+                {
+                    g.Key.Year,
+                    g.Key.Month,
+                    NonPayment = g.Count(x => x.CaseType.Name == "NonPayment"),
+                    Holdover = g.Count(x => x.CaseType.Name == "Holdover"),
+                    Other = g.Count(x => x.CaseType.Name != "NonPayment" &&
+                                         x.CaseType.Name != "Holdover")
+                })
+                .OrderBy(x => x.Year)
+                .ThenBy(x => x.Month)
+                .ToListAsync();
+
+            // 2️⃣ Project to your DTO in C#
+            return raw
+                .Select(x => new PipeLineChartItem
+                {
+                    Month = new DateTime(x.Year, x.Month, 1).ToString("MMM"),
+                    NonPayment = x.NonPayment,
+                    Holdover = x.Holdover,
+                    Other = x.Other
+                })
+                .ToList();
         }
 
 
@@ -396,7 +459,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 string f = filters.CaseCode;
                 query = query.Where(c =>
                     c.Casecode != null &&
-                    c.Casecode.StartsWith(f, StringComparison.OrdinalIgnoreCase));
+                    c.Casecode.ToLower().StartsWith(f));
             }
 
             // CLIENT
@@ -407,10 +470,11 @@ namespace EvictionFiler.Infrastructure.Repositories
                     c.Clients != null &&
                     (
                         (c.Clients.ClientCode != null &&
-                            c.Clients.ClientCode.StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                            c.Clients.ClientCode.ToLower().StartsWith(f))
                         ||
                         ((c.Clients.FirstName + " " + c.Clients.LastName)
-                            .StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                        .ToLower()
+                         .StartsWith(f))
                     ));
             }
 
@@ -422,10 +486,11 @@ namespace EvictionFiler.Infrastructure.Repositories
                     c.Tenants != null &&
                     (
                         (c.Tenants.TenantCode != null &&
-                            c.Tenants.TenantCode.StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                            c.Tenants.TenantCode.ToLower().StartsWith(f))
                         ||
                         ((c.Tenants.FirstName + " " + c.Tenants.LastName)
-                            .StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                        .ToLower()
+                            .StartsWith(f))
                     ));
             }
 
@@ -437,10 +502,11 @@ namespace EvictionFiler.Infrastructure.Repositories
                     c.LandLords != null &&
                     (
                         (c.LandLords.LandLordCode != null &&
-                            c.LandLords.LandLordCode.StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                            c.LandLords.LandLordCode.ToLower().StartsWith(f))
                         ||
                         ((c.LandLords.FirstName + " " + c.LandLords.LastName)
-                            .StartsWith(f, StringComparison.OrdinalIgnoreCase))
+                        .ToLower()
+                            .StartsWith(f))
                     ));
             }
 
@@ -456,7 +522,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 string f = filters.ReasonHoldover;
                 query = query.Where(x =>
                     x.ReasonHoldover != null &&
-                    x.ReasonHoldover.Name.StartsWith(f, StringComparison.OrdinalIgnoreCase));
+                    x.ReasonHoldover.Name.ToLower().StartsWith(f));
             }
 
             // ACTION DATE
@@ -479,6 +545,13 @@ namespace EvictionFiler.Infrastructure.Repositories
                 {
                     query = query.Where(x => x.IsActive == false && x.IsDeleted == true);
                 }
+            }
+            // Firms
+            if (filters.FirmId != null && filters.FirmId != Guid.Empty)
+            {
+               
+                 query = query.Where(x => x.CreatedBy == filters.FirmId);
+                
             }
 
             /* ---------------------------------------------------

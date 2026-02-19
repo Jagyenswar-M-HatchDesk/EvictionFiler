@@ -31,10 +31,16 @@ namespace EvictionFiler.Application.Services.Master
         {
             var query = _repository.GetAllQuerable
                 (
-                x => x.IsDeleted != true && (x.FirmId ==FirmId || x.FirmId == null) ,
+                x => x.IsDeleted != true ,
                     x => x.CaseType,
-                    x => x.Category
+                    x => x.Category,
+                    x=>x.Firms
                );
+
+            if(FirmId != null  && FirmId != Guid.Empty)
+            {
+                query = query.Where(x => x.FirmId == FirmId || x.FirmId == null);
+            }
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
@@ -42,6 +48,7 @@ namespace EvictionFiler.Application.Services.Master
                 query = query.Where(form =>
                        (form.CaseType.Name ?? "").ToLower().Contains(lowerSearch) ||
                       (form.Category.Name ?? "").ToLower().Contains(lowerSearch) ||
+                      (form.Firms.Name ?? "").ToLower().Contains(lowerSearch) ||
                        (form.Name ?? "").ToLower().Contains(lowerSearch) 
 
                  );
@@ -65,7 +72,8 @@ namespace EvictionFiler.Application.Services.Master
             HTML = x.HTML,
             CreatedOn = x.CreatedOn,
             Id = x.Id,
-            FirmId = x.FirmId
+            FirmId = x.FirmId,
+            FirmName = x.Firms != null ? x.Firms.Name : "Generic",
         })
         .ToList();
 
@@ -141,7 +149,7 @@ namespace EvictionFiler.Application.Services.Master
 
         public async Task<FormAddEditViewModelDto?> GetFormByIdAsync(Guid? id)
         {
-            var form = await _repository.GetAsync(id);
+            var form = await _repository.FindAsync(e=>e.Id ==id, a=>a.Firms!);
 
             if (form == null) return null;
             return new FormAddEditViewModelDto
@@ -153,6 +161,7 @@ namespace EvictionFiler.Application.Services.Master
                 Name = form.Name,
                 CreatedOn = form.CreatedOn,
                 FirmId = form.FirmId,
+                FirmName = form.Firms?.Name
             };
         }
 

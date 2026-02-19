@@ -3,6 +3,7 @@
 @using EvictionFiler.Application.Common.Interfaces
 @using EvictionFiler.Application.Common.Models
 @using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.FirmDtos
 @using EvictionFiler.Application.DTOs.FormTypeDto
 @using EvictionFiler.Application.DTOs.UserDto
 @using EvictionFiler.Application.Interfaces.IRepository
@@ -22,6 +23,7 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 @inject ILoggedInUserService _loggedInUserService
+@inject IFirmService _firmService
 
 <style>
     .offcanvas.show {
@@ -55,6 +57,10 @@
     .modal-body {
     max-height: 500px;
     overflow-y: auto;
+    }
+
+    .list-group-item{
+        border:none;
     }
 </style>
 
@@ -105,6 +111,43 @@ aria-labelledby="createUserLabel">
 
 
                 </div>
+                @if(identityUser.IsSuperAdmin)
+                {
+                    <div class="col-md-4 " style="position:relative;">
+                        <label class="form-label color-text ">Firm</label>
+                        <input class="form-control "
+                               placeholder="Search Firm"
+                               @bind="selectedFirm"
+                               @onfocusout="FocusOutClient"
+                               @onfocus="OnClientFocus"
+                               @oninput="OnClientInput" />
+
+
+                        <ul class="list-group position-absolute " style="z-index:1000; font-size:14px; border:1px solid;width:100%;"
+                            hidden="@( !firmSuggestionsChecked || !FirmSuggestions.Any() )">
+                            @if (FirmSuggestions.Any())
+                            {
+                                @foreach (var suggestion in FirmSuggestions)
+                                {
+                                    <li class="list-group-item list-group-item-action"
+                                        style="cursor:pointer;"
+                                        @onclick="() => SelectClient(suggestion)">
+                                        @suggestion.Name
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="list-group-item text-muted">
+                                    No result found
+                                </li>
+                            }
+                        </ul>
+
+
+                    </div>
+                }
+                
             </div>
 
             <div class="row mb-3">
@@ -175,7 +218,11 @@ aria-labelledby="createUserLabel">
     private LoggedInUser? identityUser;
     private bool isAdmin { get; set; }
     private string? loggedInUserId;
-
+    private string? selectedFirm = "Generic";
+    private Guid? selectedFirmId = null;
+    private bool firmSuggestionsChecked = false;
+    private List<FirmDto> FirmSuggestions = new List<FirmDto>();
+    private CancellationTokenSource _cts;
 
     protected override async Task OnInitializedAsync()
     {
@@ -221,7 +268,7 @@ aria-labelledby="createUserLabel">
         }
         else
         {
-            createForm.FirmId = null; // or Guid.Empty depending on your model
+            createForm.FirmId = selectedFirmId; // or Guid.Empty depending on your model
         }
 
         var isSaved = await ManageFormService.CreateForm(createForm);
@@ -243,7 +290,7 @@ aria-labelledby="createUserLabel">
     }
     private string html;
 
-    
+
     private async Task GetHtmlValue()
     {
         html = await JS.InvokeAsync<string>("getTextareaValue", "htmlEditor");
@@ -252,5 +299,57 @@ aria-labelledby="createUserLabel">
     private void ClosePreview()
     {
         IsPreviewVisible = false;
+    }
+
+    private async Task OnClientInput(ChangeEventArgs e)
+    {
+        selectedFirm = e.Value?.ToString();
+
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(300, _cts.Token);
+
+            if (!string.IsNullOrWhiteSpace(selectedFirm))
+            {
+                FirmSuggestions =
+                    await _firmService.GetFirmSuggestions(selectedFirm);
+                firmSuggestionsChecked = true;
+            }
+            else
+            {
+                FirmSuggestions =
+                    await _firmService.GetTopFirms();
+                firmSuggestionsChecked = true;
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            // ignore
+        }
+    }
+    private void SelectClient(FirmDto Firm)
+    {
+        selectedFirm = $"{Firm.Name}";
+        selectedFirmId = Firm.Id;
+        FirmSuggestions.Clear();
+        firmSuggestionsChecked = false;
+    }
+    private async Task FocusOutClient()
+    {
+        await Task.Delay(500);
+        FirmSuggestions.Clear();
+        firmSuggestionsChecked = false;
+    }
+    private async Task OnClientFocus()
+    {
+
+        if (string.IsNullOrWhiteSpace(selectedFirm))
+        {
+            FirmSuggestions = await _firmService.GetTopFirms();
+            firmSuggestionsChecked = true;
+        }
     }
 }
