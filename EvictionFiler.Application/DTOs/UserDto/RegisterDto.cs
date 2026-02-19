@@ -22,10 +22,14 @@ namespace EvictionFiler.Application.DTOs.UserDto
        
         public string Password { get; set; } = "";
 
-        
+        public string? Phone { get; set; }
         public string ConfirmPassword { get; set; } = "";
         public string Role { get; set; } = "Admin";
         public Guid? SubscriptionId { get; set; } 
-        public Guid? FirmId { get; set; } 
+        public Guid? FirmId { get; set; }
+
+        //Added
+        public Guid? SubscriptionTypeId { get; set; }
+        public string? SubscriptionName { get; set; }
     }
 }

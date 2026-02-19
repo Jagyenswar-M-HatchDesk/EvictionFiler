@@ -19,5 +19,11 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<IEnumerable<User>> GetAllStaffMembers(Guid FirmId);
         Task<User> GetUserById(Guid UserId);
         Task<UserDto?> GetUserByIdAsync(Guid UserId);
+
+        Task<UserDto?> GetFirmOwnerAsync(Guid firmId);
+
+        Task<List<UserDto>> GetUsersByFirmIdAsync(Guid firmId);
+
+
     }
 }

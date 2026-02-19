@@ -1,0 +1,144 @@
+﻿@using EvictionFiler.Application.DTOs.FirmDtos
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Client.SpinnerService
+@using EvictionFiler.Domain.Entities
+@inject SpinnerService spinnerservice
+@inject IFirmService FirmService
+@inject IJSRuntime JS
+@inject ISubscriptionTypeRepository _subscription
+
+<style>
+    .offcanvas.show {
+        transform: translateX(0%);
+    }
+
+    .offcanvas {
+        transform: translateX(100%);
+        width: 500px !important;
+    }
+
+    .color-text {
+        color: #1F365D;
+    }
+
+    .btn-lg {
+        font-family: 'Poppins';
+        font-size: 14px;
+    }
+</style>
+
+
+<div class="offcanvas offcanvas-end show border-start shadow" tabindex="-1" id="createFirm"
+style="visibility:@(IsVisible ? "visible" : "hidden"); transition: transform 0.9s ease-in-out;"
+aria-labelledby="createFirmLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="createUserLabel">Add New Firm</h5>
+        <button type="button" class="btn-close text-reset" @onclick="Hide"></button>
+    </div>
+
+    <div class="offcanvas-body">
+        <div class="ps-3 pe-3 mt-2 mb-2">
+            <label class="form-label color-text">Choose Subscription</label>
+
+            @if (SubscriptionTypes != null && SubscriptionTypes.Any())
+            {
+                <InputRadioGroup @bind-Value="SelectedSubscriptionId" Name="subscription">
+                     <div class="d-flex gap-4 align-items-center flex-wrap">
+                    @foreach (var sub in SubscriptionTypes)
+                    {
+                        <div class="form-check">
+                            <InputRadio class="form-check-input" Value="@sub.Id" />
+                            <label class="form-check-label color-text">@sub.Name</label>
+                        </div>
+                    }
+                    </div>
+
+                </InputRadioGroup>
+            }
+            else
+            {
+                <div class="text-muted">Loading subscriptions...</div>
+            }
+        </div>
+
+
+    <div class="input-form ps-3 pe-3">
+
+        <label class="form-label color-text">Company Name</label>
+        <InputText class="form-inputs form-input mb-3" @bind-Value="Firms.Name" placeholder="Companyname" />
+
+        <label class="form-label color-text">Company Email</label>
+        <InputText class="form-inputs form-input mb-3" @bind-Value="Firms.Email" placeholder="Email" />
+
+        <div class="row">
+            <div class="col-md-6">
+
+
+                <label class="form-label color-text">Phone</label>
+                <InputText class="form-inputs form-input  mb-3" @bind-Value="Firms.Phone" placeholder=" Phone number " />
+            </div>
+            <div class="col-md-6">
+
+                <label class="form-label color-text">FAX</label>
+                <InputText class="form-inputs form-input mb-3" @bind-Value="Firms.FAX" placeholder="  Fax number" />
+            </div>
+        </div>
+        <label class="form-label color-text">Address</label>
+        <InputText class="form-inputs form-input mb-3" @bind-Value="Firms.Address" placeholder=" Enter Address" />
+
+        <label class="form-label color-text">Website</label>
+        <InputText class="form-inputs form-input mb-3" @bind-Value="Firms.Website" placeholder="Enter website" />
+    </div>
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary btn-lg" @onclick="SubmitFirm" disabled="@(!IsCompanyFormValid)">Submit</button>
+        </div>
+    </div>
+
+    
+    </div>
+
+
+@code {
+    [Parameter] public FirmDto Firms { get; set; } = new FirmDto();
+    [Parameter] public EventCallback Submit { get; set; }
+    public IEnumerable<SubscriptionType> SubscriptionTypes = new List<SubscriptionType>();
+    public Guid  SelectedSubscriptionId { get; set; }
+    private bool IsVisible { get; set; } = false;
+   
+    public async Task Show(FirmDto firm)
+    {
+        Firms = firm;
+        SubscriptionTypes = await _subscription.GetAllAsync();
+        IsVisible = true;
+        // await GetAllFirm();
+        StateHasChanged();
+    }
+
+    public void Hide()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+    private bool IsCompanyFormValid =>
+       Firms != null &&
+       !string.IsNullOrWhiteSpace(Firms.Name);
+
+    public async Task SubmitFirm()
+    {
+        if (SelectedSubscriptionId == Guid.Empty)
+        {
+            await JS.InvokeVoidAsync("alert", "Please select a subscription");
+            return;
+        }
+        spinnerservice.Show();
+        Firms.SubscriptionTypeId = SelectedSubscriptionId;
+        var result = await FirmService.AddNewFirm(Firms);
+        if (result)
+        {
+            await Submit.InvokeAsync();
+            Hide();
+        }
+        spinnerservice.Hide();
+    }
+}

@@ -13,5 +13,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository
     public interface IFirmRepository : IRepository<Firms>
     {
         Task<Guid?> RegisterFirm(FirmDto dto);
+
+             Task<bool> UpdateFirm(FirmDto dto);
     }
 }

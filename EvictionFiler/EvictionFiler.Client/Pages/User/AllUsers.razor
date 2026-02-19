@@ -143,6 +143,77 @@
     {
         font-weight: 700;
     }
+
+    .role-card {
+        display: flex;
+        flex-direction: column;
+        border-radius: 16px;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
+        border: none;
+        height: 100%;
+        transition: transform .25s ease;
+    }
+
+    /* .case-card:hover {
+                transform: translateY(-5px);
+            } */
+
+    .role-header {
+        background: #1F365D;
+        color: #fff;
+        padding: 10px 11px;
+        border-radius: 16px 16px 0 0;
+        font-size: 16px;
+        font-weight: 500;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .role-body {
+        padding: 10px;
+        font-size: 15px;
+        flex-grow: 1;
+    }
+
+        .role-body .title {
+            font: 500 16px 'Lato';
+            color: #1F365D;
+        }
+
+        .role-body .value {
+            font: 500 14px 'Lato';
+            color: #1F365D;
+            text-align: right;
+        }
+
+    /* -------------------------------------------------------
+                   Info Rows (Bottom Data)
+                --------------------------------------------------------*/
+    .card-footer-data {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .label-1 {
+        font: 500 16px 'Lato';
+        color: #1F365D;
+    }
+
+    .value-1 {
+        font: 500 14px 'Lato';
+        color: #1F365D;
+    }
+
+    .btn-grid {
+        border-top-right-radius: 0px !important;
+        border-bottom-right-radius: 0px !important;
+    }
+
+    .btn-table {
+        border-top-left-radius: 0px !important;
+        border-bottom-left-radius: 0px !important;
+    }
 </style>
 
 
@@ -153,21 +224,111 @@
         <!-- Title Row -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="m-0 head">Manage Users</h5>
-        </div>
+       
 
         <!-- Search Filters -->
-        <div class="g-2 mb-3 d-flex justify-content-between align-items-center">
+        <div class="g-2 mb-3 d-flex align-items-center gap-2 ">
             <!-- Four default search boxes -->
             <button class="btn btn-primary add-btn" @onclick="AddUser">Add New</button>
+
+            <div class="d-flex justify-content-end gap-1"></div>
+            <div class="btn-group view-toggle">
+                <button id="cardViewBtn" class=@(IsGridView ? "btn btn-primary btn-grid btn-sm" : "btn btn-grid btn-outline-secondary btn-sm") @onclick="OnViewTypeChange">
+                    <i class="bi bi-grid"></i>
+                </button>
+                <button id="tableViewBtn" class=@(IsGridView ? "btn btn-table btn-outline-secondary btn-sm" : "btn btn-table btn-primary btn-sm") @onclick="OnViewTypeChange">
+                    <i class="bi bi-table"></i>
+                </button>
+            </div>
             <div class="position-relative w-50">
                 <input class="form-control border border-primary text-navy" placeholder="Search.." @bind="searchTerm" @bind:event="oninput" />
                 <button class="search-btn" type="button">
                     <i class="fa fa-search"></i>
                 </button>
             </div>
+            </div>
+            </div>
+        @if (IsGridView)
+        {
+            <div class="row g-4">
+                @{
+                    int srNo = 1;
+                }
+                @if (cases != null)
+                {
 
-        </div>
+                    @foreach (var user in cases)
+                    {
 
+
+                        <div class="col-md-6 col-xl-4">
+                            <div class="card role-card">
+                                <div class="role-header">
+                                    <div class="d-flex align-items-center gap-2">
+
+
+
+
+                                        @* <span class="badge badge-type" style="margin-bottom:0px !important">
+                                                @(cas.IsActive == true? "Active" : cas.IsDeleted == true ? "InActive" : "Not Set")
+                                                </span> *@
+                                        <span class="badge badge-type
+                                                                                                                                         @(user.IsActive ? "bg-success text-white" : user.IsDeleted == true ? "bg-secondary text-white" : "bg-warning text-dark")" style="margin-bottom:0px !important">
+                                            @(user.IsActive ? "Active" : user.IsDeleted == true ? "InActive" : "Not Set")
+                                        </span>
+
+
+
+                                    </div>
+
+                                    <div class="role-actions d-flex">
+
+                                        <i class="fa-solid fa-pen-to-square text-navy me-2" style="cursor:pointer"
+                                           @onclick="@(() => EditUser(user))"
+                                           title="Edit"></i>
+                                        @* <i class="fa-solid fa-trash-can text-navy  me-2" title="Delete" style="cursor:pointer" @onclick="@(() => DeleteRole(role.Id))"></i> *@
+
+                                    </div>
+                                </div>
+                                <div class="role-body">
+                                    <div class="mt-2 mb-1 row"><span class="col-auto title">Name: </span><span class="col value">@($"{user.FirstName} {user.LastName}" ?? "")</span></div>
+                                    <div class="mb-1 row"><span class="col-auto title">FirmName: </span><span class="col value">@(user.Firms?.Name ?? "")</span></div>
+                                    <div class="mb-1 row"><span class="col-auto title">Email: </span><span class="col value">@(user.Email ?? "")</span></div>
+                                    <div class="mb-1 row"><span class="col-auto title">Phone: </span><span class="col value">@(user.PhoneNumber ?? "")</span></div>
+
+
+
+                                </div>
+                                <hr style="margin:0;" />
+                                <div class="row p-3">
+                                    <div class="col-10" style="align-content:end;">
+                                        @if (user.UpdatedOn == null)
+                                        {
+                                            <div class="card-footer-data" style="margin-bottom:0px"><span class="label-1">Created On: </span><span class="value-1">@user.CreatedOn?.ToString(DateFormats.Default)</span></div>
+                                        }
+                                        else
+                                        {
+                                            <div class="card-footer-data" style="margin-bottom:0px"><span class="label-1">Updated On:  </span><span class="value-1">@user.UpdatedOn?.ToString(DateFormats.Default)</span></div>
+                                        }
+                                    </div>
+                                    </div>
+                            </div>
+                        </div>
+
+                        srNo++;
+                    }
+                }
+                else
+                {
+
+                    <p class="text-muted text-center fs-5">No Cases found.</p>
+
+                }
+
+            </div>
+        }
+        else
+        {
         <!-- Data Table -->
         <div class="table-responsive mb-3">
             <table class="table table-hover align-middle text-center" style="margin-bottom: 0px;">
@@ -223,7 +384,7 @@
                                     }
                                     <td>@(user.PhoneNumber ?? "")</td>
                                     <td>@(user?.CreatedOn?.ToString(DateFormats.Default))</td>
-                                    <td class="sticky"><i class="fa-solid fa-pen-to-square"></i><span class="status-active ms-2">Active</span></td>
+                                    <td class="sticky"><i class="fa-solid fa-pen-to-square" style="cursor:pointer" @onclick="() => EditUser(user)"></i><span class="status-active ms-2">Active</span></td>
                                 </tr>
                             }
                         }
@@ -252,21 +413,24 @@
                 </ul>
             </nav>
         </div>
-
+        }
     </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
     <CreateUsers @ref="createUserRef" Submit="Handle" />
+    <EditUsers @ref="editUserRef" Submit="Handle1" />
 </body>
 
 
 @code {
     private string searchTerm = string.Empty;
-
+    
 
     private CreateUsers createUserRef;
+    private EditUsers editUserRef;
+    private bool IsGridView = true;
 
     private async Task AddUser()
     {
@@ -275,9 +439,24 @@
 
         var alluser = _userService.GetAllUserAsync();
     }
+    private async Task EditUser(User user)
+    {
+        var modal = new RegisterDto
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            Phone = user.PhoneNumber,
+            Role = user.Role.Name,
+            FirmId = user.FirmId
+        };
+        editUserRef.Show(modal);
+       
+    }
     private CancellationTokenSource _cts;
 
-    public async Task Handle()
+    public async Task Handle(RegisterDto register)
     {
         // Your existing DB logic here
         _cts?.Cancel(); // cancel previous call
@@ -285,6 +464,20 @@
         var token = _cts.Token;
         await Task.Delay(1000, token);
         createUserRef.Hide();
+       
+        allUsers = await _userService.GetAllUserAsync();
+
+        StateHasChanged();
+    }
+    public async Task Handle1(RegisterDto dto)
+    {
+        // Your existing DB logic here
+        _cts?.Cancel(); // cancel previous call
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+        await Task.Delay(1000, token);
+        editUserRef.Hide();
+
         allUsers = await _userService.GetAllUserAsync();
 
         StateHasChanged();
@@ -307,7 +500,10 @@
     }
 
 
-
+    private async Task OnViewTypeChange()
+    {
+        IsGridView = !IsGridView;
+    }
     private async Task GetAllCases()
     {
         allUsers = await _userService.GetAllUserAsync();

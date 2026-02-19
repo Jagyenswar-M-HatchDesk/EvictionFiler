@@ -1,0 +1,492 @@
+﻿@using EvictionFiler.Application.DTOs.FirmDtos
+@using EvictionFiler.Application.DTOs.UserDto
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Client.SpinnerService
+@using System.Linq.Expressions
+@using EvictionFiler.Domain.Entities
+@inject IFirmService _firmService
+@inject SpinnerService spinnerservice
+@inject ISubscriptionTypeRepository _subscription
+
+<style>
+    .offcanvas.show {
+        transform: translateX(0%);
+    }
+
+    .offcanvas {
+        transform: translateX(100%);
+        width: 800px !important;
+    }
+
+    .color-text {
+        color: #1F365D;
+    }
+
+    .btn-lg {
+        font-family: 'Poppins';
+        font-size: 14px;
+    }
+</style>
+<style>
+    .stepper-container {
+        width: 100%;
+    }
+
+    .stepper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .step-item {
+        text-align: center;
+        flex: 1;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .step-circle {
+        font-size: 14px;
+        width: 25px;
+        height: 25px;
+        line-height: 25px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        color: #1F365D;
+        /* margin: 0 auto; */
+        font-weight: 600;
+        z-index: 2;
+        transition: 0.25s ease-in-out;
+    }
+
+    .step-item:hover .step-circle {
+        transform: scale(1.05);
+    }
+
+    .active-step {
+        background-color: #1F365D;
+        color: #fff;
+        box-shadow: 0 0 4px rgba(0,0,0,0.4);
+    }
+
+    .step-label {
+        margin-left: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #1F365D;
+    }
+
+    /* Dotted connector line */
+    .step-line {
+        flex: 1;
+        border-top: 3px dotted #b8c4d4;
+        margin: 0 10px;
+        height: 0;
+    }
+
+    /* Active connector */
+    .active-line {
+        border-color: #1F365D;
+    }
+
+    .input-form {
+        max-width: 65%;
+        margin: auto;
+    }
+
+    .form-input {
+        box-shadow: none !important;
+        width: 100%;
+        font-size: 14px;
+        padding: 12px 14px;
+        border: 1px solid #1F365D;
+        border-radius: 12px;
+        background-color: #fff;
+        color: #1F365D;
+        outline: none;
+        min-height: 45px;
+    }
+
+        .form-input option:checked,
+        .form-input option:hover,
+        .form-input option:focus {
+            background-color: #f5f5f5 !important; /* Light grey */
+            color: #1F365D !important;
+        }
+
+        /* Remove highlight outline when opening */
+        .form-input:focus {
+            border-color: #1F365D !important;
+            box-shadow: 0 0 0 0 !important;
+            outline: none !important;
+        }
+
+        .form-input:disabled {
+            background-color: lightgrey;
+        }
+
+        .form-input.modified.valid {
+            outline: none;
+        }
+
+    .input-group-text {
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+    }
+
+    .card {
+        cursor: pointer;
+    }
+
+    .required-label::after {
+        content: " *";
+        color: red;
+    }
+
+</style>
+
+<div class="offcanvas offcanvas-end show border-start shadow" tabindex="-1"
+     style="visibility:@(IsVisible ? "visible" : "hidden"); transition: transform 0.9s ease-in-out;">
+
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Edit Firm</h5>
+        <button type="button" class="btn-close" @onclick="Hide"></button>
+    </div>
+
+    <div class="offcanvas-body">
+
+        <div class="stepper-container mb-4">
+
+            <div class="stepper">
+
+                <!-- STEP 1 -->
+                <div class="step-item"
+                     @onclick="() => GoToStep(1)"
+                     style="cursor:@(CurrentStep >= 1 ? "pointer" : "not-allowed")">
+                    <div class="step-circle @(CurrentStep >= 1 ? "active-step" : "")">1</div>
+                    <div class="step-label">Subscription</div>
+                </div>
+
+
+                <!-- STEP 2 -->
+                <div class="step-item"
+                     @onclick="() => { if (CurrentStep >= 2) GoToStep(2); }"
+                     style="cursor:@(CurrentStep >= 2 ? "pointer" : "not-allowed")">
+                    <div class="step-circle @(CurrentStep >= 2 ? "active-step" : "")">2</div>
+                    <div class="step-label">Owner Info</div>
+                </div>
+
+
+                <!-- STEP 3 -->
+                <div class="step-item"
+                     @onclick="() => { if (CurrentStep >= 3) GoToStep(3); }"
+                     style="cursor:@(CurrentStep >= 3 ? "pointer" : "not-allowed")">
+                    <div class="step-circle @(CurrentStep >= 3 ? "active-step" : "")">3</div>
+                    <div class="step-label">Company Info</div>
+                </div>
+
+            </div>
+
+            <!-- SMOOTH PROGRESS BAR -->
+            <div class="progress mt-2 mb-4" style="height: 10px; border-radius: 6px;">
+                <div class="progress-bar"
+                     role="progressbar"
+                     style="width:@ProgressPercent; background-color:#1F365D; transition:width .4s ease;">
+                </div>
+            </div>
+
+        </div>
+
+        @if (_editContext != null)
+        {
+            <EditForm EditContext="_editContext">
+                <DataAnnotationsValidator />
+
+                <!-- STEP 1: SUBSCRIPTION -->
+                @if (CurrentStep == 1)
+                {
+                    <div class="input-form">
+
+                        <label class="form-label required-label color-text">Choose Subscription</label>
+
+                            <InputRadioGroup @bind-Value="registerDto.SubscriptionId">
+                                @foreach (var subs in SubscriptionTypes)
+                                {
+                                <div class="card p-3  mt-3 @(registerDto.SubscriptionId == subs.Id ? "shadow-sm" : "")"
+                                             style="cursor:pointer;"
+                                             @onclick="() => SelectSubscription(subs.Id)">
+
+                                            <div class="form-check mt-1">
+                                                <InputRadio class="form-check-input"
+                                                    Value="@subs.Id"/>
+                                                <label class="form-check-label ms-2">
+                                                    @subs.Name
+                                                </label>
+                                            </div>
+                                 
+                                            @if (!string.IsNullOrWhiteSpace(subs.Description))
+                                            {
+                                                <div class="text-muted mt-1" style="font-size:0.9rem;">
+                                                    @subs.Description
+                                                </div>
+                                            }
+                                        </div>
+                                }
+                            </InputRadioGroup>
+                        <ValidationMessage For="() => registerDto.SubscriptionId" />
+
+                    </div>
+                }
+
+                <!-- STEP 2: OWNER INFO -->
+                @if (CurrentStep == 2)
+                {
+                    <div class="input-form">
+
+                        <!-- First Name -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label required-label color-text">First Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
+                                    <InputText class="form-input" style="width:91%;" @bind-Value="registerDto.FirstName"
+                                               @bind-Value:after=@(() => ValidateParticularInput(() => registerDto.FirstName, nameof(registerDto.FirstName), "First Name is required."))
+                                               placeholder="Enter First Name" />
+                                    <ValidationMessage For="() => registerDto.FirstName" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Last Name -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label color-text">Last Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa fa-user color-text"></i></span>
+                                    <InputText class="form-input" style="width:91%;"
+                                               @bind-Value="registerDto.LastName"
+                                                />
+                                    <ValidationMessage For="() => registerDto.LastName" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label required-label color-text">Email</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-regular fa-at color-text"></i></span>
+                                    <InputText class="form-input" style="width:91%;"
+                                               @bind-Value="registerDto.Email"
+                                               @bind-Value:after="@(() => ValidateParticularInput(() => registerDto.Email, nameof(registerDto.Email), "Email is required."))"
+                                                />
+                                    <ValidationMessage For="() => registerDto.Email" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- STEP 3: COMPANY INFO -->
+                @if (CurrentStep == 3)
+                {
+                    <div class="input-form">
+                        <label class="form-label color-text">Company Name</label>
+                        <InputText class="form-input mb-3" @bind-Value="Firms.Name" />
+
+                        <label class="form-label color-text">Company Email</label>
+                        <InputText class="form-input mb-3" @bind-Value="Firms.Email" />
+
+                        <label class="form-label color-text">Phone</label>
+                        <InputText class="form-input mb-3" @bind-Value="Firms.Phone" />
+
+                        <label class="form-label color-text">FAX</label>
+                        <InputText class="form-input mb-3" @bind-Value="Firms.FAX" />
+
+                        <label class="form-label color-text">Address</label>
+                        <InputText class="form-input mb-3" @bind-Value="Firms.Address" />
+
+                        <label class="form-label color-text">Website</label>
+                        <InputText class="form-input mb-3" @bind-Value="Firms.Website" />
+                    </div>
+                }
+
+                <!-- BUTTONS -->
+                <div class=@(CurrentStep > 1 ? "d-flex justify-content-between mt-4" : "d-flex justify-content-end mt-4")>
+                    @if (CurrentStep > 1)
+                    {
+                        <button type="button" style="width:120px;" @onclick="PrevStep" class="btn btn-secondary btn-lg">Back</button>
+                    }
+
+                    @if (CurrentStep < 3)
+                    {
+                        <button type="submit" style="width:120px;" class="btn btn-primary btn-lg" @onclick="NextStep">Next</button>
+                    }
+                    else
+                    {
+                        <button type="button" style="width:120px;" @onclick="SubmitEdit" class="btn btn-primary btn-lg">
+                            Update
+                        </button>
+                    }
+                </div>
+
+            </EditForm>
+        }
+    </div>
+</div>
+
+@code {
+
+    [Parameter] public EventCallback Submit { get; set; }
+
+    private bool IsVisible = false;
+    public int CurrentStep = 1;
+
+    [Parameter] public FirmDto Firms { get; set; } = new FirmDto();
+    [Parameter] public RegisterDto registerDto { get; set; } = new RegisterDto();
+
+    private EditContext _editContext;
+    private ValidationMessageStore messageStore;
+
+    private string SelectedSubscriptionName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _editContext = new EditContext(registerDto);
+        messageStore = new ValidationMessageStore(_editContext);
+        //SubscriptionTypes = await _subscription.GetAllAsync();
+    }
+    // SHOW EDIT
+    public async Task ShowForEdit(RegisterDto user, FirmDto firm, string subscriptionName)
+    {
+        registerDto = user;
+        Firms = firm;
+         SubscriptionTypes = await _subscription.GetAllAsync();
+        SelectedSubscriptionName = subscriptionName;
+
+        _editContext = new EditContext(registerDto);
+        messageStore = new ValidationMessageStore(_editContext);
+
+        CurrentStep = 1;
+        IsVisible = true;
+        StateHasChanged();
+    }
+
+    private void Hide()
+    {
+        registerDto = new RegisterDto();
+        Firms = new FirmDto();
+        CurrentStep = 1;
+        IsVisible = false;
+    }
+
+    private void NextStep()
+    {
+        if (CurrentStep < 3) CurrentStep++;
+    }
+
+    private void PrevStep()
+    {
+        if (CurrentStep > 1) CurrentStep--;
+    }
+
+    private async Task SubmitEdit()
+    {
+        spinnerservice.Show();
+
+        Firms.SubscriptionTypeId = registerDto.SubscriptionId;
+
+        var result = await _firmService.UpdateFirm(registerDto, Firms);
+
+        if (result)
+        {
+            await Submit.InvokeAsync();
+            Hide();
+        }
+
+        spinnerservice.Hide();
+    }
+
+    //Previous next step
+    private void GoToStep(int step)
+    {
+        CurrentStep = step;
+        StateHasChanged();
+    }
+
+    private string ProgressPercent => CurrentStep switch
+    {
+        1 => "33%",
+        2 => "66%",
+        3 => "100%",
+        _ => "0%"
+    };
+
+    private Task ValidateParticularInput<T>(Expression<Func<T>> accessor, string fieldName, string validationMsg)
+    {
+        Require(accessor, fieldName, validationMsg);
+        _editContext.NotifyValidationStateChanged();
+        return Task.CompletedTask;
+    }
+
+    private async Task<bool> ValidateCurrentStep()
+    {
+        messageStore.Clear();
+
+        if (CurrentStep == 1)
+        {
+            Require(() => registerDto.SubscriptionId, nameof(registerDto.SubscriptionId), "Select a subscription.");
+        }
+        else if (CurrentStep == 2)
+        {
+            Require(() => registerDto.FirstName, nameof(registerDto.FirstName), "First Name is required.");
+            Require(() => registerDto.Email, nameof(registerDto.Email), "Email is required.");
+
+        }
+        _editContext.NotifyValidationStateChanged();
+
+        // Get current validation messages (optional: for logging)
+        var errors = _editContext.GetValidationMessages().ToList();
+        Console.WriteLine($"Validation errors : {string.Join(", ", errors)}");
+
+        // Check if form is valid
+        bool isValid = !_editContext.GetValidationMessages().Any();
+
+        // Return validity
+        return isValid;
+    }
+    private void Require<T>(Expression<Func<T>> accessor, string fieldName, string message)
+    {
+        var value = accessor.Compile().Invoke();
+        var fieldIdentifier = new FieldIdentifier(registerDto, fieldName);
+
+        // Clear old message first
+        messageStore.Clear(fieldIdentifier);
+
+        // Add message if invalid
+        bool isEmpty = value == null ||
+                       (value is string s && string.IsNullOrWhiteSpace(s)) ||
+                       (value is Guid g && g == Guid.Empty);
+
+        if (isEmpty)
+        {
+            messageStore.Add(fieldIdentifier, message);
+        }
+
+        _editContext.NotifyValidationStateChanged();
+    }
+
+    public IEnumerable<SubscriptionType> SubscriptionTypes = new List<SubscriptionType>();
+    public string? SelectedSubscription { get; set; }
+    private void SelectSubscription(Guid id)
+    {
+        registerDto.SubscriptionId = id;
+        _editContext.NotifyFieldChanged(
+            new FieldIdentifier(registerDto, nameof(registerDto.SubscriptionId))
+        );
+    }
+}
