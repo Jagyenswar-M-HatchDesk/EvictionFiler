@@ -543,7 +543,7 @@
         </div>
         <div class="searchbar row">
            
-            <div class="col ">
+            @* <div class="col ">
                 <input class="form-control search-box"
                        placeholder="Search by Client"
                        @bind="selectedClient"
@@ -661,7 +661,95 @@
                         </li>
                     }
                 </ul>
-            </div>
+            </div> *@
+
+                <!-- CLIENT -->
+                <div class="col">
+                    <input class="form-control search-box"
+                           placeholder="Search by Client"
+                           @bind="clientInput"
+                           @oninput="OnClientInput"
+                           @onfocus="OnClientFocus"
+                           @onfocusout="OnClientFocusOut" />
+
+                    <ul class="list-group position-absolute" style="z-index:1000; font-size:14px"
+                        hidden="@(!clientSuggestionsChecked || !clientSuggestions.Any())">
+                        @foreach (var suggestion in clientSuggestions)
+                        {
+                            <li class="list-group-item list-group-item-action"
+                                @onclick="() => SelectClient(suggestion)">
+                                @suggestion.ClientCode - @suggestion.FirstName @suggestion.LastName
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <!-- LANDLORD -->
+                <div class="col">
+                    <input class="form-control search-box"
+                           placeholder="Search by Landlord"
+                           @bind="landlordInput"
+                           @oninput="OnLandlordInput"
+                           @onfocus="OnLandlordFocus"
+                           @onfocusout="OnLandlordFocusOut"
+                           autocomplete="off" />
+
+                    <ul class="list-group position-absolute" style="z-index:1000; font-size:14px"
+                        hidden="@(!landlordSuggestionsChecked || !landlordSuggestions.Any())">
+                        @foreach (var suggestion in landlordSuggestions)
+                        {
+                            <li class="list-group-item list-group-item-action"
+                                @onclick="() => SelectLandlord(suggestion)">
+                                @suggestion.LandLordCode - @suggestion.FirstName @suggestion.LastName
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <!-- TENANT -->
+                <div class="col">
+                    <input class="form-control search-box"
+                           placeholder="Search by Tenant"
+                           @bind="tenantInput"
+                           @oninput="OnTenantInput"
+                           @onfocus="OnTenantFocus"
+                           @onfocusout="OnTenantFocusOut"
+                           autocomplete="off" />
+
+                    <ul class="list-group position-absolute" style="z-index:1000; font-size:14px"
+                        hidden="@(!tenantSuggestionsChecked || !tenantSuggestions.Any())">
+                        @foreach (var suggestion in tenantSuggestions)
+                        {
+                            <li class="list-group-item list-group-item-action"
+                                @onclick="() => SelectTenant(suggestion)">
+                                @suggestion.TenantCode - @suggestion.FirstName @suggestion.LastName
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <!-- CASE -->
+                <div class="col">
+                    <input class="form-control search-box"
+                           placeholder="Search by Case"
+                           @bind="caseInput"
+                           @oninput="OnCaseInput"
+                           @onfocus="OnCaseFocus"
+                           @onfocusout="OnCaseFocusOut"
+                           autocomplete="off" />
+
+                    <ul class="list-group position-absolute" style="z-index:1000; font-size:14px"
+                        hidden="@(!caseSuggestionsChecked || !caseSuggestions.Any())">
+                        @foreach (var suggestion in caseSuggestions)
+                        {
+                            <li class="list-group-item list-group-item-action"
+                                @onclick="() => SelectCase(suggestion)">
+                                @suggestion.Casecode
+                            </li>
+                        }
+                    </ul>
+                </div>
+
             <div class="col-md-2">
 
                 <button class="searchbtn" @onclick="Search" style="border-radius:25px; width:100%;"> <i class="fa fa-search mx-1"></i>  </button>
@@ -1104,25 +1192,27 @@
     private int pageSize = 10;
     private string searchTerm = "";
 
-    private string selectedClient = string.Empty;
-    private bool clientSuggestionsChecked = false;
-    private List<EditToClientDto> clientSuggestions = new List<EditToClientDto>();
+    // private string selectedClient = string.Empty;
+    // private string _previousClientText = string.Empty;
+    // private Guid? selectedClientId = null;
+    // private bool clientSuggestionsChecked = false;
+    // private List<EditToClientDto> clientSuggestions = new List<EditToClientDto>();
 
     private string selectedReasonholdover = string.Empty;
     private bool reasonholdoverSuggestionsChecked = false;
     private List<string> reasonholdoverSuggestions = new List<string>();
 
-    private string selectedTenant = string.Empty;
-    private bool tenantSuggestionsChecked = false;
-    private List<EditToTenantDto> tenantSuggestions = new List<EditToTenantDto>();
+    // private string selectedTenant = string.Empty;
+    // private bool tenantSuggestionsChecked = false;
+    // private List<EditToTenantDto> tenantSuggestions = new List<EditToTenantDto>();
 
-    private string selectedCase = string.Empty;
-    private bool caseSuggestionsChecked = false;
-    private List<CreateToEditLegalCaseModel> caseSuggestions = new List<CreateToEditLegalCaseModel>();
+    // private string selectedCase = string.Empty;
+    // private bool caseSuggestionsChecked = false;
+    // private List<CreateToEditLegalCaseModel> caseSuggestions = new List<CreateToEditLegalCaseModel>();
 
-    private string selectedLandlord = string.Empty;
-    private bool landlordSuggestionsChecked = false;
-    private List<EditToLandlordDto> landlordSuggestions = new List<EditToLandlordDto>();
+    // private string selectedLandlord = string.Empty;
+    // private bool landlordSuggestionsChecked = false;
+    // private List<EditToLandlordDto> landlordSuggestions = new List<EditToLandlordDto>();
 
     private List<List<LegalCase>> legalcaseDto = new();
     private List<LegalCase> TodaylegalcaseDto = new();
@@ -1145,6 +1235,29 @@
     private List<EditToRemainderCenterDto> InCompleteRemainder = new();
     private List<IGrouping<string?, EditToRemainderCenterDto>> groupedRemainder = new();
     private LoggedInUser? identityUser;
+
+    // INPUT (typing only)
+    private string clientInput = "";
+    private string landlordInput = "";
+    private string tenantInput = "";
+    private string caseInput = "";
+
+    // SELECTED ENTITIES
+    private EditToClientDto selectedClient;
+    private EditToLandlordDto selectedLandlord;
+    private EditToTenantDto selectedTenant;
+    private CreateToEditLegalCaseModel selectedCase;
+
+    // SUGGESTIONS
+    private List<EditToClientDto> clientSuggestions = new();
+    private List<EditToLandlordDto> landlordSuggestions = new();
+    private List<EditToTenantDto> tenantSuggestions = new();
+    private List<CreateToEditLegalCaseModel> caseSuggestions = new();
+
+    private bool clientSuggestionsChecked;
+    private bool landlordSuggestionsChecked;
+    private bool tenantSuggestionsChecked;
+    private bool caseSuggestionsChecked;
 
 
     protected override async Task OnInitializedAsync()
@@ -1205,52 +1318,53 @@
     }
 
 
-    private async Task OnClientFocus()
-    {
+    // private async Task OnClientFocus()
+    // {
 
-        if (string.IsNullOrWhiteSpace(selectedClient))
-        {
-            clientSuggestions = await DashBoardRepository.GetTopClients();
-            clientSuggestionsChecked = true;
-        }
-    }
+    //     if (string.IsNullOrWhiteSpace(selectedClient))
+    //     {
+    //         clientSuggestions = await DashBoardRepository.GetTopClients();
+    //         clientSuggestionsChecked = true;
+    //     }
+    // }
 
-    private async Task OnCaseFocus()
-    {
+    // private async Task OnCaseFocus()
+    // {
 
-        if (string.IsNullOrWhiteSpace(selectedCase))
-        {
-            caseSuggestions = await DashBoardRepository.GetTopCases();
-            caseSuggestionsChecked = true;
-        }
-    }
+    //     if (string.IsNullOrWhiteSpace(selectedCase))
+    //     {
+    //         caseSuggestions = await DashBoardRepository.GetTopCases();
+    //         caseSuggestionsChecked = true;
+    //     }
+    // }
 
-    private async Task OnLandlordsFocus()
-    {
+    // private async Task OnLandlordsFocus()
+    // {
 
-        if (string.IsNullOrWhiteSpace(selectedLandlord))
-        {
-            landlordSuggestions = await DashBoardRepository.GetTopLandlords();
-            landlordSuggestionsChecked = true;
-        }
-    }
-    private async Task OnTenantsFocus()
-    {
+    //     if (string.IsNullOrEmpty(selectedLandlord))
+    //     {
+    //         landlordSuggestions = await DashBoardRepository.GetTopLandlords();
+    //         landlordSuggestionsChecked = true;
+    //     }
 
-        if (string.IsNullOrWhiteSpace(selectedTenant))
-        {
-            tenantSuggestions = await DashBoardRepository.GetTopTenants();
-            tenantSuggestionsChecked = true;
-        }
-    }
+    // }
+    // private async Task OnTenantsFocus()
+    // {
+
+    //     if (string.IsNullOrWhiteSpace(selectedTenant))
+    //     {
+    //         tenantSuggestions = await DashBoardRepository.GetTopTenants();
+    //         tenantSuggestionsChecked = true;
+    //     }
+    // }
 
     private async Task Search()
     {
 
-        if (string.IsNullOrWhiteSpace(selectedCase) &&
-            string.IsNullOrWhiteSpace(selectedClient) &&
-            string.IsNullOrWhiteSpace(selectedTenant) &&
-            string.IsNullOrWhiteSpace(selectedLandlord) &&
+        if (string.IsNullOrWhiteSpace(caseInput) &&
+            string.IsNullOrWhiteSpace(clientInput) &&
+            string.IsNullOrWhiteSpace(tenantInput) &&
+            string.IsNullOrWhiteSpace(landlordInput) &&
             string.IsNullOrWhiteSpace(selectedReasonholdover) &&
             string.IsNullOrWhiteSpace(searchTermDate) &&
             string.IsNullOrWhiteSpace(searchTermStatus))
@@ -1269,17 +1383,17 @@
         string url = "/legalcases/search";
         List<string> queryParams = new();
 
-        if (!string.IsNullOrWhiteSpace(selectedCase))
-            queryParams.Add($"cases={selectedCase}");
+        if (!string.IsNullOrWhiteSpace(caseInput))
+            queryParams.Add($"cases={caseInput}");
 
-        if (!string.IsNullOrWhiteSpace(selectedClient))
-            queryParams.Add($"client={selectedClient}");
+        if (!string.IsNullOrWhiteSpace(clientInput))
+            queryParams.Add($"client={clientInput}");
 
-        if (!string.IsNullOrWhiteSpace(selectedTenant))
-            queryParams.Add($"tenant={selectedTenant}");
+        if (!string.IsNullOrWhiteSpace(tenantInput))
+            queryParams.Add($"tenant={tenantInput}");
 
-        if (!string.IsNullOrWhiteSpace(selectedLandlord))
-            queryParams.Add($"landlord={selectedLandlord}");
+        if (!string.IsNullOrWhiteSpace(landlordInput))
+            queryParams.Add($"landlord={landlordInput}");
 
         // Append query string only if we have filters
         if (queryParams.Any())
@@ -1334,178 +1448,186 @@
     //     }
     // }
 
-    private async Task OnClientInput(ChangeEventArgs e)
-    {
-        selectedClient = e.Value?.ToString();
+    // private async Task OnClientInput(ChangeEventArgs e)
+    // {
+    //     var newValue = e.Value?.ToString() ?? string.Empty;
 
-        _cts?.Cancel();
-        _cts = new CancellationTokenSource();
+    //     bool isDeleting = newValue.Length < _previousClientText.Length;
+    //     bool isAdding = newValue.Length > _previousClientText.Length;
 
-        try
-        {
-            await Task.Delay(300, _cts.Token);
+    //     selectedClient = newValue;
 
-            if (!string.IsNullOrWhiteSpace(selectedClient))
-            {
-                clientSuggestions =
-                    await DashBoardRepository.GetClientSuggestions(selectedClient);
-                clientSuggestionsChecked = true;
-            }
-            else
-            {
-                clientSuggestions =
-                    await DashBoardRepository.GetTopClients();
-                clientSuggestionsChecked = true;
-            }
-        }
-        catch (TaskCanceledException)
-        {
-            // ignore
-        }
-    }
+    //     _previousClientText = newValue;
+
+    //     _cts?.Cancel();
+    //     _cts = new CancellationTokenSource();
+
+    //     try
+    //     {
+    //         await Task.Delay(300, _cts.Token);
+
+    //         if (!string.IsNullOrWhiteSpace(selectedClient))
+    //         {
+    //             clientSuggestions =
+    //                 await DashBoardRepository.GetClientSuggestions(selectedClient);
+    //             clientSuggestionsChecked = true;
+    //         }
+    //         else
+    //         {
+    //             clientSuggestions =
+    //                 await DashBoardRepository.GetTopClients();
+    //             clientSuggestionsChecked = true;
+    //         }
+    //     }
+    //     catch (TaskCanceledException)
+    //     {
+    //         // ignore
+    //     }
+    // }
 
 
-    private async Task OnTenantInput(ChangeEventArgs e)
-    {
-        selectedTenant = e.Value?.ToString();
-        _cts?.Cancel();
-        _cts = new CancellationTokenSource();
-        try
-        {
-            await Task.Delay(300, _cts.Token);
-            if (!string.IsNullOrWhiteSpace(selectedTenant))
-            {
-                tenantSuggestions = await DashBoardRepository.GetTenantSuggestions(selectedTenant);
-                tenantSuggestionsChecked = true;
-            }
-            else
-            {
-                tenantSuggestions = new List<EditToTenantDto>();
-                tenantSuggestionsChecked = false;
-            }
-        }
-        catch (TaskCanceledException)
-        {
+    // private async Task OnTenantInput(ChangeEventArgs e)
+    // {
+    //     selectedTenant = e.Value?.ToString();
+    //     _cts?.Cancel();
+    //     _cts = new CancellationTokenSource();
+    //     try
+    //     {
+    //         await Task.Delay(300, _cts.Token);
+    //         if (!string.IsNullOrWhiteSpace(selectedTenant))
+    //         {
+    //             tenantSuggestions = await DashBoardRepository.GetTenantSuggestions(selectedTenant);
+    //             tenantSuggestionsChecked = true;
+    //         }
+    //         else
+    //         {
+    //             tenantSuggestions = new List<EditToTenantDto>();
+    //             tenantSuggestionsChecked = false;
+    //         }
+    //     }
+    //     catch (TaskCanceledException)
+    //     {
 
-        }
-    }
+    //     }
+    // }
 
-    private async Task OnCaseInput(ChangeEventArgs e)
-    {
-        selectedCase = e.Value?.ToString();
-        _cts?.Cancel();
-        _cts = new CancellationTokenSource();
-        try
-        {
-            await Task.Delay(300, _cts.Token);
+    // private async Task OnCaseInput(ChangeEventArgs e)
+    // {
+    //     selectedCase = e.Value?.ToString();
+    //     _cts?.Cancel();
+    //     _cts = new CancellationTokenSource();
+    //     try
+    //     {
+    //         await Task.Delay(300, _cts.Token);
 
-            if (!string.IsNullOrWhiteSpace(selectedCase))
-            {
-                caseSuggestions = await DashBoardRepository.GetCaseSuggestions(selectedCase);
-                caseSuggestionsChecked = true;
-            }
-            else
-            {
-                caseSuggestions = new List<CreateToEditLegalCaseModel>();
-                caseSuggestionsChecked = false;
-            }
-        }
-        catch (TaskCanceledException)
-        {
+    //         if (!string.IsNullOrWhiteSpace(selectedCase))
+    //         {
+    //             caseSuggestions = await DashBoardRepository.GetCaseSuggestions(selectedCase);
+    //             caseSuggestionsChecked = true;
+    //         }
+    //         else
+    //         {
+    //             caseSuggestions = new List<CreateToEditLegalCaseModel>();
+    //             caseSuggestionsChecked = false;
+    //         }
+    //     }
+    //     catch (TaskCanceledException)
+    //     {
 
-        }
-    }
+    //     }
+    // }
 
-    private async Task OnLandlordInput(ChangeEventArgs e)
-    {
-        selectedLandlord = e.Value?.ToString();
-        _cts?.Cancel();
-        _cts = new CancellationTokenSource();
-        try
-        {
-            await Task.Delay(300, _cts.Token);
+    // private async Task OnLandlordInput(ChangeEventArgs e)
+    // {
+    //     selectedLandlord = e.Value?.ToString();
+    //     _cts?.Cancel();
+    //     _cts = new CancellationTokenSource();
+    //     try
+    //     {
+    //         await Task.Delay(300, _cts.Token);
 
-            if (!string.IsNullOrWhiteSpace(selectedLandlord))
-            {
-                landlordSuggestions = await DashBoardRepository.GetLandlordSuggestions(selectedLandlord);
-                landlordSuggestionsChecked = true;
-            }
-            else
-            {
-                landlordSuggestions = new List<EditToLandlordDto>();
-                landlordSuggestionsChecked = false;
-            }
-        }
-        catch (TaskCanceledException)
-        {
+    //         if (!string.IsNullOrWhiteSpace(selectedLandlord))
+    //         {
+    //             landlordSuggestions = await DashBoardRepository.GetLandlordSuggestions(selectedLandlord);
+    //             landlordSuggestionsChecked = true;
+    //         }
+    //         else
+    //         {
+    //             landlordSuggestions = new List<EditToLandlordDto>();
+    //             landlordSuggestionsChecked = false;
+    //         }
+    //     }
+    //     catch (TaskCanceledException)
+    //     {
 
-        }
-    }
+    //     }
+    // }
 
-    private void SelectClient(EditToClientDto client)
-    {
-        selectedClient = $"{client.FirstName} {client.LastName}";
-        clientSuggestions.Clear();
-        clientSuggestionsChecked = false;
-    }
-    private async Task FocusOutClient()
-    {
-        await Task.Delay(500);
-        clientSuggestions.Clear();
-        clientSuggestionsChecked = false;
-    }
+    // private void SelectClient(EditToClientDto client)
+    // {
+    //     selectedClient = $"{client.FirstName} {client.LastName}";
+    //     clientSuggestions.Clear();
+    //     clientSuggestionsChecked = false;
+    // }
 
-    private void Selectlandlord(EditToLandlordDto landlord)
-    {
-        selectedLandlord = $"{landlord.FirstName} {landlord.LastName}";
-        landlordSuggestions.Clear();
-        landlordSuggestionsChecked = false;
-    }
-    private async Task FocusOutLandlord()
-    {
-        await Task.Delay(500);
-        landlordSuggestions.Clear();
-        landlordSuggestionsChecked = false;
-    }
-    private void SelectTenant(EditToTenantDto tenant)
-    {
-        selectedTenant = $"{tenant.FirstName} {tenant.LastName}"; ;
-        tenantSuggestions.Clear();
-        tenantSuggestionsChecked = false;
-    }
-    private async Task FocusOutTenant()
-    {
-        await Task.Delay(500);
-        tenantSuggestions.Clear();
-        tenantSuggestionsChecked = false;
-    }
+    // private async Task FocusOutClient()
+    // {
+    //     await Task.Delay(500);
+    //     clientSuggestions.Clear();
+    //     clientSuggestionsChecked = false;
+    // }
 
-    private void SelectCase(CreateToEditLegalCaseModel cases)
-    {
-        selectedCase = cases?.Casecode;
-        caseSuggestions.Clear();
-        caseSuggestionsChecked = false;
-    }
-    private async Task FocusOutCase()
-    {
-        await Task.Delay(500);
-        caseSuggestions.Clear();
-        caseSuggestionsChecked = false;
-    }
+    // private void Selectlandlord(EditToLandlordDto landlord)
+    // {
+    //     selectedLandlord = $"{landlord.FirstName} {landlord.LastName}";
+    //     landlordSuggestions.Clear();
+    //     landlordSuggestionsChecked = false;
+    // }
+    // private async Task FocusOutLandlord()
+    // {
+    //     await Task.Delay(500);
+    //     landlordSuggestions.Clear();
+    //     landlordSuggestionsChecked = false;
+    // }
+    // private void SelectTenant(EditToTenantDto tenant)
+    // {
+    //     selectedTenant = $"{tenant.FirstName} {tenant.LastName}"; ;
+    //     tenantSuggestions.Clear();
+    //     tenantSuggestionsChecked = false;
+    // }
+    // private async Task FocusOutTenant()
+    // {
+    //     await Task.Delay(500);
+    //     tenantSuggestions.Clear();
+    //     tenantSuggestionsChecked = false;
+    // }
 
-    private void Resetsearch()
-    {
-        selectedClient = string.Empty;
-        selectedCase = string.Empty;
-        selectedTenant = string.Empty;
-        selectedLandlord = string.Empty;
-        selectedReasonholdover = string.Empty;
-        searchTermDate = string.Empty;
-        searchTermStatus = string.Empty;
+    // private void SelectCase(CreateToEditLegalCaseModel cases)
+    // {
+    //     selectedCase = cases?.Casecode;
+    //     caseSuggestions.Clear();
+    //     caseSuggestionsChecked = false;
+    // }
+    // private async Task FocusOutCase()
+    // {
+    //     await Task.Delay(500);
+    //     caseSuggestions.Clear();
+    //     caseSuggestionsChecked = false;
+    // }
 
-        searchResults = null;
+    // private void Resetsearch()
+    // {
+    //     selectedClient = string.Empty;
+    //     selectedCase = string.Empty;
+    //     selectedTenant = string.Empty;
+    //     selectedLandlord = string.Empty;
+    //     selectedReasonholdover = string.Empty;
+    //     searchTermDate = string.Empty;
+    //     searchTermStatus = string.Empty;
 
-    }
+    //     searchResults = null;
+
+    // }
 
     int columnWidth = 15; // default desktop width
 
@@ -1682,7 +1804,272 @@
                                         Date = "Dec",
                                         task = 294000
                                         }
-                                        };
+                                    };
 
 
+    private void ResetLandlordSection()
+    {
+        selectedLandlord = null;
+        landlordInput = "";
+        landlordSuggestions.Clear();
+        landlordSuggestionsChecked = false;
+
+        ResetTenantSection();
+    }
+
+    private void ResetTenantSection()
+    {
+        selectedTenant = null;
+        tenantInput = "";
+        tenantSuggestions.Clear();
+        tenantSuggestionsChecked = false;
+
+        ResetCaseSection();
+    }
+
+    private void ResetCaseSection()
+    {
+        selectedCase = null;
+        caseInput = "";
+        caseSuggestions.Clear();
+        caseSuggestionsChecked = false;
+    }
+
+    private async Task OnClientInput(ChangeEventArgs e)
+    {
+        clientInput = e.Value?.ToString() ?? "";
+
+        selectedClient = null;              // typing breaks selection
+        ResetLandlordSection();             // clear dependent sections
+
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(300, _cts.Token);
+
+            if (!string.IsNullOrWhiteSpace(clientInput))
+            {
+                clientSuggestions = await DashBoardRepository.GetClientSuggestions(clientInput);
+                clientSuggestionsChecked = true;
+            }
+            else
+            {
+                clientSuggestions.Clear();
+                clientSuggestionsChecked = false;
+            }
+        }
+        catch { }
+    }
+    private async Task OnClientFocus()
+    {
+        if (string.IsNullOrWhiteSpace(clientInput))
+        {
+            clientSuggestions = await DashBoardRepository.GetTopClients();
+            clientSuggestionsChecked = true;
+        }
+    }
+
+    private async Task OnClientFocusOut()
+    {
+        await Task.Delay(500);
+        if (selectedClient == null)
+            clientInput = "";      // clear because nothing is selected
+
+        clientSuggestions.Clear();
+        clientSuggestionsChecked = false;
+    }
+
+    private async Task SelectClient(EditToClientDto client)
+    {
+        selectedClient = client;
+        clientInput = $"{client.FirstName} {client.LastName}";
+
+        clientSuggestions.Clear();
+        clientSuggestionsChecked = false;
+
+        ResetLandlordSection(); // wipe dependent hierarchy
+    }
+
+    private async Task OnLandlordInput(ChangeEventArgs e)
+    {
+        landlordInput = e.Value?.ToString() ?? "";
+        selectedLandlord = null;
+        ResetTenantSection();
+
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(300, _cts.Token);
+
+            if (!string.IsNullOrWhiteSpace(landlordInput))
+            {
+                landlordSuggestions = await DashBoardRepository
+                    .GetLandlordSuggestions(landlordInput, selectedClient?.Id);
+                landlordSuggestionsChecked = true;
+            }
+            else
+            {
+                landlordSuggestions.Clear();
+                landlordSuggestionsChecked = false;
+            }
+        }
+        catch { }
+    }
+
+    private async Task OnLandlordFocus()
+    {
+        if (string.IsNullOrWhiteSpace(landlordInput))
+        {
+            landlordSuggestions = await DashBoardRepository
+                .GetTopLandlords(selectedClient?.Id);
+
+            landlordSuggestionsChecked = true;
+        }
+    }
+
+    private async Task OnLandlordFocusOut()
+    {
+        await Task.Delay(500);
+
+        if (selectedLandlord == null)
+            landlordInput = "";
+
+        landlordSuggestions.Clear();
+        landlordSuggestionsChecked = false;
+    }
+
+    private void SelectLandlord(EditToLandlordDto landlord)
+    {
+        selectedLandlord = landlord;
+        landlordInput = $"{landlord.FirstName} {landlord.LastName}";
+
+        landlordSuggestions.Clear();
+        landlordSuggestionsChecked = false;
+
+        ResetTenantSection();
+    }
+
+    private async Task OnTenantInput(ChangeEventArgs e)
+    {
+        tenantInput = e.Value?.ToString() ?? "";
+        selectedTenant = null;
+        ResetCaseSection();
+
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(300, _cts.Token);
+
+            if (!string.IsNullOrWhiteSpace(tenantInput))
+            {
+                tenantSuggestions = await DashBoardRepository
+                    .GetTenantSuggestions(tenantInput, selectedClient?.Id, selectedLandlord?.Id);
+
+                tenantSuggestionsChecked = true;
+            }
+            else
+            {
+                tenantSuggestions.Clear();
+                tenantSuggestionsChecked = false;
+            }
+        }
+        catch { }
+    }
+
+    private async Task OnTenantFocus()
+    {
+        if (string.IsNullOrWhiteSpace(tenantInput))
+        {
+            tenantSuggestions = await DashBoardRepository
+                .GetTopTenants(selectedClient?.Id, selectedLandlord?.Id);
+
+            tenantSuggestionsChecked = true;
+        }
+    }
+
+    private async Task OnTenantFocusOut()
+    {
+        await Task.Delay(500);
+
+        if (selectedTenant == null)
+            tenantInput = "";
+
+        tenantSuggestions.Clear();
+        tenantSuggestionsChecked = false;
+    }
+
+    private void SelectTenant(EditToTenantDto tenant)
+    {
+        selectedTenant = tenant;
+        tenantInput = $"{tenant.FirstName} {tenant.LastName}";
+
+        tenantSuggestions.Clear();
+        tenantSuggestionsChecked = false;
+
+        ResetCaseSection();
+    }
+
+    private async Task OnCaseInput(ChangeEventArgs e)
+    {
+        caseInput = e.Value?.ToString() ?? "";
+        selectedCase = null;
+
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(300, _cts.Token);
+
+            if (!string.IsNullOrWhiteSpace(caseInput))
+            {
+                caseSuggestions = await DashBoardRepository
+                    .GetCaseSuggestions(caseInput, selectedClient?.Id, selectedLandlord?.Id, selectedTenant?.Id);
+
+                caseSuggestionsChecked = true;
+            }
+            else
+            {
+                caseSuggestions.Clear();
+                caseSuggestionsChecked = false;
+            }
+        }
+        catch { }
+    }
+
+    private async Task OnCaseFocus()
+    {
+        if (string.IsNullOrWhiteSpace(caseInput))
+        {
+            caseSuggestions = await DashBoardRepository
+                .GetTopCases(selectedClient?.Id, selectedLandlord?.Id, selectedTenant?.Id);
+
+            caseSuggestionsChecked = true;
+        }
+    }
+
+    private async Task OnCaseFocusOut()
+    {
+        await Task.Delay(500);
+        if (selectedCase == null)
+            caseInput = "";
+
+        caseSuggestions.Clear();
+        caseSuggestionsChecked = false;
+    }
+
+    private void SelectCase(CreateToEditLegalCaseModel cases)
+    {
+        selectedCase = cases;
+        caseInput = cases.Casecode;
+
+        caseSuggestions.Clear();
+        caseSuggestionsChecked = false;
+    }
 }

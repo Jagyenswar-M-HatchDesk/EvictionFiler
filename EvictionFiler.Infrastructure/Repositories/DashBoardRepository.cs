@@ -21,115 +21,134 @@ namespace EvictionFiler.Infrastructure.Repositories
     {
         private readonly MainDbContext _context;
 
-        public DashBoardRepository(MainDbContext context) 
+        public DashBoardRepository(MainDbContext context)
         {
             _context = context;
         }
 
-        public async Task<List<EditToTenantDto>> GetTenantSuggestions(string term)
-        {
-            term = term.ToLower().Trim();
+        //public async Task<List<EditToTenantDto>> GetTenantSuggestions(string term)
+        //{
+        //    term = term.ToLower().Trim();
 
-            IQueryable<EditToTenantDto> query;
-
-
-            query = _context.Tenants
-                .Where(c => c.TenantCode.ToLower().Contains(term) || (c.FirstName + " " + c.LastName).ToLower().StartsWith(term))
-                    .Select(c => new EditToTenantDto
-                    {
-                        Id = c.Id,
-                       TenantCode = c.TenantCode ,
-                       FirstName = c.FirstName,
-                       LastName =  c.LastName
-                    });
-           
-
-            return await query.Take(5).ToListAsync();
-        }
-
-        public async Task<List<EditToLandlordDto>> GetLandlordSuggestions(string term)
-        {
-            term = term.ToLower().Trim();
-
-            IQueryable<EditToLandlordDto> query;
+        //    IQueryable<EditToTenantDto> query;
 
 
-            query = _context.LandLords
-                .Where(c => c.LandLordCode.ToLower().Contains(term) || (c.FirstName + " " + c.LastName).ToLower().StartsWith(term))
-                    .Select(c =>new EditToLandlordDto
-                    {  
-                        Id = c.Id ,
-                        LandLordCode =  c.LandLordCode ,
-                        FirstName = c.FirstName ,
-                        LastName = c.LastName 
-                    });
-            
-            return await query.Take(5).ToListAsync();
-        }
+        //    query = _context.Tenants
+        //        .Where(c => c.TenantCode.ToLower().Contains(term) || (c.FirstName + " " + c.LastName).ToLower().StartsWith(term))
+        //            .Select(c => new EditToTenantDto
+        //            {
+        //                Id = c.Id,
+        //               TenantCode = c.TenantCode ,
+        //               FirstName = c.FirstName,
+        //               LastName =  c.LastName
+        //            });
 
-        public async Task<List<CreateToEditLegalCaseModel>> GetCaseSuggestions(string term)
-        {
-            term = term.ToLower().Trim();
 
-            IQueryable<CreateToEditLegalCaseModel> query;
+        //    return await query.Take(5).ToListAsync();
+        //}
 
-            query = _context.LegalCases
-                  .Where(c => c.Casecode.ToLower().ToLower().StartsWith(term))
-                    .Select(c => new CreateToEditLegalCaseModel
-                    {
-                        Id = c.Id,
-                        Casecode = c.Casecode,
-                        
-                    });
+        //public async Task<List<EditToLandlordDto>> GetLandlordSuggestions(string term)
+        //{
+        //    term = term.ToLower().Trim();
 
-            return await query.Take(5).ToListAsync();
-        }
+        //    IQueryable<EditToLandlordDto> query;
 
-        public async Task<List<CreateToEditLegalCaseModel>> GetTopCases()
-        {
-            return await _context.LegalCases
-                .OrderBy(c => c.Casecode)
-                .Take(10)
-                .Select(c => new CreateToEditLegalCaseModel
-                {
-                    Id = c.Id,
-                    Casecode = c.Casecode,
 
-                })
-                .ToListAsync();
-        }
+        //    query = _context.LandLords
+        //        .Where(c => c.LandLordCode.ToLower().Contains(term) || (c.FirstName + " " + c.LastName).ToLower().StartsWith(term))
+        //            .Select(c =>new EditToLandlordDto
+        //            {  
+        //                Id = c.Id ,
+        //                LandLordCode =  c.LandLordCode ,
+        //                FirstName = c.FirstName ,
+        //                LastName = c.LastName 
+        //            });
 
-        public async Task<List<EditToLandlordDto>> GetTopLandlords()
-        {
-            return await _context.LandLords
-                .OrderBy(c => c.FirstName)
-                .Take(10)
-                .Select(c => new EditToLandlordDto
-                {
-                    Id = c.Id,
-                    LandLordCode = c.LandLordCode,
-                    FirstName = c.FirstName,
-                    LastName = c.LastName,
+        //    return await query.Take(5).ToListAsync();
+        //}
 
-                })
-                .ToListAsync();
-        }
+        //public async Task<List<CreateToEditLegalCaseModel>> GetCaseSuggestions(string term)
+        //{
+        //    term = term.ToLower().Trim();
 
-        public async Task<List<EditToTenantDto>> GetTopTenants()
-        {
-            return await _context.Tenants
-                .OrderBy(c => c.FirstName)
-                .Take(10)
-                .Select(c => new EditToTenantDto
-                {
-                    Id = c.Id,
-                    TenantCode = c.TenantCode,
-                    FirstName = c.FirstName,
-                    LastName = c.LastName,
+        //    IQueryable<CreateToEditLegalCaseModel> query;
 
-                })
-                .ToListAsync();
-        }
+        //    query = _context.LegalCases
+        //          .Where(c => c.Casecode.ToLower().ToLower().StartsWith(term))
+        //            .Select(c => new CreateToEditLegalCaseModel
+        //            {
+        //                Id = c.Id,
+        //                Casecode = c.Casecode,
+
+        //            });
+
+        //    return await query.Take(5).ToListAsync();
+        //}
+
+        //public async Task<List<CreateToEditLegalCaseModel>> GetTopCases()
+        //{
+        //    return await _context.LegalCases
+        //        .OrderBy(c => c.Casecode)
+        //        .Take(10)
+        //        .Select(c => new CreateToEditLegalCaseModel
+        //        {
+        //            Id = c.Id,
+        //            Casecode = c.Casecode,
+
+        //        })
+        //        .ToListAsync();
+        //}
+
+        //public async Task<List<EditToLandlordDto>> GetTopLandlords(Guid? ClientId=null)
+        //{
+        //    if (ClientId == null || ClientId == Guid.Empty)
+        //    {
+        //        return await _context.LandLords
+        //        .OrderBy(c => c.FirstName)
+        //        .Take(10)
+        //        .Select(c => new EditToLandlordDto
+        //        {
+        //            Id = c.Id,
+        //            LandLordCode = c.LandLordCode,
+        //            FirstName = c.FirstName,
+        //            LastName = c.LastName,
+
+        //        })
+        //        .ToListAsync();
+        //    }
+        //    else
+        //    {
+        //        return await _context.LandLords.Where(e=>e.ClientId == ClientId)
+        //        .OrderBy(c => c.FirstName)
+        //        .Take(10)
+        //        .Select(c => new EditToLandlordDto
+        //        {
+        //            Id = c.Id,
+        //            LandLordCode = c.LandLordCode,
+        //            FirstName = c.FirstName,
+        //            LastName = c.LastName,
+
+        //        })
+        //        .ToListAsync();
+        //    }
+
+        //}
+
+        //public async Task<List<EditToTenantDto>> GetTopTenants()
+        //{
+        //    return await _context.Tenants
+        //        .OrderBy(c => c.FirstName)
+        //        .Take(10)
+        //        .Select(c => new EditToTenantDto
+        //        {
+        //            Id = c.Id,
+        //            TenantCode = c.TenantCode,
+        //            FirstName = c.FirstName,
+        //            LastName = c.LastName,
+
+        //        })
+        //        .ToListAsync();
+        //}
 
         public async Task<List<EditToClientDto>> GetTopClients()
         {
@@ -172,11 +191,11 @@ namespace EvictionFiler.Infrastructure.Repositories
                     .Select(c => new EditToClientDto
                     {
                         Id = c.Id,
-                        ClientCode = c.ClientCode ,
-                        FirstName = c.FirstName ,
-                        LastName = c.LastName 
+                        ClientCode = c.ClientCode,
+                        FirstName = c.FirstName,
+                        LastName = c.LastName
                     });
-           
+
 
             return await query.Take(5).ToListAsync();
         }
@@ -302,7 +321,164 @@ namespace EvictionFiler.Infrastructure.Repositories
             };
         }
 
-        
+        public async Task<List<EditToLandlordDto>> GetLandlordSuggestions(string term, Guid? clientId)
+        {
+            term = term.ToLower().Trim();
+
+            var query = _context.LandLords.AsQueryable();
+
+            // Filter by client if provided
+            if (clientId.HasValue)
+                query = query.Where(c => c.ClientId == clientId);
+
+            // Apply search
+            query = query.Where(c =>
+                c.LandLordCode.ToLower().Contains(term) ||
+                (c.FirstName + " " + c.LastName).ToLower().StartsWith(term)
+            );
+
+            return await query
+                .OrderBy(c => c.FirstName)
+                .Take(10)
+                .Select(c => new EditToLandlordDto
+                {
+                    Id = c.Id,
+                    LandLordCode = c.LandLordCode,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<EditToLandlordDto>> GetTopLandlords(Guid? clientId)
+        {
+            var query = _context.LandLords.AsQueryable();
+
+            if (clientId.HasValue)
+                query = query.Where(c => c.ClientId == clientId);
+
+            return await query
+                .OrderBy(c => c.FirstName)
+                .Take(10)
+                .Select(c => new EditToLandlordDto
+                {
+                    Id = c.Id,
+                    LandLordCode = c.LandLordCode,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<EditToTenantDto>> GetTenantSuggestions(string term, Guid? clientId, Guid? landlordId)
+        {
+            term = term.ToLower().Trim();
+
+            var query = _context.Tenants.AsQueryable();
+
+            if (landlordId.HasValue)
+            {
+                // Tenant → Landlord
+                query = query.Where(c => c.Building.LandlordId == landlordId);
+            }
+            else if (clientId.HasValue)
+            {
+                // Tenant → Landlord → Client
+                query = query.Where(c => c.Building.Landlord.ClientId == clientId);
+            }
+
+            query = query.Where(c =>
+                c.TenantCode.ToLower().Contains(term) ||
+                (c.FirstName + " " + c.LastName).ToLower().StartsWith(term)
+            );
+
+            return await query
+                .OrderBy(c => c.FirstName)
+                .Take(10)
+                .Select(c => new EditToTenantDto
+                {
+                    Id = c.Id,
+                    TenantCode = c.TenantCode,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<EditToTenantDto>> GetTopTenants(Guid? clientId, Guid? landlordId)
+        {
+            var query = _context.Tenants.AsQueryable();
+
+            if (landlordId.HasValue)
+                query = query.Where(c => c.Building.LandlordId == landlordId);
+            else if (clientId.HasValue)
+                query = query.Where(c => c.Building.Landlord.ClientId == clientId);
+
+            return await query
+                .OrderBy(c => c.FirstName)
+                .Take(10)
+                .Select(c => new EditToTenantDto
+                {
+                    Id = c.Id,
+                    TenantCode = c.TenantCode,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<CreateToEditLegalCaseModel>> GetCaseSuggestions(string term, Guid? clientId, Guid? landlordId, Guid? tenantId)
+        {
+            term = term.ToLower().Trim();
+
+            var query = _context.LegalCases.AsQueryable();
+
+            if (tenantId.HasValue)
+                query = query.Where(c => c.TenantId == tenantId);
+
+            if (landlordId.HasValue)
+                query = query.Where(c => c.LandLordId == landlordId);
+
+            if (clientId.HasValue)
+                query = query.Where(c => c.ClientId == clientId);
+
+            query = query.Where(c => c.Casecode.ToLower().StartsWith(term));
+
+            return await query
+                .OrderBy(c => c.Casecode)
+                .Take(10)
+                .Select(c => new CreateToEditLegalCaseModel
+                {
+                    Id = c.Id,
+                    Casecode = c.Casecode
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<CreateToEditLegalCaseModel>> GetTopCases(Guid? clientId, Guid? landlordId, Guid? tenantId)
+        {
+            var query = _context.LegalCases.AsQueryable();
+
+            if (tenantId.HasValue)
+                query = query.Where(c => c.TenantId == tenantId);
+
+            if (landlordId.HasValue)
+                query = query.Where(c => c.LandLordId == landlordId);
+
+            if (clientId.HasValue)
+                query = query.Where(c => c.ClientId == clientId);
+
+            return await query
+                .OrderBy(c => c.Casecode)
+                .Take(10)
+                .Select(c => new CreateToEditLegalCaseModel
+                {
+                    Id = c.Id,
+                    Casecode = c.Casecode
+                })
+                .ToListAsync();
+        }
+
     }
 
 }
