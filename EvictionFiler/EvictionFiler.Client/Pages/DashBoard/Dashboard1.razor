@@ -502,7 +502,18 @@
             font-weight: 400;
             font-size: 18px;
         }
-
+        .case-link:hover
+        {
+        font-weight: bold;
+        }
+        .btn-sm
+        {
+        min-height: 21px !important;
+        border-radius: 7px !important;
+        font-size: 12px !important;
+        padding: 0px 5px !important;
+        line-height: 1 !important;
+        }
 </style>
 
 <div class="container">
@@ -1049,8 +1060,19 @@
                     {
                         <div class="card p-2 mb-2" style="cursor:pointer; border:1px solid #d0d7e1;"
                              @onclick="@(() => OpenReminderPopup(group))">
+                             <div class="d-flex justify-content-between align-items-center">
+
+                                 <div>
+
                             <strong>Case @group.Key</strong>
                             <div class="text-muted">@group.Count() reminders pending</div>
+                            </div>
+                            <div>
+                                    <button class="btn btn-sm" type="button" style="background-color:#1F365D; color:white; border-radius:25px; cursor:pointer;" @onclick="() => NavigateToCase(group.First().CaseId)" @onclick:stopPropagation="true">
+                                        Go to case
+                                    </button>
+                            </div>
+                            </div>
                         </div>
                     }
                 </div>
@@ -1067,7 +1089,7 @@
 
                 <div class="modal-header text-white" style="background-color: #1F365D;">
                     <h5 class="modal-title">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Reminders for Case @selectedGroup.Key
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Reminders for Case <span class=" case-link text-decoration-underline " style="cursor:pointer;" @onclick ="()=>NavigateToCase(selectedGroup.First().CaseId)"> @selectedGroup.Key</span>
                     </h5>
                     <button type="button" class="btn-close btn-close-white" aria-label="Close"
                             @onclick="CloseReminderPopup">
@@ -1580,7 +1602,13 @@
         showCaseModal = true;
     }
 
-
+    void NavigateToCase(Guid? caseId)
+    {
+        if (caseId.HasValue)
+        {
+            navManager.NavigateTo($"/legalcase/details/{caseId.Value}");
+        }
+    }
 
     class DataItem
     {
