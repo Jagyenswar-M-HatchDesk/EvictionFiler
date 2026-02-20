@@ -355,5 +355,6 @@ app.MapGet("/api/casefile/{**relativePath}", async (string relativePath) =>
 });
 
 app.MapRazorPages();
+app.MapFallbackToFile("index.html");
 
 app.Run();
