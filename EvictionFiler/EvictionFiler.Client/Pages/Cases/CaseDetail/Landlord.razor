@@ -1,0 +1,99 @@
+﻿@using EvictionFiler.Application.DTOs.CaseDetailDtos
+@using EvictionFiler.Application.Interfaces.IServices
+@inject ICaseDetailService caseDetailService
+
+
+<div class="col-md-4 mt-0">
+
+    <div class="info-table">
+        <div class="info-bar">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="info-bar-title">
+                    <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:7px !important; margin-right:10px;">
+
+                        <i class="fa-regular fa-user" style="font-size:16px;color:#1F365D !important;"></i>
+                    </div>
+                    LandLord Details
+                </div>
+                @* <button type="button" class="btn btn-sm normal p-1"  title="Edit Landlord" style="color:white">
+                    <i class="bi bi-pencil"></i>
+                </button> *@
+            </div>
+        </div>
+        @if (isLoading)
+        {
+            <!-- 🔄 Loading UI -->
+            <div class="d-flex flex-column justify-content-center align-items-center p-4">
+                <div class="spinner-border " style=" color:#1F365D; width: 2.5rem; height: 2.5rem;" role="status"></div>
+                
+            </div>
+        }
+        else
+        {
+
+        <div class="info-row" style="padding-top:10px">
+            <div class="info-cell label" style="text-transform: uppercase;">Enitiy Name</div>
+            <div class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(landlordDetail.FullName) ? "--" : landlordDetail.FullName)</div>
+        </div>
+        <div class="info-row">
+            <div class="info-cell label" style="text-transform: uppercase;">Authorized Rep</div>
+            <div class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(landlordDetail.ContactPersonName) ? "--" : landlordDetail.ContactPersonName)</div>
+        </div>
+
+        <div class="info-row" style="padding-bottom:10px">
+            <div class="info-cell label" style="text-transform: uppercase;">Legal Address</div>
+            <div class="info-cell value ellipsis" style="white-space:normal">
+                @{
+                    var partlandlord = new List<string>();
+
+                    if (!string.IsNullOrWhiteSpace(landlordDetail.LandlordAddress)) partlandlord.Add(landlordDetail.LandlordAddress);
+
+
+                    var fulllandlordAddress = partlandlord.Count() > 0 ? string.Join(", ", partlandlord) : "--";
+                }
+                @fulllandlordAddress
+            </div>
+        </div>
+        }
+    </div>
+
+
+
+</div>
+
+@code {
+    [Parameter] public Guid? CurrentCaseId { get; set; }
+    private LandlordDetailDto landlordDetail { get; set; } = new LandlordDetailDto();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+
+
+        if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty)
+        {
+
+            isLoading = true;
+           
+           await  Task.Delay(1000);
+            StateHasChanged();
+            await LandlordDetails();
+            isLoading = false;
+        }
+      
+        
+
+    }
+    public async Task LandlordDetails()
+    {
+        landlordDetail = await caseDetailService.GetLandlordDetailAsync(CurrentCaseId!.Value);
+
+    }
+
+    // private void ShowLandlordModal()
+    // {
+    //     LandlordModal.Show(legalcaseDto);
+    // }
+
+}

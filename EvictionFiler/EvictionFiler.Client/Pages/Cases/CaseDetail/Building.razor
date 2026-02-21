@@ -1,0 +1,134 @@
+﻿@using EvictionFiler.Application.DTOs.CaseDetailDtos
+@using EvictionFiler.Application.Interfaces.IServices
+@inject ICaseDetailService caseDetailService
+<div class="col-md-4 mt-0">
+
+
+    <table class="info-table">
+        <thead>
+            <tr>
+                <th colspan="2" class="info-bar">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="info-bar-title">
+                            <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:7px !important;margin-right:10px;">
+
+                                <i class="fa-regular fa-building" style="font-size:16px;color:#1F365D !important;"></i>
+                            </div>
+                            Building Registry
+                        </div>
+                        @* <button type="button" class="btn btn-sm normal p-1" title="Edit Building"  style="color:white">
+                            <i class="bi bi-pencil"></i>
+                        </button> *@
+                    </div>
+                </th>
+            </tr>
+        </thead>
+
+
+        <tbody>
+            @if (isLoading)
+            {
+                <!-- 🔄 Loading UI -->
+                <tr>
+                    <td colspan="3">
+                        <div class="d-flex flex-column justify-content-center align-items-center p-4">
+                            <div class="spinner-border"
+                                 style="color:#1F365D; width:2.5rem; height:2.5rem;"
+                                 role="status">
+                            </div>
+                           
+                        </div>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                <tr class="info-row" style="padding-top:10px">
+                    <td class="info-cell label" style="text-transform: uppercase;">Inter Asset Id</td>
+                    <td class="info-cell value ellipsis" style="padding-bottom:0px;">--</td>
+                    <td class="info-cell span">Portfolio Aplha</td>
+                </tr>
+
+                <tr class="info-row">
+                    <td class="info-cell label" style="text-transform: uppercase;">MDR Number</td>
+                    <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(buildingDetail.Mdr) ? "--" : buildingDetail.Mdr)</td>
+                </tr>
+
+                <tr class="info-row" style="padding-bottom:10px">
+                    <td class="info-cell label" style="text-transform: uppercase;">Primary Address</td>
+                    <td class="info-cell value ellipsis" style="white-space:normal">
+                        @{
+                            var partbuilding = new List<string>();
+
+                            if (!string.IsNullOrWhiteSpace(buildingDetail.BuildingAddress)) partbuilding.Add(buildingDetail.BuildingAddress);
+                            // if (!string.IsNullOrWhiteSpace(legalcaseDto.Address2)) partlandlord.Add(legalcaseDto.Address2);
+                            if (!string.IsNullOrWhiteSpace(buildingDetail.Borough)) partbuilding.Add(buildingDetail.Borough);
+                            if (!string.IsNullOrWhiteSpace(buildingDetail.BuildingState)) partbuilding.Add(buildingDetail.BuildingState);
+                            if (!string.IsNullOrWhiteSpace(buildingDetail.BuildingZip)) partbuilding.Add(buildingDetail.BuildingZip);
+
+                            var fullbuildingAddress = partbuilding.Count() > 0 ? string.Join(", ", partbuilding) : "--";
+                        }
+                        @fullbuildingAddress
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+
+
+</div>
+
+@code {
+    [Parameter] public Guid? CurrentCaseId { get; set; }
+    [Parameter] public EventCallback<string> OnAddressLoaded { get; set; }
+    private BuildingDetailDto buildingDetail { get; set; } = new BuildingDetailDto();
+    private bool isLoading = true;
+    private string fullBuildingAddress = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+
+
+
+        if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty)
+        {
+
+            isLoading = true;
+           
+            await Task.Delay(1000);
+            StateHasChanged();
+            await BuildingDetails();
+            isLoading = false;
+        }
+
+
+
+    }
+   
+    public async Task BuildingDetails()
+    {
+        buildingDetail = await caseDetailService.GetBuildingDetailAsync(CurrentCaseId!.Value);
+
+        var partbuilding = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(buildingDetail.BuildingAddress))
+            partbuilding.Add(buildingDetail.BuildingAddress);
+
+        if (!string.IsNullOrWhiteSpace(buildingDetail.Borough))
+            partbuilding.Add(buildingDetail.Borough);
+
+        if (!string.IsNullOrWhiteSpace(buildingDetail.BuildingState))
+            partbuilding.Add(buildingDetail.BuildingState);
+
+        if (!string.IsNullOrWhiteSpace(buildingDetail.BuildingZip))
+            partbuilding.Add(buildingDetail.BuildingZip);
+
+        fullBuildingAddress = partbuilding.Any()
+            ? string.Join(", ", partbuilding)
+            : "--";
+
+    
+        await OnAddressLoaded.InvokeAsync(fullBuildingAddress);
+    }
+
+}

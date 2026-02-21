@@ -1,0 +1,99 @@
+﻿@using EvictionFiler.Application.DTOs.CaseDetailDtos
+@using EvictionFiler.Application.Interfaces.IServices
+@inject ICaseDetailService tenantDetailService
+  <div class="col-md-4 mt-0">
+
+
+                                <table class="info-table">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2" class="info-bar">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="info-bar-title">
+                                                        <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:7px !important;margin-right:10px;">
+
+                                                           <i class="fa-regular fa-user" style="font-size:16px;color:#1F365D !important;"></i>
+                                                        </div>
+                                                        Tenant Profile
+                                                    </div>
+                                                    @* <button type="button" class="btn btn-sm normal p-1" title="Edit Tenant"  style="color:white">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button> *@
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+            @if (isLoading)
+            {
+
+                <tr>
+                    <td colspan="3">
+                        <div class="d-flex flex-column justify-content-center align-items-center p-4">
+                            <div class="spinner-border"
+                                 style="color:#1F365D; width:2.5rem; height:2.5rem;"
+                                 role="status">
+                            </div>
+                            
+                        </div>
+                    </td>
+                </tr>
+
+            }
+            else
+            {
+                <tr class="info-row" style="padding-top:10px">
+                    <td class="info-cell label" style="text-transform: uppercase;">Primary tenant</td>
+                    <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(tenantDetail.TenantName) ? "--" : tenantDetail.TenantName)</td>
+                </tr>
+
+                <tr class="info-row">
+                    <td class="info-cell label" style="text-transform: uppercase;">Occupied Unit</td>
+                    <td class="info-cell value ellipsis" style="padding-bottom:0px;">@(string.IsNullOrWhiteSpace(tenantDetail.UnitOrApartmentNumber) ? "--" : tenantDetail.UnitOrApartmentNumber)</td>
+                    <td class="info-cell span">2 Br / 1 Ba</td>
+
+                </tr>
+
+                <tr class="info-row" style="padding-bottom:10px">
+                    <td class="info-cell label" style="text-transform: uppercase;">Service Address</td>
+                    <td class="info-cell value ellipsis" style="white-space:normal">@(tenantDetail.TenantId == null || tenantDetail.TenantId == Guid.Empty ? "--" : FullBuildingAddress)</td>
+                </tr>
+            }
+        </tbody>
+                                </table>
+
+
+                            </div> 
+
+@code {
+    [Parameter] public Guid? CurrentCaseId { get; set; }
+    [Parameter] public string FullBuildingAddress { get; set; } = "";
+    private TenantDetailDto tenantDetail { get; set; } = new TenantDetailDto();
+    private bool isLoading = true;
+    protected override async Task OnInitializedAsync()
+    {
+
+
+
+        if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty)
+        {
+
+            isLoading = true;
+           
+            await Task.Delay(1000);
+            StateHasChanged();
+            await TenantDetails();
+            isLoading = false;
+        }
+
+     
+
+    }
+    public async Task TenantDetails()
+    {
+        tenantDetail = await tenantDetailService.GetTenantDetailAsync(CurrentCaseId!.Value);
+
+    }
+
+}
