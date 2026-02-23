@@ -103,19 +103,20 @@
 
                     </div>
                 }
-               
 
 
-                <div class="nav flex-column ">
-                    <a title="Client" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Client") || (isCollapsed && IsSubmenuActive("Client")) ? "active" : "")"
-                       @onclick="@(() => ToggleMenu("Client"))">
-                        <i class="fa-solid fa-user-group menu-icon"></i>
+                @if (userRole == "Admin" && userRole == "Staff Member")
+                {
+                    <div class="nav flex-column ">
+                        <a title="Client" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Client") || (isCollapsed && IsSubmenuActive("Client")) ? "active" : "")"
+                           @onclick="@(() => ToggleMenu("Client"))">
+                            <i class="fa-solid fa-user-group menu-icon"></i>
 
-                        <span class="hide-on-collapse menu-label">Clients</span>
-                    </a>
+                            <span class="hide-on-collapse menu-label">Clients</span>
+                        </a>
 
-                </div>
-
+                    </div>
+                }
                 @if (userRole == "Super Admin")
                 {
                     <div class="nav flex-column ">
@@ -141,7 +142,7 @@
                 {
                     <!-- Reporting -->
                     <div class="nav flex-column "
-                    @onmouseover="@(() => HoveredMenu = "Reporting")"
+                         @onmouseover="@(() => HoveredMenu = "Reporting")"
                          @onmouseout="@(() => HoveredMenu = null)">
                         <a title="Reporting" class="sidebar-link text-decoration-none p-2 d-flex align-items-center justify-content-between @(IsExpanded("Reporting") || (isCollapsed && IsSubmenuActive("Reporting")) ? "active" : "")"
                            @onclick="@(() => ToggleMenu("Reporting"))">
@@ -153,29 +154,107 @@
 
                 }
 
-                    @if (!isCollapsed && IsExpanded("Reporting"))
+                @if (!isCollapsed && IsExpanded("Reporting"))
+                {
+                    <div class="ms-3 submenu-container">
+
+
+                        @foreach (var submenu in submenuMap["Reporting"])
+                        {
+                            <a class="submenu-link text-decoration-none @(activeMenu == submenu.Title ? "active-submenu" : "")"
+                               @onclick="@(() => NavigateToReporting(submenu.Title))">
+
+                                <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
+                                <span class="submenu-text hide-on-collapse">@submenu.Title</span>
+
+
+
+                            </a>
+                        }
+                    </div>
+                }
+                else if (isCollapsed && HoveredMenu == "Reporting")
+                {
+                    <div class="flyout-menu submenu-container">
+                        @foreach (var submenu in submenuMap["Reporting"])
+                        {
+                            <a class="dropdown-item submenu-link text-decoration-none  @(activeMenu == submenu.Title ? "active-submenu" : "")"
+                               @onclick="@(() => NavigateToReporting(submenu.Title))">
+
+                                <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
+                                <span class="submenu-text ">@submenu.Title</span>
+                            </a>
+                        }
+                    </div>
+                }
+
+                @if (userRole == "Super Admin" || userRole == "Admin")
+                {
+                    <!-- MANAGE -->
+                    <div class="nav flex-column ">
+                        <a title="User" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Reminder Center") || (isCollapsed && IsSubmenuActive("Remainder Center")) ? "active" : "")"
+                           @onclick="@(() => ToggleMenu("Reminder Center"))">
+                            <i class="fa-solid fa-bell menu-icon"></i>
+
+
+                            <span class="hide-on-collapse menu-label">Reminder Center</span>
+                        </a>
+
+                    </div>
+                }
+                @if (userRole == "Super Admin")
+                {
+                    <div class="nav flex-column  ">
+                        <a title="Client" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Attorney") || (isCollapsed && IsSubmenuActive("Attorney")) ? "active" : "")"
+                           @onclick="@(() => ToggleMenu("Attorney"))">
+                            <i class="fa-solid fa-user menu-icon"></i>
+
+                            <span class="hide-on-collapse menu-label"> Attorney Billing</span>
+                        </a>
+
+                    </div>
+
+                    <div class="nav flex-column  ">
+                        <a title="Client" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Real-Estate") || (isCollapsed && IsSubmenuActive("Real-Estate")) ? "active" : "")"
+                           @onclick="@(() => ToggleMenu("Real-Estate"))">
+                            <i class="fa-solid fa-city menu-icon" style="padding-top:@(isCollapsed ? "0px" : "1px")"></i>
+
+                            <span class="hide-on-collapse menu-label"> Real Estate</span>
+                        </a>
+
+                    </div>
+
+                    <!-- Accounting -->
+                    <div class="nav flex-column  "
+                         @onmouseover="@(() => HoveredMenu = "Accounting")"
+                         @onmouseout="@(() => HoveredMenu = null)">
+                        <a title="Accounting" class="sidebar-link text-decoration-none p-2 d-flex align-items-center justify-content-between @(IsExpanded("Accounting") || (isCollapsed && IsSubmenuActive("Accounting")) ? "active" : "")"
+                           @onclick="@(() => ToggleMenu("Accounting"))">
+                            <i class="fa-solid fa-hand-holding-dollar menu-icon"></i>
+                            <span class="hide-on-collapse menu-label">Accounting</span>
+
+                            <i class="fa-solid @(IsExpanded("Accounting") ? "fa-chevron-up" : "fa-chevron-down") ms-auto"></i>
+                        </a>
+                    </div>
+
+                    @if (!isCollapsed && IsExpanded("Accounting"))
                     {
                         <div class="ms-3 submenu-container">
-
-
-                            @foreach (var submenu in submenuMap["Reporting"])
+                            @foreach (var submenu in submenuMap["Accounting"])
                             {
                                 <a class="submenu-link text-decoration-none @(activeMenu == submenu.Title ? "active-submenu" : "")"
                                    @onclick="@(() => NavigateToReporting(submenu.Title))">
 
                                     <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
                                     <span class="submenu-text hide-on-collapse">@submenu.Title</span>
-
-
-
                                 </a>
                             }
                         </div>
                     }
-                    else if (isCollapsed && HoveredMenu == "Reporting")
+                    else if (isCollapsed && HoveredMenu == "Accounting")
                     {
                         <div class="flyout-menu submenu-container">
-                            @foreach (var submenu in submenuMap["Reporting"])
+                            @foreach (var submenu in submenuMap["Accounting"])
                             {
                                 <a class="dropdown-item submenu-link text-decoration-none  @(activeMenu == submenu.Title ? "active-submenu" : "")"
                                    @onclick="@(() => NavigateToReporting(submenu.Title))">
@@ -186,87 +265,9 @@
                             }
                         </div>
                     }
-
-                    @if (userRole == "Super Admin" || userRole == "Admin")
-                    {
-                        <!-- MANAGE -->
-                        <div class="nav flex-column ">
-                            <a title="User" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Remainder Center") || (isCollapsed && IsSubmenuActive("Remainder Center")) ? "active" : "")"
-                               @onclick="@(() => ToggleMenu("Remainder Center"))">
-                                <i class="fa-solid fa-bell menu-icon"></i>
-
-
-                                <span class="hide-on-collapse menu-label">Remainder Center</span>
-                            </a>
-
-                        </div>
-                    }
-                    @if (userRole == "Super Admin")
-                    {
-                        <div class="nav flex-column  ">
-                            <a title="Client" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Attorney") || (isCollapsed && IsSubmenuActive("Attorney")) ? "active" : "")"
-                               @onclick="@(() => ToggleMenu("Attorney"))">
-                                <i class="fa-solid fa-user menu-icon"></i>
-
-                                <span class="hide-on-collapse menu-label"> Attorney Billing</span>
-                            </a>
-
-                        </div>
-
-                        <div class="nav flex-column  ">
-                            <a title="Client" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Real-Estate") || (isCollapsed && IsSubmenuActive("Real-Estate")) ? "active" : "")"
-                               @onclick="@(() => ToggleMenu("Real-Estate"))">
-                                <i class="fa-solid fa-city menu-icon" style="padding-top:@(isCollapsed ? "0px" : "1px")"></i>
-
-                                <span class="hide-on-collapse menu-label"> Real Estate</span>
-                            </a>
-
-                        </div>
-
-                        <!-- Accounting -->
-                        <div class="nav flex-column  "
-                             @onmouseover="@(() => HoveredMenu = "Accounting")"
-                             @onmouseout="@(() => HoveredMenu = null)">
-                            <a title="Accounting" class="sidebar-link text-decoration-none p-2 d-flex align-items-center justify-content-between @(IsExpanded("Accounting") || (isCollapsed && IsSubmenuActive("Accounting")) ? "active" : "")"
-                               @onclick="@(() => ToggleMenu("Accounting"))">
-                                <i class="fa-solid fa-hand-holding-dollar menu-icon"></i>
-                                <span class="hide-on-collapse menu-label">Accounting</span>
-
-                                <i class="fa-solid @(IsExpanded("Accounting") ? "fa-chevron-up" : "fa-chevron-down") ms-auto"></i>
-                            </a>
-                        </div>
-
-                        @if (!isCollapsed && IsExpanded("Accounting"))
-                        {
-                            <div class="ms-3 submenu-container">
-                                @foreach (var submenu in submenuMap["Accounting"])
-                                {
-                                    <a class="submenu-link text-decoration-none @(activeMenu == submenu.Title ? "active-submenu" : "")"
-                                       @onclick="@(() => NavigateToReporting(submenu.Title))">
-
-                                        <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
-                                        <span class="submenu-text hide-on-collapse">@submenu.Title</span>
-                                    </a>
-                                }
-                            </div>
-                        }
-                        else if (isCollapsed && HoveredMenu == "Accounting")
-                        {
-                            <div class="flyout-menu submenu-container">
-                                @foreach (var submenu in submenuMap["Accounting"])
-                                {
-                                    <a class="dropdown-item submenu-link text-decoration-none  @(activeMenu == submenu.Title ? "active-submenu" : "")"
-                                       @onclick="@(() => NavigateToReporting(submenu.Title))">
-
-                                        <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
-                                        <span class="submenu-text ">@submenu.Title</span>
-                                    </a>
-                                }
-                            </div>
-                        }
-                    }
-                    <!-- Maintenance -->
-                    @* @if (userRole == "Super Admin")
+                }
+                <!-- Maintenance -->
+                @* @if (userRole == "Super Admin")
                     {
                         <div class="nav flex-column "
                              @onmouseover="@(() => HoveredMenu = "Maintenance")"
@@ -310,8 +311,8 @@
                         }
                     } *@
 
-                    <!-- Process Server -->
-                    @*     <div class="nav flex-column "
+                <!-- Process Server -->
+                @*     <div class="nav flex-column "
                      @onmouseover="@(() => HoveredMenu = "Process")"
                      @onmouseout="@(() => HoveredMenu = null)">
                         <a title="Process Server" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Process") || (isCollapsed && IsSubmenuActive("Process")) ? "active" : "")"
@@ -349,8 +350,8 @@
                     </div>
                 } *@
 
-                    <!-- Case Transfer -->
-                    @* <div class="nav flex-column "
+                <!-- Case Transfer -->
+                @* <div class="nav flex-column "
                      @onmouseover="@(() => HoveredMenu = "Transfer")"
                      @onmouseout="@(() => HoveredMenu = null)">
                         <a   title="Case Transfer" class="sidebar-link text-decoration-none p-2 @(IsExpanded("Transfer") || (isCollapsed && IsSubmenuActive("Transfer")) ? "active" : "")"
@@ -391,8 +392,8 @@
 
 
 
-                    <!-- NYCEF Email -->
-                    @*   <div class="nav flex-column "
+                <!-- NYCEF Email -->
+                @*   <div class="nav flex-column "
                  @onmouseover="@(() => HoveredMenu = "NYCEFEmail")"
                  @onmouseout="@(() => HoveredMenu = null)">
                     <a  title=" NYCEEF Email Async" class="sidebar-link text-decoration-none p-2 @(IsExpanded("NYCEFEmail") || (isCollapsed && IsSubmenuActive("Drafting")) ? "active" : "")"
@@ -402,7 +403,7 @@
                     </a>
                 </div> *@
 
-                    @*  @if (!isCollapsed && IsExpanded("NYCEFEmail"))
+                @*  @if (!isCollapsed && IsExpanded("NYCEFEmail"))
                 {
                     <div class="ms-3 submenu-container">
                         @foreach (var submenu in submenuMap["NYCEFEmail"])
@@ -430,8 +431,8 @@
                         }
                     </div>
                 } *@
-                    <!-- Print Forms -->
-                    @* <div class="nav flex-column "
+                <!-- Print Forms -->
+                @* <div class="nav flex-column "
                  @onmouseover="@(() => HoveredMenu = "FormsPrint")"
                  @onmouseout="@(() => HoveredMenu = null)">
                     <a title=" Forms Print" class="sidebar-link text-decoration-none p-2 @(IsExpanded("FormsPrint") || (isCollapsed && IsSubmenuActive("FormsPrint")) ? "active" : "")"
@@ -444,8 +445,8 @@
 
 
 
-                    @*                 @if (!isCollapsed && IsExpanded("FormsPrint")) *@
-                    @*   {
+                @*                 @if (!isCollapsed && IsExpanded("FormsPrint")) *@
+                @*   {
                     <div class="ms-3 submenu-container">
                         @foreach (var submenu in submenuMap["FormsPrint"])
                         {
@@ -476,100 +477,100 @@
 
 
 
-                    @if (userRole == "Super Admin" || userRole == "Admin")
-                    {
-                        <div class="nav flex-column "
-                             @onmouseover="@(() => HoveredMenu = "Drafting")"
-                             @onmouseout="@(() => HoveredMenu = null)">
-                            <a title="Manage Forms" class="sidebar-link text-decoration-none p-2 d-flex align-items-center justify-content-between @(IsExpanded("Drafting") || (isCollapsed && IsSubmenuActive("Forms")) ? "active" : "")"
-                               @onclick="@(() => ToggleMenu("Drafting"))">
-                                <i class="fa-solid fa-drafting-compass" style="margin-left:@(isCollapsed ? "0px !important" : "11px")"></i>
-                                <span class="hide-on-collapse menu-label">Drafting Library</span>
-
-                                <i class="fa-solid @(IsExpanded("Drafting") ? "fa-chevron-up" : "fa-chevron-down") ms-auto"></i>
-                            </a>
-
-                        </div>
-
-                        @if (!isCollapsed && IsExpanded("Drafting"))
-                        {
-                            <div class="ms-3 submenu-container">
-                                @foreach (var submenu in submenuMap["Drafting"])
-                                {
-                                    <a class="submenu-link text-decoration-none @(activeMenu == submenu.Title ? "active-submenu" : "")"
-                                       @onclick="@(() => NavigateToDrafting(submenu.Title))">
-
-                                        <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
-                                        <span class="submenu-text hide-on-collapse">@submenu.Title</span>
-                                    </a>
-                                }
-                            </div>
-                        }
-                        else if (isCollapsed && HoveredMenu == "Drafting")
-                        {
-                            <div class="flyout-menu submenu-container">
-                                @foreach (var submenu in submenuMap["Drafting"])
-                                {
-                                    <a class="dropdown-item submenu-link text-decoration-none   @(activeMenu == submenu.Title ? "active-submenu" : "")"
-                                       @onclick="@(() => NavigateToDrafting(submenu.Title))">
-
-                                        <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
-                                        <span class="submenu-text ">@submenu.Title</span>
-                                    </a>
-                                }
-                            </div>
-                        }
-
-                    }
-                @if (userRole == "Super Admin" )
+                @if (userRole == "Super Admin" || userRole == "Admin")
                 {
-                        <div class="nav position-relative flex-column "
-                             @onmouseover="@(() => HoveredMenu = "Settings")"
-                             @onmouseout="@(() => HoveredMenu = "null")">
-                            <a title="Manage Forms" class="sidebar-link text-decoration-none p-2 d-flex align-items-center justify-content-between @(IsExpanded("Settings") || (isCollapsed && IsSubmenuActive("Forms")) ? "active" : "")"
-                               @onclick="@(() => ToggleMenu("Settings"))">
-                                <i class="fa-solid fa-gear" style="margin-left:@(isCollapsed ? "-2px !important" : "11px")"></i>
+                    <div class="nav flex-column "
+                         @onmouseover="@(() => HoveredMenu = "Drafting")"
+                         @onmouseout="@(() => HoveredMenu = null)">
+                        <a title="Manage Forms" class="sidebar-link text-decoration-none p-2 d-flex align-items-center justify-content-between @(IsExpanded("Drafting") || (isCollapsed && IsSubmenuActive("Forms")) ? "active" : "")"
+                           @onclick="@(() => ToggleMenu("Drafting"))">
+                            <i class="fa-solid fa-drafting-compass" style="margin-left:@(isCollapsed ? "0px !important" : "11px")"></i>
+                            <span class="hide-on-collapse menu-label">Drafting Library</span>
 
+                            <i class="fa-solid @(IsExpanded("Drafting") ? "fa-chevron-up" : "fa-chevron-down") ms-auto"></i>
+                        </a>
 
-                                <span class="hide-on-collapse menu-label">Settings</span>
+                    </div>
 
-                                <i class="fa-solid @(IsExpanded("Settings") ? "fa-chevron-up" : "fa-chevron-down") ms-auto"></i>
-                            </a>
+                    @if (!isCollapsed && IsExpanded("Drafting"))
+                    {
+                        <div class="ms-3 submenu-container">
+                            @foreach (var submenu in submenuMap["Drafting"])
+                            {
+                                <a class="submenu-link text-decoration-none @(activeMenu == submenu.Title ? "active-submenu" : "")"
+                                   @onclick="@(() => NavigateToDrafting(submenu.Title))">
 
+                                    <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
+                                    <span class="submenu-text hide-on-collapse">@submenu.Title</span>
+                                </a>
+                            }
                         </div>
-
-
-                        @if (!isCollapsed && IsExpanded("Settings"))
-                        {
-                            <div class="ms-3 submenu-container">
-                                @foreach (var submenu in submenuMap["Settings"])
-                                {
-                                    <a class="submenu-link text-decoration-none @(activeMenu == submenu.Title ? "active-submenu" : "")"
-                                       @onclick="@(() => NavigateToSettings(submenu.Title))">
-
-                                        <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
-                                        <span class="submenu-text hide-on-collapse">@submenu.Title</span>
-                                    </a>
-                                }
-                            </div>
-                        }
-
-                        else if (isCollapsed && HoveredMenu == "Settings")
-                        {
-                            <div class="flyout-menu submenu-container">
-                                @foreach (var submenu in submenuMap["Settings"])
-                                {
-                                    <a class="dropdown-item submenu-link text-decoration-none   @(activeMenu == submenu.Title ? "active-submenu" : "")"
-                                       @onclick="@(() => NavigateToSettings(submenu.Title))">
-
-                                        <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
-                                        <span class="submenu-text ">@submenu.Title</span>
-                                    </a>
-                                }
-                            </div>
-                        }
                     }
-                
+                    else if (isCollapsed && HoveredMenu == "Drafting")
+                    {
+                        <div class="flyout-menu submenu-container">
+                            @foreach (var submenu in submenuMap["Drafting"])
+                            {
+                                <a class="dropdown-item submenu-link text-decoration-none   @(activeMenu == submenu.Title ? "active-submenu" : "")"
+                                   @onclick="@(() => NavigateToDrafting(submenu.Title))">
+
+                                    <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
+                                    <span class="submenu-text ">@submenu.Title</span>
+                                </a>
+                            }
+                        </div>
+                    }
+
+                }
+                @if (userRole == "Super Admin")
+                {
+                    <div class="nav position-relative flex-column "
+                         @onmouseover="@(() => HoveredMenu = "Settings")"
+                         @onmouseout="@(() => HoveredMenu = "null")">
+                        <a title="Manage Forms" class="sidebar-link text-decoration-none p-2 d-flex align-items-center justify-content-between @(IsExpanded("Settings") || (isCollapsed && IsSubmenuActive("Forms")) ? "active" : "")"
+                           @onclick="@(() => ToggleMenu("Settings"))">
+                            <i class="fa-solid fa-gear" style="margin-left:@(isCollapsed ? "-2px !important" : "11px")"></i>
+
+
+                            <span class="hide-on-collapse menu-label">Settings</span>
+
+                            <i class="fa-solid @(IsExpanded("Settings") ? "fa-chevron-up" : "fa-chevron-down") ms-auto"></i>
+                        </a>
+
+                    </div>
+
+
+                    @if (!isCollapsed && IsExpanded("Settings"))
+                    {
+                        <div class="ms-3 submenu-container">
+                            @foreach (var submenu in submenuMap["Settings"])
+                            {
+                                <a class="submenu-link text-decoration-none @(activeMenu == submenu.Title ? "active-submenu" : "")"
+                                   @onclick="@(() => NavigateToSettings(submenu.Title))">
+
+                                    <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
+                                    <span class="submenu-text hide-on-collapse">@submenu.Title</span>
+                                </a>
+                            }
+                        </div>
+                    }
+
+                    else if (isCollapsed && HoveredMenu == "Settings")
+                    {
+                        <div class="flyout-menu submenu-container">
+                            @foreach (var submenu in submenuMap["Settings"])
+                            {
+                                <a class="dropdown-item submenu-link text-decoration-none   @(activeMenu == submenu.Title ? "active-submenu" : "")"
+                                   @onclick="@(() => NavigateToSettings(submenu.Title))">
+
+                                    <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
+                                    <span class="submenu-text ">@submenu.Title</span>
+                                </a>
+                            }
+                        </div>
+                    }
+                }
+
 
             </div>
 
@@ -605,6 +606,14 @@
                                 <i class="fa-solid fa-id-badge me-2"></i> My Profile
                             </a>
 
+                            @if (!string.IsNullOrEmpty(IsSuperadmin))
+                            {
+                                <a href="javascript:void(0);" class="dropdown-item text-dark d-flex align-items-center p-2"
+                                   @onclick="RevertToAdmin">
+                                    <i class="fa-solid fa-right-from-bracket me-2"></i> Back To SuperAdmin
+                                </a>
+                            }
+
                             <a href="javascript:void(0);" class="dropdown-item text-dark d-flex align-items-center p-2"
                                @onclick="LogoutUser">
                                 <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
@@ -639,6 +648,20 @@
 
     }
 </div>
+<script>
+    window.revertImpersonation = async function () {
+        const response = await fetch("/api/auth/revert", {
+            method: "POST",
+            credentials: "include"
+        });
+
+        return {
+            ok: response.ok,
+            status: response.status,
+            statusText: response.statusText
+        };
+    }
+</script>
 @code {
     private bool showProfileOptions = false;
     Dictionary<string, bool> expandedMenus = new();
@@ -646,6 +669,7 @@
 
 
     public string Name { get; set; }
+    public string? IsSuperadmin { get; set; } = null;
 
     bool IsSubmenuActive(string parentMenu) =>
         submenuMap.ContainsKey(parentMenu) &&
@@ -659,7 +683,7 @@
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-
+        IsSuperadmin = user.FindFirstValue("OriginalAdminId");
 
 
         if (user.Identity?.IsAuthenticated == true)
@@ -680,7 +704,7 @@
         string[] menus = {
 
     "Home", "ManageCases", "Firms","StaffMembers", "Client","Marshals", "Calender","Drafting",
-    "Reporting", "Remainder Center","Real-Estate","Attorney", "Accounting", 
+    "Reporting", "Reminder Center","Real-Estate","Attorney", "Accounting",
     "Process", "Transfer", "FormsPrint","NYCEFEmail" , "Settings"
 };
         foreach (var menu in menus)
@@ -723,10 +747,10 @@
             expandedMenus["Roles"] = true;
         }
 
-        if (uri.EndsWith("/remainder-center"))
+        if (uri.EndsWith("/reminder-center"))
         {
-            activeMenu = "Remainder Center";
-            expandedMenus["Remainder Center"] = true;
+            activeMenu = "Reminder Center";
+            expandedMenus["Reminder Center"] = true;
         }
         if (uri.EndsWith("/clients"))
         {
@@ -760,10 +784,10 @@
             expandedMenus["Reporting"] = true;
         }
 
-        if (uri.EndsWith("/remainder-center") || uri.Contains("/remainder-center"))
+        if (uri.EndsWith("/reminder-center") || uri.Contains("/reminder-center"))
         {
-            activeMenu = "Remainder Center";
-            expandedMenus["Remainder Center"] = true;
+            activeMenu = "Reminder Center";
+            expandedMenus["Reminder Center"] = true;
         }
         if (uri.EndsWith("/maintenance") || uri.Contains("/maintenance"))
         {
@@ -798,7 +822,7 @@
             }
             if (uri.EndsWith("/hold-over-forms"))
             {
-                activeMenu = "Hold Over";
+                activeMenu = "Holdover";
             }
 
             if (uri.EndsWith("/motions-and-orders-to-show-cause"))
@@ -811,7 +835,7 @@
             }
             if (uri.EndsWith("/non-payment-forms"))
             {
-                activeMenu = "Non-Payment";
+                activeMenu = "NonPayment";
             }
             if (uri.EndsWith("/notice-of-entry"))
             {
@@ -896,8 +920,8 @@
                 break;
             case "Reporting":
                 break;
-            case "Remainder Center":
-                nav.NavigateTo("/remainder-center");
+            case "Reminder Center":
+                nav.NavigateTo("/reminder-center");
                 break;
             case "Accounting":
                 break;
@@ -930,6 +954,28 @@
         });
         Navigation.NavigateTo("/login", forceLoad: true);
     }
+    public class ImpersonateResponse
+    {
+        public bool Ok { get; set; }
+        public int Status { get; set; }
+        public string StatusText { get; set; }
+    }
+
+    private async Task RevertToAdmin()
+    {
+        var result = await JS.InvokeAsync<ImpersonateResponse>("revertImpersonation");
+
+        if (result.Ok)
+        {
+            // Refresh identity by forcing full page reload
+            nav.NavigateTo("/dashboard", true);
+        }
+        else
+        {
+            Console.WriteLine($"Revert failed: {result.Status} {result.StatusText}");
+            // You can also show toast message, modal, etc.
+        }
+    }
 
     private void ToggleProfileOptions()
     {
@@ -961,7 +1007,7 @@
      { "ManageCases", new()
     {
           ("Manage-Cases" , "fa-solid fa-handshake"),
-        
+
     }
 },
 
@@ -971,7 +1017,7 @@
             ("Accounting Report", "fa-solid fa-scale-balanced"),
             ("Client Billing Report", "fa-solid fa-list-check"),
             ("Marshal Reports", "fa-solid fa-gavel"),
-            
+
         }
     },
 
@@ -1047,10 +1093,10 @@
        ("Manage-Forms" , "fa-solid fa-handshake"), // existing
         ("Affidavits", "fa-solid fa-file-signature"),
         ("Appeals", "fa-solid fa-gavel"),
-        ("Hold Over", "fa-solid fa-file-contract"),
+        ("Holdover", "fa-solid fa-file-contract"),
         ("Motions", "fa-solid fa-scale-balanced"),
         ("Non-Military", "fa-solid fa-user-shield"),
-        ("Non-Payment", "fa-solid fa-file-invoice-dollar"),
+        ("NonPayment", "fa-solid fa-file-invoice-dollar"),
         ("Notice of Entry", "fa-solid fa-door-open"),
         ("Stipulations", "fa-solid fa-scroll"),
         ("Tenant", "fa-solid fa-people-roof"),
@@ -1074,7 +1120,7 @@
             ("Renewal Status", "fa-solid fa-arrows-rotate"),
             ("Rent Regulations", "fa-solid fa-file-invoice-dollar"),
             ("Type Of Owners", "fa-solid fa-user-tag"),
-            ("Unit Illigals", "fa-solid fa-house-crack"),
+            ("Illegal Unit", "fa-solid fa-house-crack"),
                 ("Categories", "fa-solid fa-arrows-rotate"),
                  ("Courts", "fa-solid fa-file-alt"),
             ("Fees Catalog", "fa-solid fa-briefcase"),
@@ -1103,7 +1149,7 @@
             case "Appeals":
                 nav.NavigateTo("/Drafting/appeals");
                 break;
-            case "Hold Over":
+            case "Holdover":
                 nav.NavigateTo("/Drafting/hold-over-forms");
                 break;
             case "Motions":
@@ -1112,7 +1158,7 @@
             case "Non-Military":
                 nav.NavigateTo("/Drafting/non-military-affidavit-of-investigation");
                 break;
-            case "Non-Payment":
+            case "NonPayment":
                 nav.NavigateTo("/Drafting/non-payment-forms");
                 break;
             case "Notice of Entry":
@@ -1181,8 +1227,8 @@
             case "Type Of Owners":
                 nav.NavigateTo("/Settings/type-of-owner");
                 break;
-            case "Unit Illigals":
-                nav.NavigateTo("/Settings/unit-illigal");
+            case "Illegal Unit":
+                nav.NavigateTo("/Settings/unit-illegal");
                 break;
             case "Categories":
                 nav.NavigateTo("/Settings/category");
@@ -1199,7 +1245,7 @@
             case "Fee Catalog":
                 nav.NavigateTo("/Settings/feescatalog");
                 break;
-            case "Remainders":
+            case "Reminders":
                 nav.NavigateTo("/Settings/reminders");
                 break;
             case "Push notification & Alerts":

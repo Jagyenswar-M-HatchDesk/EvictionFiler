@@ -32,6 +32,8 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Radzen;
+using System.Security.Claims;
+using static System.Net.WebRequestMethods;
 
 
 
@@ -273,6 +275,7 @@ builder.Services.AddScoped<ISubscriptionTypeRepository, SubscriptionTypeReposito
 builder.Services.AddScoped<ILoggedInUserService, LoggedInUserService>();
 builder.Services.AddScoped<IRegisterRepository, RegisterRepository>();
 builder.Services.AddScoped<IRegisterService, RegisterService>();
+builder.Services.AddScoped<IFormCategoryRepository, FormCategoryRepository>();
 builder.Services.AddScoped<
     IUserClaimsPrincipalFactory<User>,
     ApplicationUserClaimsPrincipalFactory>();
@@ -347,13 +350,67 @@ app.MapGet("/api/casefile/{**relativePath}", async (string relativePath) =>
 {
     var filePath = Path.Combine(caseFormsPath, relativePath);
 
-    if (!File.Exists(filePath))
+    if (!System.IO.File.Exists(filePath))
         return Results.NotFound($"File '{relativePath}' not found.");
 
-    var stream = File.OpenRead(filePath);
+    var stream = System.IO.File.OpenRead(filePath);
     var contentType = "application/octet-stream";
     return Results.File(stream, contentType, Path.GetFileName(filePath));
 });
+
+app.MapPost("/api/auth/impersonate/{userId:guid}", async (
+    Guid userId,
+    UserManager<User> userManager,
+    SignInManager<User> signInManager, HttpContext http,
+    IHttpContextAccessor accessor) =>
+{
+    var adminId = accessor.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (adminId == null) return Results.Unauthorized();
+
+    var targetUser = await userManager.FindByIdAsync(userId.ToString());
+    if (targetUser == null) return Results.NotFound("User not found");
+
+    await signInManager.SignOutAsync();
+
+    var principal = await signInManager.CreateUserPrincipalAsync(targetUser);
+    var identity = (ClaimsIdentity)principal.Identity!;
+
+    // 3. ADD impersonation claims BEFORE writing cookie
+    identity.AddClaim(new Claim("ImpersonatedBy", adminId));
+    identity.AddClaim(new Claim("OriginalAdminId", adminId));
+
+    // 4. WRITE THE COOKIE MANUALLY (do NOT call SignInManager.SignInAsync again)
+    await http.SignInAsync(
+        IdentityConstants.ApplicationScheme,
+        new ClaimsPrincipal(identity),
+        new AuthenticationProperties { IsPersistent = false }
+    );
+
+    return Results.Ok(new { message = "Impersonation started" });
+})
+.RequireAuthorization();
+app.MapPost("/api/auth/revert", async (
+    UserManager<User> userManager,
+    SignInManager<User> signInManager,
+    IHttpContextAccessor accessor) =>
+{
+    var http = accessor.HttpContext!;
+    var adminId = http.User.FindFirstValue("OriginalAdminId");
+
+    if (adminId == null)
+        return Results.BadRequest("Not impersonating anyone");
+
+    var admin = await userManager.FindByIdAsync(adminId);
+    if (admin == null)
+        return Results.NotFound("Admin not found");
+
+    await signInManager.SignOutAsync();
+    await signInManager.SignInAsync(admin, isPersistent: false);
+
+    return Results.Ok(new { message = "Reverted to super admin" });
+})
+.RequireAuthorization();
+
 
 app.MapRazorPages();
 app.MapFallbackToFile("index.html");

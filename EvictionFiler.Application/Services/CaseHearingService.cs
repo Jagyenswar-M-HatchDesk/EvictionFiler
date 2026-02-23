@@ -189,10 +189,10 @@ namespace EvictionFiler.Application.Services
 
 
             // 🔹 Total count (pagination)
-            var totalCount = await query.CountAsync();
+            //var totalCount = await query.CountAsync();
 
             // 🔹 SAME DTO mapping (unchanged)
-            var items = await query
+            var items = await query.Where(e=>e.HearingDate >  DateTime.Today)
                 .OrderByDescending(x => x.CreatedOn)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -266,7 +266,7 @@ namespace EvictionFiler.Application.Services
             return new PaginationDto<CaseHearingDto>
             {
                 Items = items,
-                TotalCount = totalCount,
+                TotalCount = items.Count(),
                 PageSize = pageSize,
                 CurrentPage = pageNumber
             };
