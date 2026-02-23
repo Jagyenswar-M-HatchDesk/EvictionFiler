@@ -21,13 +21,15 @@ namespace EvictionFiler.Application.Services
         private readonly RoleManager<Role> _roleManager;
         private readonly IFirmRepository _firmRepository;
         private readonly IEmailService _emailService;
+        private readonly CaptchaService _captchaService;
 
         public RegisterService(
             IRegisterRepository repo,
             UserManager<User> userManager,
             RoleManager<Role> roleManager,
             IFirmRepository firmRepository,
-            IEmailService emailService
+            IEmailService emailService,
+            CaptchaService captchaService
             )
         {
             _repo = repo;
@@ -35,16 +37,24 @@ namespace EvictionFiler.Application.Services
             _roleManager = roleManager;
             _firmRepository = firmRepository;
             _emailService = emailService;
+            _captchaService = captchaService;
         }
 
        
-        public async Task<(bool Success, string Message)> RegisterAsync(RegisterDto dto,FirmDto? Dto, string SubscriptionName)
+        public async Task<(bool Success, string Message)> RegisterAsync(RegisterDto dto,FirmDto? Dto, string SubscriptionName,string captchaToken)
         {
             
 
             try
             {
-               
+                if (string.IsNullOrWhiteSpace(captchaToken))
+                    return (false, "Captcha is required");
+
+                var isCaptchaValid = await _captchaService.ValidateRecaptcha(captchaToken);
+
+                if (!isCaptchaValid)
+                    return (false, "Captcha validation failed");
+
                 string roleName = string.IsNullOrWhiteSpace(dto.Role) ? "Admin" : dto.Role;
 
                 var role = await _roleManager.FindByNameAsync(roleName);
