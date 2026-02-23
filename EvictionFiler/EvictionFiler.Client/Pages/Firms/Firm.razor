@@ -1,4 +1,6 @@
 ﻿@page "/firms"
+@using EvictionFiler.Application.Common.Interfaces
+@using EvictionFiler.Application.Common.Models
 @using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.FirmDtos
 @using EvictionFiler.Application.DTOs.UserDto
@@ -10,6 +12,11 @@
 @inject IUserservices _userService
 @inject IFirmService _firmservice
 @inject SpinnerService spinnerservice
+@inject ILoggedInUserService _loggedInUserService
+@inject NavigationManager nav
+@inject HttpClient _http
+@inject IJSRuntime JS
+
 <PageTitle>Firms - Housing Court Filer</PageTitle>
 @attribute [Authorize]
 <!-- Bootstrap CSS -->
@@ -202,6 +209,7 @@
                                                 @onclick="() => ToggleEmployees(user.Id)">
                                             @(expandedFirmId == user.Id ? "-" : "+")
                                         </button>
+                                        <i class="fa-regular fa-user" style="cursor:pointer" @onclick="() => ImpersonateAdmin(user.Id)"></i>
                                     </td>
                                     <td> @(user.Name ?? "") </td>
                                     <td>@(user.Phone ?? "")</td>
@@ -307,6 +315,21 @@
 
     <EnrollFirm @ref="createFirm" Submit="Handle" />
     <EditFirm @ref="editFirm" Submit="Handle" />
+    <script>
+                     window.impersonateUser = async function (url) {
+            const response = await fetch(url, {
+                method: "POST",
+                credentials: "include"
+            });
+
+            // Return a JSON object back to C#
+            return {
+                ok: response.ok,
+                status: response.status,
+                statusText: response.statusText
+            };
+        }
+    </script>
 </body>
 
 
@@ -314,6 +337,7 @@
 
     private Dictionary<Guid, List<UserDto>> firmEmployees = new();
     private Guid? expandedFirmId = null;
+    private LoggedInUser? identityUser;
 
     private async Task ToggleEmployees(Guid firmId)
     {
@@ -374,14 +398,48 @@
     protected override async Task OnInitializedAsync()
     {
         spinnerservice.Show();
+
+        var loggedInUser = await _loggedInUserService.GetAsync();
+        if (loggedInUser == null || !loggedInUser.IsAuthenticated)
+        {
+            nav.NavigateTo("/", forceLoad: true);
+            return;
+        }
+        this.identityUser = loggedInUser;
+
         await GetAllFirms();
         _editContext = new EditContext(registerDto);
         messageStore = new ValidationMessageStore(_editContext);
         spinnerservice.Hide();
     }
 
+    private async Task ImpersonateAdmin(Guid Firmid)
+    {
+        var employees = await _userService.GetUsersByFirmIdAsync(Firmid);
+        var admin = employees.Where(e => e.Role.RoleName.ToLower() == "admin").FirstOrDefault();
 
+        var result = await JS.InvokeAsync<ImpersonateResponse>(
+         "impersonateUser",
+         $"/api/auth/impersonate/{admin.UserId}"
+     );
 
+        if (result.Ok)
+        {
+           // await JS.InvokeVoidAsync("location.replace", "/dashboard");
+            nav.NavigateTo("/dashboard", true);
+        }
+        else
+        {
+            // Handle error (toast, message, logs)
+            Console.WriteLine($"Failed: {result.Status} {result.StatusText}");
+        }
+    }
+    public class ImpersonateResponse
+    {
+        public bool Ok { get; set; }
+        public int Status { get; set; }
+        public string StatusText { get; set; }
+    }
     private async Task GetAllFirms()
     {
         allFirms = await _firmservice.GetAllFirms();

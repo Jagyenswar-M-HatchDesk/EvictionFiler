@@ -43,6 +43,7 @@ namespace EvictionFiler.Infrastructure.DbContexts
         public DbSet<DefenseType> MstDefenseTypes { get; set; }
         public DbSet<County> MstCounties { get; set; }
         public DbSet<Category> MstCategories { get; set; }
+        public DbSet<FormCategory> MstFormCategories { get; set; }
         public DbSet<LandlordType> MstLandlordTypes { get; set; }
         public DbSet<CaseSubType> MstCaseSubTypes { get; set; }
 

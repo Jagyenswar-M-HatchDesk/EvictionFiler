@@ -19,9 +19,10 @@ namespace EvictionFiler.Domain.Entities.Master
 		[ForeignKey("CaseTypeId")]
 		public CaseType? CaseType { get; set; }
         [MaxLength(500)]
-        public Guid? CategoryId { get; set; }
-        [ForeignKey("CategoryId")]
-        public Category? Category { get; set; }
+        
+        [ForeignKey("FormCategoryId")]
+        public FormCategory? Category { get; set; }
+        public Guid? FormCategoryId { get; set; }
         public string? HTML { get; set; }
         public string? Code { get; set; }
        
