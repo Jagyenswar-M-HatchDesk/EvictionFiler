@@ -430,7 +430,7 @@ namespace EvictionFiler.Application.Services
       
         c => c.CaseType!,
        
-        c => c.Tenants!,
+       
         c => c.RegulationStatus!,
         c => c.TenancyType!,
         c => c.RenewalStatus!,
@@ -535,14 +535,14 @@ namespace EvictionFiler.Application.Services
 
 
                         // Tenant
-                        TenantId = caseEntity.TenantId,
-                        TenantName = caseEntity.Tenants != null ? $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}" : string.Empty,
-                        ApartmentNumber = caseEntity.Tenants != null ? caseEntity.Tenants?.UnitOrApartmentNumber : string.Empty,
-                        TenancyTypeId = caseEntity.Tenants != null ? caseEntity.Tenants.TenancyTypeId : Guid.Empty,
-                        PrimaryResidence = caseEntity.Tenants != null ? caseEntity.Tenants.PrimaryResidence : false,
-                        MonthlyRent = caseEntity.Tenants != null ? caseEntity.Tenants.MonthlyRent : 0,
-                        TenantShare = caseEntity.Tenants != null ? caseEntity.Tenants.TenantShare : 0,
-                        RentDueEachMonthOrWeekId = caseEntity.Tenants != null ? caseEntity.Tenants.RentDueEachMonthOrWeekId : Guid.Empty,
+                        //TenantId = caseEntity.TenantId,
+                        //TenantName = caseEntity.Tenants != null ? $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}" : string.Empty,
+                        //ApartmentNumber = caseEntity.Tenants != null ? caseEntity.Tenants?.UnitOrApartmentNumber : string.Empty,
+                        //TenancyTypeId = caseEntity.Tenants != null ? caseEntity.Tenants.TenancyTypeId : Guid.Empty,
+                        //PrimaryResidence = caseEntity.Tenants != null ? caseEntity.Tenants.PrimaryResidence : false,
+                        //MonthlyRent = caseEntity.Tenants != null ? caseEntity.Tenants.MonthlyRent : 0,
+                        //TenantShare = caseEntity.Tenants != null ? caseEntity.Tenants.TenantShare : 0,
+                        //RentDueEachMonthOrWeekId = caseEntity.Tenants != null ? caseEntity.Tenants.RentDueEachMonthOrWeekId : Guid.Empty,
 
                         WrittenLease = caseEntity.WrittenLease,
                         OralAgreeMent = caseEntity.OralAgreeMent,

@@ -151,6 +151,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     IsUnitIllegalId = t.IsUnitIllegalId,
                     PrimaryResidence = t.PrimaryResidence,
                     
+
                 })
                 .ToListAsync();
 
