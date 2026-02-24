@@ -13,6 +13,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository.Base
         Task<T> AddAsync(T entity);
         Task<T?> GetAsync(object id);
         Task<T> UpdateAsync(T entity);
+        Task<IQueryable<T>> GetAllQuerable(Expression<Func<T, bool>>? predicate = null, params Expression<Func<T, object>>[]? includes);
 
     }
 }

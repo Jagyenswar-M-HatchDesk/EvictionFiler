@@ -2,6 +2,7 @@
 using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.CaseDetailDtos;
 using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Domain.Entities.Master;
@@ -32,6 +33,8 @@ namespace EvictionFiler.Application.Interfaces.IServices
 
         Task<List<EditToBuildingDto>> SearchBuilding(string query, Guid landlordId);
 
+
+        Task<Guid?> UpdateCaseForTenantAsync(IntakeModel legalCase);
 
     }
 }

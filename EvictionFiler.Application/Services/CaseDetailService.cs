@@ -2,6 +2,7 @@
 using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.CaseDetailDtos;
 using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
@@ -281,6 +282,23 @@ namespace EvictionFiler.Application.Services
 
             }
             catch
+            {
+                throw new Exception();
+            }
+        }
+
+        public async Task<Guid?> UpdateCaseForTenantAsync(IntakeModel legalCase)
+        {
+            try
+            {
+
+
+                var result = await _tenantReadRepository.UpdateCaseTenant(legalCase);
+
+                return result;
+
+            }
+            catch (Exception ex)
             {
                 throw new Exception();
             }

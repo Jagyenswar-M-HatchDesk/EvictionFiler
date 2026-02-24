@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-using EvictionFiler.Application.DTOs.ApartmentDto;
+﻿using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.ArrearLedgerDtos;
 using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.OccupantDto;
 using EvictionFiler.Domain.Entities.Base.Base;
+using System.ComponentModel.DataAnnotations;
 
 namespace EvictionFiler.Application.DTOs.TenantDto
 {
@@ -14,8 +15,10 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public string FirstName { get; set; } = string.Empty;
         [Required(ErrorMessage = "Last Name is Required")]
         public string? LastName { get; set; }
-	
-		public string Email { get; set; } = string.Empty;
+
+		public string TenantName => $"{FirstName} {LastName}";
+        public double? LastPayment { get; set; }
+        public string Email { get; set; } = string.Empty;
 		public string? Phone { get; set; } = string.Empty;
 		public string? AdditionalTenant { get; set; }
      
@@ -61,12 +64,17 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 		public string? TenancyTypeName { get; set; }
 		public string ?TenancyTypeDescription { get; set; }
 
-		public List<AddtionalTenantDto>? AdditioalTenants { get; set; }
+        public DateOnly? LastPaymentDate { get; set; }
+        public List<AddtionalTenantDto>? AdditioalTenants { get; set; }
 		public EditToBuildingDto? Building { get; set; }
 		public EditToLandlordDto? Landlord { get; set; }
         public EditToClientDto? Client { get; set; }
         public DateOnly? MoveInDate { get; set; }
         public string? CompletedAddress { get; set; }
+        public DateOnly? LeaseEnd { get; set; }
+        public DateOnly? LeaseStart { get; set; }
+        public double? TotalOwed { get; set; }
+        
 
     }
 }

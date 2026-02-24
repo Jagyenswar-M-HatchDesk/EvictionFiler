@@ -58,7 +58,19 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 
             return await query.ToListAsync();
         }
+        public async Task<IQueryable<T>> GetAllQuerable(Expression<Func<T, bool>>? predicate = null, params Expression<Func<T, object>>[]? includes)
+        {
+            await using var db = await _contextFactory.CreateDbContextAsync();
+            IQueryable<T> query = db.Set<T>().AsNoTracking();
 
+            if (predicate != null)
+                query = query.Where(predicate);
+
+            if (includes != null)
+                query = includes.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
+
+            return query;
+        }
         public async Task<T?> AddAsync(T entity)
         {
             await using var db = await _contextFactory.CreateDbContextAsync();
