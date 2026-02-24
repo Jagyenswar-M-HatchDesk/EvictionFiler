@@ -62,6 +62,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 //await SeedCaseStatus(context);
                 //await SeedCounty(context);
                 //await SeedCategory(context);
+                await SeedFormCategory(context);
                 //            await SeedUnitType(context);
                 //            await SeedFilingMethod(context);
                 //            await SeedServiceMethod(context);
@@ -318,6 +319,17 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 if (context.MstCategories.FirstOrDefault(d => d.Name == type.Name) == null)
                 {
                     await context.MstCategories.AddAsync(type);
+                }
+            }
+        }
+        private static async Task SeedFormCategory(MainDbContext context)
+        {
+            var casetypes = InitialDataGenerator.GetFormCategory();
+            foreach (var type in casetypes)
+            {
+                if (context.MstFormCategories.FirstOrDefault(d => d.Name == type.Name) == null)
+                {
+                    await context.MstFormCategories.AddAsync(type);
                 }
             }
         }

@@ -7,8 +7,10 @@
 @using EvictionFiler.Server.Components.Layout
 @using Microsoft.AspNetCore.Components.Forms
 @using System.Linq.Expressions
+@using Microsoft.JSInterop
 @inject IRegisterService _registerService
 
+@inject IJSRuntime JS
 @inject NavigationManager Nav
 
 <style>
@@ -336,6 +338,15 @@
     .btn-company:hover{
         color: #1F365D;
     }
+
+    #recaptcha-container {
+        display: flex;
+        padding-left:20px;
+    }
+
+    #recaptcha-container > div {
+            margin: 10px 0 5px 0;
+    }
 </style>
 <div class="d-flex flex-column justify-content-center align-items-center min-vh-100 px-3">
     <div class="card p-5 pb-4 pt-2 shadow border-0 register-container register-card overflow-auto">
@@ -500,6 +511,7 @@
                     <label class="form-label color-text">Website</label>
                     <InputText class="form-inputs form-input mb-3" @bind-Value="Firms.Website" placeholder="Enter website" />
                 </div>
+                  
 
                 <div class="d-flex gap-2  justify-content-between align-items-center mt-2">
 
@@ -568,6 +580,8 @@
     private string SubscriptionName = "PayAsYouGo";
     private int CurrentStep = 1;
     private bool isSkipLoading = false;
+    private string captchaToken = "";
+    private const string RecaptchaSiteKey = "6LctJ2AsAAAAAFMgH2k1FqPEMxyZSnRLpsr-QT06";
 
 
     protected override void OnInitialized()
@@ -636,7 +650,12 @@
     }
     private async Task HandleRegister()
     {
+        captchaToken = await JS.InvokeAsync<string>("getRecaptchaTokenV3",RecaptchaSiteKey);
 
+        if (string.IsNullOrWhiteSpace(captchaToken))
+        {
+            return;
+        }
 
         isLoading = true;
 
@@ -645,24 +664,30 @@
         isLoading = false;
 
 
-        Nav.NavigateTo("/", true);
+        Nav.NavigateTo("/login", true);
     }
     private async Task SkipCompany()
     {
+        captchaToken = await JS.InvokeAsync<string>("getRecaptchaTokenV3",RecaptchaSiteKey);
+
+        if (string.IsNullOrWhiteSpace(captchaToken))
+        {
+            return;
+        }
         isSkipLoading = true;
         var firmToSend = Firms;
         Firms = new();
 
-        await _registerService.RegisterAsync(registerModel, null, SubscriptionName);
+        await _registerService.RegisterAsync(registerModel, null, SubscriptionName, captchaToken);
 
 
 
         isSkipLoading = false;
-        Nav.NavigateTo("/", true);
+        Nav.NavigateTo("/login", true);
     }
     private async Task RegisterFirmAndUser()
     {
-        var result = await _registerService.RegisterAsync(registerModel, Firms, SubscriptionName);
+        var result = await _registerService.RegisterAsync(registerModel, Firms, SubscriptionName, captchaToken);
         await Task.Delay(1500);
     }
 
@@ -765,7 +790,14 @@
         if (empty)
             messageStore.Add(field, message);
     }
-
+    
 
 }
+<script>
+    window.getRecaptchaTokenV3 = async (siteKey) => {
+        if (typeof grecaptcha === "undefined") return "";
+
+        return await grecaptcha.execute(siteKey, { action: 'register' });
+    };
+</script>
 

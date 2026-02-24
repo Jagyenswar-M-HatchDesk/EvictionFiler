@@ -109,7 +109,7 @@ namespace EvictionFiler.Application.Services.Master
             HTML = x.HTML,
             CreatedOn = x.CreatedOn,
             Id = x.Id,
-            CategoryId = x.CategoryId,
+            CategoryId = x.FormCategoryId,
             UnitId = x.UnitId,
             Code = x.Code ?? "-",
             Rate = x.Rate ?? "-" ,
@@ -130,7 +130,7 @@ namespace EvictionFiler.Application.Services.Master
                 
                 HTML= dto.HTML,
                 CaseTypeId = dto.CaseTypeId,
-                CategoryId = dto.CategoryId,
+                FormCategoryId = dto.CategoryId,
                 Name = dto.Name,
                 FirmId = dto.FirmId,
                 CreatedOn = DateTime.Now,
@@ -157,7 +157,7 @@ namespace EvictionFiler.Application.Services.Master
                 Id = form.Id,
                 HTML = form.HTML,
                 CaseTypeId = form.CaseTypeId,
-                CategoryId = form.CategoryId,
+                CategoryId = form.FormCategoryId,
                 Name = form.Name,
                 CreatedOn = form.CreatedOn,
                 FirmId = form.FirmId,
@@ -184,7 +184,7 @@ namespace EvictionFiler.Application.Services.Master
             existing.HTML = form.HTML;
             existing.CaseTypeId = form.CaseTypeId;
             existing.Name = form.Name;
-            existing.CategoryId = form.CategoryId;
+            existing.FormCategoryId = form.CategoryId;
             existing.UpdatedOn = DateTime.Now;
             if(form.FirmId != null && form.FirmId != Guid.Empty) existing.FirmId = form.FirmId;
 

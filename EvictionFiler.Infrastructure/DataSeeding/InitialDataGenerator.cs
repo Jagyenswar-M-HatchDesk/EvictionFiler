@@ -447,6 +447,25 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 
             };
         }
+        public static IEnumerable<FormCategory> GetFormCategory()
+        {
+            var now = DateTime.UtcNow;
+            return new List<FormCategory>
+            {
+                new FormCategory() { Name = "Affidavits", CreatedOn = now },
+                new FormCategory() { Name = "Appeals", CreatedOn = now },
+                new FormCategory() { Name = "Holdover", CreatedOn = now },
+                new FormCategory() { Name = "Motions", CreatedOn = now },
+                new FormCategory() { Name = "Non-Military", CreatedOn = now },
+                new FormCategory() { Name = "NonPayment", CreatedOn = now },
+                new FormCategory() { Name = "Notice of Entry", CreatedOn = now },
+                new FormCategory() { Name = "Stipulations", CreatedOn = now },
+                new FormCategory() { Name = "Tenant", CreatedOn = now },
+                new FormCategory() { Name = "Warrants", CreatedOn = now },
+               
+
+            };
+        }
 
         public static IEnumerable<HarassmentType> GetHarassmentTypes()
         {

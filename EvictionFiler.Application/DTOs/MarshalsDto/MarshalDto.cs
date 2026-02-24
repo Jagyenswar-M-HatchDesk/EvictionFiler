@@ -11,8 +11,8 @@ namespace EvictionFiler.Application.DTOs.MarshalsDto
 
         public string LastName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Email is required")]
-        [EmailAddress]
+        //[Required(ErrorMessage = "Email is required")]
+        //[EmailAddress]
         public string Email { get; set; } = string.Empty;
         [Required(ErrorMessage = "Badge Number  is required")]
         public string BadgeNumber { get; set; }
@@ -24,7 +24,7 @@ namespace EvictionFiler.Application.DTOs.MarshalsDto
 
         [RegularExpression(@"^(\+1\s?)?(\(?\d{3}\)?[\s.-]?)?\d{3}[\s.-]?\d{4}$", ErrorMessage = "Enter a valid fax number.")]
         public string Fax { get; set; } = string.Empty;
-        [Required(ErrorMessage = "Docket Number  is required")]
+        //[Required(ErrorMessage = "Docket Number  is required")]
 
         public string DocketNo { get; set; } = string.Empty;
 
