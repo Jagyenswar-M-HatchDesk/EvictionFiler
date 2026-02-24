@@ -14,6 +14,8 @@ namespace EvictionFiler.Application.DTOs.FilingDtos
         public Guid Id { get; set; }
         public string? GeneratedOSC { get; set; }
         public string? GeneratedMotion { get; set; }
+        public string? GeneratedOpposition { get; set; }
+        public string? GeneratedReply { get; set; }
         public Guid? LegalCaseId { get; set; }
 
     }

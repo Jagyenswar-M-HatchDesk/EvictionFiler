@@ -6,6 +6,7 @@ using EvictionFiler.Application.DTOs.ClientDto;
 using EvictionFiler.Application.DTOs.FilingDtos;
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.LegalCaseDto;
+using EvictionFiler.Application.DTOs.NotesDtos;
 using EvictionFiler.Application.DTOs.OccupantDto;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Application.DTOs.TenantDto;
@@ -1388,7 +1389,7 @@ namespace EvictionFiler.Application.Services
 
         public async Task<IEnumerable<CaseDocument>> CaseDocumentList(Guid Id)
         {
-            var doclist = _caseDocument.GetAllQuerable();
+            var doclist = _caseDocument.GetAllQuerable(includes: e=>e.DocumentTypes);
             var returnlist = await doclist.Where(e => e.LegalCaseId == Id).OrderByDescending(e => e.CreatedOn).ToListAsync();
             return returnlist;
         }
@@ -1550,6 +1551,8 @@ namespace EvictionFiler.Application.Services
             {
                 if (!string.IsNullOrEmpty(filing.GeneratedMotion)) existing.GeneratedMotion = filing.GeneratedMotion;
                 if (!string.IsNullOrEmpty(filing.GeneratedOSC)) existing.GeneratedOSC = filing.GeneratedOSC;
+                if (!string.IsNullOrEmpty(filing.GeneratedOpposition)) existing.GeneratedOpposition = filing.GeneratedOpposition;
+                if (!string.IsNullOrEmpty(filing.GeneratedReply)) existing.GeneratedReply = filing.GeneratedReply;
 
             }
             else
@@ -1558,6 +1561,8 @@ namespace EvictionFiler.Application.Services
                 {
                     GeneratedOSC = filing.GeneratedOSC,
                     GeneratedMotion = filing.GeneratedMotion,
+                    GeneratedReply = filing.GeneratedReply,
+                    GeneratedOpposition = filing.GeneratedOpposition,
                     LegalCaseId = filing.LegalCaseId
                 };
                 await _caseFilingRepository.AddAsync(add);
@@ -1578,7 +1583,40 @@ namespace EvictionFiler.Application.Services
 
             return result;
         }
+        public async Task<bool> AddCaseNotes(NotesDto Dto)
+        {
+            var notes = new CaseNotes
+            {
+                Notes = Dto.Notes,
+                LegalcaseId = Dto.LegalcaseId,
+                CreatedById = Dto.CreatedById,
+                CreatedOn = DateTime.Now
+            };
+            await _caseNotesRepository.AddAsync(notes);
+            return await _unitOfWork.SaveChangesAsync() > 0;
+        }
+        public async Task<bool> UpdateCaseNotes(NotesDto Dto)
+        {
+            var existingnote = await _caseNotesRepository.GetAsync(Dto.Id);
+            if (existingnote == null) return false;
 
+            existingnote.Notes = Dto.Notes;
+
+            return await _unitOfWork.SaveChangesAsync() > 0;
+        }
+        public async Task<NotesDto> GetCaseNotes(Guid Id)
+        {
+            var note = await _caseNotesRepository.GetAsync(Id);
+            var notes = new NotesDto
+            {
+                Id = note.Id,
+                Notes = note.Notes,
+                LegalcaseId = note.LegalcaseId,
+                CreatedById = note.CreatedById,
+                CreatedOn = note.CreatedOn,
+            };
+            return notes;
+        }
     }
 
 

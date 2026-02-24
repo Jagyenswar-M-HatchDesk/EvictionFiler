@@ -10,5 +10,8 @@ namespace EvictionFiler.Application.Interfaces.IServices
     {
         Task<string?> GenerateOSC(Guid CaseId);
         Task<string?> GenerateMotion(Guid CaseId);
+        Task<string?> GenerateOpposition(Guid CaseId);
+        Task<string?> GenerateReply(Guid CaseId);
+
     }
 }

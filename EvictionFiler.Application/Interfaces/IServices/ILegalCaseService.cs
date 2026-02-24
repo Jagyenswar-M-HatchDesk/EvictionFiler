@@ -3,6 +3,7 @@ using EvictionFiler.Application.DTOs.ArrearLedgerDtos;
 using EvictionFiler.Application.DTOs.CaseNoticeInfoDtos;
 using EvictionFiler.Application.DTOs.FilingDtos;
 using EvictionFiler.Application.DTOs.LegalCaseDto;
+using EvictionFiler.Application.DTOs.NotesDtos;
 using EvictionFiler.Application.DTOs.PaginationDto;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
@@ -64,5 +65,10 @@ namespace EvictionFiler.Application.Interfaces.IServices
 
         Task<bool> AddorEditGeneratedContent(FilingDto filing);
         Task<FilingDto?> GetFilings(Guid CaseId);
+
+        Task<bool> AddCaseNotes(NotesDto Dto);
+        Task<NotesDto> GetCaseNotes(Guid Id);
+
+        Task<bool> UpdateCaseNotes(NotesDto Dto);
     }
 }

@@ -213,6 +213,204 @@ namespace EvictionFiler.Application.Services
                 return null;
             }
         }
+        public async Task<string?> GenerateOpposition(Guid CaseId)
+        {
+            var apiKey = _configuration.GetSection("GenerateContent:ApiKey").Value;
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                Console.WriteLine("API_KEY environment variable not set.");
+                return null;
+            }
+
+            try
+            {
+                var client = new OpenAIClient(apiKey);
+
+                List<string> uploadedFileIds = new List<string>();
+                var caseFormDto = await _CaseFormService.GetCaseFormsPathByCaseId(CaseId);
+                // 1. Download Input File (From your API endpoint)
+                foreach (var form in caseFormDto)
+                {
+                    string? url = form.File.Replace("/CaseForms/","");
+                    var bytes = await _httpClient.GetByteArrayAsync($"/api/casefile/{url}");
+                    await using var stream = new MemoryStream(bytes);
+
+                    var fileClient = client.GetOpenAIFileClient();
+                    var uploaded = await fileClient.UploadFileAsync(
+                        file: stream,
+                        purpose: "assistants",
+                        filename: Path.GetFileName(url)
+                    );
+
+                    var uploadedFileId = uploaded.Value.Id;
+                    uploadedFileIds.Add(uploadedFileId);
+                    Console.WriteLine($"Uploaded OpenAI File ID: {uploadedFileId}");
+                }
+
+
+                // NOW THE PDF GENERATION MUST USE THE RESPONSES REST API
+                using var http = new HttpClient();
+                http.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", apiKey);
+                http.DefaultRequestHeaders.Add("OpenAI-Beta", "responses=v1");
+
+                var contentItems = new List<object>
+                {
+                    new { type = "input_text", text = GenerateContentPrompts.DefaultsOpposition }
+                };
+
+                foreach (var fid in uploadedFileIds)
+                {
+                    contentItems.Add(new { type = "input_file", file_id = fid });
+                }
+
+                var requestBody = new
+                {
+                    model = "gpt-5-nano",
+                    input = new[]
+                    {
+                        new
+                        {
+                            role = "user",
+                            content = contentItems.ToArray()
+                        }
+                    }
+                };
+
+
+                var json = JsonConvert.SerializeObject(requestBody);
+                var response = await http.PostAsync(
+                    "https://api.openai.com/v1/responses",
+                    new StringContent(json, Encoding.UTF8, "application/json")
+                );
+
+                var responseJson = await response.Content.ReadAsStringAsync();
+                response.EnsureSuccessStatusCode();
+
+                var result = ExtractTextFromResponse(responseJson);
+                //var parsed = JObject.Parse(responseJson);
+                //var generatedPdfFileId = parsed["output"][0]["file_id"].ToString();
+
+                //// 4. Download the GENERATED PDF
+                //var pdfBytes = await http.GetByteArrayAsync(
+                //    $"https://api.openai.com/v1/files/{generatedPdfFileId}/content"
+                //);
+                //var uploadPath = Path.Combine(Environment.CurrentDirectory, "wwwroot", "uploads");
+                //var outputFile = Path.Combine(
+                //    uploadPath,
+                //    $"OCS_{CaseId}_{DateTime.Now:yyyyMMddHHmmss}.pdf"
+                //);
+
+                //await System.IO.File.WriteAllBytesAsync(outputFile, pdfBytes);
+
+                //Console.WriteLine("Generated OCS PDF saved: " + outputFile);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR: {ex.Message}");
+                return null;
+            }
+        }
+        public async Task<string?> GenerateReply(Guid CaseId)
+        {
+            var apiKey = _configuration.GetSection("GenerateContent:ApiKey").Value;
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                Console.WriteLine("API_KEY environment variable not set.");
+                return null;
+            }
+
+            try
+            {
+                var client = new OpenAIClient(apiKey);
+
+                List<string> uploadedFileIds = new List<string>();
+                var caseFormDto = await _CaseFormService.GetCaseFormsPathByCaseId(CaseId);
+                // 1. Download Input File (From your API endpoint)
+                foreach (var form in caseFormDto)
+                {
+                    string? url = form.File.Replace("/CaseForms/","");
+                    var bytes = await _httpClient.GetByteArrayAsync($"/api/casefile/{url}");
+                    await using var stream = new MemoryStream(bytes);
+
+                    var fileClient = client.GetOpenAIFileClient();
+                    var uploaded = await fileClient.UploadFileAsync(
+                        file: stream,
+                        purpose: "assistants",
+                        filename: Path.GetFileName(url)
+                    );
+
+                    var uploadedFileId = uploaded.Value.Id;
+                    uploadedFileIds.Add(uploadedFileId);
+                    Console.WriteLine($"Uploaded OpenAI File ID: {uploadedFileId}");
+                }
+
+
+                // NOW THE PDF GENERATION MUST USE THE RESPONSES REST API
+                using var http = new HttpClient();
+                http.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", apiKey);
+                http.DefaultRequestHeaders.Add("OpenAI-Beta", "responses=v1");
+
+                var contentItems = new List<object>
+                {
+                    new { type = "input_text", text = GenerateContentPrompts.DefaultsReply }
+                };
+
+                foreach (var fid in uploadedFileIds)
+                {
+                    contentItems.Add(new { type = "input_file", file_id = fid });
+                }
+
+                var requestBody = new
+                {
+                    model = "gpt-5-nano",
+                    input = new[]
+                    {
+                        new
+                        {
+                            role = "user",
+                            content = contentItems.ToArray()
+                        }
+                    }
+                };
+
+
+                var json = JsonConvert.SerializeObject(requestBody);
+                var response = await http.PostAsync(
+                    "https://api.openai.com/v1/responses",
+                    new StringContent(json, Encoding.UTF8, "application/json")
+                );
+
+                var responseJson = await response.Content.ReadAsStringAsync();
+                response.EnsureSuccessStatusCode();
+
+                var result = ExtractTextFromResponse(responseJson);
+                //var parsed = JObject.Parse(responseJson);
+                //var generatedPdfFileId = parsed["output"][0]["file_id"].ToString();
+
+                //// 4. Download the GENERATED PDF
+                //var pdfBytes = await http.GetByteArrayAsync(
+                //    $"https://api.openai.com/v1/files/{generatedPdfFileId}/content"
+                //);
+                //var uploadPath = Path.Combine(Environment.CurrentDirectory, "wwwroot", "uploads");
+                //var outputFile = Path.Combine(
+                //    uploadPath,
+                //    $"OCS_{CaseId}_{DateTime.Now:yyyyMMddHHmmss}.pdf"
+                //);
+
+                //await System.IO.File.WriteAllBytesAsync(outputFile, pdfBytes);
+
+                //Console.WriteLine("Generated OCS PDF saved: " + outputFile);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR: {ex.Message}");
+                return null;
+            }
+        }
         private string ExtractTextFromResponse(string json)
         {
             var doc = JsonDocument.Parse(json);
