@@ -10,6 +10,9 @@ namespace EvictionFiler.Application.Interfaces.IRepository.Base
       public interface IReadRepository<T>
     {
         Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null, params Expression<Func<T, object>>[]? includes);
+        Task<T> AddAsync(T entity);
+        Task<T?> GetAsync(object id);
+        Task<T> UpdateAsync(T entity);
 
     }
 }

@@ -426,9 +426,9 @@ namespace EvictionFiler.Application.Services
                 var caseEntity = await _repository.GetAllQuerable(
         predicate: c => c.Id == caseId,
         (Expression<Func<LegalCase, object>>)(c => c.Clients!),
-        c => c.Buildings!,
+      
         c => c.CaseType!,
-        c => c.LandLords!,
+       
         c => c.Tenants!,
         c => c.RegulationStatus!,
         c => c.TenancyType!,
@@ -475,6 +475,7 @@ namespace EvictionFiler.Application.Services
                 {
                     var intakeModel = new IntakeModel
                     {
+
                         // for Case
                         Id = caseEntity.Id,
                         SubCaseTypeId = caseEntity.SubCaseTypeId,
@@ -502,33 +503,33 @@ namespace EvictionFiler.Application.Services
                     .FirstOrDefault()?.When,
 
 
-                        // Landlord
+                        //// Landlord
                         LandlordId = caseEntity.LandLordId,
-                        landlordName = $"{caseEntity.LandLords!.FirstName} {caseEntity.LandLords.LastName}",
-                        ContactPersonName = caseEntity.LandLords.ContactPersonName,
-                        LawFirm = caseEntity.LandLords.LawFirm,
-                        AttorneyOfRecord = caseEntity.LandLords.AttorneyOfRecord,
-                        LandlordAddress = caseEntity.LandLords.Address1,
+                        //landlordName = $"{caseEntity.LandLords!.FirstName} {caseEntity.LandLords.LastName}",
+                        //ContactPersonName = caseEntity.LandLords.ContactPersonName,
+                        //LawFirm = caseEntity.LandLords.LawFirm,
+                        //AttorneyOfRecord = caseEntity.LandLords.AttorneyOfRecord,
+                        //LandlordAddress = caseEntity.LandLords.Address1,
 
 
                         // Building
                         BuildingId = caseEntity.BuildingId,
-                        Buildingcode = caseEntity.Buildings.BuildingCode,
-                        Mdr = caseEntity.Buildings?.MDRNumber,
-                        Borough = caseEntity.Buildings?.Cities != null ? caseEntity.Buildings?.Cities.Name : null,
-                        BoroughorCityId = caseEntity.Buildings != null ? caseEntity.Buildings.CityId : Guid.Empty,
-                        Units = caseEntity.Buildings != null ? caseEntity.Buildings?.BuildingUnits : null,
-                        BuildingState = caseEntity.Buildings!.State != null ? caseEntity.Buildings.State.Name : string.Empty,
-                        BuildingAddress = caseEntity.Buildings?.Address1!,
-                        BuildingZip = caseEntity.Buildings!.Zipcode,
-                        BuildingStateId = caseEntity.Buildings! != null ? caseEntity.Buildings.StateId : Guid.Empty,
-                        RegulationStatusId = caseEntity.Buildings?.RegulationStatusId ?? Guid.Empty,
-                        BuildingTypeId = caseEntity.Buildings.BuildingTypeId,
-                        RegistrationStatusTypeId = caseEntity.Buildings.RegistrationStatusId,
-                        ExemptionReasonId = caseEntity.Buildings.ExemptionReasonId,
-                        ExemptionBasisId = caseEntity.Buildings.ExemptionBasisId,
-                        GoodCause = caseEntity.Buildings.GoodCause != null ? caseEntity.Buildings.GoodCause.Value : false,
-                        OwnerOccupied = caseEntity.Buildings.OwnerOccupied != null ? caseEntity.Buildings.OwnerOccupied.Value : false,
+                        //Buildingcode = caseEntity.Buildings?.BuildingCode,
+                        //Mdr = caseEntity.Buildings?.MDRNumber,
+                        //Borough = caseEntity.Buildings?.Cities != null ? caseEntity.Buildings?.Cities.Name : null,
+                        //BoroughorCityId = caseEntity.Buildings != null ? caseEntity.Buildings?.CityId : Guid.Empty,
+                        //Units = caseEntity.Buildings != null ? caseEntity.Buildings?.BuildingUnits : null,
+                        //BuildingState = caseEntity.Buildings?.State != null ? caseEntity.Buildings?.State?.Name : string.Empty,
+                        //BuildingAddress = caseEntity.Buildings?.Address1!,
+                        //BuildingZip = caseEntity.Buildings?.Zipcode,
+                        //BuildingStateId = caseEntity.Buildings! != null ? caseEntity.Buildings?.StateId : Guid.Empty,
+                        //RegulationStatusId = caseEntity.Buildings?.RegulationStatusId ?? Guid.Empty,
+                        //BuildingTypeId = caseEntity.Buildings?.BuildingTypeId,
+                        //RegistrationStatusTypeId = caseEntity.Buildings?.RegistrationStatusId,
+                        //ExemptionReasonId = caseEntity.Buildings?.ExemptionReasonId,
+                        //ExemptionBasisId = caseEntity.Buildings?.ExemptionBasisId,
+                        //GoodCause = caseEntity.Buildings != null ? caseEntity.Buildings.GoodCause != null ? caseEntity.Buildings.GoodCause.Value : false : false,
+                        //OwnerOccupied = caseEntity.Buildings != null ? caseEntity.Buildings.OwnerOccupied != null ? caseEntity.Buildings.OwnerOccupied.Value : false : false,
 
 
 
@@ -582,8 +583,8 @@ namespace EvictionFiler.Application.Services
                         AttrneyEmail = caseEntity.AttrneyEmail,
 
                         MarshalName = caseEntity.Marshal != null ? $"{caseEntity.Marshal?.FirstName} {caseEntity.Marshal?.LastName}" : string.Empty,
-                        MarshalPhone = caseEntity.Marshal != null ? caseEntity.Marshal.Telephone : string.Empty,
-                        Docketno = caseEntity.Marshal != null ? caseEntity.Marshal.DocketNo : string.Empty,
+                        MarshalPhone = caseEntity.Marshal != null ? caseEntity.Marshal?.Telephone : string.Empty,
+                        Docketno = caseEntity.Marshal != null ? caseEntity.Marshal?.DocketNo : string.Empty,
                         WarrantRequested = caseEntity.WarrantRequested,
                         Index = caseEntity.Index,
                         County = caseEntity.County,
@@ -601,26 +602,26 @@ namespace EvictionFiler.Application.Services
                         Aps_Agl = caseEntity.Aps_Agl,
 
                         SelectedCaseTypeHPDIds = caseEntity.CaseTypeHPDs
-                                              .Select(x => x.Id)
-                                              .ToList(),
+                                                  .Select(x => x.Id)
+                                                  .ToList(),
                         SelectedHarassmentTypeIds = caseEntity.HarassmentTypse
-                                              .Select(x => x.Id)
-                                              .ToList(),
+                                                  .Select(x => x.Id)
+                                                  .ToList(),
                         SelectedDefenseTypeIds = caseEntity.DefenseTypse
-                                              .Select(x => x.Id)
-                                              .ToList(),
+                                                  .Select(x => x.Id)
+                                                  .ToList(),
                         SelectedAppearanceTypeIds = caseEntity.AppearanceType
-                                              .Select(x => x.Id)
-                                              .ToList(),
+                                                  .Select(x => x.Id)
+                                                  .ToList(),
 
                         SelectedReliefPetitionerTypeIds = caseEntity.ReliefPetitionerType
-                                              .Select(x => x.Id)
-                                              .ToList(),
+                                                  .Select(x => x.Id)
+                                                  .ToList(),
                         SelectedReliefRespondentTypeIds = caseEntity.ReliefRespondentType
-                                              .Select(x => x.Id)
-                                              .ToList(),
+                                                  .Select(x => x.Id)
+                                                  .ToList(),
                         PartyRepresentId = caseEntity.PartyRepresentId,
-                        PremiseTypeId = caseEntity.Buildings != null ? caseEntity.Buildings.PremiseTypeId : null,
+                        //PremiseTypeId = caseEntity.Buildings != null ? caseEntity.Buildings?.PremiseTypeId : null,
 
 
                         UnitOrApartmentNumber = caseEntity.Tenants != null ? caseEntity.Tenants!.UnitOrApartmentNumber : string.Empty,

@@ -169,6 +169,10 @@ builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 builder.Services.AddScoped<ICaseDocument, CaseDocumentRepository>();
 builder.Services.AddScoped<IReminderCategoryRepository, ReminderCategoryRepository>();
 builder.Services.AddScoped<IReminderEscalateRepository, ReminderEscalateRepository>();
+builder.Services.AddScoped<ICitiesRepository,CitiesRepository>();
+builder.Services.AddScoped<IExemptionBasicsRepository,ExemptionBasicsRepository>();
+builder.Services.AddScoped<IExemptionReasonsRepository,ExemptionReasonsRepository>();
+
 
 //builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 //    .AddIdentityCookies();

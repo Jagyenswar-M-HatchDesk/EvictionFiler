@@ -3,8 +3,10 @@
     public class LandlordDetailDto
     {
         public Guid? LandlordId { get; set; }
+        public Guid? ClientId { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string? LastName { get; set; }
+
 
         public string FullName =>FirstName + " " + LastName;
 

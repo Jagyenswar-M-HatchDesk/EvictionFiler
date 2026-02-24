@@ -251,11 +251,11 @@ namespace EvictionFiler.Application.DTOs
 
         public Guid? TenancyTypeForBuildingId { get; set; }
 
-        public bool OwnerOccupied { get; set; }
+        public bool OwnerOccupied { get; set; } = false;
 
         public bool PrimaryResidence { get; set; }
 
-        public bool GoodCause { get; set; }
+        public bool GoodCause { get; set; } = false;
         public bool WarrantRequested { get; set; }
 
         public List<ArrearLedgerDto> ArrearLedgers { get; set; } = new List<ArrearLedgerDto>();
