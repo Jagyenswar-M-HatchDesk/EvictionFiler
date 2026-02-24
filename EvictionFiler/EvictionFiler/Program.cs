@@ -91,7 +91,7 @@ builder.Services.AddDbContext<MainDbContext>(
 );
 //builder.Services.AddBlazoredSessionStorage();
 
-
+var captchaSecretKey = builder.Configuration["Captcha:SecretKey"];
 string ironKey = builder.Configuration["IronPdf:Key"]!;
 License.LicenseKey = ironKey;
 builder.Services.AddScoped<DialogService>();
@@ -188,6 +188,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ICloverService, CloverService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddSingleton<CaptchaService>(new CaptchaService(captchaSecretKey));
 
 builder.Services.AddAuthorization();
 
