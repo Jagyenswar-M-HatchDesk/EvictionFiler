@@ -1,0 +1,794 @@
+﻿@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.ApartmentDto
+@using EvictionFiler.Application.DTOs.CaseDetailDtos
+@* @using EvictionFiler.Application.Interfaces.IRepository.MasterRepository *@
+@using EvictionFiler.Application.Interfaces.IRepository.ReadRepositories
+@using EvictionFiler.Application.Interfaces.IServices
+
+@using EvictionFiler.Domain.Entities.Master
+@using EvictionFiler.Client.SpinnerService
+@inject ICaseDetailService caseDetailService
+@inject SpinnerService spinnerservice
+@inject IToastService ToastService
+@inject IJSRuntime JS
+@inject IBuildingReadRepository buildingReadRepository
+@inject IExemptionReasonsRepository ExemptionReasonsRepository
+@inject IExemptionBasicsRepository ExemptionBasicRepository
+
+<div class="col-md-4 mt-0">
+
+
+    <table class="info-table">
+        <thead>
+            <tr>
+                <th colspan="2" class="info-bar">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="info-bar-title">
+                            <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:7px !important;margin-right:10px;">
+
+                                <i class="fa-regular fa-building" style="font-size:16px;color:#1F365D !important;"></i>
+                            </div>
+                            Building Registry
+                        </div>
+                        <button type="button" class="btn btn-sm normal p-1" title="Edit Building" @onclick="ShowBuildingModal"  style="color:white">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+
+
+        <tbody>
+            @if (isLoading)
+            {
+                <!-- 🔄 Loading UI -->
+                <tr>
+                    <td colspan="3">
+                        <div class="d-flex flex-column justify-content-center align-items-center p-4">
+                            <div class="spinner-border"
+                                 style="color:#1F365D; width:2.5rem; height:2.5rem;"
+                                 role="status">
+                            </div>
+                           
+                        </div>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                <tr class="info-row" style="padding-top:10px">
+                    <td class="info-cell label" style="text-transform: uppercase;">Inter Asset Id</td>
+                    <td class="info-cell value ellipsis" style="padding-bottom:0px;">--</td>
+                    <td class="info-cell span">Portfolio Aplha</td>
+                </tr>
+
+                <tr class="info-row">
+                    <td class="info-cell label" style="text-transform: uppercase;">MDR Number</td>
+                    <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(buildingDetail.Mdr) ? "--" : buildingDetail.Mdr)</td>
+                </tr>
+
+                <tr class="info-row" style="padding-bottom:10px">
+                    <td class="info-cell label" style="text-transform: uppercase;">Primary Address</td>
+                    <td class="info-cell value ellipsis" style="white-space:normal">
+                        @{
+                            var partbuilding = new List<string>();
+
+                            if (!string.IsNullOrWhiteSpace(buildingDetail.BuildingAddress)) partbuilding.Add(buildingDetail.BuildingAddress);
+                            // if (!string.IsNullOrWhiteSpace(legalcaseDto.Address2)) partlandlord.Add(legalcaseDto.Address2);
+                            if (!string.IsNullOrWhiteSpace(buildingDetail.Borough)) partbuilding.Add(buildingDetail.Borough);
+                            if (!string.IsNullOrWhiteSpace(buildingDetail.BuildingState)) partbuilding.Add(buildingDetail.BuildingState);
+                            if (!string.IsNullOrWhiteSpace(buildingDetail.BuildingZip)) partbuilding.Add(buildingDetail.BuildingZip);
+
+                            var fullbuildingAddress = partbuilding.Count() > 0 ? string.Join(", ", partbuilding) : "--";
+                        }
+                        @fullbuildingAddress
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+
+
+</div>
+
+<div class="modal fade" id="buildingModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 55%;">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-semibold" id="buildingModalLabel">Edit Building Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <EditForm Model="@editBuildingModel">
+                <DataAnnotationsValidator />
+                <div class="modal-body">
+                    <div class=" border-0">
+                        <div class="card-body p-0">
+
+
+                            <div class="row mt-2">
+                                @if (!showBuildingFields)
+                                {
+                                    <div class="col-md-6 position-relative" @onfocusout="HideBuildingDropdown">
+                                        <label class="form-label  required-label">Building</label>
+                                        <input type="text" class="form-control"
+                                               placeholder="Search by Building Address or code..."
+                                               @bind-value="searchBuildingText" @onclick="ShowAllBuildings"
+                                               @oninput="OnSearchBuildingInput" />
+                                        @if (filteredBuildings?.Count() > 0)
+                                        {
+                                            <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
+                                                @foreach (var c in filteredBuildings)
+                                                {
+                                                    <li class="dropdown-item" @onclick="() => SelectBuilding(c)">
+                                                        @c.BuildingCode / @c.Address1
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                        <ValidationMessage For="() => legalcaseDto.BuildingId" />
+                                    </div>
+                                }
+
+                                @if (!showBuildingFields)
+                                {
+                                    <div class="col-md-1 d-flex justify-content-center align-items-end pb-2">
+                                        <span>OR</span>
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-end">
+                                        <button type="button" class="btn btn-primary base buttons" @onclick="OnBindBuildingAfter">+ Add</button>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Add/Edit Fields -->
+                            @if (showBuildingFields)
+                            {
+                                <div class=" rounded-3 p-3 position-relative">
+                                    <button type="button" class="buttons"
+                                            aria-label="Clear"
+                                            style="background: transparent; border: none; z-index: 9999; position:absolute; top:-15px ; right:0px"
+                                            @onclick="OnBindBuildingCancel">
+                                        <i class="fa-solid fa-xmark"></i> Clear
+                                    </button>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label required-label">Street Address </label>
+                                            <InputText class="form-control" @bind-Value="editBuildingModel.Address1" placeholder="Enter Address" />
+                                            <ValidationMessage For="() => editBuildingModel.Address1" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label required-label">MDR Number </label>
+                                            <InputText class="form-control" @bind-Value="editBuildingModel.MDRNumber" placeholder="Enter MDR Number" />
+
+
+                                            <ValidationMessage For="() => editBuildingModel.MDRNumber" />
+
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label required-label">No. of Units </label>
+                                            <InputText class="form-control" @bind-Value="editBuildingModel.BuildingUnits" placeholder="Enter Units" />
+
+                                            <ValidationMessage For="() => editBuildingModel.BuildingUnits" />
+
+                                        </div>
+                                        @*<div class="col-md-2">
+                                                <label class="form-label required-label">Unit / Apt</label>
+                                                <InputText class="form-control" @bind-Value="editBuildingModel.ApartmentCode" placeholder="Enter Unit" />
+                                            </div>
+                                             <div class="col-md-4">
+                                                    <label class="form-label required-label">Exeption Reason</label>
+                                                    <InputSelect class="form-select" @bind-Value="editBuildingModel.ExemptionreasonId">
+                                                        @foreach (var s in ExemptionReasonList)
+                                                        {
+                                                            <option value="@s.Id">@s.Name</option>
+                                                        }
+                                                    </InputSelect>
+                                                <ValidationMessage For="() => editBuildingModel.ExemptionreasonId" />
+                                                </div>*@
+                                    </div>
+                                    <div class="row mt-4">
+
+                                        <!-- County -->
+                                        <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:21%" : "")>
+                                            <label class="form-label required-label">County</label>
+                                            <InputSelect class="form-select"
+                                                         @bind-Value="editBuildingModel.CityId">
+                                                <option value="">-- Select --</option>
+                                                @foreach (var s in CityList)
+                                                {
+                                                    <option value="@s.Id">@s.Name</option>
+                                                }
+                                            </InputSelect>
+                                        </div>
+
+                                        <!-- Rent Regulation -->
+                                        <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:22%" : "")>
+                                            <label class="form-label required-label">Rent Regulation</label>
+                                            <InputSelect class="form-select"
+                                                         @bind-Value="editBuildingModel.RegulationStatusId">
+                                                <option value="">-- Select --</option>
+                                                @foreach (var l in RegulationList)
+                                                {
+                                                    <option value="@l.Id">@l.Name</option>
+                                                }
+                                            </InputSelect>
+                                        </div>
+
+                                        @if (ShowExemptionBasic)
+                                        {
+                                            <!-- Exemption Basic -->
+                                            <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:23%" : "")>
+                                                <label class="form-label ">
+                                                    Exemption Basic
+                                                </label>
+                                                <InputSelect class="form-select"
+                                                             @bind-Value="editBuildingModel.ExemptionBasisId">
+                                                    <option value="">-- Select --</option>
+                                                    @foreach (var s in ExemptionBasicList)
+                                                    {
+                                                        <option value="@s.Id">@s.Name</option>
+                                                    }
+                                                </InputSelect>
+                                            </div>
+                                        }
+                                        @if (ShowExemptionOther)
+                                        {
+                                            <!-- Exemption Basic -->
+                                            <div class="col">
+                                                <label class="form-label ">
+                                                    Exemption
+                                                </label>
+                                                <InputText class="form-control" @bind-Value="editBuildingModel.ExemptionBasisother" placeholder="Enter Exemption" />
+                                            </div>
+                                        }
+                                        @if (ShowRentOther)
+                                        {
+                                            <!-- Exemption Basic -->
+                                            <div class="col">
+                                                <label class="form-label ">
+                                                    Other Regulation
+                                                </label>
+                                                <InputText class="form-control" @bind-Value="editBuildingModel.RentRegulationOther" placeholder="Enter Other Reulation" />
+                                            </div>
+                                        }
+                                    </div>
+
+                                    @* <div class="row g-3 mt-3">
+
+                                            <div class="col-md-4">
+                                                <label class="form-label required-label">County</label>
+                                                <InputSelect class="form-select" @bind-Value="editBuildingModel.CityId">
+                                                    <option value="">-- Select --</option>
+                                                    @foreach (var s in CityList)
+                                                    {
+                                                        <option value="@s.Id">@s.Name</option>
+                                                    }
+                                                </InputSelect>
+                                                <ValidationMessage For="() => editBuildingModel.CityId" />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label required-label">Tenancy type</label>
+                                                <InputSelect class="form-select" @bind-Value="editBuildingModel.TenancyTypeForBuildingId">
+                                                    <option value="">-- Select --</option>
+                                                    @foreach (var s in TenancyTypeForBuildingList)
+                                                    {
+                                                        <option value="@s.Id">@s.Name</option>
+                                                    }
+                                                </InputSelect>
+                                                <ValidationMessage For="() => editBuildingModel.TenancyTypeForBuildingId" />
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <label class="form-label required-label">MDR Number</label>
+                                                <InputText class="form-control" @bind-Value="editBuildingModel.MDRNumber" placeholder="Enter MDR Number" />
+                                            </div>
+                                       </div>*@
+                                    @if (IsNewBuilding)
+                                    {
+                                        <div class="row g-3 mt-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">State</label>
+                                                <InputSelect class="form-select" @bind-Value="editBuildingModel.StateId">
+                                                    @foreach (var s in StateList)
+                                                    {
+                                                        <option value="@s.Id">@s.Name</option>
+                                                    }
+                                                </InputSelect>
+                                                <ValidationMessage For="() => editBuildingModel.StateId" />
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label required-label">Zip Code</label>
+                                                <InputText class="form-control" @bind-Value="editBuildingModel.Zipcode" placeholder="Enter Zipcode" />
+                                            </div>
+                                        </div>
+                                    }
+
+
+                                    <div class="row mt-4 d-flex justify-content-between">
+                                        <div class="col-md-4">
+                                            <label class="form-label required-label ">
+                                                Building Type
+                                            </label>
+                                            <InputSelect class="form-select" @bind-Value="editBuildingModel.PremiseTypeId">
+                                                <option value="">-- Select --</option>
+                                                @foreach (var s in PremiseTypesList)
+                                                {
+                                                    <option value="@s.Id">@s.Name</option>
+                                                }
+                                            </InputSelect>
+
+                                            <ValidationMessage For="() => editBuildingModel.PremiseTypeId" />
+
+
+                                        </div>
+
+
+
+                                        <div class="col-md-8">
+                                            <label class="form-label required-label ">
+                                                Registration Status (HPD/DOF)
+                                            </label>
+
+                                            <div class="row mt-1">
+                                                @if (RegistrationstatusList != null && RegistrationstatusList.Any())
+                                                {
+                                                    <div style="display: flex;flex-wrap: wrap; column-gap: 33px;">
+                                                        <InputRadioGroup @bind-Value="editBuildingModel.RegistrationStatusId" class="d-flex flex-wrap">
+                                                            @foreach (var Type in RegistrationstatusList)
+                                                            {
+                                                                <div class="col-auto">
+                                                                    <div class="form-check">
+                                                                        <InputRadio class="form-check-input"
+                                                                                    id="@($"RegStatus_{Type.Id}")"
+                                                                                    Value="@Type.Id" disabled="@(editBuildingModel.OwnerOccupied == true)" />
+                                                                        <label class="form-check-label edit-build" for="@($"RegStatus_{Type.Id}")">@Type.Name</label>
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </InputRadioGroup>
+                                                        <ValidationMessage For="() => editBuildingModel.RegistrationStatusId" />
+
+
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                    <div class="row mb-3 mt-3">
+                                        <div class="col-4">
+                                            <div class="form-check form-switch" style="padding-left:0px; ">
+
+
+                                                <label class="form-check-label form-label mb-0 me-2 edit-build" for="ownerOccupiedSwitch">
+                                                    Owner Occupied?
+                                                    @* <span class="ms-2 fw-semibold">
+                                                                @(legalcaseDto.OwnerOccupied ? "Yes" : "No")
+                                                            </span> *@
+                                                </label>
+                                                <input class="form-check-input" style="float:none"
+                                                       type="checkbox"
+                                                       id="ownerOccupiedSwitch"
+                                                       @bind="editBuildingModel.OwnerOccupied" @bind:after="SelectedOwnerOccupied" />
+                                            </div>
+
+
+                                        </div>
+
+                                        <div class="col-4">
+
+                                            <div class="form-check form-switch" style="padding-left:0px;">
+
+
+                                                <label class="form-check-label form-label mb-0 me-2 edit-build" for="goodCauseSwitch">
+                                                    Does Good Cause Apply?:
+                                                    @* <span class="ms-2 fw-semibold">
+                                                                @(legalcaseDto.OwnerOccupied ? "Yes" : "No")
+                                                            </span> *@
+                                                </label>
+                                                <input class="form-check-input" style="float:none"
+                                                       type="checkbox"
+                                                       id="GoodCauseSwitch"
+                                                       @bind="editBuildingModel.GoodCause" />
+                                            </div>
+
+
+                                        </div>
+
+                                        @if (editBuildingModel.GoodCause.Value != true)
+                                        {
+                                            <div class="col-md-4">
+                                                <label class="form-label required-label ">
+                                                    Exemption Reason
+                                                </label>
+                                                <InputSelect class="form-select" @bind-Value="editBuildingModel.ExemptionreasonId">
+                                                    <option value="">-- Select --</option>
+                                                    @foreach (var s in ExemptionReasonList)
+                                                    {
+                                                        <option value="@s.Id">@s.Name</option>
+                                                    }
+                                                </InputSelect>
+
+                                                <ValidationMessage For="() => editBuildingModel.ExemptionreasonId" />
+
+
+                                            </div>
+                                        }
+
+                                    </div>
+                                </div>
+
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                    <button type="button" class="btn btn-secondary buttons " data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary base buttons" @onclick="SaveBuildingChanges">Save</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public Guid? CurrentCaseId { get; set; }
+    [Parameter] public EventCallback<string> OnAddressLoaded { get; set; }
+    [Parameter] public Guid? LandlordId { get; set; }
+    private BuildingDetailDto buildingDetail { get; set; } = new BuildingDetailDto();
+    private EditToBuildingDto editBuildingModel = new();
+    private bool isLoading = true;
+    private string fullBuildingAddress = "";
+    private bool showBuildingFields = false;
+    private bool IsNewBuilding = false;
+    private string searchBuildingText;
+    private List<EditToBuildingDto> filteredBuildings = new();
+    private CancellationTokenSource _cts;
+    private List<State> StateList = new();
+    private IntakeModel legalcaseDto = new IntakeModel();
+    private List<EditToBuildingDto> BuildingList = new();
+    private List<RegulationStatus> RegulationList = new();
+    private IEnumerable<City> CityList = new List<City>();
+    private List<Registrationstatus> RegistrationstatusList = new List<Registrationstatus>();
+    private IEnumerable<ExemptionBasic> ExemptionBasicList = new List<ExemptionBasic>();
+    private IEnumerable<ExemptionReason> ExemptionReasonList = new List<ExemptionReason>();
+    private List<PremiseType> PremiseTypesList = new();
+
+
+    bool ShowExemptionBasic =>
+RegulationList.Any(r =>
+ r.Id == editBuildingModel.RegulationStatusId &&
+ r.Name == "Exempt");
+
+    bool ShowRentOther =>
+ RegulationList.Any(r =>
+     r.Id == editBuildingModel.RegulationStatusId &&
+     r.Name == "Other");
+
+    bool ShowExemptionOther =>
+    ExemptionBasicList.Any(r =>
+        r.Id == editBuildingModel.ExemptionBasisId &&
+        r.Name == "Other");
+
+    string ColumnClass => ShowExemptionBasic || ShowRentOther ? "col-md-4" : "col-md-6";
+    private async Task SelectedOwnerOccupied()
+    {
+        if (editBuildingModel.OwnerOccupied == true)
+        {
+            editBuildingModel.RegistrationStatusId = RegistrationstatusList.Where(e => e.Name.Equals("Registered")).FirstOrDefault().Id;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+
+
+        if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty)
+        {
+
+            isLoading = true;
+
+
+           
+            await Task.Delay(1000);
+            StateHasChanged();
+
+            ExemptionReasonList = await ExemptionReasonsRepository.GetAllAsync();
+            RegistrationstatusList = await buildingReadRepository.GetAllRegistrationstatus();
+            if (!CityList.Any())
+                CityList = await caseDetailService.GetAllCitiesList();
+            await BuildingDetails();
+            isLoading = false;
+        }
+
+
+
+    }
+   
+    public async Task BuildingDetails()
+    {
+        buildingDetail = await caseDetailService.GetBuildingDetailAsync(CurrentCaseId!.Value);
+
+        var partbuilding = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(buildingDetail.BuildingAddress))
+            partbuilding.Add(buildingDetail.BuildingAddress);
+
+        if (!string.IsNullOrWhiteSpace(buildingDetail.Borough))
+            partbuilding.Add(buildingDetail.Borough);
+
+        if (!string.IsNullOrWhiteSpace(buildingDetail.BuildingState))
+            partbuilding.Add(buildingDetail.BuildingState);
+
+        if (!string.IsNullOrWhiteSpace(buildingDetail.BuildingZip))
+            partbuilding.Add(buildingDetail.BuildingZip);
+
+        fullBuildingAddress = partbuilding.Any()
+            ? string.Join(", ", partbuilding)
+            : "--";
+
+    
+        await OnAddressLoaded.InvokeAsync(fullBuildingAddress);
+    }
+    private void OnBindBuildingAfter()
+    {
+        showBuildingFields = true;
+        editBuildingModel.GoodCause = true;
+        IsNewBuilding = true;
+    }
+    private void OnBindBuildingCancel()
+    {
+        showBuildingFields = false;
+        IsNewBuilding = false;
+        searchBuildingText = null;
+        editBuildingModel = new EditToBuildingDto();
+        editBuildingModel.StateId = StateList.Where(e => e.Name.Contains("New York")).FirstOrDefault()!.Id;
+    }
+    private void SelectBuilding(EditToBuildingDto selected)
+    {
+        editBuildingModel.Id = selected.Id;
+        editBuildingModel.Address1 = selected.Address1;
+        editBuildingModel.CityId = selected.CityId;
+        editBuildingModel.MDRNumber = selected.MDRNumber;
+        editBuildingModel.Zipcode = selected.Zipcode;
+        editBuildingModel.ApartmentCode = selected.ApartmentCode;
+        editBuildingModel.BuildingUnits = selected.BuildingUnits;
+        editBuildingModel.RegulationStatusId = selected.RegulationStatusId;
+        editBuildingModel.TenancyTypeForBuildingId = selected.TenancyTypeForBuildingId;
+        editBuildingModel.ExemptionBasisId = selected.ExemptionBasisId;
+        editBuildingModel.ExemptionreasonId = selected.ExemptionreasonId;
+        editBuildingModel.PrimaryResidence = selected.PrimaryResidence;
+        editBuildingModel.OwnerOccupied = selected.OwnerOccupied;
+        editBuildingModel.RegistrationStatusId = selected.RegistrationStatusId;
+        editBuildingModel.GoodCause = selected.GoodCause;
+        editBuildingModel.RentRegulationOther = selected.RentRegulationOther;
+        editBuildingModel.ExemptionBasisother = selected.ExemptionBasisother;
+
+        filteredBuildings.Clear();
+        searchBuildingText = selected.BuildingCode;
+
+        showBuildingFields = true;
+        IsNewBuilding = false;
+        legalcaseDto.BuildingId = selected.Id;
+    }
+
+    private async Task SaveBuildingChanges()
+    {
+        spinnerservice.Show();
+
+        var addorupdate = false;
+        if (editBuildingModel.Id == null || editBuildingModel.Id == Guid.Empty)
+        {
+            var newBuilding = new CreateToBuildingDto()
+            {
+                Address1 = editBuildingModel.Address1,
+                //Address2 = address2,
+                CityId = editBuildingModel.CityId,
+                StateId = editBuildingModel.StateId,
+                Zipcode = editBuildingModel.Zipcode,
+                BuildingUnits = editBuildingModel.BuildingUnits,
+                ApartmentCode = editBuildingModel.ApartmentCode,
+                MDRNumber = editBuildingModel.MDRNumber,
+                RegulationStatusId = editBuildingModel.RegulationStatusId,
+                RegistrationStatusId = editBuildingModel.RegistrationStatusId,
+
+                ExemptionBasisId = editBuildingModel.ExemptionBasisId,
+                ExemptionreasonId = editBuildingModel.ExemptionreasonId,
+                TenancyTypeForBuildingId = editBuildingModel.TenancyTypeForBuildingId,
+                PrimaryResidence = editBuildingModel.PrimaryResidence,
+                GoodCause = editBuildingModel.GoodCause,
+                OwnerOccupied = editBuildingModel.OwnerOccupied,
+                LandlordId = LandlordId,
+                PremiseTypeId = editBuildingModel.PremiseTypeId,
+                ExemptionBasisother = editBuildingModel.ExemptionBasisother,
+                RentRegulationOther = editBuildingModel.RentRegulationOther,
+
+            };
+
+            var buildingId = await caseDetailService.AddOnlyApartmentfromCase(newBuilding);
+            addorupdate = true;
+            legalcaseDto.BuildingId = buildingId;
+
+        }
+        else
+        {
+            if (editBuildingModel.Id != null)
+            {
+
+                var updateBuilding = new EditToBuildingDto()
+                {
+                    Id = editBuildingModel.Id,
+                    Address1 = editBuildingModel.Address1,
+                    BuildingCode = editBuildingModel.BuildingCode,
+                    //Address2 = address2,
+                    CityId = editBuildingModel.CityId,
+                    StateId = editBuildingModel.StateId,
+                    Zipcode = editBuildingModel.Zipcode,
+                    BuildingUnits = editBuildingModel.BuildingUnits,
+                    ApartmentCode = editBuildingModel.ApartmentCode,
+                    RegistrationStatusId = editBuildingModel.RegistrationStatusId,
+                    MDRNumber = editBuildingModel.MDRNumber,
+                    RegulationStatusId = editBuildingModel.RegulationStatusId,
+                    ExemptionBasisId = editBuildingModel.ExemptionBasisId,
+                    ExemptionreasonId = editBuildingModel.ExemptionreasonId,
+                    TenancyTypeForBuildingId = editBuildingModel.TenancyTypeForBuildingId,
+                    PrimaryResidence = editBuildingModel.PrimaryResidence,
+                    GoodCause = editBuildingModel.GoodCause,
+                    PremiseTypeId = editBuildingModel.PremiseTypeId,
+                    OwnerOccupied = editBuildingModel.OwnerOccupied,
+                    ExemptionBasisother = editBuildingModel.ExemptionBasisother,
+                    RentRegulationOther = editBuildingModel.RentRegulationOther,
+                };
+
+                await caseDetailService.UpdateonlyBuildingfromCase(updateBuilding);
+                addorupdate = true;
+                
+            }
+        }
+
+        if (addorupdate)
+        {
+            legalcaseDto.Id = CurrentCaseId!.Value;
+            legalcaseDto.BuildingAddress = editBuildingModel.Address1;
+            legalcaseDto.BoroughorCityId = editBuildingModel.CityId;
+            legalcaseDto.Mdr = editBuildingModel.MDRNumber;
+            legalcaseDto.BuildingZip = editBuildingModel.Zipcode;
+            legalcaseDto.BuildingStateId = editBuildingModel.StateId;
+            legalcaseDto.Units = editBuildingModel.BuildingUnits;
+            legalcaseDto.RegulationStatusId = editBuildingModel.RegulationStatusId;
+            legalcaseDto.PremiseTypeId = editBuildingModel.PremiseTypeId;
+            legalcaseDto.UnitOrApartmentNumber = editBuildingModel.ApartmentCode;
+            legalcaseDto.ExemptionBasisId = editBuildingModel.ExemptionBasisId;
+            legalcaseDto.ExemptionReasonId = editBuildingModel.ExemptionreasonId;
+            legalcaseDto.TenancyTypeForBuildingId = editBuildingModel.TenancyTypeForBuildingId;
+            // legalcaseDto.PrimaryResidence = editBuildingModel.PrimaryResidence;
+            legalcaseDto.OwnerOccupied = editBuildingModel.OwnerOccupied != null ? editBuildingModel.OwnerOccupied.Value : false;
+            legalcaseDto.GoodCause = editBuildingModel.GoodCause != null ? editBuildingModel.GoodCause.Value : false;
+            legalcaseDto.RegistrationStatusTypeId = editBuildingModel.RegistrationStatusId;
+            if (editBuildingModel.Id != null && editBuildingModel.Id != Guid.Empty)
+            {
+
+                legalcaseDto.BuildingId = editBuildingModel.Id;
+            }
+
+            var success = await caseDetailService.UpdateCaseForBuildingAsync(legalcaseDto);
+
+            if (success.HasValue)
+            {
+                ToastService.ShowSuccess("Building details updated successfully!");
+                await JS.InvokeVoidAsync("hideModal", "buildingModal");
+
+                await BuildingDetails();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to update building details.");
+            }
+        }
+        // Map edited fields
+
+
+        spinnerservice.Hide();
+    }
+    async Task HideBuildingDropdown(FocusEventArgs e)
+    {
+        await Task.Delay(500);
+        if (filteredBuildings.Any())
+        {
+            filteredBuildings.Clear();
+        }
+        StateHasChanged();
+    }
+    private async Task ShowAllBuildings()
+    {
+        if (LandlordId == null || LandlordId == Guid.Empty)
+        {
+            filteredBuildings = new List<EditToBuildingDto>();
+            return;
+        }
+        else
+        {
+
+            filteredBuildings = await caseDetailService.GetBuildingsByLandlordIdAsync(LandlordId.Value);
+        }
+
+    }
+
+    // Search handler
+    private async Task OnSearchBuildingInput(ChangeEventArgs e)
+    {
+        searchBuildingText = e.Value.ToString();
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        // ⭐ Empty — show all landlords
+        try
+        {
+
+            await Task.Delay(300, _cts.Token);
+            if (string.IsNullOrWhiteSpace(searchBuildingText))
+            {
+                await ShowAllBuildings();
+                return;
+            }
+
+            // ⭐ Jab tak 3 characters nahi — show all landlords
+            if (searchBuildingText.Length < 3)
+            {
+                await ShowAllBuildings();
+                return;
+            }
+
+            if (LandlordId == null || LandlordId == Guid.Empty)
+            {
+                filteredBuildings = new List<EditToBuildingDto>();
+                return;
+            }
+            else
+            {
+                // ⭐ 3 characters → server search
+                filteredBuildings = await caseDetailService.SearchBuilding(
+                    searchBuildingText,
+                    LandlordId.Value
+                );
+            }
+
+
+        }
+        catch (TaskCanceledException)
+        {
+            // Old task cancelled → ignore
+        }
+    }
+    private async Task ShowBuildingModal()
+    {
+        if (!PremiseTypesList.Any()) PremiseTypesList = await buildingReadRepository.GetAllPremiseType();
+        RegulationList = await buildingReadRepository.GetAllRegulationStatus();
+        ExemptionBasicList = await ExemptionBasicRepository.GetAllAsync();
+        StateList = await buildingReadRepository.GetAllState();
+        if (buildingDetail.BuildingId != null && buildingDetail.BuildingId != Guid.Empty)
+        {
+
+            //IsNewBuilding = true;
+            // Prefill edit model from case
+            editBuildingModel = await buildingReadRepository.GetBuildingByIdAsync(buildingDetail.BuildingId!.Value);
+            BuildingList = await buildingReadRepository.GetBuildingsByLandlordIdAsync(LandlordId!.Value);
+            searchBuildingText = editBuildingModel.BuildingCode;
+            if (editBuildingModel.GoodCause == null)
+            {
+                editBuildingModel.GoodCause = false;
+            }
+            showBuildingFields = true;
+        }
+        await JS.InvokeVoidAsync("showModal", "buildingModal");
+    }
+
+}

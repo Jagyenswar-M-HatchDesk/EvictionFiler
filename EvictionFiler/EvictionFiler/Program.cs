@@ -6,12 +6,15 @@ using EvictionFiler.Application.Common.Interfaces;
 using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
+using EvictionFiler.Application.Interfaces.IRepository.ReadRepositories;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Application.Interfaces.IServices.Master;
+
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Application.Services;
 using EvictionFiler.Application.Services.Helper;
 using EvictionFiler.Application.Services.Master;
+
 using EvictionFiler.Client.AuthService;
 using EvictionFiler.Client.SpinnerService;
 using EvictionFiler.Domain.Entities;
@@ -20,6 +23,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Extensions;
 using EvictionFiler.Infrastructure.Identity;
 using EvictionFiler.Infrastructure.Repositories;
+using EvictionFiler.Infrastructure.Repositories.ReadRepositories;
 using EvictionFiler.Server.Components;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
@@ -82,12 +86,19 @@ builder.Services.AddRateLimiter(options =>
 });
 
 
-builder.Services.AddDbContext<MainDbContext>(
+//builder.Services.AddDbContext<MainDbContext>(
+//    options => options.UseSqlServer(
+//        builder.Configuration.GetConnectionString("Default"),
+//        sqlOptions => sqlOptions.MigrationsAssembly("EvictionFiler.Infrastructure")
+//    )
+
+//);
+
+builder.Services.AddDbContextFactory<MainDbContext>(
     options => options.UseSqlServer(
         builder.Configuration.GetConnectionString("Default"),
         sqlOptions => sqlOptions.MigrationsAssembly("EvictionFiler.Infrastructure")
     )
-
 );
 //builder.Services.AddBlazoredSessionStorage();
 
@@ -160,6 +171,11 @@ builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 builder.Services.AddScoped<ICaseDocument, CaseDocumentRepository>();
 builder.Services.AddScoped<IReminderCategoryRepository, ReminderCategoryRepository>();
 builder.Services.AddScoped<IReminderEscalateRepository, ReminderEscalateRepository>();
+builder.Services.AddScoped<ICitiesRepository,CitiesRepository>();
+builder.Services.AddScoped<IExemptionBasicsRepository,ExemptionBasicsRepository>();
+builder.Services.AddScoped<IExemptionReasonsRepository,ExemptionReasonsRepository>();
+
+
 //builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 //    .AddIdentityCookies();
 builder.Services.AddScoped<IMarshalRepositroy, MarshalRepository>();
@@ -188,12 +204,17 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ICloverService, CloverService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<ILandlordReadRepository, LandlordReadRepository>();
+builder.Services.AddScoped<IBuildingReadRepository, BuildingReadRepository>();
+builder.Services.AddScoped<ICaseDetailService, CaseDetailService>();
+builder.Services.AddScoped<ITenantReadRepository, TenantReadRepository>();
 builder.Services.AddSingleton<CaptchaService>(new CaptchaService(captchaSecretKey));
 
 builder.Services.AddAuthorization();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+
 
 
 
