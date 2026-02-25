@@ -8,6 +8,7 @@
 
 @using EvictionFiler.Domain.Entities.Master
 @using EvictionFiler.Client.SpinnerService
+@using System.Linq.Expressions
 @inject ICaseDetailService caseDetailService
 @inject SpinnerService spinnerservice
 @inject IToastService ToastService
@@ -25,13 +26,13 @@
                 <th colspan="2" class="info-bar">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="info-bar-title">
-                            <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:7px !important;margin-right:10px;">
+                            <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#1f365d; border-radius:7px !important;margin-right:10px;">
 
-                                <i class="fa-regular fa-building" style="font-size:16px;color:#1F365D !important;"></i>
+                                <i class="fa-regular fa-building" style="font-size:16px;color:#fff !important;"></i>
                             </div>
                             Building Registry
                         </div>
-                        <button type="button" class="btn btn-sm normal p-1" title="Edit Building" @onclick="ShowBuildingModal"  style="color:white">
+                        <button type="button" class="btn btn-sm normal p-1" title="Edit Building" @onclick="ShowBuildingModal" style="color:#1f365d">
                             <i class="bi bi-pencil"></i>
                         </button>
                     </div>
@@ -51,7 +52,7 @@
                                  style="color:#1F365D; width:2.5rem; height:2.5rem;"
                                  role="status">
                             </div>
-                           
+
                         </div>
                     </td>
                 </tr>
@@ -84,8 +85,8 @@
                             var fullbuildingAddress = partbuilding.Count() > 0 ? string.Join(", ", partbuilding) : "--";
                         }
                         @fullbuildingAddress
-                </td>
-            </tr>
+                    </td>
+                </tr>
             }
         </tbody>
     </table>
@@ -101,8 +102,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <EditForm Model="@editBuildingModel">
+            <EditForm EditContext="_editContextBuilding" id="buildingForm" OnSubmit="SaveBuildingChanges">
                 <DataAnnotationsValidator />
+                <ValidationSummary />
                 <div class="modal-body">
                     <div class=" border-0">
                         <div class="card-body p-0">
@@ -128,7 +130,7 @@
                                                 }
                                             </ul>
                                         }
-                                        <ValidationMessage For="() => legalcaseDto.BuildingId" />
+                                        
                                     </div>
                                 }
 
@@ -141,6 +143,7 @@
                                         <button type="button" class="btn btn-primary base buttons" @onclick="OnBindBuildingAfter">+ Add</button>
                                     </div>
                                 }
+                                <ValidationMessage For="() => editBuildingModel.Id" />
                             </div>
 
                             <!-- Add/Edit Fields -->
@@ -157,21 +160,21 @@
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <label class="form-label required-label">Street Address </label>
-                                            <InputText class="form-control" @bind-Value="editBuildingModel.Address1" placeholder="Enter Address" />
+                                            <InputText class="form-control" @bind-Value="editBuildingModel.Address1" placeholder="Enter Address"
+                                                       @bind-Value:after=@(() => ValidateParticularInput(() => editBuildingModel.Address1, nameof(editBuildingModel.Address1), "Address is Required")) />
                                             <ValidationMessage For="() => editBuildingModel.Address1" />
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label required-label">MDR Number </label>
-                                            <InputText class="form-control" @bind-Value="editBuildingModel.MDRNumber" placeholder="Enter MDR Number" />
-
-
+                                            <InputText class="form-control" @bind-Value="editBuildingModel.MDRNumber" placeholder="Enter MDR Number"
+                                                       @bind-Value:after=@(() => ValidateParticularInput(() => editBuildingModel.MDRNumber, nameof(editBuildingModel.MDRNumber), "MDR is Required")) />
                                             <ValidationMessage For="() => editBuildingModel.MDRNumber" />
 
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label required-label">No. of Units </label>
-                                            <InputText class="form-control" @bind-Value="editBuildingModel.BuildingUnits" placeholder="Enter Units" />
-
+                                            <InputText class="form-control" @bind-Value="editBuildingModel.BuildingUnits" placeholder="Enter Units"
+                                                       @bind-Value:after=@(() => ValidateParticularInput(() => editBuildingModel.BuildingUnits, nameof(editBuildingModel.BuildingUnits), "Units is Required")) />
                                             <ValidationMessage For="() => editBuildingModel.BuildingUnits" />
 
                                         </div>
@@ -196,7 +199,8 @@
                                         <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:21%" : "")>
                                             <label class="form-label required-label">County</label>
                                             <InputSelect class="form-select"
-                                                         @bind-Value="editBuildingModel.CityId">
+                                                         @bind-Value="editBuildingModel.CityId"
+                                                         @bind-Value:after=@(() => ValidateParticularInput(() => editBuildingModel.CityId, nameof(editBuildingModel.CityId), "Select City"))>
                                                 <option value="">-- Select --</option>
                                                 @foreach (var s in CityList)
                                                 {
@@ -209,7 +213,8 @@
                                         <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:22%" : "")>
                                             <label class="form-label required-label">Rent Regulation</label>
                                             <InputSelect class="form-select"
-                                                         @bind-Value="editBuildingModel.RegulationStatusId">
+                                                         @bind-Value="editBuildingModel.RegulationStatusId"
+                                                         @bind-Value:after="BindRentRegulation">
                                                 <option value="">-- Select --</option>
                                                 @foreach (var l in RegulationList)
                                                 {
@@ -222,11 +227,12 @@
                                         {
                                             <!-- Exemption Basic -->
                                             <div class="@ColumnClass" style=@(ShowExemptionOther ? "width:23%" : "")>
-                                                <label class="form-label ">
+                                                <label class="form-label required-label">
                                                     Exemption Basic
                                                 </label>
                                                 <InputSelect class="form-select"
-                                                             @bind-Value="editBuildingModel.ExemptionBasisId">
+                                                             @bind-Value="editBuildingModel.ExemptionBasisId"
+                                                             @bind-Value:after="BindExemptionBasis">
                                                     <option value="">-- Select --</option>
                                                     @foreach (var s in ExemptionBasicList)
                                                     {
@@ -239,7 +245,7 @@
                                         {
                                             <!-- Exemption Basic -->
                                             <div class="col">
-                                                <label class="form-label ">
+                                                <label class="form-label required-label ">
                                                     Exemption
                                                 </label>
                                                 <InputText class="form-control" @bind-Value="editBuildingModel.ExemptionBasisother" placeholder="Enter Exemption" />
@@ -249,10 +255,11 @@
                                         {
                                             <!-- Exemption Basic -->
                                             <div class="col">
-                                                <label class="form-label ">
+                                                <label class="form-label required-label ">
                                                     Other Regulation
                                                 </label>
-                                                <InputText class="form-control" @bind-Value="editBuildingModel.RentRegulationOther" placeholder="Enter Other Reulation" />
+                                                <InputText class="form-control" @bind-Value="editBuildingModel.RentRegulationOther" placeholder="Enter Other Reulation"
+                                                           @bind-Value:after=@(() => ValidateParticularInput(() => editBuildingModel.RentRegulationOther, nameof(editBuildingModel.RentRegulationOther), "Other Rent Regulation")) />
                                             </div>
                                         }
                                     </div>
@@ -292,7 +299,8 @@
                                         <div class="row g-3 mt-3">
                                             <div class="col-md-6">
                                                 <label class="form-label required-label">State</label>
-                                                <InputSelect class="form-select" @bind-Value="editBuildingModel.StateId">
+                                                <InputSelect class="form-select" @bind-Value="editBuildingModel.StateId"
+                                                             @bind-Value:after=@(() => ValidateParticularInput(() => editBuildingModel.StateId, nameof(editBuildingModel.StateId), "Select State"))>
                                                     @foreach (var s in StateList)
                                                     {
                                                         <option value="@s.Id">@s.Name</option>
@@ -303,7 +311,8 @@
 
                                             <div class="col-md-6">
                                                 <label class="form-label required-label">Zip Code</label>
-                                                <InputText class="form-control" @bind-Value="editBuildingModel.Zipcode" placeholder="Enter Zipcode" />
+                                                <InputText class="form-control" @bind-Value="editBuildingModel.Zipcode" placeholder="Enter Zipcode"
+                                                           @bind-Value:after=@(() => ValidateParticularInput(() => editBuildingModel.Zipcode, nameof(editBuildingModel.Zipcode), "Zip code is Required")) />
                                             </div>
                                         </div>
                                     }
@@ -314,7 +323,8 @@
                                             <label class="form-label required-label ">
                                                 Building Type
                                             </label>
-                                            <InputSelect class="form-select" @bind-Value="editBuildingModel.PremiseTypeId">
+                                            <InputSelect class="form-select" @bind-Value="editBuildingModel.PremiseTypeId"
+                                                         @bind-Value:after=@(() => ValidateParticularInput(() => editBuildingModel.PremiseTypeId, nameof(editBuildingModel.PremiseTypeId), "Select Premises Type"))>
                                                 <option value="">-- Select --</option>
                                                 @foreach (var s in PremiseTypesList)
                                                 {
@@ -338,7 +348,8 @@
                                                 @if (RegistrationstatusList != null && RegistrationstatusList.Any())
                                                 {
                                                     <div style="display: flex;flex-wrap: wrap; column-gap: 33px;">
-                                                        <InputRadioGroup @bind-Value="editBuildingModel.RegistrationStatusId" class="d-flex flex-wrap">
+                                                        <InputRadioGroup @bind-Value="editBuildingModel.RegistrationStatusId" class="d-flex flex-wrap"
+                                                                         @bind-Value:after=@(() => ValidateParticularInput(() => editBuildingModel.RegistrationStatusId, nameof(editBuildingModel.RegistrationStatusId), "Select Registration"))>
                                                             @foreach (var Type in RegistrationstatusList)
                                                             {
                                                                 <div class="col-auto">
@@ -395,19 +406,21 @@
                                                 <input class="form-check-input" style="float:none"
                                                        type="checkbox"
                                                        id="GoodCauseSwitch"
-                                                       @bind="editBuildingModel.GoodCause" />
+                                                       @bind="editBuildingModel.GoodCause"
+                                                       @bind:after="BindGoodCause" />
                                             </div>
 
 
                                         </div>
 
-                                        @if (editBuildingModel.GoodCause.Value != true)
+                                        @if (editBuildingModel.GoodCause != true)
                                         {
                                             <div class="col-md-4">
                                                 <label class="form-label required-label ">
                                                     Exemption Reason
                                                 </label>
-                                                <InputSelect class="form-select" @bind-Value="editBuildingModel.ExemptionreasonId">
+                                                <InputSelect class="form-select" @bind-Value="editBuildingModel.ExemptionreasonId"
+                                                             @bind-Value:after=@(() => ValidateParticularInput(() => editBuildingModel.ExemptionreasonId, nameof(editBuildingModel.ExemptionreasonId), "Select Exemption"))>
                                                     <option value="">-- Select --</option>
                                                     @foreach (var s in ExemptionReasonList)
                                                     {
@@ -431,7 +444,7 @@
 
                 <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
                     <button type="button" class="btn btn-secondary buttons " data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary base buttons" @onclick="SaveBuildingChanges">Save</button>
+                    <button type="submit" class="btn btn-primary base buttons">Save</button>
                 </div>
             </EditForm>
         </div>
@@ -441,7 +454,7 @@
 
 @code {
     [Parameter] public Guid? CurrentCaseId { get; set; }
-  
+
     [Parameter] public Guid? LandlordId { get; set; }
     private BuildingDetailDto buildingDetail { get; set; } = new BuildingDetailDto();
     private EditToBuildingDto editBuildingModel = new();
@@ -462,21 +475,15 @@
     private IEnumerable<ExemptionReason> ExemptionReasonList = new List<ExemptionReason>();
     private List<PremiseType> PremiseTypesList = new();
 
+    private EditContext _editContextBuilding;
+    private ValidationMessageStore messageStoreBuilding;
 
-    bool ShowExemptionBasic =>
-RegulationList.Any(r =>
- r.Id == editBuildingModel.RegulationStatusId &&
- r.Name == "Exempt");
 
-    bool ShowRentOther =>
- RegulationList.Any(r =>
-     r.Id == editBuildingModel.RegulationStatusId &&
-     r.Name == "Other");
+    bool ShowExemptionBasic = false;
 
-    bool ShowExemptionOther =>
-    ExemptionBasicList.Any(r =>
-        r.Id == editBuildingModel.ExemptionBasisId &&
-        r.Name == "Other");
+    bool ShowRentOther = false;
+
+    bool ShowExemptionOther = false;
 
     string ColumnClass => ShowExemptionBasic || ShowRentOther ? "col-md-4" : "col-md-6";
     private async Task SelectedOwnerOccupied()
@@ -484,42 +491,83 @@ RegulationList.Any(r =>
         if (editBuildingModel.OwnerOccupied == true)
         {
             editBuildingModel.RegistrationStatusId = RegistrationstatusList.Where(e => e.Name.Equals("Registered")).FirstOrDefault().Id;
+            messageStoreBuilding.Clear(() => editBuildingModel.RegistrationStatusId);
         }
     }
 
     protected override async Task OnInitializedAsync()
     {
 
-
-
+        _editContextBuilding = new EditContext(editBuildingModel);
+        messageStoreBuilding = new ValidationMessageStore(_editContextBuilding);
+        StateHasChanged();
         if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty)
         {
-
             isLoading = true;
-
-
-           
-            await Task.Delay(1000);
             StateHasChanged();
 
-            ExemptionReasonList = await ExemptionReasonsRepository.GetAllAsync();
-            RegistrationstatusList = await buildingReadRepository.GetAllRegistrationstatus();
-            if (!CityList.Any())
-                CityList = await caseDetailService.GetAllCitiesList();
             await BuildingDetails();
             isLoading = false;
         }
 
-
-
     }
-   
+
     public async Task BuildingDetails()
     {
         buildingDetail = await caseDetailService.GetBuildingDetailAsync(CurrentCaseId!.Value);
 
-      
-       
+
+
+    }
+    private async Task BindRentRegulation()
+    {
+        if (RegulationList.Any(r => r.Id == editBuildingModel.RegulationStatusId && r.Name == "Exempt"))
+        {
+            ShowExemptionBasic = true;
+            ShowRentOther = false;
+            messageStoreBuilding.Clear(() => editBuildingModel.RentRegulationOther);
+        }
+        else if (RegulationList.Any(r => r.Id == editBuildingModel.RegulationStatusId && r.Name == "Other"))
+        {
+            ShowRentOther = true;
+        }
+        else
+        {
+            editBuildingModel.RentRegulationOther = null;
+            editBuildingModel.ExemptionBasisother = null;
+            editBuildingModel.ExemptionBasisId = null;
+            ShowExemptionBasic = false;
+            ShowRentOther = false;
+            ShowExemptionOther = false;
+            messageStoreBuilding.Clear(() => editBuildingModel.RentRegulationOther);
+            messageStoreBuilding.Clear(() => editBuildingModel.ExemptionBasisother);
+
+        }
+
+        await ValidateParticularInput(() => editBuildingModel.RegulationStatusId, nameof(editBuildingModel.RegulationStatusId), "Select Rent Regulation");
+    }
+    private async Task BindExemptionBasis()
+    {
+        if (ExemptionBasicList.Any(r => r.Id == editBuildingModel.ExemptionBasisId && r.Name == "Other") && ShowExemptionBasic)
+        {
+            ShowExemptionOther = true;
+        }
+        else
+        {
+            editBuildingModel.ExemptionBasisother = null;
+            ShowExemptionOther = false;
+            messageStoreBuilding.Clear(() => editBuildingModel.ExemptionBasisother);
+        }
+        await ValidateParticularInput(() => editBuildingModel.ExemptionBasisId, nameof(legalcaseDto.ExemptionBasisId), "Select Exemption Basis");
+    }
+    private async Task BindGoodCause()
+    {
+        if (editBuildingModel.GoodCause == true)
+        {
+            editBuildingModel.ExemptionreasonId = null;
+            messageStoreBuilding.Clear(() => editBuildingModel.ExemptionreasonId);
+        }
+
     }
     private void OnBindBuildingAfter()
     {
@@ -533,6 +581,7 @@ RegulationList.Any(r =>
         IsNewBuilding = false;
         searchBuildingText = null;
         editBuildingModel = new EditToBuildingDto();
+        StateHasChanged();
         editBuildingModel.StateId = StateList.Where(e => e.Name.Contains("New York")).FirstOrDefault()!.Id;
     }
     private void SelectBuilding(EditToBuildingDto selected)
@@ -562,9 +611,15 @@ RegulationList.Any(r =>
         IsNewBuilding = false;
         legalcaseDto.BuildingId = selected.Id;
     }
-
+    private Task ValidateParticularInput<T>(Expression<Func<T>> accessor, string fieldName, string validationMsg)
+    {
+        Require(accessor, fieldName, validationMsg);
+        _editContextBuilding.NotifyValidationStateChanged();
+        return Task.CompletedTask;
+    }
     private async Task SaveBuildingChanges()
     {
+        if (!await ValidateCurrentStep()) return;
         spinnerservice.Show();
 
         var addorupdate = false;
@@ -633,7 +688,7 @@ RegulationList.Any(r =>
 
                 await caseDetailService.UpdateonlyBuildingfromCase(updateBuilding);
                 addorupdate = true;
-                
+
             }
         }
 
@@ -750,19 +805,99 @@ RegulationList.Any(r =>
             // Old task cancelled → ignore
         }
     }
+    private async Task<bool> ValidateCurrentStep()
+    {
+        var errors1 = _editContextBuilding.GetValidationMessages().ToList();
+        messageStoreBuilding.Clear();
+
+        if (showBuildingFields)
+        {
+            Require(() => editBuildingModel.MDRNumber, nameof(editBuildingModel.MDRNumber), "MDR is required");
+
+            Require(() => editBuildingModel.Zipcode, nameof(editBuildingModel.Zipcode), "Zipcode is Required");
+            Require(() => editBuildingModel.StateId, nameof(editBuildingModel.StateId), "Select state");
+            Require(() => editBuildingModel.CityId, nameof(editBuildingModel.CityId), "Select City");
+            Require(() => editBuildingModel.BuildingUnits, nameof(editBuildingModel.BuildingUnits), "Units is required");
+            Require(() => editBuildingModel.Address1, nameof(editBuildingModel.Address1), "Address is required");
+            Require(() => editBuildingModel.RegulationStatusId, nameof(editBuildingModel.RegulationStatusId), "Select Rent Regulation");
+            Require(() => editBuildingModel.RegistrationStatusId, nameof(editBuildingModel.RegistrationStatusId), "Select Registration Status");
+            Require(() => editBuildingModel.PremiseTypeId, nameof(editBuildingModel.PremiseTypeId), "Select Building Type Status");
+            if (ShowExemptionBasic)
+            {
+                Require(() => editBuildingModel.ExemptionBasisId, nameof(editBuildingModel.ExemptionBasisId), "Select Exception Basis");
+            }
+            if (ShowExemptionOther)
+            {
+                Require(() => editBuildingModel.ExemptionBasisother, nameof(editBuildingModel.ExemptionBasisother), "Other Exemption is required");
+            }
+            if (ShowRentOther)
+            {
+                Require(() => editBuildingModel.RentRegulationOther, nameof(editBuildingModel.RentRegulationOther), "Other Regulation is required");
+            }
+            if (editBuildingModel.GoodCause != true)
+            {
+                Require(() => editBuildingModel.ExemptionreasonId, nameof(editBuildingModel.ExemptionreasonId), "Select Exemption");
+            }
+
+        }
+        else
+        {
+            Require(() => editBuildingModel.Id, nameof(editBuildingModel.Id), "Select A Building");
+
+        }
+
+
+
+
+        // Notify UI about validation changes
+        _editContextBuilding.NotifyValidationStateChanged();
+
+        // Get current validation messages (optional: for logging)
+        var errors = _editContextBuilding.GetValidationMessages().ToList();
+
+        // Check if form is valid
+        bool isValid = !_editContextBuilding.GetValidationMessages().Any();
+
+        // Return validity
+        return isValid;
+
+    }
+    private void Require<T>(Expression<Func<T>> accessor, string fieldName, string message)
+    {
+        var value = accessor.Compile().Invoke();
+        var fieldIdentifier = new FieldIdentifier(editBuildingModel, fieldName);
+
+        // Clear old message first
+        messageStoreBuilding.Clear(fieldIdentifier);
+
+        // Add message if invalid
+        bool isEmpty = value == null ||
+                       (value is string s && string.IsNullOrWhiteSpace(s)) ||
+                       (value is Guid g && g == Guid.Empty);
+
+        if (isEmpty)
+        {
+            messageStoreBuilding.Add(fieldIdentifier, message);
+        }
+
+        _editContextBuilding.NotifyValidationStateChanged();
+    }
     private async Task ShowBuildingModal()
     {
         if (!PremiseTypesList.Any()) PremiseTypesList = await buildingReadRepository.GetAllPremiseType();
-        RegulationList = await buildingReadRepository.GetAllRegulationStatus();
-        ExemptionBasicList = await ExemptionBasicRepository.GetAllAsync();
-        StateList = await buildingReadRepository.GetAllState();
+        if (!RegulationList.Any()) RegulationList = await buildingReadRepository.GetAllRegulationStatus();
+        if (!ExemptionBasicList.Any()) ExemptionBasicList = await ExemptionBasicRepository.GetAllAsync();
+        if (!StateList.Any()) StateList = await buildingReadRepository.GetAllState();
+        if (!ExemptionReasonList.Any()) ExemptionReasonList = await ExemptionReasonsRepository.GetAllAsync();
+        if (!RegistrationstatusList.Any()) RegistrationstatusList = await buildingReadRepository.GetAllRegistrationstatus();
+        if (!CityList.Any()) CityList = await caseDetailService.GetAllCitiesList();
         if (buildingDetail.BuildingId != null && buildingDetail.BuildingId != Guid.Empty)
         {
 
             //IsNewBuilding = true;
             // Prefill edit model from case
             editBuildingModel = await buildingReadRepository.GetBuildingByIdAsync(buildingDetail.BuildingId!.Value);
-            BuildingList = await buildingReadRepository.GetBuildingsByLandlordIdAsync(LandlordId!.Value);
+            if (!BuildingList.Any()) BuildingList = await buildingReadRepository.GetBuildingsByLandlordIdAsync(LandlordId!.Value);
             searchBuildingText = editBuildingModel.BuildingCode;
             if (editBuildingModel.GoodCause == null)
             {

@@ -15,5 +15,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         //Task<List<EditToClientDto>> SearchRemainderCenter(string searchTerm);
         Task CreateNewReminder(Guid caseId, string Description, DateTime Date);
         Task<List<EditToRemainderCenterDto>?> GetAllInCompleteRemainder(bool isSuperAdmin,Guid? userId = null);
+        Task<bool> UpdateRemainderCenterByCaseIdAsync(EditToRemainderCenterDto dto);
+        Task UpdateReminder(Guid caseId, string Description, DateTime Date);
     }
 }

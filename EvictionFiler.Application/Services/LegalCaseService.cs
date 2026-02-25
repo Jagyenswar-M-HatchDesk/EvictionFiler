@@ -429,7 +429,7 @@ namespace EvictionFiler.Application.Services
         (Expression<Func<LegalCase, object>>)(c => c.Clients!),
       
         c => c.CaseType!,
-       
+       c => c.Tenants!,
        
         c => c.RegulationStatus!,
         c => c.TenancyType!,
@@ -444,6 +444,7 @@ namespace EvictionFiler.Application.Services
         c => c.CaseTypePerDiems,
         c => c.PartyRepresents!,
         c => c.Buildings!.BuildingType!,
+        c => c.Buildings!.Cities!,
         c => c.Buildings!.RegistrationStatus!,
          c => c.Buildings!.ExemptionReason!,
            c => c.Buildings!.ExemptionBasis!,
@@ -517,7 +518,7 @@ namespace EvictionFiler.Application.Services
                         BuildingId = caseEntity.BuildingId,
                         //Buildingcode = caseEntity.Buildings?.BuildingCode,
                         //Mdr = caseEntity.Buildings?.MDRNumber,
-                        //Borough = caseEntity.Buildings?.Cities != null ? caseEntity.Buildings?.Cities.Name : null,
+                        Borough = caseEntity.Buildings?.Cities != null ? caseEntity.Buildings?.Cities.Name : null,
                         //BoroughorCityId = caseEntity.Buildings != null ? caseEntity.Buildings?.CityId : Guid.Empty,
                         //Units = caseEntity.Buildings != null ? caseEntity.Buildings?.BuildingUnits : null,
                         //BuildingState = caseEntity.Buildings?.State != null ? caseEntity.Buildings?.State?.Name : string.Empty,
@@ -535,12 +536,12 @@ namespace EvictionFiler.Application.Services
 
 
                         // Tenant
-                        //TenantId = caseEntity.TenantId,
-                        //TenantName = caseEntity.Tenants != null ? $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}" : string.Empty,
+                        TenantId = caseEntity.TenantId,
+                        TenantName = caseEntity.Tenants != null ? $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}" : string.Empty,
                         //ApartmentNumber = caseEntity.Tenants != null ? caseEntity.Tenants?.UnitOrApartmentNumber : string.Empty,
                         //TenancyTypeId = caseEntity.Tenants != null ? caseEntity.Tenants.TenancyTypeId : Guid.Empty,
                         //PrimaryResidence = caseEntity.Tenants != null ? caseEntity.Tenants.PrimaryResidence : false,
-                        //MonthlyRent = caseEntity.Tenants != null ? caseEntity.Tenants.MonthlyRent : 0,
+                        MonthlyRent = caseEntity.Tenants != null ? caseEntity.Tenants.MonthlyRent : 0,
                         //TenantShare = caseEntity.Tenants != null ? caseEntity.Tenants.TenantShare : 0,
                         //RentDueEachMonthOrWeekId = caseEntity.Tenants != null ? caseEntity.Tenants.RentDueEachMonthOrWeekId : Guid.Empty,
 
