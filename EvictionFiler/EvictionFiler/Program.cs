@@ -174,7 +174,9 @@ builder.Services.AddScoped<IReminderEscalateRepository, ReminderEscalateReposito
 builder.Services.AddScoped<ICitiesRepository,CitiesRepository>();
 builder.Services.AddScoped<IExemptionBasicsRepository,ExemptionBasicsRepository>();
 builder.Services.AddScoped<IExemptionReasonsRepository,ExemptionReasonsRepository>();
-
+builder.Services.AddScoped<IClientReadRepository,ClientReadRepository>();
+builder.Services.AddScoped<IMarshalAndWarrantRepository, MarshalAndWarrantRepository>();
+builder.Services.AddScoped<IWarrantRepository, WarrantRepository>();
 
 //builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 //    .AddIdentityCookies();

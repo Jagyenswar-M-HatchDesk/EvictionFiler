@@ -482,6 +482,7 @@ namespace EvictionFiler.Application.Services
 					Address1 = client.Address1,
 					Address2 = client.Address2,
 					City = client.City,
+					Reference= client.Reference,
 					StateId = client.StateId,
 					ZipCode = client.ZipCode,
 					Phone = client.Phone,

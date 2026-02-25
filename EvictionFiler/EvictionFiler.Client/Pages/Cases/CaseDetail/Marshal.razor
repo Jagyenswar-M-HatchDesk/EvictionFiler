@@ -1,0 +1,83 @@
+﻿@using EvictionFiler.Application.DTOs.CaseDetailDtos
+@using EvictionFiler.Application.Interfaces.IServices
+@inject ICaseDetailService caseDetailService
+
+                            <table class="info-table " style="border:none;">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2" class="info-bar">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="info-bar-title">
+                                                    <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:7px !important;margin-right:10px;">
+
+                                                        <i class="fa-regular fa-circle-check" style="font-size:16px;color:#1F365D !important;"></i>
+                                                     </div>
+                                                Marshal & Warrant</div>
+                                                <button type="button" class="btn btn-sm normal p-1"  style="color:white">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr class="info-row">
+                                        <td class="info-cell label">Name:</td>
+                                        <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(marshalAndWarrant.MarshalName) ? "--" : marshalAndWarrant.MarshalName)</td>
+                                    </tr>
+
+                                    <tr class="info-row">
+                                        <td class="info-cell label">Phone No.:</td>
+                                        <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(marshalAndWarrant.MarshalPhone) ? "--" : marshalAndWarrant.MarshalPhone)</td>
+                                    </tr>
+
+                                    <tr class="info-row">
+                                        <td class="info-cell label">Docket No.:</td>
+                                        <td class="info-cell value ellipsis">
+                                            @(string.IsNullOrWhiteSpace(marshalAndWarrant.Docketno) ? "--" : marshalAndWarrant.Docketno)
+
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+
+                          
+
+@code {
+    [Parameter] public Guid? CurrentCaseId { get; set; }
+    [Parameter] public bool isReload{ get; set; }
+    private MarshalAndWarrantDetailDto marshalAndWarrant = new();
+    private bool isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty)
+        {
+
+            isLoading = true;
+
+            await Task.Delay(1000);
+            StateHasChanged();
+            await MarshalAndWarrantDetails();
+
+            isLoading = false;
+        }
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        if(isReload)
+        {
+              await MarshalAndWarrantDetails();
+        }
+
+    }
+
+    public async Task MarshalAndWarrantDetails()
+    {
+        marshalAndWarrant = await caseDetailService.GetMarshalDetailAsync(CurrentCaseId!.Value);
+    }
+
+}
