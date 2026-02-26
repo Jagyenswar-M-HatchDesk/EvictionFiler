@@ -28,6 +28,7 @@
 @using EvictionFiler.Application.Interfaces.IServices.Master
 @using EvictionFiler.Application.Services
 @using EvictionFiler.Client.AuthService
+@using EvictionFiler.Client.Components.Layout
 @using EvictionFiler.Client.Pages.Actions
 @using EvictionFiler.Client.Pages.Cases.CaseDetail
 @using EvictionFiler.Client.SpinnerService
@@ -79,7 +80,7 @@
 @inject NavigationStateMessage navmessage
 @inject UserContextService userContext
 @inject ICourtTodayTypeRepository Courttodayrepo
-
+@layout Aut
 
 @attribute [Authorize]
 
@@ -779,6 +780,8 @@
         line-height: 20px;
         letter-spacing: 0px;
         color: #1F365D;
+        padding-left:8px;
+        padding-right:8px;
     }
 
 
@@ -814,8 +817,8 @@
         display: flex;
         align-items: center;
         font-family: Inter;
-        font-weight: 700;
-        font-size: 22px;
+        font-weight: 600;
+        font-size: 20px;
         line-height: 19.5px;
         letter-spacing: 0.65px;
         vertical-align: middle;
@@ -888,7 +891,7 @@
                 } */
         .info-cell.label {
             font-family: Inter;
-            font-weight: 900;
+            font-weight: 600;
             color: #94A3B8;
             font-size: 1rem;
             line-height: 20px;
@@ -958,7 +961,7 @@
     /* Label */
     .info-block .label {
         font-family: Inter;
-        font-weight: 900;
+        font-weight: 600;
         font-size: 1rem;
         line-height: 20px;
         letter-spacing: 1.2px;
@@ -1578,7 +1581,7 @@
                 <!-- Tenant & Building & Landlord-->
 
                 <div class="bg-transparent">
-                    <div class="Details-header"> Stipulation &amp; Remainders</div>
+                    <div class="Details-header"> Stipulation &amp; Reminders</div>
                 </div>
 
             </div>
@@ -1847,7 +1850,7 @@
 
                                                 <i class="fa-solid fa-building-columns" style="font-size:16px;color:#fff !important;"></i> 
                                             </div>
-                                        Court & Opposing</div>
+                                        Court </div>
                                         <button type="button" class="btn btn-sm normal p-1" @onclick="ShowCourtModal" title="Edit Courts" style="color:#1F365D">
                                             @if (isNewCourt)
                                             {
@@ -2182,11 +2185,10 @@
                                                    
                                                 ID</th>
                                                 <th scope="col" class="info-bar" style="border-radius: 0px;">Forms</th>
-                                                @if (isAdmin)
-                                                {
+                                               
 
                                                     <th scope="col" class="info-bar" style="border-radius: 0px;">Created By</th>
-                                                }
+                                                
                                                 <th scope="col" style="width:12%;border-radius:0px ;" class="text-nowrap info-bar">Actions</th>
                                                 <th scope="col" class="info-bar" style="border-radius: 0px;">Created On</th>
                                                 
@@ -2205,10 +2207,9 @@
 
                                                         </td>
                                                         <td class="info-block-table"><div class="value">@form.FormTypeName</div></td>
-                                                        @if (isAdmin)
-                                                        {
+                                                       
                                                             <td><div class="value">@form.CreatedByName</div></td>
-                                                        }
+                                                        
                                                         <td class="d-flex justify-content-between info-block-table" style="gap:2px">
                                                             <span class="action-icon value" @onclick="@(() => ViewPdf(form.File))"><i class="fa-solid fa-eye"></i></span>
                                                             <span class="action-icon value" @onclick="@(() => EditCaseDetail(form.Id))"><i class="fa-solid fa-pen-to-square"></i></span>
@@ -2245,6 +2246,7 @@
                                                 Uploaded Documents</th>
                                                 <th scope="col" style="width:12%;border-radius:0px ;" class="text-nowrap info-bar">Actions</th>
                                                 <th scope="col" style="width:12%;border-radius:0px ;" class="text-nowrap info-bar">Type</th>
+                                                <th scope="col" style="width:12%;border-radius:0px ;" class="text-nowrap info-bar">CreatedBy</th>
                                                 <th scope="col" class="info-bar" style="border-radius:0px;">Created On</th>
                                                
                                             </tr>
@@ -2273,7 +2275,8 @@
                                                                    title="Delete"></i>
                                                             </span>
                                                         </td>
-                                                        <td class="info-block-table"><div class="value">@docs.Name</div></td>
+                                                        <td class="info-block-table"><div class="value">@(docs.DocumentTypes?.Name ?? "--")</div></td>
+                                                        <td class="info-block-table"><div class="value">@(docs.User?.FirstName ?? "--")</div></td>
                                                         <td class="info-block-table"><div class="value">@docs.CreatedOn.ToString(DateFormats.Default)</div></td>
                            
                                                     </tr>
@@ -2360,7 +2363,7 @@
                             </div>
                             
                             <div class="col-9">
-                                <div class="" style="background-color:white;border-radius:20px;">
+                                <div class="ps-2 pe-2" style="background-color:white;border-radius:20px;">
                                     <div class="info-bar" style="background-color:#fff;">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="info-bar-title">
@@ -2490,7 +2493,7 @@
                                  <div class="" style="background-color:white;border-radius:20px;">
                                     <div class="vault-card">
                                         <div class=" vault-header d-flex justify-content-between align-items-center">
-                                        <span class="vault-title">EVIDENCE VAULT</span>
+                                        <span class="vault-title">UPLOADS</span>
                                            
                                              <button class="vault-add-btn">
                                                    <i class="fa-solid fa-plus"></i>
@@ -4632,7 +4635,7 @@
     @if (_showCreateAction)
     {
         <GenrateAction createAction="noticeModel"
-                       OnClose="HandleCloseCreateAction" CaseNotesId="@CaseNotesId" OpenTab="@OpenTab"
+                       OnClose="HandleCloseCreateAction" CaseNotesId="@CaseNotesId" OpenTab="@OpenTab" 
                        CurrentCaseId="CurrentCaseId" legalcaseDto="legalcaseDto" CaseForms="caseFormDto" OnFormCreate="HandleInvokeAction" OnNotesCreate="HandleNotesInvokeAction" />
     }
 
@@ -5757,7 +5760,7 @@
 
     private async Task LoadNotes()
     {
-        CaseNotes = await _service.GetAllCaseNotes();
+        CaseNotes = await _service.GetAllCaseNotes(legalcaseDto.Id);
         StateHasChanged();
 
     }

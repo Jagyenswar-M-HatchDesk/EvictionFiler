@@ -4,7 +4,7 @@ namespace EvictionFiler.Application.DTOs.TenantDto
 {
 	public class EditToTenantDto : CreateToTenantDto
 	{
-		public Guid Id { get; set; }
+		public Guid? Id { get; set; }
 		
 
 	}

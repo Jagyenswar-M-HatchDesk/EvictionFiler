@@ -5,6 +5,7 @@
 @using EvictionFiler.Application.DTOs.LandLordDto
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Client.SpinnerService
+@using System.Linq.Expressions
 @inject ICaseDetailService caseDetailService
 
 
@@ -24,7 +25,7 @@
 
                         <i class="fa-regular fa-user" style="font-size:16px;color:#fff !important;"></i>
                     </div>
-                    LandLord Details
+                    LandLord 
                 </div>
                 <button type="button" class="btn btn-sm normal p-1" @onclick="ShowLandlordModal" title="Edit Landlord" style="color:#1f365d">
                     <i class="bi bi-pencil"></i>
@@ -36,35 +37,35 @@
             <!-- 🔄 Loading UI -->
             <div class="d-flex flex-column justify-content-center align-items-center p-4">
                 <div class="spinner-border " style=" color:#1F365D; width: 2.5rem; height: 2.5rem;" role="status"></div>
-                
+
             </div>
         }
         else
         {
 
-        <div class="info-row" style="padding-top:10px">
-            <div class="info-cell label" style="text-transform: uppercase;">Enitiy Name</div>
-            <div class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(landlord.FullName) ? "--" : landlord.FullName)</div>
-        </div>
-        <div class="info-row">
-            <div class="info-cell label" style="text-transform: uppercase;">Authorized Rep</div>
-            <div class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(landlord.ContactPersonName) ? "--" : landlord.ContactPersonName)</div>
-        </div>
-
-        <div class="info-row" style="padding-bottom:10px">
-            <div class="info-cell label" style="text-transform: uppercase;">Legal Address</div>
-            <div class="info-cell value ellipsis" style="white-space:normal">
-                @{
-                    var partlandlord = new List<string>();
-
-                    if (!string.IsNullOrWhiteSpace(landlord.LandlordAddress)) partlandlord.Add(landlord.LandlordAddress);
-
-
-                    var fulllandlordAddress = partlandlord.Count() > 0 ? string.Join(", ", partlandlord) : "--";
-                }
-                @fulllandlordAddress
+            <div class="info-row" style="padding-top:10px">
+                <div class="info-cell label" style="text-transform: uppercase;">Enitiy Name</div>
+                <div class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(landlord.FullName) ? "--" : landlord.FullName)</div>
             </div>
-        </div>
+            <div class="info-row">
+                <div class="info-cell label" style="text-transform: uppercase;">Authorized Rep</div>
+                <div class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(landlord.ContactPersonName) ? "--" : landlord.ContactPersonName)</div>
+            </div>
+
+            <div class="info-row" style="padding-bottom:10px">
+                <div class="info-cell label" style="text-transform: uppercase;">Legal Address</div>
+                <div class="info-cell value ellipsis" style="white-space:normal">
+                    @{
+                        var partlandlord = new List<string>();
+
+                        if (!string.IsNullOrWhiteSpace(landlord.LandlordAddress)) partlandlord.Add(landlord.LandlordAddress);
+
+
+                        var fulllandlordAddress = partlandlord.Count() > 0 ? string.Join(", ", partlandlord) : "--";
+                    }
+                    @fulllandlordAddress
+                </div>
+            </div>
         }
     </div>
 
@@ -73,109 +74,112 @@
 </div>
 
 <div class="modal fade" id="landlordModal" tabindex="-1" aria-labelledby="landlordModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-semibold" id="landlordModalLabel">Edit Landlord Details</h5>
-                    <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-semibold" id="landlordModalLabel">Edit Landlord Details</h5>
+                <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
-                <EditForm Model="@editLandlordModel">
-                    <DataAnnotationsValidator />
-                    <div class="modal-body">
-                        <div class=" border-0">
-                            <div class="card-body p-0">
+            <EditForm EditContext="editContextLandlord" id="landlordForm" OnSubmit="SaveLandlordChanges">
+                <div class="modal-body">
+                    <div class=" border-0">
+                        <div class="card-body p-0">
 
-                             
-                                <div class="row mt-2">
-                                    @if (!showLandlordFields)
-                                    {
-                                        <div class="col-md-6 position-relative" @onfocusout="HideLandlordDropdown">
-                                            <label class="form-label  required-label">Landlord</label>
-                                            <input type="text" class="form-control"
-                                                   placeholder="Search by Landlord name or code..."
-                                                   @bind-value="searchLandlordText" @onclick="ShowAllLandlords"
-                                                   @oninput="OnSearchLandlordInput" />
-                                            @if (filteredlandlords?.Count() > 0)
-                                            {
-                                                <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
-                                                    @foreach (var c in filteredlandlords)
-                                                    {
-                                                        <li class="dropdown-item" @onclick="() => SelectLandlord(c)">
-                                                            @c.LandLordCode / @c.FirstName @c.LastName
-                                                        </li>
-                                                    }
-                                                </ul>
-                                            }
-                                            <ValidationMessage For="() => landlord.LandlordId" />
-                                        </div>
-                                    }
 
-                                    @if (!showLandlordFields)
-                                    {
-                                        <div class="col-md-1 d-flex justify-content-center align-items-end pb-2">
-                                            <span style="">OR</span>
-                                        </div>
-                                        <div class="col-md-2 d-flex align-items-end">
-                                            <button type="button" class="btn btn-primary base buttons" @onclick="OnBindLandlordAfter">+ Add</button>
-                                        </div>
-                                    }
-                                </div>
-
-                              
-                                @if (showLandlordFields)
+                            <div class="row mt-2">
+                                @if (!showLandlordFields)
                                 {
-                                    <div class=" rounded-3 p-3 position-relative">
-                                        <button type="button" class="buttons"
-                                                aria-label="Clear"
-                                                style="background: transparent; border: none; z-index: 9999; position:absolute; top:-15px ; right:0px"
-                                                @onclick="OnBindLandlordCancel">
-                                            <i class="fa-solid fa-xmark"></i> Clear
-                                        </button>
+                                    <div class="col-md-6 position-relative" @onfocusout="HideLandlordDropdown">
+                                        <label class="form-label  required-label">Landlord</label>
+                                        <input type="text" class="form-control"
+                                               placeholder="Search by Landlord name or code..."
+                                               @bind-value="searchLandlordText" @onclick="ShowAllLandlords"
+                                               @oninput="OnSearchLandlordInput" />
+                                        @if (filteredlandlords?.Count() > 0)
+                                        {
+                                            <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
+                                                @foreach (var c in filteredlandlords)
+                                                {
+                                                    <li class="dropdown-item" @onclick="() => SelectLandlord(c)">
+                                                        @c.LandLordCode / @c.FirstName @c.LastName
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                        <ValidationMessage For="() => landlord.LandlordId" />
+                                    </div>
+                                }
 
-                                        <div class="row g-3">
-
-                                            <div class="col-md-6">
-                                                <label class="form-label required-label">First Name</label>
-                                                <InputText class="form-control" @bind-Value="editLandlordModel.FirstName" placeholder="Enter First Name" />
-                                                <ValidationMessage For="() => editLandlordModel.FirstName" />
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label class="form-label required-label">Last Name</label>
-                                                <InputText class="form-control" @bind-Value="editLandlordModel.LastName" placeholder="Enter Last Name" />
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label class="form-label required-label">Contact Person Name </label>
-                                                <InputText class="form-control" @bind-Value="editLandlordModel.ContactPersonName" placeholder="Enter Contact person" />
-                                                <ValidationMessage For="() => editLandlordModel.ContactPersonName" />
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label class="form-label required-label">Address</label>
-                                                <InputText class="form-control" @bind-Value="editLandlordModel.Address1" placeholder="Enter Address" />
-                                            </div>
-
-
-
-                                        </div>
+                                @if (!showLandlordFields)
+                                {
+                                    <div class="col-md-1 d-flex justify-content-center align-items-end pb-2">
+                                        <span style="">OR</span>
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-end">
+                                        <button type="button" class="btn btn-primary base buttons" @onclick="OnBindLandlordAfter">+ Add</button>
                                     </div>
                                 }
                             </div>
+
+
+                            @if (showLandlordFields)
+                            {
+                                <div class=" rounded-3 p-3 position-relative">
+                                    <button type="button" class="buttons"
+                                            aria-label="Clear"
+                                            style="background: transparent; border: none; z-index: 9999; position:absolute; top:-15px ; right:0px"
+                                            @onclick="OnBindLandlordCancel">
+                                        <i class="fa-solid fa-xmark"></i> Clear
+                                    </button>
+
+                                    <div class="row g-3">
+
+                                        <div class="col-md-6">
+                                            <label class="form-label required-label">First Name</label>
+                                            <InputText class="form-control" @bind-Value="editLandlordModel.FirstName" placeholder="Enter First Name"
+                                                       @bind-Value:after=@(() => ValidateParticularInput(() => editLandlordModel.FirstName, nameof(editLandlordModel.FirstName), "First Name is Required")) />
+                                            <ValidationMessage For="() => editLandlordModel.FirstName" />
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label required-label">Last Name</label>
+                                            <InputText class="form-control" @bind-Value="editLandlordModel.LastName" placeholder="Enter Last Name"
+                                                       @bind-Value:after=@(() => ValidateParticularInput(() => editLandlordModel.LastName, nameof(editLandlordModel.LastName), "Last Name is Required")) />
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label required-label">Contact Person Name </label>
+                                            <InputText class="form-control" @bind-Value="editLandlordModel.ContactPersonName" placeholder="Enter Contact person"
+                                                       @bind-Value:after=@(() => ValidateParticularInput(() => editLandlordModel.ContactPersonName, nameof(editLandlordModel.ContactPersonName), "Contact Person is Required")) />
+                                            <ValidationMessage For="() => editLandlordModel.ContactPersonName" />
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label required-label">Address</label>
+                                            <InputText class="form-control" @bind-Value="editLandlordModel.Address1" placeholder="Enter Address"
+                                                       @bind-Value:after=@(() => ValidateParticularInput(() => editLandlordModel.Address1, nameof(editLandlordModel.Address1), "Address is Required")) />
+                                        </div>
+
+
+
+                                    </div>
+                                </div>
+                            }
                         </div>
                     </div>
+                </div>
 
-                    <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
-                        <button type="button" class="btn btn-secondary buttons" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary base buttons" @onclick="SaveLandlordChanges">Save</button>
-                    </div>
-                </EditForm>
+                <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                    <button type="button" class="btn btn-secondary buttons" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary base buttons" >Save</button>
+                </div>
+            </EditForm>
 
-              
-            </div>
+
         </div>
     </div>
+</div>
 
 @code {
     [Parameter] public Guid? CurrentCaseId { get; set; }
@@ -189,20 +193,24 @@
     private CancellationTokenSource _cts;
     private IntakeModel legalcaseDto = new IntakeModel();
 
+    public EditContext editContextLandlord { get; set; }
+
+    public ValidationMessageStore messageStoreLandLord { get; set; }
 
     private bool IsNewLandlord = false;
 
     protected override async Task OnInitializedAsync()
     {
 
-
+        editContextLandlord = new EditContext(editLandlordModel);
+        messageStoreLandLord = new ValidationMessageStore(editContextLandlord);
 
         if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty)
         {
 
             isLoading = true;
 
-            await  Task.Delay(1000);
+            await Task.Delay(1000);
             StateHasChanged();
             await LandlordDetails();
             isLoading = false;
@@ -211,12 +219,75 @@
 
 
     }
+
+    private async Task<bool> ValidateCurrentStep()
+    {
+        messageStoreLandLord.Clear();
+
+        // ✔ Validation trigger only when both are empty
+        if (showLandlordFields)
+        {
+            Require(() => editLandlordModel.FirstName, nameof(editLandlordModel.FirstName), "First Name is required");
+            Require(() => editLandlordModel.LastName, nameof(editLandlordModel.LastName), "Last Name is required");
+        }
+        else
+        {
+            Require(() => editLandlordModel.Id, nameof(editLandlordModel.Id), "Select Landlord");
+        }
+
+        Require(() => editLandlordModel.ContactPersonName, nameof(editLandlordModel.ContactPersonName), "Contact Person is required");
+
+
+        Require(() => editLandlordModel.Address1, nameof(editLandlordModel.Address1), "Address is required");
+
+
+        // Notify UI about validation changes
+        editContextLandlord.NotifyValidationStateChanged();
+
+        // Get current validation messages (optional: for logging)
+        var errors = editContextLandlord.GetValidationMessages().ToList();
+
+        // Check if form is valid
+        bool isValid = !editContextLandlord.GetValidationMessages().Any();
+
+        // Return validity
+        return isValid;
+
+    }
+
+    private void Require<T>(Expression<Func<T>> accessor, string fieldName, string message)
+    {
+        var value = accessor.Compile().Invoke();
+        var fieldIdentifier = new FieldIdentifier(editLandlordModel, fieldName);
+
+        // Clear old message first
+        messageStoreLandLord.Clear(fieldIdentifier);
+
+        // Add message if invalid
+        bool isEmpty = value == null ||
+                       (value is string s && string.IsNullOrWhiteSpace(s)) ||
+                       (value is Guid g && g == Guid.Empty);
+
+        if (isEmpty)
+        {
+            messageStoreLandLord.Add(fieldIdentifier, message);
+        }
+
+        editContextLandlord.NotifyFieldChanged(fieldIdentifier);
+        editContextLandlord.NotifyValidationStateChanged();
+    }
+    private Task ValidateParticularInput<T>(Expression<Func<T>> accessor, string fieldName, string validationMsg)
+    {
+        Require(accessor, fieldName, validationMsg);
+        editContextLandlord.NotifyValidationStateChanged();
+        return Task.CompletedTask;
+    }
     public async Task LandlordDetails()
     {
         landlord = await caseDetailService.GetLandlordDetailAsync(CurrentCaseId!.Value);
-        
-         await LandlordIdValue.InvokeAsync(landlord.LandlordId);   
-        
+
+        await LandlordIdValue.InvokeAsync(landlord.LandlordId);
+
 
     }
     async Task HideLandlordDropdown(FocusEventArgs e)
@@ -228,7 +299,7 @@
         }
         StateHasChanged();
     }
-    private void SelectLandlord(EditToLandlordDto selected)
+    private async Task SelectLandlord(EditToLandlordDto selected)
     {
         editLandlordModel.Id = selected.Id;
         editLandlordModel.Address1 = selected.Address1;
@@ -242,6 +313,8 @@
         showLandlordFields = true;
 
         landlord.ClientId = selected.ClientId;
+
+        await ValidateInput();
     }
     private async Task ShowAllLandlords()
     {
@@ -256,6 +329,10 @@
             filteredlandlords = await caseDetailService.GetLandlordsByClientIdAsync(landlord.ClientId.Value);
         }
 
+    }
+    private async Task ValidateInput()
+    {
+        var result = await ValidateCurrentStep();
     }
     private void OnBindLandlordAfter()
     {
@@ -329,7 +406,7 @@
     }
     private async Task SaveLandlordChanges()
     {
-        Console.WriteLine("landlord", landlord);
+        if (!await ValidateCurrentStep()) return;
         spinnerservice.Show();
 
         var addorupdate = false;

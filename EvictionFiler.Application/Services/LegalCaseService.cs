@@ -291,6 +291,7 @@ namespace EvictionFiler.Application.Services
                 }
 
                 legalCases.CreatedBy = legalCase.CreatedBy;
+                legalCases.CreatedById = legalCase.CreatedBy;
                 legalCases.CreatedOn = DateTime.Now;
 
                 var addedcase = await _repository.AddAsync(legalCases);
@@ -1390,7 +1391,7 @@ namespace EvictionFiler.Application.Services
 
         public async Task<IEnumerable<CaseDocument>> CaseDocumentList(Guid Id)
         {
-            var doclist = _caseDocument.GetAllQuerable(includes: e=>e.DocumentTypes);
+            var doclist = _caseDocument.GetAllQuerable(includes:[ e=>e.DocumentTypes, e=>e.User]);
             var returnlist = await doclist.Where(e => e.LegalCaseId == Id).OrderByDescending(e => e.CreatedOn).ToListAsync();
             return returnlist;
         }
@@ -1539,9 +1540,9 @@ namespace EvictionFiler.Application.Services
             return await _unitOfWork.SaveChangesAsync() > 0;
         }
 
-        public async Task<IEnumerable<CaseNotes>> GetAllCaseNotes()
+        public async Task<IEnumerable<CaseNotes>> GetAllCaseNotes(Guid caseId)
         {
-            return await _caseNotesRepository.GetAllAsync();
+            return await _caseNotesRepository.GetAllAsync(predicate: e=>e.LegalcaseId == caseId, includes:a=>a.User);
 
         }
 

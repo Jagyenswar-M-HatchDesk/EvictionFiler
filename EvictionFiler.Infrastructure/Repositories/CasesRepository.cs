@@ -445,7 +445,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                 if (!string.IsNullOrWhiteSpace(userId) &&
                     Guid.TryParse(userId, out Guid gid))
                 {
-                    query = query.Where(c => c.CreatedBy == gid);
+                    query = query.Where(c => c.User.FirmId == gid);
                 }
             }
 

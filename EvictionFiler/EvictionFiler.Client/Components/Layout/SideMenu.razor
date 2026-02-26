@@ -2,10 +2,8 @@
 @inject NavigationManager nav
 @using System.Security.Claims
 
-@using EvictionFiler.Server
 @* @using EvictionFiler.Client.Services *@
 @using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using Microsoft.AspNetCore.Components.WebAssembly.Http
 @* @inject SpinnerService SpinnerService *@
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -13,7 +11,6 @@
 @inject NavigationManager Navigation
 @inject HttpClient _httpClient
 @inject IJSRuntime JS
-@inject ProtectedLocalStorage LocalStorage
 
 
 
@@ -671,6 +668,7 @@
     }
 </script>
 @code {
+    [Parameter] public bool IsHideMenu { get; set; }
     private bool showProfileOptions = false;
     Dictionary<string, bool> expandedMenus = new();
     private string userRole = "";
@@ -688,7 +686,13 @@
     bool isCollapsed = false;
     private string HoveredMenu { get; set; }
 
-    
+    protected override async Task OnParametersSetAsync()
+    {
+        if(IsHideMenu)
+        {
+            isCollapsed = true;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -893,7 +897,6 @@
 
         expandedMenus[menu] = !expandedMenus[menu];
 
-        await LocalStorage.SetAsync("activeMenu", activeMenu);
 
         switch (menu)
         {

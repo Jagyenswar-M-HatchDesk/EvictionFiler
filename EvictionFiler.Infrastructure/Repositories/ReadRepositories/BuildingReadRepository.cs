@@ -37,6 +37,8 @@ namespace EvictionFiler.Infrastructure.Repositories.ReadRepositories
      .ThenInclude(b => b.Cities)
      .Include(c => c.Buildings)
      .ThenInclude(b => b.State)
+     .Include(c => c.Buildings!.PremiseType)
+     .Include(c => c.Buildings!.RegulationStatus)
 
      .FirstOrDefaultAsync();
 
@@ -49,9 +51,9 @@ namespace EvictionFiler.Infrastructure.Repositories.ReadRepositories
                 
                 Mdr = l.Buildings?.MDRNumber,
 
-
+                BuildingTyeName = l.Buildings?.PremiseType?.Name,
                 BuildingAddress = l.Buildings?.Address1,
-
+                RentRegulationType = l.Buildings?.RegulationStatus?.Name,
                 Borough = l.Buildings?.Cities != null ? l.Buildings?.Cities?.Name : null,
                 BuildingState = l.Buildings?.State != null ? l.Buildings?.State?.Name : string.Empty,
                 BuildingZip = l.Buildings?.Zipcode,

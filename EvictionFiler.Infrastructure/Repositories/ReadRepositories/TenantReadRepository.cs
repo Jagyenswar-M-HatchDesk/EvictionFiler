@@ -40,7 +40,8 @@ namespace EvictionFiler.Infrastructure.Repositories.ReadRepositories
      .ThenInclude(b=>b.Cities!)
      .Include(c => c.Tenants).ThenInclude(a => a.Building!)
      .ThenInclude(b => b.State)
-     
+     .Include(c => c.Tenants!.Building!.Cities)
+
 
 
      .FirstOrDefaultAsync();

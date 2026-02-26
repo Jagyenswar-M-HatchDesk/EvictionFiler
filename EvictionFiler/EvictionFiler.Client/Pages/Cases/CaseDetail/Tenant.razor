@@ -37,7 +37,7 @@
 
                                 <i class="fa-regular fa-user" style="font-size:16px;color:#fff !important;"></i>
                             </div>
-                            Tenant Profile
+                            Tenant
                         </div>
                         <button type="button" class="btn btn-sm normal p-1" title="Edit Tenant" style="color:#1f365d" @onclick="ShowTenantModal">
                             <i class="bi bi-pencil"></i>
@@ -135,7 +135,7 @@
                                                    placeholder="Enter Unit / Apt"
                                                    @bind-value="searchTenantText"
                                                    @oninput="OnSearchTenantInput" @onblur="SelectTenant" @onclick="ShowAllTenantForHoldover" />
-                                            <ValidationMessage For="() => tenantDetail.TenantId" />
+                                            <ValidationMessage For="() => ViewTenant.Id" />
                                             @if (filteredTenant?.Count() > 0)
                                             {
                                                 <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
@@ -168,7 +168,7 @@
                                     <div class="row mt-3">
                                         <div class="col-6 g-1 row">
                                             <label class="lbl edit-tent required-label">Tenants</label>
-                                            <ValidationMessage For="() => tenantDetail.TenantName" />
+                                            <ValidationMessage For="() => ViewTenant.TenantName" />
                                             @if (Tenants.Count > 0)
                                             {
 
@@ -236,60 +236,62 @@
                                     <div class="row mt-3 g-3">
                                         <div class="col-md-4">
                                             <label class="form-label required-label">Rent Due Frequency</label>
-                                            <InputSelect class="form-select" @bind-Value="tenantDetail.RentDueEachMonthOrWeekId">
+                                            <InputSelect class="form-select" @bind-Value="ViewTenant.RentDueEachMonthOrWeekId"
+                                                         @bind-Value:after=@(() => ValidateParticularInput(() => ViewTenant.RentDueEachMonthOrWeekId, nameof(ViewTenant.RentDueEachMonthOrWeekId), "Select Rent Due Date"))>
                                                 <option value="">-- Select --</option>
                                                 @foreach (var l in DateRentList)
                                                 {
                                                     <option value="@l.Id">@l.Name</option>
                                                 }
                                             </InputSelect>
-                                            <ValidationMessage For="() => tenantDetail.RentDueEachMonthOrWeekId" />
+                                            <ValidationMessage For="() => ViewTenant.RentDueEachMonthOrWeekId" />
                                         </div>
 
                                         <div class="col-md-4">
                                             <label class="form-label required-label">Monthly Rent ($)</label>
-                                            <InputNumber class="form-control" @bind-Value="tenantDetail.MonthlyRent" />
-                                            <ValidationMessage For="() => tenantDetail.MonthlyRent" />
+                                            <InputNumber class="form-control" @bind-Value="ViewTenant.MonthlyRent"
+                                                         @bind-Value:after=@(() => ValidateParticularInput(() => ViewTenant.MonthlyRent, nameof(ViewTenant.MonthlyRent), "Monthly Rent is Required")) />
+                                            <ValidationMessage For="() => ViewTenant.MonthlyRent" />
 
                                         </div>
 
                                         <div class="col-md-4">
                                             <label class="form-label">Tenant's Share ($)</label>
-                                            <InputNumber class="form-control" @bind-Value="tenantDetail.TenantShare" />
+                                            <InputNumber class="form-control" @bind-Value="ViewTenant.TenantShare" />
                                         </div>
 
                                         <div class="col-md-4">
                                             <label class="form-label required-label">Tenancy Type</label>
-                                            <InputSelect class="form-select" @bind-Value="tenantDetail.TenancyTypeId" @bind-Value:after="CalcNoticeDays">
+                                            <InputSelect class="form-select" @bind-Value="ViewTenant.TenancyTypeId" @bind-Value:after="CalcNoticeDays">
                                                 <option value="">-- Select --</option>
                                                 @foreach (var t in TenancyTypeList)
                                                 {
                                                     <option value="@t.Id">@t.Name</option>
                                                 }
                                             </InputSelect>
-                                            <ValidationMessage For="() => tenantDetail.TenancyTypeId" />
+                                            <ValidationMessage For="() => ViewTenant.TenancyTypeId" />
                                         </div>
 
                                         <div class="col-md-4">
                                             <label class="form-label">Last Payment Date</label>
 
-                                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="tenantDetail.LastPaymentDate" @bind-Value:after="GenerateMonths" />
+                                            <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="ViewTenant.LastPaymentDate" @bind-Value:after="GenerateMonths" />
                                         </div>
 
                                         <div class="col-md-4">
                                             <label class="form-label">Last Payment Amount ($)</label>
-                                            <InputNumber class="form-control" @bind-Value="tenantDetail.LastPayment" />
+                                            <InputNumber class="form-control" @bind-Value="ViewTenant.LastPayment" />
                                         </div>
                                         @if (tenantDetail.CaseTypeName == "NonPayment")
                                         {
                                             <div class="col-md-4">
                                                 <label class="form-label ">Lease Start </label>
-                                                <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="tenantDetail.LeaseStart" />
+                                                <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="ViewTenant.LeaseStart" />
 
                                             </div>
                                             <div class="col-md-4">
                                                 <label class="form-label ">Lease End </label>
-                                                <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="tenantDetail.LeaseEnd" />
+                                                <RadzenDatePicker DateFormat="@DateFormats.Default" AllowInput="false" ShowButton="true" Style="width:100%; box-shadow:none; cursor:pointer; " @bind-Value="ViewTenant.LeaseEnd" />
 
                                             </div>
                                             @*  <div class="col-md-4">
@@ -315,7 +317,7 @@
                                         <div class="col">
                                             <label class="form-label edit-tent">Rent Breakup</label>
                                             <div class="total-box mt-1">
-                                                <label class="form-label " style="font-size:14px; font-weight:300; margin-bottom:0px;">Total Owed: $ @(tenantDetail.TotalOwed ?? 00)</label>
+                                                <label class="form-label " style="font-size:14px; font-weight:300; margin-bottom:0px;">Total Owed: $ @(ViewTenant.TotalOwed ?? 00)</label>
                                             </div>
 
                                             @foreach (var item in Rows)
@@ -471,7 +473,7 @@
             AdditionalOccupantsFromDbList = await _additionalOccupanntService.GetAllAdditionalOccupantsAsync(CurrentCaseId.Value);
             AdditionalOccupantsList = AdditionalOccupantsFromDbList.ToList();
             searchTenantText = ViewTenant.UnitOrApartmentNumber!;
-            Tenants.Add(tenantDetail.TenantName);
+            Tenants.Add(ViewTenant.TenantName);
             if (CaseAdditionalTenantfromDbList.Any())
             {
                 Tenants.AddRange(CaseAdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}").ToList());
@@ -568,15 +570,16 @@
     {
         Tenants.Clear();
         searchTenantText = null;
-        tenantDetail.TenantId = null;
-        tenantDetail.TenantName = null;
-        tenantDetail.MonthlyRent = null;
-        tenantDetail.TenancyTypeId = null;
-        tenantDetail.RentDueEachMonthOrWeekId = null;
-        tenantDetail.PrimaryResidence = false;
-        tenantDetail.LastPaymentDate = null;
-        tenantDetail.LastPayment = null;
-        tenantDetail.TotalOwed = null;
+        ViewTenant.Id = null;
+        ViewTenant.FirstName = null;
+        ViewTenant.LastName = null;
+        ViewTenant.MonthlyRent = null;
+        ViewTenant.TenancyTypeId = null;
+        ViewTenant.RentDueEachMonthOrWeekId = null;
+        ViewTenant.PrimaryResidence = false;
+        ViewTenant.LastPaymentDate = null;
+        ViewTenant.LastPayment = null;
+        ViewTenant.TotalOwed = null;
         RowstoDelete.AddRange(Rows.Where(e => e.Id != null && e.Id != Guid.Empty).ToList());
         AdditionalTenantfromDbList = new List<AdditioanlTenants>();
         AdditionalTenantList = new List<AddtionalTenantDto>();
@@ -628,6 +631,14 @@
                 };
             }
         }
+
+        ValidateParticularInput(() => ViewTenant.TenancyTypeId, nameof(ViewTenant.TenancyTypeId), "Select Tenancy Type");
+    }
+    private Task ValidateParticularInput<T>(Expression<Func<T>> accessor, string fieldName, string validationMsg)
+    {
+        Require(accessor, fieldName, validationMsg);
+        editContext.NotifyValidationStateChanged();
+        return Task.CompletedTask;
     }
     private int DiffYears(DateTime? from, DateTime? to)
     {
@@ -637,7 +648,7 @@
 
     private async Task SaveTenantChanges()
     {
-        if (!await ValidateCurrentStep("Tenant")) return;
+        if (!await ValidateCurrentStep()) return;
         spinnerservice.Show();
 
 
@@ -653,13 +664,13 @@
             {
                 FirstName = firstName,
                 LastName = lastName,
-                UnitOrApartmentNumber = tenantDetail.UnitOrApartmentNumber ?? searchTenantText,
-                BuildingId = tenantDetail.BuildingId,
-                PrimaryResidence = tenantDetail.PrimaryResidence,
-                TenancyTypeId = tenantDetail.TenancyTypeId,
-                MonthlyRent = tenantDetail.MonthlyRent,
-                TenantShare = tenantDetail.TenantShare,
-                RentDueEachMonthOrWeekId = tenantDetail.RentDueEachMonthOrWeekId,
+                UnitOrApartmentNumber = ViewTenant.UnitOrApartmentNumber ?? searchTenantText,
+                BuildingId = ViewTenant.BuildingId,
+                PrimaryResidence = ViewTenant.PrimaryResidence,
+                TenancyTypeId = ViewTenant.TenancyTypeId,
+                MonthlyRent = ViewTenant.MonthlyRent,
+                TenantShare = ViewTenant.TenantShare,
+                RentDueEachMonthOrWeekId = ViewTenant.RentDueEachMonthOrWeekId,
 
             };
             var tenantId = await _tenantService.AddTenantfromCase(newTenant);
@@ -684,24 +695,23 @@
                     {
                         var updateTenant = new EditToTenantDto
                         {
-                            Id = tenantDetail.TenantId ?? Guid.Empty,
+                            Id = ViewTenant.Id,
                             FirstName = firstName,
                             LastName = lastName,
-                            BuildingId = tenantDetail.BuildingId,
-                            UnitOrApartmentNumber = tenantDetail.UnitOrApartmentNumber,
-                            MonthlyRent = tenantDetail.MonthlyRent,
-                            TenantShare = tenantDetail.TenantShare,
-                            RentDueEachMonthOrWeekId = tenantDetail.RentDueEachMonthOrWeekId,
-                            TotalRentOwed = tenantDetail.TotalOwed,
-                            TenancyTypeId = tenantDetail.TenancyTypeId,
-                            PrimaryResidence = tenantDetail.PrimaryResidence,
-                            SocialServices = tenantDetail.SocialService,
+                            BuildingId = ViewTenant.BuildingId,
+                            UnitOrApartmentNumber = ViewTenant.UnitOrApartmentNumber,
+                            MonthlyRent = ViewTenant.MonthlyRent,
+                            TenantShare = ViewTenant.TenantShare,
+                            RentDueEachMonthOrWeekId = ViewTenant.RentDueEachMonthOrWeekId,
+                            TotalRentOwed = ViewTenant.TotalOwed,
+                            TenancyTypeId = ViewTenant.TenancyTypeId,
+                            PrimaryResidence = ViewTenant.PrimaryResidence,
                             UpdatedOn = DateTime.Now
                         };
 
                         await _tenantService.UpdateTenantAsync(updateTenant);
                         addorupdate = true;
-                        legalcaseDto.TenantId = tenantDetail.TenantId;
+                        legalcaseDto.TenantId = ViewTenant.Id;
                     }
                 }
             }
@@ -712,7 +722,7 @@
         {
             foreach (var t in AdditionalTenantList)
             {
-                t.TenantId = tenantDetail.TenantId;
+                t.TenantId = ViewTenant.Id;
             }
 
             var toadd = AdditionalTenantList.Where(e => e.Id == null || e.Id == Guid.Empty && e.IsDeleted == false).ToList();
@@ -731,7 +741,7 @@
         if (addorupdate)
         {
             legalcaseDto.Id = CurrentCaseId!.Value;
-            legalcaseDto.TenantName = $"{tenantDetail.FirstName} {tenantDetail.LastName}";
+            legalcaseDto.TenantName = $"{ViewTenant.FirstName} {ViewTenant.LastName}";
 
 
             var success = await tenantDetailService.UpdateCaseForTenantAsync(legalcaseDto);
@@ -847,6 +857,12 @@
         }
         spinnerservice.Hide();
     }
+
+    private async Task ValidateInput()
+    {
+        var result = await ValidateCurrentStep();
+    }
+
     private bool HasTenantChanged(EditToTenantDto existing, TenantDetailDto current, string firstName, string lastName)
     {
         return existing.FirstName != firstName
@@ -859,27 +875,26 @@
             || existing.TenancyTypeId != current.TenancyTypeId
             || existing.SocialServices != current.SocialService;
     }
-    private async Task<bool> ValidateCurrentStep(string modal)
+    private async Task<bool> ValidateCurrentStep()
     {
         messageStore.Clear();
 
-        if (modal == "Tenant")
+
+        bool isTenantSelected = ViewTenant.Id.HasValue && ViewTenant.Id.Value != Guid.Empty;
+        bool isTextEntered = !string.IsNullOrWhiteSpace(searchTenantText);
+
+        // Tenant is required
+        if (!isTenantSelected && !isTextEntered)
         {
-            bool isTenantSelected = tenantDetail.TenantId.HasValue && tenantDetail.TenantId.Value != Guid.Empty;
-            bool isTextEntered = !string.IsNullOrWhiteSpace(searchTenantText);
-
-            // Tenant is required
-            if (!isTenantSelected && !isTextEntered)
-            {
-                Require(() => tenantDetail.TenantId, nameof(tenantDetail.TenantId), "Unit/Apt is required");
-            }
-
-            Require(() => tenantDetail.TenantName, nameof(tenantDetail.TenantName), "Tenant Name is required");
-            Require(() => tenantDetail.RentDueEachMonthOrWeekId, nameof(tenantDetail.RentDueEachMonthOrWeekId), "Select Date Rent due");
-            Require(() => tenantDetail.TenancyTypeId, nameof(tenantDetail.TenancyTypeId), "Select Tenancy type");
-            Require(() => tenantDetail.MonthlyRent, nameof(tenantDetail.MonthlyRent), "Monthly Rent is required");
-            Require(() => tenantDetail.PrimaryResidence, nameof(tenantDetail.PrimaryResidence), "Primary Residence is required");
+            Require(() => ViewTenant.Id, nameof(ViewTenant.Id), "Unit/Apt is required");
         }
+
+        Require(() => ViewTenant.TenantName, nameof(ViewTenant.TenantName), "Tenant Name is required");
+        Require(() => ViewTenant.RentDueEachMonthOrWeekId, nameof(ViewTenant.RentDueEachMonthOrWeekId), "Select Date Rent due");
+        Require(() => ViewTenant.TenancyTypeId, nameof(ViewTenant.TenancyTypeId), "Select Tenancy type");
+        Require(() => ViewTenant.MonthlyRent, nameof(ViewTenant.MonthlyRent), "Monthly Rent is required");
+        Require(() => ViewTenant.PrimaryResidence, nameof(ViewTenant.PrimaryResidence), "Primary Residence is required");
+
 
         //Require(() => legalcaseDto.CourtLocationId, nameof(legalcaseDto.CourtLocationId), "Court Location is required");
         // Require(() => legalcaseDto.DateNoticeServed, nameof(legalcaseDto.DateNoticeServed), "Notice Serve Date required");
@@ -901,7 +916,7 @@
     private void Require<T>(Expression<Func<T>> accessor, string fieldName, string message)
     {
         var value = accessor.Compile().Invoke();
-        var fieldIdentifier = new FieldIdentifier(tenantDetail, fieldName);
+        var fieldIdentifier = new FieldIdentifier(ViewTenant, fieldName);
 
         // Clear old message first
         messageStore.Clear(fieldIdentifier);
@@ -915,7 +930,7 @@
         {
             messageStore.Add(fieldIdentifier, message);
         }
-
+        editContext.NotifyFieldChanged(fieldIdentifier);
         editContext.NotifyValidationStateChanged();
     }
     private async void SelectedTenant(EditToTenantDto tenant)
@@ -933,16 +948,17 @@
 
         searchTenantText = $"{tenant.UnitOrApartmentNumber}";
 
-        tenantDetail.UnitOrApartmentNumber = tenant.UnitOrApartmentNumber;
-        tenantDetail.TenantName = tenant.FirstName + " " + tenant.LastName;
-        tenantDetail.TenantId = tenant.Id;
-        tenantDetail.TenancyTypeId = tenant.TenancyTypeId;
-        tenantDetail.PrimaryResidence = tenant.PrimaryResidence;
+        ViewTenant.UnitOrApartmentNumber = tenant.UnitOrApartmentNumber;
+        ViewTenant.FirstName = tenant.FirstName;
+        ViewTenant.LastName = tenant.LastName;
+        ViewTenant.Id = tenant.Id;
+        ViewTenant.TenancyTypeId = tenant.TenancyTypeId;
+        ViewTenant.PrimaryResidence = tenant.PrimaryResidence;
 
 
 
 
-        AdditionalTenantfromDbList = await _additionalTenantService.GetAllAdditionalTenantsAsync(tenantDetail.TenantId);
+        AdditionalTenantfromDbList = await _additionalTenantService.GetAllAdditionalTenantsAsync(ViewTenant.Id.Value);
         if (AdditionalTenantfromDbList.Count > 0)
         {
             Tenants.AddRange(AdditionalTenantfromDbList.Select(e => $"{e.FirstName} {e.LastName}").ToList());
@@ -959,6 +975,7 @@
 
         StateHasChanged();
 
+        await ValidateInput();
 
     }
     void DeleteAdditionalTenant(int index)
@@ -1004,24 +1021,29 @@
 
     void OnchangeAdditionalTenant(int index)
     {
+        var name = Tenants[index]?.Trim();
+
+
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var firstName = parts.FirstOrDefault() ?? string.Empty;
+        var lastName = parts.Length > 1 ? parts.Last() : string.Empty;
+
         // index 0 = primary tenant
         if (index <= 0 || index >= Tenants.Count)
         {
-            if (tenantDetail.TenantName == null)
-            {
-                tenantDetail.TenantName = Tenants[0];
-            }
+
+
+            ViewTenant.FirstName = firstName;
+            ViewTenant.LastName = lastName;
+            ValidateParticularInput(() => tenantDetail.TenantName, nameof(tenantDetail.TenantName), "Tenant Name is Required");
+
             return;
 
         }
 
-        var name = Tenants[index]?.Trim();
         if (string.IsNullOrWhiteSpace(name))
             return;
 
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var firstName = parts.FirstOrDefault() ?? "";
-        var lastName = parts.Length > 1 ? parts.Last() : "";
 
         // Map UI row → ACTIVE additional tenants only
         int activeIndex = index - 1;
@@ -1056,6 +1078,8 @@
                 IsVisible = true
             });
         }
+        ValidateParticularInput(() => tenantDetail.TenantName, nameof(tenantDetail.TenantName), "Tenant Name is Required");
+
     }
     void AddTenant()
     {

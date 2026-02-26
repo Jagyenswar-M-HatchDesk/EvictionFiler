@@ -819,6 +819,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     File = $"/CaseForms/{caseDetails.CaseCode}/{fileName}",
                     CreatedOn = DateTime.UtcNow,
                     CreatedBy = createdBy,
+                    CreatedById = createdBy,
                     IsDeleted = false
                 };
 

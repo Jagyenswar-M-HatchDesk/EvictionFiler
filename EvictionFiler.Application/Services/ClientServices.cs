@@ -47,7 +47,7 @@ namespace EvictionFiler.Application.Services
             // ✅ Agar Admin nahi hai to sirf apne hi clients dikhaye
             if (!isAdmin && Guid.TryParse(userId, out Guid userGuid))
             {
-                query = query.Where(x => x.CreatedBy == userGuid);
+                query = query.Where(x => x.User.FirmId == userGuid);
             }
 
             var landlords = await query
@@ -295,6 +295,7 @@ namespace EvictionFiler.Application.Services
 					CellPhone = client.CellPhone,
 					Fax = client.Fax,
 					CreatedBy = client.CreatedBy,
+					CreatedById = client.CreatedBy,
 					CreatedOn = DateTime.Now,
 					ClientTypeId = client.ClientTypeId,
 				};
@@ -391,7 +392,7 @@ namespace EvictionFiler.Application.Services
 								{
 									var tenant = new Tenant
 									{
-										Id = t.Id,
+										Id = t.Id.Value,
 										TenantCode = t.TenantCode,
 										FirstName = t.FirstName,
 										LastName = t.LastName,
@@ -684,14 +685,14 @@ namespace EvictionFiler.Application.Services
                             bool isNewTenant = false;
 							foreach (var t in b.editTenants)
 							{
-								if (!existingTenantsIds.Contains(t.Id))
+								if (!existingTenantsIds.Contains(t.Id.Value))
 								{
 									isNewTenant = true;
 								}
 
 								var tenant = new Tenant
 								{
-									Id = isNewTenant ? Guid.NewGuid() : t.Id,
+									Id = isNewTenant ? Guid.NewGuid() : t.Id.Value,
 									TenantCode = t.TenantCode,
 									FirstName = t.FirstName,
 									LastName = t.LastName,
