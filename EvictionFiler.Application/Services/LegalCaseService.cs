@@ -569,11 +569,12 @@ namespace EvictionFiler.Application.Services
                         Court = caseEntity.CourtLocation != null ? caseEntity.CourtLocation.Court! : "",
                         CourtAddress = caseEntity.CourtLocation != null ? caseEntity.CourtLocation.Address! : "",
                         CourtPartId = caseEntity.CourtPartId != null ? caseEntity.CourtPartId : null,
-                        CourtPart = caseEntity.CourtPart != null ? caseEntity.CourtPart.Part : string.Empty,
-                        CourtRoom = caseEntity.CourtPart != null ? caseEntity.CourtPart.RoomNo : string.Empty,
+                        CourtPart = caseEntity.CourtPart != null ? caseEntity.CourtPart.Part : new string(caseEntity.CourtRoom.Where(char.IsLetter).ToArray()),
+                        CourtRoom = caseEntity.CourtPart != null ? caseEntity.CourtPart.RoomNo : caseEntity.CourtRoom,
+                        CourtRoomNo = caseEntity.CourtPart != null ? caseEntity.CourtPart.RoomNo : new string(caseEntity.CourtRoom.Where(char.IsDigit).ToArray()),
                         CourtLocationId = caseEntity.CourtLocationId,
                         CourtName = caseEntity.CourtLocation != null ? $"{caseEntity.CourtLocation.Court}" : "",
-                        Judge = caseEntity.CourtPart != null ? caseEntity.CourtPart.Judge : string.Empty,
+                        Judge = caseEntity.CourtPart != null ? caseEntity.CourtPart.Judge : caseEntity.ManagingAgent,
                         //CourtConferenceId = caseEntity.Courts != null ? caseEntity.Courts.ConferenceId : "",
                         //CourtCallIn = caseEntity.Courts != null ? caseEntity.Courts.CallIn : "",
                         //CourtNotes = caseEntity.Courts != null ? caseEntity.Courts.Notes : "",
@@ -970,9 +971,9 @@ namespace EvictionFiler.Application.Services
                 existingCase.AttrneyEmail = legalCase.AttrneyEmail;
                 existingCase.CourtLocationId = legalCase.CourtLocationId;
                 existingCase.CourtRoom = legalCase.CourtRoom;
+                existingCase.ManagingAgent = legalCase.Judge;
                 existingCase.Index = legalCase.Index;
                 existingCase.County = legalCase.County;
-                existingCase.ManagingAgent = legalCase.ManagingAgent;
                 existingCase.OpposingCounsel = legalCase.OpposingCounsel;
                 existingCase.AppearanceDate = legalCase.AppearanceDate;
                 existingCase.AppearanceTime = legalCase.AppearanceTime;
@@ -1255,6 +1256,8 @@ namespace EvictionFiler.Application.Services
                 existingCase.CourtPartId = legalCase.CourtPartId!;
                 existingCase.CourtTypeId = legalCase.CourtTypeId!;
                 existingCase.Index = legalCase.Index!;
+                existingCase.ManagingAgent = legalCase.Judge;
+                existingCase.CourtRoom = legalCase.CourtRoom!;
 
                 var result = await _unitOfWork.SaveChangesAsync();
 

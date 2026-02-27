@@ -625,7 +625,7 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{Building_AptNo}}", caseDetails.BuildindAptno ?? "")
     .Replace("{{Building_Zip}}", caseDetails.BuildingZip ?? "")
     .Replace("{{Building_City}}", caseDetails.BuildingCity ?? "")
-    //.Replace("{{LeaseExpiredDate}}", caseDetails.LeaseExpired.ToString())
+    .Replace("{{LeaseExpiredDate}}", caseDetails.LeaseExpired.ToString())
     .Replace("{{RentalExpiredDate}}", "")
     .Replace("{{MoveOutDate}}", "")
     .Replace("{{Floors}}", "")
