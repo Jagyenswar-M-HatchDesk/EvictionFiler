@@ -177,6 +177,7 @@ builder.Services.AddScoped<IExemptionReasonsRepository,ExemptionReasonsRepositor
 builder.Services.AddScoped<IClientReadRepository,ClientReadRepository>();
 builder.Services.AddScoped<IMarshalAndWarrantRepository, MarshalAndWarrantRepository>();
 builder.Services.AddScoped<IWarrantRepository, WarrantRepository>();
+builder.Services.AddScoped<ICaseAppearanceReadRepository, CaseAppearnceReadRepository>();
 
 //builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 //    .AddIdentityCookies();

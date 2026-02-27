@@ -1,5 +1,6 @@
 ﻿using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.CaseAppearanceDtos;
 using EvictionFiler.Application.DTOs.CaseDetailDtos;
 using EvictionFiler.Application.DTOs.CaseWarrantDtos;
 using EvictionFiler.Application.DTOs.LandLordDto;
@@ -29,9 +30,10 @@ namespace EvictionFiler.Application.Services
         private readonly IClientReadRepository _clientReadRepository;
         private readonly IMarshalAndWarrantRepository _marshalAndWarrantRepository;
         private readonly IWarrantRepository _warrantRepository;
+        private readonly ICaseAppearanceReadRepository _caseAppearanceReadRepository;
 
         public CaseDetailService(ILandlordReadRepository landlordReadRepository,IBuildingReadRepository buildingReadRepository,ITenantReadRepository tenantReadRepository,ICitiesRepository cityRepository,IClientReadRepository clientReadRepository,
-                                    IMarshalAndWarrantRepository marshalAndWarrantRepository,IWarrantRepository warrantRepository)
+                                    IMarshalAndWarrantRepository marshalAndWarrantRepository,IWarrantRepository warrantRepository,ICaseAppearanceReadRepository caseAppearanceReadRepository)
         {
             _landlordReadRepository = landlordReadRepository;
             _buildingReadRepository = buildingReadRepository;
@@ -40,6 +42,7 @@ namespace EvictionFiler.Application.Services
             _clientReadRepository = clientReadRepository;
             _marshalAndWarrantRepository = marshalAndWarrantRepository;
             _warrantRepository = warrantRepository;
+            _caseAppearanceReadRepository = caseAppearanceReadRepository;
         }
         public async Task<LandlordDetailDto> GetLandlordDetailAsync(Guid caseId)
         {
@@ -399,6 +402,36 @@ namespace EvictionFiler.Application.Services
                 DocketNo = entity.DocketNo,
             };
 
+        }
+
+        //Motion
+        public async Task<List<CaseAppearanceDto>> GetAllCaseAppreance(Guid caseId)
+        {
+            var appreaaces = await _caseAppearanceReadRepository.GetAllAsync(predicate: x => x.LegalCaseId == caseId, includes: a => a.CourtToday!);
+            var result = appreaaces.Select(e => new CaseAppearanceDto
+            {
+                Id = e.Id,
+                AdjournDate = e.AdjournDate,
+                AdjournReasonId = e.AdjournReasonId,
+                AdjournTime = e.AdjournTime,
+                MotionDue = e.MotionDue,
+                ReminderPayments = e.ReminderPayments,
+                ReminderDeadlines = e.ReminderDeadlines,
+                ReplyDue = e.ReplyDue,
+                ReturnDate = e.ReturnDate,
+                CourtTodayId = e.CourtTodayId,
+                OppositionDue = e.OppositionDue,
+                JurisdictionWaived = e.JurisdictionWaived,
+                StayUntil = e.StayUntil,
+                WarrantDate = e.WarrantDate,
+                WarrantIssued = e.WarrantIssued,
+                MilitaryAffidavit = e.MilitaryAffidavit,
+                LegalCaseId = e.LegalCaseId,
+                CourtTodayName = e.CourtToday != null ? e.CourtToday.Name : string.Empty,
+
+
+            }).ToList();
+            return result;
         }
 
     }

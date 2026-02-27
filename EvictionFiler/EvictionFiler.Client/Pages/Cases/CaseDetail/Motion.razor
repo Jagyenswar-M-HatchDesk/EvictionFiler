@@ -1,0 +1,160 @@
+﻿@using EvictionFiler.Application.DTOs.CaseAppearanceDtos
+@using EvictionFiler.Application.DTOs.CaseHearing
+@using EvictionFiler.Application.Interfaces.IServices
+@inject ICaseAppearanceService _caseAppreance
+@inject ICaseHearingService _caseHearingService
+@inject ICaseDetailService caseDetailService
+
+<div class="info-table p mb-4" style="border:none;">
+    <div class="info-bar">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="info-bar-title">
+                <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#1f365d; border-radius:7px !important;margin-right:10px;">
+
+                    <i class="fa-regular fa-calendar" style="font-size:16px;color:#fff !important;"></i>
+                </div>
+                Motion Dates
+            </div>
+            <button type="button" class="btn btn-sm normal p-1"  title="Edit Motions" style="color:#1f365d">
+                <i class="bi bi-pencil"></i>
+            </button>
+        </div>
+    </div>
+    <div class="info-row" style="display:flex; flex-direction:row">
+        <!-- Column 1 -->
+        <div class="info-block">
+            <div class="label">Motion Due:</div>
+            <div class="value ellipsis">
+                @(MotionJudgements.MotionDue.HasValue
+                                ? MotionJudgements.MotionDue.Value.ToString(DateFormats.Default)
+                                : "--")
+            </div>
+        </div>
+
+        <!-- Column 2 -->
+        <div class="info-block ps-0">
+            <div class="label">Opposition Due:</div>
+            <div class="value ellipsis">
+                @(MotionJudgements.OppositionDue.HasValue
+                                ? MotionJudgements.OppositionDue.Value.ToString(DateFormats.Default)
+                                : "--")
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 2 -->
+    <div class="info-row" style="display:flex; flex-direction:row">
+        <!-- Column 1 -->
+        <div class="info-block">
+            <div class="label">Reply Due:</div>
+            <div class="value ellipsis">
+                @(MotionJudgements.ReplyDue.HasValue
+                                ? MotionJudgements.ReplyDue.Value.ToString(DateFormats.Default)
+                                : "--")
+            </div>
+        </div>
+
+        <!-- Column 2 -->
+        <div class="info-block ps-0">
+            <div class="label">OSC / Return:</div>
+            <div class="value ellipsis">
+                @(MotionJudgements.ReturnDate.HasValue
+                                ? MotionJudgements.ReturnDate.Value.ToString(DateFormats.Default)
+                                : "--")
+            </div>
+        </div>
+    </div>
+    <hr />
+    <div colspan="2" class="info-bar" style="background-color:transparent; color:#1F365D; padding-top:0px;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="info-bar-title">Key Dates</div>
+            @* <button type="button" class="btn btn-sm normal p-1" @onclick="ShowTenantModal" style="color:white">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>*@
+        </div>
+    </div>
+    <div class="info-row" style="display:flex; flex-direction:row">
+        <!-- Column 1 -->
+        <div class="info-block">
+            <div class="label">Vacate Date:</div>
+            <div class="value ellipsis">
+                @(RemainderDate.HasValue
+                                ?RemainderDate.Value.ToString(DateFormats.Default)
+                                : "--")
+            </div>
+        </div>
+
+        <!-- Column 2 -->
+        <div class="info-block">
+            <div class="label">Next Reminder:</div>
+            <div class="value ellipsis">
+                @(RemainderDate.HasValue
+                                ? RemainderDate.Value.ToString(DateFormats.Default)
+                                : "--")
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@code {
+    [Parameter] public Guid? CurrentCaseId { get; set; }
+
+    [Parameter] public DateTime? RemainderDate { get; set; }
+
+    // private IntakeModel legalcaseDto = new();
+    private List<CaseAppearanceDto> Judgements = new();
+    private CaseAppearanceDto MotionJudgements = new();
+    private List<CaseHearingDto> CaseHearings = new();
+    private CaseHearingDto CaseHearing = new();
+    protected override async Task OnInitializedAsync()
+    {
+        if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty)
+        {
+            await LoadJudgement();
+        }
+    }
+    // private async Task LoadMotionJudgementDetails()
+    // {
+    //     isLoading = true;
+    //     var response = await CaseService.GetMotionJudgementByCaseId(CurrentCaseId.Value);
+    //     if (response.IsSuccessStatusCode && response.Content != null)
+    //     {
+    //         MotionJudgements = response.Content;
+    //     }
+    //     isLoading = false;
+    // }
+    private async Task LoadJudgement()
+    {
+        Judgements = await caseDetailService.GetAllCaseAppreance(CurrentCaseId.Value);
+        if (Judgements != null)
+        {
+            if (CaseHearings != null)
+            {
+                int count = Math.Min(Judgements.Count, CaseHearings.Count);
+
+                for (int i = 0; i < count; i++)
+                {
+                    // Assign hearing date to judgement appearance date
+                    Judgements[i].AppreanceDate = CaseHearings[i].HearingDate;
+                }
+            }
+
+            MotionJudgements = Judgements!.Where(e => e.CourtTodayName!.Contains("Motion")).FirstOrDefault()! ?? new CaseAppearanceDto();
+        }
+
+
+
+
+        StateHasChanged();
+    }
+    private async Task LoadHearing()
+    {
+        CaseHearings = await _caseHearingService.GetAllCaseHeariingByCaseIdAsync(CurrentCaseId.Value);
+        if (CaseHearings.Any())
+        {
+            CaseHearing = CaseHearings.FirstOrDefault()!;
+        }
+        StateHasChanged();
+    }
+}
