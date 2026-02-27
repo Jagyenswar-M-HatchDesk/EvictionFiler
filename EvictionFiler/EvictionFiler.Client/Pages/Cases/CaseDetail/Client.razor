@@ -112,7 +112,7 @@
 
                                         <InputText type="text" class="form-control"
                                                    placeholder="Search by client name or code..."
-                                                   @bind-value="searchText"
+                                                   @bind-value="searchText" @onclick="ShowAllClients"
                                                    @oninput="OnSearchInput" />
 
                                         @if (filteredClients?.Count() > 0)
@@ -140,6 +140,8 @@
                                             </div>
                                         </div>
                                     }
+                                    <ValidationMessage For="() => clientDetail.ClientId" />
+
                                 }
                                 @if (showClientTextbox)
                                 {
@@ -221,6 +223,8 @@
 
 @code {
     [Parameter] public Guid? currentCaseId { get; set; }
+    [Parameter] public string? LoggedinUserId { get; set; }
+    [Parameter] public bool? isAdmin { get; set; }
     private ClientDetailDto clientDetail = new ClientDetailDto();
     private bool isLoading = false;
     public string searchText { get; set; }
@@ -242,7 +246,7 @@
         {
             isLoading = true;
             await Task.Delay(1000);
-            
+
             StateHasChanged();
 
 
@@ -254,7 +258,7 @@
     public async Task clientDetails()
     {
         clientDetail= await caseDetailService.GetClientDetailAsync(currentCaseId!.Value);
-        
+
 
     }
 
@@ -267,26 +271,55 @@
                         || c.ClientCode.Contains(searchText, StringComparison.OrdinalIgnoreCase))
             .ToList();
     }
+    private async Task ShowAllClients()
+    {
+
+        if (searchText != null && searchText.Length > 3)
+        {
+            var searchTerm = searchText.Trim().ToLower();
+            filteredClients = ClientList.Where(e =>
+                    (e.ClientCode != null && e.ClientCode.ToLower().Contains(searchTerm)) ||
+                    (e.FirstName != null && e.FirstName.ToLower().Contains(searchTerm)) ||
+                    (e.LastName != null && e.LastName.ToLower().Contains(searchTerm)) ||
+                    (e.Email != null && e.Email.ToLower().Contains(searchTerm)) ||
+                    (e.Phone != null && e.Phone.ToLower().Contains(searchTerm)) ||
+                    (e.CellPhone != null && e.CellPhone.ToLower().Contains(searchTerm)) ||
+                    (e.Fax != null && e.Fax.ToLower().Contains(searchTerm)) ||
+                    (e.Address1 != null && e.Address1.ToLower().Contains(searchTerm)) ||
+                    (e.Address2 != null && e.Address2.ToLower().Contains(searchTerm)) ||
+                    (e.City != null && e.City.ToLower().Contains(searchTerm))).ToList();
+        }
+        else
+        {
+            ClientList = await _clientService.GetAllClient(LoggedinUserId, isAdmin.Value);
+            filteredClients = ClientList.ToList();
+        }
+    }
 
     private void SelectClient(EditToClientDto selectedclient)
     {
         showClientTextbox = true;
-        searchText = $"{client.FirstName} {client.LastName}";
+        searchText = $"{clientDetail.FirstName} {clientDetail.LastName}";
         filteredClients.Clear();
         newClient = false;
         // Fill card
         clientDetail.ClientId = selectedclient.Id;
         client.Id = selectedclient.Id;
         client.FirstName = $"{selectedclient.FirstName}";
+        clientDetail.FirstName = $"{selectedclient.FirstName}";
         client.LastName = $"{selectedclient.LastName}";
+        clientDetail.LastName = $"{selectedclient.LastName}";
         client.Email = selectedclient.Email;
+        clientDetail.ClientEmail = selectedclient.Email;
         client.Phone = selectedclient.Phone;
+        clientDetail.ClientPhone = selectedclient.Phone;
         client.Address1 = selectedclient.Address1;
         client.Address2 = selectedclient.Address2;
         client.City = selectedclient.City;
         client.StateId = selectedclient.StateId;
         client.ZipCode = selectedclient.ZipCode;
         client.ClientTypeId = selectedclient.ClientTypeId;
+        clientDetail.ClientTypeId = selectedclient.ClientTypeId;
         client.Reference = selectedclient.Reference;
     }
     private void ClearSelectedClient()
@@ -297,6 +330,7 @@
         showClientTextbox = false;
         searchText = null;
         client = new EditToClientDto();
+        clientDetail = new();
 
         StateHasChanged();
     }
@@ -306,6 +340,7 @@
         searchText = null;
         newClient = true;
         client = new EditToClientDto();
+        messageStore.Clear(() => clientDetail.ClientId);
         StateHasChanged();
 
     }
@@ -331,8 +366,7 @@
     }
     private async Task SaveClientChanges()
     {
-        if (!await ValidateCurrentStep())
-            return;
+        if (!await ValidateCurrentStep()) return;
         spinnerservice.Show();
 
         var addorupdate = false;
@@ -430,13 +464,21 @@
     {
         messageStore.Clear();
 
+        if (newClient)
+        {
+            Require(() => clientDetail.FirstName, nameof(clientDetail.FirstName), "First Name is required.");
 
-        Require(() => clientDetail.FirstName, nameof(clientDetail.FirstName), "First Name is required.");
+            Require(() => clientDetail.ClientEmail, nameof(clientDetail.ClientEmail), "Email is required.");
+            Require(() => clientDetail.ClientPhone, nameof(clientDetail.ClientPhone), "Phone is required.");
 
-        Require(() => clientDetail.ClientEmail, nameof(clientDetail.ClientEmail), "Email is required.");
-        Require(() => clientDetail.ClientPhone, nameof(clientDetail.ClientPhone), "Phone is required.");
+            Require(() => clientDetail.ClientTypeId, nameof(clientDetail.ClientTypeId), "Select client type");
+        }
+        else
+        {
+            Require(() => clientDetail.ClientId, nameof(clientDetail.ClientId), "Select a client");
+        }
 
-        Require(() => clientDetail.ClientTypeId, nameof(clientDetail.ClientTypeId), "Select client type");
+       
 
 
 
