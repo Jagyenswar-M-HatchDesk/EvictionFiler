@@ -1771,8 +1771,8 @@
 
                         *@
                         </div>
-                        <div class="col-4 p-2">
-                            <table class="info-table " style="border:none;">
+                        <div class="col-4">
+                           @* <table class="info-table " style="border:none;">
                                 <thead>
                                     <tr>
                                         <th colspan="2" class="info-bar" >
@@ -1820,15 +1820,17 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </table>*@
 
+                            <Client currentCaseId="@caseId"/>
 
+                        </div> 
 
-                        </div>
+                        
 
                         <!-- Marshal Info -->
-                        <div class="col-4 p-2">
-                            <table class="info-table " style="border:none;">
+                        <div class="col-4">
+                            @*<table class="info-table " style="border:none;">
                                 <thead>
                                     <tr>
                                         <th colspan="2" class="info-bar">
@@ -1866,8 +1868,8 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
-
+                            </table> *@
+                            <Marshal CurrentCaseId="@caseId" isReload="@isLoadMarshal" loggedInUserId="@loggedInUserId" />
 
 
                         </div>
@@ -2046,7 +2048,7 @@
                         </div>
 
                         <div class="col-8">
-                            <div class="info-table " style="border:none;">
+                            @* <div class="info-table " style="border:none;">
                                 <div class="info-bar">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="info-bar-title">
@@ -2127,7 +2129,8 @@
                                     </div>
 
                                 </div>
-                            </div>
+                            </div> *@
+                            <Warrant CurrentCaseId="@caseId" isReload="@isLoadMarshal" loggedInUserId="@loggedInUserId" SelectedMarshalId="legalcaseDto.MarshalId"   WarrantRequested="@legalcaseDto.WarrantRequested"/>
                             @* <table class="info-table " style="border:none;">
                             <thead>
                                 <tr>
@@ -4092,7 +4095,7 @@
     </div>
 
     <!-- client Edit Modal -->
-    <div class="modal fade" id="stipulationModal" tabindex="-1" aria-labelledby="stipulationModalLabel" aria-hidden="true">
+  @* <div class="modal fade" id="stipulationModal" tabindex="-1" aria-labelledby="stipulationModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header">
@@ -4277,9 +4280,9 @@
                 </EditForm>
             </div>
         </div>
-    </div>
+    </div> *@
 
-    <div class="modal fade" id="marshalModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
+  @* <div class="modal fade" id="marshalModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header">
@@ -4422,7 +4425,7 @@
 
             </div>
         </div>
-    </div>
+    </div> *@
     <div class="modal fade" id="courtModal" tabindex="-1" aria-labelledby="CourtModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
@@ -4682,7 +4685,13 @@
     <script>
         window.showModal = (id) => {
         const modal = new bootstrap.Modal(document.getElementById(id));
+        if(modal){
         modal.show();
+
+        }
+        else{
+            console.log("No modal found");
+        }
         };
     </script>
     <script>
@@ -4800,18 +4809,20 @@
     public List<CourtDto> courts = new();
     public List<CourtDto> filteredCourts = new List<CourtDto>();
     public List<CourtPartDto> filteredCourtsPart = new List<CourtPartDto>();
-    private List<MarshalDto> filteredmarshal = new();
-    private MarshalDto selectedmarshal;
-    private string searchmarshalText;
+    // private List<MarshalDto> filteredmarshal = new();
+    // private MarshalDto selectedmarshal;
+    // private string searchmarshalText;
     private bool selectedTimeline = false;
     private bool PrimaryResidence = false;
     private Guid? TenancytypeId = Guid.Empty;
     private Guid? CaseNotesId = null;
     private CancellationTokenSource _cts;
-    private bool isMarshalAssigned = false;
+    // private bool isMarshalAssigned = false;
     [Parameter] public GenrateNoticeModel createAction { get; set; } = new();
     private bool showMarshalError = false;
     [Parameter] public EventCallback OnFormCreate { get; set; } = new();
+
+    private bool isLoadMarshal = false;
 
     private Guid? SelectedLandlordId;
 
@@ -4921,17 +4932,17 @@
     {
         SelectedLandlordId = landlordId;
     }
-    async Task HideMarshalDropDown(FocusEventArgs e)
-    {
-        // small1 delay to allow click on dropdown item to register before hiding
-        await Task.Delay(500);
-        if (filteredmarshal.Any())
-        {
-            filteredmarshal.Clear();
+    // async Task HideMarshalDropDown(FocusEventArgs e)
+    // {
+        
+    //     await Task.Delay(500);
+    //     if (filteredmarshal.Any())
+    //     {
+    //         filteredmarshal.Clear();
 
-        }
-        StateHasChanged();
-    }
+    //     }
+    //     StateHasChanged();
+    // }
     private async Task SelectCourtType()
     {
         var CourtType = CourtTypeList.FirstOrDefault(ty => ty.Id == legalcaseDto.CourtTypeId);
@@ -4994,7 +5005,7 @@
         ShowClearBtn = true;
         StateHasChanged();
     }
-    private async Task OnSearchMarshalInput(ChangeEventArgs e)
+   @* private async Task OnSearchMarshalInput(ChangeEventArgs e)
     {
         searchmarshalText = e.Value?.ToString() ?? "";
         _cts?.Cancel();
@@ -5030,7 +5041,7 @@
             // Old task cancelled → ignore
         }
 
-    }
+    } *@
 
     private async Task OpenNotesTab(Guid NotesId)
     {
@@ -5050,7 +5061,7 @@
 
     }
 
-    private async Task SubmitMarshalDates(bool formgeneration)
+   @* private async Task SubmitMarshalDates(bool formgeneration)
     {
         showMarshalError = false; // reset old errors
 
@@ -5076,7 +5087,7 @@
             {
                 ToastService.ShowError("Failed to asign Marshal .");
             }
-        }
+        } 
 
 
 
@@ -5114,9 +5125,9 @@
         }
 
         StateHasChanged();
-    }
+    } *@
 
-    private async void Selectedmarshal(MarshalDto marshal)
+   @* private async void Selectedmarshal(MarshalDto marshal)
     {
 
         selectedmarshal = marshal;
@@ -5136,23 +5147,23 @@
         StateHasChanged();
 
 
-    }
+    }*@
 
 
 
-    private void ResetMarshal()
-    {
-        spinnerservice.Show();
-        isMarshalAssigned = false;
-        selectedmarshal = null;
-        legalcaseDto.MarshalId = null;     // Marshal unassign
-        searchmarshalText = "";            // Clear search box
-        filteredmarshal?.Clear();
-        showMarshalError = false;// Clear list
+    // private void ResetMarshal()
+    // {
+    //     spinnerservice.Show();
+    //     isMarshalAssigned = false;
+    //     selectedmarshal = null;
+    //     legalcaseDto.MarshalId = null;     
+    //     searchmarshalText = "";           
+    //     filteredmarshal?.Clear();
+    //     showMarshalError = false;
 
-        StateHasChanged();
-        spinnerservice.Hide();
-    }
+    //     StateHasChanged();
+    //     spinnerservice.Hide();
+    // }
 
     private async Task GenrateMarshalForm()
     {
@@ -5189,43 +5200,43 @@
 
     }
 
-    private async Task SubmitMarshal()
-    {
-        showMarshalError = false; // reset old errors
+    // private async Task SubmitMarshal()
+    // {
+    //     showMarshalError = false; 
 
-        if (legalcaseDto.MarshalId == null || legalcaseDto.MarshalId == Guid.Empty)
-        {
-            showMarshalError = true;
-            StateHasChanged();
-            return;
-        }
-        spinnerservice.Show();
+    //     if (legalcaseDto.MarshalId == null || legalcaseDto.MarshalId == Guid.Empty)
+    //     {
+    //         showMarshalError = true;
+    //         StateHasChanged();
+    //         return;
+    //     }
+    //     spinnerservice.Show();
 
-        var result = await _service.UpdateMarshalAsync(legalcaseDto);
+    //     var result = await _service.UpdateMarshalAsync(legalcaseDto);
 
-        if (result)
-        {
-            ToastService.ShowSuccess("Marshal Assign  successfully!");
-            legalcaseDto.MarshalName = searchmarshalText;
-            legalcaseDto.MarshalPhone = selectedmarshal.Telephone;
-            legalcaseDto.Docketno = selectedmarshal.DocketNo;
-            // await LoadCaseDetails();
-            isMarshalAssigned = true;
-        }
-        else
-        {
-            ToastService.ShowError("Failed to asign Marshal .");
-        }
-        StateHasChanged();
-        spinnerservice.Hide();
+    //     if (result)
+    //     {
+    //         ToastService.ShowSuccess("Marshal Assign  successfully!");
+    //         legalcaseDto.MarshalName = searchmarshalText;
+    //         legalcaseDto.MarshalPhone = selectedmarshal.Telephone;
+    //         legalcaseDto.Docketno = selectedmarshal.DocketNo;
+            
+    //         isMarshalAssigned = true;
+    //     }
+    //     else
+    //     {
+    //         ToastService.ShowError("Failed to asign Marshal .");
+    //     }
+    //     StateHasChanged();
+    //     spinnerservice.Hide();
 
-    }
+    // }
 
-    private async Task ShowAllmarshal()
-    {
-        filteredmarshal = (await _marshalService.GetAllMarshalAsync()).ToList();
-        StateHasChanged();
-    }
+    // private async Task ShowAllmarshal()
+    // {
+    //     filteredmarshal = (await _marshalService.GetAllMarshalAsync()).ToList();
+    //     StateHasChanged();
+    // }
     private async Task OnFocusOutCourt(FocusEventArgs e)
     {
         await Task.Delay(200);
@@ -5398,6 +5409,7 @@
         await JS.InvokeVoidAsync("hideModal", "generateActions");
         CaseNotesId = null;
         _showCreateAction = false;
+        isLoadMarshal = true;
     }
     private async Task HandleNotesInvokeAction()
     {
@@ -5410,17 +5422,17 @@
     private async Task LoadCaseDetails()
     {
         legalcaseDto = await _service.GetCaseByIdAsync(caseId);
-        if (legalcaseDto.MarshalId != null && legalcaseDto.MarshalId != Guid.Empty)
-        {
-            selectedmarshal = await _marshalService.GetMarshalByIdAsync(legalcaseDto.MarshalId.Value);
-            isMarshalAssigned = true;
-        }
-        else
-        {
-            isMarshalAssigned = false;
-            selectedmarshal = null;
-            searchmarshalText = string.Empty;
-        }
+        // if (legalcaseDto.MarshalId != null && legalcaseDto.MarshalId != Guid.Empty)
+        // {
+        //     selectedmarshal = await _marshalService.GetMarshalByIdAsync(legalcaseDto.MarshalId.Value);
+        //     isMarshalAssigned = true;
+        // }
+        // else
+        // {
+        //     isMarshalAssigned = false;
+        //     selectedmarshal = null;
+        //     searchmarshalText = string.Empty;
+        // }
         if (legalcaseDto != null && legalcaseDto.CaseTypeId != null)
         {
             FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
@@ -5465,14 +5477,14 @@
 
                 // for client
                 ClientCode = legalcaseDto.ClientCode,
-                FirstName = legalcaseDto.FirstName,
-                LastName = legalcaseDto.LastName,
-                Address1 = legalcaseDto.Address1,
-                Address2 = legalcaseDto.Address2,
-                StateName = legalcaseDto.StateName,
-                ZipCode = legalcaseDto.ZipCode,
-                ClientEmail = legalcaseDto.ClientEmail,
-                ClientPhone = legalcaseDto.ClientPhone,
+                // FirstName = legalcaseDto.FirstName,
+                // LastName = legalcaseDto.LastName,
+                // Address1 = legalcaseDto.Address1,
+                // Address2 = legalcaseDto.Address2,
+                // StateName = legalcaseDto.StateName,
+                // ZipCode = legalcaseDto.ZipCode,
+                // ClientEmail = legalcaseDto.ClientEmail,
+                // ClientPhone = legalcaseDto.ClientPhone,
                 MarshalId = legalcaseDto.MarshalId,
 
                 // Landlord
@@ -5527,6 +5539,7 @@
                 ExpirationDate = legalcaseDto.ExpirationDate,
                 PredicateNotice = legalcaseDto.PredicateNotice,
                 //RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
+                // MonthlyRent = legalcaseDto.MonthlyRent,
                 //TotalOwed = legalcaseDto.TotalOwed,
                 //TenantShare = legalcaseDto.TenantShare,
                 SocialService = legalcaseDto.SocialService,
@@ -5547,9 +5560,9 @@
                 CourtVirtualLink = legalcaseDto.CourtVirtualLink,
                 Judge = legalcaseDto.Judge,
                 BillAmount = legalcaseDto.BillAmount,
-                Docketno = legalcaseDto.Docketno,
-                MarshalName = legalcaseDto.MarshalName,
-                MarshalPhone = legalcaseDto.MarshalPhone,
+                // Docketno = legalcaseDto.Docketno,
+                // MarshalName = legalcaseDto.MarshalName,
+                // MarshalPhone = legalcaseDto.MarshalPhone,
 
                 LastPayment = legalcaseDto.LastPayment,
                 Assistance = legalcaseDto.Assistance,
@@ -5894,14 +5907,14 @@
         JS.InvokeVoidAsync("showModal", "tenantModal");
     } *@
 
-    public EditToClientDto client = new EditToClientDto();
+    // public EditToClientDto client = new EditToClientDto();
     public List<EditToClientDto> ClientList = new List<EditToClientDto>();
     public IEnumerable<CaseNotes> CaseNotes = new List<CaseNotes>();
-    public List<EditToClientDto> filteredClients = new List<EditToClientDto>();
-    public List<ClientRole> ClientTypeList = new List<ClientRole>();
-    public string searchText { get; set; }
-    public bool showClientTextbox = false;
-    public bool newClient = false;
+    // public List<EditToClientDto> filteredClients = new List<EditToClientDto>();
+    // public List<ClientRole> ClientTypeList = new List<ClientRole>();
+    // public string searchText { get; set; }
+    // public bool showClientTextbox = false;
+    // public bool newClient = false;
     bool showCountyDropdown = false;
     bool ShowClearBtn = false;
     bool showCourtPartDropdown = false;
@@ -5912,18 +5925,18 @@
     private ValidationMessageStore messageStore;
     private EditContext _editContext;
     private List<PremiseType> PremiseTypesList = new();
-    private async void ShowClientModal()
-    {
-        // Copy current data into editable model
+    // private async void ShowClientModal()
+    // {
+        
 
-        client = await _clientService.GetClientByIdAsync(legalcaseDto.ClientId!.Value) ?? new EditToClientDto();
+    //     client = await _clientService.GetClientByIdAsync(legalcaseDto.ClientId!.Value) ?? new EditToClientDto();
 
-        ClientTypeList = await _clientRoleRepository.GetAllClientRole();
-        showClientTextbox = true;
-        searchText = $"{client.FirstName} {client.LastName}";
-        StateHasChanged();
-        await JS.InvokeVoidAsync("showModal", "clientModal");
-    }
+    //     ClientTypeList = await _clientRoleRepository.GetAllClientRole();
+    //     showClientTextbox = true;
+    //     searchText = $"{client.FirstName} {client.LastName}";
+    //     StateHasChanged();
+    //     JS.InvokeVoidAsync("showModal", "clientModal");
+    // }
     private async void ShowStipulationModal()
     {
 
@@ -5931,9 +5944,7 @@
     }
     private async void ShowMarshalModal()
     {
-        // Copy current data into editable model
-
-        // CaseWarranrDto = caseWarrantDto.Clone();
+        
         CaseWarranrDto = new CaseWarrantDto
         {
             Id = caseWarrantDto.Id,
@@ -5945,62 +5956,62 @@
             EvictionExecuted = caseWarrantDto.EvictionExecuted,
             ReFileDate = caseWarrantDto.ReFileDate,
             Status = caseWarrantDto.Status,
-            // add other properties here
+            
         };
 
 
         JS.InvokeVoidAsync("showModal", "marshalModal");
     }
-    private void OnSearchInput(ChangeEventArgs e)
-    {
-        searchText = e.Value.ToString();
-        filteredClients = ClientList
-            .Where(c => c.FirstName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                        || c.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                        || c.ClientCode.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-    }
-    private void SelectClient(EditToClientDto selectedclient)
-    {
-        showClientTextbox = true;
-        searchText = $"{client.FirstName} {client.LastName}";
-        filteredClients.Clear();
-        newClient = false;
-        // Fill card
-        legalcaseDto.ClientId = selectedclient.Id;
-        client.Id = selectedclient.Id;
-        client.FirstName = $"{selectedclient.FirstName}";
-        client.LastName = $"{selectedclient.LastName}";
-        client.Email = selectedclient.Email;
-        client.Phone = selectedclient.Phone;
-        client.Address1 = selectedclient.Address1;
-        client.Address2 = selectedclient.Address2;
-        client.City = selectedclient.City;
-        client.StateId = selectedclient.StateId;
-        client.ZipCode = selectedclient.ZipCode;
-        client.ClientTypeId = selectedclient.ClientTypeId;
-        client.Reference = selectedclient.Reference;
-    }
-    private void ClearSelectedClient()
-    {
-        searchText = string.Empty;
+    // private void OnSearchInput(ChangeEventArgs e)
+    // {
+    //     searchText = e.Value.ToString();
+    //     filteredClients = ClientList
+    //         .Where(c => c.FirstName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+    //                     || c.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+    //                     || c.ClientCode.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+    //         .ToList();
+    // }
+    // private void SelectClient(EditToClientDto selectedclient)
+    // {
+    //     showClientTextbox = true;
+    //     searchText = $"{client.FirstName} {client.LastName}";
+    //     filteredClients.Clear();
+    //     newClient = false;
+       
+    //     legalcaseDto.ClientId = selectedclient.Id;
+    //     client.Id = selectedclient.Id;
+    //     client.FirstName = $"{selectedclient.FirstName}";
+    //     client.LastName = $"{selectedclient.LastName}";
+    //     client.Email = selectedclient.Email;
+    //     client.Phone = selectedclient.Phone;
+    //     client.Address1 = selectedclient.Address1;
+    //     client.Address2 = selectedclient.Address2;
+    //     client.City = selectedclient.City;
+    //     client.StateId = selectedclient.StateId;
+    //     client.ZipCode = selectedclient.ZipCode;
+    //     client.ClientTypeId = selectedclient.ClientTypeId;
+    //     client.Reference = selectedclient.Reference;
+    // }
+    // private void ClearSelectedClient()
+    // {
+    //     searchText = string.Empty;
 
-        newClient = false;
-        showClientTextbox = false;
-        searchText = null;
-        client = new EditToClientDto();
+    //     newClient = false;
+    //     showClientTextbox = false;
+    //     searchText = null;
+    //     client = new EditToClientDto();
 
-        StateHasChanged();
-    }
-    private async void AddClient()
-    {
-        showClientTextbox = true;
-        searchText = null;
-        newClient = true;
-        client = new EditToClientDto();
-        StateHasChanged();
+    //     StateHasChanged();
+    // }
+    // private async void AddClient()
+    // {
+    //     showClientTextbox = true;
+    //     searchText = null;
+    //     newClient = true;
+    //     client = new EditToClientDto();
+    //     StateHasChanged();
 
-    }
+    // }
 
     // private async Task ShowLandlordModal()
     // {
@@ -6792,7 +6803,7 @@
 
         spinnerservice.Hide();
     }
-    private async Task SaveClientChanges()
+   @* private async Task SaveClientChanges()
     {
         spinnerservice.Show();
 
@@ -6878,6 +6889,7 @@
 
         spinnerservice.Hide();
     }
+    *@
     private List<CaseType> CaseTypeList = new();
     // private void CalcNoticeDays()
     // {

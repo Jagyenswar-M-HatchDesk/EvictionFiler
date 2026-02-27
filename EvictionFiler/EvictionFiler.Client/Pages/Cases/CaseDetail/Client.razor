@@ -1,0 +1,473 @@
+﻿@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.DTOs.CaseDetailDtos
+@using EvictionFiler.Application.DTOs.ClientDto
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
+@using EvictionFiler.Client.SpinnerService
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Domain.Entities.Master
+@using System.Linq.Expressions
+@inject ICaseDetailService caseDetailService
+@inject IToastService ToastService
+@inject IJSRuntime JS
+@inject ILegalCaseService _service
+@inject IClientService _clientService
+@inject IClientRoleRepository _clientRoleRepository
+@inject SpinnerService spinnerservice
+
+        <table class="info-table " style="border:none;">
+            <thead>
+                <tr>
+                    <th colspan="2" class="info-bar" >
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="info-bar-title">People & Contact</div>
+                    <button type="button" class="btn btn-sm normal p-1" @onclick="ShowClientModal" style="color:white ">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+        @if (isLoading)
+        {
+            <!-- 🔄 Loading UI -->
+            <tr>
+                <td colspan="3">
+                    <div class="d-flex flex-column justify-content-center align-items-center p-4">
+                        <div class="spinner-border"
+                             style="color:#1F365D; width:2.5rem; height:2.5rem;"
+                             role="status">
+                        </div>
+
+                    </div>
+                </td>
+            </tr>
+        }
+        else
+        {
+                <tr class="info-row">
+                    <td class="info-cell label">Email:</td>
+                    <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(clientDetail.ClientEmail) ? "--" : clientDetail.ClientEmail)</td>
+                </tr>
+
+                <tr class="info-row">
+                    <td class="info-cell label">Phone No.:</td>
+                    <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(clientDetail.ClientPhone) ? "--" : clientDetail.ClientPhone)</td>
+                </tr>
+
+                <tr class="info-row">
+                    <td class="info-cell label">Address:</td>
+                    <td class="info-cell value ellipsis">
+                        @{
+                            var partclient = new List<string>();
+
+                            if (!string.IsNullOrWhiteSpace(clientDetail.Address1)) partclient.Add(clientDetail.Address1);
+                            if (!string.IsNullOrWhiteSpace(clientDetail.Address2)) partclient.Add(clientDetail.Address2);
+                            if (!string.IsNullOrWhiteSpace(clientDetail.City)) partclient.Add(clientDetail.City);
+                            if (!string.IsNullOrWhiteSpace(clientDetail.StateName)) partclient.Add(clientDetail.StateName);
+                            if (!string.IsNullOrWhiteSpace(clientDetail.ZipCode)) partclient.Add(clientDetail.ZipCode);
+
+                            var fulllClientAddress = partclient.Count() > 0 ? string.Join(", ", partclient) : "--";
+                        }
+                        @fulllClientAddress
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+
+<!-- client Edit Modal -->
+
+<div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-semibold" id="buildingModalLabel">Edit Client Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <EditForm EditContext="@editContext">
+                <DataAnnotationsValidator />
+                <div class="modal-body py-0">
+                    <div class="card border-0">
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Case Type Dropdown -->
+                                @if (!newClient)
+                                {
+
+
+                                    <div class="col-5 position-relative">
+
+
+                                        <label class="form-label required-label">Client</label>
+
+                                        <InputText type="text" class="form-control"
+                                                   placeholder="Search by client name or code..."
+                                                   @bind-value="searchText"
+                                                   @oninput="OnSearchInput" />
+
+                                        @if (filteredClients?.Count() > 0)
+                                        {
+                                            <ul class="dropdown-menu show" style="position: absolute; width:94% !important; cursor:pointer;">
+                                                @foreach (var c in filteredClients)
+                                                {
+                                                    <li class="dropdown-item" @onclick="() => SelectClient(c)">
+                                                        @c.FirstName @c.LastName / @c.ClientCode
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                    </div>
+                                    @if (!showClientTextbox)
+                                    {
+                                        <div class="col-3 row">
+                                            <div class="col-md-3 d-flex justify-content-center align-items-end" style="padding-bottom:10px;">
+                                                <div>
+                                                    OR
+                                                </div>
+                                            </div>
+                                            <div class="col-md-9 d-flex align-items-end">
+                                                <button type="button" class="btn" style="background-color:#1F365D !important;height:40px; color:white" @onclick="AddClient">+ ADD</button>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                @if (showClientTextbox)
+                                {
+
+
+
+                                    <div class="card p-3 mt-3 position-relative">
+                                        <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                                                aria-label="Clear"
+                                                @onclick="ClearSelectedClient">
+                                        </button>
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label class="form-label required-label">First Name</label>
+                                                <InputText class="form-control" placeholder="Enter Name" @bind-Value="clientDetail.FirstName" 
+                                                           @bind-Value:after=@(() => ValidateParticularInput(() => clientDetail.FirstName, nameof(clientDetail.FirstName), "First Name is required.")) />
+                                                            <ValidationMessage For="() => clientDetail.FirstName"/>
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label">Last Name</label>
+                                                <InputText class="form-control" placeholder="Enter Name" @bind-Value="clientDetail.LastName" />
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label required-label">Client Type</label>
+                                                <InputSelect class="form-select" @bind-Value="clientDetail.ClientTypeId" style="cursor:pointer;"
+                                                             @bind-Value:after=@(() => ValidateParticularInput(() => clientDetail.ClientTypeId, nameof(clientDetail.ClientTypeId), "Select Client Type."))>
+                                                    <option value="">-- Select --</option>
+                                                    @foreach (var Own in ClientTypeList)
+                                                    {
+                                                        <option value="@Own.Id">@Own.Name</option>
+                                                    }
+                                                </InputSelect>
+                                                <ValidationMessage For="() => clientDetail.ClientTypeId" />
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-4 mt-3">
+                                                <label class="form-label required-label">Email</label>
+                                                <InputText class="form-control" placeholder="Enter Email" @bind-Value="clientDetail.ClientEmail"
+                                                           @bind-Value:after=@(() => ValidateParticularInput(() => clientDetail.ClientEmail, nameof(clientDetail.ClientEmail), "Email is required.")) />
+                                                <ValidationMessage For="() => clientDetail.ClientEmail" />
+                                            </div>
+
+                                            <div class="col-4 mt-3">
+                                                <label class="form-label required-label">Phone</label>
+                                                <InputText class="form-control" placeholder="Enter Number" @bind-Value="clientDetail.ClientPhone" 
+                                                           @bind-Value:after=@(() => ValidateParticularInput(() => clientDetail.ClientPhone, nameof(clientDetail.ClientPhone), "Phone is required.")) />
+                                                <ValidationMessage For="() => clientDetail.ClientPhone" />
+                                            </div>
+                                            <div class="col-4 mt-3">
+                                                <label class="form-label">Reference #</label>
+                                                <InputText class="form-control" placeholder="Enter Reference" @bind-Value="clientDetail.Reference" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="padding-top: 0px !important; border-top: none !important;">
+                    <button type="button" class="btn btn-secondary buttons" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary base buttons" @onclick="SaveClientChanges">Save</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+@code {
+    [Parameter] public Guid? currentCaseId { get; set; }
+    private ClientDetailDto clientDetail = new ClientDetailDto();
+    private bool isLoading = false;
+    public string searchText { get; set; }
+    public EditToClientDto client = new EditToClientDto();
+    public List<EditToClientDto> filteredClients = new List<EditToClientDto>();
+    public List<EditToClientDto> ClientList = new List<EditToClientDto>();
+    public bool showClientTextbox = false;
+    public bool newClient = false;
+    public List<ClientRole> ClientTypeList = new List<ClientRole>();
+    public IntakeModel legalcaseDto = new();
+    public EditContext editContext { get; set; }
+
+    public ValidationMessageStore messageStore { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        editContext = new EditContext(clientDetail);
+        messageStore = new ValidationMessageStore(editContext);
+        if (currentCaseId.HasValue && currentCaseId.Value != Guid.Empty)
+        {
+            isLoading = true;
+            await Task.Delay(1000);
+            
+            StateHasChanged();
+
+
+            await clientDetails();
+            isLoading = false;
+        }
+
+    }
+    public async Task clientDetails()
+    {
+        clientDetail= await caseDetailService.GetClientDetailAsync(currentCaseId!.Value);
+        
+
+    }
+
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        searchText = e.Value.ToString();
+        filteredClients = ClientList
+            .Where(c => c.FirstName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+                        || c.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+                        || c.ClientCode.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    private void SelectClient(EditToClientDto selectedclient)
+    {
+        showClientTextbox = true;
+        searchText = $"{client.FirstName} {client.LastName}";
+        filteredClients.Clear();
+        newClient = false;
+        // Fill card
+        clientDetail.ClientId = selectedclient.Id;
+        client.Id = selectedclient.Id;
+        client.FirstName = $"{selectedclient.FirstName}";
+        client.LastName = $"{selectedclient.LastName}";
+        client.Email = selectedclient.Email;
+        client.Phone = selectedclient.Phone;
+        client.Address1 = selectedclient.Address1;
+        client.Address2 = selectedclient.Address2;
+        client.City = selectedclient.City;
+        client.StateId = selectedclient.StateId;
+        client.ZipCode = selectedclient.ZipCode;
+        client.ClientTypeId = selectedclient.ClientTypeId;
+        client.Reference = selectedclient.Reference;
+    }
+    private void ClearSelectedClient()
+    {
+        searchText = string.Empty;
+
+        newClient = false;
+        showClientTextbox = false;
+        searchText = null;
+        client = new EditToClientDto();
+
+        StateHasChanged();
+    }
+    private async void AddClient()
+    {
+        showClientTextbox = true;
+        searchText = null;
+        newClient = true;
+        client = new EditToClientDto();
+        StateHasChanged();
+
+    }
+    private async Task ShowClientModal()
+    {
+        showClientTextbox = false;
+        newClient = false;
+        searchText = null;
+        client = new EditToClientDto();
+        // Copy current data into editable model
+        if (clientDetail.ClientId != null && clientDetail.ClientId != Guid.Empty)
+        {
+            client = await _clientService.GetClientByIdAsync(clientDetail.ClientId!.Value) ?? new EditToClientDto();
+
+            ClientTypeList = await _clientRoleRepository.GetAllClientRole();
+            showClientTextbox = true;
+            searchText = $"{client.FirstName} {client.LastName}";
+
+
+        }
+        await InvokeAsync(StateHasChanged);
+        await JS.InvokeVoidAsync("showModal", "clientModal");
+    }
+    private async Task SaveClientChanges()
+    {
+        if (!await ValidateCurrentStep())
+            return;
+        spinnerservice.Show();
+
+        var addorupdate = false;
+        if (client.Id == null || client.Id == Guid.Empty)
+        {
+            var newClient = new CreateToClientDto()
+            {
+                Address1 = client.Address1,
+                //Address2 = address2,
+                City = client.City,
+                StateId = client.StateId,
+                ZipCode = client.ZipCode,
+                FirstName = client.FirstName,
+                LastName = client.LastName,
+                Reference = client.Reference,
+                ClientTypeId = client.ClientTypeId,
+                Phone = client.Phone,
+                Email = client.Email,
+            };
+
+            var clientId = await _clientService.CreateOnlyClient(newClient);
+            addorupdate = true;
+            legalcaseDto.ClientId = clientId;
+
+        }
+        else
+        {
+            if (client.Id != null)
+            {
+
+                var updateBuilding = new EditToClientDto()
+                {
+                    Id = client.Id,
+                    Address1 = client.Address1,
+                    ClientCode = client.ClientCode,
+                    //Address2 = address2,
+                    ClientTypeId = client.ClientTypeId,
+                    City = client.City,
+                    StateId = client.StateId,
+                    ZipCode = client.ZipCode,
+                    Phone = client.Phone,
+                    Email = client.Email,
+                    Reference = client.Reference,
+                    FirstName = client.FirstName,
+                    LastName = client.LastName,
+
+                };
+
+                await _clientService.UpdateClientformCase(updateBuilding);
+                addorupdate = true;
+                legalcaseDto.ClientId = clientDetail.ClientId;
+            }
+        }
+
+        if (addorupdate)
+        {
+            legalcaseDto.Id = currentCaseId!.Value;
+            legalcaseDto.ClientEmail = client.Email;
+            legalcaseDto.Reference = client.Reference;
+            legalcaseDto.ClientTypeId = client.ClientTypeId;
+            legalcaseDto.ClientPhone = client.Phone;
+            legalcaseDto.ClientName = $"{client.FirstName} {client.LastName}";
+            legalcaseDto.City = client.City;
+            legalcaseDto.Address1 = client.Address1;
+            legalcaseDto.ZipCode = client.ZipCode;
+            legalcaseDto.StateId = client.StateId;
+
+            var success = await caseDetailService.UpdateCaseForClientAsync(legalcaseDto);
+
+            if (success.HasValue)
+            {
+                ToastService.ShowSuccess("Client details updated successfully!");
+                await JS.InvokeVoidAsync("hideModal", "clientModal");
+
+                await clientDetails();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to update client details.");
+            }
+        }
+        // Map edited fields
+
+
+        spinnerservice.Hide();
+    }
+
+    private Task ValidateParticularInput<T>(Expression<Func<T>> accessor, string fieldName, string validationMsg)
+    {
+        Require(accessor, fieldName, validationMsg);
+        editContext.NotifyValidationStateChanged();
+        return Task.CompletedTask;
+    }
+    private async Task<bool> ValidateCurrentStep()
+    {
+        messageStore.Clear();
+
+
+        Require(() => clientDetail.FirstName, nameof(clientDetail.FirstName), "First Name is required.");
+
+        Require(() => clientDetail.ClientEmail, nameof(clientDetail.ClientEmail), "Email is required.");
+        Require(() => clientDetail.ClientPhone, nameof(clientDetail.ClientPhone), "Phone is required.");
+
+        Require(() => clientDetail.ClientTypeId, nameof(clientDetail.ClientTypeId), "Select client type");
+
+
+
+
+
+
+
+        editContext.NotifyValidationStateChanged();
+
+
+        var errors = editContext.GetValidationMessages().ToList();
+        Console.WriteLine($"Validation errors : {string.Join(", ", errors)}");
+
+
+        bool isValid = !editContext.GetValidationMessages().Any();
+
+
+        return isValid;
+    }
+    private void Require<T>(Expression<Func<T>> accessor, string fieldName, string message)
+    {
+        var value = accessor.Compile().Invoke();
+        var fieldIdentifier = new FieldIdentifier(clientDetail, fieldName);
+
+        // Clear old message first
+        messageStore.Clear(fieldIdentifier);
+
+        // Add message if invalid
+        bool isEmpty = value == null ||
+                       (value is string s && string.IsNullOrWhiteSpace(s)) ||
+                       (value is Guid g && g == Guid.Empty);
+
+        if (isEmpty)
+        {
+            messageStore.Add(fieldIdentifier, message);
+        }
+
+        editContext.NotifyValidationStateChanged();
+    }
+}

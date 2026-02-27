@@ -1,0 +1,168 @@
+﻿@using EvictionFiler.Application.DTOs.CaseWarrantDtos
+@using EvictionFiler.Application.Interfaces.IServices
+@inject IJSRuntime JS
+
+@inject ICaseDetailService caseDetailService
+<div class="info-table " style="border:none;">
+                                <div class="info-bar">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="info-bar-title">
+                                        <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:7px !important;margin-right:10px;">
+
+                                                        <i class="fa-regular fa-circle-check" style="font-size:16px;color:#1F365D !important;"></i> 
+                                                    </div>
+                                        Marshal & Warrant </div>
+                                        <button type="button" class="btn btn-sm normal p-1" @onclick="ShowMarshalModal" style="color:white">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Warrant Issued:</div>
+                                        <div class="info-cell value ellipsis">
+                                            @(caseWarrantDto.WarrantIssued?.ToString(DateFormats.Default) ?? "--")
+
+                                        </div>
+                                    </div>
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Warrant Rejected:</div>
+                                        <div class="info-cell value ellipsis">
+                                            @(caseWarrantDto.WarrantRejected?.ToString(DateFormats.Default) ?? "--")
+
+                                        </div>
+                                    </div>
+
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Notice Served: </div>
+                                        <div class="info-cell value ellipsis">
+                                            @(caseWarrantDto.NoticeServed?.ToString(DateFormats.Default) ?? "--")
+
+                                        </div>
+                                    </div>
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Warrant Status:</div>
+                                        <div class="info-cell value ellipsis">@(WarrantRequested ? "Requested" : "Not Requested")</div>
+                                    </div>
+
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Execution Eligible:</div>
+                                        <div class="info-cell value ellipsis">
+                                            @(caseWarrantDto.ExecutionEligible?.ToString(DateFormats.Default) ?? "--")
+
+                                        </div>
+                                    </div>
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Warrant Requested:</div>
+                                        <div class="info-cell value ellipsis">
+                                            @(caseWarrantDto.WarrantIssued?.ToString(DateFormats.Default) ?? "--")
+
+                                        </div>
+                                    </div>
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Eviction Executed:</div>
+                                        <div class="info-cell value ellipsis">
+                                            @(caseWarrantDto.EvictionExecuted?.ToString(DateFormats.Default) ?? "--")
+
+                                        </div>
+                                    </div>
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Scheduled Eviction:</div>
+                                        <div class="info-cell value ellipsis">--</div>
+                                    </div>
+
+
+
+
+
+                                    <div class="info-row col-4">
+                                        <div class="info-cell label">Re-File:</div>
+                                        <div class="info-cell value ellipsis">
+                                            @(caseWarrantDto.ReFileDate?.ToString(DateFormats.Default) ?? "--")
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            
+<EditMarshalAndWarrant  modelid="warrantmodel"
+                       caseWarrantDto="caseWarrantDto"
+                       OnSaved="SaveItem" OnSave="SaveItem" MarshalId="SelectedMarshalId"
+                       CaseId="CurrentCaseId" loggedInUserId="@loggedInUserId" />
+
+@code {
+
+    [Parameter] public Guid? CurrentCaseId{ get; set; }
+    [Parameter] public bool isReload { get; set; }
+    [Parameter]
+    public string? loggedInUserId { get; set; }
+
+    private CaseWarrantDto CaseWarranrDto { get; set; } = new();
+    [Parameter] public bool WarrantRequested{ get; set; }
+    public CaseWarrantDto caseWarrantDto = new CaseWarrantDto();
+    private bool isLoading = false;
+
+
+    private bool isEditVisible;
+    [Parameter] public Guid? SelectedMarshalId { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+
+
+
+        if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty)
+        {
+
+            isLoading = true;
+
+            await Task.Delay(1000);
+            StateHasChanged();
+            await WarrantDetails();
+
+            isLoading = false;
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (isReload)
+        {
+            await WarrantDetails();
+        }
+
+    }
+    public async Task WarrantDetails()
+    {
+        caseWarrantDto = await caseDetailService.GetWarrantDetails(CurrentCaseId!.Value);
+    }
+    private async Task ShowMarshalModal()
+    {
+
+        caseWarrantDto = new CaseWarrantDto
+        {
+            Id = caseWarrantDto.Id,
+            WarrantRequested = caseWarrantDto.WarrantRequested,
+            WarrantIssued = caseWarrantDto.WarrantIssued,
+            WarrantRejected = caseWarrantDto.WarrantRejected,
+            NoticeServed = caseWarrantDto.NoticeServed,
+            ExecutionEligible = caseWarrantDto.ExecutionEligible,
+            EvictionExecuted = caseWarrantDto.EvictionExecuted,
+            ReFileDate = caseWarrantDto.ReFileDate,
+            Status = caseWarrantDto.Status,
+            LegalcaseId = caseWarrantDto.LegalcaseId
+
+        };
+        isEditVisible = true;
+        StateHasChanged();
+        JS.InvokeVoidAsync("showModal", "warrantmodel");
+       
+    }
+    private async Task SaveItem()
+    {
+
+        await WarrantDetails(); 
+    }
+    
+}

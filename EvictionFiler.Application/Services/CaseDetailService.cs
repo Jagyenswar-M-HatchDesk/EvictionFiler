@@ -1,7 +1,9 @@
 ﻿using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.CaseDetailDtos;
+using EvictionFiler.Application.DTOs.CaseWarrantDtos;
 using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.DTOs.MarshalsDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IRepository.Base;
@@ -24,13 +26,20 @@ namespace EvictionFiler.Application.Services
         private readonly IBuildingReadRepository _buildingReadRepository;
         private readonly ITenantReadRepository _tenantReadRepository;
         private readonly ICitiesRepository _cityRepository;
+        private readonly IClientReadRepository _clientReadRepository;
+        private readonly IMarshalAndWarrantRepository _marshalAndWarrantRepository;
+        private readonly IWarrantRepository _warrantRepository;
 
-        public CaseDetailService(ILandlordReadRepository landlordReadRepository,IBuildingReadRepository buildingReadRepository,ITenantReadRepository tenantReadRepository,ICitiesRepository cityRepository)
+        public CaseDetailService(ILandlordReadRepository landlordReadRepository,IBuildingReadRepository buildingReadRepository,ITenantReadRepository tenantReadRepository,ICitiesRepository cityRepository,IClientReadRepository clientReadRepository,
+                                    IMarshalAndWarrantRepository marshalAndWarrantRepository,IWarrantRepository warrantRepository)
         {
             _landlordReadRepository = landlordReadRepository;
             _buildingReadRepository = buildingReadRepository;
             _tenantReadRepository = tenantReadRepository;
             _cityRepository = cityRepository;
+            _clientReadRepository = clientReadRepository;
+            _marshalAndWarrantRepository = marshalAndWarrantRepository;
+            _warrantRepository = warrantRepository;
         }
         public async Task<LandlordDetailDto> GetLandlordDetailAsync(Guid caseId)
         {
@@ -44,6 +53,14 @@ namespace EvictionFiler.Application.Services
         {
             return await _tenantReadRepository.GetTenantDetailAsync(caseId);
         }
+        public async Task<ClientDetailDto> GetClientDetailAsync(Guid casId)
+        {
+            return await _clientReadRepository.GetClientsDetailAsync(casId);
+        }
+        public async Task<MarshalAndWarrantDetailDto> GetMarshalDetailAsync(Guid caseId)
+        {
+            return await _marshalAndWarrantRepository.GetMarshalDetailAsync(caseId);
+        }
         public async Task<EditToLandlordDto> GetLandlordByIdAsync(Guid landlordId)
         {
             return await _landlordReadRepository.GetLandlordByIdAsync(landlordId);
@@ -55,6 +72,7 @@ namespace EvictionFiler.Application.Services
 
 
         }
+
         public async Task<List<EditToLandlordDto>> SearchLandlordsAsync(string query, Guid clientId)
         {
             return await _landlordReadRepository.SearchLandlordsAsync(query, clientId);
@@ -304,6 +322,84 @@ namespace EvictionFiler.Application.Services
             }
         }
 
+        public async Task<CaseWarrantDto> GetWarrantDetails(Guid caseId)
+        {
+            var existing = await _warrantRepository.FindAsync(predicate: e => e.LegalCaseId == caseId);
+            if (existing == null) return new CaseWarrantDto();
+            var result = new CaseWarrantDto
+            {
+                ReFileDate = existing.ReFileDate,
+                WarrantRequested = existing.WarrantRequested,
+                WarrantIssued = existing.WarrantIssued,
+                WarrantRejected = existing.WarrantRejected,
+                EvictionExecuted = existing.EvictionExecuted,
+                ExecutionEligible = existing.ExecutionEligible,
+                NoticeServed = existing.NoticeServed,
+                MarshalId = existing.MarshalId,
+                LegalcaseId = existing.LegalCaseId,
+
+            };
+
+            return result;
+        }
+
+
+        public async Task<Guid?> UpdateCaseForClientAsync(IntakeModel legalCase)
+        {
+            try
+            {
+
+                var result = await _clientReadRepository.UpdateClient(legalCase);
+                return result;
+
+            }
+            catch
+            {
+                throw new Exception();
+            }
+        }
+
+        public async Task<CaseWarrantDto> GetWarrantsDetails(Guid caseId)
+        {
+            var existing = await _warrantRepository.FindAsync(predicate: e => e.LegalCaseId == caseId);
+            if (existing == null) return new CaseWarrantDto();
+            var result = new CaseWarrantDto
+            {
+                ReFileDate = existing.ReFileDate,
+                WarrantRequested = existing.WarrantRequested,
+                WarrantIssued = existing.WarrantIssued,
+                WarrantRejected = existing.WarrantRejected,
+                EvictionExecuted = existing.EvictionExecuted,
+                ExecutionEligible = existing.ExecutionEligible,
+                NoticeServed = existing.NoticeServed,
+                MarshalId = existing.MarshalId,
+                LegalcaseId = existing.LegalCaseId,
+
+            };
+
+            return result;
+        }
+
+        public async Task<MarshalDto> GetMarshalByIdAsync(Guid id)
+        {
+            var entity = await _marshalAndWarrantRepository.GetMarshalByIdAsync(id);
+            if (entity == null)
+                return null;
+
+            return new MarshalDto
+            {
+                Id = entity.Id,
+                FirstName = entity.FirstName,
+                LastName = entity.LastName,
+                Email = entity.Email,
+                BadgeNumber = entity.BadgeNumber,
+                Telephone = entity.Telephone,
+                Fax = entity.Fax,
+                OfficeAddress = entity.OfficeAddress,
+                DocketNo = entity.DocketNo,
+            };
+
+        }
 
     }
 }
