@@ -110,7 +110,7 @@ namespace EvictionFiler.Application.Services
                     RoleId=role.Id,
                     FirmId=firmId,
                     IsActive = true,
- 
+                    TwoFactorEnabled = true, 
 
                 };
 
@@ -146,5 +146,6 @@ namespace EvictionFiler.Application.Services
                 return (false, ex.Message);
             }
         }
+
     }
 }

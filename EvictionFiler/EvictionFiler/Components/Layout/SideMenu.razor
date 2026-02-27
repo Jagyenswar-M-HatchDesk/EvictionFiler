@@ -522,35 +522,53 @@
                     }
 
                 }
-                @if (userRole == "Super Admin")
+                @if (userRole == "Super Admin" || userRole == "Admin")
                 {
                     <div class="nav position-relative flex-column "
-                         @onmouseover="@(() => HoveredMenu = "Settings")"
-                         @onmouseout="@(() => HoveredMenu = "null")">
+                                  @onmouseover="@(() => HoveredMenu = "Settings")"
+                                  @onmouseout="@(() => HoveredMenu = "null")">
                         <a title="Manage Forms" class="sidebar-link text-decoration-none p-2 d-flex align-items-center justify-content-between @(IsExpanded("Settings") || (isCollapsed && IsSubmenuActive("Forms")) ? "active" : "")"
-                           @onclick="@(() => ToggleMenu("Settings"))">
+                                      @onclick="@(() => ToggleMenu("Settings"))">
                             <i class="fa-solid fa-gear" style="margin-left:@(isCollapsed ? "-2px !important" : "11px")"></i>
+
 
 
                             <span class="hide-on-collapse menu-label">Settings</span>
 
                             <i class="fa-solid @(IsExpanded("Settings") ? "fa-chevron-up" : "fa-chevron-down") ms-auto"></i>
                         </a>
-
+                        
                     </div>
+
 
 
                     @if (!isCollapsed && IsExpanded("Settings"))
                     {
                         <div class="ms-3 submenu-container">
-                            @foreach (var submenu in submenuMap["Settings"])
+                            @if (userRole == "Super Admin")
                             {
-                                <a class="submenu-link text-decoration-none @(activeMenu == submenu.Title ? "active-submenu" : "")"
-                                   @onclick="@(() => NavigateToSettings(submenu.Title))">
+                                @foreach (var submenu in submenuMap["Settings"])
+                                {
+                                    <a class="submenu-link text-decoration-none @(activeMenu == submenu.Title ? "active-submenu" : "")"
+                                                              @onclick="@(() => NavigateToSettings(submenu.Title))">
 
-                                    <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
-                                    <span class="submenu-text hide-on-collapse">@submenu.Title</span>
-                                </a>
+                                        <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
+                                        <span class="submenu-text hide-on-collapse">@submenu.Title</span>
+                                    </a>
+                                }
+
+                            }
+                            else
+                            {
+                                @foreach (var submenu in submenuMap["Settings-Admin"])
+                                {
+                                    <a class="submenu-link text-decoration-none @(activeMenu == submenu.Title ? "active-submenu" : "")"
+                                                              @onclick="@(() => NavigateToSettings(submenu.Title))">
+
+                                        <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
+                                        <span class="submenu-text hide-on-collapse">@submenu.Title</span>
+                                    </a>
+                                }
                             }
                         </div>
                     }
@@ -558,19 +576,35 @@
                     else if (isCollapsed && HoveredMenu == "Settings")
                     {
                         <div class="flyout-menu submenu-container">
-                            @foreach (var submenu in submenuMap["Settings"])
+                            @if (userRole == "Super Addmin")
                             {
-                                <a class="dropdown-item submenu-link text-decoration-none   @(activeMenu == submenu.Title ? "active-submenu" : "")"
-                                   @onclick="@(() => NavigateToSettings(submenu.Title))">
+                                @foreach (var submenu in submenuMap["Settings"])
+                                {
+                                    <a class="dropdown-item submenu-link text-decoration-none   @(activeMenu == submenu.Title ? "active-submenu" : "")"
+                                                              @onclick="@(() => NavigateToSettings(submenu.Title))">
 
-                                    <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
-                                    <span class="submenu-text ">@submenu.Title</span>
-                                </a>
+                                        <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
+                                        <span class="submenu-text ">@submenu.Title</span>
+                                    </a>
+                                }
+
+                            }
+                            else
+                            {
+                                @foreach (var submenu in submenuMap["Settings-Admin"])
+                                {
+                                    <a class="dropdown-item submenu-link text-decoration-none   @(activeMenu == submenu.Title ? "active-submenu" : "")"
+                                                              @onclick="@(() => NavigateToSettings(submenu.Title))">
+
+                                        <i class="@submenu.Icon submenu-icon" title="@submenu.Title"></i>
+                                        <span class="submenu-text ">@submenu.Title</span>
+                                    </a>
+                                }
+
                             }
                         </div>
                     }
                 }
-
 
             </div>
 
@@ -1128,10 +1162,18 @@
             ("Push notification & Alerts", "fa-solid fa-gavel"),
             ("Roles", "fa-solid fa-user-shield"),
             ("User", "fa-solid fa-user-gear"),
+            ("MFA", "fa-solid fa-lock"),
         }
 
 
-    }
+    },
+    { "Settings-Admin", new()
+            {
+            ("MFA", "fa-solid fa-lock"),
+
+            }
+
+}
 };
 
     void NavigateToDrafting(string submenu)
@@ -1251,6 +1293,9 @@
             case "Push notification & Alerts":
                 nav.NavigateTo("/Settings/alerts");
                 break;
+            case "MFA":
+                nav.NavigateTo("/Settings/mfa");
+				break;
         }
     }
 

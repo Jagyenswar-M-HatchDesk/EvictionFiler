@@ -208,6 +208,7 @@ builder.Services.AddScoped<ILandlordReadRepository, LandlordReadRepository>();
 builder.Services.AddScoped<IBuildingReadRepository, BuildingReadRepository>();
 builder.Services.AddScoped<ICaseDetailService, CaseDetailService>();
 builder.Services.AddScoped<ITenantReadRepository, TenantReadRepository>();
+builder.Services.AddScoped<IMfaRepository, MfaRepository>();
 builder.Services.AddSingleton<CaptchaService>(new CaptchaService(captchaSecretKey));
 
 builder.Services.AddAuthorization();
@@ -296,6 +297,7 @@ builder.Services.AddScoped<ISubscriptionTypeRepository, SubscriptionTypeReposito
 builder.Services.AddScoped<ILoggedInUserService, LoggedInUserService>();
 builder.Services.AddScoped<IRegisterRepository, RegisterRepository>();
 builder.Services.AddScoped<IRegisterService, RegisterService>();
+builder.Services.AddScoped<IMfaService, MfaService>();
 builder.Services.AddScoped<IFormCategoryRepository, FormCategoryRepository>();
 builder.Services.AddScoped<
     IUserClaimsPrincipalFactory<User>,
