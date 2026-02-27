@@ -3,6 +3,7 @@ using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.CaseDetailDtos;
 using EvictionFiler.Application.DTOs.CaseWarrantDtos;
 using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.DTOs.MarshalsDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IRepository.Base;
@@ -356,6 +357,48 @@ namespace EvictionFiler.Application.Services
             {
                 throw new Exception();
             }
+        }
+
+        public async Task<CaseWarrantDto> GetWarrantsDetails(Guid caseId)
+        {
+            var existing = await _warrantRepository.FindAsync(predicate: e => e.LegalCaseId == caseId);
+            if (existing == null) return new CaseWarrantDto();
+            var result = new CaseWarrantDto
+            {
+                ReFileDate = existing.ReFileDate,
+                WarrantRequested = existing.WarrantRequested,
+                WarrantIssued = existing.WarrantIssued,
+                WarrantRejected = existing.WarrantRejected,
+                EvictionExecuted = existing.EvictionExecuted,
+                ExecutionEligible = existing.ExecutionEligible,
+                NoticeServed = existing.NoticeServed,
+                MarshalId = existing.MarshalId,
+                LegalcaseId = existing.LegalCaseId,
+
+            };
+
+            return result;
+        }
+
+        public async Task<MarshalDto> GetMarshalByIdAsync(Guid id)
+        {
+            var entity = await _marshalAndWarrantRepository.GetMarshalByIdAsync(id);
+            if (entity == null)
+                return null;
+
+            return new MarshalDto
+            {
+                Id = entity.Id,
+                FirstName = entity.FirstName,
+                LastName = entity.LastName,
+                Email = entity.Email,
+                BadgeNumber = entity.BadgeNumber,
+                Telephone = entity.Telephone,
+                Fax = entity.Fax,
+                OfficeAddress = entity.OfficeAddress,
+                DocketNo = entity.DocketNo,
+            };
+
         }
 
     }

@@ -1,5 +1,6 @@
 ﻿@using EvictionFiler.Application.DTOs.CaseWarrantDtos
 @using EvictionFiler.Application.Interfaces.IServices
+@inject IJSRuntime JS
 
 @inject ICaseDetailService caseDetailService
 <div class="info-table " style="border:none;">
@@ -11,7 +12,7 @@
                                                         <i class="fa-regular fa-circle-check" style="font-size:16px;color:#1F365D !important;"></i> 
                                                     </div>
                                         Marshal & Warrant </div>
-                                        <button type="button" class="btn btn-sm normal p-1"  style="color:white">
+                                        <button type="button" class="btn btn-sm normal p-1" @onclick="ShowMarshalModal" style="color:white">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                     </div>
@@ -85,13 +86,27 @@
                                 </div>
                             </div>
 
+                            
+<EditMarshalAndWarrant  modelid="warrantmodel"
+                       caseWarrantDto="caseWarrantDto"
+                       OnSaved="SaveItem" OnSave="SaveItem" MarshalId="SelectedMarshalId"
+                       CaseId="CurrentCaseId" loggedInUserId="@loggedInUserId" />
+
 @code {
 
     [Parameter] public Guid? CurrentCaseId{ get; set; }
     [Parameter] public bool isReload { get; set; }
+    [Parameter]
+    public string? loggedInUserId { get; set; }
+
+    private CaseWarrantDto CaseWarranrDto { get; set; } = new();
     [Parameter] public bool WarrantRequested{ get; set; }
     public CaseWarrantDto caseWarrantDto = new CaseWarrantDto();
     private bool isLoading = false;
+
+
+    private bool isEditVisible;
+    [Parameter] public Guid? SelectedMarshalId { get; set; }
     protected override async Task OnInitializedAsync()
     {
 
@@ -122,6 +137,32 @@
     {
         caseWarrantDto = await caseDetailService.GetWarrantDetails(CurrentCaseId!.Value);
     }
+    private async Task ShowMarshalModal()
+    {
 
+        caseWarrantDto = new CaseWarrantDto
+        {
+            Id = caseWarrantDto.Id,
+            WarrantRequested = caseWarrantDto.WarrantRequested,
+            WarrantIssued = caseWarrantDto.WarrantIssued,
+            WarrantRejected = caseWarrantDto.WarrantRejected,
+            NoticeServed = caseWarrantDto.NoticeServed,
+            ExecutionEligible = caseWarrantDto.ExecutionEligible,
+            EvictionExecuted = caseWarrantDto.EvictionExecuted,
+            ReFileDate = caseWarrantDto.ReFileDate,
+            Status = caseWarrantDto.Status,
+            LegalcaseId = caseWarrantDto.LegalcaseId
+
+        };
+        isEditVisible = true;
+        StateHasChanged();
+        JS.InvokeVoidAsync("showModal", "warrantmodel");
+       
+    }
+    private async Task SaveItem()
+    {
+
+        await WarrantDetails(); 
+    }
     
 }

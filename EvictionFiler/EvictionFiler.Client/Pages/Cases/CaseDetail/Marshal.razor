@@ -1,6 +1,9 @@
 ﻿@using EvictionFiler.Application.DTOs.CaseDetailDtos
+@using EvictionFiler.Application.DTOs.CaseWarrantDtos
 @using EvictionFiler.Application.Interfaces.IServices
 @inject ICaseDetailService caseDetailService
+@inject IJSRuntime JS
+@inject ICaseWarrantService caseWarrantService
 
                             <table class="info-table " style="border:none;">
                                 <thead>
@@ -13,7 +16,7 @@
                                                         <i class="fa-regular fa-circle-check" style="font-size:16px;color:#1F365D !important;"></i>
                                                      </div>
                                                 Marshal & Warrant</div>
-                                                <button type="button" class="btn btn-sm normal p-1"  style="color:white">
+                                                <button type="button" class="btn btn-sm normal p-1" @onclick="ShowMarshalModal" style="color:white">
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
                                             </div>
@@ -42,14 +45,23 @@
                                 </tbody>
                             </table>
 
+    <EditMarshalAndWarrant  caseWarrantDto="caseWarrantDto" modelid="marshalModal"
+                           OnSave="SaveItem" MarshalId="SelectedMarshalId"
+                           CaseId="CurrentCaseId" loggedInUserId="@loggedInUserId" />
 
-                          
 
 @code {
     [Parameter] public Guid? CurrentCaseId { get; set; }
+
+    [Parameter]
+    public string? loggedInUserId { get; set; }
     [Parameter] public bool isReload{ get; set; }
+    private CaseWarrantDto CaseWarranrDto { get; set; } = new();
     private MarshalAndWarrantDetailDto marshalAndWarrant = new();
+    private CaseWarrantDto caseWarrantDto = new();
     private bool isLoading = false;
+    private bool isEditVisible;
+    private Guid? SelectedMarshalId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -64,20 +76,57 @@
             await MarshalAndWarrantDetails();
 
             isLoading = false;
+            caseWarrantDto = await caseDetailService.GetWarrantDetails(CurrentCaseId!.Value);
         }
     }
     protected override async Task OnParametersSetAsync()
     {
         if(isReload)
         {
-              await MarshalAndWarrantDetails();
+            await MarshalAndWarrantDetails();
         }
 
     }
 
+
     public async Task MarshalAndWarrantDetails()
     {
+
         marshalAndWarrant = await caseDetailService.GetMarshalDetailAsync(CurrentCaseId!.Value);
+        if (marshalAndWarrant != null)
+        {
+            SelectedMarshalId = marshalAndWarrant?.Id;
+        }
+        StateHasChanged();
+
     }
+    private async Task ShowMarshalModal()
+    {
+      
+        caseWarrantDto = new CaseWarrantDto
+        {
+            Id = caseWarrantDto.Id,
+            WarrantRequested = caseWarrantDto.WarrantRequested,
+            WarrantIssued = caseWarrantDto.WarrantIssued,
+            WarrantRejected = caseWarrantDto.WarrantRejected,
+            NoticeServed = caseWarrantDto.NoticeServed,
+            ExecutionEligible = caseWarrantDto.ExecutionEligible,
+            EvictionExecuted = caseWarrantDto.EvictionExecuted,
+            ReFileDate = caseWarrantDto.ReFileDate,
+            Status = caseWarrantDto.Status,
+            LegalcaseId = caseWarrantDto.LegalcaseId
+
+        };
+        isEditVisible = true;
+        StateHasChanged();
+        JS.InvokeVoidAsync("showModal", "marshalModal");
+       
+    }
+    private async Task SaveItem()
+    {
+      
+        await MarshalAndWarrantDetails(); 
+    }
+   
 
 }

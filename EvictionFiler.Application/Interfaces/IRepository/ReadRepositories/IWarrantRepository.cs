@@ -1,4 +1,5 @@
-﻿using EvictionFiler.Application.Interfaces.IRepository.Base;
+﻿using EvictionFiler.Application.DTOs.CaseWarrantDtos;
+using EvictionFiler.Application.Interfaces.IRepository.Base;
 using EvictionFiler.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,5 @@ namespace EvictionFiler.Application.Interfaces.IRepository.ReadRepositories
 {
     public interface IWarrantRepository:IReadRepository<CaseWarrant>
     {
-
     }
 }

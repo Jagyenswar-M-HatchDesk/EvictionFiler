@@ -1827,7 +1827,7 @@
                                     </tr>
                                 </tbody>
                             </table> *@
-                            <Marshal CurrentCaseId="@caseId" isReload="@isLoadMarshal" />
+                            <Marshal CurrentCaseId="@caseId" isReload="@isLoadMarshal" loggedInUserId="@loggedInUserId" />
 
 
                         </div>
@@ -2083,7 +2083,7 @@
 
                                 </div>
                             </div> *@
-                            <Warrant CurrentCaseId="@caseId" isReload="@isLoadMarshal"  WarrantRequested="@legalcaseDto.WarrantRequested"/>
+                            <Warrant CurrentCaseId="@caseId" isReload="@isLoadMarshal" loggedInUserId="@loggedInUserId" SelectedMarshalId="legalcaseDto.MarshalId"   WarrantRequested="@legalcaseDto.WarrantRequested"/>
                             @* <table class="info-table " style="border:none;">
                             <thead>
                                 <tr>
@@ -4237,7 +4237,7 @@
         </div>
     </div> *@
 
-    <div class="modal fade" id="marshalModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
+  @* <div class="modal fade" id="marshalModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header">
@@ -4380,7 +4380,7 @@
 
             </div>
         </div>
-    </div>
+    </div> *@
     <div class="modal fade" id="courtModal" tabindex="-1" aria-labelledby="CourtModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
@@ -4640,7 +4640,13 @@
     <script>
         window.showModal = (id) => {
         const modal = new bootstrap.Modal(document.getElementById(id));
+        if(modal){
         modal.show();
+
+        }
+        else{
+            console.log("No modal found");
+        }
         };
     </script>
     <script>
@@ -4758,15 +4764,15 @@
     public List<CourtDto> courts = new();
     public List<CourtDto> filteredCourts = new List<CourtDto>();
     public List<CourtPartDto> filteredCourtsPart = new List<CourtPartDto>();
-    private List<MarshalDto> filteredmarshal = new();
-    private MarshalDto selectedmarshal;
-    private string searchmarshalText;
+    // private List<MarshalDto> filteredmarshal = new();
+    // private MarshalDto selectedmarshal;
+    // private string searchmarshalText;
     private bool selectedTimeline = false;
     private bool PrimaryResidence = false;
     private Guid? TenancytypeId = Guid.Empty;
     private Guid? CaseNotesId = null;
     private CancellationTokenSource _cts;
-    private bool isMarshalAssigned = false;
+    // private bool isMarshalAssigned = false;
     [Parameter] public GenrateNoticeModel createAction { get; set; } = new();
     private bool showMarshalError = false;
     [Parameter] public EventCallback OnFormCreate { get; set; } = new();
@@ -4881,17 +4887,17 @@
     {
         SelectedLandlordId = landlordId;
     }
-    async Task HideMarshalDropDown(FocusEventArgs e)
-    {
-        // small1 delay to allow click on dropdown item to register before hiding
-        await Task.Delay(500);
-        if (filteredmarshal.Any())
-        {
-            filteredmarshal.Clear();
+    // async Task HideMarshalDropDown(FocusEventArgs e)
+    // {
+        
+    //     await Task.Delay(500);
+    //     if (filteredmarshal.Any())
+    //     {
+    //         filteredmarshal.Clear();
 
-        }
-        StateHasChanged();
-    }
+    //     }
+    //     StateHasChanged();
+    // }
     private async Task SelectCourtType()
     {
         var CourtType = CourtTypeList.FirstOrDefault(ty => ty.Id == legalcaseDto.CourtTypeId);
@@ -4954,7 +4960,7 @@
         ShowClearBtn = true;
         StateHasChanged();
     }
-    private async Task OnSearchMarshalInput(ChangeEventArgs e)
+   @* private async Task OnSearchMarshalInput(ChangeEventArgs e)
     {
         searchmarshalText = e.Value?.ToString() ?? "";
         _cts?.Cancel();
@@ -4990,7 +4996,7 @@
             // Old task cancelled → ignore
         }
 
-    }
+    } *@
 
     private async Task OpenNotesTab(Guid NotesId)
     {
@@ -5010,7 +5016,7 @@
 
     }
 
-    private async Task SubmitMarshalDates(bool formgeneration)
+   @* private async Task SubmitMarshalDates(bool formgeneration)
     {
         showMarshalError = false; // reset old errors
 
@@ -5036,7 +5042,7 @@
             {
                 ToastService.ShowError("Failed to asign Marshal .");
             }
-        }
+        } 
 
 
 
@@ -5074,9 +5080,9 @@
         }
 
         StateHasChanged();
-    }
+    } *@
 
-    private async void Selectedmarshal(MarshalDto marshal)
+   @* private async void Selectedmarshal(MarshalDto marshal)
     {
 
         selectedmarshal = marshal;
@@ -5096,23 +5102,23 @@
         StateHasChanged();
 
 
-    }
+    }*@
 
 
 
-    private void ResetMarshal()
-    {
-        spinnerservice.Show();
-        isMarshalAssigned = false;
-        selectedmarshal = null;
-        legalcaseDto.MarshalId = null;     // Marshal unassign
-        searchmarshalText = "";            // Clear search box
-        filteredmarshal?.Clear();
-        showMarshalError = false;// Clear list
+    // private void ResetMarshal()
+    // {
+    //     spinnerservice.Show();
+    //     isMarshalAssigned = false;
+    //     selectedmarshal = null;
+    //     legalcaseDto.MarshalId = null;     
+    //     searchmarshalText = "";           
+    //     filteredmarshal?.Clear();
+    //     showMarshalError = false;
 
-        StateHasChanged();
-        spinnerservice.Hide();
-    }
+    //     StateHasChanged();
+    //     spinnerservice.Hide();
+    // }
 
     private async Task GenrateMarshalForm()
     {
@@ -5149,43 +5155,43 @@
 
     }
 
-    private async Task SubmitMarshal()
-    {
-        showMarshalError = false; // reset old errors
+    // private async Task SubmitMarshal()
+    // {
+    //     showMarshalError = false; 
 
-        if (legalcaseDto.MarshalId == null || legalcaseDto.MarshalId == Guid.Empty)
-        {
-            showMarshalError = true;
-            StateHasChanged();
-            return;
-        }
-        spinnerservice.Show();
+    //     if (legalcaseDto.MarshalId == null || legalcaseDto.MarshalId == Guid.Empty)
+    //     {
+    //         showMarshalError = true;
+    //         StateHasChanged();
+    //         return;
+    //     }
+    //     spinnerservice.Show();
 
-        var result = await _service.UpdateMarshalAsync(legalcaseDto);
+    //     var result = await _service.UpdateMarshalAsync(legalcaseDto);
 
-        if (result)
-        {
-            ToastService.ShowSuccess("Marshal Assign  successfully!");
-            legalcaseDto.MarshalName = searchmarshalText;
-            legalcaseDto.MarshalPhone = selectedmarshal.Telephone;
-            legalcaseDto.Docketno = selectedmarshal.DocketNo;
-            // await LoadCaseDetails();
-            isMarshalAssigned = true;
-        }
-        else
-        {
-            ToastService.ShowError("Failed to asign Marshal .");
-        }
-        StateHasChanged();
-        spinnerservice.Hide();
+    //     if (result)
+    //     {
+    //         ToastService.ShowSuccess("Marshal Assign  successfully!");
+    //         legalcaseDto.MarshalName = searchmarshalText;
+    //         legalcaseDto.MarshalPhone = selectedmarshal.Telephone;
+    //         legalcaseDto.Docketno = selectedmarshal.DocketNo;
+            
+    //         isMarshalAssigned = true;
+    //     }
+    //     else
+    //     {
+    //         ToastService.ShowError("Failed to asign Marshal .");
+    //     }
+    //     StateHasChanged();
+    //     spinnerservice.Hide();
 
-    }
+    // }
 
-    private async Task ShowAllmarshal()
-    {
-        filteredmarshal = (await _marshalService.GetAllMarshalAsync()).ToList();
-        StateHasChanged();
-    }
+    // private async Task ShowAllmarshal()
+    // {
+    //     filteredmarshal = (await _marshalService.GetAllMarshalAsync()).ToList();
+    //     StateHasChanged();
+    // }
     private async Task OnFocusOutCourt(FocusEventArgs e)
     {
         await Task.Delay(200);
@@ -5371,17 +5377,17 @@
     private async Task LoadCaseDetails()
     {
         legalcaseDto = await _service.GetCaseByIdAsync(caseId);
-        if (legalcaseDto.MarshalId != null && legalcaseDto.MarshalId != Guid.Empty)
-        {
-            selectedmarshal = await _marshalService.GetMarshalByIdAsync(legalcaseDto.MarshalId.Value);
-            isMarshalAssigned = true;
-        }
-        else
-        {
-            isMarshalAssigned = false;
-            selectedmarshal = null;
-            searchmarshalText = string.Empty;
-        }
+        // if (legalcaseDto.MarshalId != null && legalcaseDto.MarshalId != Guid.Empty)
+        // {
+        //     selectedmarshal = await _marshalService.GetMarshalByIdAsync(legalcaseDto.MarshalId.Value);
+        //     isMarshalAssigned = true;
+        // }
+        // else
+        // {
+        //     isMarshalAssigned = false;
+        //     selectedmarshal = null;
+        //     searchmarshalText = string.Empty;
+        // }
         if (legalcaseDto != null && legalcaseDto.CaseTypeId != null)
         {
             FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
@@ -5426,14 +5432,14 @@
 
                 // for client
                 ClientCode = legalcaseDto.ClientCode,
-                FirstName = legalcaseDto.FirstName,
-                LastName = legalcaseDto.LastName,
-                Address1 = legalcaseDto.Address1,
-                Address2 = legalcaseDto.Address2,
-                StateName = legalcaseDto.StateName,
-                ZipCode = legalcaseDto.ZipCode,
-                ClientEmail = legalcaseDto.ClientEmail,
-                ClientPhone = legalcaseDto.ClientPhone,
+                // FirstName = legalcaseDto.FirstName,
+                // LastName = legalcaseDto.LastName,
+                // Address1 = legalcaseDto.Address1,
+                // Address2 = legalcaseDto.Address2,
+                // StateName = legalcaseDto.StateName,
+                // ZipCode = legalcaseDto.ZipCode,
+                // ClientEmail = legalcaseDto.ClientEmail,
+                // ClientPhone = legalcaseDto.ClientPhone,
                 MarshalId = legalcaseDto.MarshalId,
 
                 // Landlord
@@ -5509,9 +5515,9 @@
                 CourtVirtualLink = legalcaseDto.CourtVirtualLink,
                 Judge = legalcaseDto.Judge,
                 BillAmount = legalcaseDto.BillAmount,
-                Docketno = legalcaseDto.Docketno,
-                MarshalName = legalcaseDto.MarshalName,
-                MarshalPhone = legalcaseDto.MarshalPhone,
+                // Docketno = legalcaseDto.Docketno,
+                // MarshalName = legalcaseDto.MarshalName,
+                // MarshalPhone = legalcaseDto.MarshalPhone,
 
                 LastPayment = legalcaseDto.LastPayment,
                 Assistance = legalcaseDto.Assistance,

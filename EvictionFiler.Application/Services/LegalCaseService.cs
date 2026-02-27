@@ -461,7 +461,7 @@ namespace EvictionFiler.Application.Services
         c => c.CourtPart!,
         c => c.Courts!,
          c => c.CourtLocation!.County!,
-         c => c.ArrearLedgers,
+      
          c => c.Marshal,
          c => c.RemainderCenters
 
@@ -488,16 +488,16 @@ namespace EvictionFiler.Application.Services
                         Status = caseEntity.IsActive ? "Active" : "Inactive",
                         //for Client
                         ClientCode = caseEntity.Clients.ClientCode,
-                        ClientName = $"{caseEntity.Clients.FirstName} {caseEntity.Clients.LastName}",
-                        ClientTypeId = caseEntity.Clients.ClientTypeId,
-                        ClientEmail = caseEntity.Clients.Email,
-                        ClientPhone = caseEntity.Clients.Phone,
-                        Reference = caseEntity.Reference,
-                        Address1 = caseEntity.Clients.Address1,
-                        Address2 = caseEntity.Clients.Address2,
-                        City = caseEntity.Clients.City,
-                        StateName = caseEntity.Clients.State != null ? caseEntity.Clients.State.Name : string.Empty,
-                        ZipCode = caseEntity.Clients.ZipCode,
+                        //ClientName = $"{caseEntity.Clients.FirstName} {caseEntity.Clients.LastName}",
+                        //ClientTypeId = caseEntity.Clients.ClientTypeId,
+                        //ClientEmail = caseEntity.Clients.Email,
+                        //ClientPhone = caseEntity.Clients.Phone,
+                        //Reference = caseEntity.Reference,
+                        //Address1 = caseEntity.Clients.Address1,
+                        //Address2 = caseEntity.Clients.Address2,
+                        //City = caseEntity.Clients.City,
+                        //StateName = caseEntity.Clients.State != null ? caseEntity.Clients.State.Name : string.Empty,
+                        //ZipCode = caseEntity.Clients.ZipCode,
                         MarshalId = caseEntity.MarshalId,
                         RemainderDate = caseEntity.RemainderCenters?
                     .OrderByDescending(x => x.When)
@@ -583,10 +583,10 @@ namespace EvictionFiler.Application.Services
                         AttrneyContactInfo = caseEntity.AttrneyContactInfo,
                         AttrneyEmail = caseEntity.AttrneyEmail,
 
-                        MarshalName = caseEntity.Marshal != null ? $"{caseEntity.Marshal?.FirstName} {caseEntity.Marshal?.LastName}" : string.Empty,
-                        MarshalPhone = caseEntity.Marshal != null ? caseEntity.Marshal?.Telephone : string.Empty,
-                        Docketno = caseEntity.Marshal != null ? caseEntity.Marshal?.DocketNo : string.Empty,
-                        WarrantRequested = caseEntity.WarrantRequested,
+                        //MarshalName = caseEntity.Marshal != null ? $"{caseEntity.Marshal?.FirstName} {caseEntity.Marshal?.LastName}" : string.Empty,
+                        //MarshalPhone = caseEntity.Marshal != null ? caseEntity.Marshal?.Telephone : string.Empty,
+                        //Docketno = caseEntity.Marshal != null ? caseEntity.Marshal?.DocketNo : string.Empty,
+                        //WarrantRequested = caseEntity.WarrantRequested,
                         Index = caseEntity.Index,
                         County = caseEntity.County,
                         ManagingAgent = caseEntity.ManagingAgent,
@@ -1229,6 +1229,7 @@ namespace EvictionFiler.Application.Services
                 if (existingCase == null) return false;
 
                 existingCase.MarshalId = legalCase.MarshalId!;
+               
 
                 var result = await _unitOfWork.SaveChangesAsync();
 

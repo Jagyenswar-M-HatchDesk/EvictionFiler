@@ -1,5 +1,6 @@
 ﻿using EvictionFiler.Application.DTOs.CaseDetailDtos;
 using EvictionFiler.Application.Interfaces.IRepository.ReadRepositories;
+using EvictionFiler.Domain.Entities;
 using EvictionFiler.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -42,5 +43,11 @@ namespace EvictionFiler.Infrastructure.Repositories.ReadRepositories
 
 
         }
+
+        public async Task<Marshal> GetMarshalByIdAsync(Guid id)
+        {
+            await using var context = _contextFactory.CreateDbContext();
+            return await context.Marshal.FirstOrDefaultAsync(x => x.Id == id) ?? new();
         }
+    }
 }
