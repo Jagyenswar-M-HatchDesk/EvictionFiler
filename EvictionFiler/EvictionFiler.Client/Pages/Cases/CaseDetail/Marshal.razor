@@ -5,49 +5,68 @@
 @inject IJSRuntime JS
 @inject ICaseWarrantService caseWarrantService
 
-                            <table class="info-table " style="border:none;">
-                                <thead>
-                                    <tr>
-                                        <th colspan="2" class="info-bar">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="info-bar-title">
-                                                    <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#1f365d; border-radius:7px !important;margin-right:10px;">
+<table class="info-table " style="border:none;">
+    <thead>
+        <tr>
+            <th colspan="2" class="info-bar">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="info-bar-title">
+                        <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#1f365d; border-radius:7px !important;margin-right:10px;">
 
-                                                        <i class="fa-regular fa-circle-check" style="font-size:16px;color:#fff !important;"></i>
-                                                     </div>
-                                                Marshal & Warrant</div>
-                                                <button type="button" class="btn btn-sm normal p-1" @onclick="ShowMarshalModal" style="color:#1f365d">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                            </div>
-                                        </th>
-                                    </tr>
-                                </thead>
+                            <i class="fa-regular fa-circle-check" style="font-size:16px;color:#fff !important;"></i>
+                        </div>
+                        Marshal & Warrant
+                    </div>
+                    <button type="button" class="btn btn-sm normal p-1" @onclick="ShowMarshalModal" style="color:#1f365d">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                </div>
+            </th>
+        </tr>
+    </thead>
 
-                                <tbody>
-                                    <tr class="info-row">
-                                        <td class="info-cell label">Name:</td>
-                                        <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(marshalAndWarrant.MarshalName) ? "--" : marshalAndWarrant.MarshalName)</td>
-                                    </tr>
+    <tbody>
+         @if (isLoading)
+        {
+            <!-- 🔄 Loading UI -->
+            <tr>
+                <td colspan="3">
+                    <div class="d-flex flex-column justify-content-center align-items-center p-4">
+                        <div class="spinner-border"
+                             style="color:#1F365D; width:2.5rem; height:2.5rem;"
+                             role="status">
+                        </div>
 
-                                    <tr class="info-row">
-                                        <td class="info-cell label">Phone No.:</td>
-                                        <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(marshalAndWarrant.MarshalPhone) ? "--" : marshalAndWarrant.MarshalPhone)</td>
-                                    </tr>
+                    </div>
+                </td>
+            </tr>
+        }
+        else
+        {
+        <tr class="info-row">
+            <td class="info-cell label">Name:</td>
+            <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(marshalAndWarrant.MarshalName) ? "--" : marshalAndWarrant.MarshalName)</td>
+        </tr>
 
-                                    <tr class="info-row">
-                                        <td class="info-cell label">Docket No.:</td>
-                                        <td class="info-cell value ellipsis">
-                                            @(string.IsNullOrWhiteSpace(marshalAndWarrant.Docketno) ? "--" : marshalAndWarrant.Docketno)
+        <tr class="info-row">
+            <td class="info-cell label">Phone No.:</td>
+            <td class="info-cell value ellipsis">@(string.IsNullOrWhiteSpace(marshalAndWarrant.MarshalPhone) ? "--" : marshalAndWarrant.MarshalPhone)</td>
+        </tr>
 
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+        <tr class="info-row">
+            <td class="info-cell label">Docket No.:</td>
+            <td class="info-cell value ellipsis">
+                @(string.IsNullOrWhiteSpace(marshalAndWarrant.Docketno) ? "--" : marshalAndWarrant.Docketno)
 
-    <EditMarshalAndWarrant  caseWarrantDto="caseWarrantDto" modelid="marshalModal"
-                           OnSave="SaveItem" MarshalId="SelectedMarshalId"
-                           CaseId="CurrentCaseId" loggedInUserId="@loggedInUserId" />
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+
+<EditMarshalAndWarrant caseWarrantDto="caseWarrantDto" modelid="marshalModal"
+                       OnSave="SaveItem" MarshalId="SelectedMarshalId"
+                       CaseId="CurrentCaseId" loggedInUserId="@loggedInUserId" />
 
 
 @code {
@@ -55,7 +74,7 @@
 
     [Parameter]
     public string? loggedInUserId { get; set; }
-    [Parameter] public bool isReload{ get; set; }
+    [Parameter] public bool isReload { get; set; }
     private CaseWarrantDto CaseWarranrDto { get; set; } = new();
     private MarshalAndWarrantDetailDto marshalAndWarrant = new();
     private CaseWarrantDto caseWarrantDto = new();
@@ -75,13 +94,14 @@
             StateHasChanged();
             await MarshalAndWarrantDetails();
 
-            isLoading = false;
             caseWarrantDto = await caseDetailService.GetWarrantDetails(CurrentCaseId!.Value);
+            isLoading = false;
+
         }
     }
     protected override async Task OnParametersSetAsync()
     {
-        if(isReload)
+        if (isReload)
         {
             await MarshalAndWarrantDetails();
         }
@@ -102,7 +122,7 @@
     }
     private async Task ShowMarshalModal()
     {
-      
+
         caseWarrantDto = new CaseWarrantDto
         {
             Id = caseWarrantDto.Id,
@@ -120,13 +140,13 @@
         isEditVisible = true;
         StateHasChanged();
         JS.InvokeVoidAsync("showModal", "marshalModal");
-       
+
     }
     private async Task SaveItem()
     {
-      
-        await MarshalAndWarrantDetails(); 
+
+        await MarshalAndWarrantDetails();
     }
-   
+
 
 }
