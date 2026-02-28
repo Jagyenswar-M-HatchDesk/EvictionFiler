@@ -31,6 +31,7 @@
 @using EvictionFiler.Client.Components.Layout
 @using EvictionFiler.Client.Pages.Actions
 @using EvictionFiler.Client.Pages.Cases.CaseDetail
+@using EvictionFiler.Client.Pages.Cases.Steps
 @using EvictionFiler.Client.SpinnerService
 @using EvictionFiler.Domain.Entities.Master
 @using EvictionFiler.Infrastructure.Repositories
@@ -1713,7 +1714,7 @@
                                 </div>
                             </div>
 
-                            </div> *@
+                            </div> 
                             @*
                         <table class="info-table mb-4" style="border:none;">
                             <thead>
@@ -1880,7 +1881,7 @@
 
                     <div class="row mb-4">
                         <div class="col-4">
-                            <div class="info-table mb-4" style="border:none;">
+                          @* <div class="info-table mb-4" style="border:none;">
                                 <div class="info-bar">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="info-bar-title">
@@ -1962,7 +1963,7 @@
                                     </div>
 
                                 </div>
-                            </div>
+                            </div>*@
                             @* <table class="info-table mb-4" style="border:none;">
                             <thead>
                                 <tr>
@@ -2043,8 +2044,9 @@
 
                             </tbody>
                         </table>
-
+                        
                         *@
+                            <Court CurrentCaseId="@caseId"  />
                         </div>
 
                         <div class="col-8">
@@ -2219,7 +2221,7 @@
                             </div>
 
                             <div class="mb-4">
-                                <div class="table-responsive" style="height:205px;">
+                                @* <div class="table-responsive" style="height:205px;">
                                     <table class="info-table" style="border:none; ">
                                         <thead>
                                             <tr>
@@ -2274,10 +2276,10 @@
 
                                         </tbody>
                                     </table>
-                                </div>
+                                </div> *@
 
-
-
+                                
+                                  <CaseForm CaseId="@caseId" loggedInUserId="@loggedInUserId" isAdmin="isAdmin" />
                             </div>
                             <div class="">
                                 <div class="table-responsive" style="height:160px;">
@@ -4101,7 +4103,7 @@
     </div>
 
     <!-- client Edit Modal -->
-     <div class="modal fade" id="stipulationModal" tabindex="-1" aria-labelledby="stipulationModalLabel" aria-hidden="true">
+   @* <div class="modal fade" id="stipulationModal" tabindex="-1" aria-labelledby="stipulationModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header">
@@ -4168,7 +4170,7 @@
                 </EditForm>
             </div>
         </div>
-    </div>
+    </div> *@
 
     @*<div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -4433,7 +4435,8 @@
             </div>
         </div>
     </div> *@
-    <div class="modal fade" id="courtModal" tabindex="-1" aria-labelledby="CourtModalLabel" aria-hidden="true">
+
+    @* <div class="modal fade" id="courtModal" tabindex="-1" aria-labelledby="CourtModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header">
@@ -4536,10 +4539,6 @@
                                         </div>
 
 
-                                        @*<div class="col-md-6">
-                                            <label class="form-label required-label">Docket No.</label>
-                                            <InputText class="form-control" placeholder="Enter Docket No." @bind-Value="legalcaseDto.Docketno" readonly="@DocketReadonly" @onclick="CheckMarshal" />
-                                        </div>*@
 
                                     </div>
                                 </div>
@@ -4588,14 +4587,11 @@
                             <p class="fw-semibold mb-2">Please Generate Notice before adding a hearing.</p>
                         }
                     </div>
-                    @*<div class="modal-footer justify-content-center">
-                        <button class="btn btn-primary" @onclick="ShowCourtModal">Add Court Info</button>
-                        <button class="btn btn-outline-secondary" @onclick="CloseCourtInfoAlert">Close</button>
-                    </div>*@
+                    
                 </div>
             </div>
         </div>
-    }
+    } *@
     @if (ShowMarshalPopup)
     {
         <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
@@ -4904,7 +4900,7 @@
 
         // spinnerservice.Show();
         await LoadCaseDetails();
-        await LoadCaseForms();
+        // await LoadCaseForms();
         // await LoadHearing();
         // await LoadJudgement();
         await LoadCaseDocument();
@@ -5012,6 +5008,7 @@
         ShowClearBtn = true;
         StateHasChanged();
     }
+
     @* private async Task OnSearchMarshalInput(ChangeEventArgs e)
     {
         searchmarshalText = e.Value?.ToString() ?? "";
@@ -5181,11 +5178,10 @@
             bool success = false;
 
 
-            // CREATE new notice
             success = await CaseFormRepository.GenerateWarrantNoticeAsync(
                     CurrentCaseId.Value,
                     "Request for Warrant (CIV-LT-100)",
-                       // "Written Demand to Terminate (move out)",
+                      
                        Guid.Parse(loggedInUserId)
                 );
 
@@ -5194,7 +5190,7 @@
                 ToastService.ShowSuccess("Warrant Notice has been generated successfully!");
                 legalcaseDto.WarrantRequested = true;
                 var result = _service.UpdateWarrantRequested(legalcaseDto);
-                await LoadCaseForms();
+                // await LoadCaseForms();
                 await JS.InvokeVoidAsync("openTab", "activity");
             }
         }
@@ -5408,7 +5404,7 @@
     }
     private async Task HandleInvokeAction()
     {
-        await LoadCaseForms();
+        // await LoadCaseForms();
         await LoadCaseDocument();
         await LoadCaseDetails();
         // await LoadHearing();
@@ -5552,18 +5548,18 @@
                 SocialService = legalcaseDto.SocialService,
                 LastRentPaid = legalcaseDto.LastRentPaid,
 
-                CourtLocationId = legalcaseDto.CourtLocationId,
+                // CourtLocationId = legalcaseDto.CourtLocationId,
                 CourtId = legalcaseDto.CourtId,
-                Court = legalcaseDto.Court,
-                CourtPartId = legalcaseDto.CourtPartId,
-                CourtAddress = legalcaseDto.CourtAddress,
-                CourtConferenceId = legalcaseDto.CourtConferenceId,
-                CourtCallIn = legalcaseDto.CourtCallIn,
-                CourtNotes = legalcaseDto.CourtNotes,
-                CourtRoom = legalcaseDto.CourtRoom,
-                CourtPart = legalcaseDto.CourtPart,
-                CourtPhone = legalcaseDto.CourtPhone,
-                CourtRoomNo = legalcaseDto.CourtRoomNo!,
+                // Court = legalcaseDto.Court,
+                // CourtPartId = legalcaseDto.CourtPartId,
+                // CourtAddress = legalcaseDto.CourtAddress,
+                // CourtConferenceId = legalcaseDto.CourtConferenceId,
+                // CourtCallIn = legalcaseDto.CourtCallIn,
+                // CourtNotes = legalcaseDto.CourtNotes,
+                // CourtRoom = legalcaseDto.CourtRoom,
+                // CourtPart = legalcaseDto.CourtPart,
+                // CourtPhone = legalcaseDto.CourtPhone,
+                // CourtRoomNo = legalcaseDto.CourtRoomNo!,
                 CourtVirtualLink = legalcaseDto.CourtVirtualLink,
                 Judge = legalcaseDto.Judge,
                 BillAmount = legalcaseDto.BillAmount,
@@ -5618,27 +5614,27 @@
         }
     }
 
-    public async Task EditCaseDetail(Guid id)
-    {
-        spinnerservice.Show();
-        var result = await _CaseFormService.GetCaseFormByIdAsync(id);
+    // public async Task EditCaseDetail(Guid id)
+    // {
+    //     spinnerservice.Show();
+    //     var result = await _CaseFormService.GetCaseFormByIdAsync(id);
 
-        if (result != null)
-        {
-            noticeModel = new GenrateNoticeModel
-            {
-                Id = result.Id,
-                FormTypeId = result.FormTypeId,
-                File = result.File,
-                HTML = result.HTML,
-                CreatedOn = result.CreatedOn,
-            };
-            isEditMode = true;
+    //     if (result != null)
+    //     {
+    //         noticeModel = new GenrateNoticeModel
+    //         {
+    //             Id = result.Id,
+    //             FormTypeId = result.FormTypeId,
+    //             File = result.File,
+    //             HTML = result.HTML,
+    //             CreatedOn = result.CreatedOn,
+    //         };
+    //         isEditMode = true;
 
-        }
-        spinnerservice.Hide();
-        await JS.InvokeVoidAsync("showBootstrapTab", "#actions-tab");
-    }
+    //     }
+    //     spinnerservice.Hide();
+    //     await JS.InvokeVoidAsync("showBootstrapTab", "#actions-tab");
+    // }
     private decimal? BillAmount = null;
 
     private void FormTypeBindAfter()
@@ -5729,31 +5725,31 @@
     // }
 
 
-    private async Task ViewPdf(string filePath)
-    {
-        if (!string.IsNullOrWhiteSpace(filePath))
-        {
-            var fullUrl = Navigation.BaseUri.TrimEnd('/') + filePath;
-            // Navigation.NavigateTo(fullUrl, forceLoad: true);
-            await JS.InvokeVoidAsync("open", fullUrl, "_blank");
-        }
-    }
+    // private async Task ViewPdf(string filePath)
+    // {
+    //     if (!string.IsNullOrWhiteSpace(filePath))
+    //     {
+    //         var fullUrl = Navigation.BaseUri.TrimEnd('/') + filePath;
+    //         Navigation.NavigateTo(fullUrl, forceLoad: true);
+    //         await JS.InvokeVoidAsync("open", fullUrl, "_blank");
+    //     }
+    // }
 
 
-    private async Task LoadCaseForms()
-    {
-        caseFormDto = await _CaseFormService.GetCaseFormsByCaseId(CurrentCaseId.Value, loggedInUserId, isAdmin);
-        if (caseFormDto.Any())
-        {
-            caseForm = caseFormDto.FirstOrDefault()!;
-        }
-        else
-        {
-            IsFormGenerated = false;
-        }
-        await JS.InvokeVoidAsync("openTab", "activity");
-        StateHasChanged();
-    }
+    // private async Task LoadCaseForms()
+    // {
+    //     caseFormDto = await _CaseFormService.GetCaseFormsByCaseId(CurrentCaseId.Value, loggedInUserId, isAdmin);
+    //     if (caseFormDto.Any())
+    //     {
+    //         caseForm = caseFormDto.FirstOrDefault()!;
+    //     }
+    //     else
+    //     {
+    //         IsFormGenerated = false;
+    //     }
+    //     await JS.InvokeVoidAsync("openTab", "activity");
+    //     StateHasChanged();
+    // }
 
     // private async Task LoadHearing()
     // {
@@ -5848,19 +5844,19 @@
         await JS.InvokeVoidAsync("hideModal", "attorneyModal");
     }
 
-    public async Task DeleteCaseDetail(Guid id)
-    {
-        spinnerservice.Show();
-        bool isDeleted = await _CaseFormService.DeleteDetailAsync(id);
+    // public async Task DeleteCaseDetail(Guid id)
+    // {
+    //     spinnerservice.Show();
+    //     bool isDeleted = await _CaseFormService.DeleteDetailAsync(id);
 
-        if (isDeleted)
-        {
-            caseFormDto = await _CaseFormService.GetCaseFormsByCaseId(CurrentCaseId.Value, loggedInUserId, isAdmin);
-            ToastService.ShowSuccess("File  has been Deleted successfully!");
-            StateHasChanged();
-        }
-        spinnerservice.Hide();
-    }
+    //     if (isDeleted)
+    //     {
+    //         caseFormDto = await _CaseFormService.GetCaseFormsByCaseId(CurrentCaseId.Value, loggedInUserId, isAdmin);
+    //         ToastService.ShowSuccess("File  has been Deleted successfully!");
+    //         StateHasChanged();
+    //     }
+    //     spinnerservice.Hide();
+    // }
 
     //private TenantModel tenantEditModel = new();
     //private BuildingModel buildingEditModel = new();
@@ -5944,11 +5940,11 @@
     //     StateHasChanged();
     //     JS.InvokeVoidAsync("showModal", "clientModal");
     // }
-    private async void ShowStipulationModal()
-    {
+    // private async void ShowStipulationModal()
+    // {
 
-        await JS.InvokeVoidAsync("showModal", "stipulationModal");
-    }
+    //     await JS.InvokeVoidAsync("showModal", "stipulationModal");
+    // }
     private async void ShowMarshalModal()
     {
 

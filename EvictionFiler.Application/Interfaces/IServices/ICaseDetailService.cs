@@ -2,7 +2,9 @@
 using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.CaseAppearanceDtos;
 using EvictionFiler.Application.DTOs.CaseDetailDtos;
+using EvictionFiler.Application.DTOs.CaseHearing;
 using EvictionFiler.Application.DTOs.CaseWarrantDtos;
+using EvictionFiler.Application.DTOs.FormTypeDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.MarshalsDto;
 using EvictionFiler.Application.DTOs.TenantDto;
@@ -48,5 +50,9 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<CaseWarrantDto> GetWarrantsDetails(Guid caseId);
         Task<MarshalDto> GetMarshalByIdAsync(Guid id);
         Task<List<CaseAppearanceDto>> GetAllCaseAppreance(Guid caseId);
+        Task<List<CaseHearingDto>> GetAllCaseHeariingByCaseIdAsync(Guid id);
+
+        Task<CourtDetailDto> GetCourtDetailsAsync(Guid caseId);
+        Task<List<GenrateNoticeModel>> GetCaseFormsByCaseId(Guid caseId, string userId, bool isAdmin);
     }
 }
