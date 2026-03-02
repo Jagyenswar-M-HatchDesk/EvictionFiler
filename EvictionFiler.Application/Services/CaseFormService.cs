@@ -31,7 +31,7 @@ namespace EvictionFiler.Application.Services
             var query = _caseFormRepository
                 .GetAllQuerable(
                     x => x.IsDeleted != true && x.LegalCaseId == caseId,
-                    x => x.FormType!
+                    x => x.FormType!, x=>x.User!
                 );
 
             var users = await _userRepo.GetAllUser();
@@ -62,9 +62,7 @@ namespace EvictionFiler.Application.Services
                 File = dto.File,
                 HTML = dto.HTML,
                 CreatedOn = dto.CreatedOn,
-                CreatedByName = userDict.ContainsKey(dto.CreatedBy)
-                            ? userDict[dto.CreatedBy]
-                            : "Admin",
+                CreatedByName = dto.User != null ? dto.User.FirstName : string.Empty,
             }).OrderBy(e=>e.CreatedOn).ToList();
 
             return result;

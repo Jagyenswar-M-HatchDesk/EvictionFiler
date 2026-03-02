@@ -61,7 +61,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<bool> DeleteAdditionalpetitioner(CaseAdditionalPetitioner petitioner);
 
         Task<bool> UpdateCourtandIndex(IntakeModel legalCase);
-        Task<IEnumerable<CaseNotes>> GetAllCaseNotes();
+        Task<IEnumerable<CaseNotes>> GetAllCaseNotes(Guid caseId);
 
         Task<bool> AddorEditGeneratedContent(FilingDto filing);
         Task<FilingDto?> GetFilings(Guid CaseId);

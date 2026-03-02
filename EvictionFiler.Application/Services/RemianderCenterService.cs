@@ -256,6 +256,28 @@ namespace EvictionFiler.Application.Services
 
             return true;
         }
+        public async Task<bool> UpdateRemainderCenterByCaseIdAsync(EditToRemainderCenterDto dto)
+        {
+            var existing = await _remainderCenterRepo.FindAsync(e=>e.CaseId == dto.CaseId && e.ReminderName.Contains(dto.ReminderName));
+
+            if (existing == null)
+            {
+               return await Create(dto);
+            }
+            else
+            {
+                existing.When = dto.When;
+                existing.CaseId = dto.CaseId;
+                existing.Notes = dto.Notes;
+
+                existing.UpdatedOn = DateTime.Now;
+
+                // Save changes
+                _remainderCenterRepo.UpdateAsync(existing);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            return true;
+        }
 
         public async Task CreateNewReminder(Guid caseId, string Description, DateTime Date)
         {
@@ -263,10 +285,24 @@ namespace EvictionFiler.Application.Services
             {
                 CaseId = caseId,
                 ReminderName = Description,
+                Notes = Description,
                 When = Date.Date,
             };
 
             var result = await Create(remainder);
+            
+        }
+        public async Task UpdateReminder(Guid caseId, string Description, DateTime Date)
+        {
+            var remainder = new EditToRemainderCenterDto()
+            {
+                CaseId = caseId,
+                ReminderName = Description,
+                Notes = Description,
+                When = Date.Date,
+            };
+
+            var result = await UpdateRemainderCenterByCaseIdAsync(remainder);
             
         }
     }

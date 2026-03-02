@@ -29,7 +29,7 @@ namespace EvictionFiler.Client.AuthService
             if (User.Identity?.IsAuthenticated == true)
             {
                 UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                IsAdmin = User.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                IsAdmin = User.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Super Admin");
             }
 
             _isLoaded = true;

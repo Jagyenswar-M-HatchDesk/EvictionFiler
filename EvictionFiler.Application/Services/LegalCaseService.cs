@@ -291,6 +291,7 @@ namespace EvictionFiler.Application.Services
                 }
 
                 legalCases.CreatedBy = legalCase.CreatedBy;
+                legalCases.CreatedById = legalCase.CreatedBy;
                 legalCases.CreatedOn = DateTime.Now;
 
                 var addedcase = await _repository.AddAsync(legalCases);
@@ -429,7 +430,7 @@ namespace EvictionFiler.Application.Services
         (Expression<Func<LegalCase, object>>)(c => c.Clients!),
       
         c => c.CaseType!,
-       
+       c => c.Tenants!,
        
         c => c.RegulationStatus!,
         c => c.TenancyType!,
@@ -444,6 +445,7 @@ namespace EvictionFiler.Application.Services
         c => c.CaseTypePerDiems,
         c => c.PartyRepresents!,
         c => c.Buildings!.BuildingType!,
+        c => c.Buildings!.Cities!,
         c => c.Buildings!.RegistrationStatus!,
          c => c.Buildings!.ExemptionReason!,
            c => c.Buildings!.ExemptionBasis!,
@@ -461,7 +463,7 @@ namespace EvictionFiler.Application.Services
         c => c.CourtPart!,
         c => c.Courts!,
          c => c.CourtLocation!.County!,
-         c => c.ArrearLedgers,
+      
          c => c.Marshal,
          c => c.RemainderCenters
 
@@ -488,16 +490,16 @@ namespace EvictionFiler.Application.Services
                         Status = caseEntity.IsActive ? "Active" : "Inactive",
                         //for Client
                         ClientCode = caseEntity.Clients.ClientCode,
-                        ClientName = $"{caseEntity.Clients.FirstName} {caseEntity.Clients.LastName}",
-                        ClientTypeId = caseEntity.Clients.ClientTypeId,
-                        ClientEmail = caseEntity.Clients.Email,
-                        ClientPhone = caseEntity.Clients.Phone,
-                        Reference = caseEntity.Reference,
-                        Address1 = caseEntity.Clients.Address1,
-                        Address2 = caseEntity.Clients.Address2,
-                        City = caseEntity.Clients.City,
-                        StateName = caseEntity.Clients.State != null ? caseEntity.Clients.State.Name : string.Empty,
-                        ZipCode = caseEntity.Clients.ZipCode,
+                        //ClientName = $"{caseEntity.Clients.FirstName} {caseEntity.Clients.LastName}",
+                        //ClientTypeId = caseEntity.Clients.ClientTypeId,
+                        //ClientEmail = caseEntity.Clients.Email,
+                        //ClientPhone = caseEntity.Clients.Phone,
+                        //Reference = caseEntity.Reference,
+                        //Address1 = caseEntity.Clients.Address1,
+                        //Address2 = caseEntity.Clients.Address2,
+                        //City = caseEntity.Clients.City,
+                        //StateName = caseEntity.Clients.State != null ? caseEntity.Clients.State.Name : string.Empty,
+                        //ZipCode = caseEntity.Clients.ZipCode,
                         MarshalId = caseEntity.MarshalId,
                         RemainderDate = caseEntity.RemainderCenters?
                     .OrderByDescending(x => x.When)
@@ -517,7 +519,7 @@ namespace EvictionFiler.Application.Services
                         BuildingId = caseEntity.BuildingId,
                         //Buildingcode = caseEntity.Buildings?.BuildingCode,
                         //Mdr = caseEntity.Buildings?.MDRNumber,
-                        //Borough = caseEntity.Buildings?.Cities != null ? caseEntity.Buildings?.Cities.Name : null,
+                        Borough = caseEntity.Buildings?.Cities != null ? caseEntity.Buildings?.Cities.Name : null,
                         //BoroughorCityId = caseEntity.Buildings != null ? caseEntity.Buildings?.CityId : Guid.Empty,
                         //Units = caseEntity.Buildings != null ? caseEntity.Buildings?.BuildingUnits : null,
                         //BuildingState = caseEntity.Buildings?.State != null ? caseEntity.Buildings?.State?.Name : string.Empty,
@@ -535,12 +537,12 @@ namespace EvictionFiler.Application.Services
 
 
                         // Tenant
-                        //TenantId = caseEntity.TenantId,
-                        //TenantName = caseEntity.Tenants != null ? $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}" : string.Empty,
+                        TenantId = caseEntity.TenantId,
+                        TenantName = caseEntity.Tenants != null ? $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}" : string.Empty,
                         //ApartmentNumber = caseEntity.Tenants != null ? caseEntity.Tenants?.UnitOrApartmentNumber : string.Empty,
                         //TenancyTypeId = caseEntity.Tenants != null ? caseEntity.Tenants.TenancyTypeId : Guid.Empty,
                         //PrimaryResidence = caseEntity.Tenants != null ? caseEntity.Tenants.PrimaryResidence : false,
-                        //MonthlyRent = caseEntity.Tenants != null ? caseEntity.Tenants.MonthlyRent : 0,
+                        MonthlyRent = caseEntity.Tenants != null ? caseEntity.Tenants.MonthlyRent : 0,
                         //TenantShare = caseEntity.Tenants != null ? caseEntity.Tenants.TenantShare : 0,
                         //RentDueEachMonthOrWeekId = caseEntity.Tenants != null ? caseEntity.Tenants.RentDueEachMonthOrWeekId : Guid.Empty,
 
@@ -567,11 +569,12 @@ namespace EvictionFiler.Application.Services
                         Court = caseEntity.CourtLocation != null ? caseEntity.CourtLocation.Court! : "",
                         CourtAddress = caseEntity.CourtLocation != null ? caseEntity.CourtLocation.Address! : "",
                         CourtPartId = caseEntity.CourtPartId != null ? caseEntity.CourtPartId : null,
-                        CourtPart = caseEntity.CourtPart != null ? caseEntity.CourtPart.Part : string.Empty,
-                        CourtRoom = caseEntity.CourtPart != null ? caseEntity.CourtPart.RoomNo : string.Empty,
+                        CourtPart = caseEntity.CourtPart != null ? caseEntity.CourtPart.Part : new string(caseEntity.CourtRoom.Where(char.IsLetter).ToArray()),
+                        CourtRoom = caseEntity.CourtPart != null ? caseEntity.CourtPart.RoomNo : caseEntity.CourtRoom,
+                        CourtRoomNo = caseEntity.CourtPart != null ? caseEntity.CourtPart.RoomNo : new string(caseEntity.CourtRoom.Where(char.IsDigit).ToArray()),
                         CourtLocationId = caseEntity.CourtLocationId,
                         CourtName = caseEntity.CourtLocation != null ? $"{caseEntity.CourtLocation.Court}" : "",
-                        Judge = caseEntity.CourtPart != null ? caseEntity.CourtPart.Judge : string.Empty,
+                        Judge = caseEntity.CourtPart != null ? caseEntity.CourtPart.Judge : caseEntity.ManagingAgent,
                         //CourtConferenceId = caseEntity.Courts != null ? caseEntity.Courts.ConferenceId : "",
                         //CourtCallIn = caseEntity.Courts != null ? caseEntity.Courts.CallIn : "",
                         //CourtNotes = caseEntity.Courts != null ? caseEntity.Courts.Notes : "",
@@ -583,10 +586,10 @@ namespace EvictionFiler.Application.Services
                         AttrneyContactInfo = caseEntity.AttrneyContactInfo,
                         AttrneyEmail = caseEntity.AttrneyEmail,
 
-                        MarshalName = caseEntity.Marshal != null ? $"{caseEntity.Marshal?.FirstName} {caseEntity.Marshal?.LastName}" : string.Empty,
-                        MarshalPhone = caseEntity.Marshal != null ? caseEntity.Marshal?.Telephone : string.Empty,
-                        Docketno = caseEntity.Marshal != null ? caseEntity.Marshal?.DocketNo : string.Empty,
-                        WarrantRequested = caseEntity.WarrantRequested,
+                        //MarshalName = caseEntity.Marshal != null ? $"{caseEntity.Marshal?.FirstName} {caseEntity.Marshal?.LastName}" : string.Empty,
+                        //MarshalPhone = caseEntity.Marshal != null ? caseEntity.Marshal?.Telephone : string.Empty,
+                        //Docketno = caseEntity.Marshal != null ? caseEntity.Marshal?.DocketNo : string.Empty,
+                        //WarrantRequested = caseEntity.WarrantRequested,
                         Index = caseEntity.Index,
                         County = caseEntity.County,
                         ManagingAgent = caseEntity.ManagingAgent,
@@ -968,9 +971,9 @@ namespace EvictionFiler.Application.Services
                 existingCase.AttrneyEmail = legalCase.AttrneyEmail;
                 existingCase.CourtLocationId = legalCase.CourtLocationId;
                 existingCase.CourtRoom = legalCase.CourtRoom;
+                existingCase.ManagingAgent = legalCase.Judge;
                 existingCase.Index = legalCase.Index;
                 existingCase.County = legalCase.County;
-                existingCase.ManagingAgent = legalCase.ManagingAgent;
                 existingCase.OpposingCounsel = legalCase.OpposingCounsel;
                 existingCase.AppearanceDate = legalCase.AppearanceDate;
                 existingCase.AppearanceTime = legalCase.AppearanceTime;
@@ -1229,6 +1232,7 @@ namespace EvictionFiler.Application.Services
                 if (existingCase == null) return false;
 
                 existingCase.MarshalId = legalCase.MarshalId!;
+               
 
                 var result = await _unitOfWork.SaveChangesAsync();
 
@@ -1253,6 +1257,8 @@ namespace EvictionFiler.Application.Services
                 existingCase.CourtPartId = legalCase.CourtPartId!;
                 existingCase.CourtTypeId = legalCase.CourtTypeId!;
                 existingCase.Index = legalCase.Index!;
+                existingCase.ManagingAgent = legalCase.Judge;
+                existingCase.CourtRoom = legalCase.CourtRoom!;
 
                 var result = await _unitOfWork.SaveChangesAsync();
 
@@ -1389,7 +1395,7 @@ namespace EvictionFiler.Application.Services
 
         public async Task<IEnumerable<CaseDocument>> CaseDocumentList(Guid Id)
         {
-            var doclist = _caseDocument.GetAllQuerable(includes: e=>e.DocumentTypes);
+            var doclist = _caseDocument.GetAllQuerable(includes:[ e=>e.DocumentTypes, e=>e.User]);
             var returnlist = await doclist.Where(e => e.LegalCaseId == Id).OrderByDescending(e => e.CreatedOn).ToListAsync();
             return returnlist;
         }
@@ -1538,9 +1544,9 @@ namespace EvictionFiler.Application.Services
             return await _unitOfWork.SaveChangesAsync() > 0;
         }
 
-        public async Task<IEnumerable<CaseNotes>> GetAllCaseNotes()
+        public async Task<IEnumerable<CaseNotes>> GetAllCaseNotes(Guid caseId)
         {
-            return await _caseNotesRepository.GetAllAsync();
+            return await _caseNotesRepository.GetAllAsync(predicate: e=>e.LegalcaseId == caseId, includes:a=>a.User);
 
         }
 

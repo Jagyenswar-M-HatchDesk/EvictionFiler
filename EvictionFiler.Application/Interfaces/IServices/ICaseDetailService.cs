@@ -1,7 +1,9 @@
 ﻿using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.CaseDetailDtos;
+using EvictionFiler.Application.DTOs.CaseWarrantDtos;
 using EvictionFiler.Application.DTOs.LandLordDto;
+using EvictionFiler.Application.DTOs.MarshalsDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IRepository.Base;
@@ -36,5 +38,13 @@ namespace EvictionFiler.Application.Interfaces.IServices
 
         Task<Guid?> UpdateCaseForTenantAsync(IntakeModel legalCase);
 
+        Task<ClientDetailDto> GetClientDetailAsync(Guid casId);
+        Task<MarshalAndWarrantDetailDto> GetMarshalDetailAsync(Guid caseId);
+
+        Task<CaseWarrantDto> GetWarrantDetails(Guid caseId);
+
+        Task<Guid?> UpdateCaseForClientAsync(IntakeModel legalCase);
+        Task<CaseWarrantDto> GetWarrantsDetails(Guid caseId);
+        Task<MarshalDto> GetMarshalByIdAsync(Guid id);
     }
 }

@@ -82,6 +82,20 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
             return null;
         }
 
+        public async Task<T?> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[]? includes)
+        {
+             await using var db = await _contextFactory.CreateDbContextAsync();
+            IQueryable<T> query = db.Set<T>().Where(predicate);
+
+            if (includes != null && includes.Length > 0)
+            {
+                query = includes.Aggregate(query,
+                    (current, includeProperty) => current.Include(includeProperty));
+            }
+
+            return await query.FirstOrDefaultAsync();
+        }
+
 
     }
 }

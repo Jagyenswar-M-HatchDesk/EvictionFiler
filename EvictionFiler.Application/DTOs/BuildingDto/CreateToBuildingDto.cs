@@ -12,7 +12,6 @@ namespace EvictionFiler.Application.DTOs.ApartmentDto
 		public string BuildingCode { get; set; } = string.Empty;
 		
 		public string? ApartmentCode { get; set; }
-        [Required(ErrorMessage = "MDR  is Required")]
         public string? MDRNumber { get; set; }
         [Required(ErrorMessage = "Unit is Required")]
         public string? BuildingUnits { get; set; }

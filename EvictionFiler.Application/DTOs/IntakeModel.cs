@@ -254,7 +254,7 @@ namespace EvictionFiler.Application.DTOs
         public bool OwnerOccupied { get; set; } = false;
 
         public bool PrimaryResidence { get; set; }
-
+        
         public bool GoodCause { get; set; } = false;
         public bool WarrantRequested { get; set; }
 

@@ -28,6 +28,7 @@
 @using EvictionFiler.Application.Interfaces.IServices.Master
 @using EvictionFiler.Application.Services
 @using EvictionFiler.Client.AuthService
+@using EvictionFiler.Client.Components.Layout
 @using EvictionFiler.Client.Pages.Actions
 @using EvictionFiler.Client.Pages.Cases.CaseDetail
 @using EvictionFiler.Client.SpinnerService
@@ -78,6 +79,8 @@
 @inject IJSRuntime JS
 @inject NavigationStateMessage navmessage
 @inject UserContextService userContext
+@inject ICourtTodayTypeRepository Courttodayrepo
+@layout Aut
 
 @attribute [Authorize]
 
@@ -228,8 +231,8 @@
     }
 
     /*  .btn {
-                                                    min-height: 42px;
-                                                } */
+                                                        min-height: 42px;
+                                                    } */
 
     /* Review JSON block */
     details > pre {
@@ -588,7 +591,7 @@
     }
 
     .field-label {
-        font-size: 0.75rem;
+        font-size: 1rem;
         color: var(--text-muted);
         margin-bottom: 0.15rem;
     }
@@ -606,7 +609,7 @@
     }
 
     .font14 {
-        font-size: 14px;
+        font-size: 1rem;
     }
 
     .holdover-form {
@@ -777,6 +780,8 @@
         line-height: 20px;
         letter-spacing: 0px;
         color: #1F365D;
+        padding-left: 8px;
+        padding-right: 8px;
     }
 
 
@@ -801,19 +806,19 @@
     }
 
     /* .info-bar-title {
-                font-family: Inter;
-                font-weight: 600;
-                font-size: 16px;
-                line-height: 20px;
-                letter-spacing: 0px;
-                text-transform: capitalize;
-            } */
+                    font-family: Inter;
+                    font-weight: 600;
+                    font-size: 16px;
+                    line-height: 20px;
+                    letter-spacing: 0px;
+                    text-transform: capitalize;
+                } */
     .info-bar-title {
         display: flex;
         align-items: center;
         font-family: Inter;
-        font-weight: 700;
-        font-size: 13px;
+        font-weight: 600;
+        font-size: 20px;
         line-height: 19.5px;
         letter-spacing: 0.65px;
         vertical-align: middle;
@@ -821,9 +826,10 @@
     }
 
     .info-bar {
-        background: #1F365D; /* navy */
+        background: #fff; /* navy */
+        border-bottom: 1px solid lightgrey;
         white-space: nowrap;
-        color: #fff;
+        color: #1f365d;
         padding: 10px 16px;
         border-radius: 12px 12px 0 0;
         font-family: Inter;
@@ -839,16 +845,17 @@
         border-spacing: 0;
         background: white;
         overflow: hidden;
+        padding: 0px 8px;
     }
 
     /* Alternating row backgrounds */
     /* .info-row:nth-child(even) {
-                    background: #FAFAFF; /* your required alternate color *
-                }
+                        background: #FAFAFF; /* your required alternate color *
+                    }
 
-                .info-row:nth-child(odd) {
-                    background: #FFFFFF;
-                } */
+                    .info-row:nth-child(odd) {
+                        background: #FFFFFF;
+                    } */
 
     /* Table rows */
     .info-row {
@@ -859,9 +866,17 @@
         background-color: white;
     }
 
+    .info-row-court {
+        /* height: 42px; */
+        /* border-bottom: 1px solid #EEF1F8; */
+        /* display: flex; */
+        /* flex-direction: column; */
+        background-color: white;
+    }
+
     /*.info-row:last-child {
-                        border-bottom: none;
-                    } */
+                            border-bottom: none;
+                        } */
 
     /* Cells */
     .info-cell {
@@ -872,24 +887,24 @@
 
         /* Label column */
         /* .info-cell.label {
-                    width: 0%;
-                    font-family: Inter;
-                    font-weight: 500;
-                    font-size: 16px;
-                    line-height: 100%;
-                    letter-spacing: -3%;
-                    text-transform: capitalize;
-                    white-space: nowrap;
-                    color: #1F365D;
-                    padding-right: 0px;
-                } */
+                        width: 0%;
+                        font-family: Inter;
+                        font-weight: 500;
+                        font-size: 16px;
+                        line-height: 100%;
+                        letter-spacing: -3%;
+                        text-transform: capitalize;
+                        white-space: nowrap;
+                        color: #1F365D;
+                        padding-right: 0px;
+                    } */
         .info-cell.label {
             font-family: Inter;
-            font-weight: 900;
+            font-weight: 600;
             color: #94A3B8;
-            font-size: 13px;
+            font-size: 1rem;
             line-height: 20px;
-            letter-spacing: 1px;
+            letter-spacing: 1.2px;
             vertical-align: middle;
             /* text-transform: uppercase; */
             padding-bottom: 0px;
@@ -897,22 +912,22 @@
 
         /* Value column */
         /* .info-cell.value {
-                    font-family: Inter;
-                    font-weight: 500;
-                    font-size: 14px;
-                    line-height: 100%;
-                    letter-spacing: -2%;
-                    text-align: right;
-                    text-transform: capitalize;
-                    color: #1F365D;
-                    padding-top: 0px;
-                } */
+                        font-family: Inter;
+                        font-weight: 500;
+                        font-size: 14px;
+                        line-height: 100%;
+                        letter-spacing: -2%;
+                        text-align: right;
+                        text-transform: capitalize;
+                        color: #1F365D;
+                        padding-top: 0px;
+                    } */
         .info-cell.value {
             font-family: Inter;
             font-weight: 700;
-            font-size: 15.3px;
+            font-size: 1.2rem;
             line-height: 20px;
-            letter-spacing: 0%;
+            letter-spacing: 1.2px;
             vertical-align: middle;
             color: #0F172A;
             padding-top: 0px;
@@ -931,9 +946,18 @@
 
     .info-block {
         display: flex;
+        flex-direction: column;
         justify-content: space-between;
         align-items: baseline;
         width: 50%;
+        padding: 10px 18px;
+        vertical-align: middle;
+    }
+
+    .info-block-court {
+        display: flex;
+        flex-direction: column;
+        align-items: baseline;
         padding: 10px 18px;
         vertical-align: middle;
     }
@@ -946,7 +970,7 @@
 
         .info-block-table .value {
             font-family: Lato;
-            font-size: 14px;
+            font-size: 1rem;
             font-weight: 500;
             color: #1F365D;
         }
@@ -954,10 +978,10 @@
     /* Label */
     .info-block .label {
         font-family: Inter;
-        font-weight: 900;
-        font-size: 13px;
+        font-weight: 600;
+        font-size: 1rem;
         line-height: 20px;
-        letter-spacing: 1%;
+        letter-spacing: 1.2px;
         /* text-transform: capitalize; */
         color: #94A3B8;
     }
@@ -966,12 +990,34 @@
     .info-block .value {
         font-family: Inter;
         font-weight: 700;
-        font-size: 15px;
+        font-size: 1.2rem;
         line-height: 100%;
-        letter-spacing: -2%;
+        letter-spacing: 1.2px;
         text-align: right;
         /* text-transform: capitalize; */
-        color:#1F365D;
+        color: #1F365D;
+    }
+
+    .info-block-court .label {
+        font-family: Inter;
+        font-weight: 600;
+        font-size: 1rem;
+        line-height: 20px;
+        letter-spacing: 1.2px;
+        /* text-transform: capitalize; */
+        color: #94A3B8;
+    }
+
+    /* Value */
+    .info-block-court .value {
+        font-family: Inter;
+        font-weight: 700;
+        font-size: 1.2rem;
+        line-height: 100%;
+        letter-spacing: 1.2px;
+        text-align: left;
+        /* text-transform: capitalize; */
+        color: #1F365D;
     }
 
     .para {
@@ -1104,7 +1150,7 @@
     .label {
         font-family: Lato;
         font-weight: 500;
-        font-size: 16px;
+        font-size: 1.1rem;
         line-height: 100%;
         letter-spacing: -3%;
         text-transform: capitalize;
@@ -1164,10 +1210,9 @@
         font-size: 16px;
     }
 
-    .flex-col
-    {
-        display:flex;
-        flex-direction:column;
+    .flex-col {
+        display: flex;
+        flex-direction: column;
     }
     /* Card Container */
     .vault-card {
@@ -1249,7 +1294,6 @@
         cursor: pointer;
     }
 
-
 </style>
 
 
@@ -1328,7 +1372,7 @@
                                 <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:42px;height:42px; background-color:#F6F7FB; border-radius:20px !important;">
 
                                     @* <i class="fa-solid fa-dice-d6" style="font-size:34px;color:#1F365D !important;"></i> *@
-                                    <div class="icon" style ="font-size:18px;">📅</div>
+                                    <div class="icon" style="font-size:18px;">📅</div>
 
 
                                 </div>
@@ -1400,7 +1444,7 @@
 
                         <div class="card-body">
                             <div class="row g-3">
-                                
+
 
                                 @* <div class="col-md-4 mt-0">
 
@@ -1408,7 +1452,7 @@
                                         <div class="info-bar">
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div class="info-bar-title">
-                                                    <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:7px !important; margin-right:10px;">
+                                                    <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#1f365d; border-radius:7px !important; margin-right:10px;">
 
                                                         <i class="fa-regular fa-user" style="font-size:16px;color:#1F365D !important;"></i>
                                                     </div>
@@ -1447,10 +1491,10 @@
                                         
                                     </div> *@
 
-                               
-                                    <Landlord CurrentCaseId="@caseId" LandlordIdValue="HandleLandlord" />
-                                
-                            @*     <div class="col-md-4 mt-0">
+
+                                <Landlord CurrentCaseId="@caseId" LandlordIdValue="HandleLandlord" />
+
+                                @*     <div class="col-md-4 mt-0">
 
                                    
                                     <table class="info-table">
@@ -1459,7 +1503,7 @@
                                                 <th colspan="2" class="info-bar">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <div class="info-bar-title">
-                                                            <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:7px !important;margin-right:10px;">
+                                                            <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#1f365d; border-radius:7px !important;margin-right:10px;">
 
                                                                 <i class="fa-regular fa-building" style="font-size:16px;color:#1F365D !important;"></i> 
                                                             </div>
@@ -1507,11 +1551,11 @@
 
 
                             </div> *@
-                            
-                                    <Building CurrentCaseId="@caseId"  LandlordId="@SelectedLandlordId" />
-                                
 
-                          @*   <div class="col-md-4 mt-0">
+                                <Building CurrentCaseId="@caseId" LandlordId="@SelectedLandlordId" />
+
+
+                                @*   <div class="col-md-4 mt-0">
 
 
                                 <table class="info-table">
@@ -1520,7 +1564,7 @@
                                             <th colspan="2" class="info-bar">
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <div class="info-bar-title">
-                                                        <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:7px !important;margin-right:10px;">
+                                                        <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#1f365d; border-radius:7px !important;margin-right:10px;">
 
                                                            <i class="fa-regular fa-user" style="font-size:16px;color:#1F365D !important;"></i>
                                                         </div>
@@ -1556,123 +1600,124 @@
 
 
                             </div> *@
-                            
-                                    <Tenant CurrentCaseId="@caseId" />
-                                
 
+                                <Tenant CurrentCaseId="@caseId" />
+
+
+                            </div>
                         </div>
+
+                    </div>
+
+
+                </div>
+                <!-- Left -->
+            </section>
+            <section class="row g-4 mt-1">
+                <div class="col-12 col-lg-12 d-flex flex-column gap-4">
+                    <!-- Tenant & Building & Landlord-->
+
+                    <div class="bg-transparent">
+                        <div class="Details-header"> Stipulation &amp; Reminders</div>
                     </div>
 
                 </div>
+                <div class="col-12 col-lg-12 d-flexd-flex ">
+                    <!-- Tenant & Building & Landlord-->
+                    <div class="row mb-4">
+                        <div class="col-4 " style="padding: 0px 10px;">
+                            <div class="info-table p mb-4" style="border:none;">
+                                <div class="info-bar">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="info-bar-title">
+                                            <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#1f365d; border-radius:7px !important;margin-right:10px;">
 
-
-            </div>
-            <!-- Left -->
-        </section>
-        <section class="row g-4 mt-1">
-            <div class="col-12 col-lg-12 d-flex flex-column gap-4">
-                <!-- Tenant & Building & Landlord-->
-
-                <div class="bg-transparent">
-                    <div class="Details-header"> Stipulation &amp; Remainders</div>
-                </div>
-
-            </div>
-            <div class="col-12 col-lg-12 d-flexd-flex ">
-                <!-- Tenant & Building & Landlord-->
-                <div class="row mb-4">
-                    <div class="col-4">
-                        <div class="info-table p mb-4" style="border:none;">
-                            <div class="info-bar">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="info-bar-title">
-                                        <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:7px !important;margin-right:10px;">
-
-                                             <i class="fa-regular fa-calendar" style="font-size:16px;color:#1F365D !important;"></i> 
+                                                <i class="fa-regular fa-calendar" style="font-size:16px;color:#fff !important;"></i>
+                                            </div>
+                                            Motion Dates
                                         </div>
-                                    Motion Dates</div>
-                                    <button type="button" class="btn btn-sm normal p-1" @onclick="ShowStipulationModal" title="Edit Motions" style="color:white">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
+                                        <button type="button" class="btn btn-sm normal p-1" @onclick="ShowStipulationModal" title="Edit Motions" style="color:#1f365d">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="info-row" style="display:flex; flex-direction:row">
-                                <!-- Column 1 -->
-                                <div class="info-block">
-                                    <div class="label">Motion Due:</div>
-                                    <div class="value ellipsis">
-                                        @(MotionJudgements.MotionDue.HasValue
-                                                                                ? MotionJudgements.MotionDue.Value.ToString(DateFormats.Default)
-                                                                                : "--")
+                                <div class="info-row" style="display:flex; flex-direction:row">
+                                    <!-- Column 1 -->
+                                    <div class="info-block">
+                                        <div class="label">Motion Due:</div>
+                                        <div class="value ellipsis">
+                                            @(MotionJudgements.MotionDue.HasValue
+                                                                                    ? MotionJudgements.MotionDue.Value.ToString(DateFormats.Default)
+                                                                                    : "--")
+                                                                                       </div>
+                                                                                   </div>
+
+                                    <!-- Column 2 -->
+                                    <div class="info-block ps-0">
+                                        <div class="label">Opposition Due:</div>
+                                        <div class="value ellipsis">
+                                            @(MotionJudgements.OppositionDue.HasValue
+                                                                                    ? MotionJudgements.OppositionDue.Value.ToString(DateFormats.Default)
+                                                                                    : "--")
+                                                                                       </div>
                                                                                    </div>
                                                                                </div>
 
-                                <!-- Column 2 -->
-                                <div class="info-block">
-                                    <div class="label">Opposition Due:</div>
-                                    <div class="value ellipsis">
-                                        @(MotionJudgements.OppositionDue.HasValue
-                                                                                ? MotionJudgements.OppositionDue.Value.ToString(DateFormats.Default)
-                                                                                : "--")
+                                <!-- ROW 2 -->
+                                <div class="info-row" style="display:flex; flex-direction:row">
+                                    <!-- Column 1 -->
+                                    <div class="info-block">
+                                        <div class="label">Reply Due:</div>
+                                        <div class="value ellipsis">
+                                            @(MotionJudgements.ReplyDue.HasValue
+                                                                                    ? MotionJudgements.ReplyDue.Value.ToString(DateFormats.Default)
+                                                                                    : "--")
+                                                                                       </div>
                                                                                    </div>
-                                                                               </div>
-                                                                           </div>
 
-                            <!-- ROW 2 -->
-                            <div class="info-row" style="display:flex; flex-direction:row">
-                                <!-- Column 1 -->
-                                <div class="info-block">
-                                    <div class="label">Reply Due:</div>
-                                    <div class="value ellipsis">
-                                        @(MotionJudgements.ReplyDue.HasValue
-                                                                                ? MotionJudgements.ReplyDue.Value.ToString(DateFormats.Default)
-                                                                                : "--")
+                                    <!-- Column 2 -->
+                                    <div class="info-block ps-0">
+                                        <div class="label">OSC / Return:</div>
+                                        <div class="value ellipsis">
+                                            @(MotionJudgements.ReturnDate.HasValue
+                                                                                    ? MotionJudgements.ReturnDate.Value.ToString(DateFormats.Default)
+                                                                                    : "--")
+                                                                                       </div>
                                                                                    </div>
                                                                                </div>
-
-                                <!-- Column 2 -->
-                                <div class="info-block">
-                                    <div class="label">OSC / Return:</div>
-                                    <div class="value ellipsis">
-                                        @(MotionJudgements.ReturnDate.HasValue
-                                                                                ? MotionJudgements.ReturnDate.Value.ToString(DateFormats.Default)
-                                                                                : "--")
-                                                                                   </div>
-                                                                               </div>
-                                                                           </div>
-                            <hr />
-                                    <div colspan="2" class="info-bar" style="background-color:transparent; color:#1F365D; padding-top:0px;">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="info-bar-title">Key Dates</div>
-                                            @* <button type="button" class="btn btn-sm normal p-1" @onclick="ShowTenantModal" style="color:white">
+                                                                               <hr />
+                                                                               <div colspan="2" class="info-bar" style="background-color:transparent; color:#1F365D; padding-top:0px;">
+                                                                                   <div class="d-flex justify-content-between align-items-center">
+                                                                                       <div class="info-bar-title">Key Dates</div>
+                                                                                       @* <button type="button" class="btn btn-sm normal p-1" @onclick="ShowTenantModal" style="color:white">
                                                 <i class="bi bi-pencil"></i>
                                             </button>*@
-                                        </div>
                                     </div>
-                            <div class="info-row" style="display:flex; flex-direction:row">
-                                <!-- Column 1 -->
-                                <div class="info-block">
-                                    <div class="label">Vacate Date:</div>
-                                    <div class="value ellipsis">
-                                        @(legalcaseDto.RemainderDate.HasValue
-                                                                                ? legalcaseDto.RemainderDate.Value.ToString(DateFormats.Default)
-                                                                                : "--")
+                                </div>
+                                <div class="info-row" style="display:flex; flex-direction:row">
+                                    <!-- Column 1 -->
+                                    <div class="info-block">
+                                        <div class="label">Vacate Date:</div>
+                                        <div class="value ellipsis">
+                                            @(legalcaseDto.RemainderDate.HasValue
+                                                                                    ? legalcaseDto.RemainderDate.Value.ToString(DateFormats.Default)
+                                                                                    : "--")
+                                                                                       </div>
                                                                                    </div>
-                                                                               </div>
 
-                                <!-- Column 2 -->
-                                <div class="info-block">
-                                    <div class="label">Next Reminder:</div>
-                                    <div class="value ellipsis">
-                                        @(legalcaseDto.RemainderDate.HasValue
-                                                                                ? legalcaseDto.RemainderDate.Value.ToString(DateFormats.Default)
-                                                                                : "--")
-                                                                                   </div>
-                                                                               </div>
-                                                                           </div>
+                                    <!-- Column 2 -->
+                                    <div class="info-block">
+                                        <div class="label">Next Reminder:</div>
+                                        <div class="value ellipsis">
+                                            @(legalcaseDto.RemainderDate.HasValue
+                                                                                    ? legalcaseDto.RemainderDate.Value.ToString(DateFormats.Default)
+                                                                                    : "--")
+                                    </div>
+                                </div>
+                            </div>
 
-                        </div>
-                        @*
+                            </div>
+                            @*
                         <table class="info-table mb-4" style="border:none;">
                             <thead>
                                 <tr>
@@ -1729,19 +1774,19 @@
 
                         *@
                         </div>
-                        <div class="col-4">
-                            <table class="info-table " style="border:none;">
+                        <div class="col-4" style="padding: 0px 10px;">
+                            @* <table class="info-table " style="border:none;">
                                 <thead>
                                     <tr>
                                         <th colspan="2" class="info-bar" >
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div class="info-bar-title">
-                                                    <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:7px !important;margin-right:10px;">
+                                                    <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#1f365d; border-radius:7px !important;margin-right:10px;">
 
-                                                         <i class="fa-regular fa-user" style="font-size:16px;color:#1F365D !important;"></i> 
+                                                         <i class="fa-regular fa-user" style="font-size:16px;color:#fff !important;"></i> 
                                                     </div>
                                                 People & Contact</div>
-                                                <button type="button" class="btn btn-sm normal p-1" @onclick="ShowClientModal" style="color:white">
+                                                <button type="button" class="btn btn-sm normal p-1" @onclick="ShowClientModal" style="color:#1F365D">
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
                                             </div>
@@ -1778,26 +1823,28 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </table>*@
 
-
+                            <Client currentCaseId="@caseId" LoggedinUserId="@loggedInUserId" isAdmin="isAdmin" />
 
                         </div>
 
+
+
                         <!-- Marshal Info -->
-                        <div class="col-4">
-                            <table class="info-table " style="border:none;">
+                        <div class="col-4" style="padding: 0px 10px;">
+                            @*<table class="info-table " style="border:none;">
                                 <thead>
                                     <tr>
                                         <th colspan="2" class="info-bar">
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div class="info-bar-title">
-                                                    <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:7px !important;margin-right:10px;">
+                                                    <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#1f365d; border-radius:7px !important;margin-right:10px;">
 
-                                                        <i class="fa-regular fa-circle-check" style="font-size:16px;color:#1F365D !important;"></i>
+                                                        <i class="fa-regular fa-circle-check" style="font-size:16px;color:#fff !important;"></i>
                                                      </div>
                                                 Marshal & Warrant</div>
-                                                <button type="button" class="btn btn-sm normal p-1" @onclick="ShowMarshalModal" style="color:white">
+                                                <button type="button" class="btn btn-sm normal p-1" @onclick="ShowMarshalModal" style="color:#1F365D">
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
                                             </div>
@@ -1824,8 +1871,8 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
-
+                            </table> *@
+                            <Marshal CurrentCaseId="@caseId" isReload="@isLoadMarshal" loggedInUserId="@loggedInUserId" />
 
 
                         </div>
@@ -1839,13 +1886,14 @@
                                 <div class="info-bar">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="info-bar-title">
-                                            <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:7px !important;margin-right:10px;">
+                                            <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#1f365d; border-radius:7px !important;margin-right:10px;">
 
-                                                <i class="fa-solid fa-building-columns" style="font-size:16px;color:#1F365D !important;"></i> 
+                                                <i class="fa-solid fa-building-columns" style="font-size:16px;color:#fff !important;"></i>
                                             </div>
-                                        Court & Opposing</div>
-                                        <button type="button" class="btn btn-sm normal p-1" @onclick="ShowCourtModal" title="Edit Courts" style="color:white">
-                                            @if (isNewCourt)
+                                            Court
+                                        </div>
+                                        <button type="button" class="btn btn-sm normal p-1" @onclick="ShowCourtModal" title="Edit Courts" style="color:#1F365D">
+                                        @if (isNewCourt)
                                             {
                                                 <i class="fa-solid fa-plus"></i>
                                             }
@@ -1858,58 +1906,61 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="info-row col-4" style="display:flex;">
+                                    <div class="info-row-court row" style="display:flex;">
                                         <!-- Column 1 -->
-                                        <div class="info-block flex-col">
+                                        <div class="info-block-court col-4 flex-col">
                                             <div class="label">Court:</div>
-                                            <div class="value ellipsis">
+                                            <div class="value">
                                                 @(string.IsNullOrWhiteSpace(legalcaseDto.Court) ? "--" : legalcaseDto.Court)
                                             </div>
                                         </div>
-                                        <div class="info-block flex-col">
-                                            <div class="label">Judge:</div>
-                                            <div class="value ellipsis">
-                                                @(string.IsNullOrWhiteSpace(legalcaseDto.Judge) ? "--" : legalcaseDto.Judge)
-                                            </div>
-                                        </div>
-                                        <!-- Column 2 -->
-
-                                    </div>
-
-                                    <!-- ROW 2 -->
-                                    <div class="info-row col-4" style="display:flex;">
-                                        <!-- Column 1 -->
-                                        <div class="info-block flex-col">
+                                        <div class="info-block-court col-4 flex-col">
                                             <div class="label">Part:</div>
-                                            <div class="value ellipsis">
+                                            <div class="value">
                                                 @(string.IsNullOrWhiteSpace(legalcaseDto.CourtPart) ? "--" : legalcaseDto.CourtPart)
                                             </div>
                                         </div>
-
-                                        <!-- Column 2 -->
-                                        <div class="info-block flex-col">
-                                            <div class="label">Next Court Date:</div>
-                                            <div class="value ellipsis">
-                                                @(legalcaseDto.NextCourtDate == null ? "--" : legalcaseDto.NextCourtDate?.ToString(DateFormats.Default))
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="info-row col-4" style="display:flex;">
-                                        <!-- Column 1 -->
-                                        <div class="info-block flex-col">
+                                        <div class="info-block-court  col-4 flex-col">
                                             <div class="label">Room:</div>
-                                            <div class="value ellipsis">
+                                            <div class="value">
                                                 @(string.IsNullOrWhiteSpace(legalcaseDto.CourtRoomNo) ? "--" : legalcaseDto.CourtRoomNo)
                                             </div>
                                         </div>
 
                                         <!-- Column 2 -->
-                                        <div class="info-block flex-col">
+
+                                    </div>
+
+                                    <!-- ROW 2 -->
+                                    <div class="info-row-court row" style="display:flex;">
+                                        <!-- Column 1 -->
+                                        <div class="info-block-court col-4 flex-col">
+                                            <div class="label">Judge:</div>
+                                            <div class="value">
+                                                @(string.IsNullOrWhiteSpace(legalcaseDto.Judge) ? "--" : legalcaseDto.Judge)
+                                            </div>
+                                        </div>
+
+                                        <!-- Column 2 -->
+                                        <div class="info-block-court col-4 flex-col">
+                                            <div class="label">Next Court Date:</div>
+                                            <div class="value">
+                                                @(legalcaseDto.NextCourtDate == null ? "--" : legalcaseDto.NextCourtDate?.ToString(DateFormats.Default))
+                                            </div>
+                                        </div>
+
+                                        <div class="info-block-court col-4 flex-col">
                                             <div class="label">Index No.:</div>
-                                            <div class="value ellipsis">
+                                            <div class="value">
                                                 @(string.IsNullOrWhiteSpace(legalcaseDto.Index) ? "--" : legalcaseDto.Index)
                                             </div>
                                         </div>
+
+                                    </div>
+                                    <div class="info-row col-4" style="display:flex;">
+                                        <!-- Column 1 -->
+                                        <!-- Column 2 -->
+
                                     </div>
 
                                 </div>
@@ -1999,16 +2050,16 @@
                         </div>
 
                         <div class="col-8">
-                            <div class="info-table " style="border:none;">
+                            @* <div class="info-table " style="border:none;">
                                 <div class="info-bar">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="info-bar-title">
-                                        <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB; border-radius:7px !important;margin-right:10px;">
+                                        <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#1f365d; border-radius:7px !important;margin-right:10px;">
 
-                                                        <i class="fa-regular fa-circle-check" style="font-size:16px;color:#1F365D !important;"></i> 
+                                                        <i class="fa-regular fa-circle-check" style="font-size:16px;color:#fff !important;"></i> 
                                                     </div>
                                         Marshal & Warrant </div>
-                                        <button type="button" class="btn btn-sm normal p-1" @onclick="ShowMarshalModal" style="color:white">
+                                        <button type="button" class="btn btn-sm normal p-1" @onclick="ShowMarshalModal" style="color:#1F365D">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                     </div>
@@ -2080,7 +2131,8 @@
                                     </div>
 
                                 </div>
-                            </div>
+                            </div> *@
+                            <Warrant CurrentCaseId="@caseId" isReload="@isLoadMarshal" loggedInUserId="@loggedInUserId" SelectedMarshalId="legalcaseDto.MarshalId" WarrantRequested="@legalcaseDto.WarrantRequested" />
                             @* <table class="info-table " style="border:none;">
                             <thead>
                                 <tr>
@@ -2161,7 +2213,7 @@
                         </div>
                     </div>
                     <!-- Court Info -->
-                    
+
                     <div class="row mb-4">
                         <div class="col-4">
                             <div class="bg-transparent mb-4">
@@ -2171,21 +2223,21 @@
                             <div class="mb-4">
                                 <div class="table-responsive" style="height:205px;">
                                     <table class="info-table" style="border:none; ">
-                                        <thead >
+                                        <thead>
                                             <tr>
 
                                                 <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px;  display:flex;align-items:center;">
-                                                   
-                                                ID</th>
-                                                <th scope="col" class="info-bar" style="border-radius: 0px;">Forms</th>
-                                                @if (isAdmin)
-                                                {
 
-                                                    <th scope="col" class="info-bar" style="border-radius: 0px;">Created By</th>
-                                                }
+                                                    ID
+                                                </th>
+                                                <th scope="col" class="info-bar" style="border-radius: 0px;">Forms</th>
+
+
+                                                <th scope="col" class="info-bar" style="border-radius: 0px;">Created By</th>
+
                                                 <th scope="col" style="width:12%;border-radius:0px ;" class="text-nowrap info-bar">Actions</th>
                                                 <th scope="col" class="info-bar" style="border-radius: 0px;">Created On</th>
-                                                
+
                                             </tr>
                                         </thead>
 
@@ -2201,17 +2253,16 @@
 
                                                         </td>
                                                         <td class="info-block-table"><div class="value">@form.FormTypeName</div></td>
-                                                        @if (isAdmin)
-                                                        {
-                                                            <td><div class="value">@form.CreatedByName</div></td>
-                                                        }
+
+                                                        <td class="info-block-table"><div class="value">@form.CreatedByName</div></td>
+
                                                         <td class="d-flex justify-content-between info-block-table" style="gap:2px">
                                                             <span class="action-icon value" @onclick="@(() => ViewPdf(form.File))"><i class="fa-solid fa-eye"></i></span>
                                                             <span class="action-icon value" @onclick="@(() => EditCaseDetail(form.Id))"><i class="fa-solid fa-pen-to-square"></i></span>
                                                             <span class="action-icon-danger value" @onclick="@(() => DeleteCaseDetail(form.Id))"><i class="fa-solid fa-trash"></i></span>
                                                         </td>
                                                         <td class="info-block-table"><div class="value">@form.CreatedOn?.ToString(DateFormats.Default)</div></td>
-                                                        
+
                                                     </tr>
                                                     index++;
                                                 }
@@ -2230,19 +2281,21 @@
 
 
                             </div>
-                            <div class="" >
+                            <div class="">
                                 <div class="table-responsive" style="height:160px;">
-                                    <table class="info-table" >
+                                    <table class="info-table">
                                         <thead>
                                             <tr>
 
                                                 <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px; display:flex;align-items:center;">
-                                                   
-                                                Uploaded Documents</th>
+
+                                                    Uploaded Documents
+                                                </th>
                                                 <th scope="col" style="width:12%;border-radius:0px ;" class="text-nowrap info-bar">Actions</th>
                                                 <th scope="col" style="width:12%;border-radius:0px ;" class="text-nowrap info-bar">Type</th>
+                                                <th scope="col" style="width:12%;border-radius:0px ;" class="text-nowrap info-bar">CreatedBy</th>
                                                 <th scope="col" class="info-bar" style="border-radius:0px;">Created On</th>
-                                               
+
                                             </tr>
                                         </thead>
 
@@ -2255,7 +2308,7 @@
 
                                                         <td class="info-block-table"><div class="value">@docs.Name</div></td>
 
-                                                          <td class="d-flex justify-content-between info-block-table" style="gap:2px">
+                                                        <td class="d-flex justify-content-between info-block-table" style="gap:2px">
 
                                                             <span class="action-icon value">
                                                                 <i class="fa-solid fa-eye text-navy me-2" style="cursor:pointer"
@@ -2269,9 +2322,10 @@
                                                                    title="Delete"></i>
                                                             </span>
                                                         </td>
-                                                        <td class="info-block-table"><div class="value">@docs.Name</div></td>
+                                                        <td class="info-block-table"><div class="value">@(docs.DocumentTypes?.Name ?? "--")</div></td>
+                                                        <td class="info-block-table"><div class="value">@(docs.User?.FirstName ?? "--")</div></td>
                                                         <td class="info-block-table"><div class="value">@docs.CreatedOn.ToString(DateFormats.Default)</div></td>
-                           
+
                                                     </tr>
                                                 }
                                             }
@@ -2292,24 +2346,24 @@
 
                         </div>
                         <div class="col-8 row">
-                            <div class="col-12 mb-4" >
+                            <div class="col-12 mb-4">
                                 <div class="table-responsive" style="height:160px;">
-                                    <table class="info-table" >
+                                    <table class="info-table">
                                         <thead>
                                             <tr>
-                                                
+
                                                 <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px; display:flex;align-items:center;">
-                                                    
-                                                ID</th>
+
+                                                    ID
+                                                </th>
                                                 <th scope="col" class="info-bar" style="border-radius:0px;">Notes</th>
                                                 <th scope="col" style="width:12%;border-radius:0px ;" class="text-nowrap info-bar">Actions</th>
-                                                @if (isAdmin)
-                                                {
 
-                                                    <th scope="col" class="info-bar" style="border-radius:0px;">Created By</th>
-                                                }
+
+                                                <th scope="col" class="info-bar" style="border-radius:0px;">Created By</th>
+
                                                 <th scope="col" class="info-bar" style="border-radius:0px;">Created On</th>
-                                                
+
                                             </tr>
                                         </thead>
 
@@ -2325,17 +2379,19 @@
 
                                                         </td>
                                                         <td class="info-block-table"><div class="value">@notes.Notes</div></td>
-                                                             <td class="d-flex justify-content-around info-block-table" style="gap:2px">
+                                                        <td class="d-flex justify-content-around info-block-table" style="gap:2px">
 
                                                             <span class="action-icon value" @onclick=" () => OpenNotesTab(notes.Id)"><i class="fa-solid fa-pen-to-square"></i></span>
                                                             <span class="action-icon-danger value"><i class="fa-solid fa-trash"></i></span>
                                                         </td>
-                                                        @if (isAdmin)
-                                                        {
-                                                            <td class="info-block-table"><div class="value">@notes.CreatedBy</div></td>
-                                                        }
+
+                                                        <td class="info-block-table">
+                                                            <div class="value">
+                                                                @notes.User.FirstName
+                                                            </div>
+                                                        </td>
                                                         <td class="info-block-table"><div class="value">@notes.CreatedOn.ToString(DateFormats.Default)</div></td>
-                             
+
                                                     </tr>
                                                     index++;
                                                 }
@@ -2354,18 +2410,18 @@
 
 
                             </div>
-                            
+
                             <div class="col-9">
-                                <div class="" style="background-color:white;border-radius:20px;">
-                                    <div class="info-bar" style="background-color:#E2A841;">
+                                <div class="ps-2 pe-2" style="background-color:white;border-radius:20px;">
+                                    <div class="info-bar" style="background-color:#fff;">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="info-bar-title">
-                                                <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#F6F7FB ; border-radius:7px !important;margin-right:10px;">
+                                                <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#1f365d ; border-radius:7px !important;margin-right:10px;">
 
-                                                    <i class="fa-solid fa-stairs" style="font-size:16px;color:#1F365D !important;"></i> 
+                                                    <i class="fa-solid fa-stairs" style="font-size:16px;color:#fff !important;"></i>
                                                 </div>Timeline
                                             </div>
-                                            
+
                                         </div>
                                     </div>
                                     <div class=para>
@@ -2483,35 +2539,35 @@
 
                             </div>
                             <div class="col-3">
-                                 <div class="" style="background-color:white;border-radius:20px;">
+                                <div class="" style="background-color:white;border-radius:20px;">
                                     <div class="vault-card">
                                         <div class=" vault-header d-flex justify-content-between align-items-center">
-                                        <span class="vault-title">EVIDENCE VAULT</span>
-                                           
-                                             <button class="vault-add-btn">
-                                                   <i class="fa-solid fa-plus"></i>
-                                              </button>
+                                            <span class="vault-title">UPLOADS</span>
+
+                                            <button class="vault-add-btn">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </button>
+                                        </div>
+
+                                        <div class="vault-body">
+                                            <div class="vault-icon">
+                                                <i class="fa-regular fa-file-lines"></i>
                                             </div>
 
-                                            <div class="vault-body">
-                                             <div class="vault-icon">
-                                            <i class="fa-regular fa-file-lines"></i>
-                                                   </div>
+                                            <div class="vault-empty-text">VAULT EMPTY</div>
 
-                                             <div class="vault-empty-text">VAULT EMPTY</div>
-
-                                                  <div class="vault-sync">
-                                              <i class="fa-solid fa-cloud-arrow-down me-1"></i>
-                                                     CLOUD SYNC
-                                                    </div>
-                                                    </div>
+                                            <div class="vault-sync">
+                                                <i class="fa-solid fa-cloud-arrow-down me-1"></i>
+                                                CLOUD SYNC
+                                            </div>
                                         </div>
                                     </div>
+                                </div>
                             </div>
                         </div>
-                        
+
                     </div>
-                    
+
 
                     <!-- Tabs: Activity / Timeline / Actions -->
                     @*  <div class="card shadow-sm border-0">
@@ -3167,7 +3223,7 @@
                     </div>*@
                 </div>
             </section>
-           @* <section class="row g-4 mt-1">
+            @* <section class="row g-4 mt-1">
 
                 <div class="col-12 col-lg-12 d-flex flex-column gap-4">
                     <div class="card shadow-sm border-0 p-3">
@@ -3301,7 +3357,7 @@
     </script>
 
     <!-- Tenant Edit Modal -->
-     @* <div class="modal fade" id="tenantModal" tabindex="-1" aria-labelledby="tenantModalLabel" aria-hidden="true">
+    @* <div class="modal fade" id="tenantModal" tabindex="-1" aria-labelledby="tenantModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 800px !important;">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header">
@@ -4047,7 +4103,7 @@
     </div>
 
     <!-- client Edit Modal -->
-    <div class="modal fade" id="stipulationModal" tabindex="-1" aria-labelledby="stipulationModalLabel" aria-hidden="true">
+     <div class="modal fade" id="stipulationModal" tabindex="-1" aria-labelledby="stipulationModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header">
@@ -4115,7 +4171,8 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
+
+    @*<div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header">
@@ -4232,9 +4289,9 @@
                 </EditForm>
             </div>
         </div>
-    </div>
+    </div> *@
 
-    <div class="modal fade" id="marshalModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
+    @* <div class="modal fade" id="marshalModal" tabindex="-1" aria-labelledby="buildingModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header">
@@ -4377,7 +4434,7 @@
 
             </div>
         </div>
-    </div>
+    </div> *@
     <div class="modal fade" id="courtModal" tabindex="-1" aria-labelledby="CourtModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
@@ -4433,7 +4490,7 @@
                                             </InputSelect>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label required-label">Court <span class="text-danger">*</span></label>
+                                            <label class="form-label required-label">Court </label>
                                             <InputSelect class="form-select" @bind-Value="legalcaseDto.CourtLocationId" style="cursor:pointer;" @onmousedown="ShowAllCourts" @bind-Value:after="SelectCourt">
                                                 <option value="">-- Select --</option>
                                                 @foreach (var l in filteredCourts)
@@ -4637,7 +4694,13 @@
     <script>
         window.showModal = (id) => {
         const modal = new bootstrap.Modal(document.getElementById(id));
+        if(modal){
         modal.show();
+
+        }
+        else{
+            console.log("No modal found");
+        }
         };
     </script>
     <script>
@@ -4755,18 +4818,20 @@
     public List<CourtDto> courts = new();
     public List<CourtDto> filteredCourts = new List<CourtDto>();
     public List<CourtPartDto> filteredCourtsPart = new List<CourtPartDto>();
-    private List<MarshalDto> filteredmarshal = new();
-    private MarshalDto selectedmarshal;
-    private string searchmarshalText;
+    // private List<MarshalDto> filteredmarshal = new();
+    // private MarshalDto selectedmarshal;
+    // private string searchmarshalText;
     private bool selectedTimeline = false;
     private bool PrimaryResidence = false;
     private Guid? TenancytypeId = Guid.Empty;
     private Guid? CaseNotesId = null;
     private CancellationTokenSource _cts;
-    private bool isMarshalAssigned = false;
+    // private bool isMarshalAssigned = false;
     [Parameter] public GenrateNoticeModel createAction { get; set; } = new();
     private bool showMarshalError = false;
     [Parameter] public EventCallback OnFormCreate { get; set; } = new();
+
+    private bool isLoadMarshal = false;
 
     private Guid? SelectedLandlordId;
 
@@ -4853,7 +4918,7 @@
         // spinnerservice.Hide();
     }
 
-   
+
     private async Task CheckMarshal()
     {
         if (legalcaseDto.MarshalId == null || legalcaseDto.MarshalId == Guid.Empty)
@@ -4876,17 +4941,17 @@
     {
         SelectedLandlordId = landlordId;
     }
-    async Task HideMarshalDropDown(FocusEventArgs e)
-    {
-        // small1 delay to allow click on dropdown item to register before hiding
-        await Task.Delay(500);
-        if (filteredmarshal.Any())
-        {
-            filteredmarshal.Clear();
+    // async Task HideMarshalDropDown(FocusEventArgs e)
+    // {
 
-        }
-        StateHasChanged();
-    }
+    //     await Task.Delay(500);
+    //     if (filteredmarshal.Any())
+    //     {
+    //         filteredmarshal.Clear();
+
+    //     }
+    //     StateHasChanged();
+    // }
     private async Task SelectCourtType()
     {
         var CourtType = CourtTypeList.FirstOrDefault(ty => ty.Id == legalcaseDto.CourtTypeId);
@@ -4949,7 +5014,7 @@
         ShowClearBtn = true;
         StateHasChanged();
     }
-    private async Task OnSearchMarshalInput(ChangeEventArgs e)
+    @* private async Task OnSearchMarshalInput(ChangeEventArgs e)
     {
         searchmarshalText = e.Value?.ToString() ?? "";
         _cts?.Cancel();
@@ -4985,7 +5050,7 @@
             // Old task cancelled → ignore
         }
 
-    }
+    } *@
 
     private async Task OpenNotesTab(Guid NotesId)
     {
@@ -4998,14 +5063,14 @@
             await Task.Delay(100);
             await JS.InvokeVoidAsync("showModal", "generateActions");
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
 
         }
 
     }
 
-    private async Task SubmitMarshalDates(bool formgeneration)
+    @* private async Task SubmitMarshalDates(bool formgeneration)
     {
         showMarshalError = false; // reset old errors
 
@@ -5031,7 +5096,7 @@
             {
                 ToastService.ShowError("Failed to asign Marshal .");
             }
-        }
+        } 
 
 
 
@@ -5048,8 +5113,8 @@
         //     MarshalId = legalcaseDto.MarshalId,
         //     LegalcaseId = legalcaseDto.Id
         // };
-
-        var resultcasewarrant = await _casewarrantservice.AddCaseWarrant(caseWarrantDto);
+        CaseWarranrDto.LegalcaseId = legalcaseDto.Id;
+        var resultcasewarrant = await _casewarrantservice.AddCaseWarrant(CaseWarranrDto);
 
         if (resultcasewarrant)
         {
@@ -5069,9 +5134,9 @@
         }
 
         StateHasChanged();
-    }
+    } *@
 
-    private async void Selectedmarshal(MarshalDto marshal)
+    @* private async void Selectedmarshal(MarshalDto marshal)
     {
 
         selectedmarshal = marshal;
@@ -5091,23 +5156,23 @@
         StateHasChanged();
 
 
-    }
+    }*@
 
 
 
-    private void ResetMarshal()
-    {
-        spinnerservice.Show();
-        isMarshalAssigned = false;
-        selectedmarshal = null;
-        legalcaseDto.MarshalId = null;     // Marshal unassign
-        searchmarshalText = "";            // Clear search box
-        filteredmarshal?.Clear();
-        showMarshalError = false;// Clear list
+    // private void ResetMarshal()
+    // {
+    //     spinnerservice.Show();
+    //     isMarshalAssigned = false;
+    //     selectedmarshal = null;
+    //     legalcaseDto.MarshalId = null;
+    //     searchmarshalText = "";
+    //     filteredmarshal?.Clear();
+    //     showMarshalError = false;
 
-        StateHasChanged();
-        spinnerservice.Hide();
-    }
+    //     StateHasChanged();
+    //     spinnerservice.Hide();
+    // }
 
     private async Task GenrateMarshalForm()
     {
@@ -5144,43 +5209,43 @@
 
     }
 
-    private async Task SubmitMarshal()
-    {
-        showMarshalError = false; // reset old errors
+    // private async Task SubmitMarshal()
+    // {
+    //     showMarshalError = false;
 
-        if (legalcaseDto.MarshalId == null || legalcaseDto.MarshalId == Guid.Empty)
-        {
-            showMarshalError = true;
-            StateHasChanged();
-            return;
-        }
-        spinnerservice.Show();
+    //     if (legalcaseDto.MarshalId == null || legalcaseDto.MarshalId == Guid.Empty)
+    //     {
+    //         showMarshalError = true;
+    //         StateHasChanged();
+    //         return;
+    //     }
+    //     spinnerservice.Show();
 
-        var result = await _service.UpdateMarshalAsync(legalcaseDto);
+    //     var result = await _service.UpdateMarshalAsync(legalcaseDto);
 
-        if (result)
-        {
-            ToastService.ShowSuccess("Marshal Assign  successfully!");
-            legalcaseDto.MarshalName = searchmarshalText;
-            legalcaseDto.MarshalPhone = selectedmarshal.Telephone;
-            legalcaseDto.Docketno = selectedmarshal.DocketNo;
-            // await LoadCaseDetails();
-            isMarshalAssigned = true;
-        }
-        else
-        {
-            ToastService.ShowError("Failed to asign Marshal .");
-        }
-        StateHasChanged();
-        spinnerservice.Hide();
+    //     if (result)
+    //     {
+    //         ToastService.ShowSuccess("Marshal Assign  successfully!");
+    //         legalcaseDto.MarshalName = searchmarshalText;
+    //         legalcaseDto.MarshalPhone = selectedmarshal.Telephone;
+    //         legalcaseDto.Docketno = selectedmarshal.DocketNo;
 
-    }
+    //         isMarshalAssigned = true;
+    //     }
+    //     else
+    //     {
+    //         ToastService.ShowError("Failed to asign Marshal .");
+    //     }
+    //     StateHasChanged();
+    //     spinnerservice.Hide();
 
-    private async Task ShowAllmarshal()
-    {
-        filteredmarshal = (await _marshalService.GetAllMarshalAsync()).ToList();
-        StateHasChanged();
-    }
+    // }
+
+    // private async Task ShowAllmarshal()
+    // {
+    //     filteredmarshal = (await _marshalService.GetAllMarshalAsync()).ToList();
+    //     StateHasChanged();
+    // }
     private async Task OnFocusOutCourt(FocusEventArgs e)
     {
         await Task.Delay(200);
@@ -5202,7 +5267,7 @@
     // private List<ArrearLedgerDto> Rows = new();
     // private List<ArrearLedgerDto> RowstoDelete = new();
 
-  @*  private void OnMonthChanged(ArrearLedgerDto row)
+    @*  private void OnMonthChanged(ArrearLedgerDto row)
     {
         StateHasChanged();
     }
@@ -5353,6 +5418,7 @@
         await JS.InvokeVoidAsync("hideModal", "generateActions");
         CaseNotesId = null;
         _showCreateAction = false;
+        isLoadMarshal = true;
     }
     private async Task HandleNotesInvokeAction()
     {
@@ -5365,17 +5431,17 @@
     private async Task LoadCaseDetails()
     {
         legalcaseDto = await _service.GetCaseByIdAsync(caseId);
-        if (legalcaseDto.MarshalId != null && legalcaseDto.MarshalId != Guid.Empty)
-        {
-            selectedmarshal = await _marshalService.GetMarshalByIdAsync(legalcaseDto.MarshalId.Value);
-            isMarshalAssigned = true;
-        }
-        else
-        {
-            isMarshalAssigned = false;
-            selectedmarshal = null;
-            searchmarshalText = string.Empty;
-        }
+        // if (legalcaseDto.MarshalId != null && legalcaseDto.MarshalId != Guid.Empty)
+        // {
+        //     selectedmarshal = await _marshalService.GetMarshalByIdAsync(legalcaseDto.MarshalId.Value);
+        //     isMarshalAssigned = true;
+        // }
+        // else
+        // {
+        //     isMarshalAssigned = false;
+        //     selectedmarshal = null;
+        //     searchmarshalText = string.Empty;
+        // }
         if (legalcaseDto != null && legalcaseDto.CaseTypeId != null)
         {
             FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId);
@@ -5420,14 +5486,14 @@
 
                 // for client
                 ClientCode = legalcaseDto.ClientCode,
-                FirstName = legalcaseDto.FirstName,
-                LastName = legalcaseDto.LastName,
-                Address1 = legalcaseDto.Address1,
-                Address2 = legalcaseDto.Address2,
-                StateName = legalcaseDto.StateName,
-                ZipCode = legalcaseDto.ZipCode,
-                ClientEmail = legalcaseDto.ClientEmail,
-                ClientPhone = legalcaseDto.ClientPhone,
+                // FirstName = legalcaseDto.FirstName,
+                // LastName = legalcaseDto.LastName,
+                // Address1 = legalcaseDto.Address1,
+                // Address2 = legalcaseDto.Address2,
+                // StateName = legalcaseDto.StateName,
+                // ZipCode = legalcaseDto.ZipCode,
+                // ClientEmail = legalcaseDto.ClientEmail,
+                // ClientPhone = legalcaseDto.ClientPhone,
                 MarshalId = legalcaseDto.MarshalId,
 
                 // Landlord
@@ -5436,7 +5502,7 @@
                 // Phone = legalcaseDto.Phone,
                 // Email = legalcaseDto.Email,
                 // LandLordTypeId = legalcaseDto.LandLordTypeId ?? Guid.Empty,
-                
+
                 // landlordName = legalcaseDto.landlordName,
                 // ContactPersonName = legalcaseDto.ContactPersonName,
                 // LandlordAddress = legalcaseDto.LandlordAddress,
@@ -5447,7 +5513,7 @@
                 // Units = legalcaseDto.Units,
                 // BuildingAddress = legalcaseDto.BuildingAddress,
                 // RegulationStatusId = legalcaseDto.RegulationStatusId ?? Guid.Empty,
-                // Borough = legalcaseDto.Borough,
+                Borough = legalcaseDto.Borough,
                 // BuildingState = legalcaseDto.BuildingState,
                 // BuildingZip = legalcaseDto.BuildingZip,
                 // PrimaryResidence = legalcaseDto.PrimaryResidence,
@@ -5461,7 +5527,7 @@
 
                 // Tenant
                 TenantId = legalcaseDto.TenantId,
-                // TenantName = legalcaseDto.TenantName,
+                TenantName = legalcaseDto.TenantName,
                 // UnitNumber = legalcaseDto.UnitNumber,
                 // UnitOrApartmentNumber = legalcaseDto.UnitOrApartmentNumber,
                 // IsUnitIllegalId = legalcaseDto.IsUnitIllegalId,
@@ -5482,7 +5548,7 @@
                 ExpirationDate = legalcaseDto.ExpirationDate,
                 PredicateNotice = legalcaseDto.PredicateNotice,
                 //RentDueEachMonthOrWeekId = legalcaseDto.RentDueEachMonthOrWeekId,
-                //MonthlyRent = legalcaseDto.MonthlyRent,
+                // MonthlyRent = legalcaseDto.MonthlyRent,
                 //TotalOwed = legalcaseDto.TotalOwed,
                 //TenantShare = legalcaseDto.TenantShare,
                 SocialService = legalcaseDto.SocialService,
@@ -5499,13 +5565,13 @@
                 CourtRoom = legalcaseDto.CourtRoom,
                 CourtPart = legalcaseDto.CourtPart,
                 CourtPhone = legalcaseDto.CourtPhone,
-                CourtRoomNo = legalcaseDto.CourtRoom!,
+                CourtRoomNo = legalcaseDto.CourtRoomNo!,
                 CourtVirtualLink = legalcaseDto.CourtVirtualLink,
                 Judge = legalcaseDto.Judge,
                 BillAmount = legalcaseDto.BillAmount,
-                Docketno = legalcaseDto.Docketno,
-                MarshalName = legalcaseDto.MarshalName,
-                MarshalPhone = legalcaseDto.MarshalPhone,
+                // Docketno = legalcaseDto.Docketno,
+                // MarshalName = legalcaseDto.MarshalName,
+                // MarshalPhone = legalcaseDto.MarshalPhone,
 
                 LastPayment = legalcaseDto.LastPayment,
                 Assistance = legalcaseDto.Assistance,
@@ -5747,14 +5813,14 @@
 
         caseWarrantDto = await _casewarrantservice.GetWarrantDetails(legalcaseDto.Id);
 
-        
+
 
         StateHasChanged();
     }
 
     private async Task LoadNotes()
     {
-        CaseNotes = await _service.GetAllCaseNotes();
+        CaseNotes = await _service.GetAllCaseNotes(legalcaseDto.Id);
         StateHasChanged();
 
     }
@@ -5802,7 +5868,7 @@
     //private BuildingModel buildingEditModel = new();
     // private List<TenancyType> TenancyTypeList = new();
 
-  @*  private async void ShowTenantModal()
+    @*  private async void ShowTenantModal()
     {
        
         Tenants.Clear();
@@ -5850,14 +5916,14 @@
         JS.InvokeVoidAsync("showModal", "tenantModal");
     } *@
 
-    public EditToClientDto client = new EditToClientDto();
+    // public EditToClientDto client = new EditToClientDto();
     public List<EditToClientDto> ClientList = new List<EditToClientDto>();
     public IEnumerable<CaseNotes> CaseNotes = new List<CaseNotes>();
-    public List<EditToClientDto> filteredClients = new List<EditToClientDto>();
-    public List<ClientRole> ClientTypeList = new List<ClientRole>();
-    public string searchText { get; set; }
-    public bool showClientTextbox = false;
-    public bool newClient = false;
+    // public List<EditToClientDto> filteredClients = new List<EditToClientDto>();
+    // public List<ClientRole> ClientTypeList = new List<ClientRole>();
+    // public string searchText { get; set; }
+    // public bool showClientTextbox = false;
+    // public bool newClient = false;
     bool showCountyDropdown = false;
     bool ShowClearBtn = false;
     bool showCourtPartDropdown = false;
@@ -5868,28 +5934,26 @@
     private ValidationMessageStore messageStore;
     private EditContext _editContext;
     private List<PremiseType> PremiseTypesList = new();
-    private async void ShowClientModal()
-    {
-        // Copy current data into editable model
+    // private async void ShowClientModal()
+    // {
 
-        client = await _clientService.GetClientByIdAsync(legalcaseDto.ClientId!.Value) ?? new EditToClientDto();
 
-        ClientTypeList = await _clientRoleRepository.GetAllClientRole();
-        showClientTextbox = true;
-        searchText = $"{client.FirstName} {client.LastName}";
-        StateHasChanged();
-        JS.InvokeVoidAsync("showModal", "clientModal");
-    }
+    //     client = await _clientService.GetClientByIdAsync(legalcaseDto.ClientId!.Value) ?? new EditToClientDto();
+
+    //     ClientTypeList = await _clientRoleRepository.GetAllClientRole();
+    //     showClientTextbox = true;
+    //     searchText = $"{client.FirstName} {client.LastName}";
+    //     StateHasChanged();
+    //     JS.InvokeVoidAsync("showModal", "clientModal");
+    // }
     private async void ShowStipulationModal()
     {
 
-        JS.InvokeVoidAsync("showModal", "stipulationModal");
+        await JS.InvokeVoidAsync("showModal", "stipulationModal");
     }
     private async void ShowMarshalModal()
     {
-        // Copy current data into editable model
 
-        // CaseWarranrDto = caseWarrantDto.Clone();
         CaseWarranrDto = new CaseWarrantDto
         {
             Id = caseWarrantDto.Id,
@@ -5901,62 +5965,62 @@
             EvictionExecuted = caseWarrantDto.EvictionExecuted,
             ReFileDate = caseWarrantDto.ReFileDate,
             Status = caseWarrantDto.Status,
-            // add other properties here
+
         };
 
 
         JS.InvokeVoidAsync("showModal", "marshalModal");
     }
-    private void OnSearchInput(ChangeEventArgs e)
-    {
-        searchText = e.Value.ToString();
-        filteredClients = ClientList
-            .Where(c => c.FirstName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                        || c.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                        || c.ClientCode.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-    }
-    private void SelectClient(EditToClientDto selectedclient)
-    {
-        showClientTextbox = true;
-        searchText = $"{client.FirstName} {client.LastName}";
-        filteredClients.Clear();
-        newClient = false;
-        // Fill card
-        legalcaseDto.ClientId = selectedclient.Id;
-        client.Id = selectedclient.Id;
-        client.FirstName = $"{selectedclient.FirstName}";
-        client.LastName = $"{selectedclient.LastName}";
-        client.Email = selectedclient.Email;
-        client.Phone = selectedclient.Phone;
-        client.Address1 = selectedclient.Address1;
-        client.Address2 = selectedclient.Address2;
-        client.City = selectedclient.City;
-        client.StateId = selectedclient.StateId;
-        client.ZipCode = selectedclient.ZipCode;
-        client.ClientTypeId = selectedclient.ClientTypeId;
-        client.Reference = selectedclient.Reference;
-    }
-    private void ClearSelectedClient()
-    {
-        searchText = string.Empty;
+    // private void OnSearchInput(ChangeEventArgs e)
+    // {
+    //     searchText = e.Value.ToString();
+    //     filteredClients = ClientList
+    //         .Where(c => c.FirstName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+    //                     || c.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+    //                     || c.ClientCode.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+    //         .ToList();
+    // }
+    // private void SelectClient(EditToClientDto selectedclient)
+    // {
+    //     showClientTextbox = true;
+    //     searchText = $"{client.FirstName} {client.LastName}";
+    //     filteredClients.Clear();
+    //     newClient = false;
 
-        newClient = false;
-        showClientTextbox = false;
-        searchText = null;
-        client = new EditToClientDto();
+    //     legalcaseDto.ClientId = selectedclient.Id;
+    //     client.Id = selectedclient.Id;
+    //     client.FirstName = $"{selectedclient.FirstName}";
+    //     client.LastName = $"{selectedclient.LastName}";
+    //     client.Email = selectedclient.Email;
+    //     client.Phone = selectedclient.Phone;
+    //     client.Address1 = selectedclient.Address1;
+    //     client.Address2 = selectedclient.Address2;
+    //     client.City = selectedclient.City;
+    //     client.StateId = selectedclient.StateId;
+    //     client.ZipCode = selectedclient.ZipCode;
+    //     client.ClientTypeId = selectedclient.ClientTypeId;
+    //     client.Reference = selectedclient.Reference;
+    // }
+    // private void ClearSelectedClient()
+    // {
+    //     searchText = string.Empty;
 
-        StateHasChanged();
-    }
-    private async void AddClient()
-    {
-        showClientTextbox = true;
-        searchText = null;
-        newClient = true;
-        client = new EditToClientDto();
-        StateHasChanged();
+    //     newClient = false;
+    //     showClientTextbox = false;
+    //     searchText = null;
+    //     client = new EditToClientDto();
 
-    }
+    //     StateHasChanged();
+    // }
+    // private async void AddClient()
+    // {
+    //     showClientTextbox = true;
+    //     searchText = null;
+    //     newClient = true;
+    //     client = new EditToClientDto();
+    //     StateHasChanged();
+
+    // }
 
     // private async Task ShowLandlordModal()
     // {
@@ -6026,14 +6090,15 @@
             showCountyDropdown = true;
             ShowClearBtn = true;
 
-            if (legalcaseDto.CountyId == null || legalcaseDto.CountyId == Guid.Empty)
+
+        }
+        if (legalcaseDto.CountyId == null || legalcaseDto.CountyId == Guid.Empty)
+        {
+            if (!string.IsNullOrEmpty(legalcaseDto.Borough))
             {
-                if (!string.IsNullOrEmpty(legalcaseDto.Borough))
-                {
-                    var county = CountyList.FirstOrDefault(e => !string.IsNullOrEmpty(e.Name) && e.Name.Contains(legalcaseDto.Borough));
-                    if (county != null)
-                        legalcaseDto.CountyId = county.Id;
-                }
+                var county = CountyList.FirstOrDefault(e => !string.IsNullOrEmpty(e.Name) && e.Name.Contains(legalcaseDto.Borough));
+                if (county != null)
+                    legalcaseDto.CountyId = county.Id;
             }
         }
         if (legalcaseDto.CourtPartId != null && legalcaseDto.CourtPartId != Guid.Empty)
@@ -6110,7 +6175,7 @@
     //     searchLandlordText = e.Value.ToString();
     //     _cts?.Cancel();
     //     _cts = new CancellationTokenSource();
-       
+
     //     try
     //     {
 
@@ -6121,7 +6186,7 @@
     //             return;
     //         }
 
-          
+
     //         if (searchBuildingText.Length < 3)
     //         {
     //             await ShowAllLandlords();
@@ -6135,7 +6200,7 @@
     //         }
     //         else
     //         {
-                
+
     //             filteredlandlords = await _landlordSevice.SearchLandlordsAsync(
     //                 searchLandlordText,
     //                 legalcaseDto.ClientId.Value
@@ -6146,7 +6211,7 @@
     //     }
     //     catch (TaskCanceledException)
     //     {
-           
+
     //     }
     // }
     // Search handler
@@ -6155,7 +6220,7 @@
     //     searchBuildingText = e.Value.ToString();
     //     _cts?.Cancel();
     //     _cts = new CancellationTokenSource();
-    
+
     //     try
     //     {
 
@@ -6166,7 +6231,7 @@
     //             return;
     //         }
 
-           
+
     //         if (searchBuildingText.Length < 3)
     //         {
     //             await ShowAllBuildings();
@@ -6180,7 +6245,7 @@
     //         }
     //         else
     //         {
-              
+
     //             filteredBuildings = await _buildingService.SearchBuilding(
     //                 searchBuildingText,
     //                 legalcaseDto.LandlordId.Value
@@ -6191,7 +6256,7 @@
     //     }
     //     catch (TaskCanceledException)
     //     {
-          
+
     //     }
     // }
     private async Task OnSearchCourtInput(ChangeEventArgs e)
@@ -6507,7 +6572,7 @@
     //         var newBuilding = new CreateToBuildingDto()
     //         {
     //             Address1 = editBuildingModel.Address1,
-              
+
     //             CityId = editBuildingModel.CityId,
     //             StateId = editBuildingModel.StateId,
     //             Zipcode = editBuildingModel.Zipcode,
@@ -6545,7 +6610,7 @@
     //                 Id = editBuildingModel.Id,
     //                 Address1 = editBuildingModel.Address1,
     //                 BuildingCode = editBuildingModel.BuildingCode,
-                
+
     //                 CityId = editBuildingModel.CityId,
     //                 StateId = editBuildingModel.StateId,
     //                 Zipcode = editBuildingModel.Zipcode,
@@ -6584,7 +6649,7 @@
     //         legalcaseDto.ExemptionBasisId = editBuildingModel.ExemptionBasisId;
     //         legalcaseDto.ExemptionReasonId = editBuildingModel.ExemptionreasonId;
     //         legalcaseDto.TenancyTypeForBuildingId = editBuildingModel.TenancyTypeForBuildingId;
-      
+
     //         legalcaseDto.OwnerOccupied = editBuildingModel.OwnerOccupied != null ? editBuildingModel.OwnerOccupied.Value : false;
     //         legalcaseDto.GoodCause = editBuildingModel.GoodCause != null ? editBuildingModel.GoodCause.Value : false;
     //         legalcaseDto.RegistrationStatusTypeId = editBuildingModel.RegistrationStatusId;
@@ -6603,7 +6668,7 @@
     //             ToastService.ShowError("Failed to update building details.");
     //         }
     //     }
-     
+
 
 
     //     spinnerservice.Hide();
@@ -6662,7 +6727,7 @@
     //         legalcaseDto.landlordName = $"{editLandlordModel.FirstName} {editLandlordModel.LastName}";
     //         if (editLandlordModel.Id != null && editLandlordModel.Id != Guid.Empty)
     //         {
-              
+
     //             legalcaseDto.LandlordId = editLandlordModel.Id;
     //         }
 
@@ -6681,7 +6746,7 @@
     //             ToastService.ShowError("Failed to update building details.");
     //         }
     //     }
-     
+
 
 
     //     spinnerservice.Hide();
@@ -6689,22 +6754,65 @@
     private async Task SaveStipulationChanges()
     {
         spinnerservice.Show();
-        var result = await _caseAppreance.UpdateCaseAppreance(MotionJudgements);
-        if (result)
-        {
-            ToastService.ShowSuccess("Stipulation details updated successfully!");
-            await JS.InvokeVoidAsync("hideModal", "stipulationModal");
 
-            await LoadJudgement();
+        if (MotionJudgements.Id == null || MotionJudgements.Id == Guid.Empty)
+        {
+            var CourtTodayType = await Courttodayrepo.GetAllAsync();
+            MotionJudgements.LegalCaseId = legalcaseDto.Id;
+            MotionJudgements.CourtTodayId = CourtTodayType.Where(e => e.Name.ToLower().Contains("motion")).FirstOrDefault()?.Id;
+            var result = await _caseAppreance.AddCaseAppearance(MotionJudgements);
+            if (result)
+            {
+                ToastService.ShowSuccess("Stipulation details added successfully!");
+                int MotionOppDaysBeforeReturn = -1; // This is hordcoded and will be pick from config later.
+                if (MotionJudgements.OppositionDue.HasValue)
+                {
+                    await _remainder.CreateNewReminder(legalcaseDto.Id, "Opposition Due (motion)", MotionJudgements.OppositionDue!.Value.AddDays(MotionOppDaysBeforeReturn));
+                }
+                if (MotionJudgements.ReplyDue.HasValue)
+                {
+                    await _remainder.CreateNewReminder(legalcaseDto.Id, "Reply Due (motion)", MotionJudgements.ReplyDue!.Value.AddDays(MotionOppDaysBeforeReturn));
+                }
+                await JS.InvokeVoidAsync("hideModal", "stipulationModal");
+
+                await LoadJudgement();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to add stipulation details.");
+            }
         }
         else
         {
-            ToastService.ShowError("Failed to update stipulation details.");
+            var result = await _caseAppreance.UpdateCaseAppreance(MotionJudgements);
+            if (result)
+            {
+                ToastService.ShowSuccess("Stipulation details updated successfully!");
+
+                int MotionOppDaysBeforeReturn = -1; // This is hordcoded and will be pick from config later.
+                if (MotionJudgements.OppositionDue.HasValue)
+                {
+                    await _remainder.UpdateReminder(legalcaseDto.Id, "Opposition Due (motion)", MotionJudgements.OppositionDue!.Value.AddDays(MotionOppDaysBeforeReturn));
+                }
+                if (MotionJudgements.ReplyDue.HasValue)
+                {
+                    await _remainder.UpdateReminder(legalcaseDto.Id, "Reply Due (motion)", MotionJudgements.ReplyDue!.Value.AddDays(MotionOppDaysBeforeReturn));
+                }
+                await JS.InvokeVoidAsync("hideModal", "stipulationModal");
+
+                await LoadJudgement();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to update stipulation details.");
+            }
         }
+
+
 
         spinnerservice.Hide();
     }
-    private async Task SaveClientChanges()
+    @* private async Task SaveClientChanges()
     {
         spinnerservice.Show();
 
@@ -6790,6 +6898,7 @@
 
         spinnerservice.Hide();
     }
+    *@
     private List<CaseType> CaseTypeList = new();
     // private void CalcNoticeDays()
     // {
@@ -6807,14 +6916,14 @@
     //                 .Select(e => e.Name?.ToLower())
     //                 .FirstOrDefault();
 
-               
+
     //             if (new[] { "squatter", "licensee", "referee" }.Contains(type))
     //             {
     //                 length = 10;
     //             }
     //             else
     //             {
-                    
+
     //                 var yrs = DiffYears(legalcaseDto.DateTenantMoved?.ToDateTime(TimeOnly.MinValue), DateTime.Today);
 
     //                 if (yrs < 1)
@@ -6827,7 +6936,7 @@
 
     //             legalcaseDto.CalculatedNoticeLength = length;
 
-            
+
     //             legalcaseDto.PredicateNotice = type switch
     //             {
     //                 "licensee" => "10 Days Notice - Tenant Of Record Vacated (Licensee)",
@@ -6845,7 +6954,7 @@
     //     return (int)((to.Value - from.Value).TotalDays / 365);
     // }
 
-   @* private async Task SaveTenantChanges()
+    @* private async Task SaveTenantChanges()
     {
         if (!await ValidateCurrentStep("Tenant")) return;
         spinnerservice.Show();
@@ -7048,7 +7157,7 @@
         spinnerservice.Hide();
     }  *@
 
-   @* private bool HasTenantChanged(EditToTenantDto existing, IntakeModel current, string firstName, string lastName)
+    @* private bool HasTenantChanged(EditToTenantDto existing, IntakeModel current, string firstName, string lastName)
     {
         return existing.FirstName != firstName
             || existing.LastName != lastName
@@ -7275,7 +7384,7 @@
     // }
     // async Task HideTenantDropDown(FocusEventArgs e)
     // {
-        
+
     //     await Task.Delay(500);
     //     if (filteredTenant.Any())
     //     {
