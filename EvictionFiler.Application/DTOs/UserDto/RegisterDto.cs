@@ -24,6 +24,7 @@ namespace EvictionFiler.Application.DTOs.UserDto
         public string Role { get; set; } = "Admin";
         public Guid? SubscriptionId { get; set; } 
         public Guid? FirmId { get; set; }
+        
 
         //Added
         public Guid? SubscriptionTypeId { get; set; }

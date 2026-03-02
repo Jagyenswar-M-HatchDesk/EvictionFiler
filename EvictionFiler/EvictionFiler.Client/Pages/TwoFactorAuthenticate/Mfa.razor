@@ -1,0 +1,78 @@
+﻿@page "/Settings/mfa"
+@using EvictionFiler.Application.Common.Models
+@using EvictionFiler.Application.Interfaces.IServices
+@using Microsoft.AspNetCore.Components.Authorization
+
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthStateProvider
+@using System.Globalization
+
+@inject IMfaService MfaService
+
+<div class="p-4">
+    <div class="container p-4 rounded shadow-sm">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="m-0 head">Multi Function Authentication</h5>
+        </div>
+
+         @*  Toggle only for Admin/SuperAdmin *@
+        @if (identityUser?.IsSuperAdmin == true || identityUser?.IsAdmin == true)
+        {
+            <div class="d-flex justify-content-between align-items-center border rounded p-3">
+                <span class="fw-semibold">Authentication</span>
+
+                <div class="form-check form-switch">
+                    <input class="form-check-input"
+                    type="checkbox"
+                    checked="@isAuthEnabled"
+                     @onchange="OnToggleChanged" />
+
+                </div>
+            </div>
+
+            <div class="mt-3 text-end-muted">
+                Status: @(isAuthEnabled ? "Enabled" : "Disabled")
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private bool isAuthEnabled = false;
+    private LoggedInUser? identityUser;
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            var roles = user.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
+
+            identityUser = new LoggedInUser
+            {
+                IsAuthenticated = true,
+                UserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+                Name = user.Identity?.Name ?? "",
+                Email = user.FindFirst(ClaimTypes.Email)?.Value ?? "",
+                Firm = user.FindFirst("Firm")?.Value ?? "",
+                Roles = roles
+            };
+        }
+        var userId = Guid.Parse(identityUser!.UserId!);
+        isAuthEnabled = await MfaService.GetGlobalMfaStatusAsync(userId, identityUser.IsSuperAdmin);
+    }
+
+    private async Task OnToggleChanged(ChangeEventArgs e)
+    {
+        isAuthEnabled = (bool)e.Value!;
+        var userId = Guid.Parse(identityUser!.UserId!);
+
+        await MfaService.SetGlobalMfaAsync(isAuthEnabled, userId, identityUser.IsSuperAdmin);
+    }
+
+}

@@ -18,5 +18,6 @@ namespace EvictionFiler.Application.DTOs.UserDto
         [StringLength(128, MinimumLength = 8,
         ErrorMessage = "Password must be at least 8 characters long.")]
         public string Password { get; set; } = string.Empty;
+        public string? Otp { get; set; }
     }
 }

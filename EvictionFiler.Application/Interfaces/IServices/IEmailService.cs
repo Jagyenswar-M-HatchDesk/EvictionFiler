@@ -9,5 +9,6 @@ namespace EvictionFiler.Application.Interfaces.IServices
     public interface IEmailService
     {
         Task SendFirmEnrollEmailAsync(string toEmail, string userName, string firmName, string password);
+        Task SendOtpAsync(string toEmail, string otp);
     }
 }

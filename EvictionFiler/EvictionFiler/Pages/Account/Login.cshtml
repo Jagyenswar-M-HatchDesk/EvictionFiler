@@ -3,6 +3,7 @@
 @model EvictionFiler.Server.Components.Pages.Account.LoginModel
 @{
     ViewData["Title"] = "Login - Housing CourtFiler";
+    var isOtpMode = ViewData["OtpSent"] != null;
 }
 <head>
     <title>@ViewData["Title"]</title>
@@ -45,9 +46,10 @@
                 <span asp-validation-for="Login.Username" class="text-danger"></span>
                 
             </div>
-
-            <div class="mb-3 password-container">
-                <label class="form-label body-medium" asp-for="Login.Password" for="passwordInput">Password <span class="text-danger">*</span></label>
+            @if (!isOtpMode)
+            {
+                <div class="mb-3 password-container">
+                    <label class="form-label body-medium" asp-for="Login.Password" for="passwordInput">Password <span class="text-danger">*</span></label>
                 <input id="passwordInput" asp-for="Login.Password" type="password"
                        class="form-control form-control-lg form-input text-gray-300 no-outline"
                            placeholder="Password" autocomplete="current-password"
@@ -57,25 +59,48 @@
                 <span asp-validation-for="Login.Password" class="text-danger"></span>
                 
             </div>
+            }
+            @if (isOtpMode)
+            {
+                <div class="alert alert-success">
+                    OTP has been sent to your registered email.
+                </div>
 
-            <div class="mb-3 text-end">
-                <a class="body-bold forgot-password-link">
+                <div class="mb-3">
+                    <label class="form-label">Enter OTP</label>
+                    <input asp-for="Login.Otp"
+                           class="form-control form-control-lg"
+                           placeholder="Enter OTP" />
+                    <span asp-validation-for="Login.Otp" class="text-danger"></span>
+                </div>
+            }
+            <div class="mb-3 d-flex align-items-center w-100">
+
+                @if (isOtpMode)
+                {
+                    <button type="submit"
+                            asp-page-handler="ResendOtp"
+                            class="btn body-bold p-0 forgot-password-link me-auto">
+                        Resend OTP
+                    </button>
+                }
+
+                <a class="body-bold forgot-password-link ms-auto">
                     Forgot password?
                 </a>
-            </div>
 
-            <div class="d-grid login-btn-wrapper">
-                <button id="loginBtn"
+            </div>
+            
+                <div class="d-grid login-btn-wrapper">
+                    <button id="loginBtn"
                         type="submit"
-                        asp-page-handler="Submit"
+                        asp-page-handler="@(isOtpMode ? "VerifyOtp" : "Submit")"
                         class="btn bg-brand-100 title-h4-semi-bold text-white d-flex align-items-center justify-content-center gap-2 no-outline">
-                    <span id="btnText">Sign in</span>
+                    <span id="btnText">@(isOtpMode ? "Submit" : "Sign in")</span>
                     <span id="spinner" class="spinner-border spinner-border-sm d-none"></span>
                 </button>
             </div>
         </div>
-
-       
 
         <div class="mt-3 text-center">
             <div class="body-medium">

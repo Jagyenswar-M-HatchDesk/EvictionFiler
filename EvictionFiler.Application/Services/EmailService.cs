@@ -49,6 +49,36 @@ namespace EvictionFiler.Application.Services
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
         }
+        public async Task SendOtpAsync(string toEmail, string otp)
+        {
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress("Housing Court Filer", _config["Email:From"]));
+            message.To.Add(MailboxAddress.Parse(toEmail));
+            message.Subject = "Your OTP Code";
+
+            var builder = new BodyBuilder
+            {
+                HtmlBody = $@"
+        <h2>Your OTP Code</h2>
+        <h1>{otp}</h1>
+        <p>This OTP is valid for a short time.</p>"
+            };
+
+            message.Body = builder.ToMessageBody();
+
+            using var client = new SmtpClient();
+            await client.ConnectAsync(
+                _config["Email:SmtpHost"],
+                int.Parse(_config["Email:SmtpPort"]),
+                MailKit.Security.SecureSocketOptions.StartTls);
+
+            await client.AuthenticateAsync(
+                _config["Email:Username"],
+                _config["Email:Password"]);
+
+            await client.SendAsync(message);
+            await client.DisconnectAsync(true);
+        }
 
         private string GetFirmEnrollTemplate(string userName, string firmName, string email, string password)
         {

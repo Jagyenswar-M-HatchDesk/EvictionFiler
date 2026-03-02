@@ -122,6 +122,22 @@ namespace EvictionFiler.Infrastructure.Repositories
                     await _roleManager.CreateAsync(role);
                 }
 
+                var firmId = model.FirmId ?? FirmId;
+                bool enableMfaForUser = true;
+                if (model.Role == "Staff Member" && firmId != null)
+                {
+                    var adminRole = await _roleManager.FindByNameAsync("Admin");
+
+                    if (adminRole != null)
+                    {
+                        enableMfaForUser = await _db.Users
+                            .Where(u => u.FirmId == firmId &&
+                                        u.RoleId == adminRole.Id &&
+                                        u.IsActive &&
+                                        !(u.IsDeleted ?? false))
+                            .AnyAsync(u => u.TwoFactorEnabled);
+                    }
+                }
                 var user = new User
                 {
                     FirstName = model.FirstName,
@@ -133,6 +149,7 @@ namespace EvictionFiler.Infrastructure.Repositories
                     UpdatedOn = DateTime.UtcNow,
                     RoleId = role.Id,
                     IsActive = true,
+                    TwoFactorEnabled = enableMfaForUser,
                     FirmId = model.FirmId ?? FirmId
 
                 };
