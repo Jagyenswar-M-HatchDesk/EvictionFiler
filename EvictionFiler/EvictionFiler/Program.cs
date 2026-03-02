@@ -177,6 +177,10 @@ builder.Services.AddScoped<IExemptionReasonsRepository,ExemptionReasonsRepositor
 builder.Services.AddScoped<IClientReadRepository,ClientReadRepository>();
 builder.Services.AddScoped<IMarshalAndWarrantRepository, MarshalAndWarrantRepository>();
 builder.Services.AddScoped<IWarrantRepository, WarrantRepository>();
+builder.Services.AddScoped<ICaseAppearanceReadRepository, CaseAppearnceReadRepository>();
+builder.Services.AddScoped<ICaseHearingReadRepository, CaseHearingReadRepository>();
+builder.Services.AddScoped<ICourtReadRepository, CourtReadRepository>();
+builder.Services.AddScoped<ICaseFormReadRepository,CaseFormReadRepository>();
 
 //builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 //    .AddIdentityCookies();

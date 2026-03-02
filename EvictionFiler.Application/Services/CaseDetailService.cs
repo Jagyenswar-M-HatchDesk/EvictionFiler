@@ -1,7 +1,10 @@
 ﻿using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.DTOs.ApartmentDto;
+using EvictionFiler.Application.DTOs.CaseAppearanceDtos;
 using EvictionFiler.Application.DTOs.CaseDetailDtos;
+using EvictionFiler.Application.DTOs.CaseHearing;
 using EvictionFiler.Application.DTOs.CaseWarrantDtos;
+using EvictionFiler.Application.DTOs.FormTypeDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.MarshalsDto;
 using EvictionFiler.Application.DTOs.TenantDto;
@@ -12,6 +15,7 @@ using EvictionFiler.Application.Interfaces.IRepository.ReadRepositories;
 using EvictionFiler.Application.Interfaces.IServices;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,9 +33,14 @@ namespace EvictionFiler.Application.Services
         private readonly IClientReadRepository _clientReadRepository;
         private readonly IMarshalAndWarrantRepository _marshalAndWarrantRepository;
         private readonly IWarrantRepository _warrantRepository;
+        private readonly ICaseAppearanceReadRepository _caseAppearanceReadRepository;
+        private readonly ICaseHearingReadRepository _caseHearingReadRepository;
+        private readonly ICourtReadRepository _courtReadRepository;
+        private readonly ICaseFormReadRepository _caseFormReadRepository;
 
         public CaseDetailService(ILandlordReadRepository landlordReadRepository,IBuildingReadRepository buildingReadRepository,ITenantReadRepository tenantReadRepository,ICitiesRepository cityRepository,IClientReadRepository clientReadRepository,
-                                    IMarshalAndWarrantRepository marshalAndWarrantRepository,IWarrantRepository warrantRepository)
+                                    IMarshalAndWarrantRepository marshalAndWarrantRepository,IWarrantRepository warrantRepository,ICaseAppearanceReadRepository caseAppearanceReadRepository,ICaseHearingReadRepository caseHearingReadRepository,
+                                        ICourtReadRepository courtReadRepository,ICaseFormReadRepository caseFormReadRepository)
         {
             _landlordReadRepository = landlordReadRepository;
             _buildingReadRepository = buildingReadRepository;
@@ -40,6 +49,10 @@ namespace EvictionFiler.Application.Services
             _clientReadRepository = clientReadRepository;
             _marshalAndWarrantRepository = marshalAndWarrantRepository;
             _warrantRepository = warrantRepository;
+            _caseAppearanceReadRepository = caseAppearanceReadRepository;
+            _caseHearingReadRepository = caseHearingReadRepository;
+            _courtReadRepository = courtReadRepository;
+            _caseFormReadRepository = caseFormReadRepository;
         }
         public async Task<LandlordDetailDto> GetLandlordDetailAsync(Guid caseId)
         {
@@ -401,5 +414,152 @@ namespace EvictionFiler.Application.Services
 
         }
 
+        //Motion
+        public async Task<List<CaseAppearanceDto>> GetAllCaseAppreance(Guid caseId)
+        {
+            var appreaaces = await _caseAppearanceReadRepository.GetAllAsync(predicate: x => x.LegalCaseId == caseId, includes: a => a.CourtToday!);
+            var result = appreaaces.Select(e => new CaseAppearanceDto
+            {
+                Id = e.Id,
+                AdjournDate = e.AdjournDate,
+                AdjournReasonId = e.AdjournReasonId,
+                AdjournTime = e.AdjournTime,
+                MotionDue = e.MotionDue,
+                ReminderPayments = e.ReminderPayments,
+                ReminderDeadlines = e.ReminderDeadlines,
+                ReplyDue = e.ReplyDue,
+                ReturnDate = e.ReturnDate,
+                CourtTodayId = e.CourtTodayId,
+                OppositionDue = e.OppositionDue,
+                JurisdictionWaived = e.JurisdictionWaived,
+                StayUntil = e.StayUntil,
+                WarrantDate = e.WarrantDate,
+                WarrantIssued = e.WarrantIssued,
+                MilitaryAffidavit = e.MilitaryAffidavit,
+                LegalCaseId = e.LegalCaseId,
+                CourtTodayName = e.CourtToday != null ? e.CourtToday.Name : string.Empty,
+
+
+            }).ToList();
+            return result;
+        }
+
+
+        public async Task<List<CaseHearingDto>> GetAllCaseHeariingByCaseIdAsync(Guid id)
+        {
+            var calanders = await _caseHearingReadRepository
+                  .GetAllQuerable(x => x.IsDeleted != true && x.LegalCaseId == id, x => x.LegalCase, x => x.Courts)
+                  ;
+
+            var result = calanders.Select(dto => new CaseHearingDto
+            {
+                Id = dto.Id,
+
+                HearingDate = dto.HearingDate ?? DateTime.Today,
+
+                HearingTime = (dto.HearingTime == default || dto.HearingTime == TimeOnly.MinValue)
+    ? TimeOnly.FromTimeSpan(TimeSpan.FromHours(9.5))
+    : dto.HearingTime.Value,
+
+
+                CourtId = dto.CourtId,
+                LegalCaseId = dto.LegalCaseId,
+                IndexNo = dto.IndexNo,
+                Caption = dto.Caption,
+
+                // CaseType name — safe whether CaseTypeId or LegalCaseId is null
+                CaseTypeName =
+        dto.CaseTypeId != null
+            ? dto.CaseTypes.Name
+            : dto.LegalCase.CaseType.Name ?? string.Empty,
+
+                //        // Judge — prefer Hearing Judge, fallback to Court Judge
+                //        Judge = dto.Judge
+                //?? dto.Courts?.Judge
+                //?? string.Empty,
+
+                //        // Court part — from CourtPart or fallback to Court.Part
+                //        CourtPart =
+                //dto.CourtPartId != null
+                //    ? dto.CourtParts?.Part
+                //    : dto.Courts?.Part ?? string.Empty,
+
+                // Case status name — only if present
+                CaseStatusName =
+        dto.CaseStatusId != null
+            ? dto.CaseStatus.Name
+            : string.Empty,
+
+                //        // Room number — prefer explicit RoomNo, fallback to Court’s RoomNo
+                //        RoomNo = dto.RoomNo
+                //?? dto.Courts?.RoomNo
+                //?? string.Empty,
+
+                // County name — safe for null CountyId
+                CountyName =
+        dto.CountyId != null
+            ? dto.Counties.Name
+            : string.Empty,
+
+                CreatedOn = dto.CreatedOn,
+                LastAction = dto.LastAction,
+
+            }).OrderBy(e => e.HearingDate).ToList();
+
+
+
+            return result;
+        }
+
+
+        //Court
+
+        public async Task<CourtDetailDto> GetCourtDetailsAsync(Guid caseId)
+        {
+            return await _courtReadRepository.GetCourtDetailsAsync(caseId);
+        }
+
+
+        //Case forms
+
+        public async Task<List<GenrateNoticeModel>> GetCaseFormsByCaseId(Guid caseId, string userId, bool isAdmin)
+        {
+            var data = await _caseFormReadRepository
+    .GetAllAsync(x => x.IsDeleted != true && x.LegalCaseId == caseId,
+                 x => x.FormType!, x => x.User!);
+
+            var query = data.AsQueryable();
+
+            if (!isAdmin)
+            {
+                query = query.Where(c => c.IsActive == true && c.IsDeleted == false);
+
+                if (!string.IsNullOrWhiteSpace(userId))
+                {
+                    var userGuid = Guid.Parse(userId);
+                    query = query.Where(c => c.CreatedBy == userGuid);
+                }
+            }
+            else
+            {
+                query = query.OrderByDescending(c => c.CreatedOn);
+            }
+
+            var result = query
+                .OrderBy(e => e.CreatedOn)
+                .Select(dto => new GenrateNoticeModel
+                {
+                    Id = dto.Id,
+                    FormTypeName = dto.FormType.Name ?? "",
+                    FormTypeId = dto.FormTypeId,
+                    File = dto.File,
+                    HTML = dto.HTML,
+                    CreatedOn = dto.CreatedOn,
+                    CreatedByName = dto.User != null ? dto.User.FirstName : string.Empty,
+                })
+                .ToList();
+
+            return result;
+        }
     }
 }
