@@ -83,7 +83,8 @@ namespace EvictionFiler.Application.Services
                     StayUntil = data.StayUntil,
                     WarrantDate = data.WarrantDate,
                     WarrantIssued = data.WarrantIssued,
-
+                
+                   
                 };
 
                 var added = await _repository.AddAsync(toadd);

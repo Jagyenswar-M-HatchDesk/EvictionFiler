@@ -1260,6 +1260,7 @@ namespace EvictionFiler.Application.Services
                 existingCase.ManagingAgent = legalCase.Judge;
                 existingCase.CourtRoom = legalCase.CourtRoom!;
 
+                var update = _repository.UpdateAsync(existingCase);
                 var result = await _unitOfWork.SaveChangesAsync();
 
                 if (result > 0) return true;

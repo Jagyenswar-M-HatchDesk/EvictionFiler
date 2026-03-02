@@ -1,6 +1,7 @@
 ﻿@using Blazored.Toast.Services
 @using EvictionFiler.Application.DTOs.CaseAppearanceDtos
 @using EvictionFiler.Application.DTOs.CaseHearing
+@using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Client.SpinnerService
 @inject ICaseAppearanceService _caseAppreance
@@ -9,6 +10,8 @@
 @inject IJSRuntime JS
 @inject SpinnerService spinnerservice
 @inject IToastService ToastService
+@inject IRemianderCenterService _remainder
+@inject ICourtTodayTypeRepository Courttodayrepo
 
 <div class="info-table p mb-4" style="border:none;">
     <div class="info-bar">
@@ -242,42 +245,23 @@
     private async Task LoadJudgement()
     {
         Judgements = await caseDetailService.GetAllCaseAppreance(CurrentCaseId.Value);
-        if (Judgements != null)
-        {
-            if (CaseHearings != null)
+        
+            if (Judgements != null)
             {
-                int count = Math.Min(Judgements.Count, CaseHearings.Count);
-
-                for (int i = 0; i < count; i++)
+                if (CaseHearings != null)
                 {
-                    // Assign hearing date to judgement appearance date
-                    Judgements[i].AppreanceDate = CaseHearings[i].HearingDate;
+                    int count = Math.Min(Judgements.Count, CaseHearings.Count);
+
+                    for (int i = 0; i < count; i++)
+                    {
+
+                        Judgements[i].AppreanceDate = CaseHearings[i].HearingDate;
+                    }
                 }
-            }
 
-            MotionJudgements = Judgements.FirstOrDefault(e => e.CourtTodayName != null && e.CourtTodayName.Contains("Motion"));
-            if (MotionJudgements != null)
-            {
-                isMotionRecordExists = true;
+                MotionJudgements = Judgements!.Where(e => e.CourtTodayName!.Contains("Motion")).FirstOrDefault()! ?? new CaseAppearanceDto();
             }
-            else
-            {
-                MotionJudgements = new CaseAppearanceDto
-                {
-                    LegalCaseId = CurrentCaseId.Value
-                };
-                isMotionRecordExists = false;
-            }
-        }
-        else
-        {
-            MotionJudgements = new CaseAppearanceDto
-            {
-                LegalCaseId = CurrentCaseId.Value
-            };
-
-            isMotionRecordExists = false;
-        }
+           
 
 
 
@@ -293,30 +277,91 @@
         }
         StateHasChanged();
     }
+    // private async Task SaveStipulationChanges()
+    // {
+    //     spinnerservice.Show();
+    //     bool result;
+    //     if (isMotionRecordExists)
+    //     {
+    //         result = await _caseAppreance.UpdateCaseAppreance(MotionJudgements);
+    //     }
+    //     else
+    //     {
+    //          result = await _caseAppreance.AddCaseAppearance(MotionJudgements);
+    //     }
+    //     if (result)
+    //     {
+    //         ToastService.ShowSuccess("Stipulation details updated successfully!");
+    //         await JS.InvokeVoidAsync("hideModal", "stipulationModal");
+
+
+    //         await LoadJudgement();
+    //     }
+    //     else
+    //     {
+    //         ToastService.ShowError("Failed to update stipulation details.");
+    //     }
+
+    //     spinnerservice.Hide();
+    // }
     private async Task SaveStipulationChanges()
     {
         spinnerservice.Show();
-        bool result;
-        if (isMotionRecordExists)
+
+        if (MotionJudgements.Id == null || MotionJudgements.Id == Guid.Empty)
         {
-            result = await _caseAppreance.UpdateCaseAppreance(MotionJudgements);
+            var CourtTodayType = await Courttodayrepo.GetAllAsync();
+            MotionJudgements.LegalCaseId = CurrentCaseId;
+            MotionJudgements.CourtTodayId = CourtTodayType.Where(e => e.Name.ToLower().Contains("motion")).FirstOrDefault()?.Id;
+            var result = await _caseAppreance.AddCaseAppearance(MotionJudgements);
+            if (result)
+            {
+                ToastService.ShowSuccess("Stipulation details added successfully!");
+                int MotionOppDaysBeforeReturn = -1; // This is hordcoded and will be pick from config later.
+                if (MotionJudgements.OppositionDue.HasValue)
+                {
+                    await _remainder.CreateNewReminder(CurrentCaseId!.Value, "Opposition Due (motion)", MotionJudgements.OppositionDue!.Value.AddDays(MotionOppDaysBeforeReturn));
+                }
+                if (MotionJudgements.ReplyDue.HasValue)
+                {
+                    await _remainder.CreateNewReminder(CurrentCaseId!.Value, "Reply Due (motion)", MotionJudgements.ReplyDue!.Value.AddDays(MotionOppDaysBeforeReturn));
+                }
+                await JS.InvokeVoidAsync("hideModal", "stipulationModal");
+
+                // await LoadJudgement();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to add stipulation details.");
+            }
         }
         else
         {
-             result = await _caseAppreance.AddCaseAppearance(MotionJudgements);
+            var result = await _caseAppreance.UpdateCaseAppreance(MotionJudgements);
+            if (result)
+            {
+                ToastService.ShowSuccess("Stipulation details updated successfully!");
+
+                int MotionOppDaysBeforeReturn = -1; // This is hordcoded and will be pick from config later.
+                if (MotionJudgements.OppositionDue.HasValue)
+                {
+                    await _remainder.UpdateReminder(CurrentCaseId!.Value, "Opposition Due (motion)", MotionJudgements.OppositionDue!.Value.AddDays(MotionOppDaysBeforeReturn));
+                }
+                if (MotionJudgements.ReplyDue.HasValue)
+                {
+                    await _remainder.UpdateReminder(CurrentCaseId!.Value, "Reply Due (motion)", MotionJudgements.ReplyDue!.Value.AddDays(MotionOppDaysBeforeReturn));
+                }
+                await JS.InvokeVoidAsync("hideModal", "stipulationModal");
+
+                // await LoadJudgement();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to update stipulation details.");
+            }
         }
-        if (result)
-        {
-            ToastService.ShowSuccess("Stipulation details updated successfully!");
-            await JS.InvokeVoidAsync("hideModal", "stipulationModal");
 
 
-            await LoadJudgement();
-        }
-        else
-        {
-            ToastService.ShowError("Failed to update stipulation details.");
-        }
 
         spinnerservice.Hide();
     }

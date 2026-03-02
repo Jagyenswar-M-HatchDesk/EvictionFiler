@@ -1,6 +1,7 @@
 ﻿using EvictionFiler.Application.DTOs.CaseDetailDtos;
 using EvictionFiler.Application.Interfaces.IRepository.ReadRepositories;
 using EvictionFiler.Domain.Entities;
+using EvictionFiler.Domain.Entities.Base;
 using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +27,7 @@ namespace EvictionFiler.Infrastructure.Repositories.ReadRepositories
             var l= await context.LegalCases
                 
                 .Where(c => c.Id == caseId && c.IsDeleted != true)
-                .Include(a => a.Courts)
+                .Include(a => a.CourtLocation)
                   .ThenInclude(b => b.County)
                 .Include(a=> a.CourtPart)
                 .Include(a=>a.CourtTypes)
@@ -36,20 +37,33 @@ namespace EvictionFiler.Infrastructure.Repositories.ReadRepositories
 
             return new CourtDetailDto
             {
-                Id = l.Courts?.Id ?? Guid.Empty,
-                Court = l.Courts?.Court,
-                CourtTypeId = l.CourtTypeId,
-                CourtPartId = l.CourtPart?.Id,
-                CountryId = l.Courts?.County?.Id,
-                 Country = l.Courts?.County?.Name,
-                
-                 CourtLocationId = l.CourtLocationId,
-                 CourtLocation = l.Courts?.Address,
-                CourtPart = l.CourtPart?.Part,
-                CourtRoomNo = l.CourtPart?.RoomNo,
-                Judge = l.CourtPart?.Judge,
-                
+                Id = l.CourtLocation?.Id ?? Guid.Empty,
+                Court = l.CourtLocation != null ? $"{l.CourtLocation.Court}" : "",
+                CourtTypeId = l.CourtTypeId != null ? l.CourtTypeId : null,
+                CourtPartId = l.CourtPartId != null ? l.CourtPartId : null,
+                CountryId = l.CourtLocation?.County?.Id,
+                Country = l.CourtLocation?.County?.Name,
+
+                CourtLocationId = l.CourtLocationId,
+                CourtLocation = l.CourtLocation?.Address,
+                CourtPart = l.CourtPart != null ? l.CourtPart.Part : new string(l.CourtRoom.Where(char.IsLetter).ToArray()),
+                CourtRoomNo = l.CourtPart != null ? l.CourtPart.RoomNo : new string(l.CourtRoom.Where(char.IsDigit).ToArray()),
+                Judge = l.CourtPart != null ? l.CourtPart.Judge : l.ManagingAgent,
+
                 Index = l.Index
+
+
+
+
+                //Court = caseEntity.CourtLocation != null ? caseEntity.CourtLocation.Court! : "",
+                //CourtAddress = caseEntity.CourtLocation != null ? caseEntity.CourtLocation.Address! : "",
+                //CourtPartId = caseEntity.CourtPartId != null ? caseEntity.CourtPartId : null,
+                //CourtPart = caseEntity.CourtPart != null ? caseEntity.CourtPart.Part : new string(caseEntity.CourtRoom.Where(char.IsLetter).ToArray()),
+                //CourtRoom = caseEntity.CourtPart != null ? caseEntity.CourtPart.RoomNo : caseEntity.CourtRoom,
+                //CourtRoomNo = caseEntity.CourtPart != null ? caseEntity.CourtPart.RoomNo : new string(caseEntity.CourtRoom.Where(char.IsDigit).ToArray()),
+                //CourtLocationId = caseEntity.CourtLocationId,
+                //CourtName = caseEntity.CourtLocation != null ? $"{caseEntity.CourtLocation.Court}" : "",
+                //Judge = caseEntity.CourtPart != null ? caseEntity.CourtPart.Judge : caseEntity.ManagingAgent,
             };
         }
     }
