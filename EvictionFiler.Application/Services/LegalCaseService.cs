@@ -464,8 +464,8 @@ namespace EvictionFiler.Application.Services
         c => c.Courts!,
          c => c.CourtLocation!.County!,
       
-         c => c.Marshal,
-         c => c.RemainderCenters
+         c => c.Marshal
+         //c => c.RemainderCenters
 
     //c=>c.RemainderCenter
     )
@@ -501,9 +501,9 @@ namespace EvictionFiler.Application.Services
                         //StateName = caseEntity.Clients.State != null ? caseEntity.Clients.State.Name : string.Empty,
                         //ZipCode = caseEntity.Clients.ZipCode,
                         MarshalId = caseEntity.MarshalId,
-                        RemainderDate = caseEntity.RemainderCenters?
-                    .OrderByDescending(x => x.When)
-                    .FirstOrDefault()?.When,
+                    //    RemainderDate = caseEntity.RemainderCenters?
+                    //.OrderByDescending(x => x.When)
+                    //.FirstOrDefault()?.When,
 
 
                         //// Landlord
@@ -1250,7 +1250,7 @@ namespace EvictionFiler.Application.Services
         {
             try
             {
-                var existingCase = await _repository.GetAsync(legalCase.Id);
+                var existingCase = await _repository.FindAsync( e => e.Id ==legalCase.Id);
                 if (existingCase == null) return false;
 
                 existingCase.CourtLocationId = legalCase.CourtLocationId!;
@@ -1260,7 +1260,7 @@ namespace EvictionFiler.Application.Services
                 existingCase.ManagingAgent = legalCase.Judge;
                 existingCase.CourtRoom = legalCase.CourtRoom!;
 
-                var update = _repository.UpdateAsync(existingCase);
+                var update = _repository.Update(existingCase);
                 var result = await _unitOfWork.SaveChangesAsync();
 
                 if (result > 0) return true;

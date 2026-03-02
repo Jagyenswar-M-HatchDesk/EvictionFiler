@@ -7,6 +7,7 @@ using EvictionFiler.Application.DTOs.CaseWarrantDtos;
 using EvictionFiler.Application.DTOs.FormTypeDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
 using EvictionFiler.Application.DTOs.MarshalsDto;
+using EvictionFiler.Application.DTOs.RemainderCenterDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IRepository.Base;
@@ -19,7 +20,7 @@ using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Interfaces.IServices
 {
-      public  interface ICaseDetailService
+    public interface ICaseDetailService
     {
         Task<LandlordDetailDto> GetLandlordDetailAsync(Guid caseId);
         Task<List<EditToLandlordDto>> GetLandlordsByClientIdAsync(Guid? clientId);
@@ -29,7 +30,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<TenantDetailDto> GetTenantDetailAsync(Guid caseId);
         Task<Guid?> AddOnlyLandLordfromCase(CreateToLandLordDto dto);
         Task<bool> UpdateLandLordsfromCase(EditToLandlordDto landlords);
-     Task<Guid?> UpdateCaseForLandlordAsync(IntakeModel legalCase);
+        Task<Guid?> UpdateCaseForLandlordAsync(IntakeModel legalCase);
         Task<IEnumerable<City>> GetAllCitiesList();
         Task<Guid?> AddOnlyApartmentfromCase(CreateToBuildingDto appartment);
         Task<bool> UpdateonlyBuildingfromCase(EditToBuildingDto appartment);
@@ -54,5 +55,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 
         Task<CourtDetailDto> GetCourtDetailsAsync(Guid caseId);
         Task<List<GenrateNoticeModel>> GetCaseFormsByCaseId(Guid caseId, string userId, bool isAdmin);
+
+        Task<List<EditToRemainderCenterDto?>> GetRemainderCenterByCaseIdAsync(Guid? CaseId);
     }
 }

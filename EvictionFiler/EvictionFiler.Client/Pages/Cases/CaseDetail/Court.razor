@@ -283,7 +283,7 @@
             isLoading = true;
             await Task.Delay(1000);
             await LoadCourtDetails();
-            // await LoadHearing();
+            await LoadHearing();
             isLoading = false;
         }
     }
@@ -291,6 +291,7 @@
     private async Task LoadCourtDetails()
     {
         courtDetails= await caseDetailService.GetCourtDetailsAsync(CurrentCaseId.Value);
+
         StateHasChanged();
     }
     private async Task LoadHearing()
@@ -300,6 +301,9 @@
         {
             CaseHearing = CaseHearings.FirstOrDefault()!;
         }
+
+        courtDetails.NextCourtDate = CaseHearings.Where(e => e.HearingDate > DateTime.Now).OrderBy(ed => ed.HearingDate).Select(ab => ab.HearingDate).FirstOrDefault();
+
         StateHasChanged();
     }
     private async Task ShowCourtModal()
@@ -322,8 +326,16 @@
         if (courtDetails.CourtLocationId != null && courtDetails.CourtLocationId != Guid.Empty)
         {
             var location = CourtLocationList.FirstOrDefault(e => e.Id == courtDetails.CourtLocationId);
-            if (location != null)
+            if (location != null || location.CourtPart.Any())
+            {
                 CourtPartList = location.CourtPart;
+
+            }
+            else
+            {
+                showCourtPartDropdown = false;
+
+            }
         }
 
 
@@ -482,6 +494,7 @@
         else
         {
             showCourtPartDropdown = false;
+            courtDetails.CourtPartId = null;
             CourtPartList = new();
         }
 

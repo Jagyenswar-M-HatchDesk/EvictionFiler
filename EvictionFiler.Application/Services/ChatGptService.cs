@@ -160,10 +160,10 @@ namespace EvictionFiler.Application.Services
                     new { type = "input_text", text = GenerateContentPrompts.MotionPrompt }
                 };
 
-                foreach (var fid in uploadedFileIds)
-                {
-                    contentItems.Add(new { type = "input_file", file_id = fid });
-                }
+                //foreach (var fid in uploadedFileIds)
+                //{
+                //    contentItems.Add(new { type = "input_file", file_id = fid });
+                //}
 
                 var requestBody = new
                 {

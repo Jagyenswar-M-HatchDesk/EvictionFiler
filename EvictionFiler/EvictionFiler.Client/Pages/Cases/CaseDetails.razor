@@ -5793,18 +5793,8 @@
             CaseNoticeInfos = casenotice.Where(e => e.FormTypeName.Contains("Demand")).FirstOrDefault() ?? new CaseNoticeInfoDto();
             legalcaseDto.ExpirationDate = CaseNoticeInfos.DateNoticeServed.HasValue ? CaseNoticeInfos.DateNoticeServed.Value.AddDays(CaseNoticeInfos.CalcNoticeLength ?? 0) : null;
         }
-        legalcaseDto.NextCourtDate = CaseHearings.Where(e => e.HearingDate > DateTime.Now).OrderBy(ed => ed.HearingDate).Select(ab => ab.HearingDate).FirstOrDefault();
 
-        var remainders = await _remainders.GetRemainderCenterByCaseIdAsync(legalcaseDto.Id);
-        // remainders = remainders.OrderBy(e => e.When).ToList();
-        if (remainders != null)
-        {
-            legalcaseDto.RemainderDate = remainders
-        .Where(r => r.When > DateTime.Now)
-        .OrderBy(r => r.When)
-        .Select(r => r.When)
-        .FirstOrDefault();
-        }
+        
 
         caseWarrantDto = await _casewarrantservice.GetWarrantDetails(legalcaseDto.Id);
 

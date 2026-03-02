@@ -47,7 +47,7 @@ namespace EvictionFiler.Application.Services
             // ✅ Agar Admin nahi hai to sirf apne hi clients dikhaye
             if (!isAdmin && Guid.TryParse(userId, out Guid userGuid))
             {
-                query = query.Where(x => x.User.FirmId == userGuid);
+                query = query.Where(x => x.CreatedById == userGuid);
             }
 
             var landlords = await query

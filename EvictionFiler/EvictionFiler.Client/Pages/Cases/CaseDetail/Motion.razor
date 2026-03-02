@@ -12,6 +12,8 @@
 @inject IToastService ToastService
 @inject IRemianderCenterService _remainder
 @inject ICourtTodayTypeRepository Courttodayrepo
+@inject IRemianderCenterService _remainders
+
 
 <div class="info-table p mb-4" style="border:none;">
     <div class="info-bar">
@@ -263,7 +265,16 @@
             }
            
 
-
+        var remainders = await caseDetailService.GetRemainderCenterByCaseIdAsync(CurrentCaseId.Value);
+        // remainders = remainders.OrderBy(e => e.When).ToList();
+        if (remainders != null)
+        {
+            RemainderDate = remainders
+        .Where(r => r.When > DateTime.Now)
+        .OrderBy(r => r.When)
+        .Select(r => r.When)
+        .FirstOrDefault();
+        }
 
 
         StateHasChanged();
