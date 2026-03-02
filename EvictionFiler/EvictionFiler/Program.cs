@@ -181,6 +181,10 @@ builder.Services.AddScoped<ICaseAppearanceReadRepository, CaseAppearnceReadRepos
 builder.Services.AddScoped<ICaseHearingReadRepository, CaseHearingReadRepository>();
 builder.Services.AddScoped<ICourtReadRepository, CourtReadRepository>();
 builder.Services.AddScoped<ICaseFormReadRepository,CaseFormReadRepository>();
+builder.Services.AddScoped<ICaseNotesReadRepository, CaseNotesReadRepository>();
+builder.Services.AddScoped<ICaseDocUploadReadRepository, CaseDocUploadReadRepository>();
+builder.Services.AddScoped<IRemainderCenterReadRepository, RemainderCenterReadRepository>();
+builder.Services.AddScoped<ICaseNoticeInfoReadRepository, CaseNoticeInfoReadRepository>();
 
 //builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 //    .AddIdentityCookies();

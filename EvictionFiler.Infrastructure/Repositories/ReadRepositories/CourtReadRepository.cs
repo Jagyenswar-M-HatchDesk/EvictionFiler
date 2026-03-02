@@ -38,7 +38,7 @@ namespace EvictionFiler.Infrastructure.Repositories.ReadRepositories
             return new CourtDetailDto
             {
                 Id = l.CourtLocation?.Id ?? Guid.Empty,
-                Court = l.CourtLocation != null ? $"{l.CourtLocation.Court}" : "",
+                Court = l.CourtLocation != null ? $"{l.CourtLocation?.Court}" : "",
                 CourtTypeId = l.CourtTypeId != null ? l.CourtTypeId : null,
                 CourtPartId = l.CourtPartId != null ? l.CourtPartId : null,
                 CountryId = l.CourtLocation?.County?.Id,
@@ -46,9 +46,9 @@ namespace EvictionFiler.Infrastructure.Repositories.ReadRepositories
 
                 CourtLocationId = l.CourtLocationId,
                 CourtLocation = l.CourtLocation?.Address,
-                CourtPart = l.CourtPart != null ? l.CourtPart.Part : new string(l.CourtRoom.Where(char.IsLetter).ToArray()),
-                CourtRoomNo = l.CourtPart != null ? l.CourtPart.RoomNo : new string(l.CourtRoom.Where(char.IsDigit).ToArray()),
-                Judge = l.CourtPart != null ? l.CourtPart.Judge : l.ManagingAgent,
+                CourtPart = l.CourtPart != null ? l.CourtPart?.Part : new string(l.CourtRoom?.Where(char.IsLetter).ToArray()),
+                CourtRoomNo = l.CourtPart != null ? l.CourtPart?.RoomNo : new string(l.CourtRoom?.Where(char.IsDigit).ToArray()),
+                Judge = l.CourtPart != null ? l.CourtPart?.Judge : l.ManagingAgent,
 
                 Index = l.Index
 

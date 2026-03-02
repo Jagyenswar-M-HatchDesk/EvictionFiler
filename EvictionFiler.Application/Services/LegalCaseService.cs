@@ -1412,6 +1412,16 @@ namespace EvictionFiler.Application.Services
             return doclist;
         }
 
+        public async Task<bool> DeleteCaseNotes(Guid Id)
+        {
+            var doclist = await _caseNotesRepository.DeleteAsync(Id);
+            if (doclist)
+            {
+                await Task.Delay(200);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            return doclist;
+        }
         public async Task<IEnumerable<FilingMethod>> FilingMethodList()
         {
             var doclist = _filingMethod.GetAllQuerable();
