@@ -34,7 +34,8 @@ namespace EvictionFiler.Application.Services.Master
                 x => x.IsDeleted != true ,
                     x => x.CaseType,
                     x => x.Category,
-                    x=>x.Firms
+                    x=>x.Firms,
+                    x=>x.TenancyTypes
                );
 
             if(FirmId != null  && FirmId != Guid.Empty)
@@ -73,6 +74,8 @@ namespace EvictionFiler.Application.Services.Master
             CreatedOn = x.CreatedOn,
             Id = x.Id,
             FirmId = x.FirmId,
+            TenancyTypeId = x.TenancyTypeId,
+            TenancyTypeName = x.TenancyTypes != null ? x.TenancyTypes.Name : "-",
             FirmName = x.Firms != null ? x.Firms.Name : "Generic",
         })
         .ToList();
@@ -92,7 +95,8 @@ namespace EvictionFiler.Application.Services.Master
                 (
                 x => x.IsDeleted != true,
                     x => x.CaseType,
-                    x => x.Category
+                    x => x.Category,
+                    x => x.TenancyTypes
                );
 
             
@@ -114,6 +118,8 @@ namespace EvictionFiler.Application.Services.Master
             Code = x.Code ?? "-",
             Rate = x.Rate ?? "-" ,
             FirmId = x.FirmId,
+            TenancyTypeId = x.TenancyTypeId,
+            TenancyTypeName = x.TenancyTypes != null ? x.TenancyTypes.Name : string.Empty,
             UnitName = x.Units != null ? x.Units.Name : "-",
             
         })
@@ -134,8 +140,10 @@ namespace EvictionFiler.Application.Services.Master
                 Name = dto.Name,
                 FirmId = dto.FirmId,
                 CreatedOn = DateTime.Now,
+                TenancyTypeId = dto.TenancyTypeId,
 
-            };
+
+        };
             await _repository.AddAsync(forms);
 
             var result = await _unitOfWork.SaveChangesAsync();
@@ -161,7 +169,9 @@ namespace EvictionFiler.Application.Services.Master
                 Name = form.Name,
                 CreatedOn = form.CreatedOn,
                 FirmId = form.FirmId,
-                FirmName = form.Firms?.Name
+                FirmName = form.Firms?.Name,
+                 TenancyTypeId = form.TenancyTypeId,
+                TenancyTypeName = form.TenancyTypes?.Name ,
             };
         }
 
@@ -187,6 +197,7 @@ namespace EvictionFiler.Application.Services.Master
             existing.FormCategoryId = form.CategoryId;
             existing.UpdatedOn = DateTime.Now;
             if(form.FirmId != null && form.FirmId != Guid.Empty) existing.FirmId = form.FirmId;
+            if (form.TenancyTypeId != null && form.TenancyTypeId != Guid.Empty) existing.TenancyTypeId = form.TenancyTypeId;
 
             // Save changes
             _repository.UpdateAsync(existing);

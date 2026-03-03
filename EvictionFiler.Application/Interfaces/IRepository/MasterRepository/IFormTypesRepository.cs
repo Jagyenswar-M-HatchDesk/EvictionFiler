@@ -11,7 +11,7 @@ namespace EvictionFiler.Application.Interfaces.IRepository.MasterRepository
 	public interface IFormTypesRepository
 	{
 		Task<List<FormTypes>> GetAllFormTYpes();
-		Task<List<FormAddEditViewModelDto>> GetFormTypesByCaseTypeAsync(Guid? caseTypeId);
+		Task<List<FormAddEditViewModelDto>> GetFormTypesByCaseTypeAsync(Guid? caseTypeId, Guid? TenancyTypeId = null);
 
     }
 }

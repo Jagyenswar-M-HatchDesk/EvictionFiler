@@ -35,6 +35,7 @@ namespace EvictionFiler.Application.Services
                 Paid = dto.Paid,
                 Currency = dto.Currency,
                 CreatedBy = dto.CreatedBy,
+                CreatedById = dto.CreatedById,
             };
              await _transactionRepo.AddAsync(transaction);
             var result = await _unitOfWork.SaveChangesAsync();

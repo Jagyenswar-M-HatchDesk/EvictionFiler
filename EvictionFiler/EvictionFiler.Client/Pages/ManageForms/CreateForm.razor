@@ -20,6 +20,7 @@
 @inject IFormCategoryRepository CategoryRepository
 @inject IManageFormService ManageFormService
 @inject SpinnerService spinnerservice
+@inject ITenancyTypeRepository TenancyTypeRepository
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 @inject ILoggedInUserService _loggedInUserService
@@ -100,6 +101,18 @@ aria-labelledby="createUserLabel">
 
                 </div>
                 <div class="mb-4 col-md-4">
+                    <label class="form-label color-text required-label">Category</label>
+                    <select class="form-select" @bind="createForm.CategoryId">
+                        <option value="">--  Select Category --</option>
+                        @foreach (var category in CategoryList)
+                        {
+                            <option value="@category.Id">@category.Name</option>
+                        }
+                    </select>
+
+
+                </div>
+                <div class="mb-4 col-md-5">
                     <label class="form-label color-text required-label">Category</label>
                     <select class="form-select" @bind="createForm.CategoryId">
                         <option value="">--  Select Category --</option>
@@ -211,6 +224,7 @@ aria-labelledby="createUserLabel">
 @code {
     [Parameter] public FormAddEditViewModelDto createForm { get; set; } = new();
     [Parameter] public EventCallback OnClose { get; set; }
+    private IEnumerable<TenancyType> TenancyTypesList = new List<TenancyType>();
 
     private List<CaseType> CaseTypeList = new();
     private List<FormCategory> CategoryList = new();
@@ -240,6 +254,7 @@ aria-labelledby="createUserLabel">
 
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
         CategoryList = await CategoryRepository.GetAllCategory();
+        TenancyTypesList = await TenancyTypeRepository.GetAllAsync();
 
 
         // var defaultCaseType = CaseTypeList.FirstOrDefault(c => c.Name == "Common");

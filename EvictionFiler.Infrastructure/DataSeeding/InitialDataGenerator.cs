@@ -695,6 +695,16 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new TenancyType() { Name = "At Will", CreatedOn = now },
                 new TenancyType() { Name = "Squatter", CreatedOn = now },
                 new TenancyType() { Name = "Section-8", CreatedOn = now },
+                new TenancyType() { Name = "Notice To Cure/Quit", CreatedOn = now },
+                new TenancyType() { Name = "Referee Deed Prior Owner", CreatedOn = now },
+                new TenancyType() { Name = "License", CreatedOn = now },
+                new TenancyType() { Name = "Tenant of Record Vacated", CreatedOn = now },
+                new TenancyType() { Name = "Notice To Terminate For Lease", CreatedOn = now },
+                new TenancyType() { Name = "Commercial", CreatedOn = now },
+                new TenancyType() { Name = "Intent Not To Renew Lease", CreatedOn = now },
+                new TenancyType() { Name = "Primary - Non/Primary", CreatedOn = now },
+                new TenancyType() { Name = "Referee Deed", CreatedOn = now },
+                new TenancyType() { Name = "Tenant in Sufferance", CreatedOn = now },
                 new TenancyType() { Name = "Other", CreatedOn = now },
             };
         }

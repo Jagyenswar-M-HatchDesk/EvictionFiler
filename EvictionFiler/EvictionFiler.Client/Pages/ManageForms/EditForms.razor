@@ -13,6 +13,7 @@
 
 @inject ICaseTypeRepository CaseTypeRepository
 @inject IFormCategoryRepository CategoryRepository
+@inject ITenancyTypeRepository TenancyTypeRepository
 @inject IManageFormService ManageFormService
 @inject SpinnerService spinnerservice
 @inject NavigationManager Navigation
@@ -103,6 +104,18 @@
                         }
                     </select>
                     <ValidationMessage For="@(() => editForm.CategoryId)" />
+
+
+                </div>
+                <div class="mb-4 col-md-5">
+                    <label class="form-label color-text required-label">Tenancy Type</label>
+                    <select class="form-select" @bind="editForm.TenancyTypeId">
+                        <option value="">--  Select Tenancy Type --</option>
+                        @foreach (var category in TenancyTypesList)
+                        {
+                            <option value="@category.Id">@category.Name</option>
+                        }
+                    </select>
 
 
                 </div>
@@ -207,6 +220,7 @@
     private List<CaseType> CaseTypeList = new();
 
     private List<FormCategory> CategoryList = new();
+    private IEnumerable<TenancyType> TenancyTypesList = new List<TenancyType>();
     private bool IsPreviewVisible { get; set; } = false;
     private string htmlContent;
     private RadzenHtmlEditor htmlEditor;
@@ -235,6 +249,7 @@
 
         CaseTypeList = await CaseTypeRepository.GetAllCaseType();
         CategoryList = await CategoryRepository.GetAllCategory();
+        TenancyTypesList = await TenancyTypeRepository.GetAllAsync();
 
         selectedFirmId = editForm.FirmId;
         selectedFirm = editForm.FirmName ?? "Generic";

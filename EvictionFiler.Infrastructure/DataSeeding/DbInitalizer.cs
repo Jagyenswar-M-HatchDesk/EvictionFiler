@@ -19,9 +19,9 @@ namespace EvictionFiler.Infrastructure.DataSeeding
 				//await SeedLanguage(context);
 
 				//await SeedPremiseType(context);
-				await SeedCaseTypes(context);
-                await SeedUserRoles(context);
-                await SeedSubscriptionType(context);
+				//await SeedCaseTypes(context);
+                //await SeedUserRoles(context);
+                //await SeedSubscriptionType(context);
                 //            await SeedBuildingTypes(context);
                 //            await SeedCaseTypesHPD(context);
                 //            await SeedBillingTypes(context);
@@ -55,14 +55,14 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 //await SeedFormTypes(context);
                 //await SeedLandlordTypes(context);
                 //await SeedReasonHolder(context);
-                //await SeedTenancyTypes(context);
+                await SeedTenancyTypes(context);
                 //await SeedIsUnitIlligal(context);
                 //await SeedCaseprograms(context);
                 //await SeedClientRoles(context);
                 //await SeedCaseStatus(context);
                 //await SeedCounty(context);
                 //await SeedCategory(context);
-                await SeedFormCategory(context);
+                //await SeedFormCategory(context);
                 //            await SeedUnitType(context);
                 //            await SeedFilingMethod(context);
                 //            await SeedServiceMethod(context);

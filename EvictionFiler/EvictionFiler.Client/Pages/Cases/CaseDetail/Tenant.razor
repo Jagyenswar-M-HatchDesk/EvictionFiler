@@ -389,6 +389,7 @@
 @code {
     [Parameter] public Guid? CurrentCaseId { get; set; }
     [Parameter] public DateTime? LastPaymentDate { get; set; }
+    [Parameter] public EventCallback<Guid?> TenanctType { get; set; }
     private TenantDetailDto tenantDetail { get; set; } = new TenantDetailDto();
     // private EditToTenantDto editTenantModel = new EditToTenantDto();
     private bool isLoading = true;
@@ -416,14 +417,15 @@
     protected override async Task OnInitializedAsync()
     {
 
-
+        editContext = new EditContext(tenantDetail);
+        messageStore = new ValidationMessageStore(editContext);
 
         if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty)
         {
 
             isLoading = true;
 
-           
+
             StateHasChanged();
             await TenantDetails();
 
@@ -436,8 +438,10 @@
     public async Task TenantDetails()
     {
         tenantDetail = await tenantDetailService.GetTenantDetailAsync(CurrentCaseId!.Value);
-        editContext = new EditContext(tenantDetail);
-        messageStore = new ValidationMessageStore(editContext);
+        if(tenantDetail.TenancyTypeId != null  && tenantDetail.TenancyTypeId != Guid.Empty)
+        {
+            await TenanctType.InvokeAsync(tenantDetail.TenancyTypeId);
+        }
 
     }
 
@@ -584,7 +588,7 @@
         AdditionalTenantfromDbList = new List<AdditioanlTenants>();
         AdditionalTenantList = new List<AddtionalTenantDto>();
     }
-    private void CalcNoticeDays()
+    private async Task CalcNoticeDays()
     {
         if (CaseTypeList.FirstOrDefault(x => x.Id == tenantDetail.CaseTypeId)?.Name == "Holdover")
         {
@@ -632,7 +636,9 @@
             }
         }
 
-        ValidateParticularInput(() => ViewTenant.TenancyTypeId, nameof(ViewTenant.TenancyTypeId), "Select Tenancy Type");
+        await ValidateParticularInput(() => ViewTenant.TenancyTypeId, nameof(ViewTenant.TenancyTypeId), "Select Tenancy Type");
+
+        await TenanctType.InvokeAsync(tenantDetail.TenancyTypeId);
     }
     private Task ValidateParticularInput<T>(Expression<Func<T>> accessor, string fieldName, string validationMsg)
     {

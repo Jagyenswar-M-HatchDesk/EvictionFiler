@@ -17,9 +17,11 @@ namespace EvictionFiler.Application.DTOs.FormTypeDto
 
         public Guid? CaseTypeId { get; set; }
         public Guid? CategoryId { get; set; }
+        public Guid? TenancyTypeId { get; set; }
         public CaseType? CaseType { get; set; }
         public string? CaseTypeName { get; set; }
         public string? CategoryName { get; set; }
+        public string? TenancyTypeName { get; set; }
         public Category? Category { get; set; }
         public string? HTML { get; set; }
         public DateTime CreatedOn { get; set; }
