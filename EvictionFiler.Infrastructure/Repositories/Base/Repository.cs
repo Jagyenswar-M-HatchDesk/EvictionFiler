@@ -92,9 +92,9 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 				return false;
 			}
 			entity.IsDeleted = true;
-            _context.Entry(entity).State = EntityState.Modified;
+			_context.Entry(entity).State = EntityState.Modified;
 
-            return true;
+			return true;
 
 		}
 
@@ -113,7 +113,7 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 
 		public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null, params Expression<Func<T, object>>[]? includes)
 		{
-			var query = _dbSet.AsNoTracking().AsQueryable(); 
+			var query = _dbSet.AsNoTracking().AsQueryable();
 
 			if (predicate != null)
 				query = query.Where(predicate);
@@ -137,20 +137,20 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 			return query;
 		}
 
-        public IQueryable<T> GetAllQueryablewithThenInclude(Expression<Func<T, bool>>? predicate = null, Func<IQueryable<T>, IQueryable<T>>? include = null)
-        {
-            IQueryable<T> query = _dbSet;
+		public IQueryable<T> GetAllQueryablewithThenInclude(Expression<Func<T, bool>>? predicate = null, Func<IQueryable<T>, IQueryable<T>>? include = null)
+		{
+			IQueryable<T> query = _dbSet;
 
-            if (predicate != null)
-                query = query.Where(predicate);
+			if (predicate != null)
+				query = query.Where(predicate);
 
-            if (include != null)
-                query = include(query);
+			if (include != null)
+				query = include(query);
 
-            return query;
-        }
+			return query;
+		}
 
-        public async Task<T?> GetAsync(object id)
+		public async Task<T?> GetAsync(object id)
 		{
 			if (id == null)
 			{
@@ -159,11 +159,17 @@ namespace EvictionFiler.Infrastructure.Repositories.Base
 			return await _dbSet.FindAsync(id);
 		}
 
-        public T UpdateAsync(T entity)
+		public T UpdateAsync(T entity)
+		{
+			if (entity == null)
+				throw new ArgumentNullException(nameof(entity));
+			_dbSet.Attach(entity);
+			return entity;
+		}
+
+        public T Update(T entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-            _dbSet.Attach(entity);
+            _context.Entry(entity).State = EntityState.Modified;
             return entity;
         }
 

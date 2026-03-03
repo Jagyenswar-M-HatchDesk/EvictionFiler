@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 
 namespace EvictionFiler.Application.Services
 {
-    public class CaseDetailService:ICaseDetailService
+    public class CaseDetailService : ICaseDetailService
     {
         private readonly ILandlordReadRepository _landlordReadRepository;
         private readonly IBuildingReadRepository _buildingReadRepository;
@@ -257,10 +257,10 @@ namespace EvictionFiler.Application.Services
 
 
 
-            var result=await _buildingReadRepository.AddAsync(newapartment);
-           
+            var result = await _buildingReadRepository.AddAsync(newapartment);
 
-            if (result!= null) return result.Id;
+
+            if (result != null) return result.Id;
 
             return null;
         }
@@ -458,68 +458,7 @@ namespace EvictionFiler.Application.Services
 
         public async Task<List<CaseHearingDto>> GetAllCaseHeariingByCaseIdAsync(Guid id)
         {
-            var calanders = await _caseHearingReadRepository
-                  .GetAlllQuerable(x => x.IsDeleted != true && x.LegalCaseId == id, x => x.LegalCase, x => x.Courts)
-                  ;
-
-            var result = calanders.Select(dto => new CaseHearingDto
-            {
-                Id = dto.Id,
-
-                HearingDate = dto.HearingDate ?? DateTime.Today,
-
-                HearingTime = (dto.HearingTime == default || dto.HearingTime == TimeOnly.MinValue)
-    ? TimeOnly.FromTimeSpan(TimeSpan.FromHours(9.5))
-    : dto.HearingTime.Value,
-
-
-                CourtId = dto.CourtId,
-                LegalCaseId = dto.LegalCaseId,
-                IndexNo = dto.IndexNo,
-                Caption = dto.Caption,
-
-                // CaseType name — safe whether CaseTypeId or LegalCaseId is null
-                CaseTypeName =
-        dto.CaseTypeId != null
-            ? dto.CaseTypes.Name
-            : dto.LegalCase.CaseType.Name ?? string.Empty,
-
-                //        // Judge — prefer Hearing Judge, fallback to Court Judge
-                //        Judge = dto.Judge
-                //?? dto.Courts?.Judge
-                //?? string.Empty,
-
-                //        // Court part — from CourtPart or fallback to Court.Part
-                //        CourtPart =
-                //dto.CourtPartId != null
-                //    ? dto.CourtParts?.Part
-                //    : dto.Courts?.Part ?? string.Empty,
-
-                // Case status name — only if present
-                CaseStatusName =
-        dto.CaseStatusId != null
-            ? dto.CaseStatus.Name
-            : string.Empty,
-
-                //        // Room number — prefer explicit RoomNo, fallback to Court’s RoomNo
-                //        RoomNo = dto.RoomNo
-                //?? dto.Courts?.RoomNo
-                //?? string.Empty,
-
-                // County name — safe for null CountyId
-                CountyName =
-        dto.CountyId != null
-            ? dto.Counties.Name
-            : string.Empty,
-
-                CreatedOn = dto.CreatedOn,
-                LastAction = dto.LastAction,
-
-            }).OrderBy(e => e.HearingDate).ToList();
-
-
-
-            return result;
+            return await _courtReadRepository.GetCourtHearingDetailsAsync(id);
         }
 
 

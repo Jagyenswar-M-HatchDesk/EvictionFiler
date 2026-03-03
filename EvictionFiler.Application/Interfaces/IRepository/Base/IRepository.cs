@@ -23,6 +23,8 @@ namespace EvictionFiler.Application.Interfaces.IRepository.Base
 
 		public IQueryable<T> GetAllQueryablewithThenInclude(Expression<Func<T, bool>>? predicate = null, Func<IQueryable<T>, IQueryable<T>>? include = null);
 
+		T Update(T entity);
+
 
 
     }

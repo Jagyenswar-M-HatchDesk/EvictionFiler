@@ -212,7 +212,7 @@ namespace EvictionFiler.Domain.Entities
 		public string? PerDiemSignature { get; set; }
 		public DateOnly? PerDiemDate { get; set; }
 		public ICollection<HarassmentType> HarassmentTypse { get; set; } = new List<HarassmentType>();
-		public ICollection<RemainderCenter> RemainderCenters { get; set; } = new List<RemainderCenter>();
+		//public ICollection<RemainderCenter> RemainderCenters { get; set; } = new List<RemainderCenter>();
 
 		public ICollection<DefenseType> DefenseTypse { get; set; } = new List<DefenseType>();
 		public ICollection<DocumentTypePerDiem> DocumentIntructionsTypse { get; set; } = new List<DocumentTypePerDiem>();
