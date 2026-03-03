@@ -11,92 +11,92 @@
 
 @inject NavigationManager Navigation
 
- <div class="table-responsive" style="height:160px;">
-                                    <table class="info-table">
-                                        <thead>
-                                            <tr>
-
-                                                <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px; display:flex;align-items:center;">
-
-                                                    Uploaded Documents
-                                                </th>
-                                                <th scope="col" style="width:12%;border-radius:0px ;" class="text-nowrap info-bar">Actions</th>
-                                                <th scope="col" style="width:12%;border-radius:0px ;" class="text-nowrap info-bar">Type</th>
-                                                <th scope="col" style="width:12%;border-radius:0px ;" class="text-nowrap info-bar">CreatedBy</th>
-                                                <th scope="col" class="info-bar" style="border-radius:0px;">Created On</th>
-
-                                            </tr>
-                                        </thead>
-
-                                        <tbody>
-                                              @if (isLoading)
-                                              {
-         
+<div class="table-responsive" style="height:160px;">
+    <table class="info-table">
+        <thead>
             <tr>
-                <td colspan="4">
-                    <div class="d-flex flex-column justify-content-center align-items-center p-4">
-                        <div class="spinner-border"
-                             style="color:#1F365D; width:2.5rem; height:2.5rem;"
-                             role="status">
-                        </div>
 
-                    </div>
-                </td>
+                <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px; display:flex;align-items:center;">
+
+                    Uploaded Documents
+                </th>
+                <th scope="col" style="width:12%;border-radius:0px ;" class="text-nowrap info-bar">Actions</th>
+                <th scope="col" style="width:12%;border-radius:0px ;" class="text-nowrap info-bar">Type</th>
+                <th scope="col" style="width:12%;border-radius:0px ;" class="text-nowrap info-bar">CreatedBy</th>
+                <th scope="col" class="info-bar" style="border-radius:0px;">Created On</th>
+
             </tr>
-        }
-        else
-        {
-                                            @if (caseDocuments != null && caseDocuments.Count() > 0)
-                                            {
-                                                @foreach (var docs in caseDocuments)
-                                                {
-                                                    <tr class="info-row" style="display:table-row;">
+        </thead>
 
-                                                        <td class="info-block-table"><div class="value">@docs.Name</div></td>
+        <tbody>
+            @if (isLoading)
+            {
 
-                                                        <td class="d-flex justify-content-between info-block-table" style="gap:2px">
+                <tr>
+                    <td colspan="4">
+                        <div class="d-flex flex-column justify-content-center align-items-center p-4">
+                            <div class="spinner-border"
+                                 style="color:#1F365D; width:2.5rem; height:2.5rem;"
+                                 role="status">
+                            </div>
 
-                                                            <span class="action-icon value">
-                                                                <i class="fa-solid fa-eye text-navy me-2" style="cursor:pointer"
-                                                                   @onclick="@(() => PreviewDocument(docs.Path))"
-                                                                   title="Preview"></i>
+                        </div>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @if (caseDocuments != null && caseDocuments.Count() > 0)
+                {
+                    @foreach (var docs in caseDocuments)
+                    {
+                        <tr class="info-row" style="display:table-row;">
 
-                                                            </span>
-                                                            <span class="action-icon-danger value">
-                                                                <i class="fa-solid fa-trash text-navy me-2" style="cursor:pointer"
-                                                                   @onclick="@(() => DeleteCaseDocument(docs.Id))"
-                                                                   title="Delete"></i>
-                                                            </span>
-                                                        </td>
-                                                        <td class="info-block-table"><div class="value">@(docs.DocumentTypes?.Name ?? "--")</div></td>
-                                                        <td class="info-block-table"><div class="value">@(docs.User?.FirstName ?? "--")</div></td>
-                                                        <td class="info-block-table"><div class="value">@docs.CreatedOn.ToString(DateFormats.Default)</div></td>
+                            <td class="info-block-table"><div class="value">@docs.Name</div></td>
 
-                                                    </tr>
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <tr class="info-row">
-                                                    <td colspan="4" class="text-muted text-center info-block-table"> <div class="value">No Document uploaded yet.</div></td>
-                                                </tr>
-                                            }
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div> 
+                            <td class="d-flex justify-content-between info-block-table" style="gap:2px">
+
+                                <span class="action-icon value">
+                                    <i class="fa-solid fa-eye text-navy me-2" style="cursor:pointer"
+                                       @onclick="@(() => PreviewDocument(docs.Path))"
+                                       title="Preview"></i>
+
+                                </span>
+                                <span class="action-icon-danger value">
+                                    <i class="fa-solid fa-trash text-navy me-2" style="cursor:pointer"
+                                       @onclick="@(() => DeleteCaseDocument(docs.Id))"
+                                       title="Delete"></i>
+                                </span>
+                            </td>
+                            <td class="info-block-table"><div class="value">@(docs.DocumentTypes?.Name ?? "--")</div></td>
+                            <td class="info-block-table"><div class="value">@(docs.User?.FirstName ?? "--")</div></td>
+                            <td class="info-block-table"><div class="value">@(docs.CreatedOn.ToString(DateFormats.Default) ?? "--")</div></td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr class="">
+                        <td colspan="4" class="text-muted text-center info-block-table"> <div class="value">No Document uploaded yet.</div></td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
 
 
 @code {
-    [Parameter] public Guid CurrentCaseId{ get; set; }
-    [Parameter] public bool isReload{ get; set; }
+    [Parameter] public Guid CurrentCaseId { get; set; }
+    [Parameter] public bool isReload { get; set; }
     private IEnumerable<CaseDocument> caseDocuments = new List<CaseDocument>();
     private bool isLoading = false;
 
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-      
+
         await LoadCaseDocuments();
         isLoading = false;
     }
