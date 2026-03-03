@@ -70,5 +70,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<NotesDto> GetCaseNotes(Guid Id);
 
         Task<bool> UpdateCaseNotes(NotesDto Dto);
+
+       Task<bool> DeleteCaseNotes(Guid Id);
     }
 }

@@ -1379,7 +1379,9 @@
                                 </div>
                                 <div>
                                     <div class="Overview-lbl">Days Open</div>
-                                    <div class="Overview-Value" id="daysOpen">--</div>
+                                    <div class="Overview-Value" id="daysOpen">
+                                      
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2280,10 +2282,10 @@
                                 </div> *@
 
                                 
-                                  <CaseForm CaseId="@caseId" loggedInUserId="@loggedInUserId" isAdmin="isAdmin" />
+                                  <CaseForm CaseId="@caseId" loggedInUserId="@loggedInUserId" isAdmin="isAdmin" isReload="@isLoadForm" />
                             </div>
                             <div class="">
-                                <div class="table-responsive" style="height:160px;">
+                                @* <div class="table-responsive" style="height:160px;">
                                     <table class="info-table">
                                         <thead>
                                             <tr>
@@ -2339,16 +2341,16 @@
 
                                         </tbody>
                                     </table>
-                                </div>
+                                </div> *@
 
-
+                                <CaseDocUpload CurrentCaseId="@caseId" isReload="@isUploadDoc"/>
 
                             </div>
 
                         </div>
                         <div class="col-8 row">
                             <div class="col-12 mb-4">
-                                <div class="table-responsive" style="height:160px;">
+                                @* <div class="table-responsive" style="height:160px;">
                                     <table class="info-table">
                                         <thead>
                                             <tr>
@@ -2406,14 +2408,16 @@
 
                                         </tbody>
                                     </table>
-                                </div>
+                                </div> *@
+
+                                <CaseNote CurrentCaseId="@caseId" OnOpenNotes="OnHandleNotes" isReload="@isCaseNotesReload" />
 
 
 
                             </div>
 
                             <div class="col-9">
-                                <div class="ps-2 pe-2" style="background-color:white;border-radius:20px;">
+                                @* <div class="ps-2 pe-2" style="background-color:white;border-radius:20px;">
                                     <div class="info-bar" style="background-color:#fff;">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="info-bar-title">
@@ -2536,7 +2540,8 @@
 
                                     </div>
 
-                                </div>
+                                </div> *@
+                                <Timeline CurrentCaseId="@caseId" CreatedDate="@legalcaseDto.CreatedOn" isAdmin="@isAdmin" loggedInUserId="@loggedInUserId" />
 
                             </div>
                             <div class="col-3">
@@ -4749,7 +4754,7 @@
     private List<CaseAppearanceDto> Judgements = new();
     private CaseNoticeInfoDto CaseNoticeInfos = new();
     private CaseAppearanceDto MotionJudgements = new();
-    private IEnumerable<CaseDocument> caseDocuments = new List<CaseDocument>();
+    // private IEnumerable<CaseDocument> caseDocuments = new List<CaseDocument>();
     private CaseHearingDto CaseHearing = new();
     private CaseWarrantDto CaseWarranrDto { get; set; } = new();
     private CaseForms CaseForm = new();
@@ -4827,7 +4832,9 @@
     [Parameter] public EventCallback OnFormCreate { get; set; } = new();
 
     private bool isLoadMarshal = false;
-
+    private bool isLoadForm = false;
+    private bool isCaseNotesReload = false;
+    private bool isUploadDoc = false;
     private Guid? SelectedLandlordId;
 
     // private List<Registrationstatus> RegistrationstatusList = new List<Registrationstatus>();
@@ -4891,10 +4898,10 @@
 
         court.SelectedCourtPart ??= new CourtPartDto();
 
-        ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
+        // ClientList = await _clientService.GetAllClient(loggedInUserId, isAdmin);
         // ExemptionBasicList = await ExemptionBasicRepository.GetAllAsync();
         // ExemptionReasonList = await ExemptionReasonRepository.GetAllAsync();
-        TenancyTypeForBuildingList = await TenancyTypeForBuildingRepository.GetAllAsync();
+        // TenancyTypeForBuildingList = await TenancyTypeForBuildingRepository.GetAllAsync();
         // RegistrationstatusList = await CaseTypeRepository.GetAllRegistrationstatus();
         if (!CityList.Any()) CityList = await _service.GetAllCitiesList();
 
@@ -4904,9 +4911,9 @@
         // await LoadCaseForms();
         // await LoadHearing();
         // await LoadJudgement();
-        await LoadCaseDocument();
-        await LoadNotes();
-        await LoadOthers();
+        // await LoadCaseDocument();
+        // await LoadNotes();
+        // await LoadOthers();
         CalculateCaseProgress();
         StartProgressAnimation();
         StateHasChanged();
@@ -5048,7 +5055,7 @@
 
     } *@
 
-    private async Task OpenNotesTab(Guid NotesId)
+    private async Task OnHandleNotes(Guid NotesId)
     {
         try
         {
@@ -5062,9 +5069,25 @@
         catch (Exception ex)
         {
 
-        }
-
+            }
     }
+    // private async Task OpenNotesTab(Guid NotesId)
+    // {
+    //     try
+    //     {
+    //         CaseNotesId = NotesId;
+    //         OpenTab = "Notes";
+    //         _showCreateAction = true;
+    //         StateHasChanged();
+    //         await Task.Delay(100);
+    //         await JS.InvokeVoidAsync("showModal", "generateActions");
+    //     }
+    //     catch (Exception ex)
+    //     {
+
+    //     }
+
+    // }
 
     @* private async Task SubmitMarshalDates(bool formgeneration)
     {
@@ -5406,21 +5429,24 @@
     private async Task HandleInvokeAction()
     {
         // await LoadCaseForms();
-        await LoadCaseDocument();
+        // await LoadCaseDocument();
         await LoadCaseDetails();
         // await LoadHearing();
-        await LoadOthers();
+        // await LoadOthers();
         await JS.InvokeVoidAsync("hideModal", "generateActions");
         CaseNotesId = null;
         _showCreateAction = false;
         isLoadMarshal = true;
+        isLoadForm = true;
+        isUploadDoc = true;
     }
     private async Task HandleNotesInvokeAction()
     {
-        await LoadNotes();
+        // await LoadNotes();
         await JS.InvokeVoidAsync("hideModal", "generateActions");
         CaseNotesId = null;
         _showCreateAction = false;
+        isCaseNotesReload = true;
 
     }
     private async Task LoadCaseDetails()
@@ -5635,7 +5661,7 @@
     //     }
     //     spinnerservice.Hide();
     //     await JS.InvokeVoidAsync("showBootstrapTab", "#actions-tab");
-    // }
+    // 
     private decimal? BillAmount = null;
 
     private void FormTypeBindAfter()
@@ -5785,7 +5811,7 @@
 
     //     StateHasChanged();
     // }
-    private async Task LoadOthers()
+  @*  private async Task LoadOthers()
     {
         var casenotice = await _caseNoticeinfo.GetAllCasenoticeInfo(legalcaseDto.Id);
         if (casenotice != null)
@@ -5801,20 +5827,20 @@
 
 
         StateHasChanged();
-    }
+    } *@
 
-    private async Task LoadNotes()
-    {
-        CaseNotes = await _service.GetAllCaseNotes(legalcaseDto.Id);
-        StateHasChanged();
+    // private async Task LoadNotes()
+    // {
+    //     CaseNotes = await _service.GetAllCaseNotes(legalcaseDto.Id);
+    //     StateHasChanged();
 
-    }
+    // }
 
-    private async Task LoadCaseDocument()
-    {
-        caseDocuments = await _service.CaseDocumentList(legalcaseDto.Id);
-        StateHasChanged();
-    }
+    // private async Task LoadCaseDocument()
+    // {
+    //     caseDocuments = await _service.CaseDocumentList(legalcaseDto.Id);
+    //     StateHasChanged();
+    // }
 
     // private void Createcase()
     // {
@@ -7748,7 +7774,7 @@
     }
 
 
-    private async Task PreviewDocument(string filePath)
+   @* private async Task PreviewDocument(string filePath)
     {
         if (!string.IsNullOrWhiteSpace(filePath))
         {
@@ -7770,6 +7796,6 @@
             StateHasChanged();
         }
         spinnerservice.Hide();
-    }
+    }*@
 
 }

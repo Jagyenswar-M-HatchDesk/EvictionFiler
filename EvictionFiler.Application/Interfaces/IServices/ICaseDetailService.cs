@@ -3,6 +3,7 @@ using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.CaseAppearanceDtos;
 using EvictionFiler.Application.DTOs.CaseDetailDtos;
 using EvictionFiler.Application.DTOs.CaseHearing;
+using EvictionFiler.Application.DTOs.CaseNoticeInfoDtos;
 using EvictionFiler.Application.DTOs.CaseWarrantDtos;
 using EvictionFiler.Application.DTOs.FormTypeDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
@@ -11,6 +12,7 @@ using EvictionFiler.Application.DTOs.RemainderCenterDto;
 using EvictionFiler.Application.DTOs.TenantDto;
 using EvictionFiler.Application.Interfaces.IRepository;
 using EvictionFiler.Application.Interfaces.IRepository.Base;
+using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using System;
 using System.Collections.Generic;
@@ -56,6 +58,9 @@ namespace EvictionFiler.Application.Interfaces.IServices
         Task<CourtDetailDto> GetCourtDetailsAsync(Guid caseId);
         Task<List<GenrateNoticeModel>> GetCaseFormsByCaseId(Guid caseId, string userId, bool isAdmin);
 
+        Task<IEnumerable<CaseNotes>> GetAllCaseNotes(Guid caseId);
+        Task<IEnumerable<CaseDocument>> CaseDocumentList(Guid Id);
+        Task<List<CaseNoticeInfoDto>> GetAllCasenoticeInfo(Guid caseId);
         Task<List<EditToRemainderCenterDto?>> GetRemainderCenterByCaseIdAsync(Guid? CaseId);
     }
 }

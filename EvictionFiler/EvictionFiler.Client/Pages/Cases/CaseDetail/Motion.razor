@@ -1,6 +1,8 @@
 ﻿@using Blazored.Toast.Services
+@using EvictionFiler.Application.DTOs
 @using EvictionFiler.Application.DTOs.CaseAppearanceDtos
 @using EvictionFiler.Application.DTOs.CaseHearing
+@using EvictionFiler.Application.DTOs.CaseNoticeInfoDtos
 @using EvictionFiler.Application.Interfaces.IRepository.MasterRepository
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Client.SpinnerService
@@ -33,8 +35,8 @@
     @if (isLoading)
     {
 
-        <tr>
-            <td colspan="3">
+        <div>
+            <div style="width:100%;">
                 <div class="d-flex flex-column justify-content-center align-items-center p-4">
                     <div class="spinner-border"
                     style="color:#1F365D; width:2.5rem; height:2.5rem;"
@@ -42,8 +44,8 @@
                     </div>
 
                 </div>
-            </td>
-        </tr>
+            </div>
+        </div>
 
     }
     else
@@ -115,8 +117,8 @@
                             <div class="label">Vacate Date:</div>
                             <div class="value ellipsis">
                                 @(
-                                    RemainderDate.HasValue
-                                                                    ? RemainderDate.Value.ToString(DateFormats.Default)
+                                    legalcaseDto.RemainderDate.HasValue
+                                    ? legalcaseDto.RemainderDate.Value.ToString(DateFormats.Default)
                                                                     : "--"
                                 )
                             </div>
@@ -127,8 +129,8 @@
                             <div class="label">Next Reminder:</div>
                             <div class="value ellipsis">
                                 @(
-                                    RemainderDate.HasValue
-                                                                    ? RemainderDate.Value.ToString(DateFormats.Default)
+                                    legalcaseDto.RemainderDate.HasValue
+                                    ? legalcaseDto.RemainderDate.Value.ToString(DateFormats.Default)
                                                                     : "--"
                                 )
                             </div>
@@ -217,15 +219,20 @@
     private CaseHearingDto CaseHearing = new();
     private bool isLoading = false;
     private bool isMotionRecordExists = false;
+    private CaseNoticeInfoDto CaseNoticeInfos = new();
+    private DateOnly? VacateDate { get; set; }
+    private DateTime? NextRemainder { get; set; }
+    private IntakeModel legalcaseDto = new();
     protected override async Task OnInitializedAsync()
     {
         if (CurrentCaseId.HasValue && CurrentCaseId.Value != Guid.Empty)
 
         {
             isLoading = true;   
-            await Task.Delay(1000); 
+           
             await LoadJudgement();
             // await LoadHearing();
+            await LoadOthers();
             isLoading = false;
         }
     }
@@ -246,7 +253,7 @@
     // }
     private async Task LoadJudgement()
     {
-        Judgements = await caseDetailService.GetAllCaseAppreance(CurrentCaseId.Value);
+        Judgements = await caseDetailService.GetAllCaseAppreance(CurrentCaseId!.Value);
         
             if (Judgements != null)
             {
@@ -281,10 +288,33 @@
     }
     private async Task LoadHearing()
     {
-        CaseHearings = await caseDetailService.GetAllCaseHeariingByCaseIdAsync(CurrentCaseId.Value);
+        CaseHearings = await caseDetailService.GetAllCaseHeariingByCaseIdAsync(CurrentCaseId!.Value);
         if (CaseHearings.Any())
         {
             CaseHearing = CaseHearings.FirstOrDefault()!;
+        }
+        StateHasChanged();
+    }
+    private async Task LoadOthers()
+    {
+        var casenotice = await caseDetailService.GetAllCasenoticeInfo(CurrentCaseId!.Value);
+        if (casenotice != null)
+        {
+            CaseNoticeInfos = casenotice.Where(e => e.FormTypeName.Contains("Demand")).FirstOrDefault() ?? new CaseNoticeInfoDto();
+            var date = CaseNoticeInfos.DateNoticeServed?.AddDays(CaseNoticeInfos.CalcNoticeLength ?? 0);
+            VacateDate = CaseNoticeInfos.DateNoticeServed.HasValue ? date : null;
+        }
+        NextRemainder = CaseHearings.Where(e => e.HearingDate > DateTime.Now).OrderBy(ed => ed.HearingDate).Select(ab => ab.HearingDate).FirstOrDefault();
+
+        var remainders = await caseDetailService.GetRemainderCenterByCaseIdAsync(CurrentCaseId!.Value);
+        // remainders = remainders.OrderBy(e => e.When).ToList();
+        if (remainders != null)
+        {
+            legalcaseDto.RemainderDate = remainders
+        .Where(r => r.When > DateTime.Now)
+        .OrderBy(r => r.When)
+        .Select(r => r.When)
+        .FirstOrDefault();
         }
         StateHasChanged();
     }

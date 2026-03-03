@@ -1,0 +1,173 @@
+﻿@using EvictionFiler.Application.DTOs.CaseAppearanceDtos
+@using EvictionFiler.Application.DTOs.CaseHearing
+@using EvictionFiler.Application.DTOs.FormTypeDto
+@using EvictionFiler.Application.Interfaces.IServices
+@inject ICaseDetailService _caseDetailService
+<div class="ps-2 pe-2" style="background-color:white;border-radius:20px;">
+    <div class="info-bar" style="background-color:#fff;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="info-bar-title">
+                <div class="rounded-3 text-brand-primary d-flex align-items-center justify-content-center" style="width:28px;height:28px; background-color:#1f365d ; border-radius:7px !important;margin-right:10px;">
+
+                    <i class="fa-solid fa-stairs" style="font-size:16px;color:#fff !important;"></i>
+                </div>Timeline
+            </div>
+
+        </div>
+    </div>
+      @if (isLoading)
+                                              {
+         
+            <div>
+                <div style="width:100%;">
+                    <div class="d-flex flex-column justify-content-center align-items-center p-4">
+                        <div class="spinner-border"
+                             style="color:#1F365D; width:2.5rem; height:2.5rem;"
+                             role="status">
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+    <div class=para>
+        <p class="text-secondary">Filed<span class="arrow ms-1 me-1">→</span>Service<span class="arrow ms-1 me-1">→</span>Judgment<span class="arrow ms-1 me-1">→</span>Environment</p>
+    </div>
+
+
+
+    <div class="timeline" id="timelineList">
+        <div class="item" data-status="completed">
+            <span class="dot"></span>
+
+            <div class="text-secondary field-label font14 mx-2">@CreatedDate?.ToString(DateFormats.Default)</div>
+            <div class="fw-semibold label mx-2">Case Created</div>
+            <div class="text-secondary field-label font14 mx-2">Initial Intake And File Opened</div>
+
+
+        </div>
+        @if (caseFormDto.Count() > 0)
+        {
+            @foreach (var item in caseFormDto)
+            {
+
+                <div class="item" data-status="completed">
+                    <span class="dot"></span>
+                    <div class="text-secondary field-label font14 mx-2">@(item.CreatedOn?.ToString(DateFormats.Default) ?? "---")</div>
+                    <div class="fw-semibold label mx-2">Notice Served</div>
+                    <div class="text-secondary field-label font14 mx-2">@(item.FormTypeName ?? "---")</div>
+
+
+                </div>
+            }
+        }
+        else
+        {
+
+            <div class="item" data-status="upcoming">
+                <span class="dot"></span>
+                <div class="text-secondary field-label font14 mx-2">--</div>
+                <div class="fw-semibold label mx-2">Notice Not Generated</div>
+                <div class="text-secondary field-label font14 mx-2">Pending Notice</div>
+
+
+            </div>
+        }
+        @if (CaseHearings.Count() > 0)
+        {
+            @foreach (var item in CaseHearings)
+            {
+                <div class="item" data-status="current">
+                    <span class="dot"></span>
+                    <div class="text-secondary field-label font14 mx-2">@(item.HearingDate?.ToString(DateFormats.Default))</div>
+                    <div class="fw-semibold label mx-2">Hearing Scheduled</div>
+                    <div class="text-secondary field-label font14 mx-2">Awaiting confirmation from court</div>
+
+
+                </div>
+
+            }
+        }
+        else
+        {
+
+            <div class="item" data-status="upcoming">
+                <span class="dot"></span>
+
+                <div class="text-secondary field-label font14 mx-2">--</div>
+                <div class="fw-semibold label mx-2">Hearing Scheduled</div>
+                <div class="text-secondary field-label font14 mx-2">Awaiting confirmation from court</div>
+
+            </div>
+
+        }
+
+        @if (Judgements.Count() > 0)
+        {
+            @foreach (var item in Judgements)
+            {
+                <div class="item" data-status="current">
+                    <span class="dot"></span>
+
+                    <div class="text-secondary field-label font14 mx-2">@item.AppreanceDate?.ToString(DateFormats.Default)</div>
+                    <div class="fw-semibold label mx-2">@item.CourtTodayName</div>
+                    <div class="text-secondary field-label font14 mx-2"></div>
+
+
+                </div>
+            }
+        }
+        else
+        {
+
+            <div class="item" data-status="upcoming">
+                <span class="dot"></span>
+
+                <div class="text-secondary field-label font14 mx-2">--</div>
+                <div class="fw-semibold label mx-2">Judgment</div>
+                <div class="text-secondary field-label font14 mx-2">Pending hearing</div>
+
+
+            </div>
+        }
+        <div class="item" data-status="upcoming">
+            <span class="dot"></span>
+            <div class="text-secondary field-label font14 mx-2">--</div>
+            <div class="fw-semibold label mx-2">Warrant/Enforcement</div>
+            <div class="text-secondary field-label font14 mx-2">To be requested if applicable</div>
+
+
+        </div>
+
+    </div>
+    }
+
+</div>
+
+@code {
+    [Parameter] public Guid CurrentCaseId {get; set;}
+    [Parameter]
+    public string? loggedInUserId { get; set; }
+    [Parameter]
+    public bool? isAdmin { get; set; }
+    [Parameter]
+    public DateTime? CreatedDate { get; set; }
+    private List<GenrateNoticeModel> caseFormDto = new();
+    private List<CaseHearingDto> CaseHearings = new();
+    private List<CaseAppearanceDto> Judgements = new();
+    private bool isLoading { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+     
+        caseFormDto = await _caseDetailService.GetCaseFormsByCaseId(CurrentCaseId, loggedInUserId, isAdmin.Value);
+        CaseHearings = await _caseDetailService.GetAllCaseHeariingByCaseIdAsync(CurrentCaseId);
+        Judgements = await _caseDetailService.GetAllCaseAppreance(CurrentCaseId);
+        isLoading = false;
+        
+    }
+
+}

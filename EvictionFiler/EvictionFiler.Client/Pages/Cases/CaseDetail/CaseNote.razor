@@ -1,0 +1,135 @@
+﻿@using Blazored.Toast.Services
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Domain.Entities
+@using EvictionFiler.Client.SpinnerService
+@inject ICaseDetailService _caseDetailService
+@inject SpinnerService spinnerservice
+@inject IToastService ToastService
+@inject ILegalCaseService _service
+<div class="table-responsive" style="height:160px;">
+    <table class="info-table">
+        <thead>
+            <tr>
+
+                <th scope="col" class="info-bar" style="border-radius:8px 0px 0px 0px; display:flex;align-items:center;">
+
+                    ID
+                </th>
+                <th scope="col" class="info-bar" style="border-radius:0px;">Notes</th>
+                <th scope="col" style="width:12%;border-radius:0px ;" class="text-nowrap info-bar">Actions</th>
+
+
+                <th scope="col" class="info-bar" style="border-radius:0px;">Created By</th>
+
+                <th scope="col" class="info-bar" style="border-radius:0px;">Created On</th>
+
+            </tr>
+        </thead>
+
+        <tbody>
+          @if (isLoading)
+        {
+            <!-- 🔄 Loading UI -->
+            <tr>
+                <td colspan="3">
+                    <div class="d-flex flex-column justify-content-center align-items-center p-4">
+                        <div class="spinner-border"
+                             style="color:#1F365D; width:2.5rem; height:2.5rem;"
+                             role="status">
+                        </div>
+
+                    </div>
+                </td>
+            </tr>
+        }
+        else
+        {
+            @if (CaseNotes != null && CaseNotes.Count() > 0)
+            {
+                int index = 1;
+                @foreach (var notes in CaseNotes)
+                {
+                    <tr class="info-row" style="display:table-row;">
+                        <td class="info-block-table">
+                            <div class="value">@index</div>
+
+                        </td>
+                        <td class="info-block-table"><div class="value">@notes.Notes</div></td>
+                        <td class="d-flex justify-content-around info-block-table" style="gap:2px">
+
+                            <span class="action-icon value" @onclick=" () => OpenNotesTab(notes.Id)"><i class="fa-solid fa-pen-to-square"></i></span>
+                            <span class="action-icon-danger value" style="cursor:pointer" @onclick="() => DeleteCaseNotes(notes.Id)"><i class="fa-solid fa-trash"></i></span>
+                        </td>
+
+                        <td class="info-block-table">
+                            <div class="value">
+                                @notes.User.FirstName
+                            </div>
+                        </td>
+                        <td class="info-block-table"><div class="value">@notes.CreatedOn.ToString(DateFormats.Default)</div></td>
+
+                    </tr>
+                    index++;
+                }
+            }
+            else
+            {
+                <tr class="info-row">
+                    <td colspan="4" class="text-muted text-center info-block-table"> <div class="value">No notes submitted yet.</div></td>
+                </tr>
+            }
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public Guid CurrentCaseId { get; set; }
+    [Parameter]
+    public bool isReload { get; set; }
+    [Parameter] public EventCallback<Guid> OnOpenNotes{ get; set; }
+    public bool isLoading { get; set; } = true;
+
+    public IEnumerable<CaseNotes> CaseNotes = new List<CaseNotes>();
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        // await Task.Delay(1000);
+        await LoadCaseNotes();
+        isLoading = false;
+    }
+
+    private async Task OpenNotesTab(Guid NotesId)
+    {
+
+        await OnOpenNotes.InvokeAsync(NotesId);
+
+
+    }
+    private async Task LoadCaseNotes()
+    {
+        CaseNotes = await _caseDetailService.GetAllCaseNotes(CurrentCaseId);
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        if (isReload)
+        {
+           await  LoadCaseNotes();
+        }
+
+    }
+    public async Task DeleteCaseNotes(Guid id)
+    {
+        spinnerservice.Show();
+        bool isDeleted = await _service.DeleteCaseNotes(id);
+
+        if (isDeleted)
+        {
+            CaseNotes = await _caseDetailService.GetAllCaseNotes(CurrentCaseId);
+            ToastService.ShowSuccess("File  has been Deleted successfully!");
+            StateHasChanged();
+        }
+        spinnerservice.Hide();
+    }
+}

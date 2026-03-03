@@ -40,7 +40,7 @@ namespace EvictionFiler.Infrastructure.Repositories.ReadRepositories
             return new CourtDetailDto
             {
                 Id = l.CourtLocation?.Id ?? Guid.Empty,
-                Court = l.CourtLocation != null ? $"{l.CourtLocation.Court}" : "",
+                Court = l.CourtLocation != null ? $"{l.CourtLocation?.Court}" : "",
                 CourtTypeId = l.CourtTypeId != null ? l.CourtTypeId : null,
                 CourtPartId = l.CourtPartId != null ? l.CourtPartId : null,
                 CountryId = l.CourtLocation?.County?.Id,

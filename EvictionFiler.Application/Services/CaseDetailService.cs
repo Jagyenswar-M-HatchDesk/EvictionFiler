@@ -3,6 +3,7 @@ using EvictionFiler.Application.DTOs.ApartmentDto;
 using EvictionFiler.Application.DTOs.CaseAppearanceDtos;
 using EvictionFiler.Application.DTOs.CaseDetailDtos;
 using EvictionFiler.Application.DTOs.CaseHearing;
+using EvictionFiler.Application.DTOs.CaseNoticeInfoDtos;
 using EvictionFiler.Application.DTOs.CaseWarrantDtos;
 using EvictionFiler.Application.DTOs.FormTypeDto;
 using EvictionFiler.Application.DTOs.LandLordDto;
@@ -38,10 +39,15 @@ namespace EvictionFiler.Application.Services
         private readonly ICaseHearingReadRepository _caseHearingReadRepository;
         private readonly ICourtReadRepository _courtReadRepository;
         private readonly ICaseFormReadRepository _caseFormReadRepository;
+        private readonly ICaseNotesReadRepository _caseNotesReadRepository;
+        private readonly ICaseDocUploadReadRepository _caseDocUploadReadRepository;
+        private readonly ICaseNoticeInfoReadRepository _caseNoticeInfoReadRepository;
+        private readonly IRemainderCenterReadRepository _remainderCenterReadRepository;
 
-        public CaseDetailService(ILandlordReadRepository landlordReadRepository, IBuildingReadRepository buildingReadRepository, ITenantReadRepository tenantReadRepository, ICitiesRepository cityRepository, IClientReadRepository clientReadRepository,
-                                    IMarshalAndWarrantRepository marshalAndWarrantRepository, IWarrantRepository warrantRepository, ICaseAppearanceReadRepository caseAppearanceReadRepository, ICaseHearingReadRepository caseHearingReadRepository,
-                                        ICourtReadRepository courtReadRepository, ICaseFormReadRepository caseFormReadRepository)
+        public CaseDetailService(ILandlordReadRepository landlordReadRepository,IBuildingReadRepository buildingReadRepository,ITenantReadRepository tenantReadRepository,ICitiesRepository cityRepository,IClientReadRepository clientReadRepository,
+                                    IMarshalAndWarrantRepository marshalAndWarrantRepository,IWarrantRepository warrantRepository,ICaseAppearanceReadRepository caseAppearanceReadRepository,ICaseHearingReadRepository caseHearingReadRepository,
+                                        ICourtReadRepository courtReadRepository,ICaseFormReadRepository caseFormReadRepository,ICaseNotesReadRepository caseNotesReadRepository,ICaseDocUploadReadRepository caseDocUploadReadRepository,
+                                        ICaseNoticeInfoReadRepository caseNoticeInfoReadRepository,IRemainderCenterReadRepository remainderCenterReadRepository)
         {
             _landlordReadRepository = landlordReadRepository;
             _buildingReadRepository = buildingReadRepository;
@@ -54,6 +60,10 @@ namespace EvictionFiler.Application.Services
             _caseHearingReadRepository = caseHearingReadRepository;
             _courtReadRepository = courtReadRepository;
             _caseFormReadRepository = caseFormReadRepository;
+            _caseNotesReadRepository = caseNotesReadRepository;
+            _caseDocUploadReadRepository = caseDocUploadReadRepository;
+            _caseNoticeInfoReadRepository = caseNoticeInfoReadRepository;
+            _remainderCenterReadRepository = remainderCenterReadRepository;
         }
         public async Task<LandlordDetailDto> GetLandlordDetailAsync(Guid caseId)
         {
@@ -458,7 +468,7 @@ namespace EvictionFiler.Application.Services
         {
             return await _courtReadRepository.GetCourtDetailsAsync(caseId);
         }
-
+       
 
         //Case forms
 
@@ -502,10 +512,65 @@ namespace EvictionFiler.Application.Services
             return result;
         }
 
-        public async Task<List<EditToRemainderCenterDto?>> GetRemainderCenterByCaseIdAsync(Guid? CaseId)
+        //Case Notes
+
+        public async Task<IEnumerable<CaseNotes>> GetAllCaseNotes(Guid caseId)
         {
-            return await _courtReadRepository.GetRemainderDetailsAsync(CaseId.Value);
+            return await _caseNotesReadRepository.GetAllAsync(predicate: e => e.LegalcaseId == caseId, includes: a => a.User);
+
+        }
+        public async Task<IEnumerable<CaseDocument>> CaseDocumentList(Guid Id)
+        {
+            var doclist = await _caseDocUploadReadRepository.GetAllAsync(e => e.LegalCaseId == Id);
+            var returnlist = doclist.OrderByDescending(e => e.CreatedOn).ToList();
+            return returnlist;
         }
 
+        public async Task<List<CaseNoticeInfoDto>> GetAllCasenoticeInfo(Guid caseId)
+        {
+            //var list = await _repo.GetAllQueryablewithThenInclude(predicate: a=>a.LegalCaseId == caseId , include: b=>b.Include(c=>c.FormType).ThenInclude(d=>d.))
+            var list = await _caseNoticeInfoReadRepository.GetAllAsync(predicate: a => a.LegalCaseId == caseId, includes: b => b.FormType);
+            var result = list.Select(e => new CaseNoticeInfoDto
+            {
+                DateNoticeServed = e.DateNoticeServed,
+                CalcNoticeLength = e.CalcNoticeLength,
+                FormTypeName = e.FormType != null ? e.FormType.Name : string.Empty,
+
+            }).ToList();
+            return result;
+        }
+
+        public async Task<List<EditToRemainderCenterDto?>> GetRemainderCenterByCaseIdAsync(Guid? CaseId)
+        {
+            var list = await _remainderCenterReadRepository.GetAllAsync(predicate: e => e.CaseId == CaseId, includes: b => b.RemainderType!);
+
+
+            //if (dto == null)
+            //    return null;
+
+            var result = list.Select(dto => new EditToRemainderCenterDto
+            {
+                Id = dto.Id,
+                When = dto.When,
+                CaseId = dto.CaseId,
+                CountyId = dto.CountyId,
+                TenantId = dto.TenantId,
+                RemainderTypeId = dto.RemainderTypeId,
+                Index = dto.Index,
+                Notes = dto.Notes,
+                RemainderTypeName = dto.RemainderType?.Name ?? "Unknown",
+                CountyName = dto.County?.Name ?? "Unknown",
+                TenantName = dto.Tenant?.FirstName ?? "Unknown",
+                CaseCode = dto.Case?.Casecode ?? "Unknown",
+                ReminderName = dto.ReminderName,
+                ReminderCategoryId = dto.ReminderCategoryId,
+                ReminderEscalateId = dto.ReminderEscalateId,
+                ReminderCategoryName = dto.ReminderCategory != null ? dto.ReminderCategory.Name : string.Empty,
+                ReminderEscalateName = dto.ReminderEscalates != null ? dto.ReminderEscalates.Name : string.Empty,
+                IsComplete = dto.IsComplete,
+            }).ToList();
+
+            return result;
+        }
     }
 }
