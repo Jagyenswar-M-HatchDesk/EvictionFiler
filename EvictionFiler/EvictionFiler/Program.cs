@@ -5,13 +5,16 @@ using EvictionFiler.Application;
 using EvictionFiler.Application.Common.Interfaces;
 using EvictionFiler.Application.DTOs;
 using EvictionFiler.Application.Interfaces.IRepository;
+using EvictionFiler.Application.Interfaces.IRepository.Dashboard;
 using EvictionFiler.Application.Interfaces.IRepository.MasterRepository;
 using EvictionFiler.Application.Interfaces.IRepository.ReadRepositories;
 using EvictionFiler.Application.Interfaces.IServices;
+using EvictionFiler.Application.Interfaces.IServices.Dashboard;
 using EvictionFiler.Application.Interfaces.IServices.Master;
 
 using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Application.Services;
+using EvictionFiler.Application.Services.Dahboard;
 using EvictionFiler.Application.Services.Helper;
 using EvictionFiler.Application.Services.Master;
 
@@ -23,6 +26,7 @@ using EvictionFiler.Infrastructure.DbContexts;
 using EvictionFiler.Infrastructure.Extensions;
 using EvictionFiler.Infrastructure.Identity;
 using EvictionFiler.Infrastructure.Repositories;
+using EvictionFiler.Infrastructure.Repositories.Dashboard;
 using EvictionFiler.Infrastructure.Repositories.ReadRepositories;
 using EvictionFiler.Server.Components;
 using Microsoft.AspNetCore.Authentication;
@@ -185,6 +189,8 @@ builder.Services.AddScoped<ICaseNotesReadRepository, CaseNotesReadRepository>();
 builder.Services.AddScoped<ICaseDocUploadReadRepository, CaseDocUploadReadRepository>();
 builder.Services.AddScoped<IRemainderCenterReadRepository, RemainderCenterReadRepository>();
 builder.Services.AddScoped<ICaseNoticeInfoReadRepository, CaseNoticeInfoReadRepository>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IDashboardReadRepository,DashboardReadRepository>();
 
 //builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 //    .AddIdentityCookies();

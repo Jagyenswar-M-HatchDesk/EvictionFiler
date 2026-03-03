@@ -1,0 +1,88 @@
+﻿@using EvictionFiler.Application.Common.Interfaces
+@using EvictionFiler.Application.Common.Models
+@using EvictionFiler.Application.DTOs.DashboardDto
+@using EvictionFiler.Application.DTOs.RemainderCenterDto
+@using EvictionFiler.Application.Interfaces.IRepository.Dashboard
+@using EvictionFiler.Application.Interfaces.IServices
+@using EvictionFiler.Application.Interfaces.IServices.Dashboard
+@inject ILoggedInUserService _loggedInUserService
+@inject NavigationManager navManager;
+@inject ILegalCaseService _service
+@inject ICaseHearingService _caseService
+@inject IRemianderCenterService _remainder
+@inject IDashboardService dashboardService
+@inject IDashboardReadRepository dashboardReadRepository
+
+
+
+
+<a class="tile" href="@href">
+    <div class="icon">@icon</div>
+    <div>
+        <div class="count">@DisplayValue</div>
+        <div class="label">@label</div>
+    </div>
+</a>
+@code {
+    [Parameter] public string label { get; set; }
+    [Parameter] public string icon { get; set; }
+    [Parameter] public string href { get; set; }
+    [Parameter]
+    public LoggedInUser LoggedinUserId{ get; set; }
+    [Parameter]
+    public EventCallback<List<IGrouping<string?, EditToRemainderCenterDto>>> Reminder { get; set; }
+    private List<EditToRemainderCenterDto> InCompleteRemainder = new();
+    private List<IGrouping<string?, EditToRemainderCenterDto>> groupedRemainder = new();
+    private int ActiveIndex = 0;
+    private int totalCases = 0;
+    private int totalRemainder = 0;
+    private int totalCasesHearing = 0;
+    private int activeCases = 0;
+    private bool IsPrevDisabled => ActiveIndex == 0;
+    private int DisplayValue = 0;
+
+    private LoggedInUser? identityUser;
+    protected override async Task OnInitializedAsync()
+    {
+
+        this.identityUser = LoggedinUserId;
+
+        totalCases = await dashboardService.GetTotalCasesCountAsync(LoggedinUserId.FirmId ?? string.Empty, LoggedinUserId.IsSuperAdmin);
+        totalCasesHearing = await dashboardService.GetAllTodayCaseHearingAsync(LoggedinUserId.FirmId ?? string.Empty, LoggedinUserId.IsSuperAdmin);
+        InCompleteRemainder = await dashboardReadRepository.GetAllInCompleteRemainder(identityUser.IsSuperAdmin, Guid.Parse(LoggedinUserId.UserId ?? string.Empty));
+
+        groupedRemainder = InCompleteRemainder.GroupBy(e => e.CaseCode).ToList();
+        if (Reminder.HasDelegate)
+        {
+            await Reminder.InvokeAsync(groupedRemainder);
+        }
+        if (groupedRemainder.Any())
+
+            totalRemainder = InCompleteRemainder.Count();
+        switch (label)
+        {
+            case "Cases Filed This Week":
+                DisplayValue =totalCases;
+                break;
+
+            case "Hearings Today":
+                DisplayValue = totalCasesHearing;
+                break;
+
+            case "Smart Alerts":
+                DisplayValue =totalRemainder ;
+                break;
+
+
+
+
+
+            default:
+                DisplayValue =0;
+                break;
+        }
+
+    }
+
+    
+}
