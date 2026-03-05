@@ -9,6 +9,7 @@ using EvictionFiler.Application.Interfaces.IUserRepository;
 using EvictionFiler.Domain.Entities;
 using EvictionFiler.Domain.Entities.Master;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Numerics;
 using System.Runtime.Intrinsics.X86;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -306,14 +307,14 @@ namespace EvictionFiler.Application.Services
             if (entity != null)
             {
 
-                if (entity.FirstName != tenants.FirstName) entity.FirstName = tenants.FirstName;
-                if (entity.UnitOrApartmentNumber != tenants.UnitOrApartmentNumber) entity.UnitOrApartmentNumber = tenants.UnitOrApartmentNumber;
-                if (entity.LastName != tenants.LastName) entity.LastName = tenants.LastName;
-                if (entity.BuildinId != tenants.BuildingId) entity.BuildinId = tenants.BuildingId;
-                if (entity.PrimaryResidence != tenants.PrimaryResidence) entity.PrimaryResidence = tenants.PrimaryResidence;
-                if (entity.TenancyTypeId != tenants.TenancyTypeId) entity.TenancyTypeId = tenants.TenancyTypeId;
-                if (entity.MonthlyRent != tenants.MonthlyRent) entity.MonthlyRent = tenants.MonthlyRent;
-                if (entity.RentDueEachMonthOrWeekId != tenants.RentDueEachMonthOrWeekId) entity.RentDueEachMonthOrWeekId = tenants.RentDueEachMonthOrWeekId;
+                if (!string.IsNullOrEmpty(tenants.FirstName) && entity.FirstName != tenants.FirstName) entity.FirstName = tenants.FirstName;
+                if (!string.IsNullOrEmpty(tenants.UnitOrApartmentNumber) && entity.UnitOrApartmentNumber != tenants.UnitOrApartmentNumber) entity.UnitOrApartmentNumber = tenants.UnitOrApartmentNumber;
+                if (!string.IsNullOrEmpty(tenants.LastName) && entity.LastName != tenants.LastName) entity.LastName = tenants.LastName;
+                if ((tenants.BuildingId != null || tenants.BuildingId != Guid.Empty) && entity.BuildinId != tenants.BuildingId) entity.BuildinId = tenants.BuildingId;
+                if ( entity.PrimaryResidence != tenants.PrimaryResidence) entity.PrimaryResidence = tenants.PrimaryResidence;
+                if ( (tenants.TenancyTypeId != null || tenants.TenancyTypeId != Guid.Empty) && entity.TenancyTypeId != tenants.TenancyTypeId) entity.TenancyTypeId = tenants.TenancyTypeId;
+                if (tenants.MonthlyRent != null && entity.MonthlyRent != tenants.MonthlyRent) entity.MonthlyRent = tenants.MonthlyRent;
+                if ((tenants.RentDueEachMonthOrWeekId != null || tenants.RentDueEachMonthOrWeekId != Guid.Empty) && entity.RentDueEachMonthOrWeekId != tenants.RentDueEachMonthOrWeekId) entity.RentDueEachMonthOrWeekId = tenants.RentDueEachMonthOrWeekId;
 
             }
 

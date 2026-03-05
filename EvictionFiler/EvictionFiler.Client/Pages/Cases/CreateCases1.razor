@@ -1553,9 +1553,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
 
                                     </div>
                                     <div class="row mt-3">
-                                        <div class="col-auto" style="display: flex;
-                                                                            justify-content: center;
-                                                                            align-items: flex-end;">
+                                        <div class="col-12" >
                                             <label class="lbl required-label fw-semibold">
                                                 Tenancy Type
                                             </label>
@@ -3199,7 +3197,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                                placeholder="Search by client name or code..."
                                                                @bind-="searchText"
                                                                @bind:after="ValidateInput"
-                                                               @onclick="ShowAllClients" />
+                                                               @onclick="ShowAllClients" @oninput="OnSearchInput" />
 
                                                         @if (filteredClients?.Any() == true)
                                                         {
@@ -3493,6 +3491,8 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     <option value="@l.Id">@l.Name</option>
                                                 }
                                             </InputSelect>
+                                            <ValidationMessage For="() => legalcaseDto.CountyId" />
+
                                         </div>
                                         <div class=@(showCountyDropdown ? "col-md-4" : "col-md-6")>
                                             <label class="lbl fw-semibold">Court <span class="text-danger">*</span></label>
@@ -3503,6 +3503,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                                                     <option value="@l.Id">@l.Court</option>
                                                 }
                                             </InputSelect>
+                                            <ValidationMessage For="() => legalcaseDto.CourtLocationId" />
                                         </div>
                                         <!-- Part / Room # -->
                                         @if (!showCourtPartDropdown)
@@ -6026,7 +6027,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 }
                 else
                 {
-                    <button type="button" class="btn btn-success" style="height: 45px; width: 160px;" @onclick="OpenPayment">Submit</button>
+                    @if (this.identityUser != null && (this.identityUser.IsSuperAdmin || this.identityUser.Subscription == SubscriptionTypes.Enterprises))
+                    {
+                        <button type="button" class="btn btn-Primary" style="height: 45px; width: 115px;" @onclick="SubmitAsync">Submit</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-success" style="height: 45px; width: 160px; " @onclick="OpenPayment">Pay & Submit</button>
+                    }
                 }
 
 
@@ -6043,7 +6051,14 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 }
                 else
                 {
-                    <button type="button" class="btn btn-success" style="height: 45px; width: 160px;" @onclick="OpenPayment">Submit</button>
+                    @if (this.identityUser != null && (this.identityUser.IsSuperAdmin || this.identityUser.Subscription == SubscriptionTypes.Enterprises))
+                    {
+                        <button type="button" class="btn btn-Primary" style="height: 45px; width: 115px;" @onclick="SubmitAsync">Submit</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-success" style="height: 45px; width: 160px; " @onclick="OpenPayment">Pay & Submit</button>
+                    }
                 }
 
 
@@ -8198,7 +8213,7 @@ EvictionFiler – Intake Wizard (Blazor + Bootstrap 5)
                 {
                     if (selectedTenant != null && HasTenantChanged(selectedTenant, legalcaseDto))
                     {
-                        var nameparts = searchlandlordText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                        var nameparts = searchTenantText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
                         var updateTenant = new EditToTenantDto()
                         {

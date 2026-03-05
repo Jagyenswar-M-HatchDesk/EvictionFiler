@@ -218,6 +218,7 @@ namespace EvictionFiler.Application.Services
                     legalCases.AttrneyContactInfo = legalCase.AttrneyContactInfo;
                     legalCases.AttrneyEmail = legalCase.AttrneyEmail;
                     legalCases.CourtLocationId = legalCase.CourtLocationId;
+                    legalCases.CourtPartId = legalCase.CourtPartId;
                     legalCases.CourtRoom = legalCase.CourtRoom;
                     legalCases.Index = legalCase.Index;
                     legalCases.County = legalCase.County;

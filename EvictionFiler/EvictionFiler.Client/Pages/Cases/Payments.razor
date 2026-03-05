@@ -6,6 +6,7 @@
 @inject ITransactionService TransactionService
 @using EvictionFiler.Client.SpinnerService
 @inject SpinnerService spinnerService
+
 <style>
     #CARD_NAME_ID, #CARD_NUMBER_ID, #CARD_DATE_ID, #CARD_CVV_ID, #CARD_POSTAL_CODE_ID, #PAYMENT_REQUEST_BUTTON_ID {
         border: 1px solid !important;
@@ -322,7 +323,7 @@
             window.cloverPayment._observer = observer;
         },
 
-        createToken: async function () {
+             createToken: async function () {
             const result = await window._cloverInstance.createToken();
 
             console.log(result)
@@ -332,11 +333,42 @@
 
             return { success: true, token: result.token };
         },
+            
+         destroy: function () {
 
-        destroy: function () {
+            // stop mutation observer
             if (window.cloverPayment._observer) {
                 window.cloverPayment._observer.disconnect();
+                window.cloverPayment._observer = null;
             }
+
+            // clear mounted fields
+            const ids = [
+                "card-name",
+                "card-number",
+                "card-date",
+                "card-cvv",
+                "card-postal-code"
+            ];
+
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = "";
+            });
+
+            // remove recaptcha container
+            const recaptcha = document.getElementById("recaptcha-container");
+            if (recaptcha) {
+                recaptcha.remove();
+            }
+
+            // remove clover footer
+            const footer = document.querySelector(".clover-footer");
+            if (footer) {
+                footer.remove();
+            }
+
+            window._cloverInstance = null;
         }
     };
 
@@ -413,12 +445,20 @@
         {
             IsProcessing = false;
             StateHasChanged();
-            await Task.Yield();
-            await JS.InvokeVoidAsync(
+
+            // if (result.CaptchaMissing)
+            // {
+                await JS.InvokeVoidAsync("cloverPayment.destroy");
+
+                await Task.Delay(300);
+
+                await JS.InvokeVoidAsync(
                     "cloverPayment.init",
                     "43ba624d8636628fe2c210086b5ec4ab",
                     "Z7JTAEZA30R31"
                 );
+            // }
+
             return;
         }
 
@@ -439,6 +479,8 @@
 
                 await Task.Delay(1000); // show tick animation
 
+                await JS.InvokeVoidAsync("cloverPayment.destroy");
+
                 await OnSuccessTranx.InvokeAsync(response);
             }
             else
@@ -456,6 +498,7 @@
 
     private async Task CloseTranx()
     {
+        await JS.InvokeVoidAsync("cloverPayment.destroy");
         await OnCloseTranx.InvokeAsync();
     }
 
@@ -463,5 +506,6 @@
     {
         public bool Success { get; set; }
         public string Token { get; set; }
+        public bool CaptchaMissing { get; set; }
     }
 }

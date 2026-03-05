@@ -40,17 +40,17 @@ namespace EvictionFiler.Infrastructure.Repositories.ReadRepositories
             return new LandlordDetailDto
             {
                 ClientId = l.ClientId,
-                LandlordId = l.LandLords.Id,
+                LandlordId = l.LandLords?.Id,
                
-                FirstName = l.LandLords.FirstName,
-                LastName = l.LandLords.LastName,
+                FirstName = l.LandLords?.FirstName,
+                LastName = l.LandLords?.LastName,
                
-                LandlordAddress = l.LandLords.Address1,
+                LandlordAddress = l.LandLords?.Address1,
                
                 LandLordTypeId = l.LandlordTypeId,
-                LandLordTypeName = l.LandlordType != null ? l.LandlordType.Name : string.Empty,
+                LandLordTypeName = l.LandlordType != null ? l.LandlordType?.Name : string.Empty,
                
-                ContactPersonName = l.LandLords.ContactPersonName,
+                ContactPersonName = l.LandLords?.ContactPersonName,
                
             };
         }
