@@ -737,7 +737,7 @@
 @using System.Linq.Expressions
 @using System.Globalization
 
-<div class="modal fade" id="generateActions" tabindex="-1" aria-labelledby="generateActionsLabel" aria-hidden="true">
+<div class="modal fade show" id="generateActions" tabindex="-1" aria-labelledby="generateActionsLabel" aria-hidden="true" style="display:block;">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 70% !important;">
         <div class="modal-content border-0 shadow" style="overflow:hidden; height:90vh;">
             <div class="modal-header">
@@ -1527,7 +1527,7 @@
 
                             <div class="@(OpenTab.ToLower() == "hearings" ? "tab-pane fade show active" : "tab-pane fade")" id="hearing" role="tabpanel" aria-labelledby="hearing-tab">
                                 <!-- CONTENT for Add Hearing -->
-                                @if ((legalcaseDto.CourtLocationId == null || legalcaseDto.CourtLocationId == Guid.Empty) && !CaseForms.Any())
+                                @if (!CaseCourtCreated && !CaseForms)
                                 {
                                     <div class="modal-body mb-3 courthearing">
                                         <ul>
@@ -1538,7 +1538,7 @@
                                 }
 
 
-                                else if (!CaseForms.Any())
+                                else if (!CaseForms)
                                 {
                                     <div class="modal-body mb-3 courthearing">
 
@@ -1550,7 +1550,7 @@
 
                                     </div>
                                 }
-                                else if (legalcaseDto.CourtLocationId == null || legalcaseDto.CourtLocationId == Guid.Empty)
+                                else if (!CaseCourt)
                                 {
                                     <div class="modal-body mb-3 courthearing">
 
@@ -3406,7 +3406,8 @@
     public Guid caseId { get; set; }
     private List<FormAddEditViewModelDto> FilteredFormTypeList = new();
     [Parameter] public IntakeModel legalcaseDto { get; set; } = new();
-    [Parameter] public List<GenrateNoticeModel> CaseForms { get; set; } = new();
+    [Parameter] public bool CaseForms { get; set; } = false;
+    [Parameter] public bool CaseCourt { get; set; } = false;
     [Parameter] public EventCallback OnFormCreate { get; set; } = new();
     [Parameter] public EventCallback OnNotesCreate { get; set; } = new();
     private IEnumerable<ServiceMethod> ServiceMethodList = new List<ServiceMethod>();
@@ -3448,6 +3449,8 @@
     [Parameter] public Guid? CaseNotesId { get; set; } = null;
     [Parameter] public Guid? TenancyTypeId { get; set; } = null;
     [Parameter] public string? OpenTab { get; set; } = null;
+    [Parameter] public bool? CaseFormCreated { get; set; } = null;
+    public bool CaseCourtCreated { get; set; } = false;
     private CancellationTokenSource _cts;
     private bool showMarshalError = false;
     private ValidationMessageStore messageStore;
@@ -3479,25 +3482,36 @@
         _editContext = new EditContext(noticeModel);
         messageStore = new ValidationMessageStore(_editContext);
 
-        FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId, TenancyTypeId);
+        if (!FilteredFormTypeList.Any()) FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId, TenancyTypeId);
 
         caseHearing = new CaseHearingDto();
         caseHearing.CourtPartId = legalcaseDto.CourtPartId;
         caseHearing.HearingDate = DateTime.Now;
         caseHearing.HearingTime = TimeOnly.FromTimeSpan(TimeSpan.FromHours(10));
         if (!ServiceMethodList.Any()) ServiceMethodList = await _caseService.ServiceMethodList();
+
         if (!BilingTypesList.Any()) BilingTypesList = await CaseTypeRepository.GetAllBilingTypes();
-        PaymentMethodDtoList = await CaseTypeRepository.GetAllPaymentMethod();
+
+        if (!PaymentMethodDtoList.Any()) PaymentMethodDtoList = await CaseTypeRepository.GetAllPaymentMethod();
+
         if (!TenancyTypeList.Any()) TenancyTypeList = await TenancyTypeRepository.GetAllTenancyType();
+
         if (!DateRentList.Any()) DateRentList = await DateRentRepository.GetAllDateRent();
-        AppearanceModes = await _caseHearingService.GetAllModes();
-        AppearanceTypeforHearing = await _caseHearingService.GetAllAppearanceTypeForHearing();
-        AppearanceTypes = await appearanceTypeRepository.GetAllAsync();
-        VirtualPlatforms = await _caseHearingService.GetAllPlatform();
+
+        if (!AppearanceModes.Any()) AppearanceModes = await _caseHearingService.GetAllModes();
+
+        if (!AppearanceTypeforHearing.Any()) AppearanceTypeforHearing = await _caseHearingService.GetAllAppearanceTypeForHearing();
+
+        if (!AppearanceTypes.Any()) AppearanceTypes = await appearanceTypeRepository.GetAllAsync();
+
+        if (!VirtualPlatforms.Any()) VirtualPlatforms = await _caseHearingService.GetAllPlatform();
+
         if (!reminderTypes.Any()) reminderTypes = await remaindercategoryRepo.GetAllAsync();
+
         if (legalcaseDto.CourtLocationId != null && legalcaseDto.CourtLocationId != Guid.Empty)
         {
             Court = await courtRepository.GetCourtByIdAsync(legalcaseDto.CourtLocationId!.Value);
+            CaseCourtCreated = true;
         }
 
         noticeModel.DateNoticeServed = DateOnly.FromDateTime(DateTime.Now);
@@ -3690,6 +3704,7 @@
         ShowProcessServer = false;
         ShowReminder = false;
         ShowMarshal = false;
+        await OnClose.InvokeAsync();
         StateHasChanged();
         //spinnerservice.Hide();
     }

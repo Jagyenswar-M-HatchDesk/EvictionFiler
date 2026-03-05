@@ -705,7 +705,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 new TenancyType() { Name = "Primary - Non/Primary", CreatedOn = now },
                 new TenancyType() { Name = "Referee Deed", CreatedOn = now },
                 new TenancyType() { Name = "Tenant in Sufferance", CreatedOn = now },
-                new TenancyType() { Name = "Other", CreatedOn = now },
+                //new TenancyType() { Name = "Other", CreatedOn = now },
             };
         }
 

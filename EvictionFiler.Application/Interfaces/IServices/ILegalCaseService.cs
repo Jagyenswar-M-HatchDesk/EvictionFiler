@@ -71,6 +71,7 @@ namespace EvictionFiler.Application.Interfaces.IServices
 
         Task<bool> UpdateCaseNotes(NotesDto Dto);
 
-       Task<bool> DeleteCaseNotes(Guid Id);
+        Task<bool> DeleteCaseNotes(Guid Id);
+       Task<IntakeModel> GetEditCaseByIdAsync(Guid caseId);
     }
 }

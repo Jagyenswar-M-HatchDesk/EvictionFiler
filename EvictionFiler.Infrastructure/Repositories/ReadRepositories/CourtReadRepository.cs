@@ -94,8 +94,8 @@ namespace EvictionFiler.Infrastructure.Repositories.ReadRepositories
                 // CaseType name — safe whether CaseTypeId or LegalCaseId is null
                 CaseTypeName =
         dto.CaseTypeId != null
-            ? dto.CaseTypes.Name
-            : dto.LegalCase.CaseType.Name ?? string.Empty,
+            ? dto.CaseTypes?.Name
+            : dto.LegalCase.CaseType?.Name ?? string.Empty,
 
                 //        //        // Judge — prefer Hearing Judge, fallback to Court Judge
                 //        //        Judge = dto.Judge

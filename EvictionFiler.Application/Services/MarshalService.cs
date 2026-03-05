@@ -70,7 +70,7 @@ namespace EvictionFiler.Application.Services
                 Telephone = dto.Telephone,
                 Fax = dto.Fax,
                 OfficeAddress = dto.OfficeAddress,
-                DocketNo = dto.OfficeAddress
+                DocketNo = dto.DocketNo
             };
 
             var saved = await _marshalRepo.AddMarshalAsync(entity);

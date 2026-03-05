@@ -2049,7 +2049,7 @@
                         </table>
                         
                         *@
-                            <Court CurrentCaseId="@caseId"  />
+                            <Court CurrentCaseId="@caseId"  CourtAssigned="CourtAssigned" />
                         </div>
 
                         <div class="col-8">
@@ -2282,7 +2282,7 @@
                                 </div> *@
 
                                 
-                                  <CaseForm CaseId="@caseId" loggedInUserId="@loggedInUserId" isAdmin="isAdmin" isReload="@isLoadForm" />
+                                  <CaseForm CaseId="@caseId" loggedInUserId="@loggedInUserId" isAdmin="isAdmin" isReload="@isLoadForm"  FormLoaded="CaseFormGenerated"/>
                             </div>
                             <div class="">
                                 @* <div class="table-responsive" style="height:160px;">
@@ -4686,7 +4686,7 @@
     {
         <GenrateAction createAction="noticeModel"
                        OnClose="HandleCloseCreateAction" CaseNotesId="@CaseNotesId" OpenTab="@OpenTab" TenancyTypeId="@TenancyTypeId"
-                       CurrentCaseId="CurrentCaseId" legalcaseDto="legalcaseDto" CaseForms="caseFormDto" OnFormCreate="HandleInvokeAction" OnNotesCreate="HandleNotesInvokeAction" />
+                       CurrentCaseId="CurrentCaseId" legalcaseDto="legalcaseDto" CaseForms="CaseFormGeneratedset" CaseCourt="CourtAssignedset" OnFormCreate="HandleInvokeAction" OnNotesCreate="HandleNotesInvokeAction" />
     }
 
 
@@ -4835,6 +4835,8 @@
     private bool isLoadForm = false;
     private bool isCaseNotesReload = false;
     private bool isUploadDoc = false;
+    private bool CourtAssignedset = false;
+    private bool CaseFormGeneratedset = false;
     private Guid? SelectedLandlordId;
     private Guid? TenancyTypeId;
 
@@ -4924,6 +4926,14 @@
     public async Task SetTenancyType(Guid? TypeId)
     {
         TenancyTypeId = TypeId;
+    }
+    public async Task CourtAssigned(bool? court)
+    {
+        CourtAssignedset = court!.Value;
+    }
+    public async Task CaseFormGenerated(bool? form)
+    {
+        CaseFormGeneratedset = form!.Value;
     }
 
     private async Task CheckMarshal()
@@ -5422,12 +5432,12 @@
         CaseNotesId = null;
         await Task.Delay(100);
         noticeModel = new GenrateNoticeModel();
-        await JS.InvokeVoidAsync("showModal", "generateActions");
+        // await JS.InvokeVoidAsync("showModal", "generateActions");
     }
 
     private async Task HandleCloseCreateAction()
     {
-        await JS.InvokeVoidAsync("hideModal", "generateActions");
+        // await JS.InvokeVoidAsync("hideModal", "generateActions");
         _showCreateAction = false;
         await HandleInvokeAction();
     }
@@ -5580,7 +5590,7 @@
                 SocialService = legalcaseDto.SocialService,
                 LastRentPaid = legalcaseDto.LastRentPaid,
 
-                // CourtLocationId = legalcaseDto.CourtLocationId,
+                CourtLocationId = legalcaseDto.CourtLocationId,
                 CourtId = legalcaseDto.CourtId,
                 // Court = legalcaseDto.Court,
                 // CourtPartId = legalcaseDto.CourtPartId,

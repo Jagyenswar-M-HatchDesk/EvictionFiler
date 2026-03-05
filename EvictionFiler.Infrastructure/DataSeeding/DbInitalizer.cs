@@ -55,7 +55,7 @@ namespace EvictionFiler.Infrastructure.DataSeeding
                 //await SeedFormTypes(context);
                 //await SeedLandlordTypes(context);
                 //await SeedReasonHolder(context);
-                await SeedTenancyTypes(context);
+                //await SeedTenancyTypes(context);
                 //await SeedIsUnitIlligal(context);
                 //await SeedCaseprograms(context);
                 //await SeedClientRoles(context);

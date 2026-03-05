@@ -253,6 +253,7 @@
 
 @code {
     [Parameter] public Guid? CurrentCaseId { get; set; }
+    [Parameter] public EventCallback<bool?> CourtAssigned { get; set; }
     private List<CaseHearingDto> CaseHearings = new();
     private CaseHearingDto CaseHearing = new();
     private CourtDetailDto courtDetails = new();
@@ -281,9 +282,13 @@
         {
 
             isLoading = true;
-          
+
             await LoadCourtDetails();
             await LoadHearing();
+            if(!string.IsNullOrEmpty(courtDetails.Court))
+            {
+                await CourtAssigned.InvokeAsync(true);
+            }
             isLoading = false;
         }
     }
