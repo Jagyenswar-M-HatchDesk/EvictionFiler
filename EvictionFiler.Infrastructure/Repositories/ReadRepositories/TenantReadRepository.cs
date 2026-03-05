@@ -41,6 +41,7 @@ namespace EvictionFiler.Infrastructure.Repositories.ReadRepositories
      .Include(c => c.Tenants).ThenInclude(a => a.Building!)
      .ThenInclude(b => b.State)
      .Include(c => c.Tenants!.Building!.Cities)
+     .Include(c => c.Tenants!.TenancyType!)
 
 
 
@@ -54,6 +55,7 @@ namespace EvictionFiler.Infrastructure.Repositories.ReadRepositories
                 LastPaymentDate= l.LastPaymentDate,
                 MonthlyRent = l.Tenants?.MonthlyRent,
                 TenancyTypeId = l.Tenants?.TenancyTypeId,
+                TenancyTypeName = l.Tenants?.TenancyType?.Name,
                 RentDueEachMonthOrWeekId = l.Tenants?.RentDueEachMonthOrWeekId,
                 PrimaryResidence = l.Tenants != null? l.Tenants.PrimaryResidence : false,
                 LastPayment = l.LastPayment,

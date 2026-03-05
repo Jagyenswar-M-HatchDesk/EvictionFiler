@@ -28,6 +28,7 @@ namespace EvictionFiler.Application.DTOs.CaseDetailDtos
         public double? TotalOwed { get; set; }
         public double? MonthlyRent { get; set; }
         public Guid? TenancyTypeId { get; set; }
+        public string? TenancyTypeName { get; set; }
         public Guid? RentDueEachMonthOrWeekId { get; set; }
         public bool PrimaryResidence { get; set; }
         public double? LastPayment { get; set; }
