@@ -254,7 +254,10 @@
 @code {
     [Parameter] public Guid? CurrentCaseId { get; set; }
     [Parameter] public EventCallback<bool?> CourtAssigned { get; set; }
+    [Parameter] public EventCallback<List<CaseHearingDto>> CaseHearingChanged{ get; set; }
     private List<CaseHearingDto> CaseHearings = new();
+    [Parameter]
+    public EventCallback<Guid?> CourtLocationChanged { get; set; }
     private CaseHearingDto CaseHearing = new();
     private CourtDetailDto courtDetails = new();
     public bool isLoading { get; set; } = false;
@@ -296,6 +299,7 @@
     private async Task LoadCourtDetails()
     {
         courtDetails= await caseDetailService.GetCourtDetailsAsync(CurrentCaseId.Value);
+        await CourtLocationChanged.InvokeAsync(courtDetails.CourtLocationId);
 
         StateHasChanged();
     }
@@ -305,6 +309,7 @@
         if (CaseHearings.Any())
         {
             CaseHearing = CaseHearings.FirstOrDefault()!;
+            await CaseHearingChanged.InvokeAsync(CaseHearings);
         }
 
         courtDetails.NextCourtDate = CaseHearings.Where(e => e.HearingDate > DateTime.Now).OrderBy(ed => ed.HearingDate).Select(ab => ab.HearingDate).FirstOrDefault();

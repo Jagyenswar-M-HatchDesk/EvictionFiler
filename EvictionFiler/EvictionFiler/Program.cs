@@ -191,6 +191,7 @@ builder.Services.AddScoped<IRemainderCenterReadRepository, RemainderCenterReadRe
 builder.Services.AddScoped<ICaseNoticeInfoReadRepository, CaseNoticeInfoReadRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IDashboardReadRepository,DashboardReadRepository>();
+builder.Services.AddScoped<IPipelineRepository, PiplelineRepository>();
 
 //builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 //    .AddIdentityCookies();

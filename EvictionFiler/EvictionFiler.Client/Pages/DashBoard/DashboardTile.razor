@@ -5,6 +5,7 @@
 @using EvictionFiler.Application.Interfaces.IRepository.Dashboard
 @using EvictionFiler.Application.Interfaces.IServices
 @using EvictionFiler.Application.Interfaces.IServices.Dashboard
+@using EvictionFiler.Client.SpinnerService
 @inject ILoggedInUserService _loggedInUserService
 @inject NavigationManager navManager;
 @inject ILegalCaseService _service
@@ -13,8 +14,21 @@
 @inject IDashboardService dashboardService
 @inject IDashboardReadRepository dashboardReadRepository
 
+@inject SpinnerService spinnerservice
 
 
+@if (isLoading)
+{
+    <a class="tile">
+        <div class="icon">@icon</div>
+        <div>
+            <div class="count">...</div>
+            <div class="label">@label</div>
+        </div>
+    </a>
+}
+else
+{
 
 <a class="tile" href="@href">
     <div class="icon">@icon</div>
@@ -23,6 +37,7 @@
         <div class="label">@label</div>
     </div>
 </a>
+}
 @code {
     [Parameter] public string label { get; set; }
     [Parameter] public string icon { get; set; }
@@ -39,12 +54,12 @@
     private int totalCasesHearing = 0;
     private int activeCases = 0;
     private bool IsPrevDisabled => ActiveIndex == 0;
-    private int DisplayValue = 0;
-
+    private string DisplayValue = "";
+    private bool isLoading = true;
     private LoggedInUser? identityUser;
     protected override async Task OnInitializedAsync()
     {
-
+        isLoading = true;
         this.identityUser = LoggedinUserId;
 
         totalCases = await dashboardService.GetTotalCasesCountAsync(LoggedinUserId.FirmId ?? string.Empty, LoggedinUserId.IsSuperAdmin);
@@ -62,25 +77,37 @@
         switch (label)
         {
             case "Cases Filed This Week":
-                DisplayValue =totalCases;
+                DisplayValue = totalCases.ToString();
                 break;
 
             case "Hearings Today":
-                DisplayValue = totalCasesHearing;
+                DisplayValue = totalCasesHearing.ToString();
                 break;
 
             case "Smart Alerts":
-                DisplayValue =totalRemainder ;
+                DisplayValue =totalRemainder.ToString() ;
                 break;
 
 
+            case "Open Balance Alerts":
+                DisplayValue = "$0k";
+                break;
+
+            case "Trust Balances":
+                DisplayValue = "$0k";
+                break;
 
 
+            case "Tasks Completed (wk)":
+                DisplayValue = "0%";
+                break;
 
             default:
-                DisplayValue =0;
+                DisplayValue ="0";
                 break;
         }
+
+        isLoading = false;
 
     }
 

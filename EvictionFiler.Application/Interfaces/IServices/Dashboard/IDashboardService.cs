@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EvictionFiler.Application.DTOs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,9 @@ namespace EvictionFiler.Application.Interfaces.IServices.Dashboard
     {
         Task<int> GetTotalCasesCountAsync(string userId, bool isAdmin);
         Task<int> GetAllTodayCaseHearingAsync(string userId, bool isAdmin);
-        
+
+        Task<List<PipeLineChartItem>> GetPipelineChartItems(string userId, bool isAdmin);
+
+
     }
 }
