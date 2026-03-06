@@ -1,5 +1,6 @@
 ﻿
 using EvictionFiler.Application.Constants;
+using EvictionFiler.Application.DTOs.GeneratedResposeDtos;
 using EvictionFiler.Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -31,13 +33,17 @@ namespace EvictionFiler.Application.Services
             //_webHostEnvironment = webHostEnvironment;
         }
 
-        public async Task<string?> GenerateOSC(Guid CaseId)
+        public async Task<GeneratedContentResponseDto> GenerateOSC(Guid CaseId, string prompt)
         {
             var apiKey = _configuration.GetSection("GenerateContent:ApiKey").Value;
             if (string.IsNullOrEmpty(apiKey))
             {
                 Console.WriteLine("API_KEY environment variable not set.");
-                return null;
+                return new GeneratedContentResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "ApiKey Not Found"
+                };
             }
 
             try
@@ -73,7 +79,7 @@ namespace EvictionFiler.Application.Services
 
                 var contentItems = new List<object>
                 {
-                    new { type = "input_text", text = GenerateContentPrompts.DefaultsOSC }
+                    new { type = "input_text", text = prompt }
                 };
 
                 //foreach (var fid in uploadedFileIds)
@@ -106,21 +112,30 @@ namespace EvictionFiler.Application.Services
 
                 var result = ExtractTextFromResponse(responseJson);
                 
+                
                 return result;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"ERROR: {ex.Message}");
-                return null;
+                return new GeneratedContentResponseDto
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
             }
         }
-        public async Task<string?> GenerateMotion(Guid CaseId)
+        public async Task<GeneratedContentResponseDto> GenerateMotion(Guid CaseId , string prompt)
         {
             var apiKey = _configuration.GetSection("GenerateContent:ApiKey").Value;
             if (string.IsNullOrEmpty(apiKey))
             {
                 Console.WriteLine("API_KEY environment variable not set.");
-                return null;
+                return new GeneratedContentResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "ApiKey Not Found"
+                };
             }
 
             try
@@ -157,7 +172,7 @@ namespace EvictionFiler.Application.Services
 
                 var contentItems = new List<object>
                 {
-                    new { type = "input_text", text = GenerateContentPrompts.MotionPrompt }
+                    new { type = "input_text", text = prompt }
                 };
 
                 foreach (var fid in uploadedFileIds)
@@ -210,16 +225,24 @@ namespace EvictionFiler.Application.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"ERROR: {ex.Message}");
-                return null;
+                return new GeneratedContentResponseDto
+                {
+                    IsSuccess = false,
+                    Message = ex.Message,
+                }; ;
             }
         }
-        public async Task<string?> GenerateOpposition(Guid CaseId)
+        public async Task<GeneratedContentResponseDto> GenerateOpposition(Guid CaseId, string prompt)
         {
             var apiKey = _configuration.GetSection("GenerateContent:ApiKey").Value;
             if (string.IsNullOrEmpty(apiKey))
             {
                 Console.WriteLine("API_KEY environment variable not set.");
-                return null;
+                return new GeneratedContentResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "ApiKey Not Found"
+                };
             }
 
             try
@@ -256,7 +279,115 @@ namespace EvictionFiler.Application.Services
 
                 var contentItems = new List<object>
                 {
-                    new { type = "input_text", text = GenerateContentPrompts.OppositionPrompt }
+                    new { type = "input_text", text = prompt }
+                };
+
+                foreach (var fid in uploadedFileIds)
+                {
+                    contentItems.Add(new { type = "input_file", file_id = fid });
+                }
+
+                var requestBody = new
+                {
+                    model = "gpt-5-nano",
+                    input = new[]
+                    {
+                        new
+                        {
+                            role = "user",
+                            content = contentItems.ToArray()
+                        }
+                    }
+                };
+
+
+                var json = JsonConvert.SerializeObject(requestBody);
+                var response = await http.PostAsync(
+                    "https://api.openai.com/v1/responses",
+                    new StringContent(json, Encoding.UTF8, "application/json")
+                );
+
+                var responseJson = await response.Content.ReadAsStringAsync();
+                response.EnsureSuccessStatusCode();
+
+                var result = ExtractTextFromResponse(responseJson);
+                //var parsed = JObject.Parse(responseJson);
+                //var generatedPdfFileId = parsed["output"][0]["file_id"].ToString();
+
+                //// 4. Download the GENERATED PDF
+                //var pdfBytes = await http.GetByteArrayAsync(
+                //    $"https://api.openai.com/v1/files/{generatedPdfFileId}/content"
+                //);
+                //var uploadPath = Path.Combine(Environment.CurrentDirectory, "wwwroot", "uploads");
+                //var outputFile = Path.Combine(
+                //    uploadPath,
+                //    $"OCS_{CaseId}_{DateTime.Now:yyyyMMddHHmmss}.pdf"
+                //);
+
+                //await System.IO.File.WriteAllBytesAsync(outputFile, pdfBytes);
+
+                //Console.WriteLine("Generated OCS PDF saved: " + outputFile);
+               
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR: {ex.Message}");
+                return new GeneratedContentResponseDto
+                {
+                    IsSuccess = false,
+                    Message =ex.Message
+                };
+            }
+        }
+        public async Task<GeneratedContentResponseDto> GenerateReply(Guid CaseId, string prompt)
+        {
+            var apiKey = _configuration.GetSection("GenerateContent:ApiKey").Value;
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                Console.WriteLine("API_KEY environment variable not set.");
+                return new GeneratedContentResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "ApiKey Not Found"
+                };
+            }
+
+            try
+            {
+                var client = new OpenAIClient(apiKey);
+
+                List<string> uploadedFileIds = new List<string>();
+                var caseFormDto = await _CaseFormService.GetCaseFormsPathByCaseId(CaseId);
+                // 1. Download Input File (From your API endpoint)
+                foreach (var form in caseFormDto)
+                {
+                    string? url = form.File.Replace("/CaseForms/","");
+                    var bytes = await _httpClient.GetByteArrayAsync($"/api/casefile/{url}");
+                    await using var stream = new MemoryStream(bytes);
+
+                    var fileClient = client.GetOpenAIFileClient();
+                    var uploaded = await fileClient.UploadFileAsync(
+                        file: stream,
+                        purpose: "assistants",
+                        filename: Path.GetFileName(url)
+                    );
+
+                    var uploadedFileId = uploaded.Value.Id;
+                    uploadedFileIds.Add(uploadedFileId);
+                    Console.WriteLine($"Uploaded OpenAI File ID: {uploadedFileId}");
+                }
+
+
+                // NOW THE PDF GENERATION MUST USE THE RESPONSES REST API
+                using var http = new HttpClient();
+                http.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", apiKey);
+                http.DefaultRequestHeaders.Add("OpenAI-Beta", "responses=v1");
+
+                var contentItems = new List<object>
+                {
+                    new { type = "input_text", text = prompt }
                 };
 
                 foreach (var fid in uploadedFileIds)
@@ -309,109 +440,14 @@ namespace EvictionFiler.Application.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"ERROR: {ex.Message}");
-                return null;
+                return new GeneratedContentResponseDto
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
             }
         }
-        public async Task<string?> GenerateReply(Guid CaseId)
-        {
-            var apiKey = _configuration.GetSection("GenerateContent:ApiKey").Value;
-            if (string.IsNullOrEmpty(apiKey))
-            {
-                Console.WriteLine("API_KEY environment variable not set.");
-                return null;
-            }
-
-            try
-            {
-                var client = new OpenAIClient(apiKey);
-
-                List<string> uploadedFileIds = new List<string>();
-                var caseFormDto = await _CaseFormService.GetCaseFormsPathByCaseId(CaseId);
-                // 1. Download Input File (From your API endpoint)
-                foreach (var form in caseFormDto)
-                {
-                    string? url = form.File.Replace("/CaseForms/","");
-                    var bytes = await _httpClient.GetByteArrayAsync($"/api/casefile/{url}");
-                    await using var stream = new MemoryStream(bytes);
-
-                    var fileClient = client.GetOpenAIFileClient();
-                    var uploaded = await fileClient.UploadFileAsync(
-                        file: stream,
-                        purpose: "assistants",
-                        filename: Path.GetFileName(url)
-                    );
-
-                    var uploadedFileId = uploaded.Value.Id;
-                    uploadedFileIds.Add(uploadedFileId);
-                    Console.WriteLine($"Uploaded OpenAI File ID: {uploadedFileId}");
-                }
-
-
-                // NOW THE PDF GENERATION MUST USE THE RESPONSES REST API
-                using var http = new HttpClient();
-                http.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", apiKey);
-                http.DefaultRequestHeaders.Add("OpenAI-Beta", "responses=v1");
-
-                var contentItems = new List<object>
-                {
-                    new { type = "input_text", text = GenerateContentPrompts.ReplyPrompt }
-                };
-
-                foreach (var fid in uploadedFileIds)
-                {
-                    contentItems.Add(new { type = "input_file", file_id = fid });
-                }
-
-                var requestBody = new
-                {
-                    model = "gpt-5-nano",
-                    input = new[]
-                    {
-                        new
-                        {
-                            role = "user",
-                            content = contentItems.ToArray()
-                        }
-                    }
-                };
-
-
-                var json = JsonConvert.SerializeObject(requestBody);
-                var response = await http.PostAsync(
-                    "https://api.openai.com/v1/responses",
-                    new StringContent(json, Encoding.UTF8, "application/json")
-                );
-
-                var responseJson = await response.Content.ReadAsStringAsync();
-                response.EnsureSuccessStatusCode();
-
-                var result = ExtractTextFromResponse(responseJson);
-                //var parsed = JObject.Parse(responseJson);
-                //var generatedPdfFileId = parsed["output"][0]["file_id"].ToString();
-
-                //// 4. Download the GENERATED PDF
-                //var pdfBytes = await http.GetByteArrayAsync(
-                //    $"https://api.openai.com/v1/files/{generatedPdfFileId}/content"
-                //);
-                //var uploadPath = Path.Combine(Environment.CurrentDirectory, "wwwroot", "uploads");
-                //var outputFile = Path.Combine(
-                //    uploadPath,
-                //    $"OCS_{CaseId}_{DateTime.Now:yyyyMMddHHmmss}.pdf"
-                //);
-
-                //await System.IO.File.WriteAllBytesAsync(outputFile, pdfBytes);
-
-                //Console.WriteLine("Generated OCS PDF saved: " + outputFile);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"ERROR: {ex.Message}");
-                return null;
-            }
-        }
-        private string ExtractTextFromResponse(string json)
+        private GeneratedContentResponseDto ExtractTextFromResponse(string json)
         {
             var doc = JsonDocument.Parse(json);
 
@@ -428,13 +464,22 @@ namespace EvictionFiler.Application.Services
                     {
                         if (content.GetProperty("type").GetString() == "output_text")
                         {
-                            return content.GetProperty("text").GetString();
+                            return new GeneratedContentResponseDto
+                            {
+                                IsSuccess = true,
+                                Message = "Content successfully generated.",
+                                Content = content.GetProperty("text").GetString(),
+                            };
+                               
                         }
                     }
                 }
             }
-
-            return null; // nothing found
+            return new GeneratedContentResponseDto
+            {
+                IsSuccess = true,
+                Message = "Content parsed failed.",
+            }; // nothing found
         }
     }
 }

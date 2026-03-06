@@ -541,7 +541,7 @@ namespace EvictionFiler.Application.Services
                         TenantId = caseEntity.TenantId,
                         TenantName = caseEntity.Tenants != null ? $"{caseEntity.Tenants?.FirstName} {caseEntity.Tenants?.LastName}" : string.Empty,
                         //ApartmentNumber = caseEntity.Tenants != null ? caseEntity.Tenants?.UnitOrApartmentNumber : string.Empty,
-                        //TenancyTypeId = caseEntity.Tenants != null ? caseEntity.Tenants.TenancyTypeId : Guid.Empty,
+                        TenancyTypeId = caseEntity.Tenants != null ? caseEntity.Tenants?.TenancyTypeId : Guid.Empty,
                         //PrimaryResidence = caseEntity.Tenants != null ? caseEntity.Tenants.PrimaryResidence : false,
                         MonthlyRent = caseEntity.Tenants != null ? caseEntity.Tenants.MonthlyRent : 0,
                         //TenantShare = caseEntity.Tenants != null ? caseEntity.Tenants.TenantShare : 0,

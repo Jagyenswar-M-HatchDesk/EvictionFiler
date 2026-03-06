@@ -486,7 +486,7 @@
         font-family: Lato;
         font-weight: 500;
         min-height: 50px;
-        font-size: 16px;
+        font-size: 18px;
         line-height: 100%;
         letter-spacing: -3%;
         text-transform: capitalize;
@@ -585,6 +585,7 @@
         border-radius : 14px;
         box-shadow: 2px 2px 4px 2px #0000000D;
         overflow: hidden;
+
         /* background: #fff; */
     }
 
@@ -710,7 +711,7 @@
     .nav-link {
         font-family: Lato;
         font-weight: 500;
-        font-size: 16px;
+        font-size: 18px !important;
         line-height: 100%;
         text-transform: capitalize;
         color: #1F365D;
@@ -730,7 +731,7 @@
         }
 
     .motion-section button span {
-        font-size: 16px;
+        font-size: 20px;
     }
 </style>
 @using System.Collections.Generic
@@ -1358,14 +1359,21 @@
                                         </ul>
                                         <div class="tab-content mb-3" id="actionTabsContent">
                                             <div class="tab-pane fade " id="osc" role="tabpanel" aria-labelledby="osc-tab">
+
+                                                <div class="row mb-3 motion-form">
+                                                    <label class="form-label mt-3">OSC input</label>
+                                                    <InputTextArea class="form-control " placeholder=" OSC prompt "
+                                                                   style="height: 180px;" id="htmlEditor1" @bind-Value="OSCPrompt" />
+                                                </div>
+
                                                 <div class="row mb-3 motion-form">
                                                     <label class="form-label mt-3">Generated OSC Content</label>
                                                     <InputTextArea class="form-control " placeholder="Generated OSC content "
-                                                                   style="height: 380px;" id="htmlEditor" @bind-Value="CaseFiling.GeneratedOSC" />
+                                                                   style="height: 380px;" id="htmlEditor2" @bind-Value="CaseFiling.GeneratedOSC" />
 
                                                     <div class="row d-flex justify-content-end mt-4">
                                                         <div class="col-auto">
-                                                            <button type="button" class="btn btn-primary" style="width:250px" @onclick="GenerateOSC" disabled="@IsProcessing">
+                                                            <button type="button" class="btn btn-primary" style="width:250px" @onclick="() => GenerateOSC()" disabled="@IsProcessing">
 
 
                                                                 @if (IsProcessing)
@@ -1390,6 +1398,13 @@
                                             </div>
 
                                             <div class="tab-pane fade show active" id="motion" role="tabpanel" aria-labelledby="motion-tab">
+
+                                                <div class="row mb-3 motion-form">
+                                                    <label class="form-label mt-3">Motion input</label>
+                                                    <InputTextArea class="form-control " placeholder=" Motion prompt "
+                                                                   style="height: 180px;" id="htmlEditor1" @bind-Value="motionPrompt" />
+                                                </div>
+
                                                 <div class="row mb-3 motion-form">
                                                     <label class="form-label mt-3"> Generate Motion </label>
                                                     <textarea class="form-control " placeholder="Generated Motion content "
@@ -1398,7 +1413,7 @@
                                                     <div class="row d-flex justify-content-end mt-4">
                                                         <div class="col-auto">
 
-                                                            <button type="button" class="btn btn-primary" style="width:250px" @onclick="GenerateMotion" disabled="@IsProcessing">
+                                                            <button type="button" class="btn btn-primary" style="width:250px" @onclick="() => GenerateMotion(motionPrompt)" disabled="@IsProcessing">
 
 
                                                                 @if (IsProcessing)
@@ -1422,6 +1437,13 @@
                                             </div>
 
                                             <div class="tab-pane fade" id="opposition" role="tabpanel" aria-labelledby="opposition-tab">
+
+                                                <div class="row mb-3 motion-form">
+                                                    <label class="form-label mt-3">Opposition input</label>
+                                                    <InputTextArea class="form-control " placeholder=" Opposition prompt "
+                                                                   style="height: 150px;" id="htmlEditor1" @bind-Value="OppositionPrompt" />
+                                                </div>
+
                                                 <div class="row mb-3 motion-form">
                                                     <label class="form-label mt-3"> Generate Opposition </label>
                                                     <textarea class="form-control " placeholder="Generated Oposotion content "
@@ -1454,6 +1476,13 @@
                                             </div>
 
                                             <div class="tab-pane fade " id="reply" role="tabpanel" aria-labelledby="reply-tab">
+
+                                                <div class="row mb-3 motion-form">
+                                                    <label class="form-label mt-3">Reply input</label>
+                                                    <InputTextArea class="form-control " placeholder=" Reply prompt "
+                                                                   style="height: 180px;" id="htmlEditor1" @bind-Value="ReplyPrompt" />
+                                                </div>
+
                                                 <div class="row mb-3 motion-form">
                                                     <label class="form-label mt-3"> Generate Reply</label>
                                                     <textarea class="form-control " placeholder="Generate Reply content"
@@ -3427,7 +3456,7 @@
     private List<DateRent> DateRentList = new();
     private CourtDto Court = new();
     private NotesDto CaseNotes = new();
-
+    // private GenerateContentPrompts CaseFilingprompt { get; set; }
     private string? loggedInUserId;
     private string? MarshalName;
     private string? generatedOSC;
@@ -3472,6 +3501,11 @@
     private CreateToRemainderCenterDto remainderDto = new CreateToRemainderCenterDto();
     public FilingDto CaseFiling = new FilingDto();
 
+    private string motionPrompt = GenerateContentPrompts.MotionPrompt;
+    private string OSCPrompt = GenerateContentPrompts.OSCPrompt;
+    private string ReplyPrompt = GenerateContentPrompts.ReplyPrompt;
+    private string OppositionPrompt = GenerateContentPrompts.OppositionPrompt;
+
     protected override async Task OnInitializedAsync()
     {
         spinnerservice.Show();
@@ -3486,6 +3520,8 @@
 
         _editContext = new EditContext(noticeModel);
         messageStore = new ValidationMessageStore(_editContext);
+
+        noticeModel.DateNoticeServed = DateOnly.FromDateTime(DateTime.Now);
 
         if (!FilteredFormTypeList.Any()) FilteredFormTypeList = await FormTypesRepository.GetFormTypesByCaseTypeAsync(legalcaseDto.CaseTypeId, TenancyTypeId);
 
@@ -3605,35 +3641,36 @@
         // spinnerservice.Show();
         IsProcessing = true;
         GenerateCommand = "OSC";
-        var result = await openAi.GenerateOSC(legalcaseDto.Id);
-        if (!string.IsNullOrEmpty(result))
+        var result = await openAi.GenerateOSC(legalcaseDto.Id, ReplyPrompt);
+        if (result.IsSuccess)
         {
             ToastService.ShowSuccess("OSC text Generated");
-            CaseFiling.GeneratedOSC = result;
+            CaseFiling.GeneratedOSC = result.Content;
             StateHasChanged();
         }
         else
         {
-            ToastService.ShowError("Error Occured");
+            ToastService.ShowError($"Error : {result.Message}");
         }
         IsProcessing = false;
         // spinnerservice.Hide();
     }
-    private async Task GenerateMotion()
+
+    private async Task GenerateMotion(string prompt)
     {
         // spinnerservice.Show();
         IsProcessing = true;
         GenerateCommand = "Motion";
-        var result = await openAi.GenerateMotion(legalcaseDto.Id);
-        if (!string.IsNullOrEmpty(result))
+        var result = await openAi.GenerateMotion(legalcaseDto.Id, prompt);
+        if (result.IsSuccess)
         {
             ToastService.ShowSuccess("Motion text Generated");
-            CaseFiling.GeneratedMotion = result;
+            CaseFiling.GeneratedMotion = result.Content;
             StateHasChanged();
         }
         else
         {
-            ToastService.ShowError("Error Occured");
+            ToastService.ShowError($"Error: {result.Message}");
         }
         IsProcessing = false;
         // spinnerservice.Hide();
@@ -3643,16 +3680,16 @@
         // spinnerservice.Show();
         IsProcessing = true;
         GenerateCommand = "Reply";
-        var result = await openAi.GenerateReply(legalcaseDto.Id);
-        if (!string.IsNullOrEmpty(result))
+        var result = await openAi.GenerateReply(legalcaseDto.Id, ReplyPrompt);
+        if (result.IsSuccess)
         {
-            ToastService.ShowSuccess("Motion text Generated");
-            CaseFiling.GeneratedReply = result;
+            ToastService.ShowSuccess("Reply text Generated");
+            CaseFiling.GeneratedReply = result.Content;
             StateHasChanged();
         }
         else
         {
-            ToastService.ShowError("Error Occured");
+            ToastService.ShowError($"Error : {result.Message}");
         }
         IsProcessing = false;
         // spinnerservice.Hide();
@@ -3662,16 +3699,16 @@
         // spinnerservice.Show();
         IsProcessing = true;
         GenerateCommand = "Opposition";
-        var result = await openAi.GenerateOpposition(legalcaseDto.Id);
-        if (!string.IsNullOrEmpty(result))
+        var result = await openAi.GenerateOpposition(legalcaseDto.Id, OppositionPrompt);
+        if (result.IsSuccess)
         {
             ToastService.ShowSuccess("Opposition text Generated");
-            CaseFiling.GeneratedOpposition = result;
+            CaseFiling.GeneratedOpposition = result.Content;
             StateHasChanged();
         }
         else
         {
-            ToastService.ShowError("Error Occured");
+            ToastService.ShowError($"Error : {result.Message}");
         }
         IsProcessing = false;
         // spinnerservice.Hide();
@@ -3690,6 +3727,7 @@
         {
             ToastService.ShowError("Error Occured");
         }
+        StateHasChanged();
         spinnerservice.Hide();
     }
     private async Task GetFiling()
@@ -3699,6 +3737,7 @@
         OpenTab = "Filings";
 
         spinnerservice.Hide();
+        StateHasChanged();
     }
     private async Task CloseModal()
     {
@@ -3717,7 +3756,7 @@
     {
         spinnerservice.Show();
         OpenTab = "Notices";
-
+        StateHasChanged();
         spinnerservice.Hide();
     }
     private async Task ShowDocument()
@@ -3730,7 +3769,7 @@
         ShowReminder = false;
         ShowMarshal = false;
         OpenTab = "Documents";
-
+        StateHasChanged();
         spinnerservice.Hide();
     }
     private async Task ShowReminders()
@@ -3745,6 +3784,7 @@
         OpenTab = "Reminders";
 
         spinnerservice.Hide();
+        StateHasChanged();
     }
     private async Task ShowServers()
     {
@@ -3758,6 +3798,7 @@
         OpenTab = "Servers";
 
         spinnerservice.Hide();
+        StateHasChanged();
     }
     private async Task ShowNotes()
     {
@@ -3765,6 +3806,7 @@
         OpenTab = "Notes";
 
         spinnerservice.Hide();
+        StateHasChanged();
     }
     private async Task ShowAppearances()
     {
@@ -3778,6 +3820,7 @@
         OpenTab = "Appearances";
 
         spinnerservice.Hide();
+        StateHasChanged();
     }
 
     private async Task ShowHearing()
@@ -3786,6 +3829,7 @@
         OpenTab = "Hearings";
 
         spinnerservice.Hide();
+        StateHasChanged();
     }
     private async Task OnMarshalTabOpen()
     {
@@ -3864,14 +3908,18 @@
                 int length = 0;
 
                 var type = TenancyTypeList
-                    .Where(a => a.Id == noticeModel.TenancyTypeId)
+                    .Where(a => a.Id == legalcaseDto.TenancyTypeId)
                     .Select(e => e.Name?.ToLower())
                     .FirstOrDefault();
 
                 // ✅ Special case tenancy types get fixed 10 days
-                if (new[] { "squatter", "licensee", "referee" }.Contains(type))
+                if (new[] { "notice to cure to renew lease", "squatter", "terminate", "referee deed prior owner" ,"tenant of record vacated"}.Contains(type))
                 {
                     length = 10;
+                }
+                else if (new[] { "referee deed", "at will", "tenant in sufferance" }.Contains(type))
+                {
+                    length = 90;
                 }
                 else
                 {
@@ -3889,14 +3937,14 @@
                 noticeModel.CalcNoticeLength = length;
                 noticeModel.ExpirationDate = noticeModel.DateNoticeServed.Value.AddDays(length);
                 // ✅ Set PredicateNotice text
-                noticeModel.PredicateNotice = type switch
-                {
-                    "licensee" => "10 Days Notice - Tenant Of Record Vacated (Licensee)",
-                    "referee" => "10 Days Notice - Referee Deed / Prior Owner",
-                    "squatter" => "10 Days Notice - Squatter / Intruder",
-                    "month-to-month" => $"{length} Days Notice - Month to Month",
-                    _ => ""
-                };
+                // noticeModel.PredicateNotice = type switch
+                // {
+                //     "licensee" => "10 Days Notice - Tenant Of Record Vacated (Licensee)",
+                //     "referee" => "10 Days Notice - Referee Deed / Prior Owner",
+                //     "squatter" => "10 Days Notice - Squatter / Intruder",
+                //     "month-to-month" => $"{length} Days Notice - Month to Month",
+                //     _ => ""
+                // };
             }
         }
     }
