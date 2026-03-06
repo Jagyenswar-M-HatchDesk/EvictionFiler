@@ -655,7 +655,7 @@
 
     <!-- Greeting & suggestions -->
     <div class="greeting">
-        <h2 id="greet">Good Morning, @identityUser.Name </h2>
+        <h2 id="greet">Good Morning, @(identityUser?.Name ?? "") </h2>
         <div class="chips">
             <span class="chip">“Show me holdovers filed this week”</span>
             <span class="chip">“Deadlines in Queens today”</span>
@@ -668,6 +668,12 @@
     <!-- Quick Snapshot tiles (Top Row) -->
     <div class="grid cols-4" style="margin-bottom:12px">
 
+        @* @if (isLoading)
+        {
+            <div style="display:flex;justify-content:center;align-items:center;height:60vh;">
+                <div class="spinner-border text-primary"></div>
+            </div>
+        } *@
         @* @foreach (var tile in tiles)
         {
             <a class="tile" href="@tile.Href">
@@ -678,14 +684,18 @@
                 </div>
             </a>
         } *@
-        <DashboardTile label="Hearings Today" icon="⚖️" href="/calender" LoggedinUserId="identityUser" Reminder="OnReminderReceived" />
-        <DashboardTile label="Due Today / Overdue" icon="🕔" href="#deadlines" LoggedinUserId="identityUser"  />
-        <DashboardTile label="Cases Filed This Week" icon="📁" href="/legalcases" LoggedinUserId="identityUser" />
-        <DashboardTile label="Pending Client Approvals" icon="✅" href="#approvals" LoggedinUserId="identityUser" />
-        <DashboardTile label="Open Balance Alerts" icon="💳" href="#balances" LoggedinUserId="identityUser" />
-        <DashboardTile label="Trust Balances" icon="🏦" href="#trust" LoggedinUserId="identityUser" />
-        <DashboardTile label="Tasks Completed (wk)" icon="📈" href="#progress" LoggedinUserId="identityUser" />
-        <DashboardTile label="Smart Alerts" icon="🔔" href="/reminder-center" LoggedinUserId="identityUser" />
+       
+           
+                <DashboardTile label="Hearings Today" icon="⚖️" href="/calender" LoggedinUserId="identityUser" Reminder="OnReminderReceived" />
+                <DashboardTile label="Due Today / Overdue" icon="🕔" href="#deadlines" LoggedinUserId="identityUser"  />
+                <DashboardTile label="Cases Filed This Week" icon="📁" href="/legalcases" LoggedinUserId="identityUser" />
+                <DashboardTile label="Pending Client Approvals" icon="✅" href="#approvals" LoggedinUserId="identityUser" />
+                <DashboardTile label="Open Balance Alerts" icon="💳" href="#balances" LoggedinUserId="identityUser" />
+                <DashboardTile label="Trust Balances" icon="🏦" href="#trust" LoggedinUserId="identityUser" />
+                <DashboardTile label="Tasks Completed (wk)" icon="📈" href="#progress" LoggedinUserId="identityUser" />
+                <DashboardTile label="Smart Alerts" icon="🔔" href="/reminder-center" LoggedinUserId="identityUser" />
+            
+        
 
     @*     <a class="tile" href="/calender">
             <div class="icon">⚖️</div>
@@ -762,7 +772,7 @@
         <!-- Charts & Visuals -->
         <section id="charts" class="active">
             <div class="grid cols-2">
-                <div class="card pad">
+                @* <div class="card pad">
                     <div class="header">Case Pipeline — Nonpayment vs Holdover vs Other</div>
                     <div id="pipelineChart" style="margin-top:-50px">
                         <RadzenMediaQuery Query="(max-width: 768px)" Change="OnMediaQueryChange" />
@@ -814,7 +824,18 @@
                             <i style="background:var(--warning)"></i>Other
                         </span>
                     </div>
-                </div>
+                </div> *@
+                @* @if (isLoading)
+                {
+                    <div style="display:flex;justify-content:center;align-items:center;height:60vh;">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                } *@
+            
+                        <CasePipeline LoggedinUserId="identityUser" />
+
+                    
+                
                 <div class="card pad">
                     <div class="header">Financial Snapshot — Billed vs Collected</div>
                     <div id="finacialChart" style="margin-top:-50px">
@@ -1144,7 +1165,7 @@
     private List<LegalCase> TodaylegalcaseDto = new();
 
     private int ActiveIndex = 0;
-   
+
     private int totalRemainder = 0;
     private int totalCasesHearing = 0;
     private int activeCases = 0;
@@ -1161,6 +1182,7 @@
     private List<EditToRemainderCenterDto> InCompleteRemainder = new();
     private List<IGrouping<string?, EditToRemainderCenterDto>> groupedRemainder = new();
     private LoggedInUser? identityUser;
+    private bool isLoading = true;
 
     // INPUT (typing only)
     // private string clientInput = "";
@@ -1186,55 +1208,70 @@
     // private bool caseSuggestionsChecked;
 
     private List<DashboardTileDto> tiles = new();
+    private bool firstLoad = true;
 
 
     protected override async Task OnInitializedAsync()
     {
-        spinnerservice.Show();
-        var loggedInUser = await _loggedInUserService.GetAsync();
-        if (loggedInUser==null || !loggedInUser.IsAuthenticated)
+        try
         {
-            navManager.NavigateTo("/", forceLoad: true);
-            return;
-        }
-        this.identityUser = loggedInUser;
-        var uri = new Uri(navManager.Uri);
-        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-        if (query != null && query.Any())
-        {
-            if (query.TryGetValue("success", out var isSuccess) && isSuccess == "true")
+      
+            var loggedInUser = await _loggedInUserService.GetAsync();
+            if (loggedInUser == null || !loggedInUser.IsAuthenticated)
             {
-                successMessage = "Case Added successfully!";
-                await Task.Delay(1000);
-                successMessage = string.Empty;
-
-                navManager.NavigateTo("dashboard", forceLoad: true);
+                navManager.NavigateTo("/", forceLoad: true);
+                return;
             }
-            else if (query.TryGetValue("edit", out var isEdit) && isEdit == "true")
+
+            this.identityUser = loggedInUser;
+
+       
+            var uri = new Uri(navManager.Uri);
+            var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+            if (query != null && query.Any())
             {
-                successMessage = "Case updated successfully!";
-                StateHasChanged();
+                if (query.TryGetValue("success", out var isSuccess) && isSuccess == "true")
+                {
+                    successMessage = "Case Added successfully!";
+                      
+                    successMessage = string.Empty;
 
-                await Task.Delay(2000);
-                successMessage = string.Empty;
-                StateHasChanged();
+                    navManager.NavigateTo("dashboard", forceLoad: true);
+                }
+                else if (query.TryGetValue("edit", out var isEdit) && isEdit == "true")
+                {
+                    successMessage = "Case updated successfully!";
+                 
+                    successMessage = string.Empty;
 
-                navManager.NavigateTo("/dashboard", forceLoad: false);
+                  
+
+                    navManager.NavigateTo("/dashboard", forceLoad: false);
+                }
+
             }
+
+            // totalCases = await _service.GetTotalCasesCountAsync(loggedInUser.FirmId??string.Empty, loggedInUser.IsSuperAdmin);
+            // totalCasesHearing = await _caseService.GetAllTodayCaseHearingAsync(loggedInUser.FirmId ?? string.Empty, loggedInUser.IsSuperAdmin);
+            //activeCases = await _service.GetActiveCasesCountAsync(loggedInUser.UserId ?? string.Empty, loggedInUser.IsSuperAdmin);
+            // pipelineData = await _service.GetPipelineChartItems(loggedInUser.FirmId ?? string.Empty, loggedInUser.IsSuperAdmin);
+
+            // InCompleteRemainder = await _remainder.GetAllInCompleteRemainder(identityUser.IsSuperAdmin, Guid.Parse(loggedInUser.UserId??string.Empty));
+
+            // groupedRemainder = InCompleteRemainder.GroupBy(e => e.CaseCode).ToList();
+            // if (groupedRemainder.Any())
+            //     showCaseModal = true;
+            // totalRemainder = InCompleteRemainder.Count();
+
+        
+    }
+    finally{
+            
         }
 
-        // totalCases = await _service.GetTotalCasesCountAsync(loggedInUser.FirmId??string.Empty, loggedInUser.IsSuperAdmin);
-        // totalCasesHearing = await _caseService.GetAllTodayCaseHearingAsync(loggedInUser.FirmId ?? string.Empty, loggedInUser.IsSuperAdmin);
-        //activeCases = await _service.GetActiveCasesCountAsync(loggedInUser.UserId ?? string.Empty, loggedInUser.IsSuperAdmin);
-        pipelineData = await _service.GetPipelineChartItems(loggedInUser.FirmId ?? string.Empty, loggedInUser.IsSuperAdmin);
 
-        // InCompleteRemainder = await _remainder.GetAllInCompleteRemainder(identityUser.IsSuperAdmin, Guid.Parse(loggedInUser.UserId??string.Empty));
-
-        // groupedRemainder = InCompleteRemainder.GroupBy(e => e.CaseCode).ToList();
-        // if (groupedRemainder.Any())
-        //     showCaseModal = true;
-        // totalRemainder = InCompleteRemainder.Count();
-        spinnerservice.Hide();
+        
+       
     }
     private Task OnReminderReceived(List<IGrouping<string?, EditToRemainderCenterDto>> data)
     {
@@ -1572,14 +1609,14 @@
 
     // }
 
-    int columnWidth = 15; // default desktop width
+    // int columnWidth = 15; 
 
-    void OnMediaQueryChange(bool matches)
-    {
-        // matches == true means screen <= 768px
-        columnWidth = matches ? 6 : 15;
-        StateHasChanged();
-    }
+    // void OnMediaQueryChange(bool matches)
+    // {
+       
+    //     columnWidth = matches ? 6 : 15;
+    //     StateHasChanged();
+    // }
 
     public class CalendarDay
     {
@@ -2009,7 +2046,7 @@
     //     if (selectedCase == null)
     //         caseInput = "";
 
-    //     caseSuggestions.Clear();
+    //     caseSuggestions.Clear();4
     //     caseSuggestionsChecked = false;
     // }
 

@@ -1,0 +1,93 @@
+﻿@using EvictionFiler.Application.Common.Models
+@using EvictionFiler.Application.DTOs
+@using EvictionFiler.Application.Interfaces.IServices.Dashboard
+@using EvictionFiler.Client.SpinnerService
+@inject IDashboardService dashboardService
+@inject SpinnerService spinnerservice
+
+@if (isLoading)
+{
+    <div class="card pad" style="height:300px;display:flex;align-items:center;justify-content:center;">
+        Loading chart...
+    </div>
+}
+else
+{
+    <div class="card pad">
+        <div class="header">Case Pipeline — Nonpayment vs Holdover vs Other</div>
+        <div id="pipelineChart" style="margin-top:-50px">
+            <RadzenMediaQuery Query="(max-width: 768px)" Change="OnMediaQueryChange" />
+
+
+            <RadzenStack>
+                <RadzenRow>
+                    <RadzenColumn>
+                        <RadzenChart>
+                            <RadzenColumnSeries Data="@pipelineData"
+                            CategoryProperty="Month"
+                            ValueProperty="NonPayment"
+                            Fill="#002B5C" />
+
+                            <RadzenColumnSeries Data="@pipelineData"
+                            CategoryProperty="Month"
+                            ValueProperty="Holdover"
+                            Fill="#00BFFF" />
+
+                            <RadzenColumnSeries Data="@pipelineData"
+                            CategoryProperty="Month"
+                            ValueProperty="Other"
+                            Fill="#FFA500" />
+
+                            <!-- width 22 + gap via spacing -->
+                            <RadzenColumnOptions Radius="2" Width="@columnWidth" />
+
+                            <!-- axis hidden but padding increased to add gap between categories -->
+                            <RadzenCategoryAxis Visible="true" Padding="20" />
+                            <RadzenLegend Visible="false" />
+                            <RadzenValueAxis Visible="false">
+                                <RadzenGridLines Visible="false" />
+                            </RadzenValueAxis>
+                        </RadzenChart>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenStack>
+        </div>
+
+
+
+
+
+
+        <div class="legend">
+            <span><i style="background:var(--navy)"></i>Nonpayment</span><span>
+                <i style="background:var(--info)"></i>Holdover
+            </span><span>
+                <i style="background:var(--warning)"></i>Other
+            </span>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public LoggedInUser LoggedinUserId { get; set; }
+    public List<PipeLineChartItem> pipelineData = new List<PipeLineChartItem>();
+
+    private bool isLoading = true;
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        pipelineData = await dashboardService
+        .GetPipelineChartItems(LoggedinUserId.FirmId ?? string.Empty, LoggedinUserId.IsSuperAdmin);
+        isLoading = false;
+    }
+    int columnWidth = 15; // default desktop width
+
+    void OnMediaQueryChange(bool matches)
+    {
+        // matches == true means screen <= 768px
+        columnWidth = matches ? 6 : 15;
+        StateHasChanged();
+    }
+
+}
