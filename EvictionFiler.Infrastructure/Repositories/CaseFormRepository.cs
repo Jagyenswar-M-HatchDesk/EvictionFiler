@@ -432,10 +432,10 @@ namespace EvictionFiler.Infrastructure.Repositories
         : null,
 
                      LandlordAddress = landlord != null
-        ? (landlord.Address1 ?? "") + " " +
-          (landlord.Address2 ?? "") + " " +
-          (landlord.City != null ? landlord.City.Name : "") + " " +
-          (landlord.State != null ? landlord.State.Name : "") + " " +
+        ? (landlord.Address1 ?? "") + ", " +
+          (landlord.Address2 ?? "") + ", " +
+          (landlord.City != null ? landlord.City.Name : "") + ", " +
+          (landlord.State != null ? landlord.State.Name : "") + ", " +
           (landlord.Zipcode ?? "")
         : null,
 
@@ -443,10 +443,11 @@ namespace EvictionFiler.Infrastructure.Repositories
                      LandlordEmail = landlord.Email,
 
                      PropertyAddress = building != null
-        ? (building.Address1 ?? "") + " " +
-          (building.Address2 ?? "") + " " +
-          (building.Cities != null ? building.Cities.Name : "") + " " +
-          (building.State != null ? building.State.Name : "") + " " +
+        ? (building.Address1 ?? "") + ", " +
+          (building.Address2 ?? "") + ", " + 
+          (tenant.UnitOrApartmentNumber ?? "") + ", " + 
+          (building.Cities != null ? building.Cities.Name : "") + ", " +
+          (building.State != null ? building.State.Name : "") + ", " +
           (building.Zipcode ?? "")
         : null,
 
@@ -570,21 +571,28 @@ namespace EvictionFiler.Infrastructure.Repositories
                 string otherTenantsText = "";
                 if (otherTenantsList.Any())
                 {
-                    otherTenantsText =
-
-                        string.Join(",", otherTenantsList) ;
+                    if (otherTenantsList.Count == 1)
+                    {
+                        otherTenantsText = otherTenantsList[0];
+                    }
+                    else
+                    {
+                        otherTenantsText =
+                            string.Join(", ", otherTenantsList.Take(otherTenantsList.Count - 1)) +
+                            " and " +
+                            otherTenantsList.Last();
+                    }
                 }
+
                 otherTenantsText += " (Tenant)";
 
                 string occupantsText = "";
                 if (occupantList.Any())
                 {
-                    occupantsText =
-
-                       "<br>" + string.Join(",", occupantList) ;
+                    occupantsText = "<br>" + string.Join(" ", occupantList.Select(o => $"\"{o}\""));
                 }
 
-                occupantsText += ", John Doe, Jane Doe (Under Tenant)";
+                occupantsText += ", \"John Doe\" and \"Jane Doe\" (Under Tenant)";
 
                 // Parse last rent
                 string lastRentMonth = "";
@@ -618,7 +626,7 @@ namespace EvictionFiler.Infrastructure.Repositories
     .Replace("{{Rent_day}}", caseDetails.RentDate ?? "")
     .Replace("{{month}}", lastRentMonth ?? "")
     .Replace("{{year}}", lastRentYear ?? "")
-    .Replace("{{Vacate_Date}}", caseDetails.VacateDate?.ToString(DateFormats.Default) ?? caseDetails.VacateDatelc?.ToString(DateFormats.Default))
+    .Replace("{{Vacate_Date}}", caseDetails.VacateDate?.ToString(DateFormats.Default))
     .Replace("{{NP}}", caseDetails.NoticePeriod.ToString())
     .Replace("{{Building_Street}}", caseDetails.BuildingStreet ?? "")
     .Replace("{{Building_State}}", caseDetails.BuildingState ?? "")
